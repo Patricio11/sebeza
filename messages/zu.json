@@ -1,0 +1,9 @@
+{
+  "__notice": "isiZulu (zu) catalog — TRANSLATION PENDING. Awaiting professional human translation. Missing keys fall back to English via i18n/request.ts deepMerge. NEVER machine-translate POPIA/consent/legal copy.",
+  "meta": {
+    "siteName": "Sebenza"
+  },
+  "nav": {
+    "menu": "Imenyu"
+  }
+}

@@ -1,0 +1,211 @@
+{
+  "meta": {
+    "siteName": "Sebenza",
+    "tagline": "South Africa's talent platform",
+    "description": "Find skilled people near you. Get found for the work you do."
+  },
+  "nav": {
+    "findTalent": "Find talent",
+    "createProfile": "Create profile",
+    "signIn": "Sign in",
+    "insights": "Insights",
+    "menu": "Menu",
+    "skipToContent": "Skip to main content"
+  },
+  "landing": {
+    "hero": {
+      "lineOne": "Find skilled people.",
+      "lineTwo": "Near you.",
+      "lineThree": "For real.",
+      "subhead": "Sebenza matches South African talent to work by skill and place — with employment data you can actually trust."
+    },
+    "search": {
+      "professionLabel": "Profession or skill",
+      "professionPlaceholder": "e.g. Chef, Electrician, Developer",
+      "locationLabel": "Location",
+      "locationPlaceholder": "Province or city",
+      "submit": "Search",
+      "recentChips": "Popular searches"
+    },
+    "pulseStrip": {
+      "heading": "National pulse",
+      "subheading": "Live, freshness-weighted — never stale, never spun.",
+      "totalActive": "Active profiles",
+      "confirmedHires": "Confirmed hires this month",
+      "skillsInDemand": "Skills in active demand"
+    },
+    "valueCards": {
+      "trusted": {
+        "title": "Trusted profiles",
+        "body": "Every qualification carries an honest verification state — never \"Verified\" by default."
+      },
+      "live": {
+        "title": "Live availability",
+        "body": "Our Talent Pulse keeps employment status fresh. Stale entries are down-ranked, not hidden."
+      },
+      "real": {
+        "title": "Real employment data",
+        "body": "Hires are counted only when confirmed on the platform — analytics you can act on."
+      }
+    },
+    "split": {
+      "employer": {
+        "eyebrow": "Employers & recruiters",
+        "heading": "Find verified, available talent in your city.",
+        "body": "Search by skill and location. Reveal contact details only after the candidate has consented — and every access is recorded.",
+        "cta": "Start hiring"
+      },
+      "government": {
+        "eyebrow": "Government & policy",
+        "heading": "The visibility ESSA has never had.",
+        "body": "Real-time employment analytics by skill, location, and freshness — exportable, aggregate, never personal.",
+        "cta": "See the insights"
+      }
+    },
+    "footer": {
+      "privacy": "Privacy & POPIA",
+      "paia": "PAIA manual",
+      "terms": "Terms",
+      "accessibility": "Accessibility",
+      "language": "Language",
+      "rights": "© 2026 Sebenza. A national talent platform for South Africa."
+    }
+  },
+  "search": {
+    "heading": "{count, plural, =0 {No matches} =1 {# {role}} other {# {role}}} in {location}",
+    "headingFallback": "Talent search",
+    "filters": {
+      "title": "Filters",
+      "open": "Open filters",
+      "close": "Close",
+      "apply": "Apply",
+      "clear": "Clear all",
+      "skill": "Skill",
+      "location": "Location",
+      "province": "Province",
+      "city": "City",
+      "status": "Employment status",
+      "seniority": "Seniority",
+      "verification": "Verification",
+      "nationality": "Nationality (optional)",
+      "highlightCitizens": "Highlight SA citizens",
+      "nationalityHelp": "Sebenza matches by location and skill. Nationality is shown, never a barrier."
+    },
+    "states": {
+      "loading": "Loading talent…",
+      "empty": "No matches yet",
+      "emptyBody": "Try broadening the location or removing a filter. Your search is also being recorded — anonymised — so we can show policymakers where the skill gaps are.",
+      "error": "Something went wrong",
+      "errorBody": "We couldn't reach the talent index. Please try again.",
+      "retry": "Try again"
+    },
+    "loadMore": "Load more",
+    "rosterItem": {
+      "viewProfile": "View profile",
+      "completeness": "Profile completeness",
+      "topSkills": "Top skills"
+    }
+  },
+  "status": {
+    "employed": "Employed",
+    "unemployed": "Unemployed",
+    "self_employed": "Self-employed",
+    "studying": "Studying",
+    "open_to_work": "Open to work",
+    "confirmedRelative": "Confirmed {when}",
+    "neverConfirmed": "Status not confirmed",
+    "freshness": {
+      "fresh": "Fresh",
+      "ageing": "Ageing",
+      "stale": "Stale",
+      "freshHelp": "Confirmed within the last 30 days.",
+      "ageingHelp": "30 to 90 days old — slight down-rank, nudge sent.",
+      "staleHelp": "90+ days old — strongly down-ranked, flagged in analytics."
+    }
+  },
+  "verification": {
+    "unverified": "Unverified",
+    "pending": "Verification pending",
+    "verified": "Verified",
+    "rejected": "Rejected",
+    "selfReported": "Self-reported"
+  },
+  "profile": {
+    "headerVerification": "Verification",
+    "headerStatus": "Employment status",
+    "memberSince": "On Sebenza since {date}",
+    "skills": "Skills",
+    "experience": "Experience",
+    "qualifications": "Qualifications",
+    "bio": "About",
+    "locked": {
+      "contact": "Contact details",
+      "documents": "Documents & certificates",
+      "lockedBody": "Verified employers can request to view this. Every access is consent-checked and recorded.",
+      "lockedCta": "Sign in as a verified employer",
+      "seekerHint": "We never show your ID number, documents, or contact details in search results — even to verified employers, until you consent."
+    },
+    "report": "Report this profile",
+    "redacted": "(Surname is hidden in public search until you consent to be contacted.)"
+  },
+  "dashboard": {
+    "seeker": {
+      "title": "Your visibility",
+      "completenessLabel": "Profile completeness",
+      "nextAction": "Add {n} more {n, plural, =1 {skill} other {skills}} to rank higher in search.",
+      "pulseTitle": "Talent Pulse",
+      "pulseQuestion": "Are you still open to work?",
+      "confirmFresh": "Yes — confirm",
+      "lastConfirmed": "Last confirmed {when}",
+      "viewedBy": "Who's viewed you",
+      "contactedBy": "Who's contacted you",
+      "noViewers": "No one has viewed your profile yet.",
+      "noContacts": "No employers have contacted you yet."
+    },
+    "employer": {
+      "title": "Employer portal",
+      "orgUnverifiedBanner": "Your organisation is not yet verified. You can search talent, but contact details and documents stay locked until verification is complete.",
+      "orgUnverifiedCta": "Verify organisation",
+      "savedSearches": "Saved searches",
+      "shortlists": "Talent pools",
+      "noSavedSearches": "You haven't saved any searches yet.",
+      "noShortlists": "Build a talent pool by saving candidates from search.",
+      "markHired": "Mark as hired",
+      "markHiredHelp": "Help map South Africa's job market. Confirming hires keeps our data honest."
+    }
+  },
+  "insights": {
+    "title": "Employment insights",
+    "subtitle": "Freshness-weighted. Aggregate only. Updated continuously.",
+    "stat": {
+      "totalActive": "Active profiles",
+      "confirmedHires": "Confirmed hires (this month)",
+      "openToWork": "Open to work"
+    },
+    "byStatus": "By employment status",
+    "trend": "Registrations & placements",
+    "skillsGap": "Skills in demand vs. matches",
+    "skillsGapHelp": "When searches dwarf matches, we have a skills gap. This is the policy lever.",
+    "confidence": "Confidence {percent}%",
+    "confidenceHelp": "Freshness confidence: the higher the share of recently-confirmed statuses, the higher the confidence.",
+    "export": "Export aggregate (CSV)",
+    "exportNote": "Exports are aggregate only. No personal data leaves the system. Every export is logged."
+  },
+  "admin": {
+    "title": "Admin & moderation",
+    "comingSoon": "The admin shell is scaffolded but not wired up in Phase 1. Verification queues, taxonomy, audit-log viewer arrive in Phase 7."
+  },
+  "errors": {
+    "notFoundTitle": "Page not found",
+    "notFoundBody": "We couldn't find that page. It may have moved, or it never existed.",
+    "errorTitle": "Something went wrong",
+    "errorBody": "An unexpected error occurred. Please try again.",
+    "home": "Go to home",
+    "retry": "Try again"
+  },
+  "common": {
+    "loading": "Loading…",
+    "viewAll": "View all",
+    "close": "Close"
+  }
+}

@@ -1,0 +1,150 @@
+@import "tailwindcss";
+
+/* ---------------------------------------------------------
+   Sebenza Design Tokens (Civic Editorial — see UX_UI_SPEC §1)
+   Warm paper, warm ink, institutional teal, one warm accent.
+   AA contrast on every pair. No SaaS blue/purple.
+   --------------------------------------------------------- */
+@theme {
+  /* Surfaces */
+  --color-paper: #faf8f4;
+  --color-surface: #ffffff;
+  --color-surface-sunk: #f1ede6;
+
+  /* Ink */
+  --color-ink: #1a1714;
+  --color-ink-soft: #5a5249;
+  --color-hairline: #e4ded4;
+
+  /* Brand — deep institutional teal-green */
+  --color-brand: #134e48;
+  --color-brand-strong: #0c3833;
+  --color-brand-tint: #dcebe8;
+
+  /* Accent — warm ochre/amber, used sparingly */
+  --color-accent: #d97a14;
+  --color-accent-tint: #fbead2;
+
+  /* Semantic / Talent Pulse */
+  --color-employed: #2e7d5b;
+  --color-open: #d97a14;
+  --color-unemployed: #5a5249;
+  --color-self-employed: #6b7f3f;
+  --color-studying: #3d6a99;
+  --color-stale: #b45f3c;
+  --color-danger: #c2451e;
+  --color-verified: #134e48;
+
+  /* Radii */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --radius-pill: 999px;
+
+  /* Fonts — next/font provides the underlying variables.
+     Display = Fraunces (editorial gravitas). Body = Hanken Grotesk. */
+  --font-display: var(--font-fraunces), Georgia, serif;
+  --font-body: var(--font-hanken), system-ui, -apple-system, sans-serif;
+
+  /* Type scale (fluid). Match UX_UI_SPEC §1.1. */
+  --text-display-xl: clamp(2.5rem, 6vw, 4.5rem);
+  --text-display-xl--line-height: 1.05;
+  --text-display-l: clamp(2rem, 4vw, 3rem);
+  --text-display-l--line-height: 1.1;
+}
+
+/* ---------------------------------------------------------
+   Base
+   --------------------------------------------------------- */
+@layer base {
+  html {
+    color-scheme: light;
+    font-family: var(--font-body);
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body {
+    background: var(--color-paper);
+    color: var(--color-ink);
+  }
+
+  /* Visible keyboard focus everywhere (WCAG 2.2 AA) */
+  *:focus-visible {
+    outline: 2px solid var(--color-brand);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  /* Editorial display headings */
+  .font-display,
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    letter-spacing: -0.01em;
+  }
+
+  /* Tabular numerals for stats */
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Hairlines should be exactly 1px on retina screens */
+  hr,
+  .hairline {
+    border: 0;
+    border-top: 1px solid var(--color-hairline);
+  }
+}
+
+/* ---------------------------------------------------------
+   Motion — minimal, purposeful, reduced-motion aware.
+   One orchestrated landing reveal; nothing loops.
+   --------------------------------------------------------- */
+@layer utilities {
+  @keyframes sebenza-rise {
+    from {
+      opacity: 0;
+      transform: translateY(0.5rem);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .anim-rise {
+    animation: sebenza-rise 480ms cubic-bezier(0.2, 0.6, 0.2, 1) both;
+  }
+
+  .anim-delay-1 {
+    animation-delay: 80ms;
+  }
+  .anim-delay-2 {
+    animation-delay: 160ms;
+  }
+  .anim-delay-3 {
+    animation-delay: 240ms;
+  }
+  .anim-delay-4 {
+    animation-delay: 320ms;
+  }
+
+  .shadow-soft {
+    box-shadow:
+      0 1px 2px rgba(26, 23, 20, 0.06),
+      0 8px 24px rgba(26, 23, 20, 0.06);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0ms !important;
+    scroll-behavior: auto !important;
+  }
+}

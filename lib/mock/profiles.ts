@@ -1,0 +1,239 @@
+import type { PublicProfile } from "./types";
+
+// Representative, realistic SA fixtures. Includes:
+// - a fresh verified citizen (top of search)
+// - a stale-status citizen (down-ranked, honestly)
+// - a verified Nigerian resident in Cape Town (Location-Not-Nationality Rule)
+// - cross-province spread to exercise filter combinations.
+// Names are intentionally generic ("Thandeka M.") — Redaction Rule.
+export const mockProfiles: PublicProfile[] = [
+  {
+    handle: "thandeka-m",
+    displayName: "Thandeka M.",
+    profession: "Chef",
+    seniority: "senior",
+    city: "Cape Town",
+    province: "Western Cape",
+    nationality: "South African",
+    isCitizen: true,
+    topSkills: [
+      { name: "Pastry", proficiency: 5 },
+      { name: "Menu design", proficiency: 4 },
+      { name: "Kitchen management", proficiency: 4 },
+    ],
+    bio: "Senior pastry chef with 11 years across fine dining and large-format catering. Comfortable owning a section, mentoring junior cooks, and writing seasonal menus.",
+    status: "open_to_work",
+    statusConfirmedAt: "2026-05-13T09:00:00Z",
+    verification: "verified",
+    completeness: 82,
+    memberSince: "2024-08-02",
+    experience: [
+      {
+        role: "Senior Pastry Chef",
+        organization: "La Colombe",
+        city: "Cape Town",
+        startedAt: "2022-03",
+        endedAt: null,
+        description:
+          "Owns pastry section across tasting menus. Leads four cooks.",
+      },
+      {
+        role: "Pastry Chef",
+        organization: "Marble",
+        city: "Johannesburg",
+        startedAt: "2018-01",
+        endedAt: "2022-02",
+      },
+    ],
+    qualifications: [
+      {
+        title: "Diploma in Culinary Arts",
+        institution: "Capsicum Culinary Studio",
+        awardedYear: 2014,
+        verification: "verified",
+      },
+    ],
+  },
+  {
+    handle: "sipho-k",
+    displayName: "Sipho K.",
+    profession: "Chef",
+    seniority: "intermediate",
+    city: "Cape Town",
+    province: "Western Cape",
+    nationality: "South African",
+    isCitizen: true,
+    topSkills: [
+      { name: "Grill", proficiency: 4 },
+      { name: "Prep", proficiency: 5 },
+    ],
+    bio: "Reliable grill cook. Fast, clean, dependable.",
+    // Intentionally stale → will visibly down-rank.
+    status: "employed",
+    statusConfirmedAt: "2026-01-15T09:00:00Z",
+    verification: "pending",
+    completeness: 64,
+    memberSince: "2023-11-19",
+    experience: [
+      {
+        role: "Line Cook",
+        organization: "The Pot Luck Club",
+        city: "Cape Town",
+        startedAt: "2024-01",
+        endedAt: null,
+      },
+    ],
+    qualifications: [],
+  },
+  {
+    handle: "amara-o",
+    displayName: "Amara O.",
+    profession: "Chef",
+    seniority: "senior",
+    city: "Cape Town",
+    province: "Western Cape",
+    // Legally resident in Cape Town → appears in CT search. Location-Not-Nationality Rule.
+    nationality: "Nigerian",
+    isCitizen: false,
+    topSkills: [
+      { name: "Pastry", proficiency: 5 },
+      { name: "Plating", proficiency: 5 },
+      { name: "Menu design", proficiency: 4 },
+    ],
+    bio: "West-African and Cape pastry traditions. 9 years in fine dining; pop-up consultant.",
+    status: "open_to_work",
+    statusConfirmedAt: "2026-05-18T09:00:00Z",
+    verification: "verified",
+    completeness: 90,
+    memberSince: "2025-02-14",
+    qualifications: [
+      {
+        title: "Advanced Pastry, Le Cordon Bleu",
+        institution: "Le Cordon Bleu Paris",
+        awardedYear: 2017,
+        verification: "verified",
+      },
+    ],
+  },
+  {
+    handle: "lerato-n",
+    displayName: "Lerato N.",
+    profession: "Software Developer",
+    seniority: "senior",
+    city: "Johannesburg",
+    province: "Gauteng",
+    nationality: "South African",
+    isCitizen: true,
+    topSkills: [
+      { name: "TypeScript", proficiency: 5 },
+      { name: "React", proficiency: 5 },
+      { name: "Node.js", proficiency: 4 },
+      { name: "PostgreSQL", proficiency: 4 },
+    ],
+    bio: "Full-stack engineer. Builds for low-bandwidth South African users by default. Quietly opinionated about accessibility.",
+    status: "open_to_work",
+    statusConfirmedAt: "2026-05-19T09:00:00Z",
+    verification: "verified",
+    completeness: 95,
+    memberSince: "2024-01-08",
+    experience: [
+      {
+        role: "Senior Engineer",
+        organization: "Yoco",
+        city: "Cape Town (remote from JHB)",
+        startedAt: "2022-06",
+        endedAt: null,
+      },
+    ],
+    qualifications: [
+      {
+        title: "BSc Computer Science",
+        institution: "University of the Witwatersrand",
+        awardedYear: 2018,
+        verification: "verified",
+      },
+    ],
+  },
+  {
+    handle: "kabelo-m",
+    displayName: "Kabelo M.",
+    profession: "Electrician",
+    seniority: "intermediate",
+    city: "Pretoria",
+    province: "Gauteng",
+    nationality: "South African",
+    isCitizen: true,
+    topSkills: [
+      { name: "Domestic wiring", proficiency: 5 },
+      { name: "Industrial wiring", proficiency: 3 },
+    ],
+    bio: "Wireman's licence holder. Domestic + small industrial.",
+    status: "open_to_work",
+    statusConfirmedAt: "2026-04-30T09:00:00Z",
+    verification: "verified",
+    completeness: 70,
+    memberSince: "2025-06-01",
+    qualifications: [
+      {
+        title: "Trade Test: Electrician",
+        institution: "INDLELA",
+        awardedYear: 2019,
+        verification: "verified",
+      },
+    ],
+  },
+  {
+    handle: "nomvula-d",
+    displayName: "Nomvula D.",
+    profession: "Nurse",
+    seniority: "senior",
+    city: "Durban",
+    province: "KwaZulu-Natal",
+    nationality: "South African",
+    isCitizen: true,
+    topSkills: [
+      { name: "Paediatrics", proficiency: 5 },
+      { name: "Triage", proficiency: 5 },
+    ],
+    bio: "Paediatric nurse. 14 years public + private sector.",
+    status: "employed",
+    statusConfirmedAt: "2026-05-10T09:00:00Z",
+    verification: "verified",
+    completeness: 78,
+    memberSince: "2023-03-21",
+    qualifications: [
+      {
+        title: "Diploma in Nursing (General, Psychiatric, Community)",
+        institution: "Wits Health Sciences",
+        awardedYear: 2011,
+        verification: "verified",
+      },
+    ],
+  },
+  {
+    handle: "andile-z",
+    displayName: "Andile Z.",
+    profession: "Software Developer",
+    seniority: "junior",
+    city: "Cape Town",
+    province: "Western Cape",
+    nationality: "South African",
+    isCitizen: true,
+    topSkills: [
+      { name: "TypeScript", proficiency: 3 },
+      { name: "React", proficiency: 3 },
+    ],
+    bio: "Self-taught. Looking for a first proper engineering role.",
+    status: "open_to_work",
+    statusConfirmedAt: "2026-05-17T09:00:00Z",
+    verification: "unverified",
+    completeness: 48,
+    memberSince: "2026-04-02",
+    qualifications: [],
+  },
+];
+
+/** Convenience lookup. */
+export function getProfileByHandle(handle: string) {
+  return mockProfiles.find((p) => p.handle === handle) ?? null;
+}
