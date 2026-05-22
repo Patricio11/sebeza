@@ -52,6 +52,10 @@ When I give you a Phase: pull design/screen detail from `UX_UI_SPEC.md` and task
 - **Icons:** Lucide React.
 - **State:** Server Components + Server Actions; React `useState`/`useTransition` for in-component UI state; TanStack Query reserved for the interactive search surface in Phase 4 only.
 - **Database:** Neon Postgres + Drizzle ORM (`drizzle-orm` 0.36 + `drizzle-kit` 0.30 + `drizzle-zod`).
+  - **Hosting path:** Neon (`eu-central-1`) for Phase 2 → migrate to self-hosted Postgres
+    in AWS Cape Town (`af-south-1`) on Docker in Phase 9, so PII never leaves SA
+    jurisdiction. Drizzle is driver-agnostic; the swap is `db/client.ts` only.
+    Schema, queries, seed script don't change.
 - **Auth:** Better Auth ≥ 1.6.5 (Drizzle adapter; email + password + email OTP; TOTP 2FA mandatory for `employer` and `admin`). Wires in Phase 2.
 - **Validation:** Zod (single source of truth via `drizzle-zod`).
 - **File storage:** **Supabase Storage** (private bucket, server-side service-role key, signed URLs only) for CVs / certificates / profile photos. We use Supabase Storage standalone — auth is Better Auth, DB is Neon.

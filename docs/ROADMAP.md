@@ -307,6 +307,14 @@ deletedAt: timestamp("deleted_at"),         // soft delete → erasure
 - [ ] Erasure path tested end-to-end (right to deletion).
 - [ ] Privacy Policy + PAIA manual published before real users onboard.
 - [ ] Pen-test / dependency audit; secrets management review.
+- [ ] **Postgres → AWS Cape Town (`af-south-1`) on Docker.** Migrate off Neon
+  (`eu-central-1`) to a self-hosted Postgres in SA jurisdiction so PII never leaves
+  the country. Drizzle stays the ORM; the only code change is swapping
+  `drizzle-orm/neon-http` for `drizzle-orm/node-postgres` (or `postgres-js`) in
+  `db/client.ts`. Plan covers: Docker compose / RDS instance, daily encrypted
+  backups to SA storage, PITR retention, monitoring, failover, schema replay
+  via `db:migrate`, data replay via `pg_dump | pg_restore`. Schedule the cutover
+  during a maintenance window with a read-only Neon snapshot as the rollback.
 
 ---
 
