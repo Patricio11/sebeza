@@ -155,21 +155,33 @@ that registry — we win on **data quality, usability, and analytics.** The syst
 ---
 
 ## 🔐 PHASE 2: IDENTITY, AUTH & CONSENT
-*Goal: Real accounts, roles, and lawful consent.*
+*Goal: Real accounts, roles, and lawful consent. Full plan + acceptance criteria in `docs/PHASE_2_PLAN.md`.*
 
 ### Task 2.1: Better Auth Setup
-- [ ] Better Auth ≥1.6.5 + Drizzle adapter; email+password + email OTP.
-- [ ] 2FA required for `employer` and `admin`.
-- [ ] Role model (`seeker | employer | admin`) + middleware on route groups.
+- [ ] Better Auth ≥1.6.5 + Drizzle adapter; email+password + email verification + forgot/reset password.
+- [ ] Role model (`seeker | employer | admin`) + Server-Action sign-in that **routes by `app_user.role`** (no role chip on the sign-in page — credentials identify the user).
+- [ ] Session-based `requireRole()` / `requireOrgVerified()` guards via `proxy.ts` on the `(seeker)` / `(employer)` / `(admin)` route groups.
+- [ ] 2FA **enforcement deferred to Phase 7.** Phase 2 does not build `/setup-2fa` or `/verify-2fa`.
 
 ### Task 2.2: Sign-Up Flows
 - [ ] **Seeker sign-up:** identity basics + **explicit consent capture** before profile becomes searchable.
 - [ ] **Employer sign-up:** creates an `organization` (status `unverified`); cannot view PII until verified.
-- [ ] Email verification + welcome (Resend / react-email).
+- [ ] Email verification (mandatory before sign-in works) + welcome email.
+- [ ] Forgot-password → `/reset-password/[token]` new-password flow.
+- [ ] Sign-out Server Action + buttons on every account page.
 
 ### Task 2.3: Consent & Privacy UX
 - [ ] Granular consent screen (searchability, contact, document sharing) → `consents`.
 - [ ] Account → Privacy: view/revoke consent, request data export, request erasure.
+
+### Task 2.4: Email transport (env-driven)
+- [ ] `lib/email/send.ts` abstraction: `EMAIL_TRANSPORT=mailtrap` (dev — captured sandbox) or `EMAIL_TRANSPORT=resend` (prod). Console transport as a fallback when no transport is set.
+- [ ] `nodemailer` for Mailtrap SMTP; `resend` SDK for production sends.
+- [ ] Better Auth's `sendVerificationEmail` / `sendResetPassword` callbacks wired to `send()`.
+
+### Task 2.5: Audit-log persistence
+- [ ] `lib/audit.logAccess()` writes to `audit_log` table (keeps the ring buffer as a tail).
+- [ ] `/admin/audit-log` reads from the table.
 
 ---
 
@@ -268,17 +280,24 @@ deletedAt: timestamp("deleted_at"),         // soft delete → erasure
 *Goal: Keep the database trustworthy.*
 
 ### Task 7.1: Admin Shell & Auth
-- [ ] `/admin` route group; admin-only guard + 2FA.
+- [ ] `/admin` route group; admin-only guard.
 
-### Task 7.2: Verification & Moderation Queue
+### Task 7.2: 2FA enforcement (deferred from Phase 2)
+- [ ] Build `/setup-2fa` (QR + manual key + verify code + 8 downloadable backup codes).
+- [ ] Build `/verify-2fa` (TOTP code field, rate-limited, backup-code fallback) — slots into the sign-in flow between password and session-create.
+- [ ] Wire Better Auth's twoFactor plugin; enable mandatory 2FA for `employer` and `admin`.
+- [ ] Existing employer + admin users without 2FA get a one-time forced setup on next sign-in.
+- [ ] Account → 2FA panel: configure, regenerate backup codes, view recovery options.
+
+### Task 7.3: Verification & Moderation Queue
 - [ ] Review uploaded qualifications → set `verified / rejected` with reason.
 - [ ] Review reported profiles; suspend/restore.
 - [ ] Organization verification workflow.
 
-### Task 7.3: Taxonomy & Reference Data
+### Task 7.4: Taxonomy & Reference Data
 - [ ] Manage `professions`, `skills`, `provinces`, `cities` (controlled vocab, no free text in search).
 
-### Task 7.4: Audit-Log Viewer
+### Task 7.5: Audit-Log Viewer
 - [ ] Searchable view of PII access/exports (who saw what, when) for compliance.
 
 ---

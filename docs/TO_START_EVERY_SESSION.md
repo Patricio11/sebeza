@@ -27,27 +27,29 @@ profile experience. **NOT** flashy. (See Rule 1 — this is deliberate, not an o
 - **`ROADMAP.md`** — the phased build plan (Phase 0 → deployment). *What* to build and in what order.
 - **`UX_UI_SPEC.md`** — design system + Phase 1 screen-by-screen UX + the typed mock-data layer + expanded detail for Phases 2–6. *How it looks and behaves.*
 - **`MOBILE_PLAN.md`** — mobile-responsiveness phases (M1–M7), all done. The No-Flash Rule made concrete at 360 px.
-- **Phase completion docs** — `PHASE_0_COMPLETE.md` · `PHASE_1_COMPLETE.md` · `PHASE_1_5_COMPLETE.md` (what shipped, when, with verification).
-- **Active phase plan** — `PHASE_N_PLAN.md` for the phase being built. Today: `PHASE_2_PLAN.md` (real Better Auth + consent + 2FA).
+- **Phase completion docs** (in `docs/completed/`) — `PHASE_0_COMPLETE.md` · `PHASE_1_COMPLETE.md` · `PHASE_1_5_COMPLETE.md` (what shipped, when, with verification).
+- **Active phase plan** — `PHASE_N_PLAN.md` at the top of `docs/` for the phase being built. Today: `PHASE_2_PLAN.md` (real Better Auth + consent + email-verify + forgot/reset).
 - **This file** — always-on context + non-negotiable rules. Paste it at the top of every session.
 
 When I give you a Phase: pull design/screen detail from `UX_UI_SPEC.md` and task detail from `ROADMAP.md`.
 
 > **Doc convention (non-negotiable when a phase ships):**
-> 1. Write / promote `PHASE_N_COMPLETE.md` (what shipped + verification).
+> 1. Write `docs/completed/PHASE_N_COMPLETE.md` (what shipped + verification).
 > 2. Tick the phase header in `ROADMAP.md` with ✅ + date.
 > 3. Update the **Current State** block below.
-> 4. Open `PHASE_(N+1)_PLAN.md` with the recheck for the next phase.
+> 4. Open `docs/PHASE_(N+1)_PLAN.md` with the recheck for the next phase.
 > 5. Commit with `Phase N complete + Phase N+1 opens` in the message.
+>
+> Active plans live at the top of `docs/`. Completed phases move into `docs/completed/`.
 
 ---
 
 # CURRENT STATE (read this before doing anything)
 
-- **Phase 0** (foundations + POPIA spine) — ✅ done 2026-05-21. See `PHASE_0_COMPLETE.md`.
-- **Phase 1** (public face + search + redacted profile) — ✅ done 2026-05-21. See `PHASE_1_COMPLETE.md`.
-- **Phase 1.5** (auth UI + seeker/employer/admin dashboards + Career compass + Student mode + Mzansi National + mobile pass + ESSA-positioning cleanup) — ✅ done 2026-05-22, mock-driven. See `PHASE_1_5_COMPLETE.md`.
-- **Next:** Phase 2 — real Better Auth + real consent persistence + real session-based guards + full sign-up / sign-in / sign-out / email-verify / forgot-reset / 2FA flows. Open `PHASE_2_PLAN.md` to start.
+- **Phase 0** (foundations + POPIA spine) — ✅ done 2026-05-21. See `docs/completed/PHASE_0_COMPLETE.md`.
+- **Phase 1** (public face + search + redacted profile) — ✅ done 2026-05-21. See `docs/completed/PHASE_1_COMPLETE.md`.
+- **Phase 1.5** (auth UI + seeker/employer/admin dashboards + Career compass + Student mode + Mzansi National + mobile pass + ESSA-positioning cleanup) — ✅ done 2026-05-22, mock-driven. See `docs/completed/PHASE_1_5_COMPLETE.md`.
+- **Next:** Phase 2 — real Better Auth + real consent persistence + real session-based guards + full sign-up / sign-in / sign-out / email-verify / forgot-reset flows. **2FA enforcement deferred to Phase 7** (the UI hook stays in the account pages; no setup-2fa / verify-2fa pages built in Phase 2). Open `docs/PHASE_2_PLAN.md` to start.
 
 ---
 
