@@ -9,6 +9,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { getMyProfile } from "@/lib/profile/me";
 import { freshnessSummary } from "@/lib/status";
 import { formatRelativeTime } from "@/lib/utils";
+import { getSeekerActivity } from "@/lib/profile/activity";
 import {
   Eye,
   MessageCircle,
@@ -36,11 +37,60 @@ export default async function SeekerOverviewPage({
   const t = await getTranslations("seekerDash");
   const lastConfirmed = formatRelativeTime(me.statusConfirmedAt, locale);
   const freshness = freshnessSummary(me.statusConfirmedAt);
-  const nextActionN = Math.max(0, 5 - me.topSkills.length);
   // Career compass still reads from the mock dataset (Phase 6 wires the real
   // demand-by-skill query). The seeker's handle is the lookup key.
   const compass = getCompassForHandle(me.handle);
   const topRec = compass.recommendations[0];
+
+  // Derive Next steps from real profile state — never lie about what's done.
+  const nextSteps: { text: string; done: boolean; href?: string }[] = [
+    {
+      text: "Verify your email address",
+      done: true, // sign-in only succeeds for verified emails
+    },
+    {
+      text: "Add a profile photo",
+      done: !!me.profilePhotoUrl,
+      href: "/dashboard/profile#avatar",
+    },
+    {
+      text:
+        me.topSkills.length >= 5
+          ? "Skills set is strong"
+          : `Add ${5 - me.topSkills.length} more skill${
+              5 - me.topSkills.length === 1 ? "" : "s"
+            }`,
+      done: me.topSkills.length >= 5,
+      href: "/dashboard/profile#skills",
+    },
+    {
+      text:
+        (me.qualifications?.length ?? 0) > 0
+          ? "Certificate on file"
+          : "Upload a recent certificate",
+      done: (me.qualifications?.length ?? 0) > 0,
+      href: "/dashboard/qualifications",
+    },
+    {
+      text:
+        (me.experience?.length ?? 0) > 0
+          ? "Experience captured"
+          : "Add a work-experience entry",
+      done: (me.experience?.length ?? 0) > 0,
+      href: "/dashboard/experience",
+    },
+    {
+      text: me.hasNationalId
+        ? "ID on file (encrypted)"
+        : "Add your ID number (encrypted on save)",
+      done: me.hasNationalId,
+      href: "/dashboard/profile#national-id",
+    },
+  ];
+
+  // Pull the seeker-side activity feed (real events from audit_log).
+  // Empty until Phase 5 starts writing reveal / download events.
+  const activity = await getSeekerActivity(me, 6);
 
   return (
     <DashboardShell
@@ -78,9 +128,11 @@ export default async function SeekerOverviewPage({
             <ProfileCompleteness value={me.completeness} variant="arc" />
             <div className="max-w-md text-[color:var(--color-ink-soft)]">
               <p>
-                {nextActionN > 0
-                  ? t("overview.nextAction", { n: nextActionN })
-                  : "Your profile is in excellent shape — recruiters will see it first."}
+                {me.completeness >= 80
+                  ? "Your profile is in excellent shape — recruiters will see it first."
+                  : me.completeness >= 50
+                    ? "Solid foundation. A few more touches put you in the top tier."
+                    : "Let's get the essentials in. Each section below adds visible weight."}
               </p>
               <Link
                 href="/dashboard/profile"
@@ -102,7 +154,7 @@ export default async function SeekerOverviewPage({
           lastConfirmedLabel={lastConfirmed}
         />
 
-        {/* Rank in search */}
+        {/* Rank in search — see your live position in the FTS-ranked pool */}
         <section
           aria-labelledby="rank-h"
           className="md:col-span-2 rounded-[var(--radius-md)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-6 md:p-8"
@@ -117,28 +169,27 @@ export default async function SeekerOverviewPage({
             </h2>
           </header>
           <p className="mb-5 text-sm text-[color:var(--color-ink-soft)]">
-            Position in the <em>{me.profession} · {me.province}</em> pool.
-          </p>
-          <div className="grid grid-cols-[auto_1fr_auto] items-baseline gap-4">
-            <span className="font-display text-[3.5rem] leading-none tabular text-[color:var(--color-ink)]">
-              #4
+            See your live position in the{" "}
+            <em>
+              {me.profession} · {me.province}
+            </em>{" "}
+            pool. Search runs Postgres FTS ranked by{" "}
+            <span className="text-[color:var(--color-ink)]">
+              relevance × freshness × completeness
             </span>
-            <div className="border-l border-[color:var(--color-hairline)] pl-4">
-              <div className="text-xs uppercase tracking-[0.18em] text-[color:var(--color-ink-soft)]">
-                of 312 candidates
-              </div>
-              <div className="mt-1 text-sm">
-                Up 3 places this week. Adding two more skills would move you into
-                the top three.
-              </div>
-            </div>
-            <Link
-              href="/search"
-              className="text-sm text-[color:var(--color-brand)] hover:underline"
-            >
-              See the pool →
-            </Link>
-          </div>
+            .
+          </p>
+          <Link
+            href={`/search?query=${encodeURIComponent(me.profession)}&province=${encodeURIComponent(me.province.toLowerCase().replace(/\s+/g, "-"))}`}
+            className="inline-flex items-center gap-2 rounded-[var(--radius-pill)] bg-[color:var(--color-ink)] px-4 py-2 text-sm font-medium text-[color:var(--color-paper)]"
+          >
+            See your pool
+            <ArrowUpRight className="size-3.5" aria-hidden="true" />
+          </Link>
+          <p className="mt-3 text-xs text-[color:var(--color-ink-soft)]">
+            A "your rank" widget that highlights you in the result list comes
+            with the Phase 5 employer reveal flow.
+          </p>
         </section>
 
         {/* Career compass — strategic glance, drills into /dashboard/grow */}
@@ -214,7 +265,7 @@ export default async function SeekerOverviewPage({
           </div>
         </section>
 
-        {/* Next steps */}
+        {/* Next steps — derived from real profile state */}
         <section
           aria-labelledby="next-h"
           className="rounded-[var(--radius-md)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface-sunk)] p-6"
@@ -229,34 +280,34 @@ export default async function SeekerOverviewPage({
             </h2>
           </header>
           <ol className="space-y-3 text-sm">
-            <NextStep
-              done
-              text="Verify your email address"
-            />
-            <NextStep
-              done
-              text="Grant searchability consent"
-            />
-            <NextStep
-              text="Add two more skills"
-              href="/dashboard/profile"
-            />
-            <NextStep
-              text="Upload a recent certificate"
-              href="/dashboard/qualifications"
-            />
+            {nextSteps.map((step, i) => (
+              <NextStep
+                key={i}
+                text={step.text}
+                href={step.href}
+                done={step.done}
+              />
+            ))}
           </ol>
         </section>
 
-        {/* Activity rails */}
+        {/* Activity — real audit log filtered to this seeker */}
         <ActivitySection
           icon={<Eye className="size-4" aria-hidden="true" />}
           title={t("overview.viewedBy")}
           empty={t("overview.noViewers")}
+          link={{ href: "/dashboard/activity", label: "Open ledger →" }}
         >
-          <ActivityRow when="2 hours ago" who="Verified employer" detail="Wits Health Sciences · Gauteng" />
-          <ActivityRow when="Yesterday" who="Verified employer" detail="Discovery Bank · Western Cape" />
-          <ActivityRow when="3 days ago" who="Verified employer" detail="Yoco · Western Cape" />
+          {activity.feed.length > 0
+            ? activity.feed.slice(0, 4).map((item, i) => (
+                <ActivityRow
+                  key={i}
+                  when={formatRelativeTime(item.at, locale)}
+                  who={item.actor}
+                  detail={item.detail}
+                />
+              ))
+            : null}
         </ActivitySection>
 
         <ActivitySection
@@ -264,11 +315,21 @@ export default async function SeekerOverviewPage({
           title={t("overview.contactedBy")}
           empty={t("overview.noContacts")}
         >
-          <ActivityRow
-            when="Yesterday"
-            who="Discovery Bank"
-            detail='Re: "Senior engineer — Sandton"'
-          />
+          {activity.feed
+            .filter(
+              (i) =>
+                i.kind === "profile.contact.request" ||
+                i.kind === "profile.contact.reveal",
+            )
+            .slice(0, 3)
+            .map((item, i) => (
+              <ActivityRow
+                key={i}
+                when={formatRelativeTime(item.at, locale)}
+                who={item.actor}
+                detail={item.detail}
+              />
+            ))}
         </ActivitySection>
       </div>
     </DashboardShell>
@@ -320,18 +381,32 @@ function ActivitySection({
   empty,
   icon,
   children,
+  link,
 }: {
   title: string;
   empty: string;
   icon: React.ReactNode;
   children?: React.ReactNode;
+  link?: { href: string; label: string };
 }) {
-  const hasContent = Array.isArray(children) ? children.length > 0 : !!children;
+  const hasContent = Array.isArray(children)
+    ? children.filter(Boolean).length > 0
+    : !!children;
   return (
     <section className="rounded-[var(--radius-md)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-6">
-      <header className="mb-3 flex items-center gap-2 border-b border-[color:var(--color-hairline)] pb-2">
-        <span className="text-[color:var(--color-ink-soft)]">{icon}</span>
-        <h2 className="font-display text-lg">{title}</h2>
+      <header className="mb-3 flex items-center justify-between gap-2 border-b border-[color:var(--color-hairline)] pb-2">
+        <div className="flex items-center gap-2">
+          <span className="text-[color:var(--color-ink-soft)]">{icon}</span>
+          <h2 className="font-display text-lg">{title}</h2>
+        </div>
+        {link && hasContent && (
+          <Link
+            href={link.href as never}
+            className="text-xs text-[color:var(--color-brand)] hover:underline"
+          >
+            {link.label}
+          </Link>
+        )}
       </header>
       {hasContent ? (
         <ol className="divide-y divide-[color:var(--color-hairline)]">
@@ -358,8 +433,10 @@ function ActivityRow({
       <span className="text-[0.7rem] uppercase tracking-[0.18em] text-[color:var(--color-ink-soft)]">
         {when}
       </span>
-      <span>
-        <span className="font-medium text-[color:var(--color-ink)]">{who}</span>
+      <span className="min-w-0">
+        <span className="block truncate font-medium text-[color:var(--color-ink)]">
+          {who}
+        </span>
         <span className="block text-xs text-[color:var(--color-ink-soft)]">
           {detail}
         </span>

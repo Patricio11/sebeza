@@ -1,10 +1,10 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
+import { redirect } from "next/navigation";
 import { Link } from "@/i18n/navigation";
 import { DashboardShell } from "@/components/layout/DashboardShell";
 import { SEEKER_NAV } from "@/components/layout/seekerNav";
 import { Button } from "@/components/ui/Button";
-import { dataProvider } from "@/lib/data/provider";
-import { verifyRole } from "@/lib/auth/dal";
+import { getMyProfile } from "@/lib/profile/me";
 import {
   getCompassForHandle,
   PROVIDER_LABEL,
@@ -39,8 +39,6 @@ import {
   Landmark,
 } from "lucide-react";
 
-const MOCK_HANDLE = "andile-z";
-
 export default async function CareerCompassPage({
   params,
 }: {
@@ -48,10 +46,12 @@ export default async function CareerCompassPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  await verifyRole("seeker");
 
-  const me = await dataProvider.getProfile(MOCK_HANDLE);
-  if (!me) return null;
+  // Real session — but Career compass demand data is intentionally still on
+  // the mock dataset; Phase 6 wires it to the live `search_events ×
+  // profile_skills` queries that form the government skills-gap wedge.
+  const me = await getMyProfile();
+  if (!me) redirect("/sign-in?next=/dashboard/grow");
 
   const t = await getTranslations("seekerDash.grow");
   const tStudent = await getTranslations("seekerDash.grow.student");

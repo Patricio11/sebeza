@@ -1,9 +1,10 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
+import { redirect } from "next/navigation";
 import { DashboardShell } from "@/components/layout/DashboardShell";
 import { SEEKER_NAV } from "@/components/layout/seekerNav";
 import { Button } from "@/components/ui/Button";
 import { ConsentRow } from "@/components/feature/auth/ConsentRow";
-import { dataProvider } from "@/lib/data/provider";
+import { getMyProfile } from "@/lib/profile/me";
 import { CONSENT_PURPOSES, type ConsentState } from "@/lib/consent";
 import { verifyRole } from "@/lib/auth/dal";
 import { getDb } from "@/db/client";
@@ -11,22 +12,22 @@ import { consents } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { Trash2, Download } from "lucide-react";
 
-const MOCK_HANDLE = "andile-z";
-
 interface ConsentSnapshot {
   state: ConsentState;
   grantedAt: string | null;
   version: string;
 }
 
+/** Fallback when a consent row doesn't exist for the user yet — shows
+    `none` so the UI is honest, not pre-populated as granted. */
 const FALLBACK_CONSENT: Record<
   (typeof CONSENT_PURPOSES)[number],
   ConsentSnapshot
 > = {
-  searchability: { state: "granted", grantedAt: "2024-01-08", version: "v2.1" },
-  contact_reveal: { state: "granted", grantedAt: "2024-01-08", version: "v2.1" },
-  document_sharing: { state: "granted", grantedAt: "2024-01-08", version: "v2.1" },
-  analytics_aggregate: { state: "revoked", grantedAt: null, version: "v2.1" },
+  searchability: { state: "none", grantedAt: null, version: "v2.1" },
+  contact_reveal: { state: "none", grantedAt: null, version: "v2.1" },
+  document_sharing: { state: "none", grantedAt: null, version: "v2.1" },
+  analytics_aggregate: { state: "none", grantedAt: null, version: "v2.1" },
 };
 
 const PURPOSE_LABEL: Record<(typeof CONSENT_PURPOSES)[number], string> = {
@@ -55,8 +56,8 @@ export default async function PrivacyPage({
   const { locale } = await params;
   setRequestLocale(locale);
   const session = await verifyRole("seeker");
-  const me = await dataProvider.getProfile(MOCK_HANDLE);
-  if (!me) return null;
+  const me = await getMyProfile();
+  if (!me) redirect("/sign-in?next=/dashboard/privacy");
   const t = await getTranslations("seekerDash.privacy");
 
   // Read live consents for the signed-in user.
@@ -114,10 +115,23 @@ export default async function PrivacyPage({
             <p className="mt-2 text-sm text-[color:var(--color-ink-soft)]">
               {t("exportBody")}
             </p>
-            <Button type="button" variant="primary" size="md" className="mt-4">
+            <Button
+              type="button"
+              variant="primary"
+              size="md"
+              className="mt-4"
+              disabled
+            >
               <Download className="size-4" aria-hidden="true" />
-              {t("exportCta")}
+              {t("exportCta")}{" "}
+              <span className="ml-2 text-[0.62rem] uppercase tracking-[0.18em]">
+                Phase 8
+              </span>
             </Button>
+            <p className="mt-2 text-xs text-[color:var(--color-ink-soft)]">
+              Data-export job wires up in Phase 8 alongside the transactional
+              email pipeline (we email you a signed download link).
+            </p>
           </div>
 
           <div className="rounded-[var(--radius-md)] border-2 border-[color:var(--color-danger)] bg-[color:var(--color-surface)] p-6">
@@ -130,11 +144,19 @@ export default async function PrivacyPage({
             </p>
             <button
               type="button"
-              className="mt-4 inline-flex items-center gap-2 rounded-[var(--radius-pill)] border border-[color:var(--color-danger)] px-4 py-2 text-sm font-medium text-[color:var(--color-danger)] hover:bg-[color:var(--color-danger)] hover:text-white"
+              disabled
+              className="mt-4 inline-flex items-center gap-2 rounded-[var(--radius-pill)] border border-[color:var(--color-danger)] px-4 py-2 text-sm font-medium text-[color:var(--color-danger)] opacity-50 cursor-not-allowed"
             >
               <Trash2 className="size-4" aria-hidden="true" />
-              {t("deleteCta")}
+              {t("deleteCta")}{" "}
+              <span className="ml-2 text-[0.62rem] uppercase tracking-[0.18em]">
+                Phase 8
+              </span>
             </button>
+            <p className="mt-2 text-xs text-[color:var(--color-ink-soft)]">
+              Soft-delete + 30-day grace period + hard-delete cron all land in
+              Phase 8.
+            </p>
           </div>
         </div>
       </section>
