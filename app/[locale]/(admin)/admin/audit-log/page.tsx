@@ -4,6 +4,7 @@ import { ADMIN_NAV, MOCK_ADMIN } from "@/components/layout/adminNav";
 import { Button } from "@/components/ui/Button";
 import { recentAuditEvents } from "@/lib/audit";
 import { Download } from "lucide-react";
+import { CustomSelect } from "@/components/ui/CustomSelect";
 
 export default async function AuditLogPage({
   params,
@@ -34,21 +35,28 @@ export default async function AuditLogPage({
     >
       {/* Filters */}
       <form className="mb-6 grid gap-3 md:grid-cols-[1fr_1fr_auto]">
-        <label className="flex flex-col gap-1">
+        <div className="flex flex-col gap-1">
           <span className="text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--color-ink-soft)]">
             {t("filterKind")}
           </span>
-          <select className="h-10 rounded-[var(--radius-sm)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] px-3">
-            <option>All</option>
-            <option>search.profiles</option>
-            <option>profile.view</option>
-            <option>profile.contact.reveal</option>
-            <option>profile.document.download</option>
-            <option>analytics.export</option>
-            <option>consent.grant</option>
-            <option>consent.revoke</option>
-          </select>
-        </label>
+          <CustomSelect
+            ariaLabel={t("filterKind")}
+            variant="compact"
+            name="kind"
+            defaultValue=""
+            placeholder="All kinds"
+            options={[
+              { value: "", label: "All kinds" },
+              { value: "search.profiles", label: "search.profiles" },
+              { value: "profile.view", label: "profile.view" },
+              { value: "profile.contact.reveal", label: "profile.contact.reveal" },
+              { value: "profile.document.download", label: "profile.document.download" },
+              { value: "analytics.export", label: "analytics.export" },
+              { value: "consent.grant", label: "consent.grant" },
+              { value: "consent.revoke", label: "consent.revoke" },
+            ]}
+          />
+        </div>
         <label className="flex flex-col gap-1">
           <span className="text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--color-ink-soft)]">
             {t("filterActor")}

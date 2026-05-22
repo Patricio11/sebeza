@@ -1,14 +1,17 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
+import { useTransition } from "react";
+import { Languages } from "lucide-react";
 import { usePathname, useRouter } from "@/i18n/navigation";
 import { LOCALES, LOCALE_LABELS } from "@/lib/i18n/config";
-import { useTransition } from "react";
+import { CustomSelect } from "@/components/ui/CustomSelect";
+import type { AppLocale } from "@/i18n/routing";
 
 /**
- * Persistent language switcher (UX_UI_SPEC §3.1). Native <select> for
- * accessibility + zero JS framework cost beyond the router transition.
- * Each language is labelled in its own name.
+ * Persistent language switcher. UX_UI_SPEC §3.1 — every language labelled
+ * in its own name (Zulu shows "isiZulu"). Uses CustomSelect so the dropdown
+ * looks like Sebenza on every platform, not the OS default.
  */
 export function LocaleSwitcher() {
   const locale = useLocale();
@@ -17,28 +20,23 @@ export function LocaleSwitcher() {
   const pathname = usePathname();
   const [pending, startTransition] = useTransition();
 
-  function onChange(e: React.ChangeEvent<HTMLSelectElement>) {
-    const next = e.target.value;
-    startTransition(() => {
-      router.replace(pathname, { locale: next });
-    });
-  }
-
   return (
-    <label className="inline-flex items-center gap-2 text-sm">
-      <span className="text-[color:var(--color-ink-soft)]">{t("language")}:</span>
-      <select
-        value={locale}
-        onChange={onChange}
-        disabled={pending}
-        className="rounded-[var(--radius-sm)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] px-2 py-1 text-[color:var(--color-ink)]"
-      >
-        {LOCALES.map((l) => (
-          <option key={l} value={l}>
-            {LOCALE_LABELS[l]}
-          </option>
-        ))}
-      </select>
-    </label>
+    <CustomSelect
+      ariaLabel={t("language")}
+      icon={<Languages className="size-4" aria-hidden="true" />}
+      variant="compact"
+      value={locale}
+      disabled={pending}
+      className="min-w-[160px]"
+      options={LOCALES.map((l) => ({
+        value: l,
+        label: LOCALE_LABELS[l],
+      }))}
+      onChange={(next) => {
+        startTransition(() => {
+          router.replace(pathname, { locale: next as AppLocale });
+        });
+      }}
+    />
   );
 }

@@ -6,6 +6,7 @@ import { PROVINCES } from "@/lib/mock/taxonomy";
 import type { EmploymentStatus, SearchFilters as F, Seniority, VerificationStatus } from "@/lib/mock/types";
 import { useState, useTransition } from "react";
 import { cn } from "@/lib/utils";
+import { CustomSelect } from "@/components/ui/CustomSelect";
 
 interface Props {
   defaultFilters: F;
@@ -61,34 +62,38 @@ export function SearchFilters({ defaultFilters, query }: Props) {
   const body = (
     <div className={cn("flex flex-col gap-7", pending && "opacity-60")}>
       <FilterGroup label={t("province")}>
-        <select
+        <CustomSelect
+          ariaLabel={t("province")}
+          variant="compact"
+          placeholder="All provinces"
           value={defaultFilters.province ?? ""}
-          onChange={(e) => update({ province: e.target.value || null, city: null })}
-          className="w-full rounded-[var(--radius-sm)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] px-3 py-2"
-        >
-          <option value="">All provinces</option>
-          {PROVINCES.map((p) => (
-            <option key={p.slug} value={p.slug}>
-              {p.label}
-            </option>
-          ))}
-        </select>
+          onChange={(v) => update({ province: v || null, city: null })}
+          options={[
+            { value: "", label: "All provinces" },
+            ...PROVINCES.map((p) => ({ value: p.slug, label: p.label })),
+          ]}
+        />
       </FilterGroup>
 
       {province && (
         <FilterGroup label={t("city")}>
-          <select
+          <CustomSelect
+            ariaLabel={t("city")}
+            variant="compact"
+            placeholder={`All cities in ${province.label}`}
             value={defaultFilters.city ?? ""}
-            onChange={(e) => update({ city: e.target.value || null })}
-            className="w-full rounded-[var(--radius-sm)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] px-3 py-2"
-          >
-            <option value="">All cities in {province.label}</option>
-            {province.cities.map((c) => (
-              <option key={c.slug} value={c.slug}>
-                {c.label}
-              </option>
-            ))}
-          </select>
+            onChange={(v) => update({ city: v || null })}
+            options={[
+              {
+                value: "",
+                label: `All cities in ${province.label}`,
+              },
+              ...province.cities.map((c) => ({
+                value: c.slug,
+                label: c.label,
+              })),
+            ]}
+          />
         </FilterGroup>
       )}
 

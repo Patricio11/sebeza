@@ -3,6 +3,7 @@ import { Link } from "@/i18n/navigation";
 import { DashboardShell } from "@/components/layout/DashboardShell";
 import { ADMIN_NAV, MOCK_ADMIN } from "@/components/layout/adminNav";
 import { dataProvider } from "@/lib/data/provider";
+import { CustomSelect } from "@/components/ui/CustomSelect";
 
 interface MockUserRow {
   handle: string;
@@ -58,12 +59,19 @@ export default async function UsersPage({
           placeholder="Search handle, email or display name…"
           className="h-10 rounded-[var(--radius-sm)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] px-3 text-sm"
         />
-        <select className="h-10 rounded-[var(--radius-sm)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] px-3 text-sm">
-          <option value="">All roles</option>
-          <option value="seeker">Seeker</option>
-          <option value="employer">Employer</option>
-          <option value="admin">Admin</option>
-        </select>
+        <CustomSelect
+          ariaLabel="Filter by role"
+          variant="compact"
+          name="role"
+          defaultValue=""
+          placeholder="All roles"
+          options={[
+            { value: "", label: "All roles" },
+            { value: "seeker", label: "Seeker" },
+            { value: "employer", label: "Employer" },
+            { value: "admin", label: "Admin" },
+          ]}
+        />
         <button
           type="submit"
           className="h-10 rounded-[var(--radius-pill)] bg-[color:var(--color-ink)] px-5 text-sm font-medium text-[color:var(--color-paper)]"

@@ -6,6 +6,7 @@ import { PROFESSIONS, PROVINCES } from "@/lib/mock/taxonomy";
 import { Search } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { CustomSelect } from "@/components/ui/CustomSelect";
 
 interface Props {
   /** "hero" sits inside the landing hero — large + editorial. "compact" is for the search header. */
@@ -93,23 +94,18 @@ export function SearchBar({
           label={t("locationLabel")}
           eyebrow="02"
         >
-          <select
+          <CustomSelect
             name="province"
             value={loc}
-            onChange={(e) => setLoc(e.target.value)}
-            className={cn(
-              "w-full appearance-none border-0 bg-transparent text-[color:var(--color-ink)] outline-none",
-              isHero ? "text-lg md:text-xl" : "text-base",
-              loc === "" && "text-[color:var(--color-ink-soft)]",
-            )}
-          >
-            <option value="">{t("locationPlaceholder")}</option>
-            {PROVINCES.map((p) => (
-              <option key={p.slug} value={p.slug}>
-                {p.label}
-              </option>
-            ))}
-          </select>
+            onChange={setLoc}
+            placeholder={t("locationPlaceholder")}
+            ariaLabel={t("locationLabel")}
+            variant="bare"
+            triggerTextClassName={
+              isHero ? "text-lg md:text-xl" : "text-base"
+            }
+            options={PROVINCES.map((p) => ({ value: p.slug, label: p.label }))}
+          />
         </Field>
 
         <button

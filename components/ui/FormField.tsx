@@ -1,4 +1,6 @@
+import * as React from "react";
 import { cn } from "@/lib/utils";
+import { CustomSelect, type CustomSelectOption } from "@/components/ui/CustomSelect";
 
 interface FieldShellProps {
   id: string;
@@ -101,6 +103,12 @@ interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
   children: React.ReactNode;
 }
 
+/**
+ * `SelectField` API is unchanged for backwards compatibility: every call site
+ * still passes `<option>` children. Internally we extract them and hand the
+ * data to `<CustomSelect>` so every dropdown in Sebenza uses the same Mzansi
+ * National popover / mobile bottom sheet — never a native OS dropdown.
+ */
 export function SelectField({
   id,
   label,
@@ -109,20 +117,29 @@ export function SelectField({
   optional,
   className,
   children,
-  ...props
+  name,
+  defaultValue,
+  value,
+  required,
+  disabled,
 }: SelectProps) {
+  const { options, placeholder } = extractOptions(children);
   return (
     <FieldShell id={id} label={label} hint={hint} badge={badge} optional={optional}>
-      <select
+      <CustomSelect
         id={id}
-        className={cn(
-          "h-12 w-full appearance-none rounded-[var(--radius-sm)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] px-3 text-[color:var(--color-ink)] outline-none transition-colors focus:border-[color:var(--color-ink)]",
-          className,
-        )}
-        {...props}
-      >
-        {children}
-      </select>
+        name={typeof name === "string" ? name : undefined}
+        defaultValue={
+          typeof defaultValue === "string" ? defaultValue : undefined
+        }
+        value={typeof value === "string" ? value : undefined}
+        options={options}
+        placeholder={placeholder ?? "Select…"}
+        required={required}
+        disabled={disabled}
+        ariaLabel={label}
+        className={className}
+      />
     </FieldShell>
   );
 }
@@ -154,6 +171,55 @@ export function TextareaField({
       />
     </FieldShell>
   );
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Internals
+// ──────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Walks the `<option>` children passed to <SelectField> and turns them into
+ * the `{value,label,disabled}` data CustomSelect expects. The first option
+ * with an empty `value` is treated as the placeholder rather than a real
+ * option — matches the convention every call site already uses.
+ */
+function extractOptions(children: React.ReactNode): {
+  options: CustomSelectOption[];
+  placeholder?: string;
+} {
+  const out: CustomSelectOption[] = [];
+  let placeholder: string | undefined;
+
+  React.Children.forEach(children, (child) => {
+    if (!React.isValidElement(child)) return;
+    if (typeof child.type !== "string") return;
+    if (child.type !== "option") return;
+    const props = child.props as {
+      value?: string | number | readonly string[];
+      children?: React.ReactNode;
+      disabled?: boolean;
+    };
+    const value = String(props.value ?? "");
+    const label = nodeToString(props.children);
+    if (value === "" && out.length === 0 && placeholder === undefined) {
+      placeholder = label;
+      return;
+    }
+    out.push({ value, label, disabled: props.disabled });
+  });
+
+  return { options: out, placeholder };
+}
+
+function nodeToString(node: React.ReactNode): string {
+  if (node == null || typeof node === "boolean") return "";
+  if (typeof node === "string" || typeof node === "number") return String(node);
+  if (Array.isArray(node)) return node.map(nodeToString).join("");
+  if (React.isValidElement(node)) {
+    const children = (node.props as { children?: React.ReactNode }).children;
+    return nodeToString(children);
+  }
+  return "";
 }
 
 export function EncryptedBadge({ children = "Encrypted on save" }: { children?: React.ReactNode }) {
