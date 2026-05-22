@@ -5,6 +5,7 @@ import type { PublicProfile } from "@/lib/mock/types";
 import { StatusChip } from "./StatusChip";
 import { VerificationBadge } from "./VerificationBadge";
 import { ProfileCompleteness } from "./ProfileCompleteness";
+import { Avatar } from "./Avatar";
 
 interface Props {
   profile: PublicProfile;
@@ -28,7 +29,6 @@ export function TalentRosterItem({
   className,
 }: Props) {
   const t = useTranslations("search.rosterItem");
-  const initials = getInitials(profile.displayName);
   const showCitizenHighlight = highlightCitizen && profile.isCitizen;
 
   return (
@@ -40,7 +40,12 @@ export function TalentRosterItem({
         className,
       )}
     >
-      <Avatar initials={initials} />
+      <Avatar
+        name={profile.displayName}
+        photoUrl={profile.profilePhotoUrl}
+        verification={profile.verification}
+        size="md"
+      />
 
       <div className="min-w-0">
         {/* Top line: name + verification */}
@@ -101,22 +106,3 @@ export function TalentRosterItem({
   );
 }
 
-function Avatar({ initials }: { initials: string }) {
-  return (
-    <div
-      aria-hidden="true"
-      className="flex size-12 shrink-0 items-center justify-center rounded-full bg-[color:var(--color-brand-tint)] font-display text-lg text-[color:var(--color-brand-strong)]"
-    >
-      {initials}
-    </div>
-  );
-}
-
-function getInitials(displayName: string): string {
-  return displayName
-    .split(/\s+/)
-    .filter(Boolean)
-    .map((s) => s[0]?.toUpperCase() ?? "")
-    .slice(0, 2)
-    .join("");
-}

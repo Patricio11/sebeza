@@ -36,6 +36,12 @@ export interface PublicProfile {
   handle: string;
   /** Surname is redacted in public/search payloads (e.g. "Thandeka M."). */
   displayName: string;
+  /**
+   * Optional profile photo URL. Phase 4+: stored in R2 with signed-URL access;
+   * the public payload only surfaces a small/thumbnail variant. When null, the
+   * Avatar component renders a sophisticated SA-palette initials block.
+   */
+  profilePhotoUrl?: string | null;
   profession: string;
   seniority: Seniority | null;
   city: string;

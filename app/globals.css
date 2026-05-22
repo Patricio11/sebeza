@@ -1,39 +1,40 @@
 @import "tailwindcss";
 
 /* ---------------------------------------------------------
-   Sebenza Design Tokens (Civic Editorial — see UX_UI_SPEC §1)
-   Warm paper, warm ink, institutional teal, one warm accent.
-   AA contrast on every pair. No SaaS blue/purple.
+   Sebenza Design Tokens — "Mzansi National"
+   Inspired by the SA flag (deep green primary, gold accent,
+   red for alerts only). Charcoal + cream for ink and paper.
+   AA contrast on every pair. NEVER a literal flag.
    --------------------------------------------------------- */
 @theme {
   /* Surfaces */
-  --color-paper: #faf8f4;
+  --color-paper: #fbf8f0;         /* SA cream — sunnier than warm-paper */
   --color-surface: #ffffff;
-  --color-surface-sunk: #f1ede6;
+  --color-surface-sunk: #f3efe7;
 
   /* Ink */
-  --color-ink: #1a1714;
+  --color-ink: #14110d;           /* SA charcoal, deeper than the old warm-black */
   --color-ink-soft: #5a5249;
   --color-hairline: #e4ded4;
 
-  /* Brand — deep institutional teal-green */
-  --color-brand: #134e48;
-  --color-brand-strong: #0c3833;
-  --color-brand-tint: #dcebe8;
+  /* Brand — SA flag-green (slightly desaturated for screens) */
+  --color-brand: #006b3c;
+  --color-brand-strong: #003d1f;
+  --color-brand-tint: #e1f0e7;
 
-  /* Accent — warm ochre/amber, used sparingly */
-  --color-accent: #d97a14;
-  --color-accent-tint: #fbead2;
+  /* Accent — SA gold (warmer + readable on cream) */
+  --color-accent: #c98214;
+  --color-accent-tint: #fff3d7;
 
   /* Semantic / Talent Pulse */
-  --color-employed: #2e7d5b;
-  --color-open: #d97a14;
+  --color-employed: #006b3c;       /* aligns with SA green */
+  --color-open: #c98214;           /* aligns with SA gold-deep */
   --color-unemployed: #5a5249;
-  --color-self-employed: #6b7f3f;
-  --color-studying: #3d6a99;
+  --color-self-employed: #5e7a31;
+  --color-studying: #2f5e8a;
   --color-stale: #b45f3c;
-  --color-danger: #c2451e;
-  --color-verified: #134e48;
+  --color-danger: #de3831;         /* SA red — alerts only */
+  --color-verified: #006b3c;
 
   /* ─────────────────────────────────────────────────────────
      SA flag-inspired palette (new — landing page only for now).

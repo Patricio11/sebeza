@@ -1,5 +1,6 @@
 import { Link } from "@/i18n/navigation";
 import { LocaleSwitcher } from "@/components/feature/LocaleSwitcher";
+import { SAChevron } from "@/components/ui/SAChevron";
 import { cn } from "@/lib/utils";
 
 export type DashboardRole = "seeker" | "employer" | "admin";
@@ -66,18 +67,22 @@ export function DashboardShell({
           aria-label={`${workspaceLabel} navigation`}
           className="hidden border-r border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] md:flex md:min-h-screen md:flex-col"
         >
+          {/* Top flag band over the sidebar */}
+          <div aria-hidden="true" className="flex h-[3px] w-full">
+            <div className="flex-[3] bg-[color:var(--color-brand)]" />
+            <div className="flex-[2] bg-[color:var(--color-accent)]" />
+            <div className="flex-[1] bg-[color:var(--color-danger)]" />
+          </div>
+
           <div className="relative flex items-center gap-3 border-b border-[color:var(--color-hairline)] px-6 py-5">
             <span
               aria-hidden="true"
               className={cn("absolute inset-y-0 left-0 w-1", roleAccent.strip)}
             />
-            <Link href="/" className="flex items-baseline gap-1.5">
+            <Link href="/" className="flex items-baseline gap-2">
+              <SAChevron variant="mark" className="size-3 translate-y-[1px]" />
               <span className="font-display text-xl leading-none">Sebenza</span>
-              <span
-                aria-hidden="true"
-                className="inline-block size-1.5 translate-y-[-2px] rounded-full bg-[color:var(--color-accent)]"
-              />
-              <span className="text-[0.62rem] uppercase tracking-[0.22em] text-[color:var(--color-ink-soft)]">
+              <span className="text-[0.62rem] uppercase tracking-[0.24em] text-[color:var(--color-ink-soft)]">
                 ZA
               </span>
             </Link>
@@ -139,17 +144,19 @@ export function DashboardShell({
         <div className="flex min-h-screen flex-col">
           {/* Mobile top strip */}
           <div className="border-b border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] md:hidden">
+            <div aria-hidden="true" className="flex h-[3px] w-full">
+              <div className="flex-[3] bg-[color:var(--color-brand)]" />
+              <div className="flex-[2] bg-[color:var(--color-accent)]" />
+              <div className="flex-[1] bg-[color:var(--color-danger)]" />
+            </div>
             <div className="flex items-center justify-between px-5 py-3">
               <Link href="/" className="flex items-baseline gap-1.5">
+                <SAChevron variant="mark" className="size-3 translate-y-[1px]" />
                 <span className="font-display text-lg">Sebenza</span>
-                <span
-                  aria-hidden="true"
-                  className="inline-block size-1.5 translate-y-[-2px] rounded-full bg-[color:var(--color-accent)]"
-                />
               </Link>
               <span
                 className={cn(
-                  "text-[0.62rem] uppercase tracking-[0.22em]",
+                  "text-[0.62rem] uppercase tracking-[0.24em]",
                   roleAccent.text,
                 )}
               >
