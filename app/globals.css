@@ -125,6 +125,35 @@
     }
   }
 
+  /* Pointer cursor on every clickable element.
+     Tailwind v4's preflight doesn't set this on <button>, and ARIA-styled
+     elements (role="button", role="option", role="tab") need it explicitly
+     too. Disabled controls flip to `not-allowed` so the affordance is honest. */
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  [role="option"]:not([aria-disabled="true"]),
+  [role="tab"]:not([aria-disabled="true"]),
+  [role="menuitem"]:not([aria-disabled="true"]),
+  [role="switch"]:not([aria-disabled="true"]),
+  summary,
+  label[for]:not([data-no-cursor]),
+  select:not(:disabled),
+  input[type="checkbox"]:not(:disabled),
+  input[type="radio"]:not(:disabled),
+  input[type="submit"]:not(:disabled),
+  input[type="reset"]:not(:disabled),
+  input[type="file"]:not(:disabled),
+  input[type="color"]:not(:disabled) {
+    cursor: pointer;
+  }
+
+  button:disabled,
+  [aria-disabled="true"],
+  [role="button"][aria-disabled="true"],
+  [role="option"][aria-disabled="true"] {
+    cursor: not-allowed;
+  }
+
   /* Improve text-wrapping for editorial headlines + meta lines. */
   h1,
   h2 {
