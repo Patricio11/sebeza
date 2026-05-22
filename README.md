@@ -3,7 +3,7 @@
 South Africa's talent-intelligence platform — a fast, accessible, POPIA-compliant
 search and analytics surface for matching people to work by skill and location.
 
-> The trustworthy, real-time layer ESSA never had.
+> The trustworthy, real-time layer for South African work.
 
 This is the **Phase 1** build: clickable end-to-end on mock data. Backend slots in
 behind a typed `dataProvider` seam — see [lib/data/provider.ts](lib/data/provider.ts).

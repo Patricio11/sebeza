@@ -155,7 +155,7 @@ States: fonts-not-loaded fallback; JS-off the search still submits (progressive 
   ```
   - Ranking: relevance × status freshness × completeness × citizen-highlight.
   - **Redaction enforced:** no surname in full until reveal, no ID, no docs, no contact in payload.
-  - Stale statuses visibly lower + dashed chip — honesty is the differentiator vs ESSA.
+  - Stale statuses visibly lower + dashed chip — honesty is the differentiator.
 - **States:** loading = skeleton roster rows; empty = helpful "no chefs in Cape Town yet — broaden location?"
   with suggestions (this empty state also feeds `searchEvents` = skills-gap signal).
 - Pagination: cursor-based, data-light, "load more."
@@ -190,7 +190,7 @@ States: fonts-not-loaded fallback; JS-off the search still submits (progressive 
 - **Charts (Recharts, lightweight):** registrations & placements over time; demand by skill/location
   (from `searchEvents`); skills-gap leaderboard ("most-searched, least-filled").
 - **Freshness disclosure:** every figure shows a confidence indicator — we never present stale data as fact.
-  This single honesty feature is what ESSA cannot claim.
+  This single honesty feature is the platform's wedge.
 - Exports: aggregate-only CSV/PDF, audit-logged, zero PII.
 
 ### 2.7 Admin / Moderation  `/admin`

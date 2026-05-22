@@ -1,8 +1,11 @@
 # SEBENZA — NATIONAL TALENT PLATFORM ROADMAP (v1.0)
 **Project:** Sebenza *(working name)* — South African Talent-Intelligence Platform
-**Strategy:** "The trustworthy, real-time layer ESSA never had."
+**Strategy:** "The trustworthy, real-time layer for South African work."
 **Goal:** A fast, accessible, POPIA-compliant platform that matches talent by skill + location,
 keeps employment data *fresh*, and exposes employment analytics the state can't currently see.
+
+> **Tone rule (non-negotiable in product copy):** Never name the incumbent national registry in
+> user-facing copy. Never compare. Sebenza stands on its own merits.
 
 **Companion docs:** `TO_START_EVERY_SESSION.md` (always-on context + rules) · `UX_UI_SPEC.md` (design system, Phase 1 screen-by-screen, typed mock-data layer, expanded Phases 2–6). Read all three together.
 
@@ -10,9 +13,9 @@ keeps employment data *fresh*, and exposes employment analytics the state can't 
 
 ## 🎯 EXECUTIVE SUMMARY
 
-Sebenza is a national talent-intelligence platform for South Africa. The existing government system
-(ESSA) is mandated and free but suffers from stale, unreliable data. We do not rebuild the registry —
-we win on **data quality, usability, and analytics.** The system has three surfaces:
+Sebenza is a national talent-intelligence platform for South Africa. The existing national
+talent registry is mandated and free but suffers from stale, unreliable data. We do not rebuild
+that registry — we win on **data quality, usability, and analytics.** The system has three surfaces:
 
 - **Public / Job-Seeker:** create a verified-ish profile, keep a *live* employment status, get found.
 - **Employer / Recruiter:** search talent by skill + location + status, shortlist, contact, log hires.
@@ -244,7 +247,7 @@ deletedAt: timestamp("deleted_at"),         // soft delete → erasure
 ---
 
 ## 📊 PHASE 6: THE ANALYTICS & POLICY DASHBOARD
-*Goal: The government wedge — the visibility ESSA lacks.*
+*Goal: The government wedge — real-time workforce visibility.*
 
 ### Task 6.1: Employment Analytics (Recharts)
 - [ ] Counts/trends by skill, profession, location, seniority, status — **weighted by data freshness**.

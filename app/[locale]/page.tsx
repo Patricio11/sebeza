@@ -44,7 +44,7 @@ export default async function LandingPage({
       <main id="main">
         <Hero t={t} analytics={analytics} confidence={confidence} locale={locale} />
         <PulseStrip t={t} analytics={analytics} confidence={confidence} locale={locale} />
-        <Difference />
+        <Principles />
         <Pillars t={t} />
         <Outcomes />
         <DualSplit t={t} />
@@ -331,9 +331,11 @@ function PulseStrip({
               id="pulse-h"
               className="mt-3 max-w-3xl font-display text-[clamp(2.4rem,5vw,4.2rem)] leading-[0.98] tracking-[-0.02em]"
             >
-              The number ESSA{" "}
-              <span className="italic text-[color:var(--color-sa-gold)]">cannot</span>{" "}
-              put on the table.
+              South Africa,{" "}
+              <span className="italic text-[color:var(--color-sa-gold)]">
+                at work.
+              </span>{" "}
+              Right now.
             </h2>
           </div>
           <p className="max-w-sm text-[color:var(--color-sa-cream)]/80">
@@ -462,112 +464,77 @@ function BigStat({
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// DIFFERENCE — comparison, framed positively (the wedge, honestly)
+// PRINCIPLES — what Sebenza commits to, in its own voice
 // ─────────────────────────────────────────────────────────────────────────────
 
-const DIFF_ROWS: { dimension: string; old: string; sebenza: string }[] = [
+const PRINCIPLES: { dimension: string; commitment: string }[] = [
   {
     dimension: "Employment data",
-    old: "Snapshot at registration; rarely refreshed.",
-    sebenza: "Live, status-time-stamped, freshness-weighted.",
+    commitment: "Live, status-time-stamped, freshness-weighted.",
   },
   {
     dimension: "Skills gap visibility",
-    old: "Anecdotal; lags by months.",
-    sebenza: "Derived from real-time employer searches.",
+    commitment: "Derived from real-time employer searches.",
   },
   {
     dimension: "Verification",
-    old: "Self-reported, indistinguishable from real.",
-    sebenza: "Honest states — `unverified` is the default.",
+    commitment: "Honest states — “unverified” is the default.",
   },
   {
     dimension: "Built for",
-    old: "Desktop, broadband, English.",
-    sebenza: "360px Android, 3G, four launch languages.",
+    commitment: "360 px Android, 3G, four launch languages.",
   },
 ];
 
-function Difference() {
+function Principles() {
   return (
     <section
-      aria-labelledby="diff-h"
+      aria-labelledby="prin-h"
       className="bg-[color:var(--color-sa-cream)] py-20 md:py-28"
     >
       <div className="mx-auto max-w-[1320px] px-5 md:px-10">
         <header className="mb-12 md:mb-16">
           <div className="flex items-center gap-3 text-[0.72rem] uppercase tracking-[0.28em] text-[color:var(--color-sa-green-deep)]">
             <SAChevron variant="mark" className="size-3" />
-            Where we differ
+            How we work
           </div>
           <h2
-            id="diff-h"
+            id="prin-h"
             className="mt-3 max-w-3xl font-display text-[clamp(2.2rem,5vw,3.6rem)] leading-[1.02] tracking-[-0.02em]"
           >
-            The register exists.
+            Built on four
             <br />
             <span className="italic text-[color:var(--color-sa-green-deep)]">
-              The signal
+              honest
             </span>{" "}
-            does not.
+            principles.
           </h2>
           <p className="mt-4 max-w-2xl text-[color:var(--color-ink-soft)]">
-            We are not rebuilding ESSA. ESSA is mandated and free. Where it
-            falls short — data quality, usability, real-time analytics — is
-            exactly where we win.
+            A national platform is judged by what its data shows — and by
+            what it refuses to show. Sebenza commits to these four.
           </p>
         </header>
 
-        <div className="grid gap-8 md:grid-cols-[1fr_auto_1fr] md:gap-12 md:items-stretch">
-          {/* Old column */}
-          <div>
-            <div className="text-[0.68rem] uppercase tracking-[0.28em] text-[color:var(--color-ink-soft)]">
-              The 90-day-old register
-            </div>
-            <ul className="mt-4 divide-y divide-[color:var(--color-sa-charcoal)]/10 border-t border-[color:var(--color-sa-charcoal)]/15">
-              {DIFF_ROWS.map((row) => (
-                <li key={row.dimension} className="py-5">
-                  <div className="text-[0.66rem] uppercase tracking-[0.22em] text-[color:var(--color-ink-soft)]">
-                    {row.dimension}
-                  </div>
-                  <div className="mt-1.5 text-base italic text-[color:var(--color-ink-soft)]">
-                    {row.old}
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Spine */}
-          <div
-            aria-hidden="true"
-            className="relative hidden md:flex md:w-12 md:items-center md:justify-center"
-          >
-            <div className="h-full w-px bg-[color:var(--color-sa-charcoal)]/15" />
-            <div className="absolute inline-flex size-10 items-center justify-center rounded-full bg-[color:var(--color-sa-charcoal)] text-[color:var(--color-sa-gold)]">
-              <SAChevron variant="inline" className="size-5" />
-            </div>
-          </div>
-
-          {/* Sebenza column */}
-          <div>
-            <div className="text-[0.68rem] uppercase tracking-[0.28em] text-[color:var(--color-sa-green-deep)]">
-              Sebenza
-            </div>
-            <ul className="mt-4 divide-y divide-[color:var(--color-sa-green)]/30 border-t-2 border-[color:var(--color-sa-green-deep)]">
-              {DIFF_ROWS.map((row) => (
-                <li key={row.dimension} className="py-5">
-                  <div className="text-[0.66rem] uppercase tracking-[0.22em] text-[color:var(--color-sa-green-deep)]">
-                    {row.dimension}
-                  </div>
-                  <div className="mt-1.5 font-display text-lg leading-snug text-[color:var(--color-sa-charcoal)]">
-                    {row.sebenza}
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
+        <ol className="grid gap-px overflow-hidden rounded-2xl bg-[color:var(--color-sa-charcoal)]/10 md:grid-cols-2">
+          {PRINCIPLES.map((p, i) => (
+            <li
+              key={p.dimension}
+              className="group flex flex-col gap-3 bg-[color:var(--color-sa-cream)] p-7 transition-colors hover:bg-[color:var(--color-sa-green-tint)] md:p-10"
+            >
+              <div className="flex items-baseline gap-3">
+                <span className="font-display text-[2.4rem] italic leading-none text-[color:var(--color-sa-gold-deep)]">
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                <div className="text-[0.66rem] uppercase tracking-[0.24em] text-[color:var(--color-sa-green-deep)]">
+                  {p.dimension}
+                </div>
+              </div>
+              <p className="font-display text-xl leading-snug text-[color:var(--color-sa-charcoal)] md:text-2xl">
+                {p.commitment}
+              </p>
+            </li>
+          ))}
+        </ol>
 
         {/* Pull quote */}
         <blockquote className="mt-16 max-w-3xl border-l-4 border-[color:var(--color-sa-gold)] pl-6 md:mt-20">
@@ -576,7 +543,7 @@ function Difference() {
             aria-hidden="true"
           />
           <p className="font-display text-2xl italic leading-snug text-[color:var(--color-sa-charcoal)] md:text-3xl">
-            The trustworthy, real-time layer ESSA never had.
+            The trustworthy, real-time layer for South African work.
           </p>
           <cite className="mt-3 block text-[0.72rem] uppercase not-italic tracking-[0.24em] text-[color:var(--color-ink-soft)]">
             — Sebenza · strategy brief, 2026
@@ -588,7 +555,7 @@ function Difference() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// PILLARS — three things we do that the old system can't
+// PILLARS — three commitments that define the platform
 // ─────────────────────────────────────────────────────────────────────────────
 
 function Pillars({
@@ -629,13 +596,17 @@ function Pillars({
         <header className="mb-12 max-w-3xl md:mb-16">
           <div className="flex items-center gap-3 text-[0.72rem] uppercase tracking-[0.28em] text-[color:var(--color-sa-gold)]">
             <SAChevron variant="mark" className="size-3" />
-            The wedge
+            What we do
           </div>
           <h2
             id="pillars-h"
             className="mt-3 font-display text-[clamp(2.2rem,5vw,3.6rem)] leading-[1.02] tracking-[-0.02em]"
           >
-            Three things we do — and they cannot.
+            Three things, done{" "}
+            <span className="italic text-[color:var(--color-sa-gold)]">
+              honestly
+            </span>
+            .
           </h2>
         </header>
 
