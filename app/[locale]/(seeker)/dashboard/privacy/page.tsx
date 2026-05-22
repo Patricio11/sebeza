@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/Button";
 import { ConsentRow } from "@/components/feature/auth/ConsentRow";
 import { dataProvider } from "@/lib/data/provider";
 import { CONSENT_PURPOSES, type ConsentState } from "@/lib/consent";
-import { getSessionUser } from "@/lib/auth/guard";
+import { verifyRole } from "@/lib/auth/dal";
 import { getDb } from "@/db/client";
 import { consents } from "@/db/schema";
 import { eq } from "drizzle-orm";
@@ -54,14 +54,13 @@ export default async function PrivacyPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
+  const session = await verifyRole("seeker");
   const me = await dataProvider.getProfile(MOCK_HANDLE);
   if (!me) return null;
   const t = await getTranslations("seekerDash.privacy");
 
-  // Read live consents for the signed-in user; fall back to mock fixtures
-  // when no session / no DB.
-  const session = await getSessionUser();
-  const rows = await loadConsents(session?.id);
+  // Read live consents for the signed-in user.
+  const rows = await loadConsents(session.id);
 
   return (
     <DashboardShell

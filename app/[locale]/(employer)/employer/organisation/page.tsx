@@ -6,6 +6,7 @@ import { TextField, SelectField } from "@/components/ui/FormField";
 import { Button } from "@/components/ui/Button";
 import { VerificationBadge } from "@/components/ui/VerificationBadge";
 import { ShieldCheck } from "lucide-react";
+import { verifyRole } from "@/lib/auth/dal";
 
 export default async function OrganisationPage({
   params,
@@ -14,6 +15,7 @@ export default async function OrganisationPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
+  await verifyRole("employer");
   const t = await getTranslations("employerDash.organisation");
   const tOuter = await getTranslations("employerDash");
   const org = MOCK_EMPLOYER;

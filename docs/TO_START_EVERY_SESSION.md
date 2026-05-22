@@ -27,8 +27,9 @@ profile experience. **NOT** flashy. (See Rule 1 — this is deliberate, not an o
 - **`ROADMAP.md`** — the phased build plan (Phase 0 → deployment). *What* to build and in what order.
 - **`UX_UI_SPEC.md`** — design system + Phase 1 screen-by-screen UX + the typed mock-data layer + expanded detail for Phases 2–6. *How it looks and behaves.*
 - **`MOBILE_PLAN.md`** — mobile-responsiveness phases (M1–M7), all done. The No-Flash Rule made concrete at 360 px.
-- **Phase completion docs** (in `docs/completed/`) — `PHASE_0_COMPLETE.md` · `PHASE_1_COMPLETE.md` · `PHASE_1_5_COMPLETE.md` · `PHASE_2_COMPLETE.md` · `PHASE_2_PLAN.md` (archived) (what shipped, when, with verification).
-- **Active phase plan** — `PHASE_N_PLAN.md` at the top of `docs/` for the phase being built. Today: `PHASE_3_PLAN.md` (profile CRUD + Supabase Storage uploads + employment-status engine).
+- **Phase completion docs** (in `docs/completed/`) — `PHASE_0_COMPLETE.md` · `PHASE_1_COMPLETE.md` · `PHASE_1_5_COMPLETE.md` · `PHASE_2_COMPLETE.md` · `PHASE_3_COMPLETE.md` + archived plan/smoke-test records (what shipped, when, with verification).
+- **`docs/SECURITY.md`** — three-layer security model (proxy = UX, DAL = real gate, Server Actions = defense-in-depth). Read before touching `lib/auth/*` or adding a new protected page.
+- **Active phase plan** — `PHASE_N_PLAN.md` at the top of `docs/` for the phase being built. Today: `PHASE_4_PLAN.md` (Postgres FTS + ranking SQL + real `dbProvider`).
 - **This file** — always-on context + non-negotiable rules. Paste it at the top of every session.
 
 When I give you a Phase: pull design/screen detail from `UX_UI_SPEC.md` and task detail from `ROADMAP.md`.
@@ -50,7 +51,8 @@ When I give you a Phase: pull design/screen detail from `UX_UI_SPEC.md` and task
 - **Phase 1** (public face + search + redacted profile) — ✅ done 2026-05-21. See `docs/completed/PHASE_1_COMPLETE.md`.
 - **Phase 1.5** (auth UI + seeker/employer/admin dashboards + Career compass + Student mode + Mzansi National + mobile pass + ESSA-positioning cleanup) — ✅ done 2026-05-22, mock-driven. See `docs/completed/PHASE_1_5_COMPLETE.md`.
 - **Phase 2** (real Better Auth + consent persistence + audit-log persistence + session-based guards + full sign-up / sign-in / sign-out / verify / forgot / reset, with env-driven Mailtrap/Resend transport) — ✅ done 2026-05-22. **2FA enforcement deferred to Phase 7 task 7.2.** See `docs/completed/PHASE_2_COMPLETE.md`.
-- **Next:** Phase 3 — real profile CRUD via Server Actions, CV/certificate/photo upload to **Supabase Storage** (private bucket, signed URLs), and the time-aware employment-status engine (`statusConfirmedAt` + freshness bands + re-confirmation nudge). Open `docs/PHASE_3_PLAN.md` to start.
+- **Phase 3** (profile CRUD via Server Actions + Supabase Storage uploads for CV/cert/photo + the time-aware employment-status engine with dashboard nudge banner) — ✅ done 2026-05-22. See `docs/completed/PHASE_3_COMPLETE.md`.
+- **Next:** Phase 4 — Postgres FTS + ranking SQL + real `dbProvider`. The mock-driven `/search`, `/p/[handle]` and `/insights` swap to DB; signed photo URLs surface on public reads. Open `docs/PHASE_4_PLAN.md` to start.
 
 ---
 

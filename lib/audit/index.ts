@@ -31,7 +31,22 @@ export type AuditKind =
   | "auth.signup"
   | "auth.signout"
   | "consent.grant"
-  | "consent.revoke";
+  | "consent.revoke"
+  // Phase 3 — self-edit events on the seeker dashboard.
+  | "profile.update"
+  | "profile.skills.update"
+  | "profile.status.update"
+  | "profile.status.reconfirm"
+  | "profile.national_id.update"
+  | "profile.national_id.remove"
+  | "profile.experience.add"
+  | "profile.experience.update"
+  | "profile.experience.delete"
+  | "profile.qualification.add"
+  | "profile.qualification.delete"
+  | "profile.qualification.document.upload"
+  | "profile.photo.upload"
+  | "profile.photo.remove";
 
 export interface AuditEvent {
   kind: AuditKind;

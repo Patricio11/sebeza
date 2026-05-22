@@ -185,25 +185,27 @@ that registry — we win on **data quality, usability, and analytics.** The syst
 
 ---
 
-## 👤 PHASE 3: THE TALENT PROFILE
-*Goal: Rich, trustworthy profiles with a live, time-aware employment status.*
+## 👤 PHASE 3: THE TALENT PROFILE ✅ *(done 2026-05-22)*
+*Goal: Rich, trustworthy profiles with a live, time-aware employment status. See `docs/completed/PHASE_3_COMPLETE.md`.*
 
 ### Task 3.1: Profile CRUD
-- [ ] Personal: name, location (province/city), nationality, ID number (**encrypted, never displayed**).
-- [ ] Professional: profession, seniority, headline, bio.
-- [ ] Skills: multi-select from controlled taxonomy + self-rated proficiency.
-- [ ] Experience: roles, orgs, dates, descriptions.
+- [x] Personal: display name, location (province/city), nationality, ID number (**encrypted on save, never displayed back** — SA Luhn-validated).
+- [x] Professional: profession, seniority, bio.
+- [x] Skills: multi-select from controlled taxonomy + self-rated proficiency; replace-on-save transaction.
+- [x] Experience: add / edit / delete; inline form with date-order validation.
 
 ### Task 3.2: Qualifications & Documents
-- [ ] Upload certificates/CV to **Supabase Storage** (private bucket, signed URLs, service-role key on the server only).
-- [ ] Each qualification: title, institution, `verification_status` (default `unverified`).
-- [ ] Virus/Content type checks on upload; size limits; PII access logged.
+- [x] Upload certificates to **Supabase Storage** (private bucket, signed URLs, service-role key server-only).
+- [x] Each qualification: title, institution, awarded year, `verification_status` (default `unverified`; flips to `pending` on document upload).
+- [x] Content-type + size limits + **magic-byte sniff** (don't trust browser's claimed type); per-user rate limit (5 / 10 min, in-memory; Upstash in Phase 9); every PII path audit-logged.
+- [x] Profile photo upload with client-side resize to 512 px (canvas + JPEG re-encode) — keeps payloads tiny on metered data.
 
 ### Task 3.3: Employment Status Engine (the differentiator)
-- [ ] `status` enum + `statusConfirmedAt`.
-- [ ] Freshness/confidence derivation (e.g. fresh < 30d, ageing < 90d, stale ≥ 90d).
-- [ ] Re-confirmation nudge (cron Route Handler + Resend) for ageing/stale statuses.
-- [ ] Stale statuses down-ranked in search and flagged low-confidence in analytics.
+- [x] `status` enum + `statusConfirmedAt` (already in schema since Phase 0).
+- [x] Freshness/confidence derivation in `lib/status.ts` — `fresh < 30d`, `ageing < 90d`, `stale ≥ 90d`; confidence weights 1.0 / 0.6 / 0.25.
+- [x] Re-confirmation nudge surfaced as a **dashboard banner** (yellow ageing, red stale); inline "Yes, still accurate" button hits `reconfirmStatus`.
+- [ ] **Email-cron nudge for ageing/stale statuses → Phase 8** alongside the email comms hardening (the banner is enough for the in-dashboard surface).
+- [ ] **Stale statuses down-ranked in search + flagged low-confidence in analytics → Phase 4** (the engine ships in Phase 3; the search-side wire-up is part of the Postgres FTS work).
 
 ---
 
@@ -447,5 +449,5 @@ HR Practitioner · Electrician · Plumber · Accountant · Nurse · Driver · Bo
 ---
 
 *Last Updated: 2026-05-22*
-*Version: 1.3 — Phase 2 complete (real Better Auth, real consent persistence, env-driven email transport) — see `docs/completed/PHASE_2_COMPLETE.md`. Phase 3 (profile CRUD + Supabase Storage uploads) opens next — see `docs/PHASE_3_PLAN.md`.*
+*Version: 1.4 — Phase 3 complete (profile CRUD + Supabase Storage + status engine + dashboard nudge + DAL-based three-layer security audit) — see `docs/completed/PHASE_3_COMPLETE.md` and `docs/SECURITY.md`. Phase 4 (Postgres FTS + real `dbProvider` + signed photo URLs on public reads) opens next — see `docs/PHASE_4_PLAN.md`.*
 *Working name: Sebenza (replace with chosen brand)*

@@ -4,6 +4,7 @@ import { SEEKER_NAV } from "@/components/layout/seekerNav";
 import { TextField } from "@/components/ui/FormField";
 import { Button } from "@/components/ui/Button";
 import { dataProvider } from "@/lib/data/provider";
+import { verifyRole } from "@/lib/auth/dal";
 import { Smartphone, Monitor, Tablet } from "lucide-react";
 import { SignOutButton } from "@/components/feature/auth/SignOutButton";
 
@@ -32,6 +33,7 @@ export default async function AccountPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
+  await verifyRole("seeker");
   const me = await dataProvider.getProfile(MOCK_HANDLE);
   if (!me) return null;
   const t = await getTranslations("seekerDash.account");

@@ -3,6 +3,7 @@ import { DashboardShell } from "@/components/layout/DashboardShell";
 import { EMPLOYER_NAV, MOCK_EMPLOYER } from "@/components/layout/employerNav";
 import { OrgVerificationBanner } from "@/components/layout/OrgVerificationBanner";
 import { Button } from "@/components/ui/Button";
+import { verifyRole } from "@/lib/auth/dal";
 import { Plus, Users2, Share2 } from "lucide-react";
 
 interface Pool {
@@ -26,6 +27,7 @@ export default async function ShortlistsPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
+  await verifyRole("employer");
   const t = await getTranslations("employerDash.shortlists");
   const tOuter = await getTranslations("employerDash");
 

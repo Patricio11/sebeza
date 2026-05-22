@@ -3,6 +3,7 @@ import { Link } from "@/i18n/navigation";
 import { DashboardShell } from "@/components/layout/DashboardShell";
 import { ADMIN_NAV, MOCK_ADMIN } from "@/components/layout/adminNav";
 import { Button } from "@/components/ui/Button";
+import { verifyAdmin } from "@/lib/auth/dal";
 import { PROFESSIONS, SKILLS, PROVINCES } from "@/lib/mock/taxonomy";
 import { Plus, Pencil } from "lucide-react";
 
@@ -21,6 +22,7 @@ export default async function TaxonomyPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
+  await verifyAdmin();
   const { tab } = await searchParams;
   const active: Tab = (
     tab === "skills" || tab === "provinces" || tab === "cities" ? tab : "professions"

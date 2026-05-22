@@ -3,6 +3,7 @@ import { DashboardShell } from "@/components/layout/DashboardShell";
 import { ADMIN_NAV, MOCK_ADMIN } from "@/components/layout/adminNav";
 import { Button } from "@/components/ui/Button";
 import { recentAuditEventsFromDb } from "@/lib/audit";
+import { verifyAdmin } from "@/lib/auth/dal";
 import { Download } from "lucide-react";
 import { CustomSelect } from "@/components/ui/CustomSelect";
 
@@ -13,6 +14,7 @@ export default async function AuditLogPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
+  await verifyAdmin();
   const t = await getTranslations("adminDash.auditLog");
   const events = await recentAuditEventsFromDb(100);
 

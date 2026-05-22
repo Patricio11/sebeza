@@ -1,36 +1,8 @@
-import type {
-  FreshnessBand,
-  PublicProfile,
-  SearchFilters,
-} from "./types";
-
-/**
- * Status-Freshness Rule (TO_START_EVERY_SESSION.md §7).
- * Bands match ROADMAP.md Appendix.
- */
-export function freshnessBand(
-  statusConfirmedAt: string,
-  reference: Date = new Date(),
-): FreshnessBand {
-  const days =
-    (reference.getTime() - new Date(statusConfirmedAt).getTime()) /
-    (1000 * 60 * 60 * 24);
-  if (days < 30) return "fresh";
-  if (days < 90) return "ageing";
-  return "stale";
-}
-
-/** 0..1 confidence weight derived from freshness band. Used in ranking + analytics. */
-export function freshnessConfidence(band: FreshnessBand): number {
-  switch (band) {
-    case "fresh":
-      return 1.0;
-    case "ageing":
-      return 0.6;
-    case "stale":
-      return 0.25;
-  }
-}
+import type { PublicProfile, SearchFilters } from "./types";
+// Canonical status-freshness engine lives in `lib/status.ts` (Phase 3).
+// Re-exported here so existing imports (`@/lib/mock/helpers`) keep working.
+import { freshnessBand, freshnessConfidence } from "@/lib/status";
+export { freshnessBand, freshnessConfidence };
 
 /** Deterministic completeness score — shared between client + server. */
 export function computeCompleteness(p: Pick<

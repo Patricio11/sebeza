@@ -18,8 +18,7 @@ interface Props {
 /**
  * Mzansi National auth shell. Flag stripe at the top, chevron mark in the
  * wordmark, faint chevron motif anchored to the right side of the page so
- * even single-form pages feel national. Demo-mode banner under the stripe
- * keeps the Phase 1.5 mock honest.
+ * even single-form pages feel national.
  */
 export function AuthShell({
   eyebrow,
@@ -42,8 +41,6 @@ export function AuthShell({
         variant="signature"
         className="pointer-events-none absolute -right-32 top-20 hidden size-[640px] opacity-[0.06] md:block"
       />
-
-      <DemoBanner />
 
       {/* Wordmark bar */}
       <div className="relative border-b border-[color:var(--color-hairline)]">
@@ -103,14 +100,3 @@ export function AuthShell({
   );
 }
 
-function DemoBanner() {
-  return (
-    <div className="border-b border-[color:var(--color-accent)]/40 bg-[color:var(--color-accent-tint)]">
-      <div className="mx-auto flex max-w-[1320px] items-center gap-2 px-5 py-2 text-[0.7rem] uppercase tracking-[0.24em] text-[color:var(--color-accent)] md:justify-center md:px-10">
-        <SAChevron variant="mark" className="size-3" />
-        Demo mode · Phase 1.5 — no credentials are stored. Better Auth wires up
-        in Phase 2.
-      </div>
-    </div>
-  );
-}

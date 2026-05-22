@@ -4,6 +4,7 @@ import { DashboardShell } from "@/components/layout/DashboardShell";
 import { ADMIN_NAV, MOCK_ADMIN } from "@/components/layout/adminNav";
 import { Button } from "@/components/ui/Button";
 import { VerificationBadge } from "@/components/ui/VerificationBadge";
+import { verifyAdmin } from "@/lib/auth/dal";
 import { FileText, Eye } from "lucide-react";
 
 interface QualSubmission {
@@ -42,6 +43,7 @@ export default async function VerificationsPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
+  await verifyAdmin();
   const { tab } = await searchParams;
   const active = tab === "organisations" ? "organisations" : "qualifications";
 

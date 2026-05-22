@@ -6,6 +6,7 @@ import { TextField } from "@/components/ui/FormField";
 import { Button } from "@/components/ui/Button";
 import { ShieldCheck } from "lucide-react";
 import { SignOutButton } from "@/components/feature/auth/SignOutButton";
+import { verifyRole } from "@/lib/auth/dal";
 
 export default async function EmployerAccountPage({
   params,
@@ -14,6 +15,7 @@ export default async function EmployerAccountPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
+  await verifyRole("employer");
   const t = await getTranslations("employerDash.account");
   const tOuter = await getTranslations("employerDash");
 

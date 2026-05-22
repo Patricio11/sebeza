@@ -4,6 +4,7 @@ import { DashboardShell } from "@/components/layout/DashboardShell";
 import { SEEKER_NAV } from "@/components/layout/seekerNav";
 import { Button } from "@/components/ui/Button";
 import { dataProvider } from "@/lib/data/provider";
+import { verifyRole } from "@/lib/auth/dal";
 import {
   getCompassForHandle,
   PROVIDER_LABEL,
@@ -47,6 +48,7 @@ export default async function CareerCompassPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
+  await verifyRole("seeker");
 
   const me = await dataProvider.getProfile(MOCK_HANDLE);
   if (!me) return null;

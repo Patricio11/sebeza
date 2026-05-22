@@ -18,15 +18,22 @@
 import "server-only";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { nextCookies } from "better-auth/next-js";
 import { getDb } from "@/db/client";
 import * as schema from "@/db/schema";
 import { sendEmail } from "@/lib/email/send";
 
 const db = getDb();
 
+const appUrl = process.env.BETTER_AUTH_URL ?? "http://localhost:3000";
+
 export const auth = betterAuth({
-  baseURL: process.env.BETTER_AUTH_URL ?? "http://localhost:3000",
+  baseURL: appUrl,
   secret: process.env.BETTER_AUTH_SECRET,
+  // Origins Better Auth will accept sign-in / sign-up requests from.
+  // Without this dev sign-ins can fail with CSRF-style errors when the
+  // request origin doesn't match the configured baseURL exactly.
+  trustedOrigins: [appUrl, "http://localhost:3000", "http://localhost:3001"],
 
   database: drizzleAdapter(db, {
     provider: "pg",
@@ -89,9 +96,32 @@ export const auth = betterAuth({
   },
 
   advanced: {
-    cookiePrefix: "sebenza",
+    // Use Better Auth's default cookie name (`better-auth.session_token`).
+    // A custom `cookiePrefix` requires every code path that reads cookies
+    // (proxy/middleware, getSessionCookie, etc.) to know about it — easier
+    // to silently break than to keep working. Defaults are fine.
     useSecureCookies: process.env.NODE_ENV === "production",
   },
+
+  /**
+   * REQUIRED for Next.js Server Actions.
+   *
+   * Without this plugin, calling `auth.api.signInEmail()` /
+   * `signUpEmail()` etc. from a Server Action returns success but the
+   * Set-Cookie header is dropped — the session cookie never reaches the
+   * browser. Sign-in appears to work, but every subsequent request is
+   * unauthenticated, causing the proxy to bounce the user back to /sign-in
+   * in an infinite loop.
+   *
+   * Quoting the Better Auth docs:
+   *   "When you call a function that needs to set cookies, like
+   *    signInEmail or signUpEmail in a server action, cookies won't
+   *    be set. This is because server actions need to use the cookies
+   *    helper from Next.js to set cookies."
+   *
+   * **Must be the last plugin in the array** per the same docs.
+   */
+  plugins: [nextCookies()],
 });
 
 export type Auth = typeof auth;

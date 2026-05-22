@@ -4,6 +4,7 @@ import { DashboardShell } from "@/components/layout/DashboardShell";
 import { EMPLOYER_NAV, MOCK_EMPLOYER } from "@/components/layout/employerNav";
 import { OrgVerificationBanner } from "@/components/layout/OrgVerificationBanner";
 import { Button } from "@/components/ui/Button";
+import { verifyRole } from "@/lib/auth/dal";
 import { Plus, Pencil, Trash2, Bell } from "lucide-react";
 
 interface SavedSearch {
@@ -52,6 +53,7 @@ export default async function SavedSearchesPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
+  await verifyRole("employer");
   const t = await getTranslations("employerDash.savedSearches");
   const tOuter = await getTranslations("employerDash");
 

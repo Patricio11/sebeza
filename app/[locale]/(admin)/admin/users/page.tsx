@@ -3,6 +3,7 @@ import { Link } from "@/i18n/navigation";
 import { DashboardShell } from "@/components/layout/DashboardShell";
 import { ADMIN_NAV, MOCK_ADMIN } from "@/components/layout/adminNav";
 import { dataProvider } from "@/lib/data/provider";
+import { verifyAdmin } from "@/lib/auth/dal";
 import { CustomSelect } from "@/components/ui/CustomSelect";
 
 interface MockUserRow {
@@ -27,6 +28,7 @@ export default async function UsersPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
+  await verifyAdmin();
   const t = await getTranslations("adminDash.users");
 
   const profiles = (await dataProvider.searchProfiles({})).profiles;

@@ -3,6 +3,7 @@ import { DashboardShell } from "@/components/layout/DashboardShell";
 import { EMPLOYER_NAV, MOCK_EMPLOYER } from "@/components/layout/employerNav";
 import { OrgVerificationBanner } from "@/components/layout/OrgVerificationBanner";
 import { Button } from "@/components/ui/Button";
+import { verifyRole } from "@/lib/auth/dal";
 import { Plus, CheckCircle2 } from "lucide-react";
 
 interface Placement {
@@ -37,6 +38,7 @@ export default async function PlacementsPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
+  await verifyRole("employer");
   const t = await getTranslations("employerDash.placements");
   const tOuter = await getTranslations("employerDash");
 

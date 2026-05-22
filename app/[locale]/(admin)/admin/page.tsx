@@ -3,6 +3,7 @@ import { Link } from "@/i18n/navigation";
 import { DashboardShell } from "@/components/layout/DashboardShell";
 import { ADMIN_NAV, MOCK_ADMIN } from "@/components/layout/adminNav";
 import { recentAuditEventsFromDb } from "@/lib/audit";
+import { verifyAdmin } from "@/lib/auth/dal";
 import { ShieldCheck, Flag, Users, ScrollText } from "lucide-react";
 
 export default async function AdminOverviewPage({
@@ -12,6 +13,7 @@ export default async function AdminOverviewPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
+  await verifyAdmin();
 
   const t = await getTranslations("adminDash");
   const events = await recentAuditEventsFromDb(8);

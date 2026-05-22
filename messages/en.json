@@ -83,7 +83,6 @@
       "hidePassword": "Hide password",
       "rememberMe": "Remember me on this device",
       "or": "or",
-      "demoNotice": "Demo mode — no real authentication yet. Wires up in Phase 2 (Better Auth).",
       "back": "Back"
     },
     "signIn": {

@@ -1,13 +1,17 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
+import { redirect } from "next/navigation";
+import { eq, asc } from "drizzle-orm";
 import { DashboardShell } from "@/components/layout/DashboardShell";
 import { SEEKER_NAV } from "@/components/layout/seekerNav";
-import { Button } from "@/components/ui/Button";
-import { EmptyState } from "@/components/ui/EmptyState";
-import { VerificationBadge } from "@/components/ui/VerificationBadge";
-import { dataProvider } from "@/lib/data/provider";
-import { FileUp, FileText, ShieldCheck } from "lucide-react";
-
-const MOCK_HANDLE = "andile-z";
+import { getMyProfile } from "@/lib/profile/me";
+import { getDb } from "@/db/client";
+import { qualifications } from "@/db/schema";
+import { ShieldCheck } from "lucide-react";
+import {
+  QualificationsManager,
+  type QualificationRow,
+} from "@/components/feature/profile/QualificationsManager";
+import type { VerificationStatus } from "@/lib/mock/types";
 
 export default async function QualificationsPage({
   params,
@@ -16,11 +20,27 @@ export default async function QualificationsPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const me = await dataProvider.getProfile(MOCK_HANDLE);
-  if (!me) return null;
+
+  const me = await getMyProfile();
+  if (!me) redirect("/sign-in?next=/dashboard/qualifications");
 
   const t = await getTranslations("seekerDash.qualifications");
-  const items = me.qualifications ?? [];
+
+  const db = getDb();
+  const rows = await db
+    .select()
+    .from(qualifications)
+    .where(eq(qualifications.profileId, me.profileId))
+    .orderBy(asc(qualifications.awardedYear));
+
+  const initial: QualificationRow[] = rows.map((r) => ({
+    id: r.id,
+    title: r.title,
+    institution: r.institution,
+    awardedYear: r.awardedYear,
+    verification: r.verification as VerificationStatus,
+    hasDocument: !!r.documentStorageKey,
+  }));
 
   return (
     <DashboardShell
@@ -32,15 +52,9 @@ export default async function QualificationsPage({
       pageEyebrow="Credentials"
       pageTitle={t("title")}
       pageSubtitle={t("subtitle")}
-      pageActions={
-        <Button variant="primary" size="md">
-          <FileUp className="size-4" aria-hidden="true" />
-          {t("add")}
-        </Button>
-      }
     >
       <div className="grid gap-6 md:grid-cols-3">
-        {/* Upload + verification info */}
+        {/* Verification info — left rail */}
         <section className="rounded-[var(--radius-md)] border-2 border-dashed border-[color:var(--color-ink)] bg-[color:var(--color-surface-sunk)] p-6 md:col-span-1">
           <div className="text-[0.72rem] uppercase tracking-[0.22em] text-[color:var(--color-ink)]">
             How verification works
@@ -50,15 +64,24 @@ export default async function QualificationsPage({
           </h2>
           <ul className="mt-4 space-y-3 text-sm">
             <li className="flex items-start gap-2">
-              <ShieldCheck className="mt-0.5 size-4 shrink-0 text-[color:var(--color-brand)]" aria-hidden="true" />
-              <span>Upload an original certificate (PDF or image, max 10MB).</span>
+              <ShieldCheck
+                className="mt-0.5 size-4 shrink-0 text-[color:var(--color-brand)]"
+                aria-hidden="true"
+              />
+              <span>Upload an original certificate (PDF, JPEG or PNG; max 10 MB).</span>
             </li>
             <li className="flex items-start gap-2">
-              <ShieldCheck className="mt-0.5 size-4 shrink-0 text-[color:var(--color-brand)]" aria-hidden="true" />
-              <span>Our admin queue or a SAQA partner verifies authenticity.</span>
+              <ShieldCheck
+                className="mt-0.5 size-4 shrink-0 text-[color:var(--color-brand)]"
+                aria-hidden="true"
+              />
+              <span>Upload flips state to <strong>pending</strong>; the admin queue or a SAQA partner verifies authenticity.</span>
             </li>
             <li className="flex items-start gap-2">
-              <ShieldCheck className="mt-0.5 size-4 shrink-0 text-[color:var(--color-brand)]" aria-hidden="true" />
+              <ShieldCheck
+                className="mt-0.5 size-4 shrink-0 text-[color:var(--color-brand)]"
+                aria-hidden="true"
+              />
               <span>Files live in a private Supabase Storage bucket — every reveal is audit-logged.</span>
             </li>
           </ul>
@@ -68,40 +91,15 @@ export default async function QualificationsPage({
           </p>
         </section>
 
-        {/* List */}
+        {/* Live manager */}
         <div className="md:col-span-2">
-          {items.length === 0 ? (
-            <EmptyState
-              title={t("empty")}
-              action={
-                <Button variant="primary" size="md">
-                  <FileUp className="size-4" aria-hidden="true" />
-                  {t("add")}
-                </Button>
-              }
-            />
-          ) : (
-            <ul className="space-y-4">
-              {items.map((q, i) => (
-                <li
-                  key={i}
-                  className="grid grid-cols-[auto_1fr_auto] items-center gap-4 rounded-[var(--radius-md)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-5"
-                >
-                  <span className="inline-flex size-10 items-center justify-center rounded-[var(--radius-sm)] bg-[color:var(--color-brand-tint)] text-[color:var(--color-brand-strong)]">
-                    <FileText className="size-5" aria-hidden="true" />
-                  </span>
-                  <div>
-                    <div className="font-display text-lg">{q.title}</div>
-                    <div className="text-sm text-[color:var(--color-ink-soft)]">
-                      {q.institution}
-                      {q.awardedYear ? ` · ${q.awardedYear}` : ""}
-                    </div>
-                  </div>
-                  <VerificationBadge state={q.verification} />
-                </li>
-              ))}
-            </ul>
-          )}
+          <QualificationsManager
+            initial={initial}
+            labels={{
+              add: t("add"),
+              empty: t("empty"),
+            }}
+          />
         </div>
       </div>
     </DashboardShell>

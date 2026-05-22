@@ -2,6 +2,7 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import { DashboardShell } from "@/components/layout/DashboardShell";
 import { SEEKER_NAV } from "@/components/layout/seekerNav";
 import { dataProvider } from "@/lib/data/provider";
+import { verifyRole } from "@/lib/auth/dal";
 import { Eye, MessageCircle, FileText, Download } from "lucide-react";
 
 const MOCK_HANDLE = "andile-z";
@@ -36,6 +37,7 @@ export default async function ActivityPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
+  await verifyRole("seeker");
   const me = await dataProvider.getProfile(MOCK_HANDLE);
   if (!me) return null;
   const t = await getTranslations("seekerDash.activity");

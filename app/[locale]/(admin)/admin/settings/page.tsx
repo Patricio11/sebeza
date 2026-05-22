@@ -3,6 +3,7 @@ import { DashboardShell } from "@/components/layout/DashboardShell";
 import { ADMIN_NAV, MOCK_ADMIN } from "@/components/layout/adminNav";
 import { TextField } from "@/components/ui/FormField";
 import { Button } from "@/components/ui/Button";
+import { verifyAdmin } from "@/lib/auth/dal";
 
 export default async function SettingsPage({
   params,
@@ -11,6 +12,7 @@ export default async function SettingsPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
+  await verifyAdmin();
   const t = await getTranslations("adminDash.settings");
 
   return (

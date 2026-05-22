@@ -1,26 +1,28 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
+import { redirect } from "next/navigation";
 import { DashboardShell } from "@/components/layout/DashboardShell";
 import { SEEKER_NAV } from "@/components/layout/seekerNav";
-import {
-  TextField,
-  TextareaField,
-  SelectField,
-  EncryptedBadge,
-} from "@/components/ui/FormField";
-import { Button } from "@/components/ui/Button";
 import { ProfileCompleteness } from "@/components/ui/ProfileCompleteness";
 import { VerificationBadge } from "@/components/ui/VerificationBadge";
-import { dataProvider } from "@/lib/data/provider";
+import { getMyProfile } from "@/lib/profile/me";
 import {
-  PROVINCES,
   PROFESSIONS,
   INSTITUTIONS,
   INSTITUTION_KIND_LABEL,
   NQF_LEVELS,
 } from "@/lib/mock/taxonomy";
-import { GraduationCap, X } from "lucide-react";
-
-const MOCK_HANDLE = "andile-z";
+import { SKILLS } from "@/lib/mock/taxonomy";
+import { GraduationCap } from "lucide-react";
+import { ProfileBasicsForm } from "@/components/feature/profile/ProfileBasicsForm";
+import { SkillsEditor } from "@/components/feature/profile/SkillsEditor";
+import { NationalIdControls } from "@/components/feature/profile/NationalIdControls";
+import { AvatarEditor } from "@/components/feature/profile/AvatarEditor";
+import { signedPhotoUrl } from "@/lib/storage/signed";
+import { isStorageConfigured } from "@/lib/storage/supabase";
+import {
+  TextField,
+  SelectField,
+} from "@/components/ui/FormField";
 
 export default async function ProfileEditorPage({
   params,
@@ -30,12 +32,30 @@ export default async function ProfileEditorPage({
   const { locale } = await params;
   setRequestLocale(locale);
 
-  const me = await dataProvider.getProfile(MOCK_HANDLE);
-  if (!me) return null;
+  const me = await getMyProfile();
+  if (!me) redirect("/sign-in?next=/dashboard/profile");
 
   const t = await getTranslations("seekerDash.profileEditor");
   const tAcademic = await getTranslations("seekerDash.profileEditor.academic");
   const academic = me.academic;
+
+  // Map the live `topSkills` (labels) back to slug+label so the SkillsEditor
+  // can validate against the controlled taxonomy.
+  const slugByLabel = new Map(SKILLS.map((s) => [s.label, s.slug]));
+  const initialSkills = me.topSkills
+    .map((s) => {
+      const slug = slugByLabel.get(s.name);
+      if (!slug) return null;
+      return { slug, label: s.name, proficiency: s.proficiency };
+    })
+    .filter((s): s is NonNullable<typeof s> => s !== null);
+
+  // Mint a short-lived signed URL for the current photo, if any. The page
+  // re-renders on every nav so this stays fresh.
+  const photoUrl =
+    me.profilePhotoUrl && isStorageConfigured()
+      ? await signedPhotoUrl(me.profilePhotoUrl)
+      : null;
 
   return (
     <DashboardShell
@@ -50,22 +70,22 @@ export default async function ProfileEditorPage({
       pageActions={
         <div className="flex items-center gap-3">
           <ProfileCompleteness value={me.completeness} />
-          <Button variant="primary" size="md">
-            {t("saveButton")}
-          </Button>
         </div>
       }
     >
-      <form className="grid gap-10 md:grid-cols-[240px_1fr] md:gap-16">
+      <div className="grid gap-10 md:grid-cols-[240px_1fr] md:gap-16">
         {/* Sticky section nav */}
         <aside className="hidden md:block md:sticky md:top-6 md:self-start">
           <div className="mb-3 border-b-2 border-[color:var(--color-ink)] pb-2 text-[0.7rem] uppercase tracking-[0.22em]">
             Sections
           </div>
           <ul className="space-y-1.5 text-sm">
+            <li><a href="#avatar" className="text-[color:var(--color-ink-soft)] hover:text-[color:var(--color-ink)]">Photo</a></li>
             <li><a href="#identity" className="text-[color:var(--color-ink-soft)] hover:text-[color:var(--color-ink)]">Identity basics</a></li>
             <li><a href="#location" className="text-[color:var(--color-ink-soft)] hover:text-[color:var(--color-ink)]">Location</a></li>
             <li><a href="#professional" className="text-[color:var(--color-ink-soft)] hover:text-[color:var(--color-ink)]">Professional summary</a></li>
+            <li><a href="#skills" className="text-[color:var(--color-ink-soft)] hover:text-[color:var(--color-ink)]">Skills</a></li>
+            <li><a href="#national-id" className="text-[color:var(--color-ink-soft)] hover:text-[color:var(--color-ink)]">National ID</a></li>
             {academic && (
               <li>
                 <a
@@ -76,7 +96,6 @@ export default async function ProfileEditorPage({
                 </a>
               </li>
             )}
-            <li><a href="#skills" className="text-[color:var(--color-ink-soft)] hover:text-[color:var(--color-ink)]">Skills</a></li>
           </ul>
           <p className="mt-6 rounded-[var(--radius-sm)] border border-dashed border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-3 text-xs text-[color:var(--color-ink-soft)]">
             {t("savedHint")}
@@ -84,143 +103,101 @@ export default async function ProfileEditorPage({
         </aside>
 
         <div className="space-y-12">
-          {/* Identity */}
-          <section id="identity">
-            <SectionHeading
-              eyebrow="01"
-              title={t("sections.identity")}
-              hint="Captured once, encrypted on save, never displayed back."
-            />
-            <div className="grid gap-5 md:grid-cols-2">
-              <TextField
-                id="fullName"
-                label={t("fields.fullName")}
-                defaultValue={`Lerato Nkosi`}
-                autoComplete="name"
-              />
-              <TextField
-                id="displayName"
-                label={t("fields.displayName")}
-                defaultValue={me.displayName}
-                hint={t("fields.displayNameHelp")}
-              />
-              <TextField
-                id="nationalId"
-                label={t("fields.nationalId")}
-                placeholder="•••• •••• •••• •"
-                badge={<EncryptedBadge />}
-                hint={t("fields.nationalIdHelp")}
-              />
-              <TextField
-                id="dob"
-                label={t("fields.dob")}
-                type="date"
-                defaultValue="1992-06-12"
-              />
-              <SelectField
-                id="nationality"
-                label={t("fields.nationality")}
-                defaultValue={me.nationality ?? "South African"}
-              >
-                <option>South African</option>
-                <option>Nigerian</option>
-                <option>Zimbabwean</option>
-                <option>Mozambican</option>
-                <option>Other</option>
-              </SelectField>
-              <label className="mt-2 inline-flex items-center gap-2 text-sm md:mt-auto md:pb-3">
-                <input
-                  type="checkbox"
-                  defaultChecked={me.isCitizen}
-                  className="size-4"
-                />
-                {t("fields.citizen")}
-              </label>
-            </div>
+          {/* Avatar — sits above the editorial numbered sections */}
+          <section id="avatar" aria-labelledby="avatar-h">
+            <header className="mb-5 border-b-2 border-[color:var(--color-ink)] pb-3">
+              <div className="flex items-baseline gap-3">
+                <span className="font-display text-2xl italic text-[color:var(--color-accent)]">
+                  00
+                </span>
+                <h2 id="avatar-h" className="font-display text-2xl">
+                  Photo
+                </h2>
+              </div>
+              <p className="mt-1 text-sm text-[color:var(--color-ink-soft)]">
+                Optional. A real photo lifts profile completeness; initials still look great.
+              </p>
+            </header>
+            <AvatarEditor name={me.displayName} initialUrl={photoUrl} />
           </section>
 
-          {/* Location */}
-          <section id="location">
+          <ProfileBasicsForm
+            initial={{
+              displayName: me.displayName,
+              profession: me.profession,
+              seniority: me.seniority,
+              city: me.city,
+              province: me.province,
+              nationality: me.nationality,
+              isCitizen: me.isCitizen,
+              bio: me.bio ?? "",
+              completeness: me.completeness,
+            }}
+            professions={PROFESSIONS}
+            identityHeading={
+              <SectionHeading
+                eyebrow="01"
+                title={t("sections.identity")}
+                hint="Display name + nationality. ID number lives in its own section below — encrypted, never displayed back."
+              />
+            }
+            locationHeading={
+              <SectionHeading
+                eyebrow="02"
+                title={t("sections.locationTitle")}
+                hint="Where you live and want to work. Sebenza matches by location + skill — never by nationality."
+              />
+            }
+            professionalHeading={
+              <SectionHeading
+                eyebrow="03"
+                title={t("sections.professional")}
+                hint="What employers see first in your dossier."
+              />
+            }
+            labels={{
+              displayName: t("fields.displayName"),
+              displayNameHelp: t("fields.displayNameHelp"),
+              province: t("fields.province"),
+              city: t("fields.city"),
+              willingToRelocate: t("fields.willingToRelocate"),
+              profession: t("fields.profession"),
+              seniority: t("fields.seniority"),
+              bio: t("fields.bio"),
+              bioHelp: t("fields.bioHelp"),
+              saveButton: t("saveButton"),
+              completenessLive: t("completenessLive"),
+              citizen: t("fields.citizen"),
+              nationality: t("fields.nationality"),
+            }}
+          />
+
+          {/* Skills */}
+          <section id="skills">
             <SectionHeading
-              eyebrow="02"
-              title={t("sections.locationTitle")}
-              hint="Where you live and want to work. Sebenza matches by location + skill — never by nationality."
+              eyebrow="04"
+              title={t("sections.skillsTitle")}
+              hint="Skills must come from our controlled taxonomy — keeps search and analytics clean."
             />
-            <div className="grid gap-5 md:grid-cols-2">
-              <SelectField
-                id="province"
-                label={t("fields.province")}
-                defaultValue="gauteng"
-              >
-                {PROVINCES.map((p) => (
-                  <option key={p.slug} value={p.slug}>
-                    {p.label}
-                  </option>
-                ))}
-              </SelectField>
-              <SelectField id="city" label={t("fields.city")} defaultValue="johannesburg">
-                {(PROVINCES.find((p) => p.slug === "gauteng")?.cities ?? []).map((c) => (
-                  <option key={c.slug} value={c.slug}>
-                    {c.label}
-                  </option>
-                ))}
-              </SelectField>
-              <label className="mt-2 inline-flex items-center gap-2 text-sm md:col-span-2">
-                <input type="checkbox" className="size-4" />
-                {t("fields.willingToRelocate")}
-              </label>
-            </div>
+            <SkillsEditor initial={initialSkills} />
           </section>
 
-          {/* Professional */}
-          <section id="professional">
+          {/* National ID */}
+          <section id="national-id">
             <SectionHeading
-              eyebrow="03"
-              title={t("sections.professional")}
-              hint="What employers see first in your dossier."
+              eyebrow="05"
+              title="National ID"
+              hint="Captured once, encrypted on save, never displayed back. POPIA special-category data."
             />
-            <div className="grid gap-5 md:grid-cols-2">
-              <SelectField
-                id="profession"
-                label={t("fields.profession")}
-                defaultValue="software-developer"
-              >
-                {PROFESSIONS.map((p) => (
-                  <option key={p.slug} value={p.slug}>
-                    {p.label}
-                  </option>
-                ))}
-              </SelectField>
-              <SelectField
-                id="seniority"
-                label={t("fields.seniority")}
-                defaultValue={me.seniority ?? "intermediate"}
-              >
-                <option value="junior">Junior</option>
-                <option value="intermediate">Intermediate</option>
-                <option value="senior">Senior</option>
-              </SelectField>
-              <TextField
-                id="headline"
-                label={t("fields.headline")}
-                defaultValue="Full-stack engineer · low-bandwidth & accessibility-first"
-                className="md:col-span-2"
-              />
-              <TextareaField
-                id="bio"
-                label={t("fields.bio")}
-                defaultValue={me.bio}
-                hint={t("fields.bioHelp")}
-                className="md:col-span-2"
-              />
-            </div>
+            <NationalIdControls hasNationalId={me.hasNationalId} />
           </section>
 
-          {/* Studies — student mode */}
+          {/* Studies — student mode (read-only display for now;
+              dedicated academic actions wire in Phase 8 alongside SAQA). */}
           {academic && (
             <section id="academic">
               <SectionHeading
-                eyebrow="04"
+                eyebrow="06"
                 title={tAcademic("heading")}
                 hint={tAcademic("subhead")}
               />
@@ -244,6 +221,7 @@ export default async function ProfileEditorPage({
                       {INSTITUTION_KIND_LABEL[academic.institutionKind]}
                     </span>
                   }
+                  disabled
                 >
                   {INSTITUTIONS.map((i) => (
                     <option key={i.slug} value={i.slug}>
@@ -256,18 +234,21 @@ export default async function ProfileEditorPage({
                   id="academic-programme"
                   label={tAcademic("programme")}
                   defaultValue={academic.programme}
+                  disabled
                 />
 
                 <TextField
                   id="academic-field"
                   label={tAcademic("field")}
                   defaultValue={academic.fieldOfStudy}
+                  disabled
                 />
 
                 <SelectField
                   id="academic-nqf"
                   label={tAcademic("nqfLevel")}
                   defaultValue={String(academic.nqfLevel)}
+                  disabled
                 >
                   {NQF_LEVELS.map((n) => (
                     <option key={n.level} value={n.level}>
@@ -275,122 +256,14 @@ export default async function ProfileEditorPage({
                     </option>
                   ))}
                 </SelectField>
-
-                <SelectField
-                  id="academic-year"
-                  label={tAcademic("year")}
-                  defaultValue={academic.currentYear ? String(academic.currentYear) : ""}
-                >
-                  <option value="">N/A (postgrad)</option>
-                  {[1, 2, 3, 4, 5].map((y) => (
-                    <option key={y} value={y}>
-                      Year {y}
-                    </option>
-                  ))}
-                </SelectField>
-
-                <TextField
-                  id="academic-graduation"
-                  label={tAcademic("graduation")}
-                  type="month"
-                  defaultValue={academic.expectedGraduation}
-                />
-
-                <label className="mt-2 inline-flex items-center gap-2 text-sm md:col-span-2">
-                  <input
-                    type="checkbox"
-                    defaultChecked={academic.nsfas}
-                    className="size-4"
-                  />
-                  {tAcademic("nsfas")}
-                </label>
-
-                <label className="inline-flex items-start gap-2 text-sm md:col-span-2">
-                  <input
-                    type="checkbox"
-                    defaultChecked={academic.openToInternships}
-                    className="mt-1 size-4"
-                  />
-                  <span>{tAcademic("openToInternships")}</span>
-                </label>
-
-                <label className="inline-flex items-start gap-2 text-sm md:col-span-2">
-                  <input
-                    type="checkbox"
-                    defaultChecked={academic.openToGraduateProgrammes}
-                    className="mt-1 size-4"
-                  />
-                  <span>{tAcademic("openToGraduateProgrammes")}</span>
-                </label>
               </div>
+              <p className="mt-4 rounded-[var(--radius-sm)] border border-dashed border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-3 text-xs text-[color:var(--color-ink-soft)]">
+                Studies are read-only for now. Editing wires up in Phase 8 alongside the SAQA + institution verification integration.
+              </p>
             </section>
           )}
-
-          {/* Skills */}
-          <section id="skills">
-            <SectionHeading
-              eyebrow="05"
-              title={t("sections.skillsTitle")}
-              hint="Skills must come from our controlled taxonomy — keeps search and analytics clean."
-            />
-            <ul className="grid gap-3 md:grid-cols-2">
-              {me.topSkills.map((s) => (
-                <li
-                  key={s.name}
-                  className="flex items-center justify-between gap-4 rounded-[var(--radius-sm)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] px-4 py-3"
-                >
-                  <div>
-                    <div className="font-medium">{s.name}</div>
-                    <div className="text-xs text-[color:var(--color-ink-soft)]">
-                      {t("fields.proficiency")}: {s.proficiency}/5
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="flex gap-0.5">
-                      {Array.from({ length: 5 }).map((_, i) => (
-                        <span
-                          key={i}
-                          className="size-2 rounded-full"
-                          style={{
-                            background:
-                              i < s.proficiency
-                                ? "var(--color-brand)"
-                                : "var(--color-hairline)",
-                          }}
-                        />
-                      ))}
-                    </div>
-                    <button
-                      type="button"
-                      aria-label={t("fields.removeSkill")}
-                      className="text-[color:var(--color-ink-soft)] hover:text-[color:var(--color-danger)]"
-                    >
-                      <X className="size-4" aria-hidden="true" />
-                    </button>
-                  </div>
-                </li>
-              ))}
-            </ul>
-            <div className="mt-4">
-              <Button type="button" variant="secondary" size="sm">
-                {t("fields.addSkill")}
-              </Button>
-            </div>
-          </section>
-
-          <div className="flex flex-wrap items-center justify-between gap-4 rounded-[var(--radius-md)] border-2 border-[color:var(--color-ink)] bg-[color:var(--color-paper)] p-5">
-            <div>
-              <div className="text-[0.72rem] uppercase tracking-[0.22em] text-[color:var(--color-ink-soft)]">
-                {t("completenessLive")}
-              </div>
-              <ProfileCompleteness value={me.completeness} />
-            </div>
-            <Button type="submit" variant="primary" size="md">
-              {t("saveButton")}
-            </Button>
-          </div>
         </div>
-      </form>
+      </div>
     </DashboardShell>
   );
 }

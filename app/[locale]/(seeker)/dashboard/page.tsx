@@ -1,13 +1,13 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
+import { redirect } from "next/navigation";
 import { Link } from "@/i18n/navigation";
 import { DashboardShell } from "@/components/layout/DashboardShell";
 import { SEEKER_NAV } from "@/components/layout/seekerNav";
 import { ProfileCompleteness } from "@/components/ui/ProfileCompleteness";
-import { StatusChip } from "@/components/ui/StatusChip";
 import { VerificationBadge } from "@/components/ui/VerificationBadge";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { dataProvider } from "@/lib/data/provider";
-import { freshnessBand } from "@/lib/mock/helpers";
+import { getMyProfile } from "@/lib/profile/me";
+import { freshnessSummary } from "@/lib/status";
 import { formatRelativeTime } from "@/lib/utils";
 import {
   Eye,
@@ -19,8 +19,8 @@ import {
   Compass,
 } from "lucide-react";
 import { getCompassForHandle } from "@/lib/mock/growth";
-
-const MOCK_HANDLE = "andile-z";
+import { StatusCard } from "@/components/feature/profile/StatusCard";
+import { StatusNudgeBanner } from "@/components/feature/profile/StatusNudgeBanner";
 
 export default async function SeekerOverviewPage({
   params,
@@ -30,13 +30,15 @@ export default async function SeekerOverviewPage({
   const { locale } = await params;
   setRequestLocale(locale);
 
-  const me = await dataProvider.getProfile(MOCK_HANDLE);
-  if (!me) return null;
+  const me = await getMyProfile();
+  if (!me) redirect("/sign-in?next=/dashboard");
 
   const t = await getTranslations("seekerDash");
   const lastConfirmed = formatRelativeTime(me.statusConfirmedAt, locale);
-  const band = freshnessBand(me.statusConfirmedAt);
+  const freshness = freshnessSummary(me.statusConfirmedAt);
   const nextActionN = Math.max(0, 5 - me.topSkills.length);
+  // Career compass still reads from the mock dataset (Phase 6 wires the real
+  // demand-by-skill query). The seeker's handle is the lookup key.
   const compass = getCompassForHandle(me.handle);
   const topRec = compass.recommendations[0];
 
@@ -59,6 +61,7 @@ export default async function SeekerOverviewPage({
         </Link>
       }
     >
+      <StatusNudgeBanner band={freshness.band} days={freshness.days} />
       <div className="grid gap-6 md:grid-cols-3">
         {/* Completeness — anchor card */}
         <section
@@ -90,45 +93,14 @@ export default async function SeekerOverviewPage({
           </div>
         </section>
 
-        {/* Talent Pulse */}
-        <section
-          aria-labelledby="pulse-h"
-          className="rounded-[var(--radius-md)] border-2 border-[color:var(--color-ink)] bg-[color:var(--color-paper)] p-6 md:p-8"
-        >
-          <div className="text-[0.72rem] uppercase tracking-[0.24em] text-[color:var(--color-accent)]">
-            Talent Pulse
-          </div>
-          <h2 id="pulse-h" className="mt-1 font-display text-xl">
-            {t("overview.pulseQuestion")}
-          </h2>
-          <p className="mt-1 text-sm text-[color:var(--color-ink-soft)]">
-            {t("overview.lastConfirmed", { when: lastConfirmed })} ·{" "}
-            <span
-              className={
-                band === "fresh"
-                  ? "text-[color:var(--color-employed)]"
-                  : band === "ageing"
-                    ? "text-[color:var(--color-accent)]"
-                    : "text-[color:var(--color-stale)]"
-              }
-            >
-              {band}
-            </span>
-          </p>
-          <div className="mt-4">
-            <StatusChip
-              status={me.status}
-              confirmedAt={me.statusConfirmedAt}
-              locale={locale}
-            />
-          </div>
-          <button
-            type="button"
-            className="mt-5 w-full rounded-[var(--radius-pill)] bg-[color:var(--color-ink)] py-3 text-sm font-medium text-[color:var(--color-paper)]"
-          >
-            {t("overview.confirmFresh")}
-          </button>
-        </section>
+        {/* Talent Pulse — live; calls setStatus / reconfirmStatus */}
+        <StatusCard
+          status={me.status}
+          statusConfirmedAt={me.statusConfirmedAt}
+          band={freshness.band}
+          locale={locale}
+          lastConfirmedLabel={lastConfirmed}
+        />
 
         {/* Rank in search */}
         <section

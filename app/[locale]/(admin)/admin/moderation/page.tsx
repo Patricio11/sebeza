@@ -3,6 +3,7 @@ import { Link } from "@/i18n/navigation";
 import { DashboardShell } from "@/components/layout/DashboardShell";
 import { ADMIN_NAV, MOCK_ADMIN } from "@/components/layout/adminNav";
 import { Button } from "@/components/ui/Button";
+import { verifyAdmin } from "@/lib/auth/dal";
 import { Flag } from "lucide-react";
 
 type Reason = "fakeIdentity" | "inappropriate" | "harassment" | "spam";
@@ -29,6 +30,7 @@ export default async function ModerationPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
+  await verifyAdmin();
   const t = await getTranslations("adminDash.moderation");
 
   return (

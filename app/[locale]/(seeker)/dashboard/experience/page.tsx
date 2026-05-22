@@ -1,12 +1,15 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
+import { redirect } from "next/navigation";
+import { eq, desc } from "drizzle-orm";
 import { DashboardShell } from "@/components/layout/DashboardShell";
 import { SEEKER_NAV } from "@/components/layout/seekerNav";
-import { Button } from "@/components/ui/Button";
-import { EmptyState } from "@/components/ui/EmptyState";
-import { dataProvider } from "@/lib/data/provider";
-import { Plus, Pencil, GripVertical } from "lucide-react";
-
-const MOCK_HANDLE = "andile-z";
+import { getMyProfile } from "@/lib/profile/me";
+import { getDb } from "@/db/client";
+import { experiences } from "@/db/schema";
+import {
+  ExperienceManager,
+  type ExperienceRow,
+} from "@/components/feature/profile/ExperienceManager";
 
 export default async function ExperiencePage({
   params,
@@ -15,11 +18,30 @@ export default async function ExperiencePage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const me = await dataProvider.getProfile(MOCK_HANDLE);
-  if (!me) return null;
+
+  const me = await getMyProfile();
+  if (!me) redirect("/sign-in?next=/dashboard/experience");
 
   const t = await getTranslations("seekerDash.experience");
-  const items = me.experience ?? [];
+
+  // We re-query experiences here (rather than re-using me.experience) so we
+  // capture each row's `id` — needed for edit/delete.
+  const db = getDb();
+  const rows = await db
+    .select()
+    .from(experiences)
+    .where(eq(experiences.profileId, me.profileId))
+    .orderBy(desc(experiences.startedAt));
+
+  const initial: ExperienceRow[] = rows.map((r) => ({
+    id: r.id,
+    role: r.role,
+    organization: r.organization,
+    city: r.city,
+    startedAt: r.startedAt,
+    endedAt: r.endedAt,
+    description: r.description,
+  }));
 
   return (
     <DashboardShell
@@ -31,61 +53,16 @@ export default async function ExperiencePage({
       pageEyebrow="Track record"
       pageTitle={t("title")}
       pageSubtitle={t("subtitle")}
-      pageActions={
-        <Button variant="primary" size="md">
-          <Plus className="size-4" aria-hidden="true" />
-          {t("add")}
-        </Button>
-      }
     >
-      {items.length === 0 ? (
-        <EmptyState
-          title={t("empty")}
-          action={
-            <Button variant="primary" size="md">
-              <Plus className="size-4" aria-hidden="true" />
-              {t("add")}
-            </Button>
-          }
-        />
-      ) : (
-        <ol className="space-y-6">
-          {items.map((e, i) => (
-            <li
-              key={i}
-              className="grid grid-cols-[auto_1fr_auto] items-start gap-4 rounded-[var(--radius-md)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-5"
-            >
-              <span className="mt-1 text-[color:var(--color-ink-soft)]">
-                <GripVertical className="size-4" aria-hidden="true" />
-              </span>
-              <div>
-                <div className="text-[0.7rem] uppercase tracking-[0.18em] text-[color:var(--color-ink-soft)]">
-                  {e.startedAt} {t("to")}{" "}
-                  {e.endedAt ?? (
-                    <span className="text-[color:var(--color-accent)]">
-                      {t("current")}
-                    </span>
-                  )}
-                </div>
-                <div className="mt-1 font-display text-xl">{e.role}</div>
-                <div className="text-sm text-[color:var(--color-ink-soft)]">
-                  {e.organization} · {e.city}
-                </div>
-                {e.description && (
-                  <p className="mt-2 text-sm">{e.description}</p>
-                )}
-              </div>
-              <button
-                type="button"
-                className="rounded-[var(--radius-pill)] border border-[color:var(--color-hairline)] p-2 text-[color:var(--color-ink-soft)] hover:border-[color:var(--color-ink)] hover:text-[color:var(--color-ink)]"
-                aria-label="Edit experience"
-              >
-                <Pencil className="size-4" aria-hidden="true" />
-              </button>
-            </li>
-          ))}
-        </ol>
-      )}
+      <ExperienceManager
+        initial={initial}
+        labels={{
+          add: t("add"),
+          to: t("to"),
+          current: t("current"),
+          empty: t("empty"),
+        }}
+      />
     </DashboardShell>
   );
 }

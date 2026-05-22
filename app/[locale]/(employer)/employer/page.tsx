@@ -6,6 +6,7 @@ import { OrgVerificationBanner } from "@/components/layout/OrgVerificationBanner
 import { TalentRosterItem } from "@/components/ui/TalentRosterItem";
 import { Button } from "@/components/ui/Button";
 import { dataProvider } from "@/lib/data/provider";
+import { verifyRole } from "@/lib/auth/dal";
 import { CheckCircle2 } from "lucide-react";
 
 export default async function EmployerOverviewPage({
@@ -15,6 +16,7 @@ export default async function EmployerOverviewPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
+  await verifyRole("employer");
 
   const t = await getTranslations("employerDash");
   const search = await dataProvider.searchProfiles({
