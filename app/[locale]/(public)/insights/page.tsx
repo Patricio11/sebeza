@@ -2,6 +2,7 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { StatCard } from "@/components/ui/StatCard";
+import { SAChevron } from "@/components/ui/SAChevron";
 import { dataProvider } from "@/lib/data/provider";
 import { overallFreshnessConfidence } from "@/lib/mock/analytics";
 import { InsightsCharts } from "@/components/feature/InsightsCharts";
@@ -34,36 +35,45 @@ export default async function InsightsPage({
     <>
       <SiteHeader />
       <main id="main">
-        {/* Masthead like a national bulletin */}
-        <header className="border-b-2 border-[color:var(--color-ink)] bg-[color:var(--color-paper)]">
-          <div className="mx-auto max-w-[1240px] px-5 py-10 md:px-8 md:py-14">
-            <div className="flex flex-wrap items-baseline justify-between gap-3 text-[0.72rem] uppercase tracking-[0.24em] text-[color:var(--color-ink-soft)]">
-              <span>National employment insights · ZA · MMXXVI</span>
-              <span>Updated {today}</span>
+        {/* National bulletin masthead with chevron motif */}
+        <header className="relative overflow-hidden border-b-2 border-[color:var(--color-ink)] bg-[color:var(--color-paper)]">
+          <SAChevron
+            variant="signature"
+            className="pointer-events-none absolute -right-32 -top-16 size-[520px] opacity-[0.06]"
+          />
+          <div className="relative mx-auto max-w-[1320px] px-5 py-12 md:px-10 md:py-20">
+            <div className="flex flex-wrap items-center justify-between gap-3 text-[0.72rem] uppercase tracking-[0.28em] text-[color:var(--color-brand-strong)]">
+              <span className="inline-flex items-center gap-2">
+                <SAChevron variant="mark" className="size-3" />
+                National employment insights · ZA · MMXXVI
+              </span>
+              <span className="text-[color:var(--color-ink-soft)]">
+                Bulletin · updated {today}
+              </span>
             </div>
-            <h1 className="mt-3 max-w-3xl font-display text-4xl leading-[1.05] tracking-tight md:text-6xl">
+            <h1 className="mt-4 max-w-3xl font-display text-[clamp(2.4rem,6vw,4.8rem)] leading-[0.98] tracking-[-0.025em]">
               {t("title")}
             </h1>
-            <p className="mt-3 max-w-2xl text-lg text-[color:var(--color-ink-soft)]">
+            <p className="mt-4 max-w-2xl text-lg text-[color:var(--color-ink-soft)]">
               {t("subtitle")}
             </p>
 
-            <div className="mt-6 flex flex-wrap items-center gap-3">
-              <div className="inline-flex items-center gap-2 rounded-[var(--radius-pill)] border border-[color:var(--color-brand)] bg-[color:var(--color-brand-tint)] px-3 py-1.5 text-sm text-[color:var(--color-brand-strong)]">
+            <div className="mt-7 flex flex-wrap items-center gap-3">
+              <div className="inline-flex items-center gap-2 rounded-full bg-[color:var(--color-brand)] px-4 py-2 text-sm font-medium text-[color:var(--color-paper)] shadow-press">
                 <span
-                  className="size-2 rounded-full bg-[color:var(--color-brand)]"
+                  className="size-2 rounded-full bg-[color:var(--color-accent)]"
                   aria-hidden="true"
                 />
                 {t("confidence", { percent: Math.round(conf * 100) })}
               </div>
-              <span className="text-xs text-[color:var(--color-ink-soft)]">
+              <span className="max-w-md text-xs text-[color:var(--color-ink-soft)]">
                 {t("confidenceHelp")}
               </span>
             </div>
           </div>
         </header>
 
-        <div className="mx-auto max-w-[1240px] px-5 py-12 md:px-8 md:py-16">
+        <div className="mx-auto max-w-[1320px] px-5 py-14 md:px-10 md:py-20">
           {/* Headline stats */}
           <section aria-label="Headline statistics" className="grid gap-4 md:grid-cols-3">
             <StatCard

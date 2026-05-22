@@ -194,16 +194,22 @@ export function DashboardShell({
           {banner}
 
           {/* Masthead */}
-          <header className="border-b-2 border-[color:var(--color-ink)] bg-[color:var(--color-paper)]">
-            <div className="flex flex-col gap-4 px-5 py-8 md:flex-row md:items-end md:justify-between md:px-12 md:py-10">
+          <header className="relative overflow-hidden border-b-2 border-[color:var(--color-ink)] bg-[color:var(--color-paper)]">
+            {/* Faint chevron motif in the top-right of every dashboard masthead */}
+            <SAChevron
+              variant="signature"
+              className="pointer-events-none absolute -right-24 -top-12 size-[360px] opacity-[0.05]"
+            />
+            <div className="relative flex flex-col gap-4 px-5 py-8 md:flex-row md:items-end md:justify-between md:px-12 md:py-10">
               <div>
                 {pageEyebrow && (
                   <div
                     className={cn(
-                      "text-[0.72rem] uppercase tracking-[0.24em]",
+                      "flex items-center gap-2 text-[0.72rem] uppercase tracking-[0.24em]",
                       roleAccent.text,
                     )}
                   >
+                    <SAChevron variant="mark" className="size-3" />
                     {pageEyebrow}
                   </div>
                 )}

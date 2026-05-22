@@ -5,6 +5,7 @@ import { SearchBar } from "@/components/feature/SearchBar";
 import { SearchFilters } from "@/components/feature/SearchFilters";
 import { TalentRosterItem } from "@/components/ui/TalentRosterItem";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { SAChevron } from "@/components/ui/SAChevron";
 import { dataProvider } from "@/lib/data/provider";
 import type { SearchFilters as F, EmploymentStatus, Seniority, VerificationStatus } from "@/lib/mock/types";
 import { findProvinceBySlug, findCityBySlug, PROFESSIONS } from "@/lib/mock/taxonomy";
@@ -64,8 +65,8 @@ export default async function SearchPage({ params, searchParams }: SearchPagePro
       <SiteHeader />
       <main id="main">
         {/* Sticky editable search header — the query stays in front of you */}
-        <div className="sticky top-[57px] z-20 border-b border-[color:var(--color-hairline)] bg-[color:var(--color-paper)]/95 backdrop-blur">
-          <div className="mx-auto max-w-[1240px] px-5 py-4 md:px-8">
+        <div className="sticky top-[60px] z-20 border-b border-[color:var(--color-hairline)] bg-[color:var(--color-paper)]/95 backdrop-blur">
+          <div className="mx-auto max-w-[1320px] px-5 py-4 md:px-10">
             <SearchBar
               variant="compact"
               defaultQuery={query}
@@ -74,28 +75,37 @@ export default async function SearchPage({ params, searchParams }: SearchPagePro
           </div>
         </div>
 
-        <div className="mx-auto max-w-[1240px] px-5 md:px-8">
-          {/* Masthead — Fraunces hero number */}
-          <header className="border-b-2 border-[color:var(--color-ink)] py-8 md:py-10">
-            <div className="text-[0.72rem] uppercase tracking-[0.24em] text-[color:var(--color-ink-soft)]">
-              Talent register · live
+        <div className="mx-auto max-w-[1320px] px-5 md:px-10">
+          {/* Masthead — Fraunces hero number with chevron motif bleed */}
+          <header className="relative overflow-hidden border-b-2 border-[color:var(--color-ink)] py-10 md:py-14">
+            <SAChevron
+              variant="signature"
+              className="pointer-events-none absolute -right-24 -top-12 size-[420px] opacity-[0.06]"
+            />
+            <div className="relative">
+              <div className="flex items-center gap-2 text-[0.72rem] uppercase tracking-[0.28em] text-[color:var(--color-brand-strong)]">
+                <SAChevron variant="mark" className="size-3" />
+                Talent register · live
+              </div>
+              <h1 className="mt-3 font-display text-[clamp(2.2rem,5.5vw,4.2rem)] leading-[1.02] tracking-[-0.02em]">
+                <span className="tabular text-[color:var(--color-accent)]">
+                  {nfmt.format(result.total)}
+                </span>{" "}
+                <span className="text-[color:var(--color-ink)]">
+                  {inferredRole.toLowerCase()}
+                </span>{" "}
+                <span className="italic font-light text-[color:var(--color-ink-soft)]">
+                  in
+                </span>{" "}
+                <span className="text-[color:var(--color-brand-strong)]">
+                  {locationLabel}
+                </span>
+              </h1>
+              <p className="mt-3 max-w-2xl text-[color:var(--color-ink-soft)]">
+                Ranked by skill match, status freshness and completeness. Stale
+                statuses fall to the bottom — honestly.
+              </p>
             </div>
-            <h1 className="mt-2 font-display text-3xl leading-tight md:text-5xl">
-              <span className="tabular text-[color:var(--color-accent)]">
-                {nfmt.format(result.total)}
-              </span>{" "}
-              <span className="text-[color:var(--color-ink)]">
-                {inferredRole.toLowerCase()}
-              </span>{" "}
-              <span className="italic font-light text-[color:var(--color-ink-soft)]">
-                in
-              </span>{" "}
-              <span>{locationLabel}</span>
-            </h1>
-            <p className="mt-2 text-sm text-[color:var(--color-ink-soft)]">
-              Ranked by skill match, status freshness and completeness. Stale
-              statuses fall to the bottom — honestly.
-            </p>
           </header>
 
           <div className="grid grid-cols-1 gap-10 py-6 md:grid-cols-[260px_1fr] md:gap-12 md:py-10">
