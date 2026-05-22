@@ -9,6 +9,7 @@ import {
   type KeyboardEvent,
   type ReactNode,
 } from "react";
+import { createPortal } from "react-dom";
 import { Check, ChevronDown, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -97,6 +98,47 @@ export function CustomSelect({
 
   const selectedIndex = options.findIndex((o) => o.value === value);
   const selectedOption = selectedIndex >= 0 ? options[selectedIndex] : null;
+
+  // Portal mount + trigger position tracking. Rendering the panel into
+  // `document.body` means it can't be displaced by any ancestor's overflow,
+  // stacking context, or `transform` (such as our hero entrance animation).
+  // The trigger's bounding rect drives the desktop popover position.
+  const [mounted, setMounted] = useState(false);
+  const [triggerRect, setTriggerRect] = useState<{
+    top: number;
+    left: number;
+    bottom: number;
+    width: number;
+  } | null>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const measureTrigger = useCallback(() => {
+    const el = triggerRef.current;
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    setTriggerRect({
+      top: r.top,
+      left: r.left,
+      bottom: r.bottom,
+      width: r.width,
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!open) return;
+    measureTrigger();
+    const onScroll = () => measureTrigger();
+    const onResize = () => measureTrigger();
+    window.addEventListener("scroll", onScroll, true);
+    window.addEventListener("resize", onResize);
+    return () => {
+      window.removeEventListener("scroll", onScroll, true);
+      window.removeEventListener("resize", onResize);
+    };
+  }, [open, measureTrigger]);
 
   // Close on outside click + Esc.
   useEffect(() => {
@@ -287,100 +329,116 @@ export function CustomSelect({
         />
       </button>
 
-      {open && (
-        <>
-          {/* Mobile backdrop */}
-          <div
-            aria-hidden="true"
-            onClick={() => setOpen(false)}
-            className="fixed inset-0 z-40 bg-[color:var(--color-ink)]/40 anim-fade md:hidden"
-          />
+      {open && mounted &&
+        createPortal(
+          <>
+            {/* Mobile backdrop */}
+            <div
+              aria-hidden="true"
+              onClick={() => setOpen(false)}
+              className="fixed inset-0 z-[60] bg-[color:var(--color-ink)]/40 anim-fade md:hidden"
+            />
 
-          {/* Panel — bottom sheet on mobile, anchored popover on desktop */}
-          <div
-            className={cn(
-              "z-50 overflow-hidden rounded-t-2xl bg-[color:var(--color-surface)] shadow-press anim-rise-soft",
-              // Mobile: fixed bottom sheet, full width
-              "fixed inset-x-0 bottom-0 max-h-[80vh] border-t-2 border-[color:var(--color-ink)]",
-              // Desktop: anchored popover under the trigger
-              "md:absolute md:inset-auto md:bottom-auto md:left-0 md:right-auto md:top-[calc(100%+0.5rem)]",
-              "md:max-h-80 md:min-w-full md:max-w-md md:rounded-2xl md:border md:border-[color:var(--color-hairline)] md:border-t-2 md:border-t-[color:var(--color-ink)]",
-            )}
-          >
-            {/* Mobile-only header with title + close */}
-            <div className="flex items-center justify-between gap-3 border-b border-[color:var(--color-hairline)] bg-[color:var(--color-paper)] px-5 py-3 md:hidden">
-              <span className="text-[0.7rem] uppercase tracking-[0.24em] text-[color:var(--color-brand-strong)]">
-                {ariaLabel ?? placeholder}
-              </span>
-              <button
-                type="button"
-                aria-label="Close"
-                onClick={() => setOpen(false)}
-                className="inline-flex size-11 items-center justify-center rounded-full border border-[color:var(--color-hairline)] text-[color:var(--color-ink)]"
-              >
-                <X className="size-4" aria-hidden="true" />
-              </button>
-            </div>
-
-            <ul
-              ref={listRef}
-              id={listboxId}
-              role="listbox"
-              tabIndex={-1}
-              aria-activedescendant={
-                activeIndex >= 0 ? `${buttonId}-opt-${activeIndex}` : undefined
+            {/* Panel — bottom sheet on mobile, anchored popover on desktop.
+                Portaled out of the trigger's DOM so no ancestor's overflow,
+                stacking context, or transform (e.g. our hero animation) can
+                push it back into document flow. Desktop coords come from the
+                measured `triggerRect`; mobile uses bottom-sheet fixed coords. */}
+            <div
+              className={cn(
+                "z-[70] overflow-hidden bg-[color:var(--color-surface)] shadow-press anim-rise-soft",
+                // Mobile bottom sheet (default)
+                "fixed inset-x-0 bottom-0 max-h-[80vh] rounded-t-2xl border-t-2 border-[color:var(--color-ink)]",
+                // Desktop popover — clear bottom-sheet positioning + apply
+                // measured viewport coords via CSS custom properties.
+                "md:inset-auto md:bottom-auto md:top-[var(--cs-top)] md:left-[var(--cs-left)] md:min-w-[var(--cs-min-w)]",
+                "md:max-h-80 md:max-w-md md:rounded-2xl md:border md:border-[color:var(--color-hairline)] md:border-t-2 md:border-t-[color:var(--color-ink)]",
+              )}
+              style={
+                triggerRect
+                  ? ({
+                      "--cs-top": `${triggerRect.bottom + 8}px`,
+                      "--cs-left": `${triggerRect.left}px`,
+                      "--cs-min-w": `${triggerRect.width}px`,
+                    } as React.CSSProperties)
+                  : undefined
               }
-              onKeyDown={onListKey}
-              className="max-h-[calc(80vh-4rem)] overflow-y-auto py-1 outline-none md:max-h-72"
             >
-              {options.map((opt, i) => {
-                const isSelected = opt.value === value;
-                const isActive = i === activeIndex;
-                return (
-                  <li
-                    key={`${opt.value}-${i}`}
-                    id={`${buttonId}-opt-${i}`}
-                    role="option"
-                    aria-selected={isSelected}
-                    aria-disabled={opt.disabled}
-                    data-idx={i}
-                    onMouseEnter={() =>
-                      !opt.disabled && setActiveIndex(i)
-                    }
-                    onClick={() => {
-                      if (!opt.disabled) commit(opt.value);
-                    }}
-                    className={cn(
-                      "flex min-h-11 cursor-pointer items-center justify-between gap-3 border-l-2 border-transparent px-4 py-2.5 text-sm transition-colors",
-                      isActive &&
-                        !opt.disabled &&
-                        "border-l-[color:var(--color-brand)] bg-[color:var(--color-brand-tint)]",
-                      isSelected &&
-                        "font-medium text-[color:var(--color-brand-strong)]",
-                      opt.disabled && "cursor-not-allowed opacity-50",
-                    )}
-                  >
-                    <span className="min-w-0 flex-1">
-                      <span className="block truncate">{opt.label}</span>
-                      {opt.hint && (
-                        <span className="mt-0.5 block truncate text-xs text-[color:var(--color-ink-soft)]">
-                          {opt.hint}
-                        </span>
+              {/* Mobile-only header with title + close */}
+              <div className="flex items-center justify-between gap-3 border-b border-[color:var(--color-hairline)] bg-[color:var(--color-paper)] px-5 py-3 md:hidden">
+                <span className="text-[0.7rem] uppercase tracking-[0.24em] text-[color:var(--color-brand-strong)]">
+                  {ariaLabel ?? placeholder}
+                </span>
+                <button
+                  type="button"
+                  aria-label="Close"
+                  onClick={() => setOpen(false)}
+                  className="inline-flex size-11 items-center justify-center rounded-full border border-[color:var(--color-hairline)] text-[color:var(--color-ink)]"
+                >
+                  <X className="size-4" aria-hidden="true" />
+                </button>
+              </div>
+
+              <ul
+                ref={listRef}
+                id={listboxId}
+                role="listbox"
+                tabIndex={-1}
+                aria-activedescendant={
+                  activeIndex >= 0 ? `${buttonId}-opt-${activeIndex}` : undefined
+                }
+                onKeyDown={onListKey}
+                className="max-h-[calc(80vh-4rem)] overflow-y-auto py-1 outline-none md:max-h-72"
+              >
+                {options.map((opt, i) => {
+                  const isSelected = opt.value === value;
+                  const isActive = i === activeIndex;
+                  return (
+                    <li
+                      key={`${opt.value}-${i}`}
+                      id={`${buttonId}-opt-${i}`}
+                      role="option"
+                      aria-selected={isSelected}
+                      aria-disabled={opt.disabled}
+                      data-idx={i}
+                      onMouseEnter={() =>
+                        !opt.disabled && setActiveIndex(i)
+                      }
+                      onClick={() => {
+                        if (!opt.disabled) commit(opt.value);
+                      }}
+                      className={cn(
+                        "flex min-h-11 cursor-pointer items-center justify-between gap-3 border-l-2 border-transparent px-4 py-2.5 text-sm transition-colors",
+                        isActive &&
+                          !opt.disabled &&
+                          "border-l-[color:var(--color-brand)] bg-[color:var(--color-brand-tint)]",
+                        isSelected &&
+                          "font-medium text-[color:var(--color-brand-strong)]",
+                        opt.disabled && "cursor-not-allowed opacity-50",
                       )}
-                    </span>
-                    {isSelected && (
-                      <Check
-                        className="size-4 shrink-0 text-[color:var(--color-brand)]"
-                        aria-hidden="true"
-                      />
-                    )}
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
-        </>
-      )}
+                    >
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate">{opt.label}</span>
+                        {opt.hint && (
+                          <span className="mt-0.5 block truncate text-xs text-[color:var(--color-ink-soft)]">
+                            {opt.hint}
+                          </span>
+                        )}
+                      </span>
+                      {isSelected && (
+                        <Check
+                          className="size-4 shrink-0 text-[color:var(--color-brand)]"
+                          aria-hidden="true"
+                        />
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          </>,
+          document.body,
+        )}
     </div>
   );
 }
