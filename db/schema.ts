@@ -10,6 +10,7 @@
  */
 import {
   boolean,
+  customType,
   integer,
   jsonb,
   pgEnum,
@@ -17,6 +18,17 @@ import {
   text,
   timestamp,
 } from "drizzle-orm/pg-core";
+
+/**
+ * Postgres `tsvector` — full-text search column. Read-only from the app's
+ * perspective; populated by the trigger declared in
+ * `db/migrations/0001_phase4_search.sql`.
+ */
+const tsvector = customType<{ data: string; driverData: string }>({
+  dataType() {
+    return "tsvector";
+  },
+});
 
 export const employmentStatus = pgEnum("employment_status", [
   "employed",
@@ -165,8 +177,11 @@ export const profiles = pgTable("profiles", {
   completeness: integer("completeness").notNull().default(0),
   /** Encrypted (AES-GCM). NEVER selected on any public read path. */
   nationalIdEnc: text("national_id_enc"),
-  /** Materialised TSVECTOR in Phase 4; placeholder here. */
-  searchVector: text("search_vector"),
+  /** Materialised tsvector. Populated by the trigger in
+      `db/migrations/0001_phase4_search.sql` from
+      profession + seniority + bio + city + province + skills_aggregated.
+      App code never writes to it directly; queries use `@@` against this. */
+  searchVector: tsvector("search_vector"),
   memberSince: timestamp("member_since").notNull().defaultNow(),
   deletedAt: timestamp("deleted_at"),
 });

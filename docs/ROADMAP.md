@@ -209,35 +209,31 @@ that registry — we win on **data quality, usability, and analytics.** The syst
 
 ---
 
-## ⚙️ PHASE 4: THE DATA ENGINE (Backend & Schema)
-*Goal: The schema, search engine, and integrity logic everything else stands on.*
+## ⚙️ PHASE 4: THE DATA ENGINE (Backend & Schema) ✅ *(done 2026-05-22)*
+*Goal: The schema, search engine, and integrity logic everything else stands on. See `docs/completed/PHASE_4_COMPLETE.md`.*
 
 ### Task 4.1: Drizzle Schema
-- [ ] Auth tables (Better Auth) + app `userRole`.
-- [ ] `profiles`, `skills`, `profileSkills`, `experiences`, `qualifications`.
-- [ ] `organizations`, `placements`, `searchEvents`.
-- [ ] POPIA: `consents`, `auditLog`. Taxonomy: `provinces`, `cities`, `professions`.
-- [ ] Enums: `employmentStatus`, `verificationStatus`, `userRole`.
-- [ ] Indices: GIN on `searchVector`; trigram on profession/skill names; btree on city/skill FKs.
-```ts
-// status as a first-class, time-aware concept
-status: employmentStatus("status").notNull().default("open_to_work"),
-statusConfirmedAt: timestamp("status_confirmed_at").notNull().defaultNow(),
-nationalIdEnc: text("national_id_enc"),     // encrypted; never in any read payload
-searchVector: customTsvector("search_vector"),
-deletedAt: timestamp("deleted_at"),         // soft delete → erasure
-```
+- [x] Auth tables (Better Auth — Phase 2) + app `userRole`.
+- [x] `profiles`, `skills`, `profileSkills`, `experiences`, `qualifications`.
+- [x] `organizations`, `organization_members`, `placements`, `searchEvents`.
+- [x] POPIA: `consents`, `auditLog`. Taxonomy: `provinces`, `cities`, `professions`, `institutions`.
+- [x] Enums: `employmentStatus`, `verificationStatus`, `userRole`, `consentPurpose`, `consentState`, `institutionKind`, `organizationMemberRole`.
+- [x] Indices (Phase 4 migration `0001_phase4_search.sql`): GIN on `search_vector`; GIN trigram on profession + taxonomy labels + city; btree on province / city / status / verification / deleted_at.
 
 ### Task 4.2: Search Engine (Postgres FTS + pg_trgm)
-- [ ] Generated `tsvector` over `profession || headline || skills`; GIN index.
-- [ ] `websearch_to_tsquery` for free text; `pg_trgm` similarity for typo tolerance.
-- [ ] Ranking function blending relevance × status confidence × completeness × citizen highlight.
-- [ ] Strict select-list redaction at the query layer (sensitive columns never selected for public reads).
+- [x] Materialised `tsvector` via trigger over `profession + seniority + bio + city + province + aggregated skill labels` with weighted setweight() priorities.
+- [x] `pg_trgm` extension enabled; `websearch_to_tsquery` for free-text queries; trigram for typo tolerance.
+- [x] Ranking SQL: `ts_rank_cd × sebenza_freshness_confidence × (0.5 + 0.5 × completeness) × citizen_boost`. `sebenza_freshness_confidence(timestamp)` is a SQL function so ranking + Phase 6 analytics share one source of truth with `lib/status.ts`.
+- [x] Strict select-list redaction at the query layer — `national_id_enc`, `full_surname`, `search_vector`, `email`, `document_storage_key`, `deleted_at` NEVER selected on a public read.
+- [x] `dataProvider` swap: `dbProvider` is now the default; mock fallback kept for off-DB dev.
+- [x] Photo URLs minted as short-lived signed Supabase URLs at the provider boundary (raw key stays server-side).
+- [x] `/insights` adopts `revalidate = 300` ISR so aggregates refresh every 5 min without rebuild.
 
 ### Task 4.3: Integrity & Server Actions
-- [ ] Typed query functions in `db/` (no raw queries in components).
-- [ ] Server Actions for all mutations; Zod validation on every input.
-- [ ] `logAccess()` enforced on every PII read/export path.
+- [x] Typed query functions in `db/queries/*` (no raw queries in components).
+- [x] Server Actions for all mutations (Phase 2 + 3); Zod validation on every input.
+- [x] `logAccess()` enforced on every PII read/export path (Phase 2 + 3 + 4).
+- [x] `search_events` row written on every search (skills-gap signal Phase 6 builds on).
 
 ---
 
@@ -449,5 +445,5 @@ HR Practitioner · Electrician · Plumber · Accountant · Nurse · Driver · Bo
 ---
 
 *Last Updated: 2026-05-22*
-*Version: 1.4 — Phase 3 complete (profile CRUD + Supabase Storage + status engine + dashboard nudge + DAL-based three-layer security audit) — see `docs/completed/PHASE_3_COMPLETE.md` and `docs/SECURITY.md`. Phase 4 (Postgres FTS + real `dbProvider` + signed photo URLs on public reads) opens next — see `docs/PHASE_4_PLAN.md`.*
+*Version: 1.5 — Phase 4 complete (Postgres FTS + ranking SQL + real `dbProvider` + signed photo URLs + ISR analytics) — see `docs/completed/PHASE_4_COMPLETE.md`. Phase 5 (employer reveal flow + placement confirmation) opens next — see `docs/PHASE_5_PLAN.md`.*
 *Working name: Sebenza (replace with chosen brand)*

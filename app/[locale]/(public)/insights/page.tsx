@@ -8,6 +8,14 @@ import { overallFreshnessConfidence } from "@/lib/mock/analytics";
 import { InsightsCharts } from "@/components/feature/InsightsCharts";
 import { Download } from "lucide-react";
 
+/**
+ * Re-prerender /insights every 5 min. Aggregates over the live DB; doesn't
+ * need millisecond freshness but shouldn't be a build-time snapshot frozen
+ * until next deploy. Next.js ISR + the dataProvider seam means each locale
+ * gets a fresh static HTML every 300 s.
+ */
+export const revalidate = 300;
+
 const STATUS_ORDER = [
   "open_to_work",
   "unemployed",
