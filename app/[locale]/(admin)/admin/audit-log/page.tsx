@@ -1,0 +1,102 @@
+import { setRequestLocale, getTranslations } from "next-intl/server";
+import { DashboardShell } from "@/components/layout/DashboardShell";
+import { ADMIN_NAV, MOCK_ADMIN } from "@/components/layout/adminNav";
+import { Button } from "@/components/ui/Button";
+import { recentAuditEvents } from "@/lib/audit";
+import { Download } from "lucide-react";
+
+export default async function AuditLogPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+  const t = await getTranslations("adminDash.auditLog");
+  const events = recentAuditEvents(100);
+
+  return (
+    <DashboardShell
+      role="admin"
+      workspaceLabel={MOCK_ADMIN.fullName}
+      workspaceEyebrow="Administrator · 2FA required"
+      nav={ADMIN_NAV}
+      activeKey="auditLog"
+      pageEyebrow="PII access ledger"
+      pageTitle={t("title")}
+      pageSubtitle={t("subtitle")}
+      pageActions={
+        <Button variant="ghost" size="md">
+          <Download className="size-4" aria-hidden="true" />
+          Export CSV
+        </Button>
+      }
+    >
+      {/* Filters */}
+      <form className="mb-6 grid gap-3 md:grid-cols-[1fr_1fr_auto]">
+        <label className="flex flex-col gap-1">
+          <span className="text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--color-ink-soft)]">
+            {t("filterKind")}
+          </span>
+          <select className="h-10 rounded-[var(--radius-sm)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] px-3">
+            <option>All</option>
+            <option>search.profiles</option>
+            <option>profile.view</option>
+            <option>profile.contact.reveal</option>
+            <option>profile.document.download</option>
+            <option>analytics.export</option>
+            <option>consent.grant</option>
+            <option>consent.revoke</option>
+          </select>
+        </label>
+        <label className="flex flex-col gap-1">
+          <span className="text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--color-ink-soft)]">
+            {t("filterActor")}
+          </span>
+          <input
+            placeholder="User id, org, or handle…"
+            className="h-10 rounded-[var(--radius-sm)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] px-3"
+          />
+        </label>
+        <div className="self-end">
+          <Button variant="primary" size="md">Apply filters</Button>
+        </div>
+      </form>
+
+      {events.length === 0 ? (
+        <p className="rounded-[var(--radius-md)] border border-dashed border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-6 text-sm text-[color:var(--color-ink-soft)]">
+          {t("noEvents")}
+        </p>
+      ) : (
+        <div className="overflow-hidden rounded-[var(--radius-md)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)]">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b-2 border-[color:var(--color-ink)] text-left text-[0.7rem] uppercase tracking-[0.18em] text-[color:var(--color-ink-soft)]">
+                <th className="px-5 py-3 font-normal">When (UTC)</th>
+                <th className="px-5 py-3 font-normal">Kind</th>
+                <th className="px-5 py-3 font-normal">Actor</th>
+                <th className="px-5 py-3 font-normal">Subject</th>
+              </tr>
+            </thead>
+            <tbody>
+              {events.map((e, i) => (
+                <tr key={i} className="border-t border-[color:var(--color-hairline)]">
+                  <td className="px-5 py-2 font-mono text-xs text-[color:var(--color-ink-soft)]">
+                    {new Date(e.at).toISOString().replace("T", " ").slice(0, 19)}
+                  </td>
+                  <td className="px-5 py-2">
+                    <code className="rounded-[var(--radius-sm)] bg-[color:var(--color-surface-sunk)] px-1.5 py-0.5 text-xs">
+                      {e.kind}
+                    </code>
+                  </td>
+                  <td className="px-5 py-2 text-xs">{e.actor}</td>
+                  <td className="px-5 py-2 text-xs">{e.subject ?? "—"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </DashboardShell>
+  );
+}

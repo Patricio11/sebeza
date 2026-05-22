@@ -57,15 +57,21 @@ export function SiteHeader({ variant = "default" }: Props) {
           </nav>
         )}
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
           <div className="hidden md:block">
             <LocaleSwitcher />
           </div>
           <Link
-            href="/dashboard"
-            className="inline-flex items-center rounded-[var(--radius-pill)] border border-[color:var(--color-ink)] px-4 py-1.5 text-sm font-medium text-[color:var(--color-ink)] transition-colors hover:bg-[color:var(--color-ink)] hover:text-[color:var(--color-paper)]"
+            href="/sign-in"
+            className="hidden md:inline-flex items-center rounded-[var(--radius-pill)] px-3 py-1.5 text-sm font-medium text-[color:var(--color-ink)] transition-colors hover:bg-[color:var(--color-surface-sunk)]"
           >
             {t("signIn")}
+          </Link>
+          <Link
+            href="/sign-up"
+            className="inline-flex items-center rounded-[var(--radius-pill)] bg-[color:var(--color-ink)] px-4 py-1.5 text-sm font-medium text-[color:var(--color-paper)] transition-colors hover:bg-[color:var(--color-brand-strong)]"
+          >
+            {t("signUp")}
           </Link>
         </div>
       </div>

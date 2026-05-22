@@ -10,7 +10,9 @@ import { DataSpine } from "@/components/ui/DataSpine";
 import { dataProvider } from "@/lib/data/provider";
 import { freshnessBand } from "@/lib/mock/helpers";
 import { formatRelativeTime } from "@/lib/utils";
-import { Lock, ShieldAlert, Flag } from "lucide-react";
+import { Lock, ShieldAlert, Flag, GraduationCap } from "lucide-react";
+import { INSTITUTION_KIND_LABEL } from "@/lib/mock/taxonomy";
+import { monthsUntil, nqfShort } from "@/lib/mock/academic";
 
 interface Props {
   params: Promise<{ locale: string; handle: string }>;
@@ -134,6 +136,73 @@ export default async function ProfilePage({ params }: Props) {
                 <p className="text-lg leading-relaxed text-[color:var(--color-ink)]">
                   {profile.bio}
                 </p>
+              </section>
+            )}
+
+            {profile.academic && (
+              <section aria-labelledby="studies-h">
+                <SectionHeading id="studies-h" eyebrow="Studies" text={t("studies")} />
+                <div className="grid gap-6 rounded-[var(--radius-md)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-6 md:grid-cols-[auto_1fr] md:items-start">
+                  <span
+                    aria-hidden="true"
+                    className="inline-flex size-12 items-center justify-center rounded-full bg-[color:var(--color-brand-tint)] text-[color:var(--color-brand-strong)]"
+                  >
+                    <GraduationCap className="size-6" />
+                  </span>
+                  <div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h3 className="font-display text-xl text-[color:var(--color-ink)]">
+                        {profile.academic.programme}
+                      </h3>
+                      <VerificationBadge state={profile.academic.verification} />
+                    </div>
+                    <p className="mt-1 text-[color:var(--color-ink-soft)]">
+                      <span className="text-[color:var(--color-ink)]">
+                        {profile.academic.institutionLabel}
+                      </span>
+                      <span aria-hidden="true"> · </span>
+                      <span>
+                        {INSTITUTION_KIND_LABEL[profile.academic.institutionKind]}
+                      </span>
+                      <span aria-hidden="true"> · </span>
+                      <span>{nqfShort(profile.academic.nqfLevel)}</span>
+                      {profile.academic.currentYear && (
+                        <>
+                          <span aria-hidden="true"> · </span>
+                          <span>Year {profile.academic.currentYear}</span>
+                        </>
+                      )}
+                    </p>
+
+                    <dl className="mt-4 grid grid-cols-2 gap-4 text-xs md:grid-cols-4">
+                      <Meta label={t("studiesGraduation")} value={profile.academic.expectedGraduation}>
+                        {(() => {
+                          const m = monthsUntil(profile.academic.expectedGraduation);
+                          return (
+                            <span className="block text-[color:var(--color-ink-soft)]">
+                              {m <= 0
+                                ? `${Math.abs(m)} months ago`
+                                : `${m} months to go`}
+                            </span>
+                          );
+                        })()}
+                      </Meta>
+                      <Meta label={t("studiesNsfas")} value={profile.academic.nsfas ? "Yes" : "No"} />
+                      <Meta
+                        label={t("studiesOpenInternships")}
+                        value={profile.academic.openToInternships ? "Yes" : "No"}
+                      />
+                      <Meta
+                        label={t("studiesOpenGraduateProgrammes")}
+                        value={profile.academic.openToGraduateProgrammes ? "Yes" : "No"}
+                      />
+                    </dl>
+
+                    <p className="mt-4 text-xs italic text-[color:var(--color-ink-soft)]">
+                      {t("studiesSub")}
+                    </p>
+                  </div>
+                </div>
               </section>
             )}
 
@@ -283,6 +352,28 @@ function SectionHeading({
         {text}
       </h2>
     </header>
+  );
+}
+
+function Meta({
+  label,
+  value,
+  children,
+}: {
+  label: string;
+  value: React.ReactNode;
+  children?: React.ReactNode;
+}) {
+  return (
+    <div>
+      <dt className="text-[0.62rem] uppercase tracking-[0.22em] text-[color:var(--color-ink-soft)]">
+        {label}
+      </dt>
+      <dd className="mt-0.5 text-sm text-[color:var(--color-ink)]">
+        {value}
+        {children}
+      </dd>
+    </div>
   );
 }
 

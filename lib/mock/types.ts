@@ -57,6 +57,11 @@ export interface PublicProfile {
   memberSince: string;
   experience?: ExperienceItem[];
   qualifications?: QualificationItem[];
+  /**
+   * Active or recent academic enrolment. Optional — only set for student seekers.
+   * Surfaces Student mode in the dashboard + Career compass.
+   */
+  academic?: AcademicProfile;
 }
 
 export interface ExperienceItem {
@@ -76,6 +81,48 @@ export interface QualificationItem {
   /** ISO yyyy. */
   awardedYear: number | null;
   verification: VerificationStatus;
+}
+
+/**
+ * NQF (National Qualifications Framework) levels per SAQA.
+ * 4 = Matric / National Certificate, 6 = Diploma, 7 = Bachelor's, 8 = Honours,
+ * 9 = Master's, 10 = Doctorate.
+ */
+export type NqfLevel = 4 | 5 | 6 | 7 | 8 | 9 | 10;
+
+export type InstitutionKind =
+  | "university"
+  | "uot" // University of Technology
+  | "tvet" // Public TVET college
+  | "distance" // UNISA, distance-learning specialised
+  | "indlela" // National Artisan Moderation Body
+  | "private";
+
+/**
+ * Active academic enrolment. Only present when the seeker is (or recently was)
+ * a student. Status-Freshness Rule still applies: `expectedGraduation` is the
+ * freshness anchor here — past it = profile needs an update.
+ */
+export interface AcademicProfile {
+  institutionSlug: string;
+  institutionLabel: string;
+  institutionKind: InstitutionKind;
+  programme: string;
+  /** Free-text discipline (will become a controlled taxonomy in Phase 7). */
+  fieldOfStudy: string;
+  nqfLevel: NqfLevel;
+  /** 1, 2, 3, 4, 5 — academic year of study. null for postgrad without year structure. */
+  currentYear: number | null;
+  /** ISO yyyy-mm — expected graduation. Drives freshness for student profiles. */
+  expectedGraduation: string;
+  /** True if studying via NSFAS-funded route. Shown as a chip for context. */
+  nsfas: boolean;
+  /** Verification state of the enrolment record itself. Defaults `unverified`. */
+  verification: VerificationStatus;
+  /** Whether the seeker is actively looking for internships / graduate programmes. Opt-in. */
+  openToInternships: boolean;
+  /** Whether the seeker is actively looking for full graduate-track roles. Opt-in. */
+  openToGraduateProgrammes: boolean;
 }
 
 export interface SearchFilters {

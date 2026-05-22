@@ -1,4 +1,4 @@
-import type { Province, TaxonomyEntry } from "./types";
+import type { InstitutionKind, NqfLevel, Province, TaxonomyEntry } from "./types";
 
 // Controlled vocabularies. Phase 4 moves these to DB tables (`provinces`, `cities`,
 // `professions`, `skills`) — but the shape stays identical so the seam holds.
@@ -135,4 +135,74 @@ export function findCityBySlug(slug: string | null | undefined) {
 export function findProfession(slug: string | null | undefined) {
   if (!slug) return null;
   return PROFESSIONS.find((p) => p.slug === slug) ?? null;
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
+// SA tertiary institutions — controlled vocabulary.
+// Representative subset of public universities + UOTs + a TVET + UNISA + INDLELA.
+// Full list managed in admin taxonomy from Phase 7.
+
+export interface InstitutionEntry extends TaxonomyEntry {
+  kind: InstitutionKind;
+  /** Where the main campus sits — used for proximity heuristics in Career compass. */
+  city: string;
+  province: string;
+}
+
+export const INSTITUTIONS: InstitutionEntry[] = [
+  // Research universities
+  { slug: "wits", label: "University of the Witwatersrand", kind: "university", city: "Johannesburg", province: "Gauteng" },
+  { slug: "uct", label: "University of Cape Town", kind: "university", city: "Cape Town", province: "Western Cape" },
+  { slug: "stellenbosch", label: "Stellenbosch University", kind: "university", city: "Stellenbosch", province: "Western Cape" },
+  { slug: "up", label: "University of Pretoria", kind: "university", city: "Pretoria", province: "Gauteng" },
+  { slug: "uj", label: "University of Johannesburg", kind: "university", city: "Johannesburg", province: "Gauteng" },
+  { slug: "ukzn", label: "University of KwaZulu-Natal", kind: "university", city: "Durban", province: "KwaZulu-Natal" },
+  { slug: "rhodes", label: "Rhodes University", kind: "university", city: "Makhanda", province: "Eastern Cape" },
+  { slug: "nwu", label: "North-West University", kind: "university", city: "Potchefstroom", province: "North West" },
+  { slug: "ufs", label: "University of the Free State", kind: "university", city: "Bloemfontein", province: "Free State" },
+  { slug: "uwc", label: "University of the Western Cape", kind: "university", city: "Cape Town", province: "Western Cape" },
+  { slug: "ufh", label: "University of Fort Hare", kind: "university", city: "Alice", province: "Eastern Cape" },
+  { slug: "nmu", label: "Nelson Mandela University", kind: "university", city: "Gqeberha", province: "Eastern Cape" },
+  // Universities of Technology
+  { slug: "tut", label: "Tshwane University of Technology", kind: "uot", city: "Pretoria", province: "Gauteng" },
+  { slug: "cput", label: "Cape Peninsula University of Technology", kind: "uot", city: "Cape Town", province: "Western Cape" },
+  { slug: "dut", label: "Durban University of Technology", kind: "uot", city: "Durban", province: "KwaZulu-Natal" },
+  { slug: "vut", label: "Vaal University of Technology", kind: "uot", city: "Vanderbijlpark", province: "Gauteng" },
+  // Distance
+  { slug: "unisa", label: "University of South Africa (UNISA)", kind: "distance", city: "Pretoria", province: "Gauteng" },
+  // Public TVET (representative)
+  { slug: "tvet-ekurhuleni-west", label: "Ekurhuleni West TVET College", kind: "tvet", city: "Germiston", province: "Gauteng" },
+  { slug: "tvet-tshwane-north", label: "Tshwane North TVET College", kind: "tvet", city: "Pretoria", province: "Gauteng" },
+  { slug: "tvet-false-bay", label: "False Bay TVET College", kind: "tvet", city: "Cape Town", province: "Western Cape" },
+  // Artisan training
+  { slug: "indlela", label: "INDLELA", kind: "indlela", city: "Olifantsfontein", province: "Gauteng" },
+];
+
+export const INSTITUTION_KIND_LABEL: Record<InstitutionKind, string> = {
+  university: "Research university",
+  uot: "University of Technology",
+  tvet: "Public TVET",
+  distance: "Distance university",
+  indlela: "Artisan training (INDLELA)",
+  private: "Private",
+};
+
+export const NQF_LEVELS: { level: NqfLevel; label: string; band: string }[] = [
+  { level: 4, label: "NQF 4", band: "Matric / National Certificate" },
+  { level: 5, label: "NQF 5", band: "Higher Certificate" },
+  { level: 6, label: "NQF 6", band: "Diploma / Adv. Certificate" },
+  { level: 7, label: "NQF 7", band: "Bachelor's / Adv. Diploma" },
+  { level: 8, label: "NQF 8", band: "Honours / Postgrad Diploma" },
+  { level: 9, label: "NQF 9", band: "Master's" },
+  { level: 10, label: "NQF 10", band: "Doctorate" },
+];
+
+export function findInstitution(slug: string | null | undefined) {
+  if (!slug) return null;
+  return INSTITUTIONS.find((i) => i.slug === slug) ?? null;
+}
+
+export function nqfLabel(level: NqfLevel): string {
+  const entry = NQF_LEVELS.find((n) => n.level === level);
+  return entry ? `${entry.label} · ${entry.band}` : `NQF ${level}`;
 }

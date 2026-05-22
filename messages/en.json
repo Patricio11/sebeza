@@ -8,6 +8,7 @@
     "findTalent": "Find talent",
     "createProfile": "Create profile",
     "signIn": "Sign in",
+    "signUp": "Get started",
     "insights": "Insights",
     "menu": "Menu",
     "skipToContent": "Skip to main content"
@@ -69,6 +70,127 @@
       "accessibility": "Accessibility",
       "language": "Language",
       "rights": "© 2026 Sebenza. A national talent platform for South Africa."
+    }
+  },
+  "auth": {
+    "common": {
+      "email": "Email address",
+      "password": "Password",
+      "confirmPassword": "Confirm password",
+      "fullName": "Full name",
+      "phone": "Mobile number",
+      "showPassword": "Show password",
+      "hidePassword": "Hide password",
+      "rememberMe": "Remember me on this device",
+      "or": "or",
+      "demoNotice": "Demo mode — no real authentication yet. Wires up in Phase 2 (Better Auth).",
+      "back": "Back"
+    },
+    "signIn": {
+      "eyebrow": "Welcome back",
+      "heading": "Sign in to your account",
+      "subhead": "Job seekers, employers and administrators all sign in here. We'll route you to the right dashboard.",
+      "submit": "Sign in",
+      "forgot": "Forgot your password?",
+      "noAccount": "Don't have an account yet?",
+      "createOne": "Create one",
+      "twoFactor": "Two-factor authentication is required for employers and administrators.",
+      "rolePicker": "Sign in as",
+      "asSeeker": "Job seeker",
+      "asEmployer": "Employer",
+      "asAdmin": "Administrator"
+    },
+    "signUp": {
+      "eyebrow": "Get started",
+      "heading": "Join Sebenza",
+      "subhead": "Which side of the platform are you joining?",
+      "seekerCard": {
+        "eyebrow": "I'm a",
+        "title": "Job seeker",
+        "body": "Build a verified profile, keep a live employment status, and get found for the work you do.",
+        "cta": "Create a seeker profile"
+      },
+      "employerCard": {
+        "eyebrow": "I'm an",
+        "title": "Employer or recruiter",
+        "body": "Search verified talent by skill and location. Two-factor auth required. Your organisation must be verified before contact details unlock.",
+        "cta": "Register an organisation"
+      },
+      "adminNotice": "Administrator accounts are issued by Sebenza — not self-registered. If you've been invited, sign in with the credentials in your invitation email.",
+      "haveAccount": "Already have an account?",
+      "signInLink": "Sign in"
+    },
+    "seekerSignUp": {
+      "stepLabel": "Step {n} of 3",
+      "step1": {
+        "heading": "Tell us who you are",
+        "subhead": "These basics only. We'll add the rest of your profile after consent.",
+        "next": "Continue"
+      },
+      "step2": {
+        "heading": "Your consent matters",
+        "subhead": "Your profile is not searchable until you say it can be. You can revoke consent any time from your privacy centre.",
+        "next": "Grant consent & continue",
+        "purposes": {
+          "searchability": "Searchability — let employers find me by skill + location",
+          "contact_reveal": "Contact reveal — allow verified employers to request my contact details, audit-logged",
+          "document_sharing": "Document sharing — allow verified employers to request my qualifications",
+          "analytics_aggregate": "Aggregate analytics — count me in national employment statistics (no personal data shared)"
+        },
+        "required": "Required for your profile to appear in search results."
+      },
+      "step3": {
+        "heading": "Your first profile fields",
+        "subhead": "You can edit any of this later from your profile editor.",
+        "next": "Create my profile",
+        "professionLabel": "Profession",
+        "locationLabel": "Where do you live / want to work?",
+        "statusLabel": "What's your employment status today?",
+        "studentToggle": "I'm currently a student",
+        "studentToggleHint": "Tick this if you're enrolled in a SA university, university of technology, TVET, UNISA, or INDLELA programme. We'll capture your academic details so Sebenza can recommend electives, internships and graduate programmes — not just full hires.",
+        "academic": {
+          "heading": "Your studies",
+          "institutionLabel": "Institution",
+          "programmeLabel": "Programme of study",
+          "fieldLabel": "Field of study",
+          "nqfLabel": "NQF level",
+          "yearLabel": "Current year of study",
+          "graduationLabel": "Expected graduation",
+          "nsfasLabel": "I'm funded by NSFAS",
+          "openToInternships": "Open to internships during studies",
+          "openToGraduateProgrammes": "Open to graduate / articles programmes after graduation"
+        }
+      },
+      "stepHints": {
+        "name": "Goes on your profile as \"First L.\" by default — your full surname only appears after you grant contact consent.",
+        "id": "We'll encrypt this immediately. It is never displayed back — even to you, even to admins."
+      }
+    },
+    "employerSignUp": {
+      "heading": "Register your organisation",
+      "subhead": "Your organisation starts in the \"unverified\" state. You can search talent, but contact details and documents stay locked until verification is complete.",
+      "orgName": "Registered organisation name",
+      "registrationNumber": "CIPC registration number",
+      "industry": "Industry",
+      "size": "Organisation size",
+      "country": "Country of operation",
+      "youAs": "About you",
+      "yourRole": "Your role at the organisation",
+      "submit": "Register organisation",
+      "twoFactorNote": "Two-factor authentication is mandatory for employer accounts. You'll be guided through TOTP setup on your first sign-in."
+    },
+    "verify": {
+      "heading": "Check your inbox",
+      "subhead": "We've sent a verification link to {email}. Click it to confirm your email address.",
+      "resend": "Resend the email",
+      "wrongEmail": "Wrong email?",
+      "wrongEmailLink": "Start again"
+    },
+    "forgot": {
+      "heading": "Reset your password",
+      "subhead": "Enter your account email and we'll send you a one-time link to set a new password.",
+      "submit": "Send reset link",
+      "back": "Back to sign in"
     }
   },
   "search": {
@@ -138,6 +260,12 @@
     "experience": "Experience",
     "qualifications": "Qualifications",
     "bio": "About",
+    "studies": "Currently studying",
+    "studiesSub": "Self-reported until verified by the institution + SAQA in Phase 8.",
+    "studiesGraduation": "Expected graduation",
+    "studiesNsfas": "NSFAS-funded",
+    "studiesOpenInternships": "Open to internships",
+    "studiesOpenGraduateProgrammes": "Open to graduate programmes",
     "locked": {
       "contact": "Contact details",
       "documents": "Documents & certificates",
@@ -148,30 +276,372 @@
     "report": "Report this profile",
     "redacted": "(Surname is hidden in public search until you consent to be contacted.)"
   },
-  "dashboard": {
-    "seeker": {
-      "title": "Your visibility",
-      "completenessLabel": "Profile completeness",
+  "seekerDash": {
+    "title": "Your dashboard",
+    "nav": {
+      "overview": "Overview",
+      "profile": "Profile editor",
+      "experience": "Experience",
+      "qualifications": "Qualifications",
+      "grow": "Career compass",
+      "activity": "Activity",
+      "privacy": "Privacy & consent",
+      "account": "Account"
+    },
+    "overview": {
+      "greeting": "Hello, {name} — your private workspace",
+      "completeness": "Profile completeness",
       "nextAction": "Add {n} more {n, plural, =1 {skill} other {skills}} to rank higher in search.",
-      "pulseTitle": "Talent Pulse",
+      "pulse": "Talent Pulse",
       "pulseQuestion": "Are you still open to work?",
       "confirmFresh": "Yes — confirm",
       "lastConfirmed": "Last confirmed {when}",
+      "publicLink": "View my public profile →",
       "viewedBy": "Who's viewed you",
       "contactedBy": "Who's contacted you",
       "noViewers": "No one has viewed your profile yet.",
-      "noContacts": "No employers have contacted you yet."
+      "noContacts": "No employers have contacted you yet.",
+      "rankInSearch": "Where you appear in search",
+      "rankExplain": "Your ranking in the chefs · Western Cape pool, by freshness × completeness.",
+      "nextSteps": "Recommended next steps"
     },
-    "employer": {
-      "title": "Employer portal",
-      "orgUnverifiedBanner": "Your organisation is not yet verified. You can search talent, but contact details and documents stay locked until verification is complete.",
-      "orgUnverifiedCta": "Verify organisation",
+    "profileEditor": {
+      "title": "Profile editor",
+      "subtitle": "Everything here flows into your public dossier and the national analytics. We never display your ID number — it's encrypted on save.",
+      "sections": {
+        "identity": "Identity basics",
+        "professional": "Professional summary",
+        "skillsTitle": "Skills",
+        "locationTitle": "Location",
+        "academicTitle": "Studies"
+      },
+      "academic": {
+        "heading": "Your studies",
+        "subhead": "Tell us where and what you're studying — Sebenza will tune your Career compass to your programme and your remaining time before graduation.",
+        "institution": "Institution",
+        "kindHint": "Recognised SA institutions only: public universities, universities of technology, TVET colleges, UNISA, INDLELA.",
+        "programme": "Programme of study",
+        "field": "Field of study",
+        "nqfLevel": "NQF level",
+        "year": "Current year",
+        "graduation": "Expected graduation",
+        "nsfas": "NSFAS-funded",
+        "verificationNote": "We never display a 'verified' badge for self-reported enrolment. Verification arrives via SAQA + institution partnerships in Phase 8.",
+        "openToInternships": "Open to internships during studies",
+        "openToGraduateProgrammes": "Open to graduate / articles programmes after graduation"
+      },
+      "fields": {
+        "fullName": "Full name",
+        "displayName": "Public display name",
+        "displayNameHelp": "How you appear in public search (e.g. \"Thandeka M.\"). Your surname only reveals after contact consent.",
+        "nationalId": "South African ID number (or passport)",
+        "nationalIdHelp": "Encrypted at rest with AES-256-GCM the moment you save. Never displayed back. Used only for verification — never shared.",
+        "dob": "Date of birth",
+        "nationality": "Nationality",
+        "citizen": "I am a South African citizen",
+        "city": "City",
+        "province": "Province",
+        "willingToRelocate": "Open to relocating for the right role",
+        "profession": "Profession",
+        "seniority": "Seniority",
+        "headline": "Public headline",
+        "bio": "About",
+        "bioHelp": "Two or three sentences — what you're great at, and what you're looking for.",
+        "addSkill": "Add a skill",
+        "removeSkill": "Remove",
+        "proficiency": "Self-rated proficiency"
+      },
+      "saveButton": "Save changes",
+      "savedHint": "Autosaves as you type. Encrypted fields persist on blur.",
+      "completenessLive": "Live completeness:",
+      "encryptedBadge": "Encrypted on save"
+    },
+    "experience": {
+      "title": "Experience",
+      "subtitle": "Roles, dates, accomplishments. Reorder anytime.",
+      "add": "Add experience",
+      "current": "Current",
+      "to": "to",
+      "empty": "You haven't added any experience yet. Adding three or more roles improves your ranking significantly."
+    },
+    "qualifications": {
+      "title": "Qualifications & documents",
+      "subtitle": "Upload certificates as PDFs or images. Files are stored in a private bucket — only verified employers can request to view them, and every access is audit-logged.",
+      "add": "Add a qualification",
+      "uploadCert": "Upload certificate",
+      "empty": "No qualifications yet. Adding at least one trade certificate or diploma builds employer trust.",
+      "verificationBy": "Verification handled by"
+    },
+    "activity": {
+      "title": "Activity",
+      "subtitle": "Every interaction with your profile, audit-logged for your transparency.",
+      "viewers": "Profile views",
+      "contacts": "Contact requests",
+      "reveals": "Document reveals",
+      "downloads": "Document downloads"
+    },
+    "privacy": {
+      "title": "Privacy & consent",
+      "subtitle": "You control what Sebenza can do with your data. Revoke any consent below at any time.",
+      "consents": "Active consents",
+      "noConsent": "No active consents — your profile is not searchable.",
+      "revoke": "Revoke",
+      "granted": "Granted {date}",
+      "version": "Version {v}",
+      "yourData": "Your data",
+      "exportTitle": "Export everything I have on Sebenza",
+      "exportBody": "We'll generate a JSON file with your profile, experience, qualifications, consents and audit log. Delivered to your registered email within 30 days (POPIA section 23).",
+      "exportCta": "Request data export",
+      "deleteTitle": "Erase my account",
+      "deleteBody": "Soft-deletes your profile immediately (no longer searchable). A 30-day grace period applies — after that we permanently erase. Audit logs are retained anonymised, as POPIA requires.",
+      "deleteCta": "Request erasure"
+    },
+    "account": {
+      "title": "Account",
+      "subtitle": "Email, password, devices, sign-out.",
+      "email": "Email",
+      "password": "Password",
+      "changePassword": "Change password",
+      "twoFactor": "Two-factor authentication",
+      "twoFactorOptionalSeeker": "Optional for job seekers (recommended).",
+      "sessions": "Active sessions",
+      "signOutAll": "Sign out all other devices",
+      "signOut": "Sign out"
+    },
+    "grow": {
+      "title": "Career compass",
+      "subtitle": "What to learn next — grounded in real employer demand near you. We don't sell courses; we point at what's working.",
+      "eyebrow": "Skills growth · demand-driven",
+      "headline": "Learn {n, plural, =1 {# skill} other {# skills}} → move from #{from} to #{to}",
+      "headlineSub": "Projected rank in your local pool: {pool}",
+      "recommendationsTitle": "Recommended skills",
+      "recommendationsSub": "Picked from the biggest gaps between what employers search for and what they find.",
+      "reason": {
+        "demand_high": "High demand · low supply",
+        "common_among_top_ranked": "Common at top of your pool",
+        "missing_for_role": "Unlocks an adjacent role",
+        "adjacent_role": "Builds on what you already have"
+      },
+      "demandSignal": "{searches} searches vs {matches} matches this month",
+      "rankIfLearned": "If you add this: rank → #{projected} in {pool}",
+      "openProfileEditor": "Add to my profile →",
+      "pathsTitle": "Learning paths",
+      "pathsSub": "Free and subsidised options listed first. SA-recognised programmes only — SETA, TVET, INDLELA, SAQA-recognised, and open-source resources.",
+      "duration": "{weeks, plural, =1 {# week} other {# weeks}}",
+      "national": "National",
+      "providerKind": "Provider type",
+      "cost": "Cost",
+      "outcome": "Outcome",
+      "adjacentTitle": "Adjacent professions",
+      "adjacentSub": "Roles your current skills overlap with — usually one or two skills away.",
+      "overlap": "{percent}% skill overlap",
+      "missing": "Missing",
+      "cityDemandTitle": "What employers are looking for in your province",
+      "cityDemandSub": "The gap column is the policy lever — and the seeker's opportunity.",
+      "cityDemandColSkill": "Skill",
+      "cityDemandColSearches": "Searches",
+      "cityDemandColMatches": "Matches",
+      "cityDemandColGap": "Gap",
+      "honestNote": "Honesty note",
+      "honestBody": "Sebenza doesn't accept money from learning providers. We list public, SA-recognised paths first because they're real and reachable. If a course isn't here, it isn't necessarily bad — but we won't surface it without evidence it works.",
+      "student": {
+        "lane": "Student mode",
+        "headline": "Bridge your degree to the market",
+        "subhead": "You're {months, plural, =0 {graduating this month} =1 {one month from graduation} other {# months from graduation}}. Sebenza re-tunes the recommendations to what {programme} graduates actually need next.",
+        "graduating": "Graduating",
+        "electivesTitle": "Electives in your programme",
+        "electivesSub": "Subjects you can still pick — chosen because the market is screaming for them in your province.",
+        "curriculumHint": "Where in the curriculum",
+        "demandSignal": "{searches} searches vs {matches} matches this month",
+        "programmesTitle": "Internships & graduate programmes",
+        "programmesSub": "Real SA programmes — public sector first, then corporates and startups. Eligibility is shown honestly — we'd rather tell you upfront if you don't qualify than waste your time.",
+        "duration": "{months, plural, =1 {# month} other {# months}}",
+        "eligibility": "Eligibility",
+        "applicationOpen": "Open",
+        "applicationClosingSoon": "Closing soon",
+        "applicationClosed": "Closed",
+        "saqaChip": "SAQA-recognised",
+        "destinationsTitle": "Where {programme} graduates go",
+        "destinationsSub": "Aggregated from confirmed placements on Sebenza. No personal data is exposed — only the destination type and share.",
+        "medianMonths": "{months, plural, =1 {≈1 month to placement} other {≈# months to placement}}",
+        "notPlaced": "Not yet placed",
+        "supplementaryTitle": "Supplementary free learning",
+        "supplementarySub": "Gaps almost every CS / accounting graduate carries into their first role. All free.",
+        "openToToggle": "Open to",
+        "openToInternships": "Internships",
+        "openToGraduateProgrammes": "Graduate programmes"
+      }
+    }
+  },
+  "employerDash": {
+    "title": "Employer workspace",
+    "nav": {
+      "overview": "Overview",
+      "search": "Search talent",
       "savedSearches": "Saved searches",
       "shortlists": "Talent pools",
-      "noSavedSearches": "You haven't saved any searches yet.",
-      "noShortlists": "Build a talent pool by saving candidates from search.",
+      "placements": "Placements",
+      "organisation": "Organisation",
+      "team": "Team",
+      "account": "Account"
+    },
+    "orgUnverifiedBanner": "Your organisation is not yet verified. You can search talent and build shortlists, but contact details and documents stay locked until verification is complete.",
+    "orgUnverifiedCta": "Start verification",
+    "overview": {
+      "kpis": {
+        "openSearches": "Saved searches",
+        "talentPools": "Talent pools",
+        "revealsThisMonth": "Contact reveals (this month)",
+        "placements": "Confirmed placements"
+      },
+      "recent": "Recent matches",
+      "refineInSearch": "Refine in search →",
+      "placementNudge": "Hired this candidate? Confirming hires keeps national data honest — and earns your organisation a small analytics credit.",
       "markHired": "Mark as hired",
-      "markHiredHelp": "Help map South Africa's job market. Confirming hires keeps our data honest."
+      "noMatches": "No matches in this saved search",
+      "broadenHelp": "Broaden your filters, or save the gap — we feed it into national skills-gap analytics."
+    },
+    "savedSearches": {
+      "title": "Saved searches",
+      "subtitle": "Reusable filter sets. New matches alert you by email — you decide the cadence.",
+      "add": "Save a new search",
+      "lastRun": "Last run {when}",
+      "newMatches": "{n} new {n, plural, =1 {match} other {matches}} since last visit",
+      "edit": "Edit",
+      "delete": "Delete"
+    },
+    "shortlists": {
+      "title": "Talent pools",
+      "subtitle": "Curated shortlists per role or campaign. Share internally; never export PII.",
+      "add": "Create a talent pool",
+      "members": "{n} {n, plural, =1 {candidate} other {candidates}}",
+      "open": "Open",
+      "share": "Share internally"
+    },
+    "placements": {
+      "title": "Placements",
+      "subtitle": "Every hire your organisation has confirmed on Sebenza. Feeds the national placement analytics (Phase 6).",
+      "add": "Log a placement",
+      "noPlacements": "No placements logged yet. Log your first hire to earn a small analytics credit.",
+      "fields": {
+        "candidate": "Candidate",
+        "role": "Role",
+        "city": "City",
+        "hiredAt": "Hired on",
+        "salaryBand": "Salary band (optional, never shown publicly)"
+      }
+    },
+    "organisation": {
+      "title": "Organisation",
+      "subtitle": "Your registered profile. Verification status determines what you can unlock.",
+      "verification": "Verification status",
+      "details": "Registered details",
+      "company": "Company name",
+      "registration": "CIPC registration",
+      "industry": "Industry",
+      "size": "Size",
+      "country": "Country",
+      "submitForVerification": "Submit for verification",
+      "kycSlot": "Verification handled by partner KYC provider (Phase 8)."
+    },
+    "team": {
+      "title": "Team",
+      "subtitle": "Add colleagues to your workspace. Each member's access is audit-logged separately.",
+      "invite": "Invite member",
+      "role": "Workspace role",
+      "owner": "Owner",
+      "recruiter": "Recruiter",
+      "viewer": "Viewer"
+    },
+    "account": {
+      "title": "Account",
+      "subtitle": "Sign-in, two-factor, sessions.",
+      "twoFactor": "Two-factor authentication",
+      "twoFactorRequired": "Required for employer accounts.",
+      "active": "Active",
+      "configure": "Configure"
+    }
+  },
+  "adminDash": {
+    "title": "Administration",
+    "subtitle": "The integrity layer. Two-factor required.",
+    "nav": {
+      "overview": "Overview",
+      "verifications": "Verification queue",
+      "moderation": "Moderation",
+      "taxonomy": "Taxonomy",
+      "auditLog": "Audit log",
+      "users": "Users",
+      "settings": "Settings"
+    },
+    "overview": {
+      "kpis": {
+        "pendingVerifications": "Pending verifications",
+        "openReports": "Open reports",
+        "newUsersWeek": "New users (7 days)",
+        "auditEvents24h": "Audit events (24h)"
+      },
+      "queues": "Active queues",
+      "recent": "Recent admin actions"
+    },
+    "verifications": {
+      "title": "Verification queue",
+      "subtitle": "Review qualifications and organisations. Approve, reject with reason, or escalate.",
+      "tabs": {
+        "qualifications": "Qualifications",
+        "organisations": "Organisations"
+      },
+      "approve": "Approve",
+      "reject": "Reject",
+      "viewEvidence": "View evidence",
+      "submittedBy": "Submitted by",
+      "submittedWhen": "Submitted {when}"
+    },
+    "moderation": {
+      "title": "Moderation queue",
+      "subtitle": "Reported profiles and content. Suspend, restore, or close as no-action.",
+      "reasons": {
+        "fakeIdentity": "Suspected fake identity",
+        "inappropriate": "Inappropriate content",
+        "harassment": "Harassment",
+        "spam": "Spam"
+      },
+      "reportedWhen": "Reported {when}",
+      "suspend": "Suspend",
+      "restore": "Restore",
+      "closeNoAction": "Close — no action"
+    },
+    "taxonomy": {
+      "title": "Reference data",
+      "subtitle": "Controlled vocabularies. No free-text in search.",
+      "tabs": {
+        "professions": "Professions",
+        "skills": "Skills",
+        "provinces": "Provinces",
+        "cities": "Cities"
+      },
+      "add": "Add entry"
+    },
+    "auditLog": {
+      "title": "Audit log",
+      "subtitle": "Every PII access, in chronological order. POPIA-compliant retention applies.",
+      "filterKind": "Kind",
+      "filterActor": "Actor",
+      "noEvents": "No PII access yet this session. Visit /search or open a profile and reload — every event will appear here."
+    },
+    "users": {
+      "title": "Users",
+      "subtitle": "Search by handle, email, or role. Account actions are audit-logged.",
+      "role": "Role",
+      "joined": "Joined",
+      "status": "Status",
+      "active": "Active",
+      "suspended": "Suspended",
+      "deleted": "Deleted"
+    },
+    "settings": {
+      "title": "Platform settings",
+      "subtitle": "Feature flags, freshness bands, ranking weights."
     }
   },
   "insights": {
@@ -191,10 +661,6 @@
     "export": "Export aggregate (CSV)",
     "exportNote": "Exports are aggregate only. No personal data leaves the system. Every export is logged."
   },
-  "admin": {
-    "title": "Admin & moderation",
-    "comingSoon": "The admin shell is scaffolded but not wired up in Phase 1. Verification queues, taxonomy, audit-log viewer arrive in Phase 7."
-  },
   "errors": {
     "notFoundTitle": "Page not found",
     "notFoundBody": "We couldn't find that page. It may have moved, or it never existed.",
@@ -206,6 +672,14 @@
   "common": {
     "loading": "Loading…",
     "viewAll": "View all",
-    "close": "Close"
+    "close": "Close",
+    "save": "Save",
+    "cancel": "Cancel",
+    "edit": "Edit",
+    "delete": "Delete",
+    "yes": "Yes",
+    "no": "No",
+    "required": "Required",
+    "optional": "Optional"
   }
 }
