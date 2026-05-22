@@ -69,7 +69,8 @@ export default async function TaxonomyPage({
         ))}
       </nav>
 
-      <div className="overflow-hidden rounded-[var(--radius-md)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)]">
+      {/* Desktop table */}
+      <div className="hidden overflow-hidden rounded-[var(--radius-md)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] md:block">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b-2 border-[color:var(--color-ink)] text-left text-[0.7rem] uppercase tracking-[0.18em] text-[color:var(--color-ink-soft)]">
@@ -114,6 +115,54 @@ export default async function TaxonomyPage({
           </tbody>
         </table>
       </div>
+
+      {/* Mobile cards */}
+      <ul className="space-y-2 md:hidden">
+        {(active === "professions"
+          ? PROFESSIONS.map((p) => ({ ...p, province: undefined as string | undefined }))
+          : active === "skills"
+            ? SKILLS.map((s) => ({ ...s, province: undefined as string | undefined }))
+            : active === "provinces"
+              ? PROVINCES.map((p) => ({
+                  slug: p.slug,
+                  label: p.label,
+                  province: undefined as string | undefined,
+                }))
+              : CITIES_FLAT.map((c) => ({
+                  slug: c.slug,
+                  label: c.label,
+                  province: c.province as string | undefined,
+                }))
+        ).map((row) => (
+          <li
+            key={row.slug}
+            className="flex items-center justify-between gap-3 rounded-xl border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-3"
+          >
+            <div className="min-w-0">
+              <div className="font-display text-base leading-tight">
+                {row.label}
+              </div>
+              <div className="truncate text-xs">
+                <code className="font-mono text-[color:var(--color-ink-soft)]">
+                  {row.slug}
+                </code>
+                {row.province && (
+                  <span className="ml-2 text-[color:var(--color-ink-soft)]">
+                    · {row.province}
+                  </span>
+                )}
+              </div>
+            </div>
+            <button
+              type="button"
+              aria-label="Edit"
+              className="inline-flex size-11 shrink-0 items-center justify-center rounded-full border border-[color:var(--color-hairline)] text-[color:var(--color-ink-soft)] hover:border-[color:var(--color-ink)] hover:text-[color:var(--color-ink)]"
+            >
+              <Pencil className="size-4" aria-hidden="true" />
+            </button>
+          </li>
+        ))}
+      </ul>
 
       <p className="mt-4 text-xs italic text-[color:var(--color-ink-soft)]">
         Free-text in search is intentionally disabled. The controlled vocabulary

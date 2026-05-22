@@ -2,6 +2,7 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { LocaleSwitcher } from "@/components/feature/LocaleSwitcher";
 import { SAChevron } from "@/components/ui/SAChevron";
+import { MobileNav } from "@/components/layout/MobileNav";
 
 interface Props {
   variant?: "default" | "minimal";
@@ -84,11 +85,12 @@ export function SiteHeader({ variant = "default" }: Props) {
             </Link>
             <Link
               href="/sign-up"
-              className="inline-flex items-center gap-1.5 rounded-full bg-[color:var(--color-ink)] px-4 py-1.5 text-sm font-medium text-[color:var(--color-paper)] shadow-press transition-transform hover:-translate-y-0.5"
+              className="hidden md:inline-flex items-center gap-1.5 rounded-full bg-[color:var(--color-ink)] px-4 py-1.5 text-sm font-medium text-[color:var(--color-paper)] shadow-press transition-transform hover:-translate-y-0.5"
             >
               {t("signUp")}
               <span aria-hidden="true">↗</span>
             </Link>
+            <MobileNav />
           </div>
         </div>
       </div>

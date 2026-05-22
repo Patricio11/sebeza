@@ -87,7 +87,7 @@ export default async function SearchPage({ params, searchParams }: SearchPagePro
                 <SAChevron variant="mark" className="size-3" />
                 Talent register · live
               </div>
-              <h1 className="mt-3 font-display text-[clamp(2.2rem,5.5vw,4.2rem)] leading-[1.02] tracking-[-0.02em]">
+              <h1 className="mt-3 text-balance font-display text-[clamp(2rem,5.5vw,4.2rem)] leading-[1.05] tracking-[-0.02em]">
                 <span className="tabular text-[color:var(--color-accent)]">
                   {nfmt.format(result.total)}
                 </span>{" "}

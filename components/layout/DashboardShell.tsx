@@ -165,7 +165,7 @@ export function DashboardShell({
             </div>
             <nav
               aria-label={`${workspaceLabel} navigation`}
-              className="overflow-x-auto border-t border-[color:var(--color-hairline)]"
+              className="relative overflow-x-auto border-t border-[color:var(--color-hairline)]"
             >
               <ul className="flex min-w-max">
                 {nav.map((item) => {
@@ -176,7 +176,7 @@ export function DashboardShell({
                         href={item.href}
                         aria-current={isActive ? "page" : undefined}
                         className={cn(
-                          "block whitespace-nowrap px-4 py-2.5 text-xs uppercase tracking-[0.18em]",
+                          "block min-h-11 whitespace-nowrap px-4 py-3 text-xs uppercase tracking-[0.18em]",
                           isActive
                             ? "border-b-2 border-[color:var(--color-ink)] text-[color:var(--color-ink)]"
                             : "border-b-2 border-transparent text-[color:var(--color-ink-soft)]",
@@ -188,6 +188,11 @@ export function DashboardShell({
                   );
                 })}
               </ul>
+              {/* Fade-edge cue — signals there's more to scroll */}
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-[color:var(--color-surface)] to-transparent"
+              />
             </nav>
           </div>
 

@@ -72,7 +72,8 @@ export default async function UsersPage({
         </button>
       </form>
 
-      <div className="overflow-hidden rounded-[var(--radius-md)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)]">
+      {/* Desktop table */}
+      <div className="hidden overflow-hidden rounded-[var(--radius-md)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] md:block">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b-2 border-[color:var(--color-ink)] text-left text-[0.7rem] uppercase tracking-[0.18em] text-[color:var(--color-ink-soft)]">
@@ -136,6 +137,64 @@ export default async function UsersPage({
           </tbody>
         </table>
       </div>
+
+      {/* Mobile cards */}
+      <ul className="space-y-3 md:hidden">
+        {rows.map((u) => (
+          <li
+            key={u.handle}
+            className="rounded-xl border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-4"
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                {u.role === "seeker" ? (
+                  <Link
+                    href={`/p/${u.handle}`}
+                    className="font-display text-lg leading-tight hover:underline"
+                  >
+                    {u.display}
+                  </Link>
+                ) : (
+                  <span className="font-display text-lg leading-tight">
+                    {u.display}
+                  </span>
+                )}
+                <div className="truncate text-xs text-[color:var(--color-ink-soft)]">
+                  @{u.handle} · {u.email}
+                </div>
+              </div>
+              <span
+                className={
+                  "shrink-0 rounded-full px-2 py-0.5 text-[0.62rem] uppercase tracking-[0.18em] " +
+                  (u.role === "admin"
+                    ? "bg-[color:var(--color-ink)] text-[color:var(--color-paper)]"
+                    : u.role === "employer"
+                      ? "bg-[color:var(--color-accent-tint)] text-[color:var(--color-accent)]"
+                      : "bg-[color:var(--color-brand-tint)] text-[color:var(--color-brand-strong)]")
+                }
+              >
+                {u.role}
+              </span>
+            </div>
+            <div className="mt-3 flex items-baseline justify-between gap-3 border-t border-dashed border-[color:var(--color-hairline)] pt-3 text-xs">
+              <span className="text-[color:var(--color-ink-soft)]">
+                Joined {u.joined}
+              </span>
+              <span
+                className={
+                  u.status === "active"
+                    ? "text-[color:var(--color-employed)]"
+                    : u.status === "suspended"
+                      ? "text-[color:var(--color-danger)]"
+                      : "text-[color:var(--color-ink-soft)]"
+                }
+              >
+                {t(u.status)}
+              </span>
+            </div>
+          </li>
+        ))}
+      </ul>
     </DashboardShell>
   );
 }

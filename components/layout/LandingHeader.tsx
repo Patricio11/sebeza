@@ -2,6 +2,7 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { LocaleSwitcher } from "@/components/feature/LocaleSwitcher";
 import { SAChevron } from "@/components/ui/SAChevron";
+import { MobileNav } from "@/components/layout/MobileNav";
 
 /**
  * Landing-only header. Distinct from `SiteHeader` (used by all other pages)
@@ -72,11 +73,12 @@ export function LandingHeader() {
           </Link>
           <Link
             href="/sign-up"
-            className="inline-flex items-center gap-2 rounded-full bg-[color:var(--color-sa-charcoal)] px-5 py-2.5 text-sm font-medium text-[color:var(--color-sa-cream)] shadow-press transition-transform hover:translate-y-[-1px]"
+            className="hidden md:inline-flex items-center gap-2 rounded-full bg-[color:var(--color-sa-charcoal)] px-5 py-2.5 text-sm font-medium text-[color:var(--color-sa-cream)] shadow-press transition-transform hover:translate-y-[-1px]"
           >
             {t("signUp")}
             <span aria-hidden="true">↗</span>
           </Link>
+          <MobileNav tone="hero" />
         </div>
       </div>
     </header>

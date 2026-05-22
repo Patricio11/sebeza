@@ -68,7 +68,9 @@ export default async function AuditLogPage({
           {t("noEvents")}
         </p>
       ) : (
-        <div className="overflow-hidden rounded-[var(--radius-md)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)]">
+        <>
+        {/* Desktop table */}
+        <div className="hidden overflow-hidden rounded-[var(--radius-md)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] md:block">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b-2 border-[color:var(--color-ink)] text-left text-[0.7rem] uppercase tracking-[0.18em] text-[color:var(--color-ink-soft)]">
@@ -96,6 +98,36 @@ export default async function AuditLogPage({
             </tbody>
           </table>
         </div>
+
+        {/* Mobile cards */}
+        <ul className="space-y-3 md:hidden">
+          {events.map((e, i) => (
+            <li
+              key={i}
+              className="rounded-xl border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-4"
+            >
+              <div className="flex items-baseline justify-between gap-2 text-xs">
+                <code className="break-all rounded-[var(--radius-sm)] bg-[color:var(--color-surface-sunk)] px-1.5 py-0.5">
+                  {e.kind}
+                </code>
+                <span className="shrink-0 font-mono text-[0.68rem] text-[color:var(--color-ink-soft)]">
+                  {new Date(e.at).toISOString().replace("T", " ").slice(0, 19)}
+                </span>
+              </div>
+              <div className="mt-2 text-xs text-[color:var(--color-ink)]">
+                <span className="text-[color:var(--color-ink-soft)]">Actor</span>{" "}
+                {e.actor}
+              </div>
+              <div className="text-xs text-[color:var(--color-ink)]">
+                <span className="text-[color:var(--color-ink-soft)]">
+                  Subject
+                </span>{" "}
+                {e.subject ?? "—"}
+              </div>
+            </li>
+          ))}
+        </ul>
+        </>
       )}
     </DashboardShell>
   );

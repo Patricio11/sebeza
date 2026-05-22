@@ -139,8 +139,15 @@ async function ProfileHero({
               name={profile.displayName}
               photoUrl={profile.profilePhotoUrl}
               verification={profile.verification}
+              size="xl"
+              className="anim-rise-soft md:hidden"
+            />
+            <Avatar
+              name={profile.displayName}
+              photoUrl={profile.profilePhotoUrl}
+              verification={profile.verification}
               size="2xl"
-              className="anim-rise-soft"
+              className="anim-rise-soft hidden md:inline-flex"
             />
 
             <div className="flex-1">

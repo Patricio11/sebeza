@@ -113,6 +113,26 @@
     border: 0;
     border-top: 1px solid var(--color-hairline);
   }
+
+  /* Suppress iOS Safari's font-size-auto-zoom on focused form controls.
+     Any input/select/textarea under 16px triggers a zoom on iPhones — keeps
+     mobile forms thumb-friendly. Below the md breakpoint only. */
+  @media (max-width: 767px) {
+    input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+    select,
+    textarea {
+      font-size: 16px;
+    }
+  }
+
+  /* Improve text-wrapping for editorial headlines + meta lines. */
+  h1,
+  h2 {
+    text-wrap: balance;
+  }
+  p {
+    text-wrap: pretty;
+  }
 }
 
 /* ---------------------------------------------------------

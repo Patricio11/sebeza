@@ -77,11 +77,12 @@ async function Hero({
       aria-label="Hero"
       className="relative overflow-hidden bg-[color:var(--color-sa-cream)] pt-28 pb-20 md:min-h-[88vh] md:pt-36 md:pb-28"
     >
-      {/* Oversized chevron motif anchored to the right. Bleeds off-screen on the
-          right edge — gives the page identity at first glance. */}
+      {/* Oversized chevron motif. On desktop it anchors the right side; on
+          mobile it sits behind the dossier card at lower opacity so the
+          signature mark travels to the most-important target device. */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -right-24 top-0 hidden h-full w-[58%] opacity-[0.85] md:block lg:right-[-6%]"
+        className="pointer-events-none absolute -right-32 -top-12 z-0 h-[58%] w-[110%] opacity-[0.35] sm:h-[68%] sm:opacity-[0.6] md:right-[-8%] md:top-0 md:h-full md:w-[58%] md:opacity-[0.85]"
       >
         <SAChevron variant="signature" className="h-full w-full anim-fade anim-delay-5" />
       </div>

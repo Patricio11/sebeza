@@ -106,7 +106,8 @@ export default async function InsightsPage({
                 Freshness-weighted
               </span>
             </header>
-            <table className="w-full text-sm">
+            {/* Desktop table */}
+            <table className="hidden w-full text-sm md:table">
               <thead>
                 <tr className="text-left text-[0.7rem] uppercase tracking-[0.18em] text-[color:var(--color-ink-soft)]">
                   <th className="py-2 font-normal">Status</th>
@@ -142,6 +143,38 @@ export default async function InsightsPage({
                 })}
               </tbody>
             </table>
+
+            {/* Mobile cards */}
+            <ul className="space-y-3 md:hidden">
+              {STATUS_ORDER.map((s) => {
+                const row = analytics.byStatus[s];
+                const pct = Math.round(row.freshnessConfidence * 100);
+                return (
+                  <li
+                    key={s}
+                    className="rounded-xl border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-4"
+                  >
+                    <div className="flex items-baseline justify-between gap-3">
+                      <span className="text-sm">{tStatus(s)}</span>
+                      <span className="font-display tabular text-2xl">
+                        {nfmt.format(row.count)}
+                      </span>
+                    </div>
+                    <div className="mt-3 flex items-center gap-2">
+                      <div className="h-1 flex-1 overflow-hidden rounded-full bg-[color:var(--color-surface-sunk)]">
+                        <div
+                          className="h-full bg-[color:var(--color-brand)]"
+                          style={{ width: `${pct}%` }}
+                        />
+                      </div>
+                      <span className="tabular text-xs text-[color:var(--color-ink-soft)]">
+                        {pct}%
+                      </span>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
           </section>
 
           {/* Charts (client island) */}

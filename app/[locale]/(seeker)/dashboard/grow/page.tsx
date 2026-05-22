@@ -194,7 +194,8 @@ export default async function CareerCompassPage({
         <p className="mb-4 max-w-2xl text-sm text-[color:var(--color-ink-soft)]">
           {t("cityDemandSub")}
         </p>
-        <div className="overflow-hidden rounded-[var(--radius-md)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)]">
+        {/* Desktop table */}
+        <div className="hidden overflow-hidden rounded-[var(--radius-md)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] md:block">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b-2 border-[color:var(--color-ink)] text-left text-[0.7rem] uppercase tracking-[0.18em] text-[color:var(--color-ink-soft)]">
@@ -245,6 +246,58 @@ export default async function CareerCompassPage({
             </tbody>
           </table>
         </div>
+
+        {/* Mobile cards */}
+        <ul className="space-y-3 md:hidden">
+          {compass.cityDemand.map((row, i) => {
+            const ratio = row.gap / Math.max(row.searches, 1);
+            return (
+              <li
+                key={i}
+                className="rounded-xl border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-4"
+              >
+                <div className="flex items-baseline justify-between gap-3">
+                  <span className="text-sm font-medium">{row.skill}</span>
+                  <span className="font-display tabular text-2xl text-[color:var(--color-ink)]">
+                    {nfmt.format(row.gap)}
+                  </span>
+                </div>
+                <dl className="mt-3 grid grid-cols-2 gap-3 text-xs">
+                  <div>
+                    <dt className="text-[0.62rem] uppercase tracking-[0.22em] text-[color:var(--color-ink-soft)]">
+                      {t("cityDemandColSearches")}
+                    </dt>
+                    <dd className="tabular text-sm">{nfmt.format(row.searches)}</dd>
+                  </div>
+                  <div>
+                    <dt className="text-[0.62rem] uppercase tracking-[0.22em] text-[color:var(--color-ink-soft)]">
+                      {t("cityDemandColMatches")}
+                    </dt>
+                    <dd className="tabular text-sm text-[color:var(--color-ink-soft)]">
+                      {nfmt.format(row.matches)}
+                    </dd>
+                  </div>
+                </dl>
+                <div className="mt-3 flex items-center gap-2">
+                  <div
+                    className="h-1.5 flex-1 overflow-hidden rounded-full bg-[color:var(--color-surface-sunk)]"
+                    aria-hidden="true"
+                  >
+                    <div
+                      className="h-full bg-[color:var(--color-accent)]"
+                      style={{
+                        width: `${Math.min(100, Math.round(ratio * 100))}%`,
+                      }}
+                    />
+                  </div>
+                  <span className="text-[0.62rem] uppercase tracking-[0.22em] text-[color:var(--color-ink-soft)]">
+                    {t("cityDemandColGap")}
+                  </span>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
       </section>
 
       {/* ───────────── Honesty note ───────────── */}

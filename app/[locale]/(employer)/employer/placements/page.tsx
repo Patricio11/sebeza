@@ -63,7 +63,8 @@ export default async function PlacementsPage({
         />
       }
     >
-      <div className="overflow-hidden rounded-[var(--radius-md)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)]">
+      {/* Desktop table */}
+      <div className="hidden overflow-hidden rounded-[var(--radius-md)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] md:block">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b-2 border-[color:var(--color-ink)] text-left text-[0.7rem] uppercase tracking-[0.18em] text-[color:var(--color-ink-soft)]">
@@ -98,6 +99,53 @@ export default async function PlacementsPage({
           </tbody>
         </table>
       </div>
+
+      {/* Mobile cards */}
+      <ul className="space-y-3 md:hidden">
+        {PLACEMENTS.map((p, i) => (
+          <li
+            key={i}
+            className="rounded-xl border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-4"
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <div className="font-display text-lg leading-tight">
+                  {p.candidate}
+                </div>
+                <div className="text-sm text-[color:var(--color-ink-soft)]">
+                  {p.role}
+                </div>
+              </div>
+              <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[color:var(--color-brand-tint)] px-2 py-0.5 text-[0.6rem] uppercase tracking-[0.18em] text-[color:var(--color-brand-strong)]">
+                <CheckCircle2 className="size-3" aria-hidden="true" />
+                Logged
+              </span>
+            </div>
+            <dl className="mt-3 grid grid-cols-2 gap-3 border-t border-dashed border-[color:var(--color-hairline)] pt-3 text-xs">
+              <div>
+                <dt className="text-[0.62rem] uppercase tracking-[0.22em] text-[color:var(--color-ink-soft)]">
+                  {t("fields.city")}
+                </dt>
+                <dd>{p.city}</dd>
+              </div>
+              <div>
+                <dt className="text-[0.62rem] uppercase tracking-[0.22em] text-[color:var(--color-ink-soft)]">
+                  {t("fields.hiredAt")}
+                </dt>
+                <dd className="tabular">{p.hiredAt}</dd>
+              </div>
+              <div className="col-span-2">
+                <dt className="text-[0.62rem] uppercase tracking-[0.22em] text-[color:var(--color-ink-soft)]">
+                  {t("fields.salaryBand")}
+                </dt>
+                <dd className="text-[color:var(--color-ink-soft)]">
+                  {p.salaryBand}
+                </dd>
+              </div>
+            </dl>
+          </li>
+        ))}
+      </ul>
 
       <p className="mt-4 text-xs italic text-[color:var(--color-ink-soft)]">
         Placements feed the national placement analytics (Phase 6) and the
