@@ -6,7 +6,7 @@
 > **No-Flash Rule** (works on a low-end Android over 3G) and the **POPIA-First / Redaction Rules**.
 >
 > **The set:** `TO_START_EVERY_SESSION.md` (context + rules) · `ROADMAP.md` (phased tasks) ·
-> `MOBILE_PLAN.md` (responsiveness audit, all done) · `PHASE_2_HANDOFF.md` (Phase 1 / 1.5 audit) ·
+> `MOBILE_PLAN.md` (responsiveness audit, all done) · `PHASE_1_5_COMPLETE.md` (what shipped through 1.5) · `PHASE_2_PLAN.md` (next) ·
 > **this file** (design system + screen-by-screen + mock data).
 
 > **v2.0 note.** v1 of this spec called the design *"Civic Editorial"* with an institutional teal palette.

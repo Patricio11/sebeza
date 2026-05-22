@@ -428,5 +428,5 @@ HR Practitioner · Electrician · Plumber · Accountant · Nurse · Driver · Bo
 ---
 
 *Last Updated: 2026-05-22*
-*Version: 1.1 — Mzansi National design system + Phase 1.5 + mobile pass complete; Phase 2 opens with `docs/PHASE_2_HANDOFF.md`.*
+*Version: 1.2 — Mzansi National + Phase 1.5 + mobile pass complete (see `PHASE_1_5_COMPLETE.md`); Phase 2 plan rechecked 2026-05-22 (see `PHASE_2_PLAN.md`).*
 *Working name: Sebenza (replace with chosen brand)*

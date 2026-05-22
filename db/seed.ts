@@ -4,7 +4,7 @@
  * Reads from `lib/mock/*` (the same modules the running app uses today) so the
  * dataset stays single-sourced. Idempotent: truncates first, then inserts.
  *
- * **Rule of the seed** (per `docs/PHASE_2_HANDOFF.md`):
+ * **Rule of the seed** (per `docs/PHASE_2_PLAN.md`):
  *   The demo we have IS the starting database. Nothing is re-invented here.
  *
  * Usage:

@@ -27,21 +27,27 @@ profile experience. **NOT** flashy. (See Rule 1 — this is deliberate, not an o
 - **`ROADMAP.md`** — the phased build plan (Phase 0 → deployment). *What* to build and in what order.
 - **`UX_UI_SPEC.md`** — design system + Phase 1 screen-by-screen UX + the typed mock-data layer + expanded detail for Phases 2–6. *How it looks and behaves.*
 - **`MOBILE_PLAN.md`** — mobile-responsiveness phases (M1–M7), all done. The No-Flash Rule made concrete at 360 px.
-- **`PHASE_2_HANDOFF.md`** — Phase 1 / 1.5 completion audit + Phase 2 kickoff checklist + the seed rule.
+- **Phase completion docs** — `PHASE_0_COMPLETE.md` · `PHASE_1_COMPLETE.md` · `PHASE_1_5_COMPLETE.md` (what shipped, when, with verification).
+- **Active phase plan** — `PHASE_N_PLAN.md` for the phase being built. Today: `PHASE_2_PLAN.md` (real Better Auth + consent + 2FA).
 - **This file** — always-on context + non-negotiable rules. Paste it at the top of every session.
 
 When I give you a Phase: pull design/screen detail from `UX_UI_SPEC.md` and task detail from `ROADMAP.md`.
+
+> **Doc convention (non-negotiable when a phase ships):**
+> 1. Write / promote `PHASE_N_COMPLETE.md` (what shipped + verification).
+> 2. Tick the phase header in `ROADMAP.md` with ✅ + date.
+> 3. Update the **Current State** block below.
+> 4. Open `PHASE_(N+1)_PLAN.md` with the recheck for the next phase.
+> 5. Commit with `Phase N complete + Phase N+1 opens` in the message.
 
 ---
 
 # CURRENT STATE (read this before doing anything)
 
-- **Phase 0** (foundations + POPIA spine) — ✅ done 2026-05-21.
-- **Phase 1** (public face + search + redacted profile) — ✅ done 2026-05-21.
-- **Phase 1.5** (auth UI + seeker/employer/admin dashboards + Career compass + Student mode) — ✅ done 2026-05-22, mock-driven.
-- **Mobile pass** (M1–M7 in `MOBILE_PLAN.md`) — ✅ done 2026-05-22.
-- **Design system rollout** ("Mzansi National") — SA-flag-derived palette, abstracted Y-chevron motif, Avatar with SA-palette initials fallback, CustomSelect (portaled, mobile bottom sheet), MobileNav drawer — ✅ done 2026-05-22.
-- **Next:** Phase 2 — real Better Auth + real consent persistence + real session-based guards. Open `PHASE_2_HANDOFF.md` to start.
+- **Phase 0** (foundations + POPIA spine) — ✅ done 2026-05-21. See `PHASE_0_COMPLETE.md`.
+- **Phase 1** (public face + search + redacted profile) — ✅ done 2026-05-21. See `PHASE_1_COMPLETE.md`.
+- **Phase 1.5** (auth UI + seeker/employer/admin dashboards + Career compass + Student mode + Mzansi National + mobile pass + ESSA-positioning cleanup) — ✅ done 2026-05-22, mock-driven. See `PHASE_1_5_COMPLETE.md`.
+- **Next:** Phase 2 — real Better Auth + real consent persistence + real session-based guards + full sign-up / sign-in / sign-out / email-verify / forgot-reset / 2FA flows. Open `PHASE_2_PLAN.md` to start.
 
 ---
 
