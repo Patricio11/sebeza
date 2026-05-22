@@ -26,27 +26,41 @@ profile experience. **NOT** flashy. (See Rule 1 — this is deliberate, not an o
 # COMPANION DOCUMENTS (read together)
 - **`ROADMAP.md`** — the phased build plan (Phase 0 → deployment). *What* to build and in what order.
 - **`UX_UI_SPEC.md`** — design system + Phase 1 screen-by-screen UX + the typed mock-data layer + expanded detail for Phases 2–6. *How it looks and behaves.*
+- **`MOBILE_PLAN.md`** — mobile-responsiveness phases (M1–M7), all done. The No-Flash Rule made concrete at 360 px.
+- **`PHASE_2_HANDOFF.md`** — Phase 1 / 1.5 completion audit + Phase 2 kickoff checklist + the seed rule.
 - **This file** — always-on context + non-negotiable rules. Paste it at the top of every session.
 
 When I give you a Phase: pull design/screen detail from `UX_UI_SPEC.md` and task detail from `ROADMAP.md`.
 
 ---
 
+# CURRENT STATE (read this before doing anything)
+
+- **Phase 0** (foundations + POPIA spine) — ✅ done 2026-05-21.
+- **Phase 1** (public face + search + redacted profile) — ✅ done 2026-05-21.
+- **Phase 1.5** (auth UI + seeker/employer/admin dashboards + Career compass + Student mode) — ✅ done 2026-05-22, mock-driven.
+- **Mobile pass** (M1–M7 in `MOBILE_PLAN.md`) — ✅ done 2026-05-22.
+- **Design system rollout** ("Mzansi National") — SA-flag-derived palette, abstracted Y-chevron motif, Avatar with SA-palette initials fallback, CustomSelect (portaled, mobile bottom sheet), MobileNav drawer — ✅ done 2026-05-22.
+- **Next:** Phase 2 — real Better Auth + real consent persistence + real session-based guards. Open `PHASE_2_HANDOFF.md` to start.
+
+---
+
 # TECHNICAL STACK
-- **Framework:** Next.js 16 (App Router, **no `src` dir**, React 19 Server Components + Server Actions). Pin to a patched 16.2.x.
-- **Language:** TypeScript (strict).
-- **Styling:** Tailwind CSS v4 + shadcn/ui. **Framer Motion = minimal, purposeful only** (no decorative heavy animation).
+- **Framework:** Next.js 16.2.6 (App Router, **no `src` dir**, React 19 Server Components + Server Actions, Turbopack).
+- **Language:** TypeScript (strict, `noUncheckedIndexedAccess`).
+- **Styling:** Tailwind CSS v4 (design tokens in `app/globals.css` via `@theme`). **No Framer Motion**: animation is CSS-only and purposeful (count-up on insights, chevron draw-in, hero reveal).
 - **Icons:** Lucide React.
-- **State:** Server Components + Server Actions; React Context for UI state; TanStack Query for the interactive search surface only.
-- **Database:** Neon Postgres + Drizzle ORM (+ drizzle-kit, drizzle-zod).
-- **Auth:** Better Auth ≥1.6.5 (Drizzle adapter; email+password + email OTP; 2FA for employer/admin).
-- **Validation:** Zod (single source of truth via drizzle-zod).
-- **File storage:** Cloudflare R2 (private buckets, signed URLs) for CVs/certificates.
-- **Email:** Resend (+ react-email).
-- **i18n:** next-intl (App Router, `app/[locale]/…` routing, ICU message format). Human-translated catalogs; never machine-translate consent/legal copy.
-- **Search:** Postgres FTS (`tsvector`) + `pg_trgm`. NO external search engine for MVP.
-- **Charts:** Recharts.
-- **Rate limiting:** Upstash Redis (auth + search endpoints).
+- **State:** Server Components + Server Actions; React `useState`/`useTransition` for in-component UI state; TanStack Query reserved for the interactive search surface in Phase 4 only.
+- **Database:** Neon Postgres + Drizzle ORM (`drizzle-orm` 0.36 + `drizzle-kit` 0.30 + `drizzle-zod`).
+- **Auth:** Better Auth ≥ 1.6.5 (Drizzle adapter; email + password + email OTP; TOTP 2FA mandatory for `employer` and `admin`). Wires in Phase 2.
+- **Validation:** Zod (single source of truth via `drizzle-zod`).
+- **File storage:** **Supabase Storage** (private bucket, server-side service-role key, signed URLs only) for CVs / certificates / profile photos. We use Supabase Storage standalone — auth is Better Auth, DB is Neon.
+- **Email:** Resend (+ react-email). Wires in Phase 8.
+- **i18n:** `next-intl` 4.12 (App Router, `app/[locale]/…` routing, ICU message format). Human-translated catalogs; never machine-translate consent / legal copy. Tier-1 locales `en` / `zu` / `xh` / `af`.
+- **Search:** Postgres FTS (`tsvector`) + `pg_trgm`. NO external search engine. Phase 4.
+- **Charts:** Recharts 3.8 (mount-gated client island to dodge SSR sizing).
+- **Rate limiting:** Upstash Redis (auth + search endpoints). Phase 9.
+- **Fonts:** Fraunces (display, variable, optical sizing) + Hanken Grotesk (body, variable). Both subset latin, `font-display: swap`, served by `next/font`.
 
 ---
 

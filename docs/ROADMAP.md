@@ -183,7 +183,7 @@ that registry — we win on **data quality, usability, and analytics.** The syst
 - [ ] Experience: roles, orgs, dates, descriptions.
 
 ### Task 3.2: Qualifications & Documents
-- [ ] Upload certificates/CV to Cloudflare R2 (private, signed URLs).
+- [ ] Upload certificates/CV to **Supabase Storage** (private bucket, signed URLs, service-role key on the server only).
 - [ ] Each qualification: title, institution, `verification_status` (default `unverified`).
 - [ ] Virus/Content type checks on upload; size limits; PII access logged.
 
@@ -419,6 +419,6 @@ HR Practitioner · Electrician · Plumber · Accountant · Nurse · Driver · Bo
 
 ---
 
-*Last Updated: May 2026*
-*Version: 1.0*
+*Last Updated: 2026-05-22*
+*Version: 1.1 — Mzansi National design system + Phase 1.5 + mobile pass complete; Phase 2 opens with `docs/PHASE_2_HANDOFF.md`.*
 *Working name: Sebenza (replace with chosen brand)*

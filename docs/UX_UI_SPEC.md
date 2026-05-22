@@ -1,33 +1,46 @@
-# SEBENZA — UX/UI DESIGN SPECIFICATION (v1.0)
-**Companion to `ROADMAP.md`. This is the deep dive on Phase 1, plus expanded build detail for Phases 2–6.**
+# SEBENZA — UX/UI DESIGN SPECIFICATION (v2.0 — "Mzansi National")
+**Companion to `ROADMAP.md`. Deep dive on Phase 1, plus expanded build detail for Phases 2–6.**
 **Working name: Sebenza. National South African talent-intelligence platform.**
 
 > Read `TO_START_EVERY_SESSION.md` first. Every rule there governs this document — especially the
 > **No-Flash Rule** (works on a low-end Android over 3G) and the **POPIA-First / Redaction Rules**.
 >
-> **The set:** `TO_START_EVERY_SESSION.md` (context + rules) · `ROADMAP.md` (phased tasks; this expands its Phase 1 and Phases 2–6) · **this file** (design system + screen-by-screen + mock data).
+> **The set:** `TO_START_EVERY_SESSION.md` (context + rules) · `ROADMAP.md` (phased tasks) ·
+> `MOBILE_PLAN.md` (responsiveness audit, all done) · `PHASE_2_HANDOFF.md` (Phase 1 / 1.5 audit) ·
+> **this file** (design system + screen-by-screen + mock data).
+
+> **v2.0 note.** v1 of this spec called the design *"Civic Editorial"* with an institutional teal palette.
+> In May 2026 we evolved to **"Mzansi National"** — bolder national identity, SA-flag-derived palette,
+> chevron motif, sharper editorial typography. v1 lives in git history; this doc reflects the built state.
 
 ---
 
-## 0. AESTHETIC DIRECTION — "CIVIC EDITORIAL"
+## 0. AESTHETIC DIRECTION — "MZANSI NATIONAL"
 
 One sentence: *the quiet authority of a national institution, with the warmth and clarity of a great
-modern editorial product.* Proudly South African without kitsch. Trustworthy, human, distinctive.
+modern editorial product, dressed in the colours of the South African flag.* Proudly South African
+without kitsch. Trustworthy, human, distinctive — and unmistakeably *ours*.
 
-**The one thing people remember:** the **Talent Pulse** — an honest, living employment-status system
-rendered as a recurring visual signature (freshness rings + status chips) that runs through every
-screen. It is the visual embodiment of our entire reason to exist: *data you can trust.*
+**The two things people remember:**
+1. The **Talent Pulse** glyph — an honest, living employment-status visual (freshness rings + status
+   chips) that runs through every screen. The product's mark.
+2. The **abstracted Y-chevron** — derived from the SA flag (deep green outer triangle + gold inner
+   triangle apex), used as the platform's signature: anchored in the landing hero, beside the
+   wordmark, behind every dashboard masthead, watermarked into every generated initials avatar,
+   shaped into section dividers.
 
 ### How it is stunning AND fast (the reconciliation)
 | Stunning comes from | NOT from |
 |---|---|
-| A distinctive type pairing (warm serif + warm grotesque) | Heavy hero video / 3D |
-| A confident, grounded colour identity with one sharp accent | Decorative animation everywhere |
-| Editorial layout, generous space, strong hierarchy | Generic SaaS card grids |
-| 2–3 signature interactions, CSS-cheap, purposeful | Framer Motion on every element |
-| Meticulous detail: spacing rhythm, focus states, empty states | Spectacle over clarity |
+| A distinctive type pairing (Fraunces + Hanken Grotesk, optical sizing on display) | Heavy hero video / 3D |
+| The SA flag-derived palette used confidently, not literally | Decorative animation everywhere |
+| Asymmetric editorial layouts, generous space, strong hierarchy | Generic SaaS card grids |
+| Three signature interactions: count-up stats, chevron draw-in, staggered hero reveal | Framer Motion on every element |
+| Mobile-first identity: the chevron travels to 360 px; no hide-behind-`md:` | A desktop-only stunning |
+| Meticulous detail: cursor states, focus rings, empty states, gated panels | Spectacle over clarity |
 
 Total target: key routes interactive < 1.5s on throttled 3G, JS < ~150KB, fonts < ~90KB subset.
+Mobile target enforced in `MOBILE_PLAN.md` (M1–M7, all done).
 
 ---
 
@@ -56,36 +69,52 @@ Type scale (fluid, clamp-based):
 | `small` | 0.875rem | Meta, labels |
 | `mono-stat` | tabular-nums | Analytics numbers (Hanken tabular) |
 
-### 1.2 Colour — warm, institutional, one sharp accent (deliberately NOT SaaS blue/purple)
-Light-default (public trust reads better in light). Optional dark mode. All pairs meet WCAG AA.
+### 1.2 Colour — Mzansi National (SA flag-derived, never literal)
+Light-default (public trust reads better in light). Optional dark mode (Phase 10). All pairs meet WCAG AA.
+The semantic tokens (`--color-brand`, `--color-paper`, `--color-ink`) resolve to SA-palette values
+across the whole app; the explicit `--color-sa-*` tokens are also available for landing flourishes.
 
 ```css
-/* Surfaces — warm paper, not stark white */
---paper:        #FAF8F4;   /* page background */
---surface:      #FFFFFF;   /* cards */
---surface-sunk: #F1EDE6;   /* wells, inputs */
+/* Surfaces — SA cream, sunnier than warm paper */
+--color-paper:        #FBF8F0;   /* page background */
+--color-surface:      #FFFFFF;   /* cards */
+--color-surface-sunk: #F3EFE7;   /* wells, inputs */
 
-/* Ink — warm near-black */
---ink:          #1A1714;   /* primary text */
---ink-soft:     #5A5249;   /* secondary text */
---hairline:     #E4DED4;   /* borders */
+/* Ink — deep SA charcoal, near-black */
+--color-ink:          #14110D;
+--color-ink-soft:     #5A5249;
+--color-hairline:     #E4DED4;
 
-/* Brand — deep institutional teal-green (trust, calm, distinctive) */
---brand:        #134E48;
---brand-strong: #0C3833;
---brand-tint:   #DCEBE8;
+/* Brand — SA flag-green (slightly desaturated for screens) */
+--color-brand:        #006B3C;
+--color-brand-strong: #003D1F;
+--color-brand-tint:   #E1F0E7;
 
-/* Accent — warm ochre/amber (optimism, energy, SA light). Use SPARINGLY as the sharp accent. */
---accent:       #D97A14;
---accent-tint:  #FBEAD2;
+/* Accent — SA gold (warmer + readable on cream) */
+--color-accent:       #C98214;
+--color-accent-tint:  #FFF3D7;
+
+/* SA-flag-explicit tokens (used in landing flourishes + chevron motif) */
+--color-sa-green:        #006B3C;
+--color-sa-green-deep:   #003D1F;
+--color-sa-green-soft:   #0A8C50;
+--color-sa-green-tint:   #E1F0E7;
+--color-sa-gold:         #F5A623;
+--color-sa-gold-deep:    #C98214;
+--color-sa-gold-tint:    #FFF3D7;
+--color-sa-red:          #DE3831;   /* alerts only — never decorative */
+--color-sa-cream:        #FBF8F0;
+--color-sa-charcoal:     #14110D;
 
 /* Semantic / Talent Pulse */
---employed:     #2E7D5B;   /* confident green */
---open:         #D97A14;   /* open to work = accent */
---unemployed:   #5A5249;   /* neutral, never alarmist */
---stale:        #B45F3C;   /* low-confidence clay */
---danger:       #C2451E;
---verified:     #134E48;   /* badge */
+--color-employed:      #006B3C;   /* aligns with brand */
+--color-open:          #C98214;   /* aligns with accent */
+--color-unemployed:    #5A5249;   /* neutral, never alarmist */
+--color-self-employed: #5E7A31;
+--color-studying:      #2F5E8A;
+--color-stale:         #B45F3C;   /* low-confidence clay */
+--color-danger:        #DE3831;   /* SA red — alerts only */
+--color-verified:      #006B3C;
 ```
 
 ### 1.3 Space, radius, elevation
@@ -100,13 +129,55 @@ Light-default (public trust reads better in light). Optional dark mode. All pair
 - Talent Pulse: a subtle, slow ring draw on load for fresh statuses; **no loop**.
 - All wrapped in `@media (prefers-reduced-motion: reduce) { animation: none; transition: none; }`.
 
-### 1.5 Signature components
+### 1.5 Signature components (all built — see `components/ui/*`)
+- **`<SAChevron>`** — the abstracted Y-chevron motif derived from the SA flag. Four variants:
+  `mark` (14 × 14 wordmark accent), `inline` (24 × 24 inline glyph), `signature` (oversized hero
+  watermark with a hairline draw-in animation), `divider` (banded green/gold/red strip used as a
+  flag stripe at the top of every header, footer, error page).
 - **`<StatusChip>`** — the Talent Pulse. Encodes status + freshness in one honest glyph:
-  - Fresh (<30d): solid filled ring, status colour. Ageing (30–90d): half ring. Stale (≥90d): dashed outline + small dot.
-  - Always shows relative time ("confirmed 12 days ago") on hover/long-press.
-- **`<VerificationBadge>`** — `unverified` (outline, grey) / `pending` (dotted, amber) / `verified` (solid teal check). Never lies.
-- **`<ProfileCompleteness>`** — slim arc/bar, 0–100%, nudges toward completion.
-- **`<TalentRosterItem>`** — the search-result row (see 2.2). The product's signature layout.
+  - Fresh (< 30d): solid filled ring, status colour. Ageing (30–90d): half ring.
+    Stale (≥ 90d): dashed outline + small dot.
+  - Always carries text + ARIA + relative time ("confirmed 12 days ago"). Never colour-only.
+- **`<VerificationBadge>`** — `unverified` (outline, grey) / `pending` (dotted, amber) /
+  `verified` (solid SA-green check) / `rejected` (red x). Never lies — never default-verified.
+- **`<ProfileCompleteness>`** — slim bar or 96 px arc, 0–100 %, nudges toward completion.
+- **`<Avatar>`** — photo-first with a deterministic SA-palette initials fallback. Six palettes
+  hash by name so the same person renders the same avatar across the platform. Optional
+  verification ring (green for `verified`, gold for `pending`). Faint chevron watermark in every
+  generated fallback — the Sebenza signature, even on initials.
+- **`<TalentRosterItem>`** — the search-result row (see §2.2). Uses `<Avatar>` + `<StatusChip>` +
+  `<VerificationBadge>` + `<ProfileCompleteness>`. The product's signature list element.
+- **`<StatCard>`** — Fraunces tabular numeral + tiny inline-SVG sparkline + optional freshness
+  confidence meter. Lives on `/insights` and the landing pulse strip.
+- **`<DataSpine>`** — left-aligned vertical meta rail (`<dl>`), editorial cadence.
+- **`<EmptyState>`**, **`<Skeleton>`** / **`<RosterSkeleton>`**, **`<Button>`** (CVA: primary /
+  secondary / ghost / accent × sm / md / lg).
+- **`<FormField>`** family — `TextField`, `SelectField`, `TextareaField`, `FieldShell`,
+  `EncryptedBadge` (the chip rendered next to the ID-number input).
+- **`<CustomSelect>`** — replaces every native `<select>` on the platform. Portaled into
+  `document.body` (so no ancestor `transform` / `overflow` ever displaces it). Desktop:
+  anchored popover from measured trigger rect. Mobile: full-screen bottom sheet with backdrop
+  + thumb-sized Close. Three variants: `default` (h-12, matches `TextField`), `compact` (h-10
+  pill), `bare` (no chrome — used inside the SearchBar's hairline-divided cells).
+- **`<AnimatedCount>`** — single client island for IntersectionObserver-triggered count-up on
+  stat numerals. Honours `prefers-reduced-motion`.
+
+### 1.6 Layout shells (chrome that wraps every page)
+- **`<LandingHeader>`** — absolute over the hero, chevron-marked wordmark, transparent until
+  scroll; `MobileNav` trigger below `md`.
+- **`<SiteHeader>`** — sticky internal-pages header with the SA flag stripe across its top edge.
+- **`<SiteFooter>`** — charcoal ink, flag stripe at the top, chevron mark, trust strip
+  (POPIA-first · WCAG 2.2 AA · Works on 3G · 4 launch languages).
+- **`<MobileNav>`** — full-screen drawer used by both headers below `md`. Body-scroll-locked.
+  Closes on Esc, scrim, X, or route change.
+- **`<DashboardShell>`** — role-themed accent strip on the sidebar (seeker = green, employer =
+  gold, admin = ink), chevron-marked workspace label, mobile top tab strip with fade-edge cue.
+  Used by every seeker / employer / admin route.
+- **`<AuthShell>`** — flag stripe, chevron motif bleed, demo-mode banner, chevron-marked
+  eyebrow + Fraunces editorial headline. Wraps every `/sign-in`, `/sign-up*`, `/verify-email`,
+  `/forgot-password`.
+- **`<OrgVerificationBanner>`** — persistent yellow banner on every employer page when the
+  organisation is unverified.
 - **`<DataSpine>`** — left-aligned vertical meta rail used on results + profile for an editorial feel.
 - **`<StatCard>`** — analytics number block; Fraunces numeral, tabular, tiny trend sparkline (SVG).
 
@@ -375,4 +446,4 @@ makes it real — and because of the `dataProvider` seam, the UI doesn't change.
 
 ---
 
-*Last Updated: May 2026 · Version 1.0 · Working name: Sebenza*
+*Last Updated: 2026-05-22 · Version 2.0 (Mzansi National) · Working name: Sebenza*

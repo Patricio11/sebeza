@@ -48,6 +48,21 @@ export const consentState = pgEnum("consent_state", [
   "revoked",
 ]);
 
+export const institutionKind = pgEnum("institution_kind", [
+  "university",
+  "uot",
+  "tvet",
+  "distance",
+  "indlela",
+  "private",
+]);
+
+export const orgMemberRole = pgEnum("organization_member_role", [
+  "owner",
+  "recruiter",
+  "viewer",
+]);
+
 // ---------- Users / roles (Better Auth fills the auth side in Phase 2) ----------
 
 export const appUser = pgTable("app_user", {
@@ -68,6 +83,9 @@ export const profiles = pgTable("profiles", {
   handle: text("handle").notNull().unique(),
   displayName: text("display_name").notNull(),
   fullSurname: text("full_surname"), // never selected in public reads
+  /** Object key in Supabase Storage. Public bucket access is OFF; reads use a
+      server-issued signed URL with short TTL. */
+  profilePhotoUrl: text("profile_photo_url"),
   profession: text("profession").notNull(),
   seniority: text("seniority"),
   city: text("city").notNull(),
@@ -85,6 +103,33 @@ export const profiles = pgTable("profiles", {
   searchVector: text("search_vector"),
   memberSince: timestamp("member_since").notNull().defaultNow(),
   deletedAt: timestamp("deleted_at"),
+});
+
+/** Active or recent academic enrolment. Optional 1:1 with profiles.
+    Powers Student mode + the Career compass student lane.
+    SAQA / institution verification flips `verification` in Phase 8. */
+export const academicProfiles = pgTable("academic_profiles", {
+  id: text("id").primaryKey(),
+  profileId: text("profile_id")
+    .notNull()
+    .unique()
+    .references(() => profiles.id, { onDelete: "cascade" }),
+  institutionSlug: text("institution_slug")
+    .notNull()
+    .references(() => institutions.slug),
+  programme: text("programme").notNull(),
+  fieldOfStudy: text("field_of_study").notNull(),
+  nqfLevel: integer("nqf_level").notNull(), // 4..10 per SAQA
+  currentYear: integer("current_year"), // null for postgrad without year structure
+  expectedGraduation: text("expected_graduation").notNull(), // ISO yyyy-mm
+  nsfas: boolean("nsfas").notNull().default(false),
+  verification: verificationStatus("verification").notNull().default("unverified"),
+  openToInternships: boolean("open_to_internships").notNull().default(false),
+  openToGraduateProgrammes: boolean("open_to_graduate_programmes")
+    .notNull()
+    .default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
 export const skills = pgTable("skills", {
@@ -124,7 +169,7 @@ export const qualifications = pgTable("qualifications", {
   institution: text("institution").notNull(),
   awardedYear: integer("awarded_year"),
   verification: verificationStatus("verification").notNull().default("unverified"),
-  documentR2Key: text("document_r2_key"), // signed URL only on audited reveal
+  documentStorageKey: text("document_storage_key"), // object key in Supabase Storage; signed URL only on audited reveal
 });
 
 // ---------- Organisations + placements (employer side) ----------
@@ -132,8 +177,29 @@ export const qualifications = pgTable("qualifications", {
 export const organizations = pgTable("organizations", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
+  registrationNumber: text("registration_number"),
+  industry: text("industry"),
+  sizeBand: text("size_band"),
+  city: text("city"),
+  country: text("country").notNull().default("South Africa"),
   verification: verificationStatus("verification").notNull().default("unverified"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+/** Per-employer team membership. Each member's PII access is audit-logged
+    separately. Suspending a member instantly revokes their reveal capability. */
+export const organizationMembers = pgTable("organization_members", {
+  id: text("id").primaryKey(),
+  organizationId: text("organization_id")
+    .notNull()
+    .references(() => organizations.id, { onDelete: "cascade" }),
+  userId: text("user_id")
+    .notNull()
+    .references(() => appUser.id, { onDelete: "cascade" }),
+  role: orgMemberRole("role").notNull().default("recruiter"),
+  twoFactorActive: boolean("two_factor_active").notNull().default(false),
+  joinedAt: timestamp("joined_at").notNull().defaultNow(),
+  suspendedAt: timestamp("suspended_at"),
 });
 
 export const placements = pgTable("placements", {
@@ -202,4 +268,18 @@ export const cities = pgTable("cities", {
 export const professions = pgTable("professions", {
   slug: text("slug").primaryKey(),
   label: text("label").notNull(),
+});
+
+/** SA tertiary institutions — public universities + universities of technology +
+    UNISA (distance) + public TVET colleges + INDLELA (artisan training).
+    Phase 7 admin taxonomy extends this. Phase 8 SAQA integration verifies
+    `academic_profiles.verification` for enrolments here. */
+export const institutions = pgTable("institutions", {
+  slug: text("slug").primaryKey(),
+  label: text("label").notNull(),
+  kind: institutionKind("kind").notNull(),
+  city: text("city").notNull(),
+  provinceSlug: text("province_slug")
+    .notNull()
+    .references(() => provinces.slug),
 });

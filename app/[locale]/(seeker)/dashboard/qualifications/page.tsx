@@ -59,7 +59,7 @@ export default async function QualificationsPage({
             </li>
             <li className="flex items-start gap-2">
               <ShieldCheck className="mt-0.5 size-4 shrink-0 text-[color:var(--color-brand)]" aria-hidden="true" />
-              <span>Files live in a private R2 bucket — every reveal is audit-logged.</span>
+              <span>Files live in a private Supabase Storage bucket — every reveal is audit-logged.</span>
             </li>
           </ul>
           <p className="mt-5 text-xs text-[color:var(--color-ink-soft)]">
