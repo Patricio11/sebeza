@@ -4,7 +4,8 @@ import { SEEKER_NAV } from "@/components/layout/seekerNav";
 import { TextField } from "@/components/ui/FormField";
 import { Button } from "@/components/ui/Button";
 import { dataProvider } from "@/lib/data/provider";
-import { Smartphone, Monitor, Tablet, LogOut } from "lucide-react";
+import { Smartphone, Monitor, Tablet } from "lucide-react";
+import { SignOutButton } from "@/components/feature/auth/SignOutButton";
 
 const MOCK_HANDLE = "andile-z";
 
@@ -45,12 +46,7 @@ export default async function AccountPage({
       pageEyebrow="Account"
       pageTitle={t("title")}
       pageSubtitle={t("subtitle")}
-      pageActions={
-        <Button variant="ghost" size="md">
-          <LogOut className="size-4" aria-hidden="true" />
-          {t("signOut")}
-        </Button>
-      }
+      pageActions={<SignOutButton label={t("signOut")} />}
     >
       <div className="grid gap-10 md:grid-cols-2">
         <section aria-labelledby="email-h">

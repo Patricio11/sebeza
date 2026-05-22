@@ -1,6 +1,12 @@
 import type { Config } from "drizzle-kit";
+import { config as loadEnv } from "dotenv";
 
-// Phase 1 placeholder. Phase 4 enables migrations against Neon.
+// drizzle-kit doesn't auto-load .env.local — load it explicitly so
+// `npm run db:generate / db:migrate / db:push / db:studio` work the same
+// way the running app does.
+loadEnv({ path: ".env.local" });
+loadEnv(); // also load .env if present (no override)
+
 export default {
   schema: "./db/schema.ts",
   out: "./db/migrations",

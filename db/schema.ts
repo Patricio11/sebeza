@@ -63,14 +63,80 @@ export const orgMemberRole = pgEnum("organization_member_role", [
   "viewer",
 ]);
 
-// ---------- Users / roles (Better Auth fills the auth side in Phase 2) ----------
+// ---------- Users / roles (Better Auth-compatible) ----------
 
+/**
+ * The auth user table. Maps to Better Auth's `user` model via the
+ * `tables: { user: { modelName: "app_user" } }` config in `lib/auth/server.ts`.
+ * Required Better Auth columns (id, name, email, emailVerified, image,
+ * createdAt, updatedAt) sit alongside our Sebenza-specific columns (role,
+ * deletedAt) on the same row.
+ */
 export const appUser = pgTable("app_user", {
   id: text("id").primaryKey(),
+  name: text("name").notNull().default(""),
   email: text("email").notNull().unique(),
+  emailVerified: boolean("email_verified").notNull().default(false),
+  image: text("image"),
   role: userRole("role").notNull().default("seeker"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
   deletedAt: timestamp("deleted_at"),
+});
+
+/**
+ * Better Auth session table. One row per active session per device.
+ * `token` is the unique session identifier carried in the auth cookie.
+ */
+export const session = pgTable("session", {
+  id: text("id").primaryKey(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => appUser.id, { onDelete: "cascade" }),
+  token: text("token").notNull().unique(),
+  expiresAt: timestamp("expires_at").notNull(),
+  ipAddress: text("ip_address"),
+  userAgent: text("user_agent"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+/**
+ * Better Auth account table. Stores the credential record per user — for
+ * email-and-password, this is where the bcrypt-hashed password lives
+ * (`providerId = 'credential'`). For future OAuth providers, the access
+ * + refresh tokens land here too.
+ */
+export const account = pgTable("account", {
+  id: text("id").primaryKey(),
+  accountId: text("account_id").notNull(),
+  providerId: text("provider_id").notNull(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => appUser.id, { onDelete: "cascade" }),
+  accessToken: text("access_token"),
+  refreshToken: text("refresh_token"),
+  idToken: text("id_token"),
+  accessTokenExpiresAt: timestamp("access_token_expires_at"),
+  refreshTokenExpiresAt: timestamp("refresh_token_expires_at"),
+  scope: text("scope"),
+  password: text("password"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+/**
+ * Better Auth verification table. Used for email-verification tokens
+ * and password-reset tokens. `identifier` = email; `value` = token;
+ * `expiresAt` = TTL.
+ */
+export const verification = pgTable("verification", {
+  id: text("id").primaryKey(),
+  identifier: text("identifier").notNull(),
+  value: text("value").notNull(),
+  expiresAt: timestamp("expires_at").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
 // ---------- Profiles ----------

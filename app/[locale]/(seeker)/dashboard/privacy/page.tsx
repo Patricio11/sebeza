@@ -2,15 +2,26 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import { DashboardShell } from "@/components/layout/DashboardShell";
 import { SEEKER_NAV } from "@/components/layout/seekerNav";
 import { Button } from "@/components/ui/Button";
+import { ConsentRow } from "@/components/feature/auth/ConsentRow";
 import { dataProvider } from "@/lib/data/provider";
-import { CONSENT_PURPOSES } from "@/lib/consent";
+import { CONSENT_PURPOSES, type ConsentState } from "@/lib/consent";
+import { getSessionUser } from "@/lib/auth/guard";
+import { getDb } from "@/db/client";
+import { consents } from "@/db/schema";
+import { eq } from "drizzle-orm";
 import { Trash2, Download } from "lucide-react";
 
 const MOCK_HANDLE = "andile-z";
 
-const MOCK_CONSENT_STATE: Record<
+interface ConsentSnapshot {
+  state: ConsentState;
+  grantedAt: string | null;
+  version: string;
+}
+
+const FALLBACK_CONSENT: Record<
   (typeof CONSENT_PURPOSES)[number],
-  { state: "granted" | "revoked" | "none"; grantedAt: string | null; version: string }
+  ConsentSnapshot
 > = {
   searchability: { state: "granted", grantedAt: "2024-01-08", version: "v2.1" },
   contact_reveal: { state: "granted", grantedAt: "2024-01-08", version: "v2.1" },
@@ -26,10 +37,14 @@ const PURPOSE_LABEL: Record<(typeof CONSENT_PURPOSES)[number], string> = {
 };
 
 const PURPOSE_BODY: Record<(typeof CONSENT_PURPOSES)[number], string> = {
-  searchability: "Allow employers to find me by skill + location in search results.",
-  contact_reveal: "Allow verified employers to request my contact details, audit-logged.",
-  document_sharing: "Allow verified employers to request my uploaded qualifications.",
-  analytics_aggregate: "Count me in anonymised national employment statistics. No personal data shared.",
+  searchability:
+    "Allow employers to find me by skill + location in search results.",
+  contact_reveal:
+    "Allow verified employers to request my contact details, audit-logged.",
+  document_sharing:
+    "Allow verified employers to request my uploaded qualifications.",
+  analytics_aggregate:
+    "Count me in anonymised national employment statistics. No personal data shared.",
 };
 
 export default async function PrivacyPage({
@@ -43,6 +58,11 @@ export default async function PrivacyPage({
   if (!me) return null;
   const t = await getTranslations("seekerDash.privacy");
 
+  // Read live consents for the signed-in user; fall back to mock fixtures
+  // when no session / no DB.
+  const session = await getSessionUser();
+  const rows = await loadConsents(session?.id);
+
   return (
     <DashboardShell
       role="seeker"
@@ -54,7 +74,6 @@ export default async function PrivacyPage({
       pageTitle={t("title")}
       pageSubtitle={t("subtitle")}
     >
-      {/* Consents */}
       <section aria-labelledby="consents-h">
         <h2
           id="consents-h"
@@ -64,52 +83,22 @@ export default async function PrivacyPage({
         </h2>
         <ul className="space-y-3">
           {CONSENT_PURPOSES.map((purpose) => {
-            const c = MOCK_CONSENT_STATE[purpose];
-            const granted = c.state === "granted";
+            const c = rows[purpose] ?? FALLBACK_CONSENT[purpose];
             return (
-              <li
+              <ConsentRow
                 key={purpose}
-                className="grid grid-cols-1 gap-4 rounded-[var(--radius-md)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-5 md:grid-cols-[1fr_auto] md:items-center"
-              >
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="font-display text-lg">
-                      {PURPOSE_LABEL[purpose]}
-                    </span>
-                    <span
-                      className={
-                        "rounded-[var(--radius-pill)] px-2 py-0.5 text-[0.6rem] uppercase tracking-[0.18em] " +
-                        (granted
-                          ? "bg-[color:var(--color-brand-tint)] text-[color:var(--color-brand-strong)]"
-                          : "bg-[color:var(--color-surface-sunk)] text-[color:var(--color-ink-soft)]")
-                      }
-                    >
-                      {granted ? "Active" : "Revoked"}
-                    </span>
-                  </div>
-                  <p className="mt-1 text-sm text-[color:var(--color-ink-soft)]">
-                    {PURPOSE_BODY[purpose]}
-                  </p>
-                  {granted && c.grantedAt && (
-                    <p className="mt-2 text-xs text-[color:var(--color-ink-soft)]">
-                      {t("granted", { date: c.grantedAt })} · {t("version", { v: c.version })}
-                    </p>
-                  )}
-                </div>
-                <Button
-                  type="button"
-                  variant={granted ? "secondary" : "primary"}
-                  size="sm"
-                >
-                  {granted ? t("revoke") : "Re-grant"}
-                </Button>
-              </li>
+                purpose={purpose}
+                label={PURPOSE_LABEL[purpose]}
+                body={PURPOSE_BODY[purpose]}
+                initialState={c.state}
+                grantedAt={c.grantedAt}
+                version={c.version}
+              />
             );
           })}
         </ul>
       </section>
 
-      {/* Data export + erasure */}
       <section aria-labelledby="data-h" className="mt-12">
         <h2
           id="data-h"
@@ -152,4 +141,30 @@ export default async function PrivacyPage({
       </section>
     </DashboardShell>
   );
+}
+
+async function loadConsents(
+  userId: string | undefined,
+): Promise<Partial<Record<(typeof CONSENT_PURPOSES)[number], ConsentSnapshot>>> {
+  if (!userId || !process.env.DATABASE_URL) return {};
+  try {
+    const db = getDb();
+    const rows = await db
+      .select()
+      .from(consents)
+      .where(eq(consents.userId, userId));
+    const out: Partial<
+      Record<(typeof CONSENT_PURPOSES)[number], ConsentSnapshot>
+    > = {};
+    for (const r of rows) {
+      out[r.purpose as (typeof CONSENT_PURPOSES)[number]] = {
+        state: r.state as ConsentState,
+        grantedAt: r.grantedAt ? r.grantedAt.toISOString().slice(0, 10) : null,
+        version: r.version,
+      };
+    }
+    return out;
+  } catch {
+    return {};
+  }
 }

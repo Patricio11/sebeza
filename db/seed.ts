@@ -12,17 +12,24 @@
  *   2. `npm run db:generate` (drizzle-kit) and `npm run db:migrate`
  *   3. `npm run db:seed`
  *
- * Seed credentials (for Phase 2 sign-in once Better Auth lands):
- *   - All mock users get a placeholder hash; Phase 2 must reset passwords
- *     via the password-reset flow before the first real sign-in.
+ * Seed credentials (dev only — NEVER deploy these):
+ *   - Password for every seeded account: "sebenza-dev-2026"
  *   - Admin: admin@sebenza.co.za
  *   - Employer (Discovery Bank owner): naledi.khumalo@discovery.co.za
- *   - Seekers: {handle}@example.co.za (e.g. thandeka-m@example.co.za)
+ *   - Seekers: {handle}@example.co.za  (andile-z@example.co.za, etc.)
+ *   - All seeded accounts have `email_verified = true` so sign-in works
+ *     immediately. In production, sign-up flows require email verification
+ *     via the link before sign-in succeeds.
  */
-import "dotenv/config";
+import { config as loadEnv } from "dotenv";
+// Load .env.local first (developer overrides), then .env (committed defaults).
+// `dotenv/config` would only auto-load .env — we need .env.local too.
+loadEnv({ path: ".env.local" });
+loadEnv();
 import { neon } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-http";
 import { sql } from "drizzle-orm";
+import { hashPassword } from "better-auth/crypto";
 
 import * as schema from "./schema";
 import {
@@ -35,6 +42,10 @@ import { mockProfiles } from "@/lib/mock/profiles";
 import { MOCK_EMPLOYER } from "@/components/layout/employerNav";
 import { MOCK_ADMIN } from "@/components/layout/adminNav";
 import { CONSENT_PURPOSES } from "@/lib/consent";
+
+// Every seeded account uses the same dev password. NEVER deploy this to prod.
+// In production, Phase 2 sign-up creates accounts with user-chosen passwords.
+const SEED_PASSWORD = "sebenza-dev-2026";
 
 // ────────────────────────────────────────────────────────────────────────────
 // Bootstrap
@@ -73,6 +84,9 @@ async function truncate() {
       experiences,
       profile_skills,
       profiles,
+      verification,
+      session,
+      account,
       app_user,
       institutions,
       cities,
@@ -115,31 +129,51 @@ async function seedTaxonomy() {
 }
 
 async function seedUsersAndProfiles() {
-  console.log("👤 Users + profiles…");
-  // Admin user
-  await db.insert(schema.appUser).values({
-    id: id("user", "sebenza-admin"),
-    email: MOCK_ADMIN.email,
-    role: "admin",
-  });
+  console.log("👤 Users + Better Auth accounts (hashed passwords)…");
 
-  // Employer owner
-  await db.insert(schema.appUser).values({
-    id: id("user", "naledi-k"),
-    email: MOCK_EMPLOYER.user.email,
-    role: "employer",
-  });
+  // Hash the dev password once — all seeded accounts share it.
+  const pwHash = await hashPassword(SEED_PASSWORD);
 
-  // Seekers — one user per mock profile
-  await db.insert(schema.appUser).values(
-    mockProfiles.map((p) => ({
+  // Admin + employer-owner + every seeker get a user + a credential account.
+  const userRows = [
+    {
+      id: id("user", "sebenza-admin"),
+      name: MOCK_ADMIN.fullName,
+      email: MOCK_ADMIN.email,
+      emailVerified: true,
+      role: "admin" as const,
+    },
+    {
+      id: id("user", "naledi-k"),
+      name: MOCK_EMPLOYER.user.fullName,
+      email: MOCK_EMPLOYER.user.email,
+      emailVerified: true,
+      role: "employer" as const,
+    },
+    ...mockProfiles.map((p) => ({
       id: id("user", p.handle),
+      name: p.displayName,
       email: `${p.handle}@example.co.za`,
+      emailVerified: true,
       role: "seeker" as const,
+    })),
+  ];
+
+  await db.insert(schema.appUser).values(userRows);
+
+  // Better Auth credential accounts — one per user, holding the password hash.
+  await db.insert(schema.account).values(
+    userRows.map((u) => ({
+      id: `acc_${u.id}`,
+      accountId: u.id, // Better Auth pattern: accountId = userId for credentials
+      providerId: "credential",
+      userId: u.id,
+      password: pwHash,
     })),
   );
 
-  // Profiles
+  // Profiles (seekers only — admin + employer-owner don't have public profiles).
+  console.log("📄 Profiles…");
   await db.insert(schema.profiles).values(
     mockProfiles.map((p) => ({
       id: id("prof", p.handle),

@@ -4,7 +4,8 @@ import { EMPLOYER_NAV, MOCK_EMPLOYER } from "@/components/layout/employerNav";
 import { OrgVerificationBanner } from "@/components/layout/OrgVerificationBanner";
 import { TextField } from "@/components/ui/FormField";
 import { Button } from "@/components/ui/Button";
-import { ShieldCheck, LogOut } from "lucide-react";
+import { ShieldCheck } from "lucide-react";
+import { SignOutButton } from "@/components/feature/auth/SignOutButton";
 
 export default async function EmployerAccountPage({
   params,
@@ -26,12 +27,7 @@ export default async function EmployerAccountPage({
       pageEyebrow="Your account"
       pageTitle={t("title")}
       pageSubtitle={t("subtitle")}
-      pageActions={
-        <Button variant="ghost" size="md">
-          <LogOut className="size-4" aria-hidden="true" />
-          Sign out
-        </Button>
-      }
+      pageActions={<SignOutButton />}
       banner={
         <OrgVerificationBanner
           message={tOuter("orgUnverifiedBanner")}

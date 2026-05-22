@@ -154,34 +154,34 @@ that registry — we win on **data quality, usability, and analytics.** The syst
 
 ---
 
-## 🔐 PHASE 2: IDENTITY, AUTH & CONSENT
-*Goal: Real accounts, roles, and lawful consent. Full plan + acceptance criteria in `docs/PHASE_2_PLAN.md`.*
+## 🔐 PHASE 2: IDENTITY, AUTH & CONSENT ✅ *(done 2026-05-22)*
+*Goal: Real accounts, roles, and lawful consent. See `docs/completed/PHASE_2_COMPLETE.md`.*
 
 ### Task 2.1: Better Auth Setup
-- [ ] Better Auth ≥1.6.5 + Drizzle adapter; email+password + email verification + forgot/reset password.
-- [ ] Role model (`seeker | employer | admin`) + Server-Action sign-in that **routes by `app_user.role`** (no role chip on the sign-in page — credentials identify the user).
-- [ ] Session-based `requireRole()` / `requireOrgVerified()` guards via `proxy.ts` on the `(seeker)` / `(employer)` / `(admin)` route groups.
-- [ ] 2FA **enforcement deferred to Phase 7.** Phase 2 does not build `/setup-2fa` or `/verify-2fa`.
+- [x] Better Auth 1.6.11 + Drizzle adapter; email+password + email verification + forgot/reset password.
+- [x] Role model (`seeker | employer | admin`) + Server-Action sign-in that **routes by `app_user.role`** (no role chip on the sign-in page — credentials identify the user).
+- [x] Session-based `requireRole()` / `requireOrgVerified()` guards via `proxy.ts` on the `(seeker)` / `(employer)` / `(admin)` route groups.
+- [x] 2FA **enforcement deferred to Phase 7.** Phase 2 does not build `/setup-2fa` or `/verify-2fa`.
 
 ### Task 2.2: Sign-Up Flows
-- [ ] **Seeker sign-up:** identity basics + **explicit consent capture** before profile becomes searchable.
-- [ ] **Employer sign-up:** creates an `organization` (status `unverified`); cannot view PII until verified.
-- [ ] Email verification (mandatory before sign-in works) + welcome email.
-- [ ] Forgot-password → `/reset-password/[token]` new-password flow.
-- [ ] Sign-out Server Action + buttons on every account page.
+- [x] **Seeker sign-up:** identity basics + **explicit consent capture** before profile becomes searchable. National ID encrypted on save via `lib/crypto.encryptField`.
+- [x] **Employer sign-up:** creates an `organization` (status `unverified`); cannot view PII until verified.
+- [x] Email verification (mandatory before sign-in works) + welcome email.
+- [x] Forgot-password → `/reset-password?token=…` new-password flow.
+- [x] Sign-out Server Action + buttons on every account page.
 
 ### Task 2.3: Consent & Privacy UX
-- [ ] Granular consent screen (searchability, contact, document sharing) → `consents`.
-- [ ] Account → Privacy: view/revoke consent, request data export, request erasure.
+- [x] Granular consent screen (searchability, contact, document sharing) → `consents`. Persisted; live state read on `/dashboard/privacy`.
+- [x] Account → Privacy: view/revoke consent (revoke + regrant Server Actions, audit-logged). *Data export + erasure UI shipped in Phase 1.5; the backend action wires in Phase 8 alongside the cron pruner.*
 
 ### Task 2.4: Email transport (env-driven)
-- [ ] `lib/email/send.ts` abstraction: `EMAIL_TRANSPORT=mailtrap` (dev — captured sandbox) or `EMAIL_TRANSPORT=resend` (prod). Console transport as a fallback when no transport is set.
-- [ ] `nodemailer` for Mailtrap SMTP; `resend` SDK for production sends.
-- [ ] Better Auth's `sendVerificationEmail` / `sendResetPassword` callbacks wired to `send()`.
+- [x] `lib/email/send.ts` abstraction: `EMAIL_TRANSPORT=mailtrap` (dev — captured sandbox) or `EMAIL_TRANSPORT=resend` (prod). Console transport as a fallback when no transport is set.
+- [x] `nodemailer` for Mailtrap SMTP; `resend` SDK for production sends.
+- [x] Better Auth's `sendVerificationEmail` / `sendResetPassword` callbacks wired to `send()`.
 
 ### Task 2.5: Audit-log persistence
-- [ ] `lib/audit.logAccess()` writes to `audit_log` table (keeps the ring buffer as a tail).
-- [ ] `/admin/audit-log` reads from the table.
+- [x] `lib/audit.logAccess()` writes to `audit_log` table (keeps the ring buffer as a tail).
+- [x] `/admin/audit-log` + `/admin` overview KPI both read from the table.
 
 ---
 
@@ -447,5 +447,5 @@ HR Practitioner · Electrician · Plumber · Accountant · Nurse · Driver · Bo
 ---
 
 *Last Updated: 2026-05-22*
-*Version: 1.2 — Mzansi National + Phase 1.5 + mobile pass complete (see `PHASE_1_5_COMPLETE.md`); Phase 2 plan rechecked 2026-05-22 (see `PHASE_2_PLAN.md`).*
+*Version: 1.3 — Phase 2 complete (real Better Auth, real consent persistence, env-driven email transport) — see `docs/completed/PHASE_2_COMPLETE.md`. Phase 3 (profile CRUD + Supabase Storage uploads) opens next — see `docs/PHASE_3_PLAN.md`.*
 *Working name: Sebenza (replace with chosen brand)*

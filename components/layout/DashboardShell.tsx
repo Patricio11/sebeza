@@ -1,6 +1,7 @@
 import { Link } from "@/i18n/navigation";
 import { LocaleSwitcher } from "@/components/feature/LocaleSwitcher";
 import { SAChevron } from "@/components/ui/SAChevron";
+import { SignOutButton } from "@/components/feature/auth/SignOutButton";
 import { cn } from "@/lib/utils";
 
 export type DashboardRole = "seeker" | "employer" | "admin";
@@ -62,10 +63,10 @@ export function DashboardShell({
       </a>
 
       <div className="md:grid md:grid-cols-[272px_1fr]">
-        {/* Sidebar (desktop) */}
+        {/* Sidebar (desktop) — sticky to viewport; only the main column scrolls */}
         <aside
           aria-label={`${workspaceLabel} navigation`}
-          className="hidden border-r border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] md:flex md:min-h-screen md:flex-col"
+          className="hidden border-r border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] md:sticky md:top-0 md:flex md:h-screen md:flex-col md:overflow-y-auto"
         >
           {/* Top flag band over the sidebar */}
           <div aria-hidden="true" className="flex h-[3px] w-full">
@@ -137,6 +138,10 @@ export function DashboardShell({
             >
               ← Back to public site
             </Link>
+            <SignOutButton
+              label="Sign out"
+              className="w-full justify-start gap-2 rounded-[var(--radius-sm)] border border-[color:var(--color-hairline)] px-3 py-2 text-sm hover:border-[color:var(--color-ink)]"
+            />
           </div>
         </aside>
 
@@ -149,19 +154,23 @@ export function DashboardShell({
               <div className="flex-[2] bg-[color:var(--color-accent)]" />
               <div className="flex-[1] bg-[color:var(--color-danger)]" />
             </div>
-            <div className="flex items-center justify-between px-5 py-3">
+            <div className="flex items-center justify-between gap-3 px-5 py-3">
               <Link href="/" className="flex items-baseline gap-1.5">
                 <SAChevron variant="mark" className="size-3 translate-y-[1px]" />
                 <span className="font-display text-lg">Sebenza</span>
               </Link>
-              <span
-                className={cn(
-                  "text-[0.62rem] uppercase tracking-[0.24em]",
-                  roleAccent.text,
-                )}
-              >
-                {workspaceEyebrow}
-              </span>
+              <div className="flex items-center gap-2">
+                <span
+                  className={cn(
+                    "hidden text-[0.62rem] uppercase tracking-[0.24em] min-[400px]:inline",
+                    roleAccent.text,
+                  )}
+                >
+                  {workspaceEyebrow}
+                </span>
+                {/* Always-visible sign-out tap target on mobile */}
+                <SignOutButton iconOnly />
+              </div>
             </div>
             <nav
               aria-label={`${workspaceLabel} navigation`}

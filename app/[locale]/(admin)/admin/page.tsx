@@ -2,7 +2,7 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { DashboardShell } from "@/components/layout/DashboardShell";
 import { ADMIN_NAV, MOCK_ADMIN } from "@/components/layout/adminNav";
-import { recentAuditEvents } from "@/lib/audit";
+import { recentAuditEventsFromDb } from "@/lib/audit";
 import { ShieldCheck, Flag, Users, ScrollText } from "lucide-react";
 
 export default async function AdminOverviewPage({
@@ -14,7 +14,7 @@ export default async function AdminOverviewPage({
   setRequestLocale(locale);
 
   const t = await getTranslations("adminDash");
-  const events = recentAuditEvents(8);
+  const events = await recentAuditEventsFromDb(8);
 
   return (
     <DashboardShell

@@ -27,8 +27,8 @@ profile experience. **NOT** flashy. (See Rule 1 — this is deliberate, not an o
 - **`ROADMAP.md`** — the phased build plan (Phase 0 → deployment). *What* to build and in what order.
 - **`UX_UI_SPEC.md`** — design system + Phase 1 screen-by-screen UX + the typed mock-data layer + expanded detail for Phases 2–6. *How it looks and behaves.*
 - **`MOBILE_PLAN.md`** — mobile-responsiveness phases (M1–M7), all done. The No-Flash Rule made concrete at 360 px.
-- **Phase completion docs** (in `docs/completed/`) — `PHASE_0_COMPLETE.md` · `PHASE_1_COMPLETE.md` · `PHASE_1_5_COMPLETE.md` (what shipped, when, with verification).
-- **Active phase plan** — `PHASE_N_PLAN.md` at the top of `docs/` for the phase being built. Today: `PHASE_2_PLAN.md` (real Better Auth + consent + email-verify + forgot/reset).
+- **Phase completion docs** (in `docs/completed/`) — `PHASE_0_COMPLETE.md` · `PHASE_1_COMPLETE.md` · `PHASE_1_5_COMPLETE.md` · `PHASE_2_COMPLETE.md` · `PHASE_2_PLAN.md` (archived) (what shipped, when, with verification).
+- **Active phase plan** — `PHASE_N_PLAN.md` at the top of `docs/` for the phase being built. Today: `PHASE_3_PLAN.md` (profile CRUD + Supabase Storage uploads + employment-status engine).
 - **This file** — always-on context + non-negotiable rules. Paste it at the top of every session.
 
 When I give you a Phase: pull design/screen detail from `UX_UI_SPEC.md` and task detail from `ROADMAP.md`.
@@ -49,7 +49,8 @@ When I give you a Phase: pull design/screen detail from `UX_UI_SPEC.md` and task
 - **Phase 0** (foundations + POPIA spine) — ✅ done 2026-05-21. See `docs/completed/PHASE_0_COMPLETE.md`.
 - **Phase 1** (public face + search + redacted profile) — ✅ done 2026-05-21. See `docs/completed/PHASE_1_COMPLETE.md`.
 - **Phase 1.5** (auth UI + seeker/employer/admin dashboards + Career compass + Student mode + Mzansi National + mobile pass + ESSA-positioning cleanup) — ✅ done 2026-05-22, mock-driven. See `docs/completed/PHASE_1_5_COMPLETE.md`.
-- **Next:** Phase 2 — real Better Auth + real consent persistence + real session-based guards + full sign-up / sign-in / sign-out / email-verify / forgot-reset flows. **2FA enforcement deferred to Phase 7** (the UI hook stays in the account pages; no setup-2fa / verify-2fa pages built in Phase 2). Open `docs/PHASE_2_PLAN.md` to start.
+- **Phase 2** (real Better Auth + consent persistence + audit-log persistence + session-based guards + full sign-up / sign-in / sign-out / verify / forgot / reset, with env-driven Mailtrap/Resend transport) — ✅ done 2026-05-22. **2FA enforcement deferred to Phase 7 task 7.2.** See `docs/completed/PHASE_2_COMPLETE.md`.
+- **Next:** Phase 3 — real profile CRUD via Server Actions, CV/certificate/photo upload to **Supabase Storage** (private bucket, signed URLs), and the time-aware employment-status engine (`statusConfirmedAt` + freshness bands + re-confirmation nudge). Open `docs/PHASE_3_PLAN.md` to start.
 
 ---
 
@@ -59,15 +60,15 @@ When I give you a Phase: pull design/screen detail from `UX_UI_SPEC.md` and task
 - **Styling:** Tailwind CSS v4 (design tokens in `app/globals.css` via `@theme`). **No Framer Motion**: animation is CSS-only and purposeful (count-up on insights, chevron draw-in, hero reveal).
 - **Icons:** Lucide React.
 - **State:** Server Components + Server Actions; React `useState`/`useTransition` for in-component UI state; TanStack Query reserved for the interactive search surface in Phase 4 only.
-- **Database:** Neon Postgres + Drizzle ORM (`drizzle-orm` 0.36 + `drizzle-kit` 0.30 + `drizzle-zod`).
+- **Database:** Neon Postgres + Drizzle ORM (`drizzle-orm` 0.45 + `drizzle-kit` 0.31 + `drizzle-zod`).
   - **Hosting path:** Neon (`eu-central-1`) for Phase 2 → migrate to self-hosted Postgres
     in AWS Cape Town (`af-south-1`) on Docker in Phase 9, so PII never leaves SA
     jurisdiction. Drizzle is driver-agnostic; the swap is `db/client.ts` only.
     Schema, queries, seed script don't change.
-- **Auth:** Better Auth ≥ 1.6.5 (Drizzle adapter; email + password + email OTP; TOTP 2FA mandatory for `employer` and `admin`). Wires in Phase 2.
+- **Auth:** Better Auth 1.6.11 (Drizzle adapter; email + password + email verification + forgot/reset). 2FA enforcement deferred to Phase 7 task 7.2.
 - **Validation:** Zod (single source of truth via `drizzle-zod`).
 - **File storage:** **Supabase Storage** (private bucket, server-side service-role key, signed URLs only) for CVs / certificates / profile photos. We use Supabase Storage standalone — auth is Better Auth, DB is Neon.
-- **Email:** Resend (+ react-email). Wires in Phase 8.
+- **Email:** env-driven transport (`lib/email/send.ts`) — Mailtrap for dev/staging via `nodemailer`, Resend SDK for production, console fallback. Wired into Better Auth's verification + password-reset callbacks in Phase 2.
 - **i18n:** `next-intl` 4.12 (App Router, `app/[locale]/…` routing, ICU message format). Human-translated catalogs; never machine-translate consent / legal copy. Tier-1 locales `en` / `zu` / `xh` / `af`.
 - **Search:** Postgres FTS (`tsvector`) + `pg_trgm`. NO external search engine. Phase 4.
 - **Charts:** Recharts 3.8 (mount-gated client island to dodge SSR sizing).
