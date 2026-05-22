@@ -112,21 +112,16 @@ export function ProfileBasicsForm({
             hint={labels.displayNameHelp}
             autoComplete="name"
           />
-          <SelectField
+          <TextField
             id="nationality"
             label={labels.nationality}
             value={nationality}
-            onChange={(e) =>
-              setNationality((e.target as HTMLSelectElement).value)
-            }
+            onChange={(e) => setNationality(e.target.value)}
             name="nationality"
-          >
-            <option value="South African">South African</option>
-            <option value="Nigerian">Nigerian</option>
-            <option value="Zimbabwean">Zimbabwean</option>
-            <option value="Mozambican">Mozambican</option>
-            <option value="Other">Other</option>
-          </SelectField>
+            autoComplete="off"
+            placeholder="e.g. South African"
+            hint="Free text — Sebenza matches by location + skill, never by nationality."
+          />
           <label className="mt-2 inline-flex items-center gap-2 text-sm md:mt-auto md:pb-3">
             <input
               type="checkbox"

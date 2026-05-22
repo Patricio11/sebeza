@@ -104,10 +104,17 @@ interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
 }
 
 /**
- * `SelectField` API is unchanged for backwards compatibility: every call site
- * still passes `<option>` children. Internally we extract them and hand the
- * data to `<CustomSelect>` so every dropdown in Sebenza uses the same Mzansi
- * National popover / mobile bottom sheet — never a native OS dropdown.
+ * `SelectField` API mirrors native `<select>` for backwards compatibility:
+ * every call site still passes `<option>` children + the standard
+ * `onChange={(e) => …}` event handler. Internally we extract the options
+ * and hand the data to `<CustomSelect>` so every dropdown in Sebenza uses
+ * the same Mzansi National popover / mobile bottom sheet — never a native
+ * OS dropdown.
+ *
+ * Note: `CustomSelect`'s `onChange` is `(value: string) => void`. We
+ * synthesise a minimal `ChangeEvent`-shaped object so consumers can keep
+ * writing `onChange={(e) => setX(e.target.value)}` exactly as they would
+ * for a native select.
  */
 export function SelectField({
   id,
@@ -122,6 +129,7 @@ export function SelectField({
   value,
   required,
   disabled,
+  onChange,
 }: SelectProps) {
   const { options, placeholder } = extractOptions(children);
   return (
@@ -133,6 +141,21 @@ export function SelectField({
           typeof defaultValue === "string" ? defaultValue : undefined
         }
         value={typeof value === "string" ? value : undefined}
+        onChange={(nextValue) => {
+          if (!onChange) return;
+          // Synthesize a ChangeEvent shape so existing call-sites can write
+          // `onChange={(e) => setX((e.target as HTMLSelectElement).value)}`
+          // and have it Just Work, the same as they would with a native select.
+          const fakeTarget = {
+            value: nextValue,
+            name: typeof name === "string" ? name : "",
+            id,
+          } as unknown as HTMLSelectElement;
+          onChange({
+            target: fakeTarget,
+            currentTarget: fakeTarget,
+          } as unknown as React.ChangeEvent<HTMLSelectElement>);
+        }}
         options={options}
         placeholder={placeholder ?? "Select…"}
         required={required}
