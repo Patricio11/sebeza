@@ -194,6 +194,7 @@ async function seedUsersAndProfiles() {
       bio: p.bio,
       status: p.status,
       statusConfirmedAt: new Date(p.statusConfirmedAt),
+      workAvailability: p.workAvailability,
       verification: p.verification,
       completeness: p.completeness,
       memberSince: new Date(p.memberSince),
@@ -333,19 +334,153 @@ async function seedConsents() {
   console.log("✅ Consents (searchability granted for every seeker)…");
   // Every seeker who has a profile granted the base 'searchability' consent
   // so they show up in /search. Other purposes start as 'none'.
+  //
+  // Phase 7.5 — the two final-year BSc CS students (andile-z, lerato-n)
+  // are seeded with `outcomes_research` granted, paired with the synthetic
+  // cohort below so the dataset actually demos something on /insights.
+  const outcomesGranters = new Set(["andile-z", "lerato-n", "zinhle-m"]);
   await db.insert(schema.consents).values(
     mockProfiles.flatMap((p) =>
-      CONSENT_PURPOSES.map((purpose) => ({
-        id: id("cns", `${p.handle}-${purpose}`),
-        userId: id("user", p.handle),
-        purpose,
-        state:
-          purpose === "searchability" ? ("granted" as const) : ("none" as const),
-        version: "v2.1",
-        grantedAt: purpose === "searchability" ? new Date() : null,
-        revokedAt: null,
-      })),
+      CONSENT_PURPOSES.map((purpose) => {
+        const isGranted =
+          purpose === "searchability" ||
+          (purpose === "outcomes_research" && outcomesGranters.has(p.handle));
+        return {
+          id: id("cns", `${p.handle}-${purpose}`),
+          userId: id("user", p.handle),
+          purpose,
+          state: (isGranted ? "granted" : "none") as "granted" | "none",
+          version: "v2.1",
+          grantedAt: isGranted ? new Date() : null,
+          revokedAt: null,
+        };
+      }),
     ),
+  );
+}
+
+/**
+ * Phase 7.5.4 demo cohort. Without this, the longitudinal-outcomes
+ * section on /insights renders only the empty-state copy because no
+ * real cohort clears k=10 with the 8 named mock profiles.
+ *
+ * Generates 12 synthetic seekers all enrolled in BSc Computer Science
+ * at the University of the Witwatersrand, expected graduation 2026-12,
+ * Gauteng-based. 3 receive employer-confirmed placements at Discovery
+ * Bank. All grant `outcomes_research`.
+ *
+ * Cohort cell that surfaces: (BSc Computer Science × Wits × Gauteng × 2026)
+ * → size 12, placed 3, rate 25%.
+ */
+async function seedPhase7_5OutcomesCohort() {
+  console.log("🎓 Phase 7.5 — synthetic graduate cohort for /insights outcomes…");
+  const pwHash = await hashPassword(SEED_PASSWORD);
+  const orgId = id("org", "discovery-bank");
+  const institutionSlug = "wits";
+  const cohortSize = 12;
+  const placedCount = 3;
+  const memberSince = new Date("2024-02-01");
+
+  const cohortHandles = Array.from({ length: cohortSize }, (_, i) => {
+    const n = String(i + 1).padStart(2, "0");
+    return `wits-bsc-cs-2026-${n}`;
+  });
+
+  // app_user + credential account
+  await db.insert(schema.appUser).values(
+    cohortHandles.map((handle) => ({
+      id: id("user", handle),
+      name: `BSc CS Cohort ${handle.slice(-2)}`,
+      email: `${handle}@example.co.za`,
+      emailVerified: true,
+      role: "seeker" as const,
+    })),
+  );
+  await db.insert(schema.account).values(
+    cohortHandles.map((handle) => ({
+      id: `acc_${id("user", handle)}`,
+      accountId: id("user", handle),
+      providerId: "credential",
+      userId: id("user", handle),
+      password: pwHash,
+    })),
+  );
+
+  // profiles
+  await db.insert(schema.profiles).values(
+    cohortHandles.map((handle, i) => ({
+      id: id("prof", handle),
+      userId: id("user", handle),
+      handle,
+      displayName: `BSc CS Cohort ${handle.slice(-2)}`,
+      profession: "Software developer",
+      seniority: null,
+      city: "Johannesburg",
+      province: "Gauteng",
+      nationality: "South African",
+      isCitizen: true,
+      bio: null,
+      status: (i < placedCount ? "employed" : "open_to_work") as
+        | "employed"
+        | "open_to_work",
+      statusConfirmedAt: new Date("2026-05-10"),
+      workAvailability: [],
+      verification: "unverified" as const,
+      completeness: 30,
+      memberSince,
+    })),
+  );
+
+  // academic_profiles
+  await db.insert(schema.academicProfiles).values(
+    cohortHandles.map((handle) => ({
+      id: id("acad", handle),
+      profileId: id("prof", handle),
+      institutionSlug,
+      programme: "BSc Computer Science",
+      fieldOfStudy: "Computer Science",
+      nqfLevel: 7,
+      currentYear: 3,
+      expectedGraduation: "2026-12",
+      nsfas: false,
+      verification: "unverified" as const,
+      openToInternships: true,
+      openToGraduateProgrammes: true,
+    })),
+  );
+
+  // consents — searchability + outcomes_research granted; rest 'none'.
+  await db.insert(schema.consents).values(
+    cohortHandles.flatMap((handle) =>
+      CONSENT_PURPOSES.map((purpose) => {
+        const isGranted =
+          purpose === "searchability" || purpose === "outcomes_research";
+        return {
+          id: id("cns", `${handle}-${purpose}`),
+          userId: id("user", handle),
+          purpose,
+          state: (isGranted ? "granted" : "none") as "granted" | "none",
+          version: "v2.1",
+          grantedAt: isGranted ? new Date() : null,
+          revokedAt: null,
+        };
+      }),
+    ),
+  );
+
+  // employer-confirmed placements for the first `placedCount` members
+  await db.insert(schema.placements).values(
+    cohortHandles.slice(0, placedCount).map((handle, i) => ({
+      id: id("plc", handle),
+      profileId: id("prof", handle),
+      organizationId: orgId,
+      actorUserId: id("user", "naledi-k"),
+      role: ["Backend developer", "Data engineer", "Frontend developer"][i] ?? "Software developer",
+      city: "Sandton",
+      hiredAt: new Date(`2026-04-${10 + i * 3}`),
+      salaryBand: "R 480k–600k",
+      source: "employer_confirmed" as const,
+    })),
   );
 }
 
@@ -403,6 +538,11 @@ async function main() {
   await seedOrgsAndPlacements();
   await seedConsents();
   await seedPhase7Reports();
+  // Phase 7.5 — synthetic cohort that clears the k=10 floor so the
+  // /insights outcomes section renders a real row in the dev demo.
+  // Runs after seedOrgsAndPlacements because it inserts placements
+  // referencing the Discovery Bank org id.
+  await seedPhase7_5OutcomesCohort();
 
   const ms = Date.now() - started;
   console.log(

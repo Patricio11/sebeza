@@ -51,6 +51,9 @@ export type AuditKind =
   | "profile.contact.request"
   | "placement.confirm"
   | "placement.delete"
+  // Phase 7.5 — seeker self-reported placement (softer signal,
+  // excluded from official analytics + outcomes dataset).
+  | "placement.self_report"
   | "profile.shortlist.add"
   | "profile.shortlist.remove"
   | "search.saved"

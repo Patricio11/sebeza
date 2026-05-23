@@ -19,6 +19,7 @@ import {
   text,
   timestamp,
 } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
 
 /**
  * Postgres `tsvector` — full-text search column. Read-only from the app's
@@ -53,6 +54,10 @@ export const consentPurpose = pgEnum("consent_purpose", [
   "contact_reveal",
   "document_sharing",
   "analytics_aggregate",
+  // Phase 7.5 — opt-in inclusion in the longitudinal education-to-
+  // employment outcomes dataset. Optional, default-off, non-degrading:
+  // withholding it must NOT weaken job-search in any way.
+  "outcomes_research",
 ]);
 
 export const consentState = pgEnum("consent_state", [
@@ -90,6 +95,30 @@ export const reportStatus = pgEnum("report_status", [
   "open",
   "closed_no_action",
   "actioned",
+]);
+
+/**
+ * Phase 7.5 — Work-availability dimension. Decoupled from
+ * `employmentStatus` so a `studying` person can signal `casual`, and a
+ * `full_time` employee can signal `contract`. Status answers "what is
+ * your situation"; availability answers "what work will you take."
+ */
+export const workAvailabilityKind = pgEnum("work_availability_kind", [
+  "casual",
+  "part_time",
+  "contract",
+  "full_time",
+]);
+
+/**
+ * Phase 7.5 — Placement source. Splits employer-confirmed hires
+ * (the Phase-5 default, the only signal that counts in official
+ * analytics + government rollups) from softer seeker self-reports
+ * (clearly flagged, excluded from aggregate stats).
+ */
+export const placementSource = pgEnum("placement_source", [
+  "employer_confirmed",
+  "seeker_reported",
 ]);
 
 // ---------- Users / roles (Better Auth-compatible) ----------
@@ -227,6 +256,16 @@ export const profiles = pgTable("profiles", {
   bio: text("bio"),
   status: employmentStatus("status").notNull().default("open_to_work"),
   statusConfirmedAt: timestamp("status_confirmed_at").notNull().defaultNow(),
+  /**
+   * Phase 7.5 — What kinds of work this person is open to, independent
+   * of `status`. Empty = no signal (default). Multi-select. Publicly
+   * readable on `/p/[handle]` and `/search` filters — it's the point
+   * of the field, never a sensitive attribute.
+   */
+  workAvailability: workAvailabilityKind("work_availability")
+    .array()
+    .notNull()
+    .default(sql`'{}'::work_availability_kind[]`),
   verification: verificationStatus("verification").notNull().default("unverified"),
   completeness: integer("completeness").notNull().default(0),
   /** Encrypted (AES-GCM). NEVER selected on any public read path. */
@@ -353,6 +392,14 @@ export const placements = pgTable("placements", {
   hiredAt: timestamp("hired_at").notNull().defaultNow(),
   /** Optional salary band (kept private — never in public reads). */
   salaryBand: text("salary_band"),
+  /**
+   * Phase 7.5 — Placement-Truth refinement. `employer_confirmed` (the
+   * Phase 5 default, gated by the 30-day reveal window) is the only
+   * source that counts in national/government analytics. `seeker_reported`
+   * is a softer self-declared signal, shown on the seeker's own profile
+   * flagged as such, and excluded from official aggregates.
+   */
+  source: placementSource("source").notNull().default("employer_confirmed"),
 });
 
 /** Saved-search definitions per organisation. Stored filters get re-run

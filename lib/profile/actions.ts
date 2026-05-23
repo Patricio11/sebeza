@@ -15,6 +15,7 @@
 import { getDb } from "@/db/client";
 import * as schema from "@/db/schema";
 import { eq, and } from "drizzle-orm";
+import { randomUUID } from "node:crypto";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { getSessionUser } from "@/lib/auth/guard";
@@ -174,6 +175,55 @@ export async function updateSkills(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Phase 7.5 — Work-availability (independent of employment status)
+// ─────────────────────────────────────────────────────────────────────────────
+
+const WORK_AVAILABILITY_VALUES = [
+  "casual",
+  "part_time",
+  "contract",
+  "full_time",
+] as const;
+
+const workAvailabilitySchema = z.object({
+  values: z.array(z.enum(WORK_AVAILABILITY_VALUES)).max(4),
+});
+
+export async function updateWorkAvailability(
+  input: z.infer<typeof workAvailabilitySchema>,
+): Promise<ActionResult> {
+  const session = await getSessionUser();
+  if (!session) return fail("Not signed in.");
+  const parsed = workAvailabilitySchema.safeParse(input);
+  if (!parsed.success) return fail("Pick from the four kinds.");
+  const db = getDb();
+  const profile = await loadOwnedProfile(db, session.id);
+  if (!profile) return fail("Profile not found.");
+
+  // De-dupe + preserve canonical order so two seekers with the same
+  // set end up with byte-identical column values (helps GIN cardinality).
+  const dedup = Array.from(new Set(parsed.data.values)) as typeof parsed.data.values;
+  const ordered = WORK_AVAILABILITY_VALUES.filter((k) => dedup.includes(k));
+
+  await db
+    .update(schema.profiles)
+    .set({ workAvailability: ordered })
+    .where(eq(schema.profiles.id, profile.id));
+
+  await logAccess({
+    kind: "profile.update",
+    actor: session.id,
+    subject: profile.id,
+    meta: { field: "workAvailability", count: ordered.length },
+  });
+
+  revalidatePath("/dashboard");
+  revalidatePath("/dashboard/profile");
+  revalidatePath(`/p/${profile.handle}`);
+  return ok();
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Status engine: setStatus + reconfirmStatus
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -309,6 +359,95 @@ export async function removeNationalId(): Promise<ActionResult> {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Phase 7.5 — Seeker self-reported placement.
+//
+// Softer signal than the employer-confirmed `markAsHired` flow. Stored
+// in the same `placements` table with `source = 'seeker_reported'` so
+// it can be displayed on the seeker's own profile flagged as such, but
+// is excluded from the 7.5.4 outcomes dataset and from any "national
+// placements" aggregate. Placement-Truth Rule intact.
+// ─────────────────────────────────────────────────────────────────────────────
+
+const selfReportPlacementSchema = z.object({
+  organizationName: z.string().min(2).max(200),
+  role: z.string().min(2).max(120),
+  city: z.string().min(1).max(120),
+  /** ISO yyyy-mm-dd. Defaults to today. */
+  hiredAt: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .optional(),
+});
+
+export async function selfReportPlacement(
+  input: z.infer<typeof selfReportPlacementSchema>,
+): Promise<ActionResult> {
+  const session = await getSessionUser();
+  if (!session) return fail("Not signed in.");
+  const parsed = selfReportPlacementSchema.safeParse(input);
+  if (!parsed.success) {
+    return fail(parsed.error.issues[0]?.message ?? "Invalid input.");
+  }
+  const db = getDb();
+  const profile = await loadOwnedProfile(db, session.id);
+  if (!profile) return fail("Profile not found.");
+
+  // Stub org row: seeker self-reports don't go through the employer-
+  // verification flow, so we attach to a synthetic organization with
+  // `verification = 'unverified'` for trace-ability. If the org name
+  // matches an existing organization, reuse that id.
+  const existingOrg = await db
+    .select({ id: schema.organizations.id })
+    .from(schema.organizations)
+    .where(eq(schema.organizations.name, parsed.data.organizationName))
+    .limit(1);
+
+  let organizationId: string;
+  if (existingOrg[0]) {
+    organizationId = existingOrg[0].id;
+  } else {
+    organizationId = `org_self_${randomUUID()}`;
+    await db.insert(schema.organizations).values({
+      id: organizationId,
+      name: parsed.data.organizationName,
+      verification: "unverified",
+    });
+  }
+
+  const placementId = `plc_${randomUUID()}`;
+  const hiredAt = parsed.data.hiredAt
+    ? new Date(parsed.data.hiredAt)
+    : new Date();
+
+  await db.insert(schema.placements).values({
+    id: placementId,
+    profileId: profile.id,
+    organizationId,
+    actorUserId: session.id,
+    role: parsed.data.role,
+    city: parsed.data.city,
+    hiredAt,
+    source: "seeker_reported",
+  });
+
+  await logAccess({
+    kind: "placement.self_report",
+    actor: session.id,
+    subject: profile.id,
+    meta: {
+      placementId,
+      organizationName: parsed.data.organizationName,
+      role: parsed.data.role,
+      city: parsed.data.city,
+    },
+  });
+
+  revalidatePath("/dashboard");
+  revalidatePath(`/p/${profile.handle}`);
+  return ok();
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Helpers
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -316,7 +455,7 @@ type Db = ReturnType<typeof getDb>;
 
 async function loadOwnedProfile(db: Db, userId: string) {
   const rows = await db
-    .select({ id: schema.profiles.id })
+    .select({ id: schema.profiles.id, handle: schema.profiles.handle })
     .from(schema.profiles)
     .where(and(eq(schema.profiles.userId, userId)))
     .limit(1);

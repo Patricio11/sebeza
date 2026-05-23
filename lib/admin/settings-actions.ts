@@ -42,6 +42,11 @@ const KEY_SCHEMAS = {
   feature_flag_2fa_enforced: z.boolean(),
   feature_flag_email_notifications: z.boolean(),
   feature_flag_gov_portal: z.boolean(),
+  // Phase 7.5 — never lower than 5 (a 5-person cell still allows
+  // re-identification of small SA programmes). 10 is the documented
+  // default; admins can raise it but should think very hard before
+  // dropping it.
+  outcomes_min_cohort_size: z.number().int().min(5).max(200),
 } as const satisfies Record<SettingKey, z.ZodTypeAny>;
 
 const updateSchema = z.object({
@@ -54,6 +59,7 @@ const updateSchema = z.object({
     "feature_flag_2fa_enforced",
     "feature_flag_email_notifications",
     "feature_flag_gov_portal",
+    "outcomes_min_cohort_size",
   ] as const),
   value: z.unknown(),
 });

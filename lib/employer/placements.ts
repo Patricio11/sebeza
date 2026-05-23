@@ -112,6 +112,9 @@ export async function markAsHired(
     city: v.city,
     hiredAt: v.hiredAt ? new Date(v.hiredAt) : new Date(),
     salaryBand: v.salaryBand ?? null,
+    // Phase 7.5 — explicit. Only employer-confirmed placements count
+    // in official analytics + the Phase 7.5.4 outcomes dataset.
+    source: "employer_confirmed",
   });
 
   await logAccess({

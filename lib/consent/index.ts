@@ -13,6 +13,12 @@ export const CONSENT_PURPOSES = [
   "contact_reveal",
   "document_sharing",
   "analytics_aggregate",
+  // Phase 7.5 — opt-in inclusion in the longitudinal education-to-
+  // employment outcomes dataset (`/insights` outcomes section + the
+  // Phase 9 `/gov` portal). Optional, default-off, **non-degrading**:
+  // withholding it must NOT weaken job-search in any way (it's a
+  // lawfulness condition, not a UX preference).
+  "outcomes_research",
 ] as const;
 
 export type ConsentPurpose = (typeof CONSENT_PURPOSES)[number];

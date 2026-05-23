@@ -15,6 +15,7 @@ import { SKILLS } from "@/lib/mock/taxonomy";
 import { GraduationCap } from "lucide-react";
 import { ProfileBasicsForm } from "@/components/feature/profile/ProfileBasicsForm";
 import { SkillsEditor } from "@/components/feature/profile/SkillsEditor";
+import { WorkAvailabilityEditor } from "@/components/feature/profile/WorkAvailabilityEditor";
 import { NationalIdControls } from "@/components/feature/profile/NationalIdControls";
 import { AvatarEditor } from "@/components/feature/profile/AvatarEditor";
 import { signedPhotoUrl } from "@/lib/storage/signed";
@@ -182,10 +183,20 @@ export default async function ProfileEditorPage({
             <SkillsEditor initial={initialSkills} />
           </section>
 
+          {/* Work availability (Phase 7.5) */}
+          <section id="work-availability">
+            <SectionHeading
+              eyebrow="05"
+              title="Work availability"
+              hint="What kinds of work you're open to — independent of your current employment status."
+            />
+            <WorkAvailabilityEditor initialValues={me.workAvailability ?? []} />
+          </section>
+
           {/* National ID */}
           <section id="national-id">
             <SectionHeading
-              eyebrow="05"
+              eyebrow="06"
               title="National ID"
               hint="Captured once, encrypted on save, never displayed back. POPIA special-category data."
             />
@@ -197,7 +208,7 @@ export default async function ProfileEditorPage({
           {academic && (
             <section id="academic">
               <SectionHeading
-                eyebrow="06"
+                eyebrow="07"
                 title={tAcademic("heading")}
                 hint={tAcademic("subhead")}
               />

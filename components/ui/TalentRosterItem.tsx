@@ -6,6 +6,7 @@ import { StatusChip } from "./StatusChip";
 import { VerificationBadge } from "./VerificationBadge";
 import { ProfileCompleteness } from "./ProfileCompleteness";
 import { Avatar } from "./Avatar";
+import { WorkAvailabilityChips } from "@/components/feature/profile/WorkAvailabilityChips";
 
 interface Props {
   profile: PublicProfile;
@@ -83,7 +84,7 @@ export function TalentRosterItem({
           {profile.topSkills.map((s) => s.name).join(" · ")}
         </p>
 
-        {/* Status + completeness + CTA */}
+        {/* Status + completeness + availability + CTA */}
         <footer className="mt-3 flex flex-wrap items-center justify-between gap-3">
           <div className="flex flex-wrap items-center gap-3">
             <StatusChip
@@ -92,6 +93,10 @@ export function TalentRosterItem({
               locale={locale}
             />
             <ProfileCompleteness value={profile.completeness} />
+            <WorkAvailabilityChips
+              values={profile.workAvailability}
+              variant="compact"
+            />
           </div>
           <Link
             href={`/p/${profile.handle}`}

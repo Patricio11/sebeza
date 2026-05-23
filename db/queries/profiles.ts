@@ -29,6 +29,7 @@ import type {
   ExperienceItem,
   QualificationItem,
   AcademicProfile,
+  WorkAvailabilityKind,
 } from "@/lib/mock/types";
 import { INSTITUTIONS } from "@/lib/mock/taxonomy";
 import { randomUUID } from "node:crypto";
@@ -115,6 +116,18 @@ export async function searchProfilesQuery(
       sql`EXISTS (SELECT 1 FROM academic_profiles ap WHERE ap.profile_id = p.id AND ap.open_to_graduate_programmes = true)`,
     );
   }
+  // Phase 7.5 — multi-select work-availability filter. Empty array
+  // (or absent) means no filter. The `&&` operator is array overlap:
+  // a profile matches if ANY of its availability kinds is in the
+  // requested set. Backed by the GIN index on `work_availability`.
+  if (filters.availableFor && filters.availableFor.length > 0) {
+    const kindsLiteral = sql.raw(
+      `ARRAY[${filters.availableFor
+        .map((k) => `'${k.replace(/'/g, "''")}'`)
+        .join(",")}]::work_availability_kind[]`,
+    );
+    conditions.push(sql`p.work_availability && ${kindsLiteral}`);
+  }
 
   const whereClause = sql.join(conditions, sql` AND `);
 
@@ -136,6 +149,7 @@ export async function searchProfilesQuery(
       p.bio,
       p.status,
       p.status_confirmed_at,
+      p.work_availability,
       p.verification,
       p.completeness,
       p.member_since,
@@ -164,6 +178,7 @@ export async function searchProfilesQuery(
     bio: string | null;
     status: string;
     status_confirmed_at: Date;
+    work_availability: string[] | null;
     verification: string;
     completeness: number;
     member_since: Date;
@@ -189,6 +204,7 @@ export async function searchProfilesQuery(
     bio: r.bio ?? undefined,
     status: r.status as EmploymentStatus,
     statusConfirmedAt: r.status_confirmed_at.toISOString(),
+    workAvailability: (r.work_availability ?? []) as WorkAvailabilityKind[],
     verification: r.verification as VerificationStatus,
     completeness: r.completeness,
     memberSince: r.member_since.toISOString(),
@@ -242,6 +258,7 @@ export async function findProfileByHandleQuery(
       bio: schema.profiles.bio,
       status: schema.profiles.status,
       statusConfirmedAt: schema.profiles.statusConfirmedAt,
+      workAvailability: schema.profiles.workAvailability,
       verification: schema.profiles.verification,
       completeness: schema.profiles.completeness,
       memberSince: schema.profiles.memberSince,
@@ -279,6 +296,7 @@ export async function findProfileByHandleQuery(
     bio: p.bio ?? undefined,
     status: p.status as EmploymentStatus,
     statusConfirmedAt: p.statusConfirmedAt.toISOString(),
+    workAvailability: (p.workAvailability ?? []) as WorkAvailabilityKind[],
     verification: p.verification as VerificationStatus,
     completeness: p.completeness,
     memberSince: p.memberSince.toISOString(),

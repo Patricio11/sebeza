@@ -62,6 +62,14 @@ const ROWS: SettingRow[] = [
     label: "Government partner portal (Phase 9)",
     type: "boolean",
   },
+  {
+    key: "outcomes_min_cohort_size",
+    label: "Outcomes minimum cohort size (k-anonymity floor)",
+    type: "number",
+    hint:
+      "5 – 200 (default 10). Cohort cells below this are suppressed " +
+      "on /insights and exports. Lower with extreme care.",
+  },
 ];
 
 export function SettingsForm({ values }: Props) {
@@ -84,6 +92,17 @@ export function SettingsForm({ values }: Props) {
         </h2>
         <div className="grid gap-4 md:grid-cols-3">
           {ROWS.filter((r) => r.key.startsWith("ranking_weight")).map((row) => (
+            <SettingRow key={row.key} row={row} value={values[row.key]} />
+          ))}
+        </div>
+      </section>
+
+      <section className="md:col-span-2">
+        <h2 className="mb-4 border-b-2 border-[color:var(--color-ink)] pb-2 font-display text-xl">
+          Outcomes (Phase 7.5)
+        </h2>
+        <div className="grid gap-4 md:grid-cols-2">
+          {ROWS.filter((r) => r.key === "outcomes_min_cohort_size").map((row) => (
             <SettingRow key={row.key} row={row} value={values[row.key]} />
           ))}
         </div>

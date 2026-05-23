@@ -26,7 +26,12 @@ export type SettingKey =
   | "ranking_weight_citizen_boost"
   | "feature_flag_2fa_enforced"
   | "feature_flag_email_notifications"
-  | "feature_flag_gov_portal";
+  | "feature_flag_gov_portal"
+  // Phase 7.5 — k-anonymity floor for the longitudinal outcomes
+  // dataset. Cells with fewer than this many distinct profiles
+  // are suppressed, with complementary suppression to stop value
+  // recovery from row/column totals. Default 10.
+  | "outcomes_min_cohort_size";
 
 const DEFAULTS: Record<SettingKey, unknown> = {
   freshness_band_days_fresh: 30,
@@ -37,6 +42,7 @@ const DEFAULTS: Record<SettingKey, unknown> = {
   feature_flag_2fa_enforced: false,
   feature_flag_email_notifications: false,
   feature_flag_gov_portal: false,
+  outcomes_min_cohort_size: 10,
 };
 
 /**

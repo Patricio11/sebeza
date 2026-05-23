@@ -7,7 +7,13 @@ import { TalentRosterItem } from "@/components/ui/TalentRosterItem";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { SAChevron } from "@/components/ui/SAChevron";
 import { dataProvider } from "@/lib/data/provider";
-import type { SearchFilters as F, EmploymentStatus, Seniority, VerificationStatus } from "@/lib/mock/types";
+import type {
+  SearchFilters as F,
+  EmploymentStatus,
+  Seniority,
+  VerificationStatus,
+  WorkAvailabilityKind,
+} from "@/lib/mock/types";
 import { findProvinceBySlug, findCityBySlug, PROFESSIONS } from "@/lib/mock/taxonomy";
 import { SearchX } from "lucide-react";
 
@@ -18,6 +24,26 @@ interface SearchPageProps {
 
 function asString(v: string | string[] | undefined): string | undefined {
   return Array.isArray(v) ? v[0] : v;
+}
+
+const WORK_AVAILABILITY_VALUES = new Set<WorkAvailabilityKind>([
+  "casual",
+  "part_time",
+  "contract",
+  "full_time",
+]);
+
+function parseAvailableFor(
+  raw: string | undefined,
+): WorkAvailabilityKind[] | undefined {
+  if (!raw) return undefined;
+  const out = raw
+    .split(",")
+    .map((s) => s.trim())
+    .filter((s): s is WorkAvailabilityKind =>
+      WORK_AVAILABILITY_VALUES.has(s as WorkAvailabilityKind),
+    );
+  return out.length > 0 ? out : undefined;
 }
 
 export async function generateMetadata({ params }: SearchPageProps) {
@@ -42,6 +68,7 @@ export default async function SearchPage({ params, searchParams }: SearchPagePro
     highlightCitizens: sp.highlight === "1",
     openToInternships: sp.internships === "1",
     openToGraduateProgrammes: sp.graduates === "1",
+    availableFor: parseAvailableFor(asString(sp.availableFor)),
   };
 
   const result = await dataProvider.searchProfiles(filters);

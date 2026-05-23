@@ -22,6 +22,8 @@ import { createNotification } from "@/lib/notifications/server";
 import { ContactRevealCard } from "@/components/feature/employer/ContactRevealCard";
 import { QualificationDownloadButton } from "@/components/feature/employer/QualificationDownloadButton";
 import { MarkAsHiredCard } from "@/components/feature/employer/MarkAsHiredCard";
+import { PlacementNudgeBanner } from "@/components/feature/employer/PlacementNudgeBanner";
+import { placementNudgeState } from "@/lib/employer/placement-nudge";
 import type { ContactReveal } from "@/lib/employer/reveal";
 import { FileText, MapPin, Briefcase } from "lucide-react";
 
@@ -175,6 +177,9 @@ export default async function EmployerDossierPage({
     meta: { orgId: session.orgId, orgName },
     dedupeKey: session.orgId,
   });
+
+  // Phase 7.5 (Lever C) — placement-logging nudge.
+  const nudge = await placementNudgeState(session.orgId, profileRow.id);
 
   // ── Render ───────────────────────────────────────────────────────────────
 
@@ -357,12 +362,21 @@ export default async function EmployerDossierPage({
 
         {/* ─── Right column: the action rail ─── */}
         <aside className="space-y-5 md:sticky md:top-6 md:self-start">
+          {nudge.show && (
+            <PlacementNudgeBanner
+              daysSinceReveal={nudge.daysSinceReveal}
+              daysRemaining={nudge.daysRemaining}
+              candidateName={profile.displayName}
+            />
+          )}
+
           <ContactRevealCard
             handle={handle}
             consentState={contactConsent}
             initialReveal={initialReveal}
           />
 
+          <div id="mark-as-hired" />
           <MarkAsHiredCard
             handle={handle}
             defaultRole={profile.profession}

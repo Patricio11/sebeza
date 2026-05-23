@@ -81,11 +81,14 @@ export async function analyticsSnapshotQuery(): Promise<AnalyticsSnapshot> {
   );
 
   // ── Placements this month ────────────────────────────────────────────────
+  // Phase 7.5 — Placement-Truth: only `employer_confirmed` rows count
+  // in the trustworthy headline + government-facing analytics.
   const placementsRows = unwrap<{ count: number }>(
     await db.execute(sql`
       SELECT COUNT(*)::int AS count
       FROM placements
       WHERE hired_at >= date_trunc('month', now())
+        AND source = 'employer_confirmed'
     `),
   );
   const confirmedHiresThisMonth = placementsRows[0]?.count ?? 0;
@@ -149,9 +152,11 @@ export async function analyticsSnapshotQuery(): Promise<AnalyticsSnapshot> {
         GROUP BY 1
       ),
       places AS (
+        -- Phase 7.5 — employer_confirmed only (Placement-Truth Rule).
         SELECT to_char(date_trunc('month', hired_at), 'YYYY-MM') AS month,
                COUNT(*)::int AS placements
         FROM placements
+        WHERE source = 'employer_confirmed'
         GROUP BY 1
       )
       SELECT m.month,

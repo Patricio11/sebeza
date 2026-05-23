@@ -25,6 +25,7 @@ import type {
   SkillRef,
   ExperienceItem,
   QualificationItem,
+  WorkAvailabilityKind,
 } from "@/lib/mock/types";
 import { getSessionUser } from "@/lib/auth/guard";
 import { INSTITUTIONS } from "@/lib/mock/taxonomy";
@@ -141,6 +142,7 @@ export async function loadProfileForUser(userId: string): Promise<MyProfile | nu
     bio: p.bio ?? undefined,
     status: p.status as EmploymentStatus,
     statusConfirmedAt: p.statusConfirmedAt.toISOString(),
+    workAvailability: (p.workAvailability ?? []) as WorkAvailabilityKind[],
     verification: p.verification as VerificationStatus,
     completeness: p.completeness,
     memberSince: p.memberSince.toISOString(),

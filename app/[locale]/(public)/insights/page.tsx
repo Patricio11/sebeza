@@ -12,6 +12,7 @@ import {
   freshnessBreakdownQuery,
 } from "@/db/queries/analytics";
 import { getSetting } from "@/lib/admin/settings";
+import { outcomesQuery } from "@/lib/analytics/outcomes";
 import { InsightsCharts } from "@/components/feature/InsightsCharts";
 import { InsightsExportButton } from "@/components/feature/InsightsExportButton";
 import { TrendingUp, AlertCircle, ArrowUp, ArrowDown, Minus } from "lucide-react";
@@ -54,16 +55,17 @@ export default async function InsightsPage({
     getSetting<number>("freshness_band_days_ageing"),
   ]);
 
-  // Parallel load — all five aggregates ship at once. `skillsGapTrendQuery`
+  // Parallel load — all six aggregates ship at once. `skillsGapTrendQuery`
   // is `skillsGapQuery` plus the week-over-week delta arrow column (falls
   // back to no-delta when there's no prior snapshot yet).
-  const [analytics, skillsGap, skillDemand, heatmap, freshness] =
+  const [analytics, skillsGap, skillDemand, heatmap, freshness, outcomes] =
     await Promise.all([
       dataProvider.getAnalyticsSnapshot(),
       skillsGapTrendQuery({ top: 20, lookbackDays: 7 }),
       skillDemandQuery({ top: 12 }),
       supplyHeatmapQuery(),
       freshnessBreakdownQuery({ freshDays, ageingDays }),
+      outcomesQuery(),
     ]);
 
   const conf = overallFreshnessConfidence(analytics);
@@ -575,6 +577,115 @@ export default async function InsightsPage({
               </ul>
             </section>
           )}
+
+          {/* Phase 7.5.4 — Education-to-employment outcomes (consented + k-anonymised) */}
+          <section className="mt-16" aria-labelledby="outcomes-h">
+            <header className="mb-3 flex flex-wrap items-baseline justify-between gap-3 border-b-2 border-[color:var(--color-ink)] pb-2">
+              <div>
+                <h2 id="outcomes-h" className="font-display text-2xl">
+                  Education-to-employment outcomes
+                </h2>
+                <p className="mt-1 text-xs text-[color:var(--color-ink-soft)]">
+                  Cohort dimensions only. Suppression floor: ≥{" "}
+                  {outcomes.minCohortSize} consented profiles per cell.
+                  Employer-confirmed placements only.
+                </p>
+              </div>
+              <a
+                href="/api/insights/outcomes/export"
+                className="inline-flex h-9 items-center gap-2 rounded-[var(--radius-pill)] border border-[color:var(--color-hairline)] px-4 text-xs uppercase tracking-[0.18em] hover:border-[color:var(--color-ink)]"
+              >
+                Export CSV
+              </a>
+            </header>
+
+            {outcomes.cohorts.length === 0 ? (
+              <p className="rounded-[var(--radius-md)] border border-dashed border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-6 text-sm text-[color:var(--color-ink-soft)]">
+                No cohort cleared the suppression floor of{" "}
+                {outcomes.minCohortSize} consented profiles. The dataset
+                grows as students opt in to outcomes research from{" "}
+                <code>/dashboard/privacy</code> and as employers log
+                confirmed placements. Source pool today:{" "}
+                <span className="font-medium">
+                  {outcomes.consentedProfileCount}
+                </span>{" "}
+                consented profile
+                {outcomes.consentedProfileCount === 1 ? "" : "s"};{" "}
+                {outcomes.suppressedCohorts} cohort
+                {outcomes.suppressedCohorts === 1 ? " was" : "s were"}{" "}
+                suppressed.
+              </p>
+            ) : (
+              <div className="overflow-x-auto rounded-[var(--radius-md)] border border-[color:var(--color-hairline)]">
+                <table className="w-full text-sm">
+                  <thead className="bg-[color:var(--color-surface)]">
+                    <tr className="text-left text-[0.7rem] uppercase tracking-[0.18em] text-[color:var(--color-ink-soft)]">
+                      <th className="px-4 py-3 font-normal">Programme</th>
+                      <th className="px-4 py-3 font-normal">Institution</th>
+                      <th className="px-4 py-3 font-normal">Province</th>
+                      <th className="px-4 py-3 font-normal">Grad year</th>
+                      <th className="px-4 py-3 font-normal text-right">
+                        Cohort
+                      </th>
+                      <th className="px-4 py-3 font-normal text-right">
+                        Placed
+                      </th>
+                      <th className="px-4 py-3 font-normal text-right">
+                        Rate
+                      </th>
+                      <th className="px-4 py-3 font-normal text-right">
+                        Median days to hire
+                      </th>
+                      <th className="px-4 py-3 font-normal">Top destination</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {outcomes.cohorts.map((c) => (
+                      <tr
+                        key={`${c.programme}-${c.institution}-${c.province}-${c.graduationYear}`}
+                        className="border-t border-[color:var(--color-hairline)]"
+                      >
+                        <td className="px-4 py-2">{c.programme}</td>
+                        <td className="px-4 py-2 text-[color:var(--color-ink-soft)]">
+                          {c.institution}
+                        </td>
+                        <td className="px-4 py-2 capitalize text-[color:var(--color-ink-soft)]">
+                          {c.province}
+                        </td>
+                        <td className="px-4 py-2 font-mono text-xs">
+                          {c.graduationYear}
+                        </td>
+                        <td className="px-4 py-2 text-right font-mono tabular">
+                          {nfmt.format(c.cohortSize)}
+                        </td>
+                        <td className="px-4 py-2 text-right font-mono tabular">
+                          {nfmt.format(c.placed)}
+                        </td>
+                        <td className="px-4 py-2 text-right font-mono tabular">
+                          {Math.round(c.placementRate * 100)}%
+                        </td>
+                        <td className="px-4 py-2 text-right font-mono tabular text-[color:var(--color-ink-soft)]">
+                          {c.medianTimeToHireDays != null
+                            ? c.medianTimeToHireDays
+                            : "—"}
+                        </td>
+                        <td className="px-4 py-2 text-[color:var(--color-ink-soft)]">
+                          {c.topDestinationProfession ?? "—"}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                <p className="border-t border-[color:var(--color-hairline)] bg-[color:var(--color-surface-sunk)] px-4 py-2 text-[0.65rem] uppercase tracking-[0.18em] text-[color:var(--color-ink-soft)]">
+                  {outcomes.consentedProfileCount} consented profile
+                  {outcomes.consentedProfileCount === 1 ? "" : "s"} in
+                  source · {outcomes.suppressedCohorts} cohort
+                  {outcomes.suppressedCohorts === 1 ? "" : "s"} suppressed
+                  · primary + complementary k-anonymity floor
+                </p>
+              </div>
+            )}
+          </section>
 
           {/* Charts (client island — trend + demand) */}
           <section className="mt-16">

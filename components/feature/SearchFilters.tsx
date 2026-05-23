@@ -4,6 +4,8 @@ import { useTranslations } from "next-intl";
 import { useRouter, usePathname } from "@/i18n/navigation";
 import { PROVINCES } from "@/lib/mock/taxonomy";
 import type { EmploymentStatus, SearchFilters as F, Seniority, VerificationStatus } from "@/lib/mock/types";
+import { WORK_AVAILABILITY_KINDS } from "@/lib/mock/types";
+import { WORK_AVAILABILITY_LABEL } from "@/components/feature/profile/WorkAvailabilityChips";
 import { useState, useTransition } from "react";
 import { cn } from "@/lib/utils";
 import { CustomSelect } from "@/components/ui/CustomSelect";
@@ -50,6 +52,9 @@ export function SearchFilters({ defaultFilters, query }: Props) {
     if (merged.highlightCitizens) params.set("highlight", "1");
     if (merged.openToInternships) params.set("internships", "1");
     if (merged.openToGraduateProgrammes) params.set("graduates", "1");
+    if (merged.availableFor && merged.availableFor.length > 0) {
+      params.set("availableFor", merged.availableFor.join(","));
+    }
     startTransition(() => {
       router.replace(`${pathname}?${params.toString()}` as never);
     });
@@ -178,6 +183,35 @@ export function SearchFilters({ defaultFilters, query }: Props) {
             </span>
           </span>
         </label>
+      </FilterGroup>
+
+      <FilterGroup label="Available for">
+        {WORK_AVAILABILITY_KINDS.map((kind) => {
+          const checked = (defaultFilters.availableFor ?? []).includes(kind);
+          return (
+            <label
+              key={kind}
+              className="mt-2 flex items-start gap-2 text-sm first:mt-0"
+            >
+              <input
+                type="checkbox"
+                checked={checked}
+                onChange={(e) => {
+                  const cur = defaultFilters.availableFor ?? [];
+                  const next = e.target.checked
+                    ? Array.from(new Set([...cur, kind]))
+                    : cur.filter((v) => v !== kind);
+                  update({ availableFor: next.length > 0 ? next : undefined });
+                }}
+                className="mt-1"
+              />
+              <span>{WORK_AVAILABILITY_LABEL[kind]}</span>
+            </label>
+          );
+        })}
+        <p className="mt-2 text-xs italic text-[color:var(--color-ink-soft)]">
+          Self-declared by each seeker — independent of employment status.
+        </p>
       </FilterGroup>
 
       <button

@@ -99,6 +99,12 @@ const seekerSignUpSchema = z.object({
     "studying",
     "open_to_work",
   ]),
+  // Phase 7.5 — optional at sign-up (also editable later from
+  // /dashboard/profile). Empty = no signal.
+  workAvailability: z
+    .array(z.enum(["casual", "part_time", "contract", "full_time"]))
+    .max(4)
+    .optional(),
   // Optional academic block when "I'm a student" is on
   academic: z
     .object({
@@ -161,6 +167,7 @@ export async function signUpSeeker(
         nationalIdEnc: idEnc,
         status: v.status,
         statusConfirmedAt: new Date(),
+        workAvailability: v.workAvailability ?? [],
         verification: "unverified",
         completeness: 20, // very basic profile at step 3
         memberSince: new Date(),

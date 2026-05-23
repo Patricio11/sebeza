@@ -21,6 +21,24 @@ export type UserRole = "seeker" | "employer" | "admin";
 
 export type FreshnessBand = "fresh" | "ageing" | "stale";
 
+/**
+ * Phase 7.5 — What kinds of work this person will take. Independent of
+ * `EmploymentStatus`. Multi-select on the profile editor; published on
+ * `/p/[handle]` + queryable on `/search`.
+ */
+export type WorkAvailabilityKind =
+  | "casual"
+  | "part_time"
+  | "contract"
+  | "full_time";
+
+export const WORK_AVAILABILITY_KINDS: WorkAvailabilityKind[] = [
+  "casual",
+  "part_time",
+  "contract",
+  "full_time",
+];
+
 export interface SkillRef {
   name: string;
   proficiency: 1 | 2 | 3 | 4 | 5;
@@ -56,6 +74,13 @@ export interface PublicProfile {
   status: EmploymentStatus;
   /** ISO timestamp. Freshness band derives from this — see helpers.freshnessBand(). */
   statusConfirmedAt: string;
+  /**
+   * Phase 7.5 — Work-availability dimension. Decoupled from `status`:
+   * a `studying` person can be `["casual"]`; a `full_time` employee
+   * can be `["contract"]`. Empty = no signal. Publicly readable, never
+   * a sensitive attribute — it's a self-set preference.
+   */
+  workAvailability: WorkAvailabilityKind[];
   verification: VerificationStatus;
   /** 0–100. Drives ProfileCompleteness component + ranking. */
   completeness: number;
@@ -144,6 +169,11 @@ export interface SearchFilters {
   openToInternships?: boolean;
   /** Phase 6: scope to seekers open to a full graduate-track role. */
   openToGraduateProgrammes?: boolean;
+  /**
+   * Phase 7.5: multi-select work-availability filter. Empty array =
+   * no filter applied. Matches via `&&` array containment.
+   */
+  availableFor?: WorkAvailabilityKind[];
 }
 
 export interface SearchResult {

@@ -57,6 +57,8 @@ interface FormState {
   profession: string;
   province: string;
   status: "open_to_work" | "employed" | "self_employed" | "studying" | "unemployed";
+  /** Phase 7.5 — optional work-availability set captured at sign-up. */
+  workAvailability: ("casual" | "part_time" | "contract" | "full_time")[];
   academic: AcademicState;
 }
 
@@ -73,6 +75,7 @@ const initialState: FormState = {
   profession: "",
   province: "",
   status: "open_to_work",
+  workAvailability: [],
   academic: {
     isStudent: false,
     institutionSlug: "",
@@ -162,6 +165,7 @@ export function SeekerSignUpForm({ professions }: Props = {}) {
         profession: state.profession,
         province: state.province,
         status: state.status,
+        workAvailability: state.workAvailability,
         academic,
       });
 
@@ -588,6 +592,48 @@ export function SeekerSignUpForm({ professions }: Props = {}) {
                       {t("step3.academic.openToGraduateProgrammes")}
                     </span>
                   </label>
+
+                  {/* Phase 7.5 — work-availability while studying. The casual /
+                      part-time path: students taking shifts (waitressing,
+                      retail, etc.) for income now, not deferred to graduation. */}
+                  <fieldset className="mt-2 rounded-[var(--radius-sm)] border border-[color:var(--color-hairline)] p-3">
+                    <legend className="px-1 text-xs font-medium">
+                      Available for work while I study (optional)
+                    </legend>
+                    <ul className="mt-1 grid gap-2 sm:grid-cols-2">
+                      {(
+                        [
+                          ["casual", "Casual / shift work"],
+                          ["part_time", "Part-time"],
+                          ["contract", "Contract"],
+                          ["full_time", "Full-time"],
+                        ] as const
+                      ).map(([kind, label]) => {
+                        const checked = state.workAvailability.includes(kind);
+                        return (
+                          <li key={kind}>
+                            <label className="flex items-start gap-2 text-xs">
+                              <input
+                                type="checkbox"
+                                checked={checked}
+                                onChange={(e) => {
+                                  const next = e.target.checked
+                                    ? Array.from(new Set([...state.workAvailability, kind]))
+                                    : state.workAvailability.filter((v) => v !== kind);
+                                  setState({ ...state, workAvailability: next });
+                                }}
+                                className="mt-0.5 size-4"
+                              />
+                              <span>{label}</span>
+                            </label>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                    <p className="mt-2 text-[0.65rem] italic text-[color:var(--color-ink-soft)]">
+                      You can change this any time from your dashboard.
+                    </p>
+                  </fieldset>
                 </div>
               </div>
             )}

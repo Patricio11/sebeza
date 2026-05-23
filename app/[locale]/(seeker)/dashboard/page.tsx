@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { getCompassForProfile } from "@/db/queries/career-compass";
 import { StatusCard } from "@/components/feature/profile/StatusCard";
+import { SelfReportPlacementCard } from "@/components/feature/profile/SelfReportPlacementCard";
 import { StatusNudgeBanner } from "@/components/feature/profile/StatusNudgeBanner";
 
 export default async function SeekerOverviewPage({
@@ -164,6 +165,10 @@ export default async function SeekerOverviewPage({
           locale={locale}
           lastConfirmedLabel={lastConfirmed}
         />
+
+        {/* Phase 7.5 — Self-report a placement when employed. Stored as
+            seeker_reported; excluded from official analytics. */}
+        {me.status === "employed" && <SelfReportPlacementCard />}
 
         {/* Rank in search — real position in the (profession × province) pool */}
         <section

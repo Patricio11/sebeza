@@ -28,6 +28,7 @@ const FALLBACK_CONSENT: Record<
   contact_reveal: { state: "none", grantedAt: null, version: "v2.1" },
   document_sharing: { state: "none", grantedAt: null, version: "v2.1" },
   analytics_aggregate: { state: "none", grantedAt: null, version: "v2.1" },
+  outcomes_research: { state: "none", grantedAt: null, version: "v2.1" },
 };
 
 const PURPOSE_LABEL: Record<(typeof CONSENT_PURPOSES)[number], string> = {
@@ -35,6 +36,7 @@ const PURPOSE_LABEL: Record<(typeof CONSENT_PURPOSES)[number], string> = {
   contact_reveal: "Contact reveal",
   document_sharing: "Document sharing",
   analytics_aggregate: "Aggregate analytics",
+  outcomes_research: "Outcomes research (optional)",
 };
 
 const PURPOSE_BODY: Record<(typeof CONSENT_PURPOSES)[number], string> = {
@@ -46,6 +48,11 @@ const PURPOSE_BODY: Record<(typeof CONSENT_PURPOSES)[number], string> = {
     "Allow verified employers to request my uploaded qualifications.",
   analytics_aggregate:
     "Count me in anonymised national employment statistics. No personal data shared.",
+  outcomes_research:
+    "Include me in education-to-employment outcomes research. " +
+    "What's shared: cohort-level numbers (programme × institution × province × graduation year, never under 10 people per cell). " +
+    "What's never shared: any individual record, my name, my profile. " +
+    "Withholding this consent does not weaken job-search in any way — it's a separate, optional contribution to the public-good dataset.",
 };
 
 export default async function PrivacyPage({

@@ -367,6 +367,50 @@ that registry — we win on **data quality, usability, and analytics.** The syst
 
 ---
 
+## 🎓 PHASE 7.5: WORK-AVAILABILITY + LONGITUDINAL OUTCOMES ✅ 2026-05-23
+*Side-phase between Phase 7 and Phase 8, mirroring the Phase 6.5 pattern. Shipped 2026-05-23. Companion docs: `docs/completed/PHASE_7_5_PLAN.md` + `docs/completed/PHASE_7_5_COMPLETE.md`.*
+
+### Task 7.5.1: Work-availability dimension (schema + model) ✅
+- [x] `work_availability_kind` pgEnum + `profiles.work_availability` array column + GIN index
+- [x] Drizzle schema + migration `0007_phase7_5_work_availability.sql`
+- [x] `dataProvider` interface + dbProvider + mock parity; redaction-safe (publicly readable — it's the point)
+
+### Task 7.5.2: Surfacing work-availability (UI + search) ✅
+- [x] `/dashboard/profile` `<WorkAvailabilityEditor>` checkbox group with optimistic toggles
+- [x] `/sign-up/seeker` student branch toggle ("Available for work while I study") + the same checkbox set
+- [x] `/p/[handle]` chip row in the trust dossier + `<TalentRosterItem>` compact indicator next to status
+- [x] `/search` multi-select filter via `&&` array containment in `searchProfilesQuery`; URL state `?availableFor=…`
+
+### Task 7.5.3: Dedicated consent purpose for outcomes research ✅
+- [x] `consentPurpose` enum extended with `outcomes_research` via isolated migration `0008_phase7_5_outcomes_consent.sql` (`ALTER TYPE … ADD VALUE IF NOT EXISTS`)
+- [x] Optional + default-off + **non-degrading** — documented at the enum site + the privacy page copy
+- [x] `/dashboard/privacy` row + clear "what is/isn't shared" explainer in English; Tier-1 languages land in Phase 10
+- [x] Versioned in `consents`; revoke/regrant audit-logged through the existing actions
+
+### Task 7.5.5: Placement-logging completeness ✅
+- [x] `placement_source` enum + column on `placements` (`employer_confirmed` default, `seeker_reported` softer signal) + partial index on the confirmed path
+- [x] **Honesty rule** implemented: `confirmedHiresThisMonth` + trend chart + 7.5.4 outcomes dataset all filter on `source = 'employer_confirmed'`; seeker_reported is excluded from official aggregates
+- [x] Seeker self-report flow (`<SelfReportPlacementCard>` + `selfReportPlacement` action) on the dashboard when `status === "employed"`; audit-logged as `placement.self_report`
+- [x] **Incentive Lever C chosen** (2026-05-23): contextual "Did you hire?" nudge on the employer dossier at day ≥ 21 of the 30-day window when no placement is logged. New `lib/employer/placement-nudge.ts` + `<PlacementNudgeBanner>`. Lever A (analytics value-exchange via the employer hiring funnel) deferred to Phase 9; Lever B (verified-status gating) rejected — conflates KYC with behaviour
+
+### Task 7.5.4: Longitudinal education-to-employment analytics ✅
+- [x] Cohort dimensions only (`programme × institution × province × graduation_year`); never a per-person timeline
+- [x] Metrics: cohort size · employer-confirmed placements · placement rate · median time-to-hire (PG `percentile_cont`) · top destination profession (PG `mode()`)
+- [x] **Hard k-anonymity floor**: cells below `outcomes_min_cohort_size` (default 10, range 5–200, tunable from `/admin/settings`) are dropped
+- [x] **Complementary suppression** across both row + column groups so small cells can't be derived from totals
+- [x] Consented-only: source restricted to profiles with `outcomes_research` granted via INNER JOIN
+- [x] Surfaced on `/insights` (slots cleanly into Phase 9's `/gov` route group later)
+- [x] CSV export at `/api/insights/outcomes/export` reuses `outcomesQuery()` so the suppression filter is structurally identical (no bypass)
+- [x] `outcome_snapshots` cron — query is ready; nightly snapshot table + cron are a Phase 8 wire-up
+
+### Task 7.5.6: Wiring, verification, doc convention ✅
+- [x] All new strings in `messages/en.json`; `zu/xh/af` keep the deepMerge fallback (Phase 10 ships full translation, including the consent copy from 7.5.3)
+- [x] Compliance assertions in `lib/analytics/outcomes-compliance.ts` (no cohort below floor / unconsented never appears / seeker_reported excluded / work_availability values in enum). Exposed via admin-only `/api/admin/outcomes-compliance`; wired into the Phase 11.4 test runner later
+- [x] Seed: workAvailability backfill for the 8 seeded profiles; `outcomes_research` grants for 3 named seekers; **12-person synthetic Wits BSc CS cohort** with 3 employer-confirmed Discovery Bank placements so the /insights outcomes section renders a real row out of the box
+- [x] `docs/completed/PHASE_7_5_COMPLETE.md` written; `docs/completed/PHASE_7_5_PLAN.md` moved + boxes ticked; this ROADMAP header ✅; `TO_START_EVERY_SESSION.md` Current State refreshed; committed as `Phase 7.5 complete + Phase 8 opens`
+
+---
+
 ## 🔗 PHASE 8: VERIFICATION & INTEGRATIONS
 *Goal: Upgrade trust as partnerships unlock.*
 

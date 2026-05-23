@@ -26,6 +26,7 @@ import {
 import { INSTITUTION_KIND_LABEL } from "@/lib/mock/taxonomy";
 import { monthsUntil, nqfShort } from "@/lib/mock/academic";
 import { ReportProfileButton } from "@/components/feature/profile/ReportProfileButton";
+import { WorkAvailabilityChips } from "@/components/feature/profile/WorkAvailabilityChips";
 import { getSessionUser } from "@/lib/auth/dal";
 
 interface Props {
@@ -301,6 +302,14 @@ async function ProfileHero({
               <DossierRow label="Member since">
                 <span>{memberSinceFmt}</span>
               </DossierRow>
+              {profile.workAvailability.length > 0 && (
+                <DossierRow label="Available for">
+                  <WorkAvailabilityChips
+                    values={profile.workAvailability}
+                    variant="compact"
+                  />
+                </DossierRow>
+              )}
             </dl>
 
             <p className="mt-6 rounded-md bg-[color:var(--color-surface-sunk)] px-3 py-2 text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--color-ink-soft)]">
