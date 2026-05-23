@@ -277,29 +277,57 @@ that registry — we win on **data quality, usability, and analytics.** The syst
 
 ---
 
-## 🛡️ PHASE 7: ADMIN & MODERATION
-*Goal: Keep the database trustworthy.*
+## 🛡️ PHASE 7: ADMIN, MODERATION & NOTIFICATIONS
+*Goal: Keep the database trustworthy + every visible affordance does what it says. See `docs/PHASE_7_PLAN.md` for the full plan including the 2026-05-23 audit findings folded in.*
 
 ### Task 7.1: Admin Shell & Auth
-- [ ] `/admin` route group; admin-only guard.
+- [x] `/admin` route group; admin-only guard via `verifyAdmin()` (shipped Phase 3 security audit).
+- [ ] Make `/admin` overview KPIs live (pending verifications, open reports, new users 7d, audit events 24h). *Today all 4 numbers are hardcoded — audit found.*
+- [ ] `/admin/users`: replace hardcoded `EXTRA_USERS` array with a real DB query; wire search + role filter; add `suspendUser` / `restoreUser` / `eraseUser` actions.
 
 ### Task 7.2: 2FA enforcement (deferred from Phase 2)
-- [ ] Build `/setup-2fa` (QR + manual key + verify code + 8 downloadable backup codes).
-- [ ] Build `/verify-2fa` (TOTP code field, rate-limited, backup-code fallback) — slots into the sign-in flow between password and session-create.
-- [ ] Wire Better Auth's twoFactor plugin; enable mandatory 2FA for `employer` and `admin`.
+- [ ] Add Better Auth `twoFactor` plugin to `lib/auth/server.ts` (BEFORE `nextCookies` per docs).
+- [ ] Build `/setup-2fa` (QR + manual key + verify code + 10 downloadable backup codes shown once).
+- [ ] Build `/verify-2fa` (TOTP field, rate-limited, backup-code fallback) — slots into the sign-in flow between password and session-commit.
+- [ ] `app_user.two_factor_enabled` boolean + forced-setup gate: employer + admin without 2FA can't reach the dashboard until enrolled.
 - [ ] Existing employer + admin users without 2FA get a one-time forced setup on next sign-in.
-- [ ] Account → 2FA panel: configure, regenerate backup codes, view recovery options.
+- [ ] Account → 2FA panel: configure, regenerate backup codes, admin-side `reset2faForUser` recovery action (audit-logged).
 
 ### Task 7.3: Verification & Moderation Queue
-- [ ] Review uploaded qualifications → set `verified / rejected` with reason.
-- [ ] Review reported profiles; suspend/restore.
-- [ ] Organization verification workflow.
+- [ ] `lib/admin/verifications.ts`: `approveQualification`, `rejectQualification`, `approveOrganisation`, `rejectOrganisation` — each flips the row's `verification`, writes `verification.approve` / `verification.reject` audit row with `meta.reason`. *Today all Approve/Reject buttons on `/admin/verifications` are dead.*
+- [ ] `lib/admin/moderation.ts`: new `reports` table + `flagProfile` (called from public `/p/[handle]` Report button), `suspendUser`, `restoreUser`, `closeReport` — `app_user.suspendedAt` + suspended-user sign-in bounce. *Today all moderation queue buttons are dead and the Suspend button looks real in red — dangerous.*
+- [ ] Organisation verification workflow (admin flips the flag; KYC adapter is Phase 8).
 
 ### Task 7.4: Taxonomy & Reference Data
-- [ ] Manage `professions`, `skills`, `provinces`, `cities` (controlled vocab, no free text in search).
+- [ ] `lib/admin/taxonomy.ts`: `addProfession` / `addSkill` / `removeProfession` / `removeSkill` / `addCity` / `removeCity` with slug uniqueness + referential checks (can't remove a skill that's on a live profile). *Today Add/Edit buttons on `/admin/taxonomy` are inert.*
+- [ ] Wire `/admin/taxonomy` edit pencils + Add button.
 
 ### Task 7.5: Audit-Log Viewer
-- [ ] Searchable view of PII access/exports (who saw what, when) for compliance.
+- [x] Reads from `audit_log` table (shipped Phase 2).
+- [ ] Wire the filter form (kind + actor) — page reloads with `?kind=&actor=` search params; query layer filters.
+- [ ] Wire "Export CSV" button — streams aggregated CSV ≤10k rows, writes `analytics.export` audit row.
+
+### Task 7.6: In-app notifications
+- [ ] `notifications` table + 2 indices + `app_user.notification_prefs` JSONB.
+- [ ] `lib/notifications/server.ts` — `createNotification` (with 24h dedupe for high-cardinality kinds), `markRead`, `markAllRead`, `listForUser`, `unreadCount` (React.cache'd).
+- [ ] `<NotificationBell />` in `DashboardShell` header — polls `unreadCount` every 30s; unread badge caps at "9+"; dropdown panel of recent 10.
+- [ ] Shared `<NotificationsList />` at three role-scoped routes: `/dashboard/notifications`, `/employer/notifications`, `/admin/notifications`.
+- [ ] Wire 4 Phase-5 trigger points (one `createNotification` line each): `revealContact` → `contact.revealed` to seeker; `downloadQualification` → `document.downloaded`; `markAsHired` → `placement.confirmed`; dossier render → `profile.viewed` (deduped 24h per orgId).
+- [ ] Wire 8 Phase-7 admin trigger points as A.1–A.4 land (qualification approved/rejected, org approved/rejected, account suspended/restored, report filed → admins, verification queued → admins).
+- [ ] Notification preferences panel on `/dashboard/account` + `/employer/account` + `/admin/account` (in-app toggles wired; email toggles disabled with Phase-8 pill until Resend lands).
+- [ ] POPIA: `meta` JSONB never carries raw PII; no surveillance kinds (no `profile.shortlist.add` notification); suspended users' notifications queue and surface on restore; deferred `status.stale.warning` + `saved_search.new_matches` to Phase 8 cron.
+
+### Task 7.7: Platform settings persistence
+- [ ] `platform_settings` table (single-row OR key/value JSONB; DECIDE before migration).
+- [ ] `lib/admin/settings.ts` — `updateSetting`, `getSetting(key)` cached 5-min TTL.
+- [ ] Wire `/admin/settings` Save button + seed default freshness band thresholds + ranking weights + feature flags. *Today the entire page is UI-only.*
+
+### Task 7.8: Public-surface polish (Tier 2 audit carryover)
+- [ ] Landing: replace hardcoded `"May"` with `Intl.DateTimeFormat` of current month.
+- [ ] `/search`: remove the disabled "Load more" until pagination ships (Phase 6).
+- [ ] `/p/[handle]`: wire the Report button to `flagProfile` (Task 7.3); "Request contact" + "Save to pool" → link to `/sign-in?next=/employer/dossier/<handle>`.
+- [ ] `/dashboard/profile`: surface the email field (read-only, from session).
+- [ ] Seed gaps from the audit: 2 saved searches + 2 shortlist pools for Discovery Bank, 1 prior reveal for Naledi → Andile, `actorUserId` + `salaryBand` backfill on the 2 seeded placements, 1–2 open reports for the moderation demo.
 
 ---
 
@@ -448,5 +476,5 @@ HR Practitioner · Electrician · Plumber · Accountant · Nurse · Driver · Bo
 ---
 
 *Last Updated: 2026-05-23*
-*Version: 1.6 — Phase 5 complete (employer dossier + audit-logged contact reveal + document download + Placement-Truth Rule with 30-day gate + saved-searches / shortlists CRUD) — see `docs/completed/PHASE_5_COMPLETE.md`. Phase 6 (analytics + skills-gap engine — the government wedge) opens next — see `docs/PHASE_6_PLAN.md`.*
+*Version: 1.7 — Phase 5 complete (employer dossier + audit-logged contact reveal + document download + Placement-Truth Rule with 30-day gate + saved-searches / shortlists CRUD) — see `docs/completed/PHASE_5_COMPLETE.md`. Phase 6 (analytics + skills-gap engine — the government wedge) opens next — see `docs/PHASE_6_PLAN.md`. Phase 7 plan extended with Tasks 7.6 (in-app notifications), 7.7 (platform settings), 7.8 (public-surface polish) — full audit + spec in `docs/PHASE_7_PLAN.md`.*
 *Working name: Sebenza (replace with chosen brand)*
