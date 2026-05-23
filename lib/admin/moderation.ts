@@ -23,6 +23,7 @@ import { randomUUID } from "node:crypto";
 import { z } from "zod";
 import { verifyAdmin, getSessionUser } from "@/lib/auth/dal";
 import { logAccess } from "@/lib/audit";
+import { createNotification, notifyAllAdmins } from "@/lib/notifications/server";
 
 export type ActionResult<T extends object = object> =
   | ({ ok: true } & T)
@@ -82,6 +83,14 @@ export async function flagProfile(
       reason: parsed.data.reason,
       reportId: id,
     },
+  });
+
+  await notifyAllAdmins({
+    kind: "moderation.reported",
+    title: "A profile was reported",
+    body: `@${parsed.data.handle} — reason: ${parsed.data.reason.replace("_", " ")}`,
+    link: "/admin/moderation",
+    meta: { handle: parsed.data.handle, reason: parsed.data.reason, reportId: id },
   });
 
   revalidatePath("/admin/moderation");
@@ -148,6 +157,18 @@ export async function suspendUser(
     meta: { email: user.email, role: user.role, reason: parsed.data.reason },
   });
 
+  // Queue the notification so the user sees it when (if) restored.
+  // The bell can only render once they sign in again — the row sits
+  // unread in the meantime, by design.
+  await createNotification({
+    userId: user.id,
+    kind: "account.suspended",
+    title: "Your account has been suspended",
+    body: parsed.data.reason,
+    link: "/dashboard",
+    meta: { reason: parsed.data.reason },
+  });
+
   revalidatePath("/admin/users");
   revalidatePath("/admin/moderation");
   return ok();
@@ -187,6 +208,14 @@ export async function restoreUser(input: {
     actor: session.id,
     subject: user.id,
     meta: { email: user.email },
+  });
+
+  await createNotification({
+    userId: user.id,
+    kind: "account.restored",
+    title: "Your account has been restored",
+    body: "You can sign in and use Sebenza again. Welcome back.",
+    link: "/dashboard",
   });
 
   revalidatePath("/admin/users");

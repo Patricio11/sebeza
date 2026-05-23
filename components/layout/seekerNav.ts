@@ -5,6 +5,7 @@ import {
   GraduationCap,
   Compass,
   Activity,
+  Bell,
   ShieldCheck,
   Settings,
 } from "lucide-react";
@@ -17,6 +18,7 @@ export const SEEKER_NAV: DashboardNavItem[] = [
   { key: "qualifications", label: "Qualifications", href: "/dashboard/qualifications", icon: GraduationCap },
   { key: "grow", label: "Career compass", href: "/dashboard/grow", icon: Compass },
   { key: "activity", label: "Activity", href: "/dashboard/activity", icon: Activity },
+  { key: "notifications", label: "Notifications", href: "/dashboard/notifications", icon: Bell },
   { key: "privacy", label: "Privacy & consent", href: "/dashboard/privacy", icon: ShieldCheck },
   { key: "account", label: "Account", href: "/dashboard/account", icon: Settings },
 ];

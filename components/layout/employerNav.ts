@@ -6,6 +6,7 @@ import {
   CheckCircle2,
   Building2,
   UsersRound,
+  Bell,
   Settings,
 } from "lucide-react";
 import type { DashboardNavItem } from "./DashboardShell";
@@ -18,6 +19,7 @@ export const EMPLOYER_NAV: DashboardNavItem[] = [
   { key: "placements", label: "Placements", href: "/employer/placements", icon: CheckCircle2 },
   { key: "organisation", label: "Organisation", href: "/employer/organisation", icon: Building2 },
   { key: "team", label: "Team", href: "/employer/team", icon: UsersRound },
+  { key: "notifications", label: "Notifications", href: "/employer/notifications", icon: Bell },
   { key: "account", label: "Account", href: "/employer/account", icon: Settings },
 ];
 

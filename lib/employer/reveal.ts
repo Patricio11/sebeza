@@ -29,6 +29,7 @@ import { revalidatePath } from "next/cache";
 import { verifyOrgVerified } from "@/lib/auth/dal";
 import { logAccess } from "@/lib/audit";
 import { signedDocumentUrl } from "@/lib/storage/signed";
+import { createNotification } from "@/lib/notifications/server";
 
 export type ActionResult<T extends object = object> =
   | ({ ok: true } & T)
@@ -112,6 +113,26 @@ export async function revealContact(input: {
     },
   });
 
+  const orgNameRow = await db
+    .select({ name: schema.organizations.name })
+    .from(schema.organizations)
+    .where(eq(schema.organizations.id, session.orgId))
+    .limit(1);
+  const orgName = orgNameRow[0]?.name ?? "An employer";
+
+  await createNotification({
+    userId: row.userId,
+    kind: "contact.revealed",
+    title: `${orgName} revealed your contact`,
+    body: "Your email was shared under your active consent (POPIA-logged).",
+    link: "/dashboard/activity",
+    meta: {
+      orgId: session.orgId,
+      orgName,
+      consentVersion: consent.version,
+    },
+  });
+
   revalidatePath(`/employer/dossier/${input.handle}`);
 
   return ok({
@@ -182,6 +203,27 @@ export async function downloadQualification(input: {
     meta: {
       orgId: session.orgId,
       handle: row.handle,
+      qualificationId: row.qualificationId,
+      title: row.title,
+    },
+  });
+
+  const orgNameRow = await db
+    .select({ name: schema.organizations.name })
+    .from(schema.organizations)
+    .where(eq(schema.organizations.id, session.orgId))
+    .limit(1);
+  const orgName = orgNameRow[0]?.name ?? "An employer";
+
+  await createNotification({
+    userId: row.userId,
+    kind: "document.downloaded",
+    title: `${orgName} downloaded one of your documents`,
+    body: `${row.title} — every download is audit-logged on your activity timeline.`,
+    link: "/dashboard/activity",
+    meta: {
+      orgId: session.orgId,
+      orgName,
       qualificationId: row.qualificationId,
       title: row.title,
     },

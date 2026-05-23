@@ -2,9 +2,38 @@ import { Link } from "@/i18n/navigation";
 import { LocaleSwitcher } from "@/components/feature/LocaleSwitcher";
 import { SAChevron } from "@/components/ui/SAChevron";
 import { SignOutButton } from "@/components/feature/auth/SignOutButton";
+import { NotificationBell } from "@/components/feature/notifications/NotificationBell";
+import { listForUser, unreadCount } from "@/lib/notifications/query";
 import { cn } from "@/lib/utils";
 
 export type DashboardRole = "seeker" | "employer" | "admin";
+
+const NOTIFICATIONS_HREF: Record<DashboardRole, string> = {
+  seeker: "/dashboard/notifications",
+  employer: "/employer/notifications",
+  admin: "/admin/notifications",
+};
+
+/**
+ * Fetches the initial bell state on the server so the first paint is
+ * accurate. Returns `null` if the read fails (suspended user, DB
+ * hiccup) — the bell silently disappears rather than erroring out the
+ * entire dashboard.
+ */
+async function BellSlot({ role }: { role: DashboardRole }) {
+  try {
+    const [count, items] = await Promise.all([unreadCount(), listForUser({ limit: 10 })]);
+    return (
+      <NotificationBell
+        fullPageHref={NOTIFICATIONS_HREF[role]}
+        initialUnreadCount={count}
+        initialItems={items}
+      />
+    );
+  } catch {
+    return null;
+  }
+}
 
 export interface DashboardNavItem {
   key: string;
@@ -168,6 +197,7 @@ export function DashboardShell({
                 >
                   {workspaceEyebrow}
                 </span>
+                <BellSlot role={role} />
                 {/* Always-visible sign-out tap target on mobile */}
                 <SignOutButton iconOnly />
               </div>
@@ -236,11 +266,13 @@ export function DashboardShell({
                   </p>
                 )}
               </div>
-              {pageActions && (
-                <div className="flex flex-wrap items-center gap-3">
-                  {pageActions}
+              <div className="flex flex-wrap items-center gap-3">
+                {/* Desktop-only bell — mobile uses the top strip placement above. */}
+                <div className="hidden md:block">
+                  <BellSlot role={role} />
                 </div>
-              )}
+                {pageActions}
+              </div>
             </div>
           </header>
 

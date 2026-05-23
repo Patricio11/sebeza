@@ -5,6 +5,7 @@ import {
   Library,
   ScrollText,
   Users,
+  Bell,
   SlidersHorizontal,
 } from "lucide-react";
 import type { DashboardNavItem } from "./DashboardShell";
@@ -16,6 +17,7 @@ export const ADMIN_NAV: DashboardNavItem[] = [
   { key: "taxonomy", label: "Taxonomy", href: "/admin/taxonomy", icon: Library },
   { key: "auditLog", label: "Audit log", href: "/admin/audit-log", icon: ScrollText },
   { key: "users", label: "Users", href: "/admin/users", icon: Users },
+  { key: "notifications", label: "Notifications", href: "/admin/notifications", icon: Bell },
   { key: "settings", label: "Settings", href: "/admin/settings", icon: SlidersHorizontal },
 ];
 

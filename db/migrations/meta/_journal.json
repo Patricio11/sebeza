@@ -36,6 +36,13 @@
       "when": 1779700000000,
       "tag": "0004_phase7_admin",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1779710000000,
+      "tag": "0005_phase7_notifications",
+      "breakpoints": true
     }
   ]
 }

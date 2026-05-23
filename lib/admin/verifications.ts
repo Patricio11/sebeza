@@ -22,6 +22,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { verifyAdmin } from "@/lib/auth/dal";
 import { logAccess } from "@/lib/audit";
+import { createNotification, notifyOrgMembers } from "@/lib/notifications/server";
 
 export type ActionResult<T extends object = object> =
   | ({ ok: true } & T)
@@ -56,8 +57,13 @@ export async function approveQualification(
       id: schema.qualifications.id,
       profileId: schema.qualifications.profileId,
       title: schema.qualifications.title,
+      ownerUserId: schema.profiles.userId,
     })
     .from(schema.qualifications)
+    .leftJoin(
+      schema.profiles,
+      eq(schema.profiles.id, schema.qualifications.profileId),
+    )
     .where(eq(schema.qualifications.id, parsed.data.qualificationId))
     .limit(1);
   const row = rows[0];
@@ -78,6 +84,17 @@ export async function approveQualification(
       note: parsed.data.note ?? null,
     },
   });
+
+  if (row.ownerUserId) {
+    await createNotification({
+      userId: row.ownerUserId,
+      kind: "qualification.verified",
+      title: "A qualification was verified",
+      body: `${row.title} is now showing the Verified badge on your profile.`,
+      link: "/dashboard/qualifications",
+      meta: { qualificationId: row.id },
+    });
+  }
 
   revalidatePath("/admin/verifications");
   revalidatePath("/dashboard/qualifications");
@@ -105,8 +122,13 @@ export async function rejectQualification(
       id: schema.qualifications.id,
       profileId: schema.qualifications.profileId,
       title: schema.qualifications.title,
+      ownerUserId: schema.profiles.userId,
     })
     .from(schema.qualifications)
+    .leftJoin(
+      schema.profiles,
+      eq(schema.profiles.id, schema.qualifications.profileId),
+    )
     .where(eq(schema.qualifications.id, parsed.data.qualificationId))
     .limit(1);
   const row = rows[0];
@@ -127,6 +149,17 @@ export async function rejectQualification(
       reason: parsed.data.reason,
     },
   });
+
+  if (row.ownerUserId) {
+    await createNotification({
+      userId: row.ownerUserId,
+      kind: "qualification.rejected",
+      title: "A qualification was rejected",
+      body: `${row.title} — admin note: ${parsed.data.reason}`,
+      link: "/dashboard/qualifications",
+      meta: { qualificationId: row.id, reason: parsed.data.reason },
+    });
+  }
 
   revalidatePath("/admin/verifications");
   revalidatePath("/dashboard/qualifications");
@@ -170,6 +203,14 @@ export async function approveOrganisation(
     meta: { name: row.name, note: parsed.data.note ?? null },
   });
 
+  await notifyOrgMembers(row.id, {
+    kind: "org.verified",
+    title: "Your organisation is verified",
+    body: `${row.name} is now a verified employer. Search and reveal are unlocked for every member.`,
+    link: "/employer",
+    meta: { orgId: row.id, orgName: row.name },
+  });
+
   revalidatePath("/admin/verifications");
   revalidatePath("/employer/organisation");
   revalidatePath("/employer");
@@ -210,6 +251,14 @@ export async function rejectOrganisation(
     actor: session.id,
     subject: row.id,
     meta: { name: row.name, reason: parsed.data.reason },
+  });
+
+  await notifyOrgMembers(row.id, {
+    kind: "org.rejected",
+    title: "Organisation verification was rejected",
+    body: `${row.name} — admin note: ${parsed.data.reason}`,
+    link: "/employer/organisation",
+    meta: { orgId: row.id, orgName: row.name, reason: parsed.data.reason },
   });
 
   revalidatePath("/admin/verifications");

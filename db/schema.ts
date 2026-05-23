@@ -117,6 +117,10 @@ export const appUser = pgTable("app_user", {
   suspendedAt: timestamp("suspended_at"),
   suspendedReason: text("suspended_reason"),
   suspendedByUserId: text("suspended_by_user_id"),
+  /** Phase 7 (Task 7.6) — per-kind notification preferences. JSONB shape:
+      `{ "contact.revealed": { inApp: true, email: false }, … }`. Missing
+      entries fall back to the catalog defaults in lib/notifications. */
+  notificationPrefs: jsonb("notification_prefs"),
 });
 
 /**
@@ -452,6 +456,33 @@ export const platformSettings = pgTable("platform_settings", {
   value: jsonb("value").notNull(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
   updatedByUserId: text("updated_by_user_id"),
+});
+
+/**
+ * Phase 7 (Task 7.6) — in-app notifications.
+ *
+ * Notifications are UX state, NOT the system of record. The audit log
+ * remains authoritative for any PII access; deleting a notifications
+ * row only clears the user-facing bell badge.
+ *
+ * `kind` mirrors a subset of `AuditKind` (catalog in
+ * docs/PHASE_7_PLAN.md §C.7). `meta` carries display-only context
+ * — never raw PII beyond what the user has already consented to share
+ * (org name, role title). Email addresses, ID numbers, document keys
+ * never appear in this table.
+ */
+export const notifications = pgTable("notifications", {
+  id: text("id").primaryKey(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => appUser.id, { onDelete: "cascade" }),
+  kind: text("kind").notNull(),
+  title: text("title").notNull(),
+  body: text("body"),
+  link: text("link"),
+  meta: jsonb("meta"),
+  readAt: timestamp("read_at"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
 /**

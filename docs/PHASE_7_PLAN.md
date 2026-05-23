@@ -38,8 +38,10 @@ Tempting to derive notifications from `audit_log` rows since the trigger points 
 
 Cleanest separation: when a Server Action writes an audit row, it ALSO calls `createNotification()` for the affected user(s). The two writes happen in the same transaction so we never drift.
 
-### Re-check #9 — Polling, not WebSockets ✅ LOCKED
-Real-time channels are tempting but a poor fit at our scale + the No-Flash Rule. Bell component polls `unreadCount` every 30 s. That's one cheap indexed query per active session; cluster-friendly; no connection overhead on metered mobile data. Phase 9 may swap to Supabase Realtime if traffic justifies — until then polling is right.
+### Re-check #9 — No polling, no WebSockets ✅ LOCKED (revised 2026-05-23)
+Originally planned 30 s polling. Re-evaluated during implementation: every notification originates in a specific Server Action that already calls `revalidatePath` on relevant surfaces. The bell mounts inside `DashboardShell` and is server-fetched on every render, so any client-side navigation (the typical action a user takes after being notified — clicking a link, switching tabs) refreshes the badge naturally. `markRead` / `markAllRead` add `revalidatePath("/dashboard", "layout")` etc. so the local action also refreshes the bell.
+
+The trade-off: a recipient sitting completely idle on one page won't see new notifications until they navigate. Acceptable given (a) bell badges aren't life-critical, (b) no metered-data tax for users on 3G, and (c) the audit log remains authoritative regardless. Phase 9 may add Supabase Realtime if usage analytics show idle-pad-stare is common — until then, action-triggered revalidation is right.
 
 ---
 

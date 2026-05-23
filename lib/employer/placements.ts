@@ -30,6 +30,7 @@ import { randomUUID } from "node:crypto";
 import { z } from "zod";
 import { verifyOrgVerified } from "@/lib/auth/dal";
 import { logAccess } from "@/lib/audit";
+import { createNotification } from "@/lib/notifications/server";
 
 export type ActionResult<T extends object = object> =
   | ({ ok: true } & T)
@@ -68,7 +69,11 @@ export async function markAsHired(
 
   // Resolve the profile by handle.
   const profileRows = await db
-    .select({ id: schema.profiles.id, displayName: schema.profiles.displayName })
+    .select({
+      id: schema.profiles.id,
+      displayName: schema.profiles.displayName,
+      userId: schema.profiles.userId,
+    })
     .from(schema.profiles)
     .where(eq(schema.profiles.handle, v.handle))
     .limit(1);
@@ -121,9 +126,27 @@ export async function markAsHired(
     },
   });
 
-  // Phase 8: trigger seeker notification email — "Discovery Bank logged
-  // you as hired — is your status now 'employed'?" — wired alongside
-  // the Resend transactional emails.
+  const orgNameRow = await db
+    .select({ name: schema.organizations.name })
+    .from(schema.organizations)
+    .where(eq(schema.organizations.id, session.orgId))
+    .limit(1);
+  const orgName = orgNameRow[0]?.name ?? "An employer";
+
+  await createNotification({
+    userId: profile.userId,
+    kind: "placement.confirmed",
+    title: `${orgName} logged you as hired`,
+    body: `${v.role} in ${v.city}. Your status will switch to "employed" once you confirm.`,
+    link: "/dashboard",
+    meta: {
+      orgId: session.orgId,
+      orgName,
+      role: v.role,
+      city: v.city,
+      placementId: id,
+    },
+  });
 
   revalidatePath("/employer/placements");
   revalidatePath(`/employer/dossier/${v.handle}`);
