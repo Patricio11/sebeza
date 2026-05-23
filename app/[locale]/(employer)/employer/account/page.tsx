@@ -6,6 +6,9 @@ import { TextField } from "@/components/ui/FormField";
 import { Button } from "@/components/ui/Button";
 import { SignOutButton } from "@/components/feature/auth/SignOutButton";
 import { TwoFactorAccountPanel } from "@/components/feature/auth/TwoFactorAccountPanel";
+import { NotificationPrefsPanel } from "@/components/feature/notifications/NotificationPrefsPanel";
+import { getMyNotificationPrefs } from "@/lib/notifications/query";
+import type { NotificationKind } from "@/lib/notifications/catalog";
 import { verifyRole, getSessionUser } from "@/lib/auth/dal";
 import { getSetting } from "@/lib/admin/settings";
 
@@ -19,8 +22,15 @@ export default async function EmployerAccountPage({
   await verifyRole("employer");
   const me = await getSessionUser();
   const enforced = await getSetting<boolean>("feature_flag_2fa_enforced");
+  const prefs = await getMyNotificationPrefs();
   const t = await getTranslations("employerDash.account");
   const tOuter = await getTranslations("employerDash");
+
+  const EMPLOYER_NOTIFICATION_KINDS: NotificationKind[] = [
+    "org.verified",
+    "org.rejected",
+    "saved_search.new_matches",
+  ];
 
   return (
     <DashboardShell
@@ -72,6 +82,16 @@ export default async function EmployerAccountPage({
           <TwoFactorAccountPanel
             enabled={Boolean(me?.twoFactorEnabled)}
             enforced={enforced}
+          />
+        </section>
+
+        <section className="md:col-span-2">
+          <h2 className="mb-4 border-b-2 border-[color:var(--color-ink)] pb-2 font-display text-xl">
+            Notification preferences
+          </h2>
+          <NotificationPrefsPanel
+            initialPrefs={prefs}
+            kinds={EMPLOYER_NOTIFICATION_KINDS}
           />
         </section>
 

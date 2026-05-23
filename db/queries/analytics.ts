@@ -350,8 +350,22 @@ export interface FreshnessBreakdown {
 /**
  * Counts the active profile pool by freshness band. The "trust headline" on
  * /insights surfaces `fresh / total` as a percentage.
+ *
+ * The fresh / ageing thresholds come from `platform_settings` (Phase 7
+ * task A.6) so admins can tune the bands without a deploy. Defaults are
+ * pinned in `lib/admin/settings` so a brand-new DB without seeds still
+ * renders sensibly.
  */
-export async function freshnessBreakdownQuery(): Promise<FreshnessBreakdown> {
+export interface FreshnessBands {
+  freshDays: number;
+  ageingDays: number;
+}
+
+export async function freshnessBreakdownQuery(
+  bands?: FreshnessBands,
+): Promise<FreshnessBreakdown> {
+  const freshDays = bands?.freshDays ?? 30;
+  const ageingDays = bands?.ageingDays ?? 90;
   const db = getDb();
   const rows = unwrap<{
     band: "fresh" | "ageing" | "stale";
@@ -361,8 +375,8 @@ export async function freshnessBreakdownQuery(): Promise<FreshnessBreakdown> {
       WITH banded AS (
         SELECT
           CASE
-            WHEN EXTRACT(epoch FROM (now() - status_confirmed_at)) / 86400 < 30 THEN 'fresh'
-            WHEN EXTRACT(epoch FROM (now() - status_confirmed_at)) / 86400 < 90 THEN 'ageing'
+            WHEN EXTRACT(epoch FROM (now() - status_confirmed_at)) / 86400 < ${freshDays} THEN 'fresh'
+            WHEN EXTRACT(epoch FROM (now() - status_confirmed_at)) / 86400 < ${ageingDays} THEN 'ageing'
             ELSE 'stale'
           END AS band
         FROM profiles

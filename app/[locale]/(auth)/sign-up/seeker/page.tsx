@@ -1,6 +1,7 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { AuthShell } from "@/components/layout/AuthShell";
 import { SeekerSignUpForm } from "@/components/feature/auth/SeekerSignUpForm";
+import { getProfessions } from "@/lib/taxonomy/query";
 
 export const metadata = { title: "Create a seeker profile" };
 
@@ -12,6 +13,7 @@ export default async function SeekerSignUpPage({
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("auth.seekerSignUp");
+  const professions = await getProfessions();
 
   return (
     <AuthShell
@@ -20,7 +22,7 @@ export default async function SeekerSignUpPage({
       subhead="Three steps: identity, consent, then your first profile fields. You can edit everything later from your dashboard."
       rightAside={<SeekerSignUpDossier />}
     >
-      <SeekerSignUpForm />
+      <SeekerSignUpForm professions={professions} />
     </AuthShell>
   );
 }

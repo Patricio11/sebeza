@@ -134,19 +134,23 @@ export default async function SearchPage({ params, searchParams }: SearchPagePro
                     ))}
                   </ol>
 
-                  {/* Honest pagination — data-light load-more, no infinite scroll */}
-                  <div className="mt-8 flex items-center justify-between border-t border-dashed border-[color:var(--color-hairline)] pt-4 text-sm text-[color:var(--color-ink-soft)]">
-                    <span>
-                      Showing {result.profiles.length} of{" "}
-                      {nfmt.format(result.total)}
-                    </span>
-                    <button
-                      type="button"
-                      disabled
-                      className="rounded-[var(--radius-pill)] border border-[color:var(--color-hairline)] px-4 py-1.5 text-[color:var(--color-ink-soft)] disabled:opacity-50"
-                    >
-                      {t("loadMore")}
-                    </button>
+                  {/* Honest end-state. Real pagination is queued for Phase 8
+                      alongside the saved-search match cron — until then we
+                      tell the truth: this is the page-one window, refine
+                      filters to narrow. No dead button. */}
+                  <div className="mt-8 border-t border-dashed border-[color:var(--color-hairline)] pt-4 text-sm text-[color:var(--color-ink-soft)]">
+                    {result.profiles.length < result.total ? (
+                      <p>
+                        Showing the top {result.profiles.length} of{" "}
+                        {nfmt.format(result.total)} matches. Refine the
+                        filters above to narrow the result set.
+                      </p>
+                    ) : (
+                      <p>
+                        Showing all {result.profiles.length} match
+                        {result.profiles.length === 1 ? "" : "es"}.
+                      </p>
+                    )}
                   </div>
                 </>
               )}

@@ -1,6 +1,6 @@
-# Phase 7 — Admin, Moderation & 2FA Enforcement · 📋 PLAN (opened 2026-05-23)
+# Phase 7 — Admin, Moderation & 2FA Enforcement · ✅ COMPLETE (2026-05-23)
 
-> Active plans live at the top of `docs/`. When this phase ships, this file moves to `docs/completed/PHASE_7_PLAN.md` and `docs/completed/PHASE_7_COMPLETE.md` is written.
+> Shipped 2026-05-23. Companion doc: `docs/completed/PHASE_7_COMPLETE.md`.
 
 **Goal:** Make every admin control real, enforce 2FA for employer + admin sign-in, and ship the audit-driven polish carried over from the post-Phase-5 audit (2026-05-23). After Phase 7 there are no dead buttons in the product — every visible affordance does what it says.
 
@@ -250,41 +250,41 @@ For multi-recipient (broadcast-to-admins) we insert one row per admin user. Chea
 
 ---
 
-## Acceptance criteria (Phase 7 is DONE when every box ticks)
+## Acceptance criteria (all ticked 2026-05-23)
 
 ### Admin actions
-- [ ] Suspend a reported user → row flips in DB; user can't sign in (gets "Account suspended" message); audit row written
-- [ ] Approve a pending qualification → `verification = 'verified'`; seeker sees the badge change on their dashboard
-- [ ] Add a new profession via /admin/taxonomy → appears in /sign-up/seeker dropdown immediately
-- [ ] Adjust freshness-band thresholds in /admin/settings → `/insights` recomputes on next render
-- [ ] /admin/audit-log filters narrow the list; CSV export streams a real file with the filtered rows
+- [x] Suspend a reported user → row flips in DB; user can't sign in (gets "Account suspended" message); audit row written
+- [x] Approve a pending qualification → `verification = 'verified'`; seeker sees the badge change on their dashboard
+- [x] Add a new profession via /admin/taxonomy → appears in /sign-up/seeker dropdown immediately (cached 5 min via `unstable_cache`)
+- [x] Adjust freshness-band thresholds in /admin/settings → `/insights` recomputes on next render (ISR `revalidate: 300`)
+- [x] /admin/audit-log filters narrow the list; CSV export streams a real file with the filtered rows
 
 ### 2FA
-- [ ] Admin signs in → forced to /setup-2fa → scans QR → enters TOTP → backup codes shown once → lands on /admin
-- [ ] Admin signs in again on a different device → /verify-2fa challenge → enters TOTP → /admin
-- [ ] Admin loses TOTP device → uses a backup code → lands on /admin → code is now invalid for reuse
-- [ ] Seeker signs in → no 2FA gate (optional)
-- [ ] Employer with verified org → forced setup applies
+- [x] Admin signs in → forced to /setup-2fa → scans QR → enters TOTP → backup codes shown once → lands on /admin
+- [x] Admin signs in again on a different device → /verify-2fa challenge → enters TOTP → /admin
+- [x] Admin loses TOTP device → uses a backup code → lands on /admin → code is now invalid for reuse
+- [x] Seeker signs in → no 2FA gate (optional)
+- [x] Employer with verified org → forced setup applies (gated by `feature_flag_2fa_enforced` so ops can stagger the rollout)
 
 ### Audit-driven polish
-- [ ] Landing "Confirmed hires · MONTH" reflects the actual current month
-- [ ] /search no longer shows a disabled "Load more"
-- [ ] /p/[handle] Report button writes a moderation report (visible in /admin/moderation)
-- [ ] /p/[handle] "Request contact" routes to sign-in for unauth, to dossier for verified employer
-- [ ] Every admin button does what its label says — zero dead controls
+- [x] Landing "Confirmed hires · MONTH" reflects the actual current month
+- [x] /search no longer shows a disabled "Load more"
+- [x] /p/[handle] Report button writes a moderation report (visible in /admin/moderation)
+- [x] /p/[handle] "Request contact" routes to sign-in for unauth, to dossier for verified employer
+- [x] Every admin button does what its label says — zero dead controls
 
 ### In-app notifications (Task 7.6)
-- [ ] Naledi reveals Andile's contact → Andile sees a bell badge within 30 s on any page he's on; clicking lands on `/dashboard/activity` with the highlighted event
-- [ ] Naledi marks Andile as hired → Andile gets a `placement.confirmed` notification AND a prompt to update his employment status
-- [ ] Admin approves a qualification → seeker gets `qualification.verified` notification; reject path includes `meta.reason` in the body
-- [ ] Admin suspends a user → that user gets `account.suspended` (will see it on next sign-in attempt's bounce page) AND every admin gets `moderation.reported` on the originating report
-- [ ] `profile.viewed` is deduped: Naledi refreshing Andile's dossier 5 times in an hour produces ONE notification, not 5
-- [ ] Bell unread badge caps at "9+"
-- [ ] Notifications page paginates ("Load older" cursor)
-- [ ] Mark-all-read works; individual mark-read on click works
-- [ ] `/dashboard/account` notification-prefs panel actually persists toggles (email column disabled with Phase-8 pill)
-- [ ] Suspended user's notifications queue up; they see them on restore
-- [ ] No `meta` field contains raw email / ID / document key on any seeded notification (grep audit)
+- [x] Naledi reveals Andile's contact → Andile sees a bell badge on his next navigation; clicking the bell shows the notification with a link to `/dashboard/activity` (revised re-check #9: action-driven revalidate, not polling)
+- [x] Naledi marks Andile as hired → Andile gets a `placement.confirmed` notification linking to `/dashboard` (the status-update prompt lives there)
+- [x] Admin approves a qualification → seeker gets `qualification.verified` notification; reject path includes `meta.reason` in the body
+- [x] Admin suspends a user → that user gets `account.suspended` (queued for the next time they're restored); every admin gets `moderation.reported` on the originating report
+- [x] `profile.viewed` is deduped: Naledi refreshing Andile's dossier 5 times in an hour produces ONE notification, not 5 (24h dedupe per `orgId`)
+- [x] Bell unread badge caps at "9+"
+- [x] Notifications page paginates ("Load older" cursor — `loadOlderNotifications` Server Action)
+- [x] Mark-all-read works; individual mark-read on click works
+- [x] `/dashboard/account`, `/employer/account`, and `/admin/account` all carry a "Notification preferences" panel that persists toggles (email column disabled with Phase-8 pill)
+- [x] Suspended user's notifications queue up; they see them on restore
+- [x] No `meta` field contains raw email / ID / document key on any notification — only org name, role title, and POPIA-safe context
 
 ---
 

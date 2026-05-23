@@ -11,6 +11,7 @@ import {
   supplyHeatmapQuery,
   freshnessBreakdownQuery,
 } from "@/db/queries/analytics";
+import { getSetting } from "@/lib/admin/settings";
 import { InsightsCharts } from "@/components/feature/InsightsCharts";
 import { InsightsExportButton } from "@/components/feature/InsightsExportButton";
 import { TrendingUp, AlertCircle, ArrowUp, ArrowDown, Minus } from "lucide-react";
@@ -45,6 +46,14 @@ export default async function InsightsPage({
   const t = await getTranslations("insights");
   const tStatus = await getTranslations("status");
 
+  // Phase 7 (A.6) — Freshness band thresholds come from platform_settings
+  // so admins can tune the bands without a deploy. Read first so the
+  // breakdown query honours the current values.
+  const [freshDays, ageingDays] = await Promise.all([
+    getSetting<number>("freshness_band_days_fresh"),
+    getSetting<number>("freshness_band_days_ageing"),
+  ]);
+
   // Parallel load — all five aggregates ship at once. `skillsGapTrendQuery`
   // is `skillsGapQuery` plus the week-over-week delta arrow column (falls
   // back to no-delta when there's no prior snapshot yet).
@@ -54,7 +63,7 @@ export default async function InsightsPage({
       skillsGapTrendQuery({ top: 20, lookbackDays: 7 }),
       skillDemandQuery({ top: 12 }),
       supplyHeatmapQuery(),
-      freshnessBreakdownQuery(),
+      freshnessBreakdownQuery({ freshDays, ageingDays }),
     ]);
 
   const conf = overallFreshnessConfidence(analytics);
@@ -175,7 +184,7 @@ export default async function InsightsPage({
             <div className="grid gap-4 md:grid-cols-3">
               <FreshnessTile
                 label="Fresh"
-                hint="Confirmed in the last 30 days"
+                hint={`Confirmed in the last ${freshDays} days`}
                 count={freshness.fresh}
                 total={freshness.total}
                 tone="brand"
@@ -183,7 +192,7 @@ export default async function InsightsPage({
               />
               <FreshnessTile
                 label="Ageing"
-                hint="30–90 days since confirmation"
+                hint={`${freshDays}–${ageingDays} days since confirmation`}
                 count={freshness.ageing}
                 total={freshness.total}
                 tone="accent"
@@ -191,7 +200,7 @@ export default async function InsightsPage({
               />
               <FreshnessTile
                 label="Stale"
-                hint="90+ days · down-ranked in search"
+                hint={`${ageingDays}+ days · down-ranked in search`}
                 count={freshness.stale}
                 total={freshness.total}
                 tone="danger"

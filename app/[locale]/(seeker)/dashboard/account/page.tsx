@@ -10,6 +10,9 @@ import { verifyRole } from "@/lib/auth/dal";
 import { ShieldCheck } from "lucide-react";
 import { SignOutButton } from "@/components/feature/auth/SignOutButton";
 import { TwoFactorAccountPanel } from "@/components/feature/auth/TwoFactorAccountPanel";
+import { NotificationPrefsPanel } from "@/components/feature/notifications/NotificationPrefsPanel";
+import { getMyNotificationPrefs } from "@/lib/notifications/query";
+import type { NotificationKind } from "@/lib/notifications/catalog";
 
 export default async function AccountPage({
   params,
@@ -22,6 +25,19 @@ export default async function AccountPage({
   const me = await getMyProfile();
   if (!me) redirect("/sign-in?next=/dashboard/account");
   const t = await getTranslations("seekerDash.account");
+  const prefs = await getMyNotificationPrefs();
+
+  const SEEKER_NOTIFICATION_KINDS: NotificationKind[] = [
+    "contact.revealed",
+    "document.downloaded",
+    "placement.confirmed",
+    "qualification.verified",
+    "qualification.rejected",
+    "profile.viewed",
+    "status.stale.warning",
+    "account.suspended",
+    "account.restored",
+  ];
 
   return (
     <DashboardShell
@@ -90,6 +106,22 @@ export default async function AccountPage({
           <p className="mt-2 text-xs text-[color:var(--color-ink-soft)]">
             {t("twoFactorOptionalSeeker")}
           </p>
+        </section>
+
+        <section
+          aria-labelledby="notif-prefs-h"
+          className="md:col-span-2"
+        >
+          <h2
+            id="notif-prefs-h"
+            className="mb-4 border-b-2 border-[color:var(--color-ink)] pb-2 font-display text-xl"
+          >
+            Notification preferences
+          </h2>
+          <NotificationPrefsPanel
+            initialPrefs={prefs}
+            kinds={SEEKER_NOTIFICATION_KINDS}
+          />
         </section>
 
         <section aria-labelledby="sessions-h" className="md:col-span-2">

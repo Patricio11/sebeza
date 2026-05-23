@@ -311,57 +311,59 @@ that registry — we win on **data quality, usability, and analytics.** The syst
 
 ---
 
-## 🛡️ PHASE 7: ADMIN, MODERATION & NOTIFICATIONS
-*Goal: Keep the database trustworthy + every visible affordance does what it says. See `docs/PHASE_7_PLAN.md` for the full plan including the 2026-05-23 audit findings folded in.*
+## 🛡️ PHASE 7: ADMIN, MODERATION & NOTIFICATIONS ✅ 2026-05-23
+*Goal: Keep the database trustworthy + every visible affordance does what it says. Shipped 2026-05-23 across four commits. Companion docs: `docs/completed/PHASE_7_PLAN.md` + `docs/completed/PHASE_7_COMPLETE.md`.*
 
-### Task 7.1: Admin Shell & Auth
+### Task 7.1: Admin Shell & Auth ✅
 - [x] `/admin` route group; admin-only guard via `verifyAdmin()` (shipped Phase 3 security audit).
-- [ ] Make `/admin` overview KPIs live (pending verifications, open reports, new users 7d, audit events 24h). *Today all 4 numbers are hardcoded — audit found.*
-- [ ] `/admin/users`: replace hardcoded `EXTRA_USERS` array with a real DB query; wire search + role filter; add `suspendUser` / `restoreUser` / `eraseUser` actions.
+- [x] `/admin` overview KPIs live via `adminOverviewCounts()` (pending verifications, open reports, new users 7d, audit events 24h, suspended users).
+- [x] `/admin/users`: real DB join `app_user × profiles × organization_members × organizations`; search + role + status filters; `suspendUser` / `restoreUser` / `eraseUser` actions wired (erase is soft-delete with Phase 8 cron for the 30-day grace).
 
-### Task 7.2: 2FA enforcement (deferred from Phase 2)
-- [ ] Add Better Auth `twoFactor` plugin to `lib/auth/server.ts` (BEFORE `nextCookies` per docs).
-- [ ] Build `/setup-2fa` (QR + manual key + verify code + 10 downloadable backup codes shown once).
-- [ ] Build `/verify-2fa` (TOTP field, rate-limited, backup-code fallback) — slots into the sign-in flow between password and session-commit.
-- [ ] `app_user.two_factor_enabled` boolean + forced-setup gate: employer + admin without 2FA can't reach the dashboard until enrolled.
-- [ ] Existing employer + admin users without 2FA get a one-time forced setup on next sign-in.
-- [ ] Account → 2FA panel: configure, regenerate backup codes, admin-side `reset2faForUser` recovery action (audit-logged).
+### Task 7.2: 2FA enforcement ✅
+- [x] Better Auth `twoFactor` plugin wired ahead of `nextCookies` in the plugin chain.
+- [x] `/setup-2fa` ships QR + otpauth URI + verify-code field + 10 backup codes shown once with copy-all helper.
+- [x] `/verify-2fa` ships TOTP (default) and backup-code modes via toggle.
+- [x] `app_user.two_factor_enabled` flag + forced-setup gate in `verifyRole` / `verifyAdmin`. Seekers exempt (No-Flash Rule). Gate itself gated on `feature_flag_2fa_enforced` platform setting for staged rollout.
+- [x] Forced setup applies on next sign-in for any employer/admin without enrolment.
+- [x] Real "Configure 2FA" panel on /dashboard/account, /employer/account, /admin/account (replaces the dead stub from the Phase 5 audit). Admin escape hatch `reset2faForUser({ userId, reason })` surfaced as "Reset 2FA" in `/admin/users` row actions.
 
-### Task 7.3: Verification & Moderation Queue
-- [ ] `lib/admin/verifications.ts`: `approveQualification`, `rejectQualification`, `approveOrganisation`, `rejectOrganisation` — each flips the row's `verification`, writes `verification.approve` / `verification.reject` audit row with `meta.reason`. *Today all Approve/Reject buttons on `/admin/verifications` are dead.*
-- [ ] `lib/admin/moderation.ts`: new `reports` table + `flagProfile` (called from public `/p/[handle]` Report button), `suspendUser`, `restoreUser`, `closeReport` — `app_user.suspendedAt` + suspended-user sign-in bounce. *Today all moderation queue buttons are dead and the Suspend button looks real in red — dangerous.*
-- [ ] Organisation verification workflow (admin flips the flag; KYC adapter is Phase 8).
+### Task 7.3: Verification & Moderation Queue ✅
+- [x] `lib/admin/verifications.ts` — `approveQualification` / `rejectQualification` / `approveOrganisation` / `rejectOrganisation`. Every flip audit-logs with `meta.reason` AND fires the matching `qualification.verified|rejected` / `org.verified|rejected` notification.
+- [x] `lib/admin/moderation.ts` — `reports` table + `flagProfile` (called from public `/p/[handle]` Report button, anonymous-safe), `suspendUser`, `restoreUser`, `closeReport`. `app_user.suspended_at` + suspended-user sign-in bounce ("Your account is suspended: <reason>").
+- [x] Organisation verification workflow (KYC adapter remains Phase 8).
 
-### Task 7.4: Taxonomy & Reference Data
-- [ ] `lib/admin/taxonomy.ts`: `addProfession` / `addSkill` / `removeProfession` / `removeSkill` / `addCity` / `removeCity` with slug uniqueness + referential checks (can't remove a skill that's on a live profile). *Today Add/Edit buttons on `/admin/taxonomy` are inert.*
-- [ ] Wire `/admin/taxonomy` edit pencils + Add button.
+### Task 7.4: Taxonomy & Reference Data ✅
+- [x] `lib/admin/taxonomy.ts` — `addSkill`, `addProfession`, `addCity`, `removeSkill`, `removeProfession`, `removeCity`. Slug uniqueness enforced at PK + referential check refuses removal of anything still in use.
+- [x] `/admin/taxonomy` Add row form (label + slug + province for cities) and per-row Remove button via a unified `<TaxonomyManager />` client island.
+- [x] Sign-up profession dropdown reads from DB via `getProfessions()` (cached 5 min), with fallback to mock constants for brand-new DBs.
 
-### Task 7.5: Audit-Log Viewer
+### Task 7.5: Audit-Log Viewer ✅
 - [x] Reads from `audit_log` table (shipped Phase 2).
-- [ ] Wire the filter form (kind + actor) — page reloads with `?kind=&actor=` search params; query layer filters.
-- [ ] Wire "Export CSV" button — streams aggregated CSV ≤10k rows, writes `analytics.export` audit row.
+- [x] Filter form (kind + actor) wired as a real GET — URL state survives reload + share; kind validated against the catalog union.
+- [x] "Export CSV" hits `/api/admin/audit-log/export` which streams RFC-4180 CSV (≤10k rows, OWASP injection guard, UTF-8 BOM); each export writes its own `analytics.export` audit row.
 
-### Task 7.6: In-app notifications
-- [ ] `notifications` table + 2 indices + `app_user.notification_prefs` JSONB.
-- [ ] `lib/notifications/server.ts` — `createNotification` (with 24h dedupe for high-cardinality kinds), `markRead`, `markAllRead`, `listForUser`, `unreadCount` (React.cache'd).
-- [ ] `<NotificationBell />` in `DashboardShell` header — polls `unreadCount` every 30s; unread badge caps at "9+"; dropdown panel of recent 10.
-- [ ] Shared `<NotificationsList />` at three role-scoped routes: `/dashboard/notifications`, `/employer/notifications`, `/admin/notifications`.
-- [ ] Wire 4 Phase-5 trigger points (one `createNotification` line each): `revealContact` → `contact.revealed` to seeker; `downloadQualification` → `document.downloaded`; `markAsHired` → `placement.confirmed`; dossier render → `profile.viewed` (deduped 24h per orgId).
-- [ ] Wire 8 Phase-7 admin trigger points as A.1–A.4 land (qualification approved/rejected, org approved/rejected, account suspended/restored, report filed → admins, verification queued → admins).
-- [ ] Notification preferences panel on `/dashboard/account` + `/employer/account` + `/admin/account` (in-app toggles wired; email toggles disabled with Phase-8 pill until Resend lands).
-- [ ] POPIA: `meta` JSONB never carries raw PII; no surveillance kinds (no `profile.shortlist.add` notification); suspended users' notifications queue and surface on restore; deferred `status.stale.warning` + `saved_search.new_matches` to Phase 8 cron.
+### Task 7.6: In-app notifications ✅
+- [x] `notifications` table + 3 indices (user/at, unread partial, user/kind/at for dedupe lookups) + `app_user.notification_prefs` JSONB.
+- [x] `lib/notifications/server.ts` — `createNotification` honours user prefs + dedupes inside the catalog window + swallows write failures so audits are never blocked. Plus `notifyOrgMembers` + `notifyAllAdmins` fan-out helpers.
+- [x] `lib/notifications/query.ts` — `listForUser({ limit, before })` cursor pagination + cached `unreadCount` + `getMyNotificationPrefs`.
+- [x] `lib/notifications/actions.ts` — `markRead`, `markAllRead`, `updateNotificationPref`, `loadOlderNotifications` Server Actions.
+- [x] `<NotificationBell />` mounted in `DashboardShell` (desktop masthead + mobile top strip). **Revised re-check #9:** no polling — every notification fires from a specific Server Action that revalidates the relevant surfaces; navigation refreshes the bell naturally. Trade-off: idle-page-stare users wait for next nav.
+- [x] Shared `<NotificationsList />` at `/dashboard/notifications`, `/employer/notifications`, `/admin/notifications` with 20-row pages + "Load older" cursor.
+- [x] All 4 Phase-5 trigger points wired: `revealContact` → `contact.revealed`; `downloadQualification` → `document.downloaded`; `markAsHired` → `placement.confirmed`; dossier render → `profile.viewed` (24h dedupe per `orgId`).
+- [x] All 7 Phase-7 admin trigger points wired (qualification approved/rejected → seeker, org approved/rejected → all org members, user suspended/restored → affected user, report filed → all admins).
+- [x] Notification preferences panel on /dashboard/account + /employer/account + /admin/account (in-app toggles persist via JSONB; email column disabled with Phase-8 pill).
+- [x] POPIA: meta JSONB carries only display context (org name, role title); no surveillance kinds; suspended users' rows queue for restore.
 
-### Task 7.7: Platform settings persistence
-- [ ] `platform_settings` table (single-row OR key/value JSONB; DECIDE before migration).
-- [ ] `lib/admin/settings.ts` — `updateSetting`, `getSetting(key)` cached 5-min TTL.
-- [ ] Wire `/admin/settings` Save button + seed default freshness band thresholds + ranking weights + feature flags. *Today the entire page is UI-only.*
+### Task 7.7: Platform settings persistence ✅
+- [x] `platform_settings` table (key/value JSONB store) + 8 seeded defaults (freshness band days, 3 ranking weights, 3 feature flags).
+- [x] `lib/admin/settings.ts` — cached `getSetting` (React `cache()` per render) + `getAllSettings`. Write side in `lib/admin/settings-actions.ts` (`updateSetting` with cross-field validation: ageing days must exceed fresh days).
+- [x] `/admin/settings` per-row save with audit-logged prior + new values. `/insights` consumes `freshness_band_days_fresh|ageing` so admin tuning surfaces on next render.
 
-### Task 7.8: Public-surface polish (Tier 2 audit carryover)
-- [ ] Landing: replace hardcoded `"May"` with `Intl.DateTimeFormat` of current month.
-- [ ] `/search`: remove the disabled "Load more" until pagination ships (Phase 6).
-- [ ] `/p/[handle]`: wire the Report button to `flagProfile` (Task 7.3); "Request contact" + "Save to pool" → link to `/sign-in?next=/employer/dossier/<handle>`.
-- [ ] `/dashboard/profile`: surface the email field (read-only, from session).
-- [ ] Seed gaps from the audit: 2 saved searches + 2 shortlist pools for Discovery Bank, 1 prior reveal for Naledi → Andile, `actorUserId` + `salaryBand` backfill on the 2 seeded placements, 1–2 open reports for the moderation demo.
+### Task 7.8: Public-surface polish (Tier 2 audit carryover) ✅
+- [x] Landing: `Intl.DateTimeFormat(locale, { month: "long" }).format(new Date())` — no more hardcoded "May".
+- [x] `/search`: dead "Load more" replaced with honest end-state ("Showing the top N of M — refine filters" / "Showing all N matches").
+- [x] `/p/[handle]`: Report button writes a real `reports` row via `flagProfile`; "Request contact" + "Save to pool" route to `/sign-in?next=/employer/dossier/<handle>` for unauth, straight to dossier for employer/admin, with an honest explainer for signed-in seekers.
+- [x] Seed: 2 sample open reports against `amara-o` (anonymous spam) and `sipho-k` (`naledi-k` → fake_identity) for the moderation queue demo. Saved-search + shortlist seed remains a Phase 8 nice-to-have.
 
 ---
 

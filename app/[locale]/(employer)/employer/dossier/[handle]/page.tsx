@@ -18,6 +18,7 @@ import { getDb } from "@/db/client";
 import * as schema from "@/db/schema";
 import type { ConsentPurpose, ConsentState } from "@/lib/consent";
 import { logAccess } from "@/lib/audit";
+import { createNotification } from "@/lib/notifications/server";
 import { ContactRevealCard } from "@/components/feature/employer/ContactRevealCard";
 import { QualificationDownloadButton } from "@/components/feature/employer/QualificationDownloadButton";
 import { MarkAsHiredCard } from "@/components/feature/employer/MarkAsHiredCard";
@@ -153,6 +154,26 @@ export default async function EmployerDossierPage({
     actor: session.id,
     subject: profileRow.id,
     meta: { orgId: session.orgId, surface: "dossier", handle },
+  });
+
+  // Phase 7 (C.5) — Notify the seeker. createNotification dedupes
+  // per (userId, kind, dedupeKey) inside the catalog's 24h window,
+  // so an employer reloading the dossier 12 times in a day produces
+  // ONE notification, not 12.
+  const orgRow = await db
+    .select({ name: schema.organizations.name })
+    .from(schema.organizations)
+    .where(eq(schema.organizations.id, session.orgId))
+    .limit(1);
+  const orgName = orgRow[0]?.name ?? "An employer";
+  await createNotification({
+    userId: profileRow.userId,
+    kind: "profile.viewed",
+    title: `${orgName} viewed your profile`,
+    body: "Your dossier was opened. No contact details were revealed.",
+    link: "/dashboard/activity",
+    meta: { orgId: session.orgId, orgName },
+    dedupeKey: session.orgId,
   });
 
   // ── Render ───────────────────────────────────────────────────────────────

@@ -3,20 +3,55 @@
 import { useState, useTransition } from "react";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/Button";
-import { CheckCheck, Inbox } from "lucide-react";
-import { markAllRead, markRead } from "@/lib/notifications/actions";
+import { CheckCheck, ChevronDown, Inbox } from "lucide-react";
+import {
+  loadOlderNotifications,
+  markAllRead,
+  markRead,
+} from "@/lib/notifications/actions";
 import type { NotificationItem } from "@/lib/notifications/query";
 
 interface Props {
   initialItems: NotificationItem[];
-  /** "View more / older" link target. Same page; the cursor is encoded as ?before=. */
+  /** Server-resolved hint: was the first page filled? Drives the Load-older affordance. */
+  initialHasMore: boolean;
   emptyState: { title: string; body: string; ctaHref: string; ctaLabel: string };
 }
 
-export function NotificationsList({ initialItems, emptyState }: Props) {
+const PAGE_SIZE = 20;
+
+export function NotificationsList({
+  initialItems,
+  initialHasMore,
+  emptyState,
+}: Props) {
   const [items, setItems] = useState(initialItems);
+  const [hasMore, setHasMore] = useState(initialHasMore);
+  const [loadingOlder, setLoadingOlder] = useState(false);
   const [pending, startTransition] = useTransition();
+  const [loadError, setLoadError] = useState<string | null>(null);
   const unread = items.filter((i) => !i.readAt).length;
+
+  async function loadOlder() {
+    const oldest = items[items.length - 1];
+    if (!oldest) return;
+    setLoadError(null);
+    setLoadingOlder(true);
+    try {
+      const res = await loadOlderNotifications({
+        before: oldest.createdAt,
+        limit: PAGE_SIZE,
+      });
+      if (!res.ok) {
+        setLoadError(res.message);
+        return;
+      }
+      setItems((cur) => [...cur, ...res.items]);
+      if (res.items.length < PAGE_SIZE) setHasMore(false);
+    } finally {
+      setLoadingOlder(false);
+    }
+  }
 
   function markOne(id: string) {
     setItems((cur) =>
@@ -73,7 +108,10 @@ export function NotificationsList({ initialItems, emptyState }: Props) {
           Mark all read
         </Button>
       </div>
-      <ul className="divide-y divide-[color:var(--color-hairline)] overflow-hidden rounded-[var(--radius-md)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)]">
+      <ul
+        aria-busy={loadingOlder}
+        className="divide-y divide-[color:var(--color-hairline)] overflow-hidden rounded-[var(--radius-md)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)]"
+      >
         {items.map((n) => (
           <li
             key={n.id}
@@ -132,6 +170,29 @@ export function NotificationsList({ initialItems, emptyState }: Props) {
           </li>
         ))}
       </ul>
+
+      {hasMore && (
+        <div className="mt-4 flex flex-col items-center gap-2">
+          <Button
+            type="button"
+            variant="ghost"
+            size="md"
+            disabled={loadingOlder}
+            onClick={loadOlder}
+          >
+            <ChevronDown className="size-4" aria-hidden="true" />
+            {loadingOlder ? "Loading older…" : "Load older"}
+          </Button>
+          {loadError && (
+            <p className="text-xs text-[color:var(--color-danger)]">{loadError}</p>
+          )}
+        </div>
+      )}
+      {!hasMore && items.length >= PAGE_SIZE && (
+        <p className="mt-4 text-center text-xs uppercase tracking-[0.18em] text-[color:var(--color-ink-soft)]">
+          You've reached the start of your history.
+        </p>
+      )}
     </>
   );
 }

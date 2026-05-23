@@ -7,6 +7,7 @@ import {
   Users,
   Bell,
   SlidersHorizontal,
+  UserCog,
 } from "lucide-react";
 import type { DashboardNavItem } from "./DashboardShell";
 
@@ -18,7 +19,8 @@ export const ADMIN_NAV: DashboardNavItem[] = [
   { key: "auditLog", label: "Audit log", href: "/admin/audit-log", icon: ScrollText },
   { key: "users", label: "Users", href: "/admin/users", icon: Users },
   { key: "notifications", label: "Notifications", href: "/admin/notifications", icon: Bell },
-  { key: "settings", label: "Settings", href: "/admin/settings", icon: SlidersHorizontal },
+  { key: "settings", label: "Platform settings", href: "/admin/settings", icon: SlidersHorizontal },
+  { key: "account", label: "My account", href: "/admin/account", icon: UserCog },
 ];
 
 export const MOCK_ADMIN = {

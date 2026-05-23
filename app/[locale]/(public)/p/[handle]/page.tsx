@@ -26,6 +26,7 @@ import {
 import { INSTITUTION_KIND_LABEL } from "@/lib/mock/taxonomy";
 import { monthsUntil, nqfShort } from "@/lib/mock/academic";
 import { ReportProfileButton } from "@/components/feature/profile/ReportProfileButton";
+import { getSessionUser } from "@/lib/auth/dal";
 
 interface Props {
   params: Promise<{ locale: string; handle: string }>;
@@ -58,6 +59,19 @@ export default async function ProfilePage({ params }: Props) {
 
   const profile = await dataProvider.getProfile(handle);
   if (!profile) notFound();
+
+  // Route the CTAs based on who's looking. Public visitors → sign-in
+  // with a ?next= cursor back to the dossier. Verified employers →
+  // straight into the dossier. Everyone else (seekers viewing public
+  // profiles) keeps the locked-state copy — the action only makes
+  // sense for employers.
+  const viewer = await getSessionUser();
+  const dossierHref = `/employer/dossier/${profile.handle}`;
+  const ctaHref =
+    viewer?.role === "employer" || viewer?.role === "admin"
+      ? dossierHref
+      : `/sign-in?next=${encodeURIComponent(dossierHref)}`;
+  const ctaEnabled = !viewer || viewer.role === "employer" || viewer.role === "admin";
 
   const t = await getTranslations("profile");
   const tStatus = await getTranslations("status");
@@ -93,6 +107,9 @@ export default async function ProfilePage({ params }: Props) {
           locale={locale}
           tStatus={tStatus}
           t={t}
+          ctaHref={ctaHref}
+          ctaEnabled={ctaEnabled}
+          viewerSignedIn={Boolean(viewer)}
         />
 
         <ProfileBody profile={profile} t={t} locale={locale} />
@@ -113,6 +130,9 @@ async function ProfileHero({
   locale,
   tStatus,
   t,
+  ctaHref,
+  ctaEnabled,
+  viewerSignedIn,
 }: {
   profile: NonNullable<Awaited<ReturnType<typeof dataProvider.getProfile>>>;
   memberSinceFmt: string;
@@ -120,6 +140,11 @@ async function ProfileHero({
   locale: string;
   tStatus: Awaited<ReturnType<typeof getTranslations<"status">>>;
   t: Awaited<ReturnType<typeof getTranslations<"profile">>>;
+  /** Where the "Request contact" / "Save to pool" CTAs route to. */
+  ctaHref: string;
+  /** Whether to surface CTAs at all (false hides them for signed-in seekers). */
+  ctaEnabled: boolean;
+  viewerSignedIn: boolean;
 }) {
   return (
     <section
@@ -228,22 +253,29 @@ async function ProfileHero({
 
             {/* Primary actions */}
             <div className="mt-5 flex flex-col gap-2.5">
-              <button
-                type="button"
-                disabled
-                className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[color:var(--color-ink)] px-5 py-3 text-sm font-medium text-[color:var(--color-paper)] shadow-press transition-transform hover:-translate-y-0.5 disabled:opacity-60"
-              >
-                <Lock className="size-3.5" aria-hidden="true" />
-                Request contact reveal
-              </button>
-              <button
-                type="button"
-                disabled
-                className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-[color:var(--color-ink)] px-5 py-3 text-sm font-medium text-[color:var(--color-ink)] transition-colors hover:bg-[color:var(--color-ink)] hover:text-[color:var(--color-paper)] disabled:opacity-60"
-              >
-                <Bookmark className="size-3.5" aria-hidden="true" />
-                Save to talent pool
-              </button>
+              {ctaEnabled ? (
+                <Link
+                  href={ctaHref}
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[color:var(--color-ink)] px-5 py-3 text-sm font-medium text-[color:var(--color-paper)] shadow-press transition-transform hover:-translate-y-0.5"
+                >
+                  <Lock className="size-3.5" aria-hidden="true" />
+                  {viewerSignedIn ? "Open employer dossier" : "Sign in to request contact"}
+                </Link>
+              ) : (
+                <div className="rounded-md border border-dashed border-[color:var(--color-hairline)] px-4 py-3 text-center text-xs text-[color:var(--color-ink-soft)]">
+                  Contact reveal is an employer flow. Your seeker workspace
+                  doesn't see this action.
+                </div>
+              )}
+              {ctaEnabled && (
+                <Link
+                  href={ctaHref}
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-[color:var(--color-ink)] px-5 py-3 text-sm font-medium text-[color:var(--color-ink)] transition-colors hover:bg-[color:var(--color-ink)] hover:text-[color:var(--color-paper)]"
+                >
+                  <Bookmark className="size-3.5" aria-hidden="true" />
+                  {viewerSignedIn ? "Save to talent pool" : "Sign in to save"}
+                </Link>
+              )}
             </div>
 
             <div className="my-6 h-px bg-[color:var(--color-hairline)]" />

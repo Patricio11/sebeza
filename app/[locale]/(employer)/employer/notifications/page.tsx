@@ -13,7 +13,10 @@ export default async function EmployerNotificationsPage({
   const { locale } = await params;
   setRequestLocale(locale);
   await verifyRole("employer");
-  const items = await listForUser({ limit: 50 });
+  const PAGE = 20;
+  const probe = await listForUser({ limit: PAGE + 1 });
+  const hasMore = probe.length > PAGE;
+  const items = hasMore ? probe.slice(0, PAGE) : probe;
 
   return (
     <DashboardShell
@@ -28,6 +31,7 @@ export default async function EmployerNotificationsPage({
     >
       <NotificationsList
         initialItems={items}
+        initialHasMore={hasMore}
         emptyState={{
           title: "No notifications yet.",
           body: "Saved-search matches and verification decisions will appear here.",

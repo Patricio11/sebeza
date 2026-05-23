@@ -71,6 +71,9 @@ async function Hero({
   locale: string;
 }) {
   const nfmt = new Intl.NumberFormat(locale);
+  const currentMonth = new Intl.DateTimeFormat(locale, { month: "long" }).format(
+    new Date(),
+  );
 
   return (
     <section
@@ -200,7 +203,7 @@ async function Hero({
                   trend="+8.2% MoM"
                 />
                 <DossierStat
-                  label="Confirmed hires · May"
+                  label={`Confirmed hires · ${currentMonth}`}
                   value={
                     <AnimatedCount
                       value={analytics.confirmedHiresThisMonth}
@@ -312,6 +315,9 @@ function PulseStrip({
   confidence: number;
   locale: string;
 }) {
+  const currentMonth = new Intl.DateTimeFormat(locale, { month: "long" }).format(
+    new Date(),
+  );
   return (
     <section
       aria-labelledby="pulse-h"
@@ -359,7 +365,7 @@ function PulseStrip({
             iconRight={<MapPin className="size-4" aria-hidden="true" />}
           />
           <BigStat
-            label="Confirmed hires · May"
+            label={`Confirmed hires · ${currentMonth}`}
             value={
               <AnimatedCount
                 value={analytics.confirmedHiresThisMonth}

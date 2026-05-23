@@ -8,10 +8,10 @@
 import "server-only";
 import { cache } from "react";
 import { getDb } from "@/db/client";
-import { notifications } from "@/db/schema";
+import { appUser, notifications } from "@/db/schema";
 import { and, desc, eq, isNull, lt, sql } from "drizzle-orm";
 import { verifySession } from "@/lib/auth/dal";
-import type { NotificationKind } from "./catalog";
+import type { NotificationKind, NotificationPrefMap } from "./catalog";
 
 export interface NotificationItem {
   id: string;
@@ -81,3 +81,20 @@ export const unreadCount = cache(async (): Promise<number> => {
     );
   return rows[0]?.c ?? 0;
 });
+
+/**
+ * Reads the signed-in user's stored `notification_prefs` JSONB.
+ * Returns `null` when no row has been written yet — the catalog
+ * defaults apply.
+ */
+export async function getMyNotificationPrefs(): Promise<NotificationPrefMap | null> {
+  const session = await verifySession();
+  const db = getDb();
+  const rows = await db
+    .select({ prefs: appUser.notificationPrefs })
+    .from(appUser)
+    .where(eq(appUser.id, session.id))
+    .limit(1);
+  const prefs = rows[0]?.prefs;
+  return (prefs as NotificationPrefMap | null) ?? null;
+}

@@ -19,7 +19,7 @@
 import { randomUUID } from "node:crypto";
 import { getDb } from "@/db/client";
 import { auditLog } from "@/db/schema";
-import { desc } from "drizzle-orm";
+import { and, desc, eq, ilike, or, sql } from "drizzle-orm";
 
 export type AuditKind =
   | "search.profiles"
@@ -131,17 +131,48 @@ export function recentAuditEvents(limit = 50): AuditEvent[] {
   return ring.slice(-limit).reverse();
 }
 
+export interface AuditQueryOpts {
+  limit?: number;
+  /** Exact-match on `audit_log.kind`. */
+  kind?: AuditKind | null;
+  /** Substring match against actor OR subject (handle / userId / orgId). */
+  actor?: string;
+}
+
 /**
  * Recent events from the audit_log table. Used by `/admin/audit-log` when a
  * DB is wired up. Falls back to the ring buffer when no DB is configured.
  */
-export async function recentAuditEventsFromDb(limit = 50): Promise<AuditEvent[]> {
+export async function recentAuditEventsFromDb(
+  opts: AuditQueryOpts | number = {},
+): Promise<AuditEvent[]> {
+  // Backwards-compat: callers that pass a bare `limit` number still work.
+  const normalized: AuditQueryOpts =
+    typeof opts === "number" ? { limit: opts } : opts;
+  const limit = Math.min(normalized.limit ?? 50, 10_000);
+
   if (!dbAvailable()) return recentAuditEvents(limit);
   try {
     const db = getDb();
+
+    const where = [] as Array<ReturnType<typeof sql>>;
+    if (normalized.kind) {
+      where.push(eq(auditLog.kind, normalized.kind));
+    }
+    const trimmed = (normalized.actor ?? "").trim();
+    if (trimmed) {
+      where.push(
+        or(
+          ilike(auditLog.actor, `%${trimmed}%`),
+          ilike(auditLog.subject, `%${trimmed}%`),
+        )!,
+      );
+    }
+
     const rows = await db
       .select()
       .from(auditLog)
+      .where(where.length > 0 ? and(...where) : undefined)
       .orderBy(desc(auditLog.at))
       .limit(limit);
     return rows.map((r) => ({

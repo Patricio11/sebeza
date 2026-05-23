@@ -26,6 +26,7 @@ import {
   type NotificationPref,
   type NotificationPrefMap,
 } from "./catalog";
+import { listForUser, type NotificationItem } from "./query";
 
 export type ActionResult<T extends object = object> =
   | ({ ok: true } & T)
@@ -130,4 +131,27 @@ export async function updateNotificationPref(
   revalidatePath("/employer/account");
   revalidatePath("/admin/account");
   return ok();
+}
+
+/**
+ * Cursor-paginated loader for the "Load older" button on
+ * /dashboard|employer|admin/notifications. Both arguments are
+ * validated inside `listForUser` against the signed-in user.
+ */
+const loadOlderSchema = z.object({
+  before: z.string().min(1),
+  limit: z.number().int().min(1).max(100).optional(),
+});
+
+export async function loadOlderNotifications(
+  input: z.infer<typeof loadOlderSchema>,
+): Promise<ActionResult<{ items: NotificationItem[] }>> {
+  await verifySession();
+  const parsed = loadOlderSchema.safeParse(input);
+  if (!parsed.success) return fail("Invalid cursor.");
+  const items = await listForUser({
+    before: parsed.data.before,
+    limit: parsed.data.limit ?? 20,
+  });
+  return ok({ items });
 }

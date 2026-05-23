@@ -13,7 +13,10 @@ export default async function AdminNotificationsPage({
   const { locale } = await params;
   setRequestLocale(locale);
   await verifyAdmin();
-  const items = await listForUser({ limit: 50 });
+  const PAGE = 20;
+  const probe = await listForUser({ limit: PAGE + 1 });
+  const hasMore = probe.length > PAGE;
+  const items = hasMore ? probe.slice(0, PAGE) : probe;
 
   return (
     <DashboardShell
@@ -28,6 +31,7 @@ export default async function AdminNotificationsPage({
     >
       <NotificationsList
         initialItems={items}
+        initialHasMore={hasMore}
         emptyState={{
           title: "Nothing to triage.",
           body: "When a profile is reported or a queue fills, you'll see it here first.",

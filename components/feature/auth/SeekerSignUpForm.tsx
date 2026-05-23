@@ -11,10 +11,15 @@ import {
 import { Button } from "@/components/ui/Button";
 import {
   PROVINCES,
-  PROFESSIONS,
+  PROFESSIONS as MOCK_PROFESSIONS,
   INSTITUTIONS,
   NQF_LEVELS,
 } from "@/lib/mock/taxonomy";
+
+interface ProfessionOption {
+  slug: string;
+  label: string;
+}
 import {
   CONSENT_PURPOSES,
   REQUIRED_FOR_SEARCHABILITY,
@@ -82,8 +87,14 @@ const initialState: FormState = {
   },
 };
 
-export function SeekerSignUpForm() {
+interface Props {
+  /** DB-backed list; falls back to MOCK_PROFESSIONS if absent. */
+  professions?: ProfessionOption[];
+}
+
+export function SeekerSignUpForm({ professions }: Props = {}) {
   const router = useRouter();
+  const PROFESSIONS = professions && professions.length > 0 ? professions : MOCK_PROFESSIONS;
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [state, setState] = useState<FormState>(initialState);
