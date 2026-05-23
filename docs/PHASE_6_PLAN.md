@@ -89,3 +89,9 @@ The `open_to_internships` / `open_to_graduate_programmes` filter UI deferred fro
 ---
 
 *When this ships: write `docs/completed/PHASE_6_COMPLETE.md` and open `docs/PHASE_7_PLAN.md` (admin shell + 2FA enforcement).*
+
+---
+
+## Overlap note with `PHASE_7_PLAN.md` (admin)
+
+The post-Phase-5 audit (`docs/PHASE_7_PLAN.md` section A.7) already lists `/insights` "Export CSV" as a fix. Owner: whichever phase ships first wires it. If Phase 6 lands first, the export becomes part of the analytics rebuild here and Phase 7 just removes that bullet. If Phase 7 lands first (less likely — Phase 6 is next), Phase 6's analytics page just consumes the export pattern already established. Coordinate before starting either.

@@ -29,7 +29,7 @@ profile experience. **NOT** flashy. (See Rule 1 — this is deliberate, not an o
 - **`MOBILE_PLAN.md`** — mobile-responsiveness phases (M1–M7), all done. The No-Flash Rule made concrete at 360 px.
 - **Phase completion docs** (in `docs/completed/`) — `PHASE_0_COMPLETE.md` · `PHASE_1_COMPLETE.md` · `PHASE_1_5_COMPLETE.md` · `PHASE_2_COMPLETE.md` · `PHASE_3_COMPLETE.md` · `PHASE_4_COMPLETE.md` · `PHASE_5_COMPLETE.md` + archived plan/smoke-test records.
 - **`docs/SECURITY.md`** — three-layer security model (proxy = UX, DAL = real gate, Server Actions = defense-in-depth). Read before touching `lib/auth/*` or adding a new protected page.
-- **Active phase plan** — `PHASE_N_PLAN.md` at the top of `docs/` for the phase being built. Today: `PHASE_6_PLAN.md` (analytics + skills-gap engine — the government wedge).
+- **Active phase plan** — `PHASE_N_PLAN.md` at the top of `docs/` for the phase being built. Today: `PHASE_6_PLAN.md` (analytics + skills-gap engine — the government wedge). `PHASE_7_PLAN.md` is also opened ahead-of-time because the 2026-05-23 audit captured admin/2FA gaps that we want pinned before they're forgotten.
 - **This file** — always-on context + non-negotiable rules. Paste it at the top of every session.
 
 When I give you a Phase: pull design/screen detail from `UX_UI_SPEC.md` and task detail from `ROADMAP.md`.
