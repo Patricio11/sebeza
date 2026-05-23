@@ -28,6 +28,19 @@ For accountability + reversibility. The `audit_log` row is the canonical event; 
 
 ### Re-check #7 — Doc convention (unchanged)
 
+### Re-check #8 — In-app notifications are a separate table, not a view over `audit_log` ✅ LOCKED
+Tempting to derive notifications from `audit_log` rows since the trigger points overlap perfectly. We don't. Reasons:
+
+1. **Different lifetimes.** Audit log is system-of-record for POPIA — retained per policy, never user-deleted. Notifications are UX state — dismissable, prunable, per-user.
+2. **Different cardinality.** One `placement.confirm` audit row → one notification for the *seeker* AND (Phase 7) one for the *admin* (queue stat). Audit rows can't carry recipient targeting cleanly.
+3. **Different shape.** Notifications need `title` + `body` + `link` localised per recipient. Audit rows carry actor/subject ids; rendering them into copy is presentation logic.
+4. **Read-state per user.** A user marking a notification as read shouldn't mutate the audit log.
+
+Cleanest separation: when a Server Action writes an audit row, it ALSO calls `createNotification()` for the affected user(s). The two writes happen in the same transaction so we never drift.
+
+### Re-check #9 — Polling, not WebSockets ✅ LOCKED
+Real-time channels are tempting but a poor fit at our scale + the No-Flash Rule. Bell component polls `unreadCount` every 30 s. That's one cheap indexed query per active session; cluster-friendly; no connection overhead on metered mobile data. Phase 9 may swap to Supabase Realtime if traffic justifies — until then polling is right.
+
 ---
 
 ## Implementation plan
@@ -115,6 +128,126 @@ For accountability + reversibility. The `audit_log` row is the canonical event; 
 
 ---
 
+## C. In-app notifications (Task 7.6)
+
+The Phase 5 reveal / placement / download events already write audit rows but nobody knows about them unless they visit `/dashboard/activity`. Task 7.6 surfaces the same events as **in-app notifications** — bell icon with unread badge, dropdown panel, full-page list. Phase 7 admin actions (suspend / approve / reject / new queue items) naturally fold into the same channel. Phase 8 wires email as a parallel delivery channel using the same trigger points.
+
+### C.1 Schema + migration
+New table `notifications`:
+
+```ts
+notifications (
+  id text PRIMARY KEY,
+  user_id text NOT NULL REFERENCES app_user(id) ON DELETE CASCADE,
+  kind text NOT NULL,              -- e.g. 'contact.revealed'
+  title text NOT NULL,             -- "Discovery Bank revealed your contact"
+  body text,                       -- "Email shared. They have your consent on file (v2.1)."
+  link text,                       -- "/dashboard/activity" — where the bell click goes
+  meta jsonb,                      -- { orgId, orgName, profileId } for re-renders / l10n
+  read_at timestamp,               -- null = unread
+  created_at timestamp DEFAULT now()
+)
+```
+
+Indices:
+- `notifications_user_unread` ON `(user_id, created_at DESC) WHERE read_at IS NULL` — drives the unread-badge query
+- `notifications_user_at` ON `(user_id, created_at DESC)` — drives the dropdown + full page
+
+Per-user notification preferences (a small `notification_prefs` table OR a JSONB column on `app_user` — DECIDE). Plan: JSONB column `app_user.notification_prefs` keyed by `kind`, value `{ inApp: boolean, email: boolean }`. Defaults all `inApp: true, email: false` until Phase 8 ships the email channel.
+
+### C.2 Library — `lib/notifications/server.ts`
+
+```ts
+createNotification({ userId, kind, title, body?, link?, meta? }): Promise<void>
+markRead({ id }): ActionResult
+markAllRead(): ActionResult
+listForUser({ limit?, before? }): NotificationItem[]
+unreadCount(): number  // cached() per render
+```
+
+- `createNotification` is **idempotency-aware** for high-cardinality kinds: if `kind = 'profile.viewed'` and the same `(userId, kind, meta.orgId)` already exists in the last 24h, dedupe (don't ping Andile 12 times because Naledi refreshed the dossier). For lower-cardinality kinds (placement.confirmed, contact.revealed) no dedupe — every reveal is its own event.
+- All actions call `verifySession()` — notifications belong to one user only; cross-user reads forbidden.
+- `listForUser` accepts a `since`/`before` cursor for pagination. Default page size: 20.
+
+### C.3 Bell component (header)
+- New `<NotificationBell />` client island. Polls `unreadCount` every 30 s via a Server Action; renders an unread badge if `>0` (cap label at "9+").
+- Click opens a portaled dropdown panel: recent 10 notifications, click-to-mark-read, "Mark all read" link, "View all →" → `/dashboard/notifications` (role-scoped path).
+- Mounts in `DashboardShell` header for all three roles (seeker, employer, admin). The header on `SiteHeader` (public pages) does NOT mount it — unauth users have nothing to be notified about.
+
+### C.4 Full notifications page
+- One implementation, three route-group entry points so the URL matches the role:
+  - `/dashboard/notifications` (seeker)
+  - `/employer/notifications` (employer)
+  - `/admin/notifications` (admin)
+- All three render the same `<NotificationsList />` component. Pagination via "Load older" cursor.
+- Empty state per role with role-appropriate copy and a link back to the relevant surface (`/search` for seekers' "no activity yet — share your profile" etc.).
+- Update SEEKER_NAV / EMPLOYER_NAV / ADMIN_NAV to include a "Notifications" entry with the unread count as a chip.
+
+### C.5 Wire trigger points
+
+#### Already-shipped Phase 5 actions (one `createNotification` line each)
+
+| Trigger | Action file | Notification | Audience |
+|---|---|---|---|
+| Naledi opens Andile's dossier | `app/[locale]/(employer)/employer/dossier/[handle]/page.tsx` server side | `profile.viewed` (deduped 24h per orgId) | Seeker |
+| `revealContact` | `lib/employer/reveal.ts` | `contact.revealed` | Seeker |
+| `downloadQualification` | `lib/employer/reveal.ts` | `document.downloaded` | Seeker |
+| `markAsHired` | `lib/employer/placements.ts` | `placement.confirmed` | Seeker (plus admin info notification) |
+
+Each `createNotification` writes inside the same `db.transaction` as the existing audit-log + main mutation — drift-free.
+
+#### Phase 7 admin actions (added inline as A.1–A.4 land)
+
+| Trigger | Action | Notification |
+|---|---|---|
+| Admin approves qualification | `approveQualification` (A.2) | `qualification.verified` → seeker |
+| Admin rejects qualification | `rejectQualification` (A.2) | `qualification.rejected` → seeker (with `meta.reason`) |
+| Admin approves org | `approveOrganisation` (A.2) | `org.verified` → all org members |
+| Admin rejects org | `rejectOrganisation` (A.2) | `org.rejected` → all org members |
+| Admin suspends user | `suspendUser` (A.1) | `account.suspended` → user (with `meta.reason`); user is signed out + can't re-sign-in |
+| Admin restores user | `restoreUser` (A.1) | `account.restored` → user |
+| New report filed | `flagProfile` (A.1 from `/p/[handle]`) | `moderation.reported` → ALL admins (multi-recipient) |
+| New verification queued | seeker uploads cert (existing) | `verification.queued` → ALL admins |
+
+For multi-recipient (broadcast-to-admins) we insert one row per admin user. Cheap at our scale; the indexes cover it.
+
+#### Deferred (Phase 8 cron + email)
+- `status.stale.warning` → seeker (nightly cron flips when band crosses)
+- `saved_search.new_matches` → all org members of the saved-search owner org
+
+### C.6 Notification preferences UI
+- `/dashboard/account` (and `/employer/account`, `/admin/account`) gets a "Notifications" panel listing every kind with two toggles (In-app · Email) — email column is disabled with a Phase-8 pill until Resend lands.
+- Server Action `updateNotificationPref({ kind, channel, enabled })` flips the JSONB.
+- `createNotification` honours `inApp = false` and silently skips (still writes the audit row — audit is separate, by design).
+- Each kind ships with a sensible default (e.g. `contact.revealed` defaults to `inApp: true` — POPIA visibility); `profile.viewed` defaults to `inApp: false` because employers viewing a profile dozens of times is noisy.
+
+### C.7 Notification kinds catalog (canonical list)
+
+| Kind | Default in-app | Default email | Audience | Trigger |
+|---|---|---|---|---|
+| `profile.viewed` | off (noisy) | off | Seeker | Dossier render (deduped per org per day) |
+| `contact.revealed` | **on** | off (Phase 8: on) | Seeker | `revealContact` |
+| `document.downloaded` | **on** | off (Phase 8: on) | Seeker | `downloadQualification` |
+| `placement.confirmed` | **on** | off (Phase 8: on) | Seeker | `markAsHired` |
+| `qualification.verified` | **on** | off (Phase 8: on) | Seeker | `approveQualification` |
+| `qualification.rejected` | **on** | off (Phase 8: on) | Seeker | `rejectQualification` |
+| `account.suspended` | **on** | off (Phase 8: on) | Affected user | `suspendUser` |
+| `account.restored` | **on** | off | Affected user | `restoreUser` |
+| `org.verified` | **on** | off (Phase 8: on) | All org members | `approveOrganisation` |
+| `org.rejected` | **on** | off | All org members | `rejectOrganisation` |
+| `moderation.reported` | **on** | off | All admins | Public Report button |
+| `verification.queued` | off (high-volume) | off | All admins | Seeker uploads cert / org submits |
+| `status.stale.warning` | **on** | off (Phase 8: on) | Seeker | Phase 8 cron |
+| `saved_search.new_matches` | **on** | off (Phase 8: on) | All org members | Phase 8 cron |
+
+### C.8 POPIA design notes
+- **Seekers see only events about themselves.** Surveillance kinds (`profile.shortlist.add`) are NOT in the catalog — Discovery Bank does not need a seeker to know they were shortlisted.
+- **The `meta` JSONB never carries raw PII** beyond what the user has already consented to share (org name, role title). Email addresses, ID numbers, document keys never appear in notification rows.
+- **Recipient targeting respects `app_user.suspendedAt`**: suspended users don't get notifications; the rows queue up so when restored they see them.
+- **Audit log is the system-of-record**, notifications are UX state. Deleting a notification row (cleanup) never erases the underlying audit event. Document this in the Privacy page copy.
+
+---
+
 ## Acceptance criteria (Phase 7 is DONE when every box ticks)
 
 ### Admin actions
@@ -138,13 +271,29 @@ For accountability + reversibility. The `audit_log` row is the canonical event; 
 - [ ] /p/[handle] "Request contact" routes to sign-in for unauth, to dossier for verified employer
 - [ ] Every admin button does what its label says — zero dead controls
 
+### In-app notifications (Task 7.6)
+- [ ] Naledi reveals Andile's contact → Andile sees a bell badge within 30 s on any page he's on; clicking lands on `/dashboard/activity` with the highlighted event
+- [ ] Naledi marks Andile as hired → Andile gets a `placement.confirmed` notification AND a prompt to update his employment status
+- [ ] Admin approves a qualification → seeker gets `qualification.verified` notification; reject path includes `meta.reason` in the body
+- [ ] Admin suspends a user → that user gets `account.suspended` (will see it on next sign-in attempt's bounce page) AND every admin gets `moderation.reported` on the originating report
+- [ ] `profile.viewed` is deduped: Naledi refreshing Andile's dossier 5 times in an hour produces ONE notification, not 5
+- [ ] Bell unread badge caps at "9+"
+- [ ] Notifications page paginates ("Load older" cursor)
+- [ ] Mark-all-read works; individual mark-read on click works
+- [ ] `/dashboard/account` notification-prefs panel actually persists toggles (email column disabled with Phase-8 pill)
+- [ ] Suspended user's notifications queue up; they see them on restore
+- [ ] No `meta` field contains raw email / ID / document key on any seeded notification (grep audit)
+
 ---
 
 ## Out of scope for Phase 7
 
 - **Pagination on /search** — Phase 6 (alongside the FTS query rebuild for skills-gap)
-- **Email notifications** for suspend / approve / report events → Phase 8 (Resend)
+- **Email channel for notifications** — Phase 8 wires Resend; the schema already has the `email` toggle on the preferences panel, just disabled
+- **Push notifications (web push / native)** — out of scope entirely until product validates the demand
+- **Real-time delivery (WebSocket / SSE)** — Phase 9 if traffic justifies; polling holds for now
 - **Cron-driven hard-delete of soft-erased users** (30-day window) → Phase 8
+- **`status.stale.warning` + `saved_search.new_matches` notifications** — these need scheduled jobs → Phase 8
 - **Rate limiting via Upstash** → Phase 9 (Better Auth's in-memory limit + 2FA brute-force protection holds for Phase 7)
 - **SAQA / Home Affairs verification adapters** → Phase 8
 
@@ -158,6 +307,13 @@ For accountability + reversibility. The `audit_log` row is the canonical event; 
 - **2FA reset by admin is a privileged escalation path** — only Sebenza-issued admins can do it; double-log the audit row with both the admin actor and the affected user as subject.
 - **Settings persistence cache** — if cache TTL is too long, freshness-band changes don't surface for hours. Default 5 min; consider Redis pub/sub when we move to multi-instance (Phase 9).
 - **Better Auth's `twoFactor` plugin must come BEFORE `nextCookies`** in the plugins array — order matters per their docs. Verify on a fresh build.
+
+### Risks specific to notifications (Task 7.6)
+- **`profile.viewed` notification spam.** Employers reload dossiers; without dedupe, every page render pings the seeker. Mitigation: 24-hour dedupe key `(userId, kind, meta.orgId)` enforced inside `createNotification`. Verify with a brute-force test before sign-off.
+- **Polling cost.** 30s polling for every active dashboard tab → at scale this is the most-called Server Action. Mitigate with React `cache()` on `unreadCount`, and consider raising to 60s if Neon compute time becomes noisy.
+- **Suspended-user notification fan-out.** A bulk admin action that suspends many users at once shouldn't crash trying to write thousands of notification rows. Wrap multi-recipient inserts in batched `INSERT ... VALUES (...)` (max 200 rows per insert) inside a single transaction.
+- **POPIA: notification rows store actor org names + handles.** Confirm with privacy review that "Discovery Bank revealed your contact" doesn't itself constitute a new disclosure beyond the audit log (it's a delivery channel of the same fact). Document this in the Privacy page copy.
+- **Notification cleanup policy.** Without retention, the table grows forever. Plan: notifications older than 90 days are pruned by the Phase 8 nightly cron. Document the policy on the Privacy page (alongside audit-log retention).
 
 ---
 
@@ -183,6 +339,9 @@ Captured during the post-Phase-5 audit before this plan was opened. Every item i
 | Seed: `salary_band`, `actor_user_id` missing on placements | Phase 5 columns not backfilled | A.8 |
 | Seed: 0 saved searches, 0 shortlists, 0 prior reveals | Empty states forever in employer demo | A.8 |
 | Production hardening | Rate-limit, CSP, Sentry, loading.tsx, robots, sitemap | **Phase 9** (explicit) |
+| Trigger points minted by Phase 5 but no user-facing notification | reveal / placement / download / view → silent unless on `/dashboard/activity` | **C.5 (Task 7.6)** |
+| Admin queue events have no admin-visible alert | Phase 7's own A.1/A.2 actions need a delivery channel | **C.5 (Task 7.6)** |
+| Account suspension is silent to the affected user | A.1's `suspendUser` must reach the user | **C.5 (Task 7.6)** |
 
 ---
 
