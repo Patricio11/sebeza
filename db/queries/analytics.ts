@@ -561,7 +561,8 @@ export async function skillsGapTrendQuery(opts: {
 
   // 2. Find a comparison snapshot: most recent capture that's at least
   //    `lookbackDays` old. We pick from national snapshots (province IS NULL).
-  const cmp = unwrap<{ skill: string; gap: number; captured_at: Date }>(
+  // Neon's raw `execute()` returns timestamps as strings, not Date objects.
+  const cmp = unwrap<{ skill: string; gap: number; captured_at: string | Date }>(
     await db.execute(sql`
       WITH latest_capture AS (
         SELECT captured_at
@@ -587,7 +588,7 @@ export async function skillsGapTrendQuery(opts: {
   }
 
   const cmpByName = new Map(cmp.map((r) => [r.skill, r.gap]));
-  const cmpAt = cmp[0]!.captured_at;
+  const cmpAt = new Date(cmp[0]!.captured_at);
   const days = Math.round(
     (Date.now() - cmpAt.getTime()) / (1000 * 60 * 60 * 24),
   );

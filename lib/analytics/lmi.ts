@@ -118,17 +118,22 @@ export async function lmiWithTrend(): Promise<LmiTrend> {
   const db = getDb();
   let previous: LmiTrend["previous"] = null;
   try {
+    // Neon's raw `execute()` returns timestamps as ISO strings, not Date
+    // objects. Normalise through `new Date()` so the output is a canonical
+    // ISO 8601 string regardless.
     const rows = (await db.execute(sql`
       SELECT value, captured_at
       FROM lmi_snapshots
       ORDER BY captured_at DESC
       LIMIT 1
-    `)) as unknown as { rows: Array<{ value: string; captured_at: Date }> };
+    `)) as unknown as {
+      rows: Array<{ value: string; captured_at: string | Date }>;
+    };
     const last = rows.rows[0];
     if (last) {
       previous = {
         value: Number(last.value),
-        capturedAt: last.captured_at.toISOString(),
+        capturedAt: new Date(last.captured_at).toISOString(),
       };
     }
   } catch {

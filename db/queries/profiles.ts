@@ -15,7 +15,7 @@
  */
 
 import "server-only";
-import { sql, eq, desc, asc, and, isNull } from "drizzle-orm";
+import { sql, eq, desc, asc, and, isNull, inArray } from "drizzle-orm";
 import { getDb } from "@/db/client";
 import * as schema from "@/db/schema";
 import { logAccess } from "@/lib/audit";
@@ -164,6 +164,10 @@ export async function searchProfilesQuery(
     ORDER BY score DESC NULLS LAST, p.completeness DESC
     LIMIT ${SEARCH_LIMIT}
   `);
+  // Neon's raw `execute()` returns timestamp columns as ISO strings, not
+  // Date objects (the typed `db.select()` path applies Drizzle column
+  // mappers; raw execute skips them). Type these as `string | Date` and
+  // normalise through `new Date()` below.
   const rows = (result as unknown as { rows: Array<{
     id: string;
     handle: string;
@@ -177,11 +181,11 @@ export async function searchProfilesQuery(
     is_citizen: boolean;
     bio: string | null;
     status: string;
-    status_confirmed_at: Date;
+    status_confirmed_at: string | Date;
     work_availability: string[] | null;
     verification: string;
     completeness: number;
-    member_since: Date;
+    member_since: string | Date;
     score: string;
   }> }).rows;
 
@@ -203,11 +207,11 @@ export async function searchProfilesQuery(
     isCitizen: r.is_citizen,
     bio: r.bio ?? undefined,
     status: r.status as EmploymentStatus,
-    statusConfirmedAt: r.status_confirmed_at.toISOString(),
+    statusConfirmedAt: new Date(r.status_confirmed_at).toISOString(),
     workAvailability: (r.work_availability ?? []) as WorkAvailabilityKind[],
     verification: r.verification as VerificationStatus,
     completeness: r.completeness,
-    memberSince: r.member_since.toISOString(),
+    memberSince: new Date(r.member_since).toISOString(),
     topSkills: skillsByProfile.get(r.id) ?? [],
     score: Number(r.score),
   }));
@@ -356,7 +360,7 @@ async function topSkillsByProfile(
     })
     .from(schema.profileSkills)
     .innerJoin(schema.skills, eq(schema.profileSkills.skillSlug, schema.skills.slug))
-    .where(sql`${schema.profileSkills.profileId} = ANY(${profileIds})`)
+    .where(inArray(schema.profileSkills.profileId, profileIds))
     .orderBy(
       asc(schema.profileSkills.profileId),
       desc(schema.profileSkills.proficiency),
