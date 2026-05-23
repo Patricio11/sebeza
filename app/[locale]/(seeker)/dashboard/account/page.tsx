@@ -9,6 +9,7 @@ import { getMyProfile } from "@/lib/profile/me";
 import { verifyRole } from "@/lib/auth/dal";
 import { ShieldCheck } from "lucide-react";
 import { SignOutButton } from "@/components/feature/auth/SignOutButton";
+import { TwoFactorAccountPanel } from "@/components/feature/auth/TwoFactorAccountPanel";
 
 export default async function AccountPage({
   params,
@@ -82,22 +83,13 @@ export default async function AccountPage({
           >
             {t("twoFactor")}
           </h2>
-          <div className="rounded-[var(--radius-md)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-5">
-            <div className="flex items-center justify-between gap-4">
-              <div>
-                <div className="text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--color-ink-soft)]">
-                  TOTP
-                </div>
-                <div className="font-display text-lg">Not configured</div>
-                <p className="mt-1 text-xs text-[color:var(--color-ink-soft)]">
-                  {t("twoFactorOptionalSeeker")}
-                </p>
-              </div>
-              <Button variant="primary" size="sm" disabled>
-                Configure <span className="ml-2 text-[0.62rem] uppercase tracking-[0.18em]">Phase 7</span>
-              </Button>
-            </div>
-          </div>
+          <TwoFactorAccountPanel
+            enabled={Boolean(session.twoFactorEnabled)}
+            enforced={false}
+          />
+          <p className="mt-2 text-xs text-[color:var(--color-ink-soft)]">
+            {t("twoFactorOptionalSeeker")}
+          </p>
         </section>
 
         <section aria-labelledby="sessions-h" className="md:col-span-2">

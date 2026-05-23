@@ -121,6 +121,11 @@ export const appUser = pgTable("app_user", {
       `{ "contact.revealed": { inApp: true, email: false }, … }`. Missing
       entries fall back to the catalog defaults in lib/notifications. */
   notificationPrefs: jsonb("notification_prefs"),
+  /** Phase 7 (Task 7.2) — managed by Better Auth's `twoFactor` plugin.
+      Flips true once a user verifies their initial TOTP code; gates the
+      `verify-2fa` step on sign-in and the forced-setup redirect for
+      employer/admin accounts. */
+  twoFactorEnabled: boolean("two_factor_enabled").notNull().default(false),
 });
 
 /**
@@ -176,6 +181,28 @@ export const verification = pgTable("verification", {
   expiresAt: timestamp("expires_at").notNull(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+/**
+ * Phase 7 (Task 7.2) — Better Auth `twoFactor` plugin storage.
+ *
+ * One row per user once 2FA has been enabled. `secret` is the TOTP
+ * seed (encrypted by Better Auth); `backupCodes` is a JSON array of
+ * one-time recovery codes hashed at rest. `verified = true` after the
+ * user confirms their first TOTP code.
+ *
+ * Schema matches the plugin's expectations exactly — Drizzle's role
+ * here is just to surface the table for our own queries (e.g. the
+ * admin `reset2faForUser` action).
+ */
+export const twoFactor = pgTable("two_factor", {
+  id: text("id").primaryKey(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => appUser.id, { onDelete: "cascade" }),
+  secret: text("secret").notNull(),
+  backupCodes: text("backup_codes").notNull(),
+  verified: boolean("verified").notNull().default(true),
 });
 
 // ---------- Profiles ----------

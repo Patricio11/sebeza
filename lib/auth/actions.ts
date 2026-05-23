@@ -327,15 +327,33 @@ export async function signIn(
   }
 
   try {
-    const result = await auth.api.signInEmail({
+    const result = (await auth.api.signInEmail({
       body: {
         email: v.email,
         password: v.password,
       },
       asResponse: false,
-    });
+    })) as {
+      user?: { id: string; emailVerified: boolean; role?: string };
+      twoFactorRedirect?: boolean;
+    };
 
-    const u = result.user as { id: string; emailVerified: boolean; role?: string };
+    // Phase 7 (Task 7.2) — 2FA branch. Better Auth signals it has
+    // accepted the password but is holding the session until the user
+    // completes the second factor. The cookie carrying the "2FA
+    // pending" state has already been set; we just route to the verify
+    // page. `next` is preserved so post-verify routing is unchanged.
+    if (result.twoFactorRedirect) {
+      const next = v.next && v.next.startsWith("/") ? v.next : "";
+      const qs = next ? `?next=${encodeURIComponent(next)}` : "";
+      return ok({ next: `/verify-2fa${qs}` });
+    }
+
+    if (!result.user) {
+      // Defensive: signInEmail returned neither user nor 2FA flag.
+      return fail("Sign-in failed. Try again.");
+    }
+    const u = result.user;
     await logAccess({ kind: "auth.signin", actor: u.id });
 
     // Better Auth blocks unverified sign-ins (requireEmailVerification: true)

@@ -43,6 +43,13 @@
       "when": 1779710000000,
       "tag": "0005_phase7_notifications",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1779720000000,
+      "tag": "0006_phase7_two_factor",
+      "breakpoints": true
     }
   ]
 }

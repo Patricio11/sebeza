@@ -70,7 +70,9 @@ export type AuditKind =
   | "org.reject"
   | "taxonomy.add"
   | "taxonomy.remove"
-  | "setting.update";
+  | "setting.update"
+  // Phase 7 (Task 7.2) — admin escape hatch when a user loses device + codes.
+  | "account.2fa.reset";
 
 export interface AuditEvent {
   kind: AuditKind;

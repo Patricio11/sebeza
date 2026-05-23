@@ -51,6 +51,9 @@ export interface SessionUser {
   name: string;
   emailVerified: boolean;
   role: UserRole;
+  /** Phase 7 (Task 7.2) — `true` once the user has confirmed their first
+      TOTP code. Drives the forced-setup gate for employer/admin roles. */
+  twoFactorEnabled: boolean;
 }
 
 export interface OrgContext {
@@ -84,6 +87,7 @@ export const getSessionUser = cache(async (): Promise<SessionUser | null> => {
       name: string;
       emailVerified: boolean;
       role?: UserRole;
+      twoFactorEnabled?: boolean;
     };
 
     return {
@@ -92,6 +96,7 @@ export const getSessionUser = cache(async (): Promise<SessionUser | null> => {
       name: u.name,
       emailVerified: u.emailVerified,
       role: u.role ?? "seeker",
+      twoFactorEnabled: Boolean(u.twoFactorEnabled),
     };
   } catch (e) {
     // Next.js throws `DynamicServerError` (and `NEXT_REDIRECT`) as control-flow
@@ -157,6 +162,7 @@ export async function verifyRole(role: UserRole): Promise<SessionUser> {
   if (user.role !== role && user.role !== "admin") {
     redirect(roleHome(user.role));
   }
+  await enforceTwoFactorSetup(user);
   return user;
 }
 
@@ -166,7 +172,31 @@ export async function verifyRole(role: UserRole): Promise<SessionUser> {
 export async function verifyAdmin(): Promise<SessionUser> {
   const user = await verifySession();
   if (user.role !== "admin") redirect(roleHome(user.role));
+  await enforceTwoFactorSetup(user);
   return user;
+}
+
+/**
+ * Phase 7 (Task 7.2) — Forced 2FA enrollment gate for employer + admin.
+ *
+ * Seekers are not in scope (they use Sebenza on low-end mobile data;
+ * forcing TOTP would lock out the user-base the platform exists for).
+ * Employers + admins control PII access, so 2FA is non-negotiable
+ * once the `feature_flag_2fa_enforced` platform setting is on.
+ *
+ * If the flag is on and they haven't enrolled yet, bounce them to
+ * `/setup-2fa`. The setup page itself calls `verifySession()` (not
+ * `verifyRole`), so it doesn't loop.
+ */
+async function enforceTwoFactorSetup(user: SessionUser): Promise<void> {
+  if (user.role === "seeker") return;
+  if (user.twoFactorEnabled) return;
+  // Lazy-load to avoid pulling the platform-settings module into the
+  // seeker hot path. `getSetting` is React-cached per render.
+  const { getSetting } = await import("@/lib/admin/settings");
+  const enforced = await getSetting<boolean>("feature_flag_2fa_enforced");
+  if (!enforced) return;
+  redirect("/setup-2fa");
 }
 
 /**

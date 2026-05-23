@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { suspendUser, restoreUser, eraseUser } from "@/lib/admin/moderation";
+import { reset2faForUser } from "@/lib/auth/two-factor";
 
 interface Props {
   userId: string;
@@ -9,7 +10,7 @@ interface Props {
   isAdmin: boolean;
 }
 
-type Stage = "idle" | "suspend" | "erase";
+type Stage = "idle" | "suspend" | "erase" | "reset2fa";
 
 export function UserRowActions({ userId, status, isAdmin }: Props) {
   const [pending, startTransition] = useTransition();
@@ -61,6 +62,54 @@ export function UserRowActions({ userId, status, isAdmin }: Props) {
           className="h-9 rounded-[var(--radius-pill)] bg-[color:var(--color-danger)] px-3 text-xs uppercase tracking-[0.18em] text-white disabled:opacity-60"
         >
           {pending ? "…" : "Suspend"}
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            setStage("idle");
+            setReason("");
+            setError(null);
+          }}
+          className="text-xs uppercase tracking-[0.18em] text-[color:var(--color-ink-soft)] hover:text-[color:var(--color-ink)]"
+        >
+          Cancel
+        </button>
+        {error && (
+          <span className="text-xs text-[color:var(--color-danger)]">{error}</span>
+        )}
+      </form>
+    );
+  }
+
+  if (stage === "reset2fa") {
+    return (
+      <form
+        className="flex flex-wrap items-center gap-2"
+        onSubmit={(e) => {
+          e.preventDefault();
+          setError(null);
+          startTransition(async () => {
+            const res = await reset2faForUser({ userId, reason });
+            if (!res.ok) setError(res.message);
+            else setStage("idle");
+          });
+        }}
+      >
+        <input
+          autoFocus
+          required
+          minLength={10}
+          value={reason}
+          onChange={(e) => setReason(e.target.value)}
+          placeholder="Recovery reason (10+ chars)…"
+          className="h-9 w-72 rounded-[var(--radius-sm)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] px-2 text-xs"
+        />
+        <button
+          type="submit"
+          disabled={pending}
+          className="h-9 rounded-[var(--radius-pill)] bg-[color:var(--color-ink)] px-3 text-xs uppercase tracking-[0.18em] text-[color:var(--color-paper)] disabled:opacity-60"
+        >
+          {pending ? "…" : "Reset 2FA"}
         </button>
         <button
           type="button"
@@ -154,6 +203,13 @@ export function UserRowActions({ userId, status, isAdmin }: Props) {
           Suspend
         </button>
       )}
+      <button
+        type="button"
+        onClick={() => setStage("reset2fa")}
+        className="text-xs uppercase tracking-[0.18em] text-[color:var(--color-ink-soft)] hover:text-[color:var(--color-ink)]"
+      >
+        Reset 2FA
+      </button>
       <button
         type="button"
         onClick={() => setStage("erase")}

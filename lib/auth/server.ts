@@ -19,6 +19,7 @@ import "server-only";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
+import { twoFactor } from "better-auth/plugins/two-factor";
 import { getDb } from "@/db/client";
 import * as schema from "@/db/schema";
 import { sendEmail } from "@/lib/email/send";
@@ -43,6 +44,7 @@ export const auth = betterAuth({
       session: schema.session,
       account: schema.account,
       verification: schema.verification,
+      twoFactor: schema.twoFactor,
     },
   }),
 
@@ -121,7 +123,23 @@ export const auth = betterAuth({
    *
    * **Must be the last plugin in the array** per the same docs.
    */
-  plugins: [nextCookies()],
+  plugins: [
+    // Phase 7 (Task 7.2) — TOTP + backup codes. Forced enrollment for
+    // employer + admin sessions runs at the DAL layer; this plugin
+    // just provides the endpoints (/two-factor/enable, /verify-totp,
+    // /verify-backup-code, /generate-backup-codes, /disable).
+    //
+    // Sign-in flow: when 2FA is enabled, signInEmail returns
+    // `{ twoFactorRedirect: true }` instead of a session. Our signIn
+    // Server Action handles that branch by sending the user to
+    // /verify-2fa where the verifyTOTP / verifyBackupCode endpoints
+    // finish the handshake and mint the session.
+    twoFactor({
+      issuer: "Sebenza",
+      skipVerificationOnEnable: false,
+    }),
+    nextCookies(),
+  ],
 });
 
 export type Auth = typeof auth;

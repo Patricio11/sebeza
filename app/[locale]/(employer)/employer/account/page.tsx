@@ -4,9 +4,10 @@ import { EMPLOYER_NAV, MOCK_EMPLOYER } from "@/components/layout/employerNav";
 import { OrgVerificationBanner } from "@/components/layout/OrgVerificationBanner";
 import { TextField } from "@/components/ui/FormField";
 import { Button } from "@/components/ui/Button";
-import { ShieldCheck } from "lucide-react";
 import { SignOutButton } from "@/components/feature/auth/SignOutButton";
-import { verifyRole } from "@/lib/auth/dal";
+import { TwoFactorAccountPanel } from "@/components/feature/auth/TwoFactorAccountPanel";
+import { verifyRole, getSessionUser } from "@/lib/auth/dal";
+import { getSetting } from "@/lib/admin/settings";
 
 export default async function EmployerAccountPage({
   params,
@@ -16,6 +17,8 @@ export default async function EmployerAccountPage({
   const { locale } = await params;
   setRequestLocale(locale);
   await verifyRole("employer");
+  const me = await getSessionUser();
+  const enforced = await getSetting<boolean>("feature_flag_2fa_enforced");
   const t = await getTranslations("employerDash.account");
   const tOuter = await getTranslations("employerDash");
 
@@ -66,19 +69,10 @@ export default async function EmployerAccountPage({
           <h2 className="mb-4 border-b-2 border-[color:var(--color-ink)] pb-2 font-display text-xl">
             {t("twoFactor")}
           </h2>
-          <div className="rounded-[var(--radius-md)] border-2 border-[color:var(--color-brand)] bg-[color:var(--color-brand-tint)] p-5">
-            <div className="flex items-center gap-2 text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--color-brand-strong)]">
-              <ShieldCheck className="size-3.5" aria-hidden="true" />
-              {t("twoFactorRequired")}
-            </div>
-            <div className="mt-1 font-display text-2xl">{t("active")}</div>
-            <p className="mt-2 text-sm text-[color:var(--color-ink-soft)]">
-              TOTP via authenticator app. Last used 12 minutes ago.
-            </p>
-            <Button variant="secondary" size="sm" className="mt-4">
-              {t("configure")}
-            </Button>
-          </div>
+          <TwoFactorAccountPanel
+            enabled={Boolean(me?.twoFactorEnabled)}
+            enforced={enforced}
+          />
         </section>
 
         <section className="md:col-span-2">
