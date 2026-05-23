@@ -6,13 +6,14 @@ import { SAChevron } from "@/components/ui/SAChevron";
 import { dataProvider } from "@/lib/data/provider";
 import { overallFreshnessConfidence } from "@/lib/mock/analytics";
 import {
-  skillsGapQuery,
+  skillsGapTrendQuery,
+  skillDemandQuery,
   supplyHeatmapQuery,
   freshnessBreakdownQuery,
 } from "@/db/queries/analytics";
 import { InsightsCharts } from "@/components/feature/InsightsCharts";
 import { InsightsExportButton } from "@/components/feature/InsightsExportButton";
-import { TrendingUp, AlertCircle } from "lucide-react";
+import { TrendingUp, AlertCircle, ArrowUp, ArrowDown, Minus } from "lucide-react";
 
 /**
  * Re-prerender /insights every 5 min. Aggregates over the live DB; doesn't
@@ -44,13 +45,17 @@ export default async function InsightsPage({
   const t = await getTranslations("insights");
   const tStatus = await getTranslations("status");
 
-  // Parallel load — all four aggregates ship at once.
-  const [analytics, skillsGap, heatmap, freshness] = await Promise.all([
-    dataProvider.getAnalyticsSnapshot(),
-    skillsGapQuery({ top: 20 }),
-    supplyHeatmapQuery(),
-    freshnessBreakdownQuery(),
-  ]);
+  // Parallel load — all five aggregates ship at once. `skillsGapTrendQuery`
+  // is `skillsGapQuery` plus the week-over-week delta arrow column (falls
+  // back to no-delta when there's no prior snapshot yet).
+  const [analytics, skillsGap, skillDemand, heatmap, freshness] =
+    await Promise.all([
+      dataProvider.getAnalyticsSnapshot(),
+      skillsGapTrendQuery({ top: 20, lookbackDays: 7 }),
+      skillDemandQuery({ top: 12 }),
+      supplyHeatmapQuery(),
+      freshnessBreakdownQuery(),
+    ]);
 
   const conf = overallFreshnessConfidence(analytics);
   const nfmt = new Intl.NumberFormat(locale);
@@ -310,6 +315,7 @@ export default async function InsightsPage({
                         <th className="px-5 py-3 font-normal tabular text-right">Matches</th>
                         <th className="px-5 py-3 font-normal tabular text-right">Fresh matches</th>
                         <th className="px-5 py-3 font-normal">Gap</th>
+                        <th className="px-5 py-3 font-normal text-right" title="Change vs last week's snapshot">Δ 7d</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -354,6 +360,9 @@ export default async function InsightsPage({
                                   {nfmt.format(r.gap)}
                                 </span>
                               </div>
+                            </td>
+                            <td className="px-5 py-3 text-right">
+                              <DeltaCell delta={r.gapDelta} />
                             </td>
                           </tr>
                         );
@@ -468,21 +477,36 @@ export default async function InsightsPage({
                             );
                           }
                           const intensity = cell.supply / maxSupply; // 0–1
-                          const alpha = 0.15 + intensity * 0.55;
+                          const mixPercent = Math.round(
+                            (0.15 + intensity * 0.55) * 100,
+                          );
+                          // Province slug for the search deep-link.
+                          const provSlug = prov
+                            .toLowerCase()
+                            .replace(/\s+/g, "-");
                           return (
                             <td
                               key={prof}
-                              className="px-2 py-2 text-center"
+                              className="p-0 text-center"
                               style={{
-                                background: `rgba(0, 107, 60, ${alpha})`,
+                                // CSS color-mix scales opacity off the
+                                // design-system brand colour — no hardcoded
+                                // RGB literals that drift on theme changes.
+                                background: `color-mix(in srgb, var(--color-brand) ${mixPercent}%, transparent)`,
                                 color:
                                   intensity > 0.55
                                     ? "var(--color-paper)"
                                     : "var(--color-ink)",
                               }}
-                              title={`${cell.supply} profile${cell.supply === 1 ? "" : "s"} · ${Math.round(cell.freshness * 100)}% fresh`}
+                              title={`${cell.supply} profile${cell.supply === 1 ? "" : "s"} · ${Math.round(cell.freshness * 100)}% fresh · click to open in search`}
                             >
-                              {cell.supply}
+                              <a
+                                href={`/search?q=${encodeURIComponent(prof)}&province=${encodeURIComponent(provSlug)}`}
+                                className="block px-2 py-2 hover:underline"
+                                aria-label={`${cell.supply} ${prof} in ${prov} — open in search`}
+                              >
+                                {cell.supply}
+                              </a>
                             </td>
                           );
                         })}
@@ -491,6 +515,55 @@ export default async function InsightsPage({
                   </tbody>
                 </table>
               </div>
+            </section>
+          )}
+
+          {/* ── Skill-level demand — finer than profession granularity ─── */}
+          {skillDemand.length > 0 && (
+            <section className="mt-16" aria-labelledby="skill-demand-h">
+              <header className="mb-4 flex items-baseline justify-between border-b-2 border-[color:var(--color-ink)] pb-2">
+                <h2
+                  id="skill-demand-h"
+                  className="font-display text-2xl"
+                >
+                  Skill-level demand · top 12
+                </h2>
+                <span className="hidden text-[0.7rem] uppercase tracking-[0.24em] text-[color:var(--color-ink-soft)] md:inline">
+                  Controlled-vocabulary skills
+                </span>
+              </header>
+              <p className="mb-5 max-w-3xl text-sm text-[color:var(--color-ink-soft)]">
+                Sister view to the profession-level table: which individual
+                <em> skills</em> show up most in employer searches, and how
+                many people on Sebenza carry them. The most unfilled rows
+                are where bursary / SETA investment moves the needle fastest.
+              </p>
+              <ul className="grid gap-3 md:grid-cols-2">
+                {skillDemand.map((s) => {
+                  const gapPositive = s.gap > 0;
+                  return (
+                    <li
+                      key={s.slug}
+                      className="grid grid-cols-[1fr_auto] items-center gap-3 rounded-[var(--radius-sm)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] px-4 py-3"
+                    >
+                      <div className="min-w-0">
+                        <div className="truncate font-medium">{s.skill}</div>
+                        <div className="text-xs text-[color:var(--color-ink-soft)]">
+                          {nfmt.format(s.searches)} searches ·{" "}
+                          {nfmt.format(s.matches)}{" "}
+                          {s.matches === 1 ? "person carries" : "people carry"}
+                        </div>
+                      </div>
+                      <span
+                        className={`font-display tabular text-xl ${gapPositive ? "text-[color:var(--color-danger)]" : "text-[color:var(--color-brand-strong)]"}`}
+                      >
+                        {gapPositive ? "+" : ""}
+                        {nfmt.format(s.gap)}
+                      </span>
+                    </li>
+                  );
+                })}
+              </ul>
             </section>
           )}
 
@@ -523,6 +596,46 @@ export default async function InsightsPage({
       </main>
       <SiteFooter />
     </>
+  );
+}
+
+/**
+ * Δ arrow for the skills-gap table.
+ * - `null` → "—" muted (no prior snapshot to compare against)
+ * - `> 0`  → ⬆ red (gap is widening; demand outpacing supply)
+ * - `< 0`  → ⬇ green (gap is shrinking; supply catching up)
+ * - `= 0`  → − muted (unchanged)
+ */
+function DeltaCell({ delta }: { delta: number | null }) {
+  if (delta === null) {
+    return (
+      <span
+        className="inline-flex items-center text-[color:var(--color-ink-soft)]"
+        title="No prior snapshot to compare against yet"
+      >
+        —
+      </span>
+    );
+  }
+  if (delta === 0) {
+    return (
+      <span className="inline-flex items-center gap-1 text-[color:var(--color-ink-soft)]">
+        <Minus className="size-3.5" aria-hidden="true" />0
+      </span>
+    );
+  }
+  if (delta > 0) {
+    return (
+      <span className="inline-flex items-center gap-1 font-medium text-[color:var(--color-danger)]">
+        <ArrowUp className="size-3.5" aria-hidden="true" />+{delta}
+      </span>
+    );
+  }
+  return (
+    <span className="inline-flex items-center gap-1 font-medium text-[color:var(--color-brand-strong)]">
+      <ArrowDown className="size-3.5" aria-hidden="true" />
+      {delta}
+    </span>
   );
 }
 

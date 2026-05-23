@@ -286,6 +286,31 @@ that registry — we win on **data quality, usability, and analytics.** The syst
 
 ---
 
+## 📈 PHASE 6.5: ANALYTICS POLISH + REAL SEEKER RANK ✅ *(done 2026-05-23)*
+*Goal: Side-phase between Phase 6 and Phase 7 — fix the audit findings + ship the architectural adds that materially upgrade the wedge. See `docs/completed/PHASE_6_5_COMPLETE.md`.*
+
+### Tier 1 — Real fixes
+- [x] CSV formula-injection guard (OWASP — cells starting with `=+-@\t\r` get a `'` prefix; was a real security issue).
+- [x] CSV line endings `\n` → `\r\n` (Windows Excel was garbling imports).
+- [x] Skills-gap join: exact-match → partial-match-both-ways with FILTER + UNION, plus an "orphan demand" row class for terms that don't map to any profession (was systematically undercounting real demand).
+- [x] Heatmap intensity now uses `color-mix(in srgb, var(--color-brand) …)` instead of hardcoded RGB — design-system drift fixed.
+
+### Tier 2 — Architectural adds
+- [x] **`skill_gap_snapshots`** table (migration 0003) — time-series capture of top-N gaps. Nightly Phase 8 cron will own it; admin-triggerable now.
+- [x] **`captureSkillGapSnapshot` + `skillsGapTrendQuery`** — week-over-week delta arrows on `/insights` skills-gap table (fallback to "—" when no prior snapshot yet).
+- [x] **`rankInPoolQuery`** — real `DENSE_RANK() OVER (...)` against the (profession × province) pool with projected rank using a +6 completeness boost per skill. Replaces the hardcoded `currentRank: 0` the compass used.
+- [x] **`skillDemandQuery`** — skill-level granularity (joins against `skills.label` not `professions`). Surfaces "Cybersecurity" gaps that don't map to a profession.
+- [x] **Heatmap drill-down** — every cell links to `/search?q=<profession>&province=<slug>`. Trapped data unlocked.
+
+### Tier 3 — Strategic adds (queued for Phase 9)
+- [ ] PDF report export (print-CSS, no extra dep) — see `docs/PHASE_9_PLAN.md` §A.1
+- [ ] Sebenza Labour Market Index (LMI) — single weekly headline number — §A.2
+- [ ] `/gov` route group with new `gov` role — §A.3
+- [ ] City-level breakdown — §A.4
+- [ ] Holt's linear forecast layer — §A.5
+
+---
+
 ## 🛡️ PHASE 7: ADMIN, MODERATION & NOTIFICATIONS
 *Goal: Keep the database trustworthy + every visible affordance does what it says. See `docs/PHASE_7_PLAN.md` for the full plan including the 2026-05-23 audit findings folded in.*
 
@@ -485,5 +510,5 @@ HR Practitioner · Electrician · Plumber · Accountant · Nurse · Driver · Bo
 ---
 
 *Last Updated: 2026-05-23*
-*Version: 1.8 — Phase 6 complete (skills-gap engine + supply heatmap + freshness tiles + working CSV export + career compass on real demand + internship/graduate search filters) — see `docs/completed/PHASE_6_COMPLETE.md`. Phase 7 (admin + 2FA + notifications + audit polish carryover) opens next — full spec in `docs/PHASE_7_PLAN.md`.*
+*Version: 1.9 — Phase 6.5 polish shipped (CSV injection guard + CRLF + partial-match skills-gap + heatmap CSS var + skill_gap_snapshots time-series + rankInPoolQuery + skillDemandQuery + clickable heatmap + Δ deltas) — see `docs/completed/PHASE_6_5_COMPLETE.md`. Strategic adds queued for Phase 9 (PDF / LMI / `/gov` / city / forecast) — see `docs/PHASE_9_PLAN.md`. Phase 7 (admin + 2FA + notifications) opens next — `docs/PHASE_7_PLAN.md`.*
 *Working name: Sebenza (replace with chosen brand)*

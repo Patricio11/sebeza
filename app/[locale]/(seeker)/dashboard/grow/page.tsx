@@ -6,6 +6,7 @@ import { SEEKER_NAV } from "@/components/layout/seekerNav";
 import { Button } from "@/components/ui/Button";
 import { getMyProfile } from "@/lib/profile/me";
 import { getCompassForProfile } from "@/db/queries/career-compass";
+import { rankInPoolQuery } from "@/db/queries/analytics";
 import {
   PROVIDER_LABEL,
   COST_LABEL,
@@ -52,11 +53,35 @@ export default async function CareerCompassPage({
 
   const t = await getTranslations("seekerDash.grow");
   const tStudent = await getTranslations("seekerDash.grow.student");
-  // Phase 6: compass now reads real demand from `search_events` × the
+  // Phase 6: compass reads real demand from `search_events` × the
   // controlled skill taxonomy, weighted by freshness, scoped to the
   // seeker's province. Student snapshot still uses the curated mock
   // catalog of programmes (real SETA / SAQA partnership lands in Phase 8).
-  const compass = await getCompassForProfile(me);
+  //
+  // Phase 6.5: real rank in (profession × province) pool replaces the
+  // hardcoded `currentRank: 0` the mock compass returned. We splice the
+  // live numbers into the compass headline so the existing UI
+  // re-renders without a template change.
+  const [rawCompass, rank] = await Promise.all([
+    getCompassForProfile(me),
+    rankInPoolQuery({
+      handle: me.handle,
+      profession: me.profession,
+      province: me.province,
+      projectedSkillBoost: 2,
+    }),
+  ]);
+  const compass = rank
+    ? {
+        ...rawCompass,
+        headline: {
+          ...rawCompass.headline,
+          currentRank: rank.rank,
+          projectedRank: rank.projectedRank,
+          poolLabel: rank.poolLabel,
+        },
+      }
+    : rawCompass;
   const student = me.academic ? getStudentSnapshot(me.academic) : null;
   const nfmt = new Intl.NumberFormat(locale);
 

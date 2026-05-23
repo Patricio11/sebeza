@@ -10,6 +10,7 @@ import { getMyProfile } from "@/lib/profile/me";
 import { freshnessSummary } from "@/lib/status";
 import { formatRelativeTime } from "@/lib/utils";
 import { getSeekerActivity } from "@/lib/profile/activity";
+import { rankInPoolQuery } from "@/db/queries/analytics";
 import {
   Eye,
   MessageCircle,
@@ -93,6 +94,15 @@ export default async function SeekerOverviewPage({
   // Empty until Phase 5 starts writing reveal / download events.
   const activity = await getSeekerActivity(me, 6);
 
+  // Real rank in the (profession × province) pool — same blend the search
+  // SQL uses, projected with a +2-skill completeness boost.
+  const rank = await rankInPoolQuery({
+    handle: me.handle,
+    profession: me.profession,
+    province: me.province,
+    projectedSkillBoost: 2,
+  });
+
   return (
     <DashboardShell
       role="seeker"
@@ -155,7 +165,7 @@ export default async function SeekerOverviewPage({
           lastConfirmedLabel={lastConfirmed}
         />
 
-        {/* Rank in search — see your live position in the FTS-ranked pool */}
+        {/* Rank in search — real position in the (profession × province) pool */}
         <section
           aria-labelledby="rank-h"
           className="md:col-span-2 rounded-[var(--radius-md)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-6 md:p-8"
@@ -170,27 +180,56 @@ export default async function SeekerOverviewPage({
             </h2>
           </header>
           <p className="mb-5 text-sm text-[color:var(--color-ink-soft)]">
-            See your live position in the{" "}
+            Your live position in the{" "}
             <em>
               {me.profession} · {me.province}
             </em>{" "}
-            pool. Search runs Postgres FTS ranked by{" "}
+            pool. Ranked by{" "}
             <span className="text-[color:var(--color-ink)]">
-              relevance × freshness × completeness
-            </span>
-            .
+              freshness × completeness × citizen boost
+            </span>{" "}
+            — same blend that drives `/search`.
           </p>
-          <Link
-            href={`/search?query=${encodeURIComponent(me.profession)}&province=${encodeURIComponent(me.province.toLowerCase().replace(/\s+/g, "-"))}`}
-            className="inline-flex items-center gap-2 rounded-[var(--radius-pill)] bg-[color:var(--color-ink)] px-4 py-2 text-sm font-medium text-[color:var(--color-paper)]"
-          >
-            See your pool
-            <ArrowUpRight className="size-3.5" aria-hidden="true" />
-          </Link>
-          <p className="mt-3 text-xs text-[color:var(--color-ink-soft)]">
-            A "your rank" widget that highlights you in the result list comes
-            with the Phase 5 employer reveal flow.
-          </p>
+          {rank ? (
+            <div className="grid grid-cols-[auto_1fr_auto] items-baseline gap-4">
+              <span className="font-display tabular text-[3.5rem] leading-none text-[color:var(--color-ink)]">
+                #{rank.rank}
+              </span>
+              <div className="border-l border-[color:var(--color-hairline)] pl-4 text-sm">
+                <div className="text-xs uppercase tracking-[0.18em] text-[color:var(--color-ink-soft)]">
+                  of {rank.poolTotal} candidates
+                </div>
+                <div className="mt-1">
+                  {rank.projectedRank < rank.rank ? (
+                    <>
+                      Adding 2 skills would move you to{" "}
+                      <span className="font-display tabular text-base text-[color:var(--color-brand-strong)]">
+                        #{rank.projectedRank}
+                      </span>
+                      .
+                    </>
+                  ) : rank.rank === 1 ? (
+                    "You're top of the pool. Keep your status fresh."
+                  ) : (
+                    "Your completeness is already maxed in this pool — keep status confirmed."
+                  )}
+                </div>
+              </div>
+              <Link
+                href={
+                  `/search?q=${encodeURIComponent(me.profession)}&province=${encodeURIComponent(me.province.toLowerCase().replace(/\s+/g, "-"))}` as never
+                }
+                className="text-sm text-[color:var(--color-brand)] hover:underline"
+              >
+                See the pool →
+              </Link>
+            </div>
+          ) : (
+            <div className="text-sm text-[color:var(--color-ink-soft)]">
+              Your profile isn't ranked yet — confirm your status to enter
+              the pool.
+            </div>
+          )}
         </section>
 
         {/* Career compass — strategic glance, drills into /dashboard/grow */}

@@ -394,6 +394,29 @@ export const auditLog = pgTable("audit_log", {
   at: timestamp("at").notNull().defaultNow(),
 });
 
+/**
+ * Time-series snapshots of the skills-gap signal. Captured by
+ * `captureSkillGapSnapshot()` (run nightly by the Phase 8 cron; in the
+ * meantime triggerable manually from the Phase 7 admin surface).
+ *
+ * Each capture writes one row per skill in the top-N gap list, so
+ * comparing two captures by `captured_at` yields the week-over-week
+ * (or month-over-month) delta arrows on `/insights`.
+ *
+ * Province scope: NULL = national snapshot; otherwise the lowercased
+ * province label.
+ */
+export const skillGapSnapshots = pgTable("skill_gap_snapshots", {
+  id: text("id").primaryKey(),
+  capturedAt: timestamp("captured_at").notNull().defaultNow(),
+  skill: text("skill").notNull(),
+  searches: integer("searches").notNull(),
+  matches: integer("matches").notNull(),
+  freshMatches: text("fresh_matches").notNull(), // store as text so numeric precision survives the round-trip
+  gap: integer("gap").notNull(),
+  province: text("province"), // NULL = national
+});
+
 // ---------- Reference / taxonomy ----------
 
 export const provinces = pgTable("provinces", {

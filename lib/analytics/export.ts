@@ -100,7 +100,8 @@ export async function exportInsightsCsv(): Promise<
     lines.push(`trend,${csvCell(t.month)},${t.registrations},${t.placements}`);
   }
 
-  const csv = lines.join("\n");
+  // RFC 4180 line endings — Excel on Windows needs CRLF, others accept it.
+  const csv = lines.join("\r\n");
   const rowCount =
     skillsGap.length +
     heatmap.length +
@@ -129,11 +130,24 @@ export async function exportInsightsCsv(): Promise<
   return ok({ filename, csv, rowCount });
 }
 
-/** Minimal CSV-escape: wrap in quotes if the cell contains comma / quote /
- *  newline, and double up internal quotes per RFC 4180. */
+/**
+ * CSV-escape per RFC 4180 + formula-injection guard.
+ *
+ * Cells starting with `=` `+` `-` `@` `\t` are executed as formulas by
+ * Excel / LibreOffice when the CSV is opened — a malicious search term in
+ * `search_events.terms` would otherwise pop calc on an analyst's machine.
+ * OWASP-recommended fix: prefix the cell with a single quote, which Excel
+ * displays as content and never interprets.
+ *
+ *   https://owasp.org/www-community/attacks/CSV_Injection
+ *
+ * Standard quoting + double-quote escape still applies for cells containing
+ * commas, quotes, or newlines.
+ */
 function csvCell(value: string): string {
-  if (/[",\n]/.test(value)) {
-    return `"${value.replace(/"/g, '""')}"`;
+  const guarded = /^[=+\-@\t\r]/.test(value) ? `'${value}` : value;
+  if (/[",\n\r]/.test(guarded)) {
+    return `"${guarded.replace(/"/g, '""')}"`;
   }
-  return value;
+  return guarded;
 }
