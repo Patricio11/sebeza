@@ -365,7 +365,7 @@ async function PulseStrip({
             >
               South Africa,{" "}
               <span className="italic text-[color:var(--color-sa-gold)]">
-                at work.
+                in motion.
               </span>{" "}
               Right now.
             </h2>
