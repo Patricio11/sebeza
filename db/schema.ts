@@ -15,6 +15,7 @@ import {
   jsonb,
   pgEnum,
   pgTable,
+  primaryKey,
   text,
   timestamp,
 } from "drizzle-orm/pg-core";
@@ -291,10 +292,72 @@ export const placements = pgTable("placements", {
   organizationId: text("organization_id")
     .notNull()
     .references(() => organizations.id),
+  /** Who clicked "Mark as hired". Null for legacy seeded rows; required
+      going forward for accountability. */
+  actorUserId: text("actor_user_id").references(() => appUser.id),
   role: text("role").notNull(),
   city: text("city").notNull(),
   hiredAt: timestamp("hired_at").notNull().defaultNow(),
+  /** Optional salary band (kept private — never in public reads). */
+  salaryBand: text("salary_band"),
 });
+
+/** Saved-search definitions per organisation. Stored filters get re-run
+    by `runSavedSearch` to update `newMatchesCount` — we don't snapshot
+    result rows. Cross-team within an org: every member sees the org's
+    saved searches. */
+export const savedSearches = pgTable("saved_searches", {
+  id: text("id").primaryKey(),
+  organizationId: text("organization_id")
+    .notNull()
+    .references(() => organizations.id, { onDelete: "cascade" }),
+  createdByUserId: text("created_by_user_id")
+    .notNull()
+    .references(() => appUser.id),
+  name: text("name").notNull(),
+  /** Same shape as `SearchFilters` in `lib/mock/types.ts` — kept as JSONB
+      so the schema doesn't need a migration every time we add a filter. */
+  filters: jsonb("filters").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  lastRunAt: timestamp("last_run_at"),
+  newMatchesCount: integer("new_matches_count").notNull().default(0),
+});
+
+/** Talent pools = an org's shortlists. Phase 5 keeps them simple:
+    name + description + members. Phase 6 may add stage/notes per member. */
+export const shortlistPools = pgTable("shortlist_pools", {
+  id: text("id").primaryKey(),
+  organizationId: text("organization_id")
+    .notNull()
+    .references(() => organizations.id, { onDelete: "cascade" }),
+  createdByUserId: text("created_by_user_id")
+    .notNull()
+    .references(() => appUser.id),
+  name: text("name").notNull(),
+  description: text("description"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+/** Many-to-many: which profiles are in which pools. Adding/removing a
+    member is audit-logged (kind=profile.shortlist.add/.remove). */
+export const shortlistMembers = pgTable(
+  "shortlist_members",
+  {
+    poolId: text("pool_id")
+      .notNull()
+      .references(() => shortlistPools.id, { onDelete: "cascade" }),
+    profileId: text("profile_id")
+      .notNull()
+      .references(() => profiles.id, { onDelete: "cascade" }),
+    addedByUserId: text("added_by_user_id")
+      .notNull()
+      .references(() => appUser.id),
+    addedAt: timestamp("added_at").notNull().defaultNow(),
+  },
+  (t) => ({
+    pk: primaryKey({ columns: [t.poolId, t.profileId] }),
+  }),
+);
 
 // ---------- Search analytics (skills-gap signal) ----------
 

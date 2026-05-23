@@ -237,22 +237,25 @@ that registry — we win on **data quality, usability, and analytics.** The syst
 
 ---
 
-## 🏢 PHASE 5: THE EMPLOYER PORTAL
-*Goal: Employers find, shortlist, contact talent, and — critically — log hires.*
+## 🏢 PHASE 5: THE EMPLOYER PORTAL ✅ *(done 2026-05-23)*
+*Goal: Employers find, shortlist, contact talent, and — critically — log hires. See `docs/completed/PHASE_5_COMPLETE.md`.*
 
 ### Task 5.1: Organization Accounts & KYC Slot
-- [ ] Org profile; `verification_status`; pluggable company-KYC slot (third-party later).
-- [ ] Only `orgVerified` employers can reveal contact/documents (audit-logged each time).
+- [x] Org profile with `verification_status` (Phase 1.5 schema; live read in Phase 5).
+- [x] Only `orgVerified` employers can reveal contact / documents (audit-logged each time via `verifyOrgVerified` guard).
+- [ ] Pluggable third-party KYC adapter → Phase 8 (today admin flips the flag manually).
 
 ### Task 5.2: Search, Shortlist, Contact
-- [ ] Saved searches + shortlists (talent pools).
-- [ ] Contact/reveal flow → consent check → audit log entry.
-- [ ] Notifications to seeker when contacted (Resend).
+- [x] Saved searches + shortlists (talent pools) — per-org CRUD, `searchSnapshot ≠ result-set` (only count + lastRunAt stored).
+- [x] Contact reveal flow — three-lock gate (verified org × consent × audit). `revealContact` returns `{ email, city, consentVersion, revealedAt }`; cached on dossier reload.
+- [x] Document download flow — separate audit kind, 60s signed Supabase URL, gated on `document_sharing` consent.
+- [ ] Resend notification to seeker on contact reveal → Phase 8.
 
 ### Task 5.3: Placement Confirmation (analytics fuel)
-- [ ] "Mark as hired" flow → writes `placements` (profile, org, role, city, date).
-- [ ] Incentive hooks (TBD): why an employer bothers logging — design this, it's the data-quality lever.
-- [ ] On placement, prompt seeker to update status → keeps data fresh and ties the loop.
+- [x] "Mark as hired" flow → writes `placements` (profile, org, role, city, date, salary band private).
+- [x] **30-day reveal gate** — placement requires a prior `profile.contact.reveal` audit row from this org for this profile within the last 30 days (Placement-Truth Rule made enforceable).
+- [x] On placement → `/insights` ISR triggers recompute next visit (5-min window).
+- [ ] Seeker notification "Discovery Bank logged you as hired — update your status?" → Phase 8 with Resend.
 
 ---
 
@@ -444,6 +447,6 @@ HR Practitioner · Electrician · Plumber · Accountant · Nurse · Driver · Bo
 
 ---
 
-*Last Updated: 2026-05-22*
-*Version: 1.5 — Phase 4 complete (Postgres FTS + ranking SQL + real `dbProvider` + signed photo URLs + ISR analytics) — see `docs/completed/PHASE_4_COMPLETE.md`. Phase 5 (employer reveal flow + placement confirmation) opens next — see `docs/PHASE_5_PLAN.md`.*
+*Last Updated: 2026-05-23*
+*Version: 1.6 — Phase 5 complete (employer dossier + audit-logged contact reveal + document download + Placement-Truth Rule with 30-day gate + saved-searches / shortlists CRUD) — see `docs/completed/PHASE_5_COMPLETE.md`. Phase 6 (analytics + skills-gap engine — the government wedge) opens next — see `docs/PHASE_6_PLAN.md`.*
 *Working name: Sebenza (replace with chosen brand)*

@@ -27,9 +27,9 @@ profile experience. **NOT** flashy. (See Rule 1 — this is deliberate, not an o
 - **`ROADMAP.md`** — the phased build plan (Phase 0 → deployment). *What* to build and in what order.
 - **`UX_UI_SPEC.md`** — design system + Phase 1 screen-by-screen UX + the typed mock-data layer + expanded detail for Phases 2–6. *How it looks and behaves.*
 - **`MOBILE_PLAN.md`** — mobile-responsiveness phases (M1–M7), all done. The No-Flash Rule made concrete at 360 px.
-- **Phase completion docs** (in `docs/completed/`) — `PHASE_0_COMPLETE.md` · `PHASE_1_COMPLETE.md` · `PHASE_1_5_COMPLETE.md` · `PHASE_2_COMPLETE.md` · `PHASE_3_COMPLETE.md` · `PHASE_4_COMPLETE.md` + archived plan/smoke-test records (what shipped, when, with verification).
+- **Phase completion docs** (in `docs/completed/`) — `PHASE_0_COMPLETE.md` · `PHASE_1_COMPLETE.md` · `PHASE_1_5_COMPLETE.md` · `PHASE_2_COMPLETE.md` · `PHASE_3_COMPLETE.md` · `PHASE_4_COMPLETE.md` · `PHASE_5_COMPLETE.md` + archived plan/smoke-test records.
 - **`docs/SECURITY.md`** — three-layer security model (proxy = UX, DAL = real gate, Server Actions = defense-in-depth). Read before touching `lib/auth/*` or adding a new protected page.
-- **Active phase plan** — `PHASE_N_PLAN.md` at the top of `docs/` for the phase being built. Today: `PHASE_5_PLAN.md` (employer reveal flow + audited document download + placement confirmation).
+- **Active phase plan** — `PHASE_N_PLAN.md` at the top of `docs/` for the phase being built. Today: `PHASE_6_PLAN.md` (analytics + skills-gap engine — the government wedge).
 - **This file** — always-on context + non-negotiable rules. Paste it at the top of every session.
 
 When I give you a Phase: pull design/screen detail from `UX_UI_SPEC.md` and task detail from `ROADMAP.md`.
@@ -53,7 +53,8 @@ When I give you a Phase: pull design/screen detail from `UX_UI_SPEC.md` and task
 - **Phase 2** (real Better Auth + consent persistence + audit-log persistence + session-based guards + full sign-up / sign-in / sign-out / verify / forgot / reset, with env-driven Mailtrap/Resend transport) — ✅ done 2026-05-22. **2FA enforcement deferred to Phase 7 task 7.2.** See `docs/completed/PHASE_2_COMPLETE.md`.
 - **Phase 3** (profile CRUD via Server Actions + Supabase Storage uploads for CV/cert/photo + the time-aware employment-status engine with dashboard nudge banner) — ✅ done 2026-05-22. See `docs/completed/PHASE_3_COMPLETE.md`.
 - **Phase 4** (Postgres FTS + ranking SQL + real `dbProvider` + signed photo URLs on public reads + ISR analytics) — ✅ done 2026-05-22. `SEBENZA_DATA_PROVIDER=db` is now the default. See `docs/completed/PHASE_4_COMPLETE.md`.
-- **Next:** Phase 5 — employer contact-reveal flow (audit-logged, consent-gated, verified-org-only) + audited document download + "Mark as hired" placement confirmation. Open `docs/PHASE_5_PLAN.md` to start.
+- **Phase 5** (employer dossier `/employer/dossier/[handle]` + audit-logged contact reveal + document download + Placement-Truth Rule with 30-day reveal gate + saved-searches / shortlists CRUD) — ✅ done 2026-05-23. See `docs/completed/PHASE_5_COMPLETE.md`.
+- **Next:** Phase 6 — analytics + skills-gap engine (the government wedge). Real-time workforce visibility, materialised rollups, demand-vs-supply heatmap, career compass on real data, CSV export of aggregates. Open `docs/PHASE_6_PLAN.md` to start.
 
 ---
 

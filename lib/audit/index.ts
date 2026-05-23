@@ -46,7 +46,18 @@ export type AuditKind =
   | "profile.qualification.delete"
   | "profile.qualification.document.upload"
   | "profile.photo.upload"
-  | "profile.photo.remove";
+  | "profile.photo.remove"
+  // Phase 5 — employer reveal flow + placement + org tooling.
+  | "profile.contact.request"
+  | "placement.confirm"
+  | "placement.delete"
+  | "profile.shortlist.add"
+  | "profile.shortlist.remove"
+  | "search.saved"
+  | "search.saved.run"
+  | "search.saved.delete"
+  | "pool.create"
+  | "pool.delete";
 
 export interface AuditEvent {
   kind: AuditKind;
