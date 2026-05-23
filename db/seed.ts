@@ -71,8 +71,12 @@ const id = (prefix: string, slug: string) => `${prefix}_${slug}`;
 async function truncate() {
   console.log("⌫  Truncating tables…");
   // Order respects FK dependencies. RESTART IDENTITY is harmless here.
+  // We deliberately DO NOT truncate `platform_settings` — the migration
+  // seeds default values that should survive a re-seed, and the schema
+  // doesn't reference any user-scoped data here.
   await db.execute(sql`
     TRUNCATE TABLE
+      reports,
       audit_log,
       consents,
       placements,
@@ -363,6 +367,30 @@ function provinceSlugByLabel(label: string): string {
 // Run
 // ────────────────────────────────────────────────────────────────────────────
 
+async function seedPhase7Reports() {
+  console.log("🚩 Phase 7 sample reports (open + closed — for /admin/moderation)…");
+  await db.insert(schema.reports).values([
+    {
+      id: id("rep", "amara-spam"),
+      subjectProfileId: id("prof", "amara-o"),
+      reporterUserId: null, // anonymous public report
+      reason: "spam",
+      note: "Profile bio matches three other recently-removed accounts; suspected mass-signup script.",
+      status: "open",
+      createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2),
+    },
+    {
+      id: id("rep", "sipho-fake"),
+      subjectProfileId: id("prof", "sipho-k"),
+      reporterUserId: id("user", "naledi-k"),
+      reason: "fake_identity",
+      note: "Reporter claims qualifications copied from another LinkedIn profile.",
+      status: "open",
+      createdAt: new Date(Date.now() - 1000 * 60 * 60 * 26),
+    },
+  ]);
+}
+
 async function main() {
   const started = Date.now();
   console.log("🌱 Sebenza seed — Phase 2 starting database\n");
@@ -374,6 +402,7 @@ async function main() {
   await seedAcademicProfiles();
   await seedOrgsAndPlacements();
   await seedConsents();
+  await seedPhase7Reports();
 
   const ms = Date.now() - started;
   console.log(

@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import { INSTITUTION_KIND_LABEL } from "@/lib/mock/taxonomy";
 import { monthsUntil, nqfShort } from "@/lib/mock/academic";
+import { ReportProfileButton } from "@/components/feature/profile/ReportProfileButton";
 
 interface Props {
   params: Promise<{ locale: string; handle: string }>;
@@ -352,7 +353,7 @@ async function ProfileBody({
 
           <GatedSection t={t} />
 
-          <ProfileFooter t={t} />
+          <ProfileFooter handle={profile.handle} t={t} />
         </div>
 
         {/* Sticky right rail — at-a-glance stats and recent activity teaser */}
@@ -843,19 +844,15 @@ function GatedItem({
 // ─────────────────────────────────────────────────────────────────────────────
 
 function ProfileFooter({
+  handle,
   t,
 }: {
+  handle: string;
   t: Awaited<ReturnType<typeof getTranslations<"profile">>>;
 }) {
   return (
-    <footer className="flex items-center justify-between border-t border-dashed border-[color:var(--color-hairline)] pt-5 text-xs text-[color:var(--color-ink-soft)]">
-      <button
-        type="button"
-        className="inline-flex items-center gap-1.5 transition-colors hover:text-[color:var(--color-danger)]"
-      >
-        <Flag className="size-3.5" aria-hidden="true" />
-        {t("report")}
-      </button>
+    <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-dashed border-[color:var(--color-hairline)] pt-5 text-xs text-[color:var(--color-ink-soft)]">
+      <ReportProfileButton handle={handle} label={t("report")} />
       <span className="uppercase tracking-[0.18em]">
         Every reveal on this profile is audit-logged.
       </span>

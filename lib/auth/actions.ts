@@ -297,6 +297,35 @@ export async function signIn(
   if (!parsed.success) return fail("Enter a valid email and password.");
   const v = parsed.data;
 
+  // Phase 7 — before issuing a session, check `app_user.suspended_at` /
+  // `deleted_at`. Both states must block sign-in. We look up by email
+  // first; if it doesn't resolve we fall through to Better Auth which
+  // returns the same generic "incorrect" error (no enumeration).
+  try {
+    const db = getDb();
+    const lookup = await db
+      .select({
+        id: schema.appUser.id,
+        suspendedAt: schema.appUser.suspendedAt,
+        suspendedReason: schema.appUser.suspendedReason,
+        deletedAt: schema.appUser.deletedAt,
+      })
+      .from(schema.appUser)
+      .where(eq(schema.appUser.email, v.email))
+      .limit(1);
+    const account = lookup[0];
+    if (account?.deletedAt) {
+      return fail("This account has been erased.");
+    }
+    if (account?.suspendedAt) {
+      const tail = account.suspendedReason ? `: ${account.suspendedReason}` : ".";
+      return fail(`Your account is suspended${tail}`);
+    }
+  } catch {
+    // DB hiccup shouldn't break the sign-in path; fall through to
+    // Better Auth which returns its standard error envelope.
+  }
+
   try {
     const result = await auth.api.signInEmail({
       body: {

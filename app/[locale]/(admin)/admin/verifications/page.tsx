@@ -2,37 +2,14 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { DashboardShell } from "@/components/layout/DashboardShell";
 import { ADMIN_NAV, MOCK_ADMIN } from "@/components/layout/adminNav";
-import { Button } from "@/components/ui/Button";
 import { VerificationBadge } from "@/components/ui/VerificationBadge";
 import { verifyAdmin } from "@/lib/auth/dal";
-import { FileText, Eye } from "lucide-react";
-
-interface QualSubmission {
-  handle: string;
-  candidate: string;
-  title: string;
-  institution: string;
-  awardedYear: number;
-  submitted: string;
-}
-
-interface OrgSubmission {
-  org: string;
-  registration: string;
-  industry: string;
-  submitted: string;
-}
-
-const QUALS: QualSubmission[] = [
-  { handle: "thandeka-m", candidate: "Thandeka M.", title: "Diploma in Culinary Arts", institution: "Capsicum Culinary Studio", awardedYear: 2014, submitted: "2 days ago" },
-  { handle: "kabelo-m", candidate: "Kabelo M.", title: "Trade Test: Electrician", institution: "INDLELA", awardedYear: 2019, submitted: "Yesterday" },
-  { handle: "lerato-n", candidate: "Lerato N.", title: "BSc Computer Science", institution: "University of the Witwatersrand", awardedYear: 2018, submitted: "4 hours ago" },
-];
-
-const ORGS: OrgSubmission[] = [
-  { org: "Discovery Bank", registration: "1996/004593/06", industry: "Financial services", submitted: "4 hours ago" },
-  { org: "La Colombe Restaurant", registration: "2008/123456/07", industry: "Hospitality", submitted: "Yesterday" },
-];
+import {
+  listPendingQualifications,
+  listPendingOrganisations,
+} from "@/lib/admin/verifications-query";
+import { VerificationActions } from "@/components/feature/admin/VerificationActions";
+import { FileText } from "lucide-react";
 
 export default async function VerificationsPage({
   params,
@@ -48,6 +25,22 @@ export default async function VerificationsPage({
   const active = tab === "organisations" ? "organisations" : "qualifications";
 
   const t = await getTranslations("adminDash.verifications");
+  const [quals, orgs] = await Promise.all([
+    listPendingQualifications(),
+    listPendingOrganisations(),
+  ]);
+
+  const relTime = new Intl.RelativeTimeFormat(locale, { numeric: "auto" });
+  function relative(d: Date | string | null | undefined): string {
+    if (!d) return "—";
+    const at = typeof d === "string" ? new Date(d) : d;
+    const diffMs = Date.now() - at.getTime();
+    const mins = Math.round(diffMs / 60_000);
+    if (mins < 60) return relTime.format(-mins, "minute");
+    const hrs = Math.round(mins / 60);
+    if (hrs < 48) return relTime.format(-hrs, "hour");
+    return relTime.format(-Math.round(hrs / 24), "day");
+  }
 
   return (
     <DashboardShell
@@ -65,79 +58,92 @@ export default async function VerificationsPage({
         <TabLink
           active={active === "qualifications"}
           href={{ pathname: "/admin/verifications", query: { tab: "qualifications" } }}
-          label={`${t("tabs.qualifications")} · ${QUALS.length}`}
+          label={`${t("tabs.qualifications")} · ${quals.length}`}
         />
         <TabLink
           active={active === "organisations"}
           href={{ pathname: "/admin/verifications", query: { tab: "organisations" } }}
-          label={`${t("tabs.organisations")} · ${ORGS.length}`}
+          label={`${t("tabs.organisations")} · ${orgs.length}`}
         />
       </nav>
 
       {active === "qualifications" ? (
-        <ul className="space-y-3">
-          {QUALS.map((q, i) => (
-            <li
-              key={i}
-              className="grid grid-cols-1 gap-4 rounded-[var(--radius-md)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-5 md:grid-cols-[auto_1fr_auto] md:items-center"
-            >
-              <span className="inline-flex size-10 items-center justify-center rounded-[var(--radius-sm)] bg-[color:var(--color-brand-tint)] text-[color:var(--color-brand-strong)]">
-                <FileText className="size-5" aria-hidden="true" />
-              </span>
-              <div>
-                <div className="font-display text-lg">{q.title}</div>
-                <div className="text-sm text-[color:var(--color-ink-soft)]">
-                  {q.institution} · {q.awardedYear}
+        quals.length === 0 ? (
+          <EmptyQueue
+            title="Nothing pending."
+            note="When seekers upload qualification evidence, submissions appear here."
+          />
+        ) : (
+          <ul className="space-y-3">
+            {quals.map((q) => (
+              <li
+                key={q.id}
+                className="grid grid-cols-1 gap-4 rounded-[var(--radius-md)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-5 md:grid-cols-[auto_1fr_auto] md:items-center"
+              >
+                <span className="inline-flex size-10 items-center justify-center rounded-[var(--radius-sm)] bg-[color:var(--color-brand-tint)] text-[color:var(--color-brand-strong)]">
+                  <FileText className="size-5" aria-hidden="true" />
+                </span>
+                <div>
+                  <div className="font-display text-lg">{q.title}</div>
+                  <div className="text-sm text-[color:var(--color-ink-soft)]">
+                    {q.institution}
+                    {q.awardedYear ? ` · ${q.awardedYear}` : ""}
+                  </div>
+                  <div className="mt-1 text-xs text-[color:var(--color-ink-soft)]">
+                    {t("submittedBy")}{" "}
+                    {q.handle ? (
+                      <Link
+                        href={`/p/${q.handle}`}
+                        className="text-[color:var(--color-brand)] hover:underline"
+                      >
+                        {q.candidateName}
+                      </Link>
+                    ) : (
+                      <span>{q.candidateName}</span>
+                    )}
+                  </div>
                 </div>
-                <div className="mt-1 text-xs text-[color:var(--color-ink-soft)]">
-                  {t("submittedBy")}{" "}
-                  <Link
-                    href={`/p/${q.handle}`}
-                    className="text-[color:var(--color-brand)] hover:underline"
-                  >
-                    {q.candidate}
-                  </Link>{" "}
-                  · {t("submittedWhen", { when: q.submitted })}
-                </div>
-              </div>
-              <div className="flex flex-wrap items-center gap-2">
-                <Button variant="ghost" size="sm">
-                  <Eye className="size-4" aria-hidden="true" />
-                  {t("viewEvidence")}
-                </Button>
-                <Button variant="primary" size="sm">{t("approve")}</Button>
-                <Button variant="secondary" size="sm">{t("reject")}</Button>
-              </div>
-            </li>
-          ))}
-        </ul>
+                <VerificationActions
+                  id={q.id}
+                  kind="qualification"
+                  approveLabel={t("approve")}
+                  rejectLabel={t("reject")}
+                />
+              </li>
+            ))}
+          </ul>
+        )
+      ) : orgs.length === 0 ? (
+        <EmptyQueue
+          title="No organisations awaiting verification."
+          note="New employers will appear here after sign-up."
+        />
       ) : (
         <ul className="space-y-3">
-          {ORGS.map((o, i) => (
+          {orgs.map((o) => (
             <li
-              key={i}
+              key={o.id}
               className="grid grid-cols-1 gap-4 rounded-[var(--radius-md)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-5 md:grid-cols-[1fr_auto] md:items-center"
             >
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="font-display text-lg">{o.org}</span>
+                  <span className="font-display text-lg">{o.name}</span>
                   <VerificationBadge state="pending" />
                 </div>
                 <div className="text-sm text-[color:var(--color-ink-soft)]">
-                  CIPC {o.registration} · {o.industry}
+                  {o.registrationNumber ? `CIPC ${o.registrationNumber}` : "No CIPC on file"}
+                  {o.industry ? ` · ${o.industry}` : ""}
                 </div>
                 <div className="mt-1 text-xs text-[color:var(--color-ink-soft)]">
-                  {t("submittedWhen", { when: o.submitted })}
+                  Submitted {relative(o.createdAt)}
                 </div>
               </div>
-              <div className="flex flex-wrap items-center gap-2">
-                <Button variant="ghost" size="sm">
-                  <Eye className="size-4" aria-hidden="true" />
-                  {t("viewEvidence")}
-                </Button>
-                <Button variant="primary" size="sm">{t("approve")}</Button>
-                <Button variant="secondary" size="sm">{t("reject")}</Button>
-              </div>
+              <VerificationActions
+                id={o.id}
+                kind="organisation"
+                approveLabel={t("approve")}
+                rejectLabel={t("reject")}
+              />
             </li>
           ))}
         </ul>
@@ -167,5 +173,14 @@ function TabLink({
     >
       {label}
     </Link>
+  );
+}
+
+function EmptyQueue({ title, note }: { title: string; note: string }) {
+  return (
+    <div className="rounded-[var(--radius-md)] border border-dashed border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-8 text-sm text-[color:var(--color-ink-soft)]">
+      <p className="font-display text-lg text-[color:var(--color-ink)]">{title}</p>
+      <p className="mt-1">{note}</p>
+    </div>
   );
 }

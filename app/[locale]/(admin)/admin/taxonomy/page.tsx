@@ -2,16 +2,12 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { DashboardShell } from "@/components/layout/DashboardShell";
 import { ADMIN_NAV, MOCK_ADMIN } from "@/components/layout/adminNav";
-import { Button } from "@/components/ui/Button";
 import { verifyAdmin } from "@/lib/auth/dal";
-import { PROFESSIONS, SKILLS, PROVINCES } from "@/lib/mock/taxonomy";
-import { Plus, Pencil } from "lucide-react";
-
-type Tab = "professions" | "skills" | "provinces" | "cities";
-
-const CITIES_FLAT = PROVINCES.flatMap((p) =>
-  p.cities.map((c) => ({ ...c, province: p.label })),
-);
+import { loadTaxonomy } from "@/lib/admin/taxonomy-query";
+import {
+  TaxonomyManager,
+  type TaxonomyKind,
+} from "@/components/feature/admin/TaxonomyManager";
 
 export default async function TaxonomyPage({
   params,
@@ -24,11 +20,21 @@ export default async function TaxonomyPage({
   setRequestLocale(locale);
   await verifyAdmin();
   const { tab } = await searchParams;
-  const active: Tab = (
+  const active: TaxonomyKind = (
     tab === "skills" || tab === "provinces" || tab === "cities" ? tab : "professions"
-  ) as Tab;
+  ) as TaxonomyKind;
 
   const t = await getTranslations("adminDash.taxonomy");
+  const data = await loadTaxonomy();
+
+  const rows =
+    active === "skills"
+      ? data.skills
+      : active === "provinces"
+        ? data.provinces
+        : active === "cities"
+          ? data.cities
+          : data.professions;
 
   return (
     <DashboardShell
@@ -40,20 +46,14 @@ export default async function TaxonomyPage({
       pageEyebrow="Reference data"
       pageTitle={t("title")}
       pageSubtitle={t("subtitle")}
-      pageActions={
-        <Button variant="primary" size="md">
-          <Plus className="size-4" aria-hidden="true" />
-          {t("add")}
-        </Button>
-      }
     >
       <nav className="mb-6 flex flex-wrap gap-1 border-b border-[color:var(--color-hairline)]">
         {(
           [
-            ["professions", t("tabs.professions"), PROFESSIONS.length],
-            ["skills", t("tabs.skills"), SKILLS.length],
-            ["provinces", t("tabs.provinces"), PROVINCES.length],
-            ["cities", t("tabs.cities"), CITIES_FLAT.length],
+            ["professions", t("tabs.professions"), data.professions.length],
+            ["skills", t("tabs.skills"), data.skills.length],
+            ["provinces", t("tabs.provinces"), data.provinces.length],
+            ["cities", t("tabs.cities"), data.cities.length],
           ] as const
         ).map(([key, label, count]) => (
           <Link
@@ -71,105 +71,22 @@ export default async function TaxonomyPage({
         ))}
       </nav>
 
-      {/* Desktop table */}
-      <div className="hidden overflow-hidden rounded-[var(--radius-md)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] md:block">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b-2 border-[color:var(--color-ink)] text-left text-[0.7rem] uppercase tracking-[0.18em] text-[color:var(--color-ink-soft)]">
-              <th className="px-5 py-3 font-normal">Label</th>
-              <th className="px-5 py-3 font-normal">Slug</th>
-              {active === "cities" && (
-                <th className="px-5 py-3 font-normal">Province</th>
-              )}
-              <th className="px-5 py-3 font-normal"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {(active === "professions"
-              ? PROFESSIONS.map((p) => ({ ...p, province: undefined }))
-              : active === "skills"
-                ? SKILLS.map((s) => ({ ...s, province: undefined }))
-                : active === "provinces"
-                  ? PROVINCES.map((p) => ({ slug: p.slug, label: p.label, province: undefined }))
-                  : CITIES_FLAT.map((c) => ({ slug: c.slug, label: c.label, province: c.province }))
-            ).map((row) => (
-              <tr key={row.slug} className="border-t border-[color:var(--color-hairline)]">
-                <td className="px-5 py-2.5 font-display text-base">{row.label}</td>
-                <td className="px-5 py-2.5 font-mono text-xs text-[color:var(--color-ink-soft)]">
-                  {row.slug}
-                </td>
-                {active === "cities" && (
-                  <td className="px-5 py-2.5 text-[color:var(--color-ink-soft)]">
-                    {row.province}
-                  </td>
-                )}
-                <td className="px-5 py-2.5 text-right">
-                  <button
-                    type="button"
-                    aria-label="Edit"
-                    className="rounded-[var(--radius-pill)] border border-[color:var(--color-hairline)] p-1.5 text-[color:var(--color-ink-soft)] hover:border-[color:var(--color-ink)] hover:text-[color:var(--color-ink)]"
-                  >
-                    <Pencil className="size-3.5" aria-hidden="true" />
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Mobile cards */}
-      <ul className="space-y-2 md:hidden">
-        {(active === "professions"
-          ? PROFESSIONS.map((p) => ({ ...p, province: undefined as string | undefined }))
-          : active === "skills"
-            ? SKILLS.map((s) => ({ ...s, province: undefined as string | undefined }))
-            : active === "provinces"
-              ? PROVINCES.map((p) => ({
-                  slug: p.slug,
-                  label: p.label,
-                  province: undefined as string | undefined,
-                }))
-              : CITIES_FLAT.map((c) => ({
-                  slug: c.slug,
-                  label: c.label,
-                  province: c.province as string | undefined,
-                }))
-        ).map((row) => (
-          <li
-            key={row.slug}
-            className="flex items-center justify-between gap-3 rounded-xl border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-3"
-          >
-            <div className="min-w-0">
-              <div className="font-display text-base leading-tight">
-                {row.label}
-              </div>
-              <div className="truncate text-xs">
-                <code className="font-mono text-[color:var(--color-ink-soft)]">
-                  {row.slug}
-                </code>
-                {row.province && (
-                  <span className="ml-2 text-[color:var(--color-ink-soft)]">
-                    · {row.province}
-                  </span>
-                )}
-              </div>
-            </div>
-            <button
-              type="button"
-              aria-label="Edit"
-              className="inline-flex size-11 shrink-0 items-center justify-center rounded-full border border-[color:var(--color-hairline)] text-[color:var(--color-ink-soft)] hover:border-[color:var(--color-ink)] hover:text-[color:var(--color-ink)]"
-            >
-              <Pencil className="size-4" aria-hidden="true" />
-            </button>
-          </li>
-        ))}
-      </ul>
+      <TaxonomyManager
+        kind={active}
+        rows={rows}
+        provinces={active === "cities" ? data.provinces : undefined}
+      />
 
       <p className="mt-4 text-xs italic text-[color:var(--color-ink-soft)]">
         Free-text in search is intentionally disabled. The controlled vocabulary
         here is what keeps national analytics meaningful — every search and
-        profile must reduce to a slug.
+        profile must reduce to a slug.{" "}
+        {active === "provinces" && (
+          <span>
+            Provinces are seeded from Stats SA and are not editable from this
+            surface.
+          </span>
+        )}
       </p>
     </DashboardShell>
   );

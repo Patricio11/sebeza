@@ -57,7 +57,20 @@ export type AuditKind =
   | "search.saved.run"
   | "search.saved.delete"
   | "pool.create"
-  | "pool.delete";
+  | "pool.delete"
+  // Phase 7 — admin actions (moderation, verification, taxonomy, users, settings).
+  | "report.flag"
+  | "report.close"
+  | "account.suspend"
+  | "account.restore"
+  | "account.erase"
+  | "verification.approve"
+  | "verification.reject"
+  | "org.approve"
+  | "org.reject"
+  | "taxonomy.add"
+  | "taxonomy.remove"
+  | "setting.update";
 
 export interface AuditEvent {
   kind: AuditKind;

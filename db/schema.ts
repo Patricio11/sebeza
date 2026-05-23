@@ -76,6 +76,22 @@ export const orgMemberRole = pgEnum("organization_member_role", [
   "viewer",
 ]);
 
+/** Phase 7 — moderation reasons. Reporter chooses one when filing. */
+export const reportReason = pgEnum("report_reason", [
+  "fake_identity",
+  "inappropriate",
+  "harassment",
+  "spam",
+  "other",
+]);
+
+/** Phase 7 — moderation lifecycle. */
+export const reportStatus = pgEnum("report_status", [
+  "open",
+  "closed_no_action",
+  "actioned",
+]);
+
 // ---------- Users / roles (Better Auth-compatible) ----------
 
 /**
@@ -95,6 +111,12 @@ export const appUser = pgTable("app_user", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
   deletedAt: timestamp("deleted_at"),
+  /** Phase 7 — admin moderation. Suspended users are bounced at sign-in
+      with a clear "your account is suspended" message; the row stays
+      so we have an audit trail of who suspended whom and when. */
+  suspendedAt: timestamp("suspended_at"),
+  suspendedReason: text("suspended_reason"),
+  suspendedByUserId: text("suspended_by_user_id"),
 });
 
 /**
@@ -392,6 +414,44 @@ export const auditLog = pgTable("audit_log", {
   subject: text("subject"),
   meta: jsonb("meta"),
   at: timestamp("at").notNull().defaultNow(),
+});
+
+/**
+ * Phase 7 — moderation reports. Filed from the public `/p/[handle]`
+ * Report button (`flagProfile`); resolved on `/admin/moderation` by an
+ * admin's `closeReport` or `suspendUser` action.
+ *
+ * Anonymous reports allowed (`reporter_user_id` nullable) — public users
+ * shouldn't have to sign in to flag a bad actor.
+ */
+export const reports = pgTable("reports", {
+  id: text("id").primaryKey(),
+  subjectProfileId: text("subject_profile_id")
+    .notNull()
+    .references(() => profiles.id, { onDelete: "cascade" }),
+  reporterUserId: text("reporter_user_id"),
+  reason: reportReason("reason").notNull(),
+  note: text("note"),
+  status: reportStatus("status").notNull().default("open"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  closedAt: timestamp("closed_at"),
+  closedByUserId: text("closed_by_user_id"),
+  closedReason: text("closed_reason"),
+});
+
+/**
+ * Phase 7 — platform settings as a key/value JSONB store. Replaces the
+ * hardcoded constants the ranking SQL + freshness band engine carry.
+ *
+ * Read via `getSetting(key)` with a 5-min module-scope cache so we don't
+ * hammer the DB. Write via the admin Server Action which invalidates the
+ * cache on update.
+ */
+export const platformSettings = pgTable("platform_settings", {
+  key: text("key").primaryKey(),
+  value: jsonb("value").notNull(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  updatedByUserId: text("updated_by_user_id"),
 });
 
 /**

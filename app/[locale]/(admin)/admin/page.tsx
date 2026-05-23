@@ -4,6 +4,7 @@ import { DashboardShell } from "@/components/layout/DashboardShell";
 import { ADMIN_NAV, MOCK_ADMIN } from "@/components/layout/adminNav";
 import { recentAuditEventsFromDb } from "@/lib/audit";
 import { verifyAdmin } from "@/lib/auth/dal";
+import { adminOverviewCounts } from "@/lib/admin/users";
 import { ShieldCheck, Flag, Users, ScrollText } from "lucide-react";
 
 export default async function AdminOverviewPage({
@@ -16,7 +17,21 @@ export default async function AdminOverviewPage({
   await verifyAdmin();
 
   const t = await getTranslations("adminDash");
-  const events = await recentAuditEventsFromDb(8);
+  const [counts, events] = await Promise.all([
+    adminOverviewCounts(),
+    recentAuditEventsFromDb(8),
+  ]);
+
+  const pendingVerifications = counts.pendingQualifications + counts.pendingOrganisations;
+  const relTime = new Intl.RelativeTimeFormat(locale, { numeric: "auto" });
+  function relative(at: string): string {
+    const diffMs = Date.now() - new Date(at).getTime();
+    const mins = Math.round(diffMs / 60_000);
+    if (mins < 60) return relTime.format(-mins, "minute");
+    const hrs = Math.round(mins / 60);
+    if (hrs < 48) return relTime.format(-hrs, "hour");
+    return relTime.format(-Math.round(hrs / 24), "day");
+  }
 
   return (
     <DashboardShell
@@ -34,27 +49,27 @@ export default async function AdminOverviewPage({
         <KPI
           icon={<ShieldCheck className="size-4" aria-hidden="true" />}
           label={t("overview.kpis.pendingVerifications")}
-          value="14"
+          value={String(pendingVerifications)}
           tone="accent"
           href="/admin/verifications"
         />
         <KPI
           icon={<Flag className="size-4" aria-hidden="true" />}
           label={t("overview.kpis.openReports")}
-          value="3"
+          value={String(counts.openReports)}
           tone="danger"
           href="/admin/moderation"
         />
         <KPI
           icon={<Users className="size-4" aria-hidden="true" />}
           label={t("overview.kpis.newUsersWeek")}
-          value="148"
+          value={String(counts.newUsers7d)}
           tone="brand"
         />
         <KPI
           icon={<ScrollText className="size-4" aria-hidden="true" />}
           label={t("overview.kpis.auditEvents24h")}
-          value={String(events.length || 0)}
+          value={String(counts.auditEvents24h)}
           tone="ink"
           href="/admin/audit-log"
         />
@@ -65,30 +80,46 @@ export default async function AdminOverviewPage({
         <QueueCard
           eyebrow="Queue"
           title="Qualifications awaiting review"
-          count={9}
-          hint="Oldest: 2 days · INDLELA trade test"
+          count={counts.pendingQualifications}
+          hint={
+            counts.pendingQualifications === 0
+              ? "Nothing pending."
+              : `${counts.pendingQualifications} submission(s) waiting.`
+          }
           href="/admin/verifications"
         />
         <QueueCard
           eyebrow="Queue"
           title="Organisations awaiting verification"
-          count={5}
-          hint="Oldest: 4 hours · Discovery Bank"
+          count={counts.pendingOrganisations}
+          hint={
+            counts.pendingOrganisations === 0
+              ? "Nothing pending."
+              : `${counts.pendingOrganisations} organisation(s) waiting.`
+          }
           href="/admin/verifications"
         />
         <QueueCard
           eyebrow="Queue"
           title="Reported profiles"
-          count={3}
-          hint="2 marked spam · 1 suspected fake identity"
+          count={counts.openReports}
+          hint={
+            counts.openReports === 0
+              ? "No open reports."
+              : `${counts.openReports} open report(s).`
+          }
           href="/admin/moderation"
         />
         <QueueCard
-          eyebrow="Reference data"
-          title="Taxonomy proposals"
-          count={2}
-          hint='"Embedded systems engineer" awaiting decision'
-          href="/admin/taxonomy"
+          eyebrow="Lifecycle"
+          title="Suspended accounts"
+          count={counts.suspendedUsers}
+          hint={
+            counts.suspendedUsers === 0
+              ? "No accounts suspended."
+              : "Filter by suspended on /admin/users."
+          }
+          href="/admin/users"
         />
       </section>
 
@@ -97,28 +128,23 @@ export default async function AdminOverviewPage({
         <h2 className="mb-3 border-b-2 border-[color:var(--color-ink)] pb-2 font-display text-2xl">
           {t("overview.recent")}
         </h2>
-        <ol className="divide-y divide-[color:var(--color-hairline)] rounded-[var(--radius-md)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)]">
-          <RecentRow
-            when="12 minutes ago"
-            who="Sebenza · Admin"
-            detail="Approved qualification · INDLELA trade test (Kabelo M.)"
-          />
-          <RecentRow
-            when="2 hours ago"
-            who="Sebenza · Admin"
-            detail="Suspended user @suspect-account after spam report (3 reports)"
-          />
-          <RecentRow
-            when="Yesterday"
-            who="Sebenza · Admin"
-            detail="Added profession: Embedded systems engineer"
-          />
-          <RecentRow
-            when="3 days ago"
-            who="Sebenza · Admin"
-            detail="Exported aggregate insights CSV (audit-logged)"
-          />
-        </ol>
+        {events.length === 0 ? (
+          <p className="rounded-[var(--radius-md)] border border-dashed border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-6 text-sm text-[color:var(--color-ink-soft)]">
+            No admin activity yet. Every action you take here will appear in the
+            audit ledger.
+          </p>
+        ) : (
+          <ol className="divide-y divide-[color:var(--color-hairline)] rounded-[var(--radius-md)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)]">
+            {events.map((e, i) => (
+              <RecentRow
+                key={i}
+                when={relative(e.at)}
+                who={e.actor === "anonymous" ? "Anonymous" : e.actor}
+                detail={`${e.kind}${e.subject ? ` · ${e.subject}` : ""}`}
+              />
+            ))}
+          </ol>
+        )}
       </section>
     </DashboardShell>
   );
@@ -178,7 +204,7 @@ function QueueCard({
   title: string;
   count: number;
   hint: string;
-  href: "/admin/verifications" | "/admin/moderation" | "/admin/taxonomy";
+  href: "/admin/verifications" | "/admin/moderation" | "/admin/taxonomy" | "/admin/users";
 }) {
   return (
     <Link
