@@ -1,5 +1,5 @@
 /**
- * Career compass — skills-growth recommendations for the seeker dashboard.
+ * Career compass  skills-growth recommendations for the seeker dashboard.
  *
  * Anchored on the same `demandBySkill` signal that powers `/insights`. The
  * recommendation logic is intentionally simple in Phase 1.5: pick skills with
@@ -13,7 +13,7 @@
  */
 import type { TaxonomyEntry } from "./types";
 
-/** Why are we recommending this skill — drives the chip on each card. */
+/** Why are we recommending this skill  drives the chip on each card. */
 export type GrowthReason =
   | "demand_high"
   | "common_among_top_ranked"
@@ -58,7 +58,7 @@ export interface LearningPath {
 
 export interface AdjacentProfession {
   profession: TaxonomyEntry;
-  /** 0..1 — how much of the seeker's current skill set overlaps with that role. */
+  /** 0..1  how much of the seeker's current skill set overlaps with that role. */
   overlap: number;
   missingSkills: string[];
   /** Honest demand context in the seeker's province. */
@@ -82,7 +82,7 @@ export interface CompassSnapshot {
 }
 
 // ──────────────────────────────────────────────────────────────────────────────
-// Mock data — keyed to `lerato-n` (Software Developer · Gauteng).
+// Mock data  keyed to `lerato-n` (Software Developer · Gauteng).
 // Phase 6 derives all of this from `searchEvents` + ranking SQL.
 
 export const MOCK_COMPASS: CompassSnapshot = {
@@ -105,7 +105,7 @@ export const MOCK_COMPASS: CompassSnapshot = {
       skill: { slug: "react-native", label: "React Native (mobile)" },
       reason: "adjacent_role",
       detail:
-        "You already have React (5/5). Adding React Native unlocks the Mobile Developer pool — about 60% overlap, growing demand from SA fintech.",
+        "You already have React (5/5). Adding React Native unlocks the Mobile Developer pool  about 60% overlap, growing demand from SA fintech.",
       demandSignal: { searches: 880, matches: 270 },
     },
     {
@@ -119,7 +119,7 @@ export const MOCK_COMPASS: CompassSnapshot = {
       skill: { slug: "data-eng", label: "Data engineering (SQL → Spark/dbt)" },
       reason: "missing_for_role",
       detail:
-        "Your PostgreSQL is strong — extending to pipelines opens the Data Engineer pool, which has the largest gap in Gauteng right now.",
+        "Your PostgreSQL is strong  extending to pipelines opens the Data Engineer pool, which has the largest gap in Gauteng right now.",
       demandSignal: { searches: 1820, matches: 480 },
     },
   ],
@@ -130,7 +130,7 @@ export const MOCK_COMPASS: CompassSnapshot = {
       providerKind: "seta",
       durationWeeks: 48,
       cost: "subsidised",
-      costNote: "Stipend-paying — fully funded for unemployed SA citizens.",
+      costNote: "Stipend-paying  fully funded for unemployed SA citizens.",
       outcome: "NQF Level 5 Cloud Engineer certificate · covers Kubernetes, AWS basics",
       unlocksSkills: ["Kubernetes", "AWS", "CI/CD"],
       national: true,
@@ -147,7 +147,7 @@ export const MOCK_COMPASS: CompassSnapshot = {
       national: true,
     },
     {
-      title: "Wits Plus — Short Course in Cloud Native Development",
+      title: "Wits Plus  Short Course in Cloud Native Development",
       provider: "University of the Witwatersrand (Wits Plus)",
       providerKind: "university",
       durationWeeks: 12,
@@ -162,7 +162,7 @@ export const MOCK_COMPASS: CompassSnapshot = {
       providerKind: "open",
       durationWeeks: 8,
       cost: "free",
-      costNote: "Free. Data charges only — most of it is text-light.",
+      costNote: "Free. Data charges only  most of it is text-light.",
       outcome: "Self-paced. Pair with the CKAD practice exams to validate.",
       unlocksSkills: ["Kubernetes basics"],
       national: true,
@@ -173,7 +173,7 @@ export const MOCK_COMPASS: CompassSnapshot = {
       providerKind: "open",
       durationWeeks: 4,
       cost: "free",
-      costNote: "Free. ~20MB of content total — works on metered data.",
+      costNote: "Free. ~20MB of content total  works on metered data.",
       outcome: "Working knowledge of WCAG 2.2 AA + practical patterns",
       unlocksSkills: ["WCAG 2.2", "ARIA", "Keyboard navigation"],
       national: true,
@@ -192,14 +192,14 @@ export const MOCK_COMPASS: CompassSnapshot = {
       overlap: 0.58,
       missingSkills: ["Spark or dbt", "Cloud data warehousing"],
       demandHint:
-        "Largest skills gap in Gauteng IT right now — 1820 searches vs 480 matches",
+        "Largest skills gap in Gauteng IT right now  1820 searches vs 480 matches",
     },
     {
       profession: { slug: "devops-engineer", label: "DevOps / SRE" },
       overlap: 0.65,
       missingSkills: ["Kubernetes", "Terraform", "Observability stack"],
       demandHint:
-        "Senior bands pay well above SA developer median — Cloud Engineer SETA path covers most of the gap",
+        "Senior bands pay well above SA developer median  Cloud Engineer SETA path covers most of the gap",
     },
   ],
   cityDemand: [

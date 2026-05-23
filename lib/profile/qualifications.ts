@@ -1,14 +1,14 @@
 "use server";
 
 /**
- * Phase 3 — Qualification CRUD + document upload.
+ * Phase 3  Qualification CRUD + document upload.
  *
  * Flow:
- *   1. `addQualification({ title, institution, awardedYear })` — creates a row
+ *   1. `addQualification({ title, institution, awardedYear })`  creates a row
  *       in `unverified` state. No document yet.
- *   2. `uploadQualificationDocument({ qualificationId, file })` — uploads to
+ *   2. `uploadQualificationDocument({ qualificationId, file })`  uploads to
  *       Supabase Storage and writes the storage key onto the row.
- *   3. `deleteQualification(id)` — removes the DB row AND the storage object.
+ *   3. `deleteQualification(id)`  removes the DB row AND the storage object.
  *
  * Documents always live in the private bucket; reads happen via short-lived
  * signed URLs minted by `lib/storage/signed.ts`.
@@ -130,7 +130,7 @@ export async function uploadQualificationDocument(
       try {
         await deleteStorageObject(row.old);
       } catch {
-        // Not fatal — Phase 8 cron sweeps orphans.
+        // Not fatal  Phase 8 cron sweeps orphans.
       }
     }
 
@@ -182,7 +182,7 @@ export async function deleteQualification(id: string): Promise<ActionResult> {
     try {
       await deleteStorageObject(row.key);
     } catch {
-      // Not fatal — Phase 8 cron sweeps orphans.
+      // Not fatal  Phase 8 cron sweeps orphans.
     }
   }
 

@@ -1,12 +1,12 @@
 /**
- * Phase 8 — Nightly outcome-snapshots cron (Phase 7.5.4 hand-off).
+ * Phase 8  Nightly outcome-snapshots cron (Phase 7.5.4 hand-off).
  *
  * Runs `outcomesQuery()` and writes one row to `outcome_snapshots` per
  * cohort cell that cleared the suppression floor at capture time.
  * Diffing two snapshots by `captured_at` yields the year-over-year
  * placement-rate trend.
  *
- * The suppression filter applies to what gets snapshotted — the table
+ * The suppression filter applies to what gets snapshotted  the table
  * never holds below-floor cells, by design.
  */
 
@@ -31,7 +31,7 @@ export async function GET(request: Request) {
         capturedAt: capturedAt.toISOString(),
         rowsCaptured: 0,
         minCohortSize: result.minCohortSize,
-        note: "No cohort cleared the suppression floor — nothing written.",
+        note: "No cohort cleared the suppression floor  nothing written.",
       });
     }
 

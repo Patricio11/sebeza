@@ -1,6 +1,6 @@
 # Data retention policy
 
-> POPIA Section 14 — personal information must not be retained longer
+> POPIA Section 14  personal information must not be retained longer
 > than is necessary for the purpose for which it was collected. Each
 > data category has a documented retention window and an enforcement
 > mechanism. Anything not on this table doesn't exist; if it appears,
@@ -22,8 +22,8 @@ Last updated 2026-05-23.
 | **Notifications** | `notifications` | Same lifecycle as the user account | CASCADE on `app_user` DELETE. Read state never affects retention. |
 | **Audit log** | `audit_log` | **5 years** from event date | Phase 9.x cron `/api/cron/audit-log-prune` (documented below) |
 | **Search events** | `search_events` | 90 days raw; aggregated indefinitely in `skill_gap_snapshots` | Phase 9.x cron prunes raw rows; snapshots retained as policy asset |
-| **Skill-gap snapshots** | `skill_gap_snapshots` | Indefinite (the trend signal compounds in value) | None — append-only |
-| **Outcome snapshots** | `outcome_snapshots` | Indefinite (longitudinal cohort dataset) | None — append-only; cells already k-anonymised at capture |
+| **Skill-gap snapshots** | `skill_gap_snapshots` | Indefinite (the trend signal compounds in value) | None  append-only |
+| **Outcome snapshots** | `outcome_snapshots` | Indefinite (longitudinal cohort dataset) | None  append-only; cells already k-anonymised at capture |
 | **Uploaded files** | Supabase Storage | Same lifecycle as the profile | Hard-delete cron also issues Supabase delete for the user's bucket prefix |
 | **Sessions** | `session` | Better Auth default (30-day rolling) | Plugin handles expiry |
 | **Two-factor secrets + backup codes** | `two_factor` | Same lifecycle as the user account | CASCADE on `app_user` DELETE |
@@ -35,7 +35,7 @@ Last updated 2026-05-23.
 POPIA itself doesn't fix a number. We adopted 5 years because:
 
 1. The **Financial Intelligence Centre Act** requires record retention
-   for 5 years for KYC + transactional records — when our KYC adapter
+   for 5 years for KYC + transactional records  when our KYC adapter
    goes live, the audit log will need to match.
 2. The **Promotion of Administrative Justice Act** envisages a
    reasonable look-back period for administrative decisions; 5 years
@@ -46,7 +46,7 @@ POPIA itself doesn't fix a number. We adopted 5 years because:
 
 The audit-log-prune cron will live at `/api/cron/audit-log-prune` and
 delete any row where `at < now() - interval '5 years'`. Not built yet
-because we have less than a month of audit data — the cron is queued
+because we have less than a month of audit data  the cron is queued
 for the launch checklist.
 
 ## Special handling
@@ -69,7 +69,7 @@ for the launch checklist.
 - Resend stores delivery metadata for ~30 days (their default). We do
   not push PII to email bodies beyond display context (org name, role).
 - Neon retains DB backups for 7 days (PITR window). When we migrate to
-  AWS RDS Cape Town, retention is 35 days per default config — both
+  AWS RDS Cape Town, retention is 35 days per default config  both
   windows are covered by our DPA.
 - KYC SaaS provider retains their own transaction record indefinitely
   (regulatory requirement). The link is the `kyc_transaction_id` field;

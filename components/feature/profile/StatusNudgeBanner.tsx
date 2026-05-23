@@ -3,7 +3,7 @@
 /**
  * Banner that surfaces above the dashboard when a profile's status is ageing
  * or stale. Tied to the same `lib/status.ts` engine that powers ranking +
- * analytics — single source of truth.
+ * analytics  single source of truth.
  *
  * Two emphasis levels:
  *   - ageing (30–90d): soft yellow strip, "still accurate?" tone
@@ -28,7 +28,7 @@ interface Props {
 export function StatusNudgeBanner({ band, days }: Props) {
   const [pending, startTransition] = useTransition();
 
-  // Don't render at all when fresh — keeps the page calm by default.
+  // Don't render at all when fresh  keeps the page calm by default.
   if (band === "fresh") return null;
 
   const urgent = band === "stale";
@@ -66,7 +66,7 @@ export function StatusNudgeBanner({ band, days }: Props) {
           <h2 className="font-display text-lg leading-tight">
             {urgent
               ? `It's been ${days} days since you last confirmed your status.`
-              : `It's been ${days} days — is your status still accurate?`}
+              : `It's been ${days} days  is your status still accurate?`}
           </h2>
           <p className="mt-1 text-sm text-[color:var(--color-ink-soft)]">
             {urgent

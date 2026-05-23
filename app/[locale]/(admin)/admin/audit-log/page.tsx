@@ -9,7 +9,7 @@ import { CustomSelect } from "@/components/ui/CustomSelect";
 import Link from "next/link";
 
 // Catalog of selectable kinds for the filter. Mirrors the AuditKind
-// union but kept compact for the dropdown — admins can type into the
+// union but kept compact for the dropdown  admins can type into the
 // actor field for anything more specific.
 const FILTER_KINDS: { value: string; label: string }[] = [
   { value: "", label: "All kinds" },
@@ -94,7 +94,7 @@ export default async function AuditLogPage({
         </Link>
       }
     >
-      {/* Filters — plain GET form so URL state survives reloads / sharing */}
+      {/* Filters  plain GET form so URL state survives reloads / sharing */}
       <form
         method="get"
         action=""
@@ -180,7 +180,7 @@ export default async function AuditLogPage({
                       </code>
                     </td>
                     <td className="px-5 py-2 text-xs">{e.actor}</td>
-                    <td className="px-5 py-2 text-xs">{e.subject ?? "—"}</td>
+                    <td className="px-5 py-2 text-xs">{e.subject ?? ""}</td>
                   </tr>
                 ))}
               </tbody>
@@ -208,7 +208,7 @@ export default async function AuditLogPage({
                 </div>
                 <div className="text-xs text-[color:var(--color-ink)]">
                   <span className="text-[color:var(--color-ink-soft)]">Subject</span>{" "}
-                  {e.subject ?? "—"}
+                  {e.subject ?? ""}
                 </div>
               </li>
             ))}

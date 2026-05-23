@@ -1,9 +1,9 @@
 /**
- * Phase 8 — Nightly skill-gap snapshot.
+ * Phase 8  Nightly skill-gap snapshot.
  *
  * Calls the existing `captureSkillGapSnapshot()` (Phase 6.5) on a
  * schedule so the Δ deltas on `/insights` always reflect the
- * most-recent vs prior comparison. Idempotent at the row level —
+ * most-recent vs prior comparison. Idempotent at the row level 
  * the table just accumulates timestamped snapshots.
  */
 

@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * "Mark as hired" — the Placement-Truth Rule control.
+ * "Mark as hired"  the Placement-Truth Rule control.
  *
  * Gate: a prior `profile.contact.reveal` must exist for this org+profile
  * in the last 30 days. The server checks this; we mirror the state on
@@ -51,7 +51,7 @@ export function MarkAsHiredCard({
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
-  // Already logged — show the receipt
+  // Already logged  show the receipt
   if (done) {
     return (
       <div className="rounded-[var(--radius-md)] border-2 border-[color:var(--color-employed,#1f7a4a)] bg-[color:var(--color-surface)] p-5">
@@ -75,7 +75,7 @@ export function MarkAsHiredCard({
           <a className="underline" href="/insights">
             national insights
           </a>{" "}
-          — Placement-Truth Rule.
+           Placement-Truth Rule.
         </p>
       </div>
     );

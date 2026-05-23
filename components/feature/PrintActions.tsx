@@ -6,7 +6,7 @@ export function PrintActions() {
   return (
     <div className="no-print mb-6 flex flex-wrap items-center justify-between gap-3 rounded-md border border-dashed border-gray-400 bg-gray-50 px-4 py-3 text-sm">
       <span className="text-gray-700">
-        Print-friendly briefing — File → Print → Save as PDF, or one tap:
+        Print-friendly briefing  File → Print → Save as PDF, or one tap:
       </span>
       <button
         type="button"

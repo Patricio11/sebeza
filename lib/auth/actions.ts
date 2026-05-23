@@ -9,7 +9,7 @@
  *
  * - signIn / signOut delegate to Better Auth.
  *
- * - requestPasswordReset is anti-enumeration — it always returns success even
+ * - requestPasswordReset is anti-enumeration  it always returns success even
  *   when the email isn't on file.
  *
  * - revokeConsent / regrantConsent flip the row in `consents` and write an
@@ -48,7 +48,7 @@ async function createBetterAuthUser(opts: {
   name: string;
   role: SignUpRole;
 }) {
-  // sign-up via Better Auth — hashes the password, emits the verification email.
+  // sign-up via Better Auth  hashes the password, emits the verification email.
   const result = await auth.api.signUpEmail({
     body: {
       email: opts.email,
@@ -78,7 +78,7 @@ export type ActionResult<T extends object = object> =
   | { ok: false; message: string };
 
 // ─────────────────────────────────────────────────────────────────────────────
-// signUpSeeker — wires the 3-step seeker form
+// signUpSeeker  wires the 3-step seeker form
 // ─────────────────────────────────────────────────────────────────────────────
 
 const seekerSignUpSchema = z.object({
@@ -89,7 +89,7 @@ const seekerSignUpSchema = z.object({
   password: z.string().min(10).max(128),
   // Consent purposes the user granted in step 2.
   grantedConsents: z.array(z.enum(CONSENT_PURPOSES)).min(1),
-  // Step 3 — first profile fields
+  // Step 3  first profile fields
   profession: z.string().min(2),
   province: z.string().min(2),
   status: z.enum([
@@ -99,7 +99,7 @@ const seekerSignUpSchema = z.object({
     "studying",
     "open_to_work",
   ]),
-  // Phase 7.5 — optional at sign-up (also editable later from
+  // Phase 7.5  optional at sign-up (also editable later from
   // /dashboard/profile). Empty = no signal.
   workAvailability: z
     .array(z.enum(["casual", "part_time", "contract", "full_time"]))
@@ -173,7 +173,7 @@ export async function signUpSeeker(
         memberSince: new Date(),
       });
 
-      // Consents — granted ones are 'granted', the rest are 'none'.
+      // Consents  granted ones are 'granted', the rest are 'none'.
       await tx.insert(schema.consents).values(
         CONSENT_PURPOSES.map((purpose) => ({
           id: `cns_${user.id}_${purpose}`,
@@ -220,7 +220,7 @@ export async function signUpSeeker(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// signUpEmployer — wires the employer registration form
+// signUpEmployer  wires the employer registration form
 // ─────────────────────────────────────────────────────────────────────────────
 
 const employerSignUpSchema = z.object({
@@ -288,7 +288,7 @@ export async function signUpEmployer(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// signIn — email + password only, server routes by role
+// signIn  email + password only, server routes by role
 // ─────────────────────────────────────────────────────────────────────────────
 
 const signInSchema = z.object({
@@ -304,10 +304,10 @@ export async function signIn(
   if (!parsed.success) return fail("Enter a valid email and password.");
   const v = parsed.data;
 
-  // Phase 9 review (2026-05-23) — deliberately NO per-email sign-in
+  // Phase 9 review (2026-05-23)  deliberately NO per-email sign-in
   // rate limit. Decided after weighing the trade:
   //   1. Better Auth password hashing (scrypt) is intentionally slow
-  //      (~100-200ms per attempt) — that IS the brute-force mitigation.
+  //      (~100-200ms per attempt)  that IS the brute-force mitigation.
   //   2. 2FA enforcement on employer + admin (Phase 7.2).
   //   3. Suspended-user check + the account.suspended notification
   //      surface a compromised account fast.
@@ -316,7 +316,7 @@ export async function signIn(
   // user locked out). Reveal + upload paths DO rate-limit, because
   // their abuse pattern has no legitimate-user collision.
 
-  // Phase 7 — before issuing a session, check `app_user.suspended_at` /
+  // Phase 7  before issuing a session, check `app_user.suspended_at` /
   // `deleted_at`. Both states must block sign-in. We look up by email
   // first; if it doesn't resolve we fall through to Better Auth which
   // returns the same generic "incorrect" error (no enumeration).
@@ -357,7 +357,7 @@ export async function signIn(
       twoFactorRedirect?: boolean;
     };
 
-    // Phase 7 (Task 7.2) — 2FA branch. Better Auth signals it has
+    // Phase 7 (Task 7.2)  2FA branch. Better Auth signals it has
     // accepted the password but is holding the session until the user
     // completes the second factor. The cookie carrying the "2FA
     // pending" state has already been set; we just route to the verify
@@ -376,7 +376,7 @@ export async function signIn(
     await logAccess({ kind: "auth.signin", actor: u.id });
 
     // Better Auth blocks unverified sign-ins (requireEmailVerification: true)
-    // and surfaces the right error — we keep this branch as a belt-and-braces
+    // and surfaces the right error  we keep this branch as a belt-and-braces
     // check in case verification gets toggled off in the future.
     if (!u.emailVerified) {
       return ok({ next: `/verify-email?email=${encodeURIComponent(v.email)}` });
@@ -390,7 +390,7 @@ export async function signIn(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// signOut — clears the session cookie
+// signOut  clears the session cookie
 // ─────────────────────────────────────────────────────────────────────────────
 
 export async function signOut(): Promise<void> {
@@ -463,7 +463,7 @@ export async function resendVerificationEmail(email: string): Promise<ActionResu
       asResponse: false,
     });
   } catch {
-    // ignore — anti-enumeration
+    // ignore  anti-enumeration
   }
   return ok();
 }

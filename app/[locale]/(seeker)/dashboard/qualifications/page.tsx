@@ -54,7 +54,7 @@ export default async function QualificationsPage({
       pageSubtitle={t("subtitle")}
     >
       <div className="grid gap-6 md:grid-cols-3">
-        {/* Verification info — left rail */}
+        {/* Verification info  left rail */}
         <section className="rounded-[var(--radius-md)] border-2 border-dashed border-[color:var(--color-ink)] bg-[color:var(--color-surface-sunk)] p-6 md:col-span-1">
           <div className="text-[0.72rem] uppercase tracking-[0.22em] text-[color:var(--color-ink)]">
             How verification works
@@ -82,7 +82,7 @@ export default async function QualificationsPage({
                 className="mt-0.5 size-4 shrink-0 text-[color:var(--color-brand)]"
                 aria-hidden="true"
               />
-              <span>Files live in a private Supabase Storage bucket — every reveal is audit-logged.</span>
+              <span>Files live in a private Supabase Storage bucket  every reveal is audit-logged.</span>
             </li>
           </ul>
           <p className="mt-5 text-xs text-[color:var(--color-ink-soft)]">

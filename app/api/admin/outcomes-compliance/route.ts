@@ -1,5 +1,5 @@
 /**
- * Phase 7.5.6 — Admin-only smoke check that runs the outcomes-dataset
+ * Phase 7.5.6  Admin-only smoke check that runs the outcomes-dataset
  * compliance assertions against the live DB.
  *
  *   GET /api/admin/outcomes-compliance

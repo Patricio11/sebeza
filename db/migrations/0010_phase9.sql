@@ -1,7 +1,7 @@
--- Phase 9 — Launch-readiness schema add.
+-- Phase 9  Launch-readiness schema add.
 --
 -- Adds the `lmi_snapshots` table for the Sebenza Labour Market Index
--- time-series. Nothing else needs schema changes this phase — POPIA
+-- time-series. Nothing else needs schema changes this phase  POPIA
 -- governance is documents, security hardening is code (CSP headers,
 -- rate-limit module, Sentry skeleton). KYC + SAQA + Sentry remain
 -- dormant behind the existing platform flags / env-var checks.

@@ -1,9 +1,9 @@
-# Phase 9 — Trust, Security & Strategic Hardening · ✅ COMPLETE (2026-05-23, with deferrals)
+# Phase 9  Trust, Security & Strategic Hardening · ✅ COMPLETE (2026-05-23, with deferrals)
 
-> Shipped 2026-05-23. Companion doc: `docs/completed/PHASE_9_COMPLETE.md`. **AWS Cape Town `af-south-1` migration intentionally deferred** — turnkey runbook at `docs/AWS_MIGRATION_RUNBOOK.md` so it lands as a one-day swap when partnership confirms. **All third-party services (Sentry, Upstash, KYC SaaS, SAQA, Resend domain auth) stay dormant by default** — the system runs end-to-end with zero paid credentials.
+> Shipped 2026-05-23. Companion doc: `docs/completed/PHASE_9_COMPLETE.md`. **AWS Cape Town `af-south-1` migration intentionally deferred**  turnkey runbook at `docs/AWS_MIGRATION_RUNBOOK.md` so it lands as a one-day swap when partnership confirms. **All third-party services (Sentry, Upstash, KYC SaaS, SAQA, Resend domain auth) stay dormant by default**  the system runs end-to-end with zero paid credentials.
 
 Opened ahead of time because:
-1. The original ROADMAP Phase 9 was bullet-point only — turning it into a real plan now means future Phase 9 isn't a scramble.
+1. The original ROADMAP Phase 9 was bullet-point only  turning it into a real plan now means future Phase 9 isn't a scramble.
 2. The 2026-05-23 audit + Phase 6 audit surfaced concrete Phase 9 tasks (PDF export, Sebenza LMI, /gov route group, city-level breakdown, forecasting) that need a stable home.
 3. Production hardening (rate limit, CSP, Sentry, loading.tsx, robots.txt) was deferred from every prior phase and needs ownership.
 
@@ -11,28 +11,28 @@ Opened ahead of time because:
 
 ## Re-checks (decide before kickoff)
 
-### Re-check #1 — Postgres → AWS Cape Town `af-south-1` happens last
+### Re-check #1  Postgres → AWS Cape Town `af-south-1` happens last
 Per `docs/TO_START_EVERY_SESSION.md` POPIA hosting path. After Phase 9 work is otherwise complete, freeze writes, `pg_dump | pg_restore`, swap `db/client.ts` driver, smoke. Phase 9 plan organises tasks so the migration is the FINAL milestone, not the first.
 
-### Re-check #2 — `/gov` route group is a separate workspace, not pages bolted onto `/insights`
+### Re-check #2  `/gov` route group is a separate workspace, not pages bolted onto `/insights`
 Government / policy / SETA users want a distinct experience: dashboards, per-province drill-downs, public-good API. Route group `(gov)/gov/...` parallels `(seeker)`, `(employer)`, `(admin)`. Same DAL pattern; new `gov` role in `app_user.role` enum (4th role).
 
-### Re-check #3 — Materialised views ship before public launch
+### Re-check #3  Materialised views ship before public launch
 At 8 profiles, regular queries are sub-10ms. At 50k+ profiles + 100k+ search_events, the skills-gap query becomes expensive. Phase 9 migrates `analyticsSnapshotQuery + skillsGapQuery + supplyHeatmapQuery` to materialised views with concurrent refresh (refresh hourly via Phase 8 cron).
 
-### Re-check #4 — Rate limit + CSP + Sentry are non-negotiable for public launch
+### Re-check #4  Rate limit + CSP + Sentry are non-negotiable for public launch
 The launch checklist already pinned these. Phase 9 wires:
 - Upstash rate limit on auth + search + reveal + upload endpoints
 - CSP headers (script-src, connect-src for Supabase + Resend, frame-ancestors none)
 - Sentry on server + client with PII scrubbing
 
-### Re-check #5 — Forecast layer = simple exponential smoothing, not ML
+### Re-check #5  Forecast layer = simple exponential smoothing, not ML
 Holt's linear method on the weekly snapshot table. One file (`lib/analytics/forecast.ts`), pure TS, no dependencies. Surfaces "based on last 12 weeks, demand for X is growing 8%/month". Anything more sophisticated waits until we have enough data to validate.
 
-### Re-check #6 — PDF export is print-CSS, not react-pdf
-Avoid a dependency. `/insights/print` is a print-friendly route group that the user prints to PDF via the browser. Margins, page breaks, branded header — all handled by CSS `@media print`. Real PDF generation server-side is Phase 10 if the policy partner asks for it.
+### Re-check #6  PDF export is print-CSS, not react-pdf
+Avoid a dependency. `/insights/print` is a print-friendly route group that the user prints to PDF via the browser. Margins, page breaks, branded header  all handled by CSS `@media print`. Real PDF generation server-side is Phase 10 if the policy partner asks for it.
 
-### Re-check #7 — Doc convention (unchanged)
+### Re-check #7  Doc convention (unchanged)
 
 ---
 
@@ -41,38 +41,38 @@ Avoid a dependency. `/insights/print` is a print-friendly route group that the u
 ### A. Strategic adds (Tier 3 from the 2026-05-23 Phase 6 audit)
 
 #### A.1 PDF report export
-- `/insights/print` route — same data, print-friendly layout (single-column, A4 page break hints, branded letterhead)
+- `/insights/print` route  same data, print-friendly layout (single-column, A4 page break hints, branded letterhead)
 - "Print to PDF" button on `/insights` opens `/insights/print` in a new tab + triggers `window.print()`
 - All sections rendered: headline stats + freshness tiles + skills-gap + heatmap + trend
 - Footer with "Generated by Sebenza on YYYY-MM-DD · open at sebenza.co.za/insights"
 
 #### A.2 Sebenza Labour Market Index (LMI)
-- `lib/analytics/lmi.ts` — single numeric index derived from:
+- `lib/analytics/lmi.ts`  single numeric index derived from:
   - Freshness ratio (fresh / total)
   - Average gap closure rate (week-over-week delta from snapshots)
   - Placement velocity (placements / month / active pool)
   - Weighted: `0.4 × freshness + 0.4 × (1 - normalised_gap) + 0.2 × placement_velocity`
 - Surfaces as the headline stat on `/insights` and the landing pulse strip: "South Africa Labour Market Index: 0.62 (↑ 0.04 vs last week)"
 - Captured nightly into `lmi_snapshots` table for trend graph
-- Public API endpoint `/api/lmi` returns the latest value as JSON — media/researchers can pull it
+- Public API endpoint `/api/lmi` returns the latest value as JSON  media/researchers can pull it
 
 #### A.3 `/gov` route group
 - New role `gov` in `app_user.role` enum; admin can promote a user
 - Route group `(gov)/gov/...` with these pages:
-  - `/gov` — overview (LMI, top 10 provincial gaps, monthly placement trend, "request a data export" CTA)
-  - `/gov/provinces/[slug]` — per-province deep dive (supply by profession, top 10 local gaps, freshness, monthly trend)
-  - `/gov/municipalities` — city-level breakdown (requires A.4)
-  - `/gov/forecast` — forecasted demand per skill (requires A.5)
-  - `/gov/exports` — list past exports + on-demand triggers (CSV + PDF)
+  - `/gov`  overview (LMI, top 10 provincial gaps, monthly placement trend, "request a data export" CTA)
+  - `/gov/provinces/[slug]`  per-province deep dive (supply by profession, top 10 local gaps, freshness, monthly trend)
+  - `/gov/municipalities`  city-level breakdown (requires A.4)
+  - `/gov/forecast`  forecasted demand per skill (requires A.5)
+  - `/gov/exports`  list past exports + on-demand triggers (CSV + PDF)
 - All `(gov)` routes guarded by `verifyGov()` in the DAL; sees the same data the public `/insights` does PLUS the per-municipality drill-downs admin grants them
 
 #### A.4 City-level breakdown
-- `supplyHeatmapQuery` already groups by `city` — currently aggregated up to province in the page. Add a parallel `supplyHeatmapByCityQuery` that returns city-level cells.
+- `supplyHeatmapQuery` already groups by `city`  currently aggregated up to province in the page. Add a parallel `supplyHeatmapByCityQuery` that returns city-level cells.
 - `/gov/provinces/[slug]` uses it for "which cities have the worst nurse shortage in KZN?"
 - Public `/insights` heatmap stays province-level; the city granularity is gov-only.
 
 #### A.5 Forecast layer (Holt's linear exponential smoothing)
-- `lib/analytics/forecast.ts` — pure TS implementation, no deps
+- `lib/analytics/forecast.ts`  pure TS implementation, no deps
 - Input: 12+ weekly snapshots of a given skill's gap
 - Output: `{ current, trend, projected: [{ week: 'Wk+1', value: x }, ...] }` for next 8 weeks
 - Surfaced on `/gov/forecast` and a small "trend" sparkline on the `/insights` skills-gap rows
@@ -80,17 +80,17 @@ Avoid a dependency. `/insights/print` is a print-friendly route group that the u
 ### B. Production hardening (the launch checklist)
 
 #### B.1 Rate limiting (Upstash)
-- `lib/rate-limit.ts` — `@upstash/ratelimit` slidingWindow strategy
+- `lib/rate-limit.ts`  `@upstash/ratelimit` slidingWindow strategy
 - Limits per (IP, route):
-  - `/api/auth/*` — 10 req / 1 min (brute-force protection beyond Better Auth's basic)
-  - `/search` GET — 30 req / 1 min (scraper guard)
-  - `revealContact` action — 20 reveals / 1 hour per org member
-  - `uploadDocument` / `uploadPhoto` — already 5 / 10 min in-memory; swap to Upstash for cluster correctness
+  - `/api/auth/*`  10 req / 1 min (brute-force protection beyond Better Auth's basic)
+  - `/search` GET  30 req / 1 min (scraper guard)
+  - `revealContact` action  20 reveals / 1 hour per org member
+  - `uploadDocument` / `uploadPhoto`  already 5 / 10 min in-memory; swap to Upstash for cluster correctness
 - Logged via existing `logAccess` with `rate_limit.hit` kind
 
 #### B.2 Content Security Policy + security headers
 - `proxy.ts` (or `next.config.ts` headers) sets:
-  - `Content-Security-Policy` — `default-src 'self'; script-src 'self' 'nonce-...'; connect-src 'self' https://*.supabase.co https://api.resend.com; frame-ancestors 'none'`
+  - `Content-Security-Policy`  `default-src 'self'; script-src 'self' 'nonce-...'; connect-src 'self' https://*.supabase.co https://api.resend.com; frame-ancestors 'none'`
   - `Strict-Transport-Security: max-age=63072000; includeSubDomains; preload`
   - `Referrer-Policy: strict-origin-when-cross-origin`
   - `Permissions-Policy: camera=(), microphone=(), geolocation=()`
@@ -109,14 +109,14 @@ Avoid a dependency. `/insights/print` is a print-friendly route group that the u
 - All `(seeker)`, `(employer)`, `(admin)`, `(gov)` routes get one
 
 #### B.5 SEO foundations
-- `app/robots.ts` — allow all under `/`, disallow `/admin`, `/employer`, `/dashboard`, `/api`
-- `app/sitemap.ts` — generated from real DB: profile handles + provinces + professions (limited to public surfaces)
+- `app/robots.ts`  allow all under `/`, disallow `/admin`, `/employer`, `/dashboard`, `/api`
+- `app/sitemap.ts`  generated from real DB: profile handles + provinces + professions (limited to public surfaces)
 - Per-page Open Graph + Twitter Card metadata via Next.js `generateMetadata`
 - Structured data (`Person` schema for `/p/[handle]`, `Dataset` for `/insights`)
 
 #### B.6 POPIA + privacy
-- Privacy Policy page (`/privacy`) — published before real users onboard
-- PAIA manual (`/paia`) — South African Promotion of Access to Information Act compliance
+- Privacy Policy page (`/privacy`)  published before real users onboard
+- PAIA manual (`/paia`)  South African Promotion of Access to Information Act compliance
 - Cookie banner with granular consent (essential vs analytics)
 - "Download my data" + "Delete my account" Server Actions (Phase 8 stubbed these; Phase 9 ships the actual workflow)
 - Field-level encryption key rotation tested end-to-end (`encryptField` already supports the `v1.` prefix; Phase 9 tests v1→v2 migration)
@@ -124,11 +124,11 @@ Avoid a dependency. `/insights/print` is a print-friendly route group that the u
 #### B.7 Pen-test + dependency audit
 - `npm audit fix` clean, all CVE-impacted versions upgraded
 - External pen-test against staging (rate-limit, IDOR, SQL injection, XSS, SSRF)
-- Secrets management review — confirm no real keys in any committed file; rotate `BETTER_AUTH_SECRET` for production
+- Secrets management review  confirm no real keys in any committed file; rotate `BETTER_AUTH_SECRET` for production
 
 #### B.8 Materialised view migration (Re-check #3)
 - New migration creates `mv_demand_by_profession`, `mv_supply_heatmap`, `mv_skills_gap_top` as materialised views
-- `REFRESH MATERIALIZED VIEW CONCURRENTLY ...` requires unique indices on each — design the indices for the actual lookup patterns
+- `REFRESH MATERIALIZED VIEW CONCURRENTLY ...` requires unique indices on each  design the indices for the actual lookup patterns
 - Phase 8 cron triggers refresh hourly
 - `db/queries/analytics.ts` switches `SELECT FROM profiles ... GROUP BY ...` to `SELECT FROM mv_...`
 - ISR window on `/insights` could drop from 5 min to 1 min once MVs are in place
@@ -149,27 +149,27 @@ Avoid a dependency. `/insights/print` is a print-friendly route group that the u
 - [x] `/insights/print` renders the full briefing in print-friendly layout; "Print to PDF" button works in any browser via `window.print()`
 - [x] Sebenza LMI surfaces on landing pulse strip (top of `<PulseStrip>` bulletin row); `/api/lmi` returns JSON with components + previous-snapshot delta
 - [x] `/gov` route group accessible to `role = 'gov'` users only; overview + province list + per-province deep dive + exports + account live. City breakdown shipped as honest "coming soon" page documenting the k=10 unlock condition.
-- [ ] **DEFERRED** — Holt forecast on at least 5 skills with 12+ weeks of snapshot data. Phase 8's nightly `skill-gap-snapshot` is now capturing the data; revisit when 12 weeks have accumulated.
+- [ ] **DEFERRED**  Holt forecast on at least 5 skills with 12+ weeks of snapshot data. Phase 8's nightly `skill-gap-snapshot` is now capturing the data; revisit when 12 weeks have accumulated.
 
 ### Production hardening
 - [x] CSP + HSTS + Permissions-Policy + X-Frame-Options + Cross-Origin-Opener-Policy headers applied via `proxy.ts` on every response
-- [x] Sentry skeleton wired (`lib/sentry/init.ts`) — env-gated on `SENTRY_DSN`; `beforeSend` PII scrubber + auth-header strip ready. Init is a no-op until `@sentry/nextjs` is installed + DSN provided (documented).
+- [x] Sentry skeleton wired (`lib/sentry/init.ts`)  env-gated on `SENTRY_DSN`; `beforeSend` PII scrubber + auth-header strip ready. Init is a no-op until `@sentry/nextjs` is installed + DSN provided (documented).
 - [x] Every authenticated route group has a `loading.tsx` (seeker / employer / admin / gov + public)
 - [x] `/robots.txt` + `/sitemap.xml` live; per-locale alternates; profile entries only for consented + non-deleted
 - [x] Privacy Policy (`/privacy`) + PAIA manual (`/paia`) + Cookie consent banner published. POPIA governance docs at `docs/popia/` (Information Officer, DPIA, Breach response, Retention policy, Encryption inventory + key-rotation runbook).
-- [x] Rate limiter library shipped (`lib/rate-limit/`, in-memory + Upstash-ready) but **dormant by default** — no call sites wired. Decision recorded in DPIA R8 + `lib/auth/actions.ts signIn` + `lib/employer/reveal.ts revealContact`: pre-emptive rate limits trade real legitimate-user friction for theoretical defence. Re-enable when abuse is observed.
-- [ ] **DEFERRED** — `npm audit` clean + external pen-test report. Audit on every release once an external scope is engaged.
-- [ ] **DEFERRED** — Materialised views (`mv_demand_by_profession`, `mv_supply_heatmap`, `mv_skills_gap_top`). Only worth doing at 50k+ profiles / 100k+ search_events. Query latency monitoring will tell us when.
-- [ ] **DEFERRED** — Production cutover to AWS Cape Town `af-south-1`. Turnkey runbook at `docs/AWS_MIGRATION_RUNBOOK.md`; nothing else needs to happen POPIA-wise on migration day.
+- [x] Rate limiter library shipped (`lib/rate-limit/`, in-memory + Upstash-ready) but **dormant by default**  no call sites wired. Decision recorded in DPIA R8 + `lib/auth/actions.ts signIn` + `lib/employer/reveal.ts revealContact`: pre-emptive rate limits trade real legitimate-user friction for theoretical defence. Re-enable when abuse is observed.
+- [ ] **DEFERRED**  `npm audit` clean + external pen-test report. Audit on every release once an external scope is engaged.
+- [ ] **DEFERRED**  Materialised views (`mv_demand_by_profession`, `mv_supply_heatmap`, `mv_skills_gap_top`). Only worth doing at 50k+ profiles / 100k+ search_events. Query latency monitoring will tell us when.
+- [ ] **DEFERRED**  Production cutover to AWS Cape Town `af-south-1`. Turnkey runbook at `docs/AWS_MIGRATION_RUNBOOK.md`; nothing else needs to happen POPIA-wise on migration day.
 
 ---
 
 ## Out of scope for Phase 9
 
-- **Real PDF generation server-side** (react-pdf, Puppeteer headless Chrome) — print-CSS holds for the policy use case; real PDF is Phase 10 if a partner explicitly asks
-- **Native mobile app** — entirely separate work track
-- **Multi-tenancy** (one Sebenza instance serving multiple country deployments) — Phase 10+
-- **AI-driven skill recommendations** beyond the demand-based heuristic in Phase 6 — Phase 10+ (we'd need a partnership-level data agreement before training anything)
+- **Real PDF generation server-side** (react-pdf, Puppeteer headless Chrome)  print-CSS holds for the policy use case; real PDF is Phase 10 if a partner explicitly asks
+- **Native mobile app**  entirely separate work track
+- **Multi-tenancy** (one Sebenza instance serving multiple country deployments)  Phase 10+
+- **AI-driven skill recommendations** beyond the demand-based heuristic in Phase 6  Phase 10+ (we'd need a partnership-level data agreement before training anything)
 
 ---
 

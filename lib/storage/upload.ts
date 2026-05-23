@@ -3,13 +3,13 @@
  *
  * Rules (Phase 3 plan re-check #6):
  *  - Content-type allow-list (we never trust the browser's Content-Type
- *    header — we sniff magic bytes too)
+ *    header  we sniff magic bytes too)
  *  - Hard size limit (5MB photos, 10MB documents)
  *  - Naming convention: `{userId}/{kind}/{id}.{ext}`
  *  - Rate-limit (5 uploads / 10 min per user) via an in-memory map.
  *    Upstash replaces this in Phase 9.
  *
- * Returns the storage object key on success — callers then write that key
+ * Returns the storage object key on success  callers then write that key
  * to their DB row (e.g. `qualifications.document_storage_key`).
  */
 
@@ -46,7 +46,7 @@ function checkRateLimit(userId: string) {
   }
   bucket.count += 1;
   if (bucket.count > RATE_LIMIT) {
-    throw new StorageError("rate_limited", "Too many uploads — try again in a few minutes.");
+    throw new StorageError("rate_limited", "Too many uploads  try again in a few minutes.");
   }
 }
 
@@ -56,10 +56,10 @@ function checkRateLimit(userId: string) {
  * Read first 12 bytes and compare against known signatures. Returns the
  * MIME we trust (or null if no match). Caller compares to the claimed type.
  *
- * We don't try to support every format — only the ones in our allow-lists.
+ * We don't try to support every format  only the ones in our allow-lists.
  */
 function sniffMime(buffer: Uint8Array): string | null {
-  // PDF — "%PDF-"
+  // PDF  "%PDF-"
   if (
     buffer[0] === 0x25 &&
     buffer[1] === 0x50 &&
@@ -68,11 +68,11 @@ function sniffMime(buffer: Uint8Array): string | null {
   ) {
     return "application/pdf";
   }
-  // JPEG — FF D8 FF
+  // JPEG  FF D8 FF
   if (buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff) {
     return "image/jpeg";
   }
-  // PNG — 89 50 4E 47 0D 0A 1A 0A
+  // PNG  89 50 4E 47 0D 0A 1A 0A
   if (
     buffer[0] === 0x89 &&
     buffer[1] === 0x50 &&
@@ -81,7 +81,7 @@ function sniffMime(buffer: Uint8Array): string | null {
   ) {
     return "image/png";
   }
-  // WebP — "RIFF" .... "WEBP"
+  // WebP  "RIFF" .... "WEBP"
   if (
     buffer[0] === 0x52 &&
     buffer[1] === 0x49 &&
@@ -165,7 +165,7 @@ async function upload(opts: {
     );
   }
 
-  // Read bytes — needed for magic-byte sniff AND for the upload itself.
+  // Read bytes  needed for magic-byte sniff AND for the upload itself.
   const arrayBuffer = await opts.file.arrayBuffer();
   const bytes = new Uint8Array(arrayBuffer);
 
@@ -176,12 +176,12 @@ async function upload(opts: {
       "The file's contents don't match its declared type.",
     );
   }
-  // Caller's claimed type must match what we sniffed — catches re-encoded
+  // Caller's claimed type must match what we sniffed  catches re-encoded
   // payloads (e.g. browser claims JPEG but file is actually a PDF).
   if (sniffed !== opts.file.type) {
     throw new StorageError(
       "bad_content",
-      "Mismatched file content — please re-upload.",
+      "Mismatched file content  please re-upload.",
     );
   }
 

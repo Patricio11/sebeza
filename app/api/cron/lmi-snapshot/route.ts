@@ -1,5 +1,5 @@
 /**
- * Phase 9 — Nightly Sebenza LMI snapshot.
+ * Phase 9  Nightly Sebenza LMI snapshot.
  *
  * Computes the index + writes one row to `lmi_snapshots`. The
  * /insights surface diffs the most-recent snapshot against the live

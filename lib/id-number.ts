@@ -2,14 +2,14 @@
  * South African ID number validation (Phase 3).
  *
  * Format: YYMMDDSSSSCAZ (13 digits)
- *   YYMMDD — birth date
- *   SSSS   — sequence (4 digits; 0000–4999 female, 5000–9999 male)
- *   C      — citizenship (0 = SA citizen, 1 = permanent resident)
- *   A      — historical apartheid race classifier (now always 8 or 9)
- *   Z      — Luhn checksum
+ *   YYMMDD  birth date
+ *   SSSS    sequence (4 digits; 0000–4999 female, 5000–9999 male)
+ *   C       citizenship (0 = SA citizen, 1 = permanent resident)
+ *   A       historical apartheid race classifier (now always 8 or 9)
+ *   Z       Luhn checksum
  *
  * We validate format + checksum only. The birth-date sanity (e.g. not in the
- * future) is intentionally light — people lie about DOB on every form ever,
+ * future) is intentionally light  people lie about DOB on every form ever,
  * and Home Affairs verification (Phase 8) is the real check.
  */
 
@@ -35,7 +35,7 @@ export function validateSaIdNumber(input: string): IdValidationResult {
   if (!DIGITS.test(normalised)) {
     return { ok: false, normalised, reason: "not_digits" };
   }
-  // Light date check — month 01-12, day 01-31. No leap-year strictness.
+  // Light date check  month 01-12, day 01-31. No leap-year strictness.
   const month = Number(normalised.slice(2, 4));
   const day = Number(normalised.slice(4, 6));
   if (month < 1 || month > 12 || day < 1 || day > 31) {

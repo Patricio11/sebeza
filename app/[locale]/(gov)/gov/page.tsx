@@ -45,7 +45,7 @@ export default async function GovOverviewPage({
       activeKey="overview"
       pageEyebrow="National signal"
       pageTitle="Sebenza Labour Market Index"
-      pageSubtitle="One number, three components. Updated nightly. Not an official Stats SA statistic — opinionated index, formula published."
+      pageSubtitle="One number, three components. Updated nightly. Not an official Stats SA statistic  opinionated index, formula published."
       pageActions={
         <Link
           href="/api/lmi"

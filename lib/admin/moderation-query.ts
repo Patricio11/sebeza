@@ -1,5 +1,5 @@
 /**
- * Phase 7 — Read-side loaders for the admin moderation queue.
+ * Phase 7  Read-side loaders for the admin moderation queue.
  *
  * Split from `lib/admin/moderation.ts` because that file is `"use server"`
  * (all exports must be Server Actions).

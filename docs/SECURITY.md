@@ -14,17 +14,17 @@ Three layers, fail-closed:
 
 | Layer | File(s) | Purpose | Security boundary? |
 |---|---|---|---|
-| 1 — Edge proxy | `proxy.ts` | Bounce obvious-unauth requests to `/sign-in` fast (UX) | **No** |
-| 2 — Page DAL | `lib/auth/dal.ts` called from every protected page | Authoritative session validation | **Yes** |
-| 3 — Server Actions | Every action in `lib/profile/*`, `lib/auth/actions.ts` | Validate session before mutating | **Yes** |
+| 1  Edge proxy | `proxy.ts` | Bounce obvious-unauth requests to `/sign-in` fast (UX) | **No** |
+| 2  Page DAL | `lib/auth/dal.ts` called from every protected page | Authoritative session validation | **Yes** |
+| 3  Server Actions | Every action in `lib/profile/*`, `lib/auth/actions.ts` | Validate session before mutating | **Yes** |
 
-**Layer 2 is the real gate.** Removing the proxy would not weaken security — it would just slow down the unauth redirect by one server roundtrip.
+**Layer 2 is the real gate.** Removing the proxy would not weaken security  it would just slow down the unauth redirect by one server roundtrip.
 
 ---
 
-## Layer 1 — Edge proxy (UX only)
+## Layer 1  Edge proxy (UX only)
 
-`proxy.ts` runs at the Edge before any page render. It calls Better Auth's `getSessionCookie(request)` which **only checks for the cookie's presence — it does NOT validate it.** Better Auth's own docs put it bluntly:
+`proxy.ts` runs at the Edge before any page render. It calls Better Auth's `getSessionCookie(request)` which **only checks for the cookie's presence  it does NOT validate it.** Better Auth's own docs put it bluntly:
 
 > "THIS IS NOT SECURE! This is the recommended approach to optimistically redirect users."
 
@@ -40,13 +40,13 @@ So the proxy is a UX speedup, not a gate.
 
 ### Cookie name gotcha (don't repeat)
 
-We tried `cookiePrefix: "sebenza"` in `lib/auth/server.ts` once. The proxy's `getSessionCookie(request)` (no opts) silently defaulted to `cookiePrefix = "better-auth"` and looked for the wrong cookie — every authenticated user was bounced back to `/sign-in` in an infinite loop.
+We tried `cookiePrefix: "sebenza"` in `lib/auth/server.ts` once. The proxy's `getSessionCookie(request)` (no opts) silently defaulted to `cookiePrefix = "better-auth"` and looked for the wrong cookie  every authenticated user was bounced back to `/sign-in` in an infinite loop.
 
 **Fix:** dropped the custom prefix. We use Better Auth's defaults everywhere. If you ever re-introduce a custom prefix, you MUST pass `{ cookiePrefix }` to every `getSessionCookie` call.
 
 ---
 
-## Layer 2 — Page DAL (the real gate)
+## Layer 2  Page DAL (the real gate)
 
 Every protected page calls one of these guards from [`lib/auth/dal.ts`](../lib/auth/dal.ts) **as the first line of the function body**, right after `setRequestLocale(locale)`:
 
@@ -86,18 +86,18 @@ export default async function UsersPage({ params }) {
 }
 ```
 
-### Adding a new protected page — checklist
+### Adding a new protected page  checklist
 
 1. **Add the guard** as the first awaited call after `setRequestLocale`.
 2. **Pick the right one**: `verifyAdmin` / `verifyRole("seeker"|"employer")` / `verifyOrgVerified` for PII reveal.
-3. **Don't trust client input** — even after the guard, validate IDs, scope queries to the session user's profile.
+3. **Don't trust client input**  even after the guard, validate IDs, scope queries to the session user's profile.
 4. **Run the audit**: `npm run build` → confirm your route shows `ƒ` (dynamic), not `●` (static). Static pages bypass `verify*` entirely.
 
 ---
 
-## Layer 3 — Server Actions
+## Layer 3  Server Actions
 
-Every Server Action is a public-facing endpoint — anyone with the action's signature can invoke it. From Next.js docs:
+Every Server Action is a public-facing endpoint  anyone with the action's signature can invoke it. From Next.js docs:
 
 > "Treat Server Actions with the same security considerations as public-facing API endpoints, and verify if the user is allowed to perform a mutation."
 
@@ -116,15 +116,15 @@ export async function doSomething(input: Input): Promise<ActionResult> {
 
 ### Current coverage (verified)
 
-- `lib/auth/actions.ts` — `signUpSeeker` / `signUpEmployer` / `signIn` / `signOut` / password reset are intentionally public (they're the auth flows); `revokeConsent` / `regrantConsent` check session via `auth.api.getSession()`.
-- `lib/profile/actions.ts` — all 7 (`updateProfileBasics`, `updateSkills`, `setStatus`, `reconfirmStatus`, `changeNationalId`, `removeNationalId`) check session.
-- `lib/profile/experience.ts` — all 3 (`addExperience`, `updateExperience`, `deleteExperience`) check session AND verify ownership via `ownedProfileId`.
-- `lib/profile/qualifications.ts` — all 3 (`addQualification`, `uploadQualificationDocument`, `deleteQualification`) check session AND verify ownership.
-- `lib/profile/photo.ts` — both (`uploadProfilePhoto`, `removeProfilePhoto`) check session.
+- `lib/auth/actions.ts`  `signUpSeeker` / `signUpEmployer` / `signIn` / `signOut` / password reset are intentionally public (they're the auth flows); `revokeConsent` / `regrantConsent` check session via `auth.api.getSession()`.
+- `lib/profile/actions.ts`  all 7 (`updateProfileBasics`, `updateSkills`, `setStatus`, `reconfirmStatus`, `changeNationalId`, `removeNationalId`) check session.
+- `lib/profile/experience.ts`  all 3 (`addExperience`, `updateExperience`, `deleteExperience`) check session AND verify ownership via `ownedProfileId`.
+- `lib/profile/qualifications.ts`  all 3 (`addQualification`, `uploadQualificationDocument`, `deleteQualification`) check session AND verify ownership.
+- `lib/profile/photo.ts`  both (`uploadProfilePhoto`, `removeProfilePhoto`) check session.
 
 ### Ownership rule (Phase 3+)
 
-For actions that mutate row-keyed resources (e.g. `deleteExperience(id)`), the session check is NOT enough — we must also verify the row belongs to the session's profile. Every action in `lib/profile/*` does this via:
+For actions that mutate row-keyed resources (e.g. `deleteExperience(id)`), the session check is NOT enough  we must also verify the row belongs to the session's profile. Every action in `lib/profile/*` does this via:
 
 ```ts
 const profile = await ownedProfileId(db, session.id);
@@ -136,7 +136,7 @@ Without this, a logged-in seeker could delete *anyone else's* experience by pass
 
 ---
 
-## Audit log — the receipts
+## Audit log  the receipts
 
 Every PII-touching action calls `logAccess()` (`lib/audit/index.ts`). Writes to both:
 1. The `audit_log` Postgres table (canonical, `/admin/audit-log` reads from here)
@@ -160,11 +160,11 @@ Uploads go through `lib/storage/upload.ts`:
 
 1. **Service-role key never touches the client.** `lib/storage/supabase.ts` is marked `"server-only"`; a stray client import errors at build time.
 2. **Private bucket only.** `sebenza-private` has Supabase's "Public bucket" toggle OFF. Reads require a server-issued signed URL.
-3. **Content-type allow-list + magic-byte sniff.** We never trust the browser's `Content-Type` — the file's actual bytes must match. A renamed `.pdf → .jpg` is rejected.
+3. **Content-type allow-list + magic-byte sniff.** We never trust the browser's `Content-Type`  the file's actual bytes must match. A renamed `.pdf → .jpg` is rejected.
 4. **Size limits.** 5 MB photos, 10 MB documents.
 5. **Per-user rate limit.** 5 uploads / 10 min, in-memory. Phase 9 replaces this with Upstash.
 6. **Signed URLs are short-lived.** 60 s for documents (download), 5 min for photos (render). Long-cache buster.
-7. **Object path is namespaced.** `{userId}/{kind}/{id}.{ext}` — no overwrite collisions, ownership is the path itself.
+7. **Object path is namespaced.** `{userId}/{kind}/{id}.{ext}`  no overwrite collisions, ownership is the path itself.
 
 ---
 
@@ -174,7 +174,7 @@ Special-category PII (only national ID numbers, for now) is encrypted at rest wi
 
 - Wire format carries a `v1.` key-version prefix so Phase 9 key rotation is non-breaking.
 - Key lives in `SEBENZA_ENCRYPTION_KEY` (base64, 32 bytes). Rotated via KMS in Phase 9.
-- IDs are **never** echoed back to the client — not even a last-4 hint. The "ID on file · encrypted" UI is the most we expose.
+- IDs are **never** echoed back to the client  not even a last-4 hint. The "ID on file · encrypted" UI is the most we expose.
 
 ---
 
@@ -194,16 +194,16 @@ These are documented gaps with a phase number against each, not oversights:
 | Postgres → AWS Cape Town (`af-south-1`) for in-country residency | Phase 9 |
 | Pen-test / dependency audit | Phase 9 |
 | WCAG 2.2 AA audit | Phase 10 |
-| E2E security tests (Playwright) — assert no PII leaks in payload | Phase 11 |
+| E2E security tests (Playwright)  assert no PII leaks in payload | Phase 11 |
 
 ---
 
 ## Common mistakes to avoid
 
 1. **Adding a new page in `(seeker)/(employer)/(admin)/` and forgetting `verifyRole()`.** The proxy will redirect unauth users, but a forged cookie sails through. Always add the guard.
-2. **Calling `auth.api.getSession()` directly in app code.** Use `getSessionUser` from `@/lib/auth/dal` — it's cached and consistent.
+2. **Calling `auth.api.getSession()` directly in app code.** Use `getSessionUser` from `@/lib/auth/dal`  it's cached and consistent.
 3. **Trusting client-passed user/profile/row IDs.** Always scope DB writes to `session.id` AND verify ownership.
 4. **Logging full PII to stdout in dev.** The audit log writes `actor` and `subject` (handles, ids) but never raw email/ID number/document contents.
 5. **Setting `useSecureCookies: false` in production.** Don't. The current setup uses `process.env.NODE_ENV === "production"` to gate it correctly.
 6. **Putting auth checks in `layout.tsx`.** Layouts don't re-render on sibling navigation (Partial Rendering). The check stays stale. Put it on each page.
-7. **Adding a custom `cookiePrefix` without auditing every `getSessionCookie` call-site.** The default works fine — don't drift unless you have to.
+7. **Adding a custom `cookiePrefix` without auditing every `getSessionCookie` call-site.** The default works fine  don't drift unless you have to.

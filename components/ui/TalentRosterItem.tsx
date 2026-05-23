@@ -17,7 +17,7 @@ interface Props {
 }
 
 /**
- * The signature search-result row. Editorial list (NOT a card grid) — the
+ * The signature search-result row. Editorial list (NOT a card grid)  the
  * product's defining layout. See UX_UI_SPEC §2.2.
  *
  * Redaction Rule: no ID number, no documents, no raw contact details here.
@@ -103,7 +103,7 @@ export function TalentRosterItem({
             className="inline-flex items-center rounded-[var(--radius-pill)] border border-[color:var(--color-brand)] px-4 py-1.5 text-sm font-medium text-[color:var(--color-brand)] transition-colors hover:bg-[color:var(--color-brand-tint)]"
           >
             {t("viewProfile")}
-            <span className="sr-only"> — {profile.displayName}</span>
+            <span className="sr-only">  {profile.displayName}</span>
           </Link>
         </footer>
       </div>

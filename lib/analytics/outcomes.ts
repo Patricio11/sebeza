@@ -1,7 +1,7 @@
 /**
- * Phase 7.5.4 — Longitudinal education-to-employment outcomes.
+ * Phase 7.5.4  Longitudinal education-to-employment outcomes.
  *
- * The wedge — built so it can never re-identify a young person.
+ * The wedge  built so it can never re-identify a young person.
  *
  *   - Cohort dimensions: programme × institution × province × graduation_year.
  *     Never a per-person timeline. Never free-text in the cells.
@@ -17,7 +17,7 @@
  *     self-reports are excluded from this dataset, by policy.
  *
  * The suppression filter applies identically to the on-screen render
- * AND the CSV export — see the compliance assertion in 7.5.6.
+ * AND the CSV export  see the compliance assertion in 7.5.6.
  */
 
 import "server-only";
@@ -109,7 +109,7 @@ export async function outcomesQuery(): Promise<OutcomesQueryResult> {
         graduation_year,
         COUNT(DISTINCT profile_id)::int AS cohort_size,
         COUNT(role)::int               AS placed,
-        -- median (PG's percentile_cont) — null when no placements
+        -- median (PG's percentile_cont)  null when no placements
         percentile_cont(0.5) WITHIN GROUP (ORDER BY days_to_hire)
           FILTER (WHERE role IS NOT NULL)
           AS median_time_to_hire_days,
@@ -226,7 +226,7 @@ function groupSurvivorsBy(
 /**
  * Returns true when the row's parent group (same programme +
  * institution + the "other" axis) had at least one suppressed
- * sibling — meaning the visible cell's value is derivable from
+ * sibling  meaning the visible cell's value is derivable from
  * the row/column total. `axis` says whether the dropped sibling
  * varied by province (row group) or by graduation_year (col group).
  */

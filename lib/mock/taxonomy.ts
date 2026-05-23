@@ -1,7 +1,7 @@
 import type { InstitutionKind, NqfLevel, Province, TaxonomyEntry } from "./types";
 
 // Controlled vocabularies. Phase 4 moves these to DB tables (`provinces`, `cities`,
-// `professions`, `skills`) — but the shape stays identical so the seam holds.
+// `professions`, `skills`)  but the shape stays identical so the seam holds.
 
 export const PROVINCES: Province[] = [
   {
@@ -83,7 +83,7 @@ export const PROVINCES: Province[] = [
   },
 ];
 
-// Seed only — extended in Phase 7 by admin taxonomy management.
+// Seed only  extended in Phase 7 by admin taxonomy management.
 export const PROFESSIONS: TaxonomyEntry[] = [
   { slug: "chef", label: "Chef" },
   { slug: "software-developer", label: "Software Developer" },
@@ -138,13 +138,13 @@ export function findProfession(slug: string | null | undefined) {
 }
 
 // ──────────────────────────────────────────────────────────────────────────────
-// SA tertiary institutions — controlled vocabulary.
+// SA tertiary institutions  controlled vocabulary.
 // Representative subset of public universities + UOTs + a TVET + UNISA + INDLELA.
 // Full list managed in admin taxonomy from Phase 7.
 
 export interface InstitutionEntry extends TaxonomyEntry {
   kind: InstitutionKind;
-  /** Where the main campus sits — used for proximity heuristics in Career compass. */
+  /** Where the main campus sits  used for proximity heuristics in Career compass. */
   city: string;
   province: string;
 }

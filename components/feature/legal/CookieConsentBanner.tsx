@@ -1,11 +1,11 @@
 "use client";
 
 /**
- * Phase 9 — Cookie consent banner.
+ * Phase 9  Cookie consent banner.
  *
  * Shown only when no consent cookie is on file. Two paths:
  *   - Accept all → essential + analytics
- *   - Essential only → essential only (analytics stays off — the
+ *   - Essential only → essential only (analytics stays off  the
  *     default, no penalty)
  *
  * Plus a deep-link to the Privacy Policy. No dark patterns: the
@@ -45,7 +45,7 @@ export function CookieConsentBanner({ alreadyDecided }: Props) {
           <p className="mt-1 text-[color:var(--color-ink-soft)]">
             We use essential cookies (sign-in session, locale, this consent
             choice). Optional analytics cookies help us count anonymous page
-            views — no profile is built from your browsing. Read the{" "}
+            views  no profile is built from your browsing. Read the{" "}
             <a href="/privacy" className="underline">
               Privacy Policy
             </a>

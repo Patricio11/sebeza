@@ -1,5 +1,5 @@
 /**
- * Phase 9 — In-memory sliding-window rate limiter.
+ * Phase 9  In-memory sliding-window rate limiter.
  *
  * Fine for dev + single-instance production. When the deployment goes
  * multi-instance, the Upstash adapter takes over (set

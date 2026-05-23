@@ -115,7 +115,7 @@ export default async function PlacementsPage({
                       {p.hiredAt.toISOString().slice(0, 10)}
                     </td>
                     <td className="px-5 py-3 text-[color:var(--color-ink-soft)]">
-                      {p.salaryBand ?? "—"}
+                      {p.salaryBand ?? ""}
                     </td>
                     <td className="px-5 py-3">
                       <div className="flex items-center justify-end gap-2">
@@ -179,7 +179,7 @@ export default async function PlacementsPage({
                       {t("fields.salaryBand")}
                     </dt>
                     <dd className="text-[color:var(--color-ink-soft)]">
-                      {p.salaryBand ?? "—"}
+                      {p.salaryBand ?? ""}
                     </dd>
                   </div>
                 </dl>

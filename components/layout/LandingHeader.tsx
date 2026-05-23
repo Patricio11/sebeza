@@ -8,7 +8,7 @@ import { MobileNav } from "@/components/layout/MobileNav";
  * Landing-only header. Distinct from `SiteHeader` (used by all other pages)
  * so the new design can ship for review without disturbing the rest of the app.
  *
- * Editorial wordmark gets a small SA-flag chevron mark — quiet, confident,
+ * Editorial wordmark gets a small SA-flag chevron mark  quiet, confident,
  * national identity without flag-T-shirt energy.
  */
 export function LandingHeader() {

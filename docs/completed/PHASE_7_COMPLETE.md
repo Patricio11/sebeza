@@ -1,20 +1,20 @@
-# Phase 7 — Admin, Moderation & 2FA Enforcement · ✅ COMPLETE (2026-05-23)
+# Phase 7  Admin, Moderation & 2FA Enforcement · ✅ COMPLETE (2026-05-23)
 
-Shipped across four commits — three feature parts plus a "close the gaps" pass after an in-depth audit caught items the first three commits glossed over. The full plan lives at `docs/completed/PHASE_7_PLAN.md` with every acceptance box ticked.
+Shipped across four commits  three feature parts plus a "close the gaps" pass after an in-depth audit caught items the first three commits glossed over. The full plan lives at `docs/completed/PHASE_7_PLAN.md` with every acceptance box ticked.
 
 | Commit | Theme |
 |---|---|
-| `2c90b3d` | **Part 1** — admin actions + moderation + suspended sign-in bounce |
-| `bacb16f` | **Part 2** — in-app notifications (action-driven, no polling) |
-| `186844c` | **Part 3** — 2FA enforcement (Better Auth `twoFactor` plugin) |
-| _next_   | **Closing the gaps** — audit-log filters + CSV, notif prefs UI, pagination, `profile.viewed` trigger, settings consumed by `/insights`, sign-up profession from DB, public-surface polish |
+| `2c90b3d` | **Part 1**  admin actions + moderation + suspended sign-in bounce |
+| `bacb16f` | **Part 2**  in-app notifications (action-driven, no polling) |
+| `186844c` | **Part 3**  2FA enforcement (Better Auth `twoFactor` plugin) |
+| _next_   | **Closing the gaps**  audit-log filters + CSV, notif prefs UI, pagination, `profile.viewed` trigger, settings consumed by `/insights`, sign-up profession from DB, public-surface polish |
 
 ---
 
 ## What's now real (every previously dead button)
 
 ### `/admin`
-- KPI tiles read from `adminOverviewCounts()` — pending verifications, open reports, new users (7 d), audit events (24 h), suspended accounts.
+- KPI tiles read from `adminOverviewCounts()`  pending verifications, open reports, new users (7 d), audit events (24 h), suspended accounts.
 - "Recent activity" feed reads the audit ledger live with relative-time formatting per locale.
 
 ### `/admin/verifications`
@@ -32,11 +32,11 @@ Shipped across four commits — three feature parts plus a "close the gaps" pass
 - Row actions: Suspend · Restore · **Reset 2FA** · Erase. Erase is soft-delete (Phase 8 cron hard-deletes after 30 days); Reset 2FA wipes the `two_factor` row + flips `two_factor_enabled = false` and is audit-logged as `account.2fa.reset`.
 
 ### `/admin/taxonomy`
-- DB-backed read via `loadTaxonomy()` (skills, professions, cities + provinces — provinces read-only, seeded by Stats SA).
+- DB-backed read via `loadTaxonomy()` (skills, professions, cities + provinces  provinces read-only, seeded by Stats SA).
 - Add form with slug + label (cities also pick a province) and per-row Remove with a usage-count guard (refuses to drop a skill still attached to N profiles).
 
 ### `/admin/audit-log`
-- Filter form is now a real GET — `?kind=` is validated against the catalog union, `?actor=` substring-matches actor OR subject. URL state survives reload + share.
+- Filter form is now a real GET  `?kind=` is validated against the catalog union, `?actor=` substring-matches actor OR subject. URL state survives reload + share.
 - Export CSV button hits `/api/admin/audit-log/export` which streams a real RFC-4180 CSV with the same filters, capped at 10 000 rows. Every export writes its own `analytics.export` audit row. OWASP CSV-injection guard + UTF-8 BOM for Excel.
 
 ### `/admin/settings`
@@ -54,8 +54,8 @@ Shipped across four commits — three feature parts plus a "close the gaps" pass
 - `verifyRole` / `verifyAdmin` enforce 2FA setup for employer + admin sessions (seekers exempt per No-Flash Rule). The gate is itself gated on the `feature_flag_2fa_enforced` platform setting so ops can stage the rollout.
 
 ### Public surface
-- Landing month is now `Intl.DateTimeFormat(locale, { month: "long" }).format(new Date())` — no more hardcoded "May".
-- `/search` end-state now reads "Showing the top N of M — refine filters to narrow" or "Showing all N matches" — no dead "Load more" button.
+- Landing month is now `Intl.DateTimeFormat(locale, { month: "long" }).format(new Date())`  no more hardcoded "May".
+- `/search` end-state now reads "Showing the top N of M  refine filters to narrow" or "Showing all N matches"  no dead "Load more" button.
 - `/p/[handle]` "Request contact reveal" + "Save to talent pool" are real `<Link>`s: unauthenticated → `/sign-in?next=/employer/dossier/<handle>`; employer/admin → straight into the dossier; signed-in seekers see an honest explainer that the action belongs to employers.
 - `/p/[handle]` Report button writes a real `reports` row via `flagProfile` (anonymous-safe).
 
@@ -65,10 +65,10 @@ Shipped across four commits — three feature parts plus a "close the gaps" pass
 
 A self-contained subsystem at `lib/notifications/`:
 
-- **`catalog.ts`** — single source of truth for the 14 canonical kinds. Each entry carries default in-app + email toggles, audience, copy for the prefs panel, and a dedupe window in seconds.
-- **`server.ts`** — `createNotification` honours user prefs (catalog default ⊕ stored override), dedupes inside the catalog window, swallows write failures so audit-log writes are never blocked. Plus `notifyOrgMembers` + `notifyAllAdmins` fan-out helpers.
-- **`query.ts`** — `listForUser({ limit, before })` for cursor pagination + cached `unreadCount` for the bell + `getMyNotificationPrefs` for the prefs panel. All scoped to the signed-in user via `verifySession()`.
-- **`actions.ts`** — `markRead`, `markAllRead`, `updateNotificationPref`, `loadOlderNotifications` Server Actions.
+- **`catalog.ts`**  single source of truth for the 14 canonical kinds. Each entry carries default in-app + email toggles, audience, copy for the prefs panel, and a dedupe window in seconds.
+- **`server.ts`**  `createNotification` honours user prefs (catalog default ⊕ stored override), dedupes inside the catalog window, swallows write failures so audit-log writes are never blocked. Plus `notifyOrgMembers` + `notifyAllAdmins` fan-out helpers.
+- **`query.ts`**  `listForUser({ limit, before })` for cursor pagination + cached `unreadCount` for the bell + `getMyNotificationPrefs` for the prefs panel. All scoped to the signed-in user via `verifySession()`.
+- **`actions.ts`**  `markRead`, `markAllRead`, `updateNotificationPref`, `loadOlderNotifications` Server Actions.
 
 ### Trigger points wired
 
@@ -87,7 +87,7 @@ A self-contained subsystem at `lib/notifications/`:
 | `flagProfile` (public `/p/[handle]` Report button) | `lib/admin/moderation.ts` | `moderation.reported` → all admins |
 
 ### Bell + page surfaces
-- `<NotificationBell />` in `DashboardShell` (desktop masthead + mobile top strip) — initial state server-fetched, action-driven revalidate (no polling, no WebSockets — re-check #9 revised during implementation).
+- `<NotificationBell />` in `DashboardShell` (desktop masthead + mobile top strip)  initial state server-fetched, action-driven revalidate (no polling, no WebSockets  re-check #9 revised during implementation).
 - `/dashboard/notifications`, `/employer/notifications`, `/admin/notifications` all render a shared `<NotificationsList />` with 20-row pages and a "Load older" cursor.
 - Per-kind prefs panel on all three account pages writes through to `app_user.notification_prefs` JSONB.
 
@@ -96,11 +96,11 @@ A self-contained subsystem at `lib/notifications/`:
 ## 2FA enforcement (Task 7.2)
 
 - Better Auth `twoFactor` plugin wired ahead of `nextCookies()` in the plugin chain. New `two_factor` table + `app_user.two_factor_enabled` flag.
-- **/setup-2fa** — three stages: password confirm → QR + backup codes (one-time display, copy-all helper, otpauth URI shown verbatim for locked-down networks) → verify first TOTP.
-- **/verify-2fa** — TOTP (default) and backup-code modes via toggle.
-- **Forced gate** — `verifyRole` + `verifyAdmin` call `enforceTwoFactorSetup` which lazy-loads `feature_flag_2fa_enforced` from `platform_settings`. Seekers exempt.
-- **Account panels** — `/dashboard/account`, `/employer/account`, `/admin/account` carry a real `<TwoFactorAccountPanel />` (was a dead "Configure" stub since the Phase 5 audit).
-- **Admin escape hatch** — `reset2faForUser({ userId, reason })` for users who lose both device and backup codes. Audit-logged.
+- **/setup-2fa**  three stages: password confirm → QR + backup codes (one-time display, copy-all helper, otpauth URI shown verbatim for locked-down networks) → verify first TOTP.
+- **/verify-2fa**  TOTP (default) and backup-code modes via toggle.
+- **Forced gate**  `verifyRole` + `verifyAdmin` call `enforceTwoFactorSetup` which lazy-loads `feature_flag_2fa_enforced` from `platform_settings`. Seekers exempt.
+- **Account panels**  `/dashboard/account`, `/employer/account`, `/admin/account` carry a real `<TwoFactorAccountPanel />` (was a dead "Configure" stub since the Phase 5 audit).
+- **Admin escape hatch**  `reset2faForUser({ userId, reason })` for users who lose both device and backup codes. Audit-logged.
 
 ---
 
@@ -124,11 +124,11 @@ All migrations are re-runnable (`IF NOT EXISTS` on tables and `ADD COLUMN IF NOT
 
 ---
 
-## Re-check #9 — revised during implementation
+## Re-check #9  revised during implementation
 
-The plan locked 30 s polling. While building the bell I reconsidered: every notification fires from a specific Server Action that already calls `revalidatePath` on the relevant surfaces. The bell mounts inside `DashboardShell` and is server-fetched on every render, so any navigation refreshes the badge naturally — no client-side timer needed. `markRead` / `markAllRead` add `revalidatePath("/dashboard", "layout")` etc. so the local action also refreshes the bell.
+The plan locked 30 s polling. While building the bell I reconsidered: every notification fires from a specific Server Action that already calls `revalidatePath` on the relevant surfaces. The bell mounts inside `DashboardShell` and is server-fetched on every render, so any navigation refreshes the badge naturally  no client-side timer needed. `markRead` / `markAllRead` add `revalidatePath("/dashboard", "layout")` etc. so the local action also refreshes the bell.
 
-Trade-off: a recipient sitting completely idle on one page won't see new notifications until they navigate. Acceptable for a bell badge — the audit log is authoritative, no metered-data tax on SA 3G mobile, and most active users navigate within 30 s anyway. Phase 9 may add Supabase Realtime if usage analytics show idle-page-stare is common.
+Trade-off: a recipient sitting completely idle on one page won't see new notifications until they navigate. Acceptable for a bell badge  the audit log is authoritative, no metered-data tax on SA 3G mobile, and most active users navigate within 30 s anyway. Phase 9 may add Supabase Realtime if usage analytics show idle-page-stare is common.
 
 ---
 
@@ -136,10 +136,10 @@ Trade-off: a recipient sitting completely idle on one page won't see new notific
 
 `docs/PHASE_8_PLAN.md` opens with:
 
-- **Resend transactional emails** — finally turn on the per-kind `email: true` toggle on the notification prefs panel (UI already shipped, disabled with a Phase-8 pill).
-- **Cron jobs** — nightly hard-delete of soft-erased users past 30 days · `status.stale.warning` nudges · `saved_search.new_matches` rollups · daily `captureSkillGapSnapshot()`.
-- **KYC / Home Affairs adapter** — wire SA Home Affairs ID verification.
-- **SAQA adapter** — verify qualifications against the National Learners' Records Database so an admin approval can be machine-confirmed first.
+- **Resend transactional emails**  finally turn on the per-kind `email: true` toggle on the notification prefs panel (UI already shipped, disabled with a Phase-8 pill).
+- **Cron jobs**  nightly hard-delete of soft-erased users past 30 days · `status.stale.warning` nudges · `saved_search.new_matches` rollups · daily `captureSkillGapSnapshot()`.
+- **KYC / Home Affairs adapter**  wire SA Home Affairs ID verification.
+- **SAQA adapter**  verify qualifications against the National Learners' Records Database so an admin approval can be machine-confirmed first.
 
 ---
 

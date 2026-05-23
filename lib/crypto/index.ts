@@ -4,7 +4,7 @@
  * POPIA-First Rule (TO_START_EVERY_SESSION.md §4): ID numbers are encrypted
  * at rest with AES-256-GCM and NEVER displayed back. This module exposes the
  * primitives. Storage rule: `nationalIdEnc` column stores the output of
- * `encryptField()` — a single base64 string carrying iv ‖ ciphertext ‖ tag.
+ * `encryptField()`  a single base64 string carrying iv ‖ ciphertext ‖ tag.
  *
  * Key management:
  * - Phase 1: key comes from `SEBENZA_ENCRYPTION_KEY` env (base64, 32 bytes).

@@ -1,8 +1,8 @@
 /**
- * Phase 7 (A.5) — CSV export of `/admin/audit-log`.
+ * Phase 7 (A.5)  CSV export of `/admin/audit-log`.
  *
  * Streams a real CSV file with the same filters as the page form.
- * Hard-capped at 10 000 rows per re-check #6 — anything bigger goes
+ * Hard-capped at 10 000 rows per re-check #6  anything bigger goes
  * through the Phase 8 "we'll email you the file" hook.
  *
  * Every export writes its own `analytics.export` audit row so the

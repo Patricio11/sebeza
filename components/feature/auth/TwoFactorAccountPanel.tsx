@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * Phase 7 (Task 7.2) — the "two-factor" panel on /account.
+ * Phase 7 (Task 7.2)  the "two-factor" panel on /account.
  *
  * If 2FA is on, exposes a Disable form (password-confirmed). If off,
  * routes the user to /setup-2fa to enrol.
@@ -68,7 +68,7 @@ export function TwoFactorAccountPanel({ enabled, enforced }: Props) {
               {enforced && (
                 <>
                   {" "}
-                  Note: 2FA is currently enforced for your role — you will be
+                  Note: 2FA is currently enforced for your role  you will be
                   asked to re-enrol immediately.
                 </>
               )}

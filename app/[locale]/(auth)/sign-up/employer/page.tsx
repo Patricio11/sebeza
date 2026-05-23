@@ -35,7 +35,7 @@ function EmployerSignUpDossier() {
         <DossierStep
           n="01"
           title="You can search talent immediately"
-          body="The moment your account is created, you can search the live talent register and build talent pools — even before verification."
+          body="The moment your account is created, you can search the live talent register and build talent pools  even before verification."
         />
         <DossierStep
           n="02"

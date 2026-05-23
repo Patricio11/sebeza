@@ -1,4 +1,4 @@
-# Phase 5 — Live Smoke Test (Employer Portal)
+# Phase 5  Live Smoke Test (Employer Portal)
 
 > Run against your live Neon DB + Supabase bucket. Sign in as Naledi (Discovery Bank, verified org).
 
@@ -27,7 +27,7 @@ Sign in as Naledi: `naledi.khumalo@discovery.co.za` / `sebenza-dev-2026` → lan
 - ☐ Reveal succeeds; email shown
 - ☐ Audit row visible to admin
 - ☐ Seeker sees reveal in their activity ledger
-- ☐ Reload `/employer/dossier/lerato-n` — contact card stays in "revealed" state (cached from prior reveal)
+- ☐ Reload `/employer/dossier/lerato-n`  contact card stays in "revealed" state (cached from prior reveal)
 
 ---
 
@@ -40,7 +40,7 @@ Sign in as Naledi: `naledi.khumalo@discovery.co.za` / `sebenza-dev-2026` → lan
 
 ✅:
 - ☐ Disabled state + honest explanation
-- ☐ Prior reveal still visible (audit history doesn't disappear; the cache may still show the cached value — fine)
+- ☐ Prior reveal still visible (audit history doesn't disappear; the cache may still show the cached value  fine)
 
 ---
 
@@ -138,7 +138,7 @@ For now adding members happens from the dossier in a Phase 5 follow-up; for the 
 ## 9 · Sanity tail
 
 - ☐ `npm run typecheck` clean
-- ☐ `npm run build` clean — `/employer/dossier/[handle]` shows ƒ dynamic
+- ☐ `npm run build` clean  `/employer/dossier/[handle]` shows ƒ dynamic
 - ☐ All 8 employer routes accessible only to verified employer or admin
 - ☐ Mobile 360px: dossier right-rail stacks below the main column; all action cards readable
 
@@ -152,8 +152,8 @@ Phase 5 is verified end-to-end. Phase 6 (analytics + skills-gap engine) opens.
 
 ## If something fails
 
-- **Reveal returns "no organisation membership"** — Naledi's `organization_members` row is missing or her `verification` flag on the org is `unverified`. Check via `db:studio`.
-- **`audit_log` rows don't appear in `/admin/audit-log`** — admin page reads `recentAuditEventsFromDb`; check the table directly in `db:studio` to confirm the rows exist.
-- **`/insights` doesn't update after placement** — ISR runs every 5 min, or trigger refresh by visiting the URL after the revalidate window. You can also restart the dev server to force.
-- **Download button does nothing** — open browser console; the signed URL might have failed if Supabase isn't configured. Check `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` in `.env.local`.
-- **"Mark as hired" gate too strict** — gate is 30 days; if you tested across a date boundary or seeded an old reveal, may not trigger. Make a fresh reveal first.
+- **Reveal returns "no organisation membership"**  Naledi's `organization_members` row is missing or her `verification` flag on the org is `unverified`. Check via `db:studio`.
+- **`audit_log` rows don't appear in `/admin/audit-log`**  admin page reads `recentAuditEventsFromDb`; check the table directly in `db:studio` to confirm the rows exist.
+- **`/insights` doesn't update after placement**  ISR runs every 5 min, or trigger refresh by visiting the URL after the revalidate window. You can also restart the dev server to force.
+- **Download button does nothing**  open browser console; the signed URL might have failed if Supabase isn't configured. Check `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` in `.env.local`.
+- **"Mark as hired" gate too strict**  gate is 30 days; if you tested across a date boundary or seeded an old reveal, may not trigger. Make a fresh reveal first.

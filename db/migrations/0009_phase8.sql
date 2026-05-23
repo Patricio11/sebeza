@@ -1,4 +1,4 @@
--- Phase 8 — Verification & Integrations.
+-- Phase 8  Verification & Integrations.
 --
 -- Schema for the email channel + cron infrastructure + KYC + SAQA
 -- adapters. Both adapter integrations land here but stay dormant
@@ -7,7 +7,7 @@
 -- at the bottom.
 
 -- ─────────────────────────────────────────────────────────────────────────────
--- 1. app_user — email rate-limit clock + KYC transaction id
+-- 1. app_user  email rate-limit clock + KYC transaction id
 -- ─────────────────────────────────────────────────────────────────────────────
 
 ALTER TABLE "app_user"
@@ -20,21 +20,21 @@ ALTER TABLE "app_user"
   ADD COLUMN IF NOT EXISTS "kyc_verified_at" timestamp;
 
 -- ─────────────────────────────────────────────────────────────────────────────
--- 2. profiles — status-stale nudge idempotency anchor
+-- 2. profiles  status-stale nudge idempotency anchor
 -- ─────────────────────────────────────────────────────────────────────────────
 
 ALTER TABLE "profiles"
   ADD COLUMN IF NOT EXISTS "status_stale_last_sent_at" timestamp;
 
 -- ─────────────────────────────────────────────────────────────────────────────
--- 3. saved_searches — last-match hash so the cron only fires on NEW matches
+-- 3. saved_searches  last-match hash so the cron only fires on NEW matches
 -- ─────────────────────────────────────────────────────────────────────────────
 
 ALTER TABLE "saved_searches"
   ADD COLUMN IF NOT EXISTS "last_match_hash" text;
 
 -- ─────────────────────────────────────────────────────────────────────────────
--- 4. outcome_snapshots — time-series for the Phase 7.5.4 outcomes dataset
+-- 4. outcome_snapshots  time-series for the Phase 7.5.4 outcomes dataset
 -- ─────────────────────────────────────────────────────────────────────────────
 
 CREATE TABLE IF NOT EXISTS "outcome_snapshots" (
@@ -59,8 +59,8 @@ CREATE INDEX IF NOT EXISTS outcome_snapshots_cohort_idx
   ON outcome_snapshots (programme, institution, province, graduation_year, captured_at DESC);
 
 -- ─────────────────────────────────────────────────────────────────────────────
--- 5. qualification_kyc_jobs — SAQA worker queue (only used when the
---    `feature_flag_saqa_worker` flag is ON — admin flips after partnership)
+-- 5. qualification_kyc_jobs  SAQA worker queue (only used when the
+--    `feature_flag_saqa_worker` flag is ON  admin flips after partnership)
 -- ─────────────────────────────────────────────────────────────────────────────
 
 DO $$
@@ -98,7 +98,7 @@ CREATE INDEX IF NOT EXISTS qualification_kyc_jobs_qual_idx
   ON qualification_kyc_jobs (qualification_id, submitted_at DESC);
 
 -- ─────────────────────────────────────────────────────────────────────────────
--- 6. Seed the two new feature flags (both default OFF — partnership-gated).
+-- 6. Seed the two new feature flags (both default OFF  partnership-gated).
 --    Re-runnable; ON CONFLICT preserves any admin-set values from prior runs.
 -- ─────────────────────────────────────────────────────────────────────────────
 

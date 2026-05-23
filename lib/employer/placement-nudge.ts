@@ -1,14 +1,14 @@
 /**
- * Phase 7.5 — Lever C: contextual "Did you hire?" nudge.
+ * Phase 7.5  Lever C: contextual "Did you hire?" nudge.
  *
  * For the org currently viewing the dossier of profile X, did they
- * reveal X's contact ≥ 21 days ago (but ≤ 30 — still inside the
+ * reveal X's contact ≥ 21 days ago (but ≤ 30  still inside the
  * Phase-5 reveal gate) AND have they NOT logged a placement for X?
  * If yes, surface a one-tap "Did you hire?" prompt on the dossier.
  *
- * This is the chosen placement-incentive lever (Lever A — analytics
- * value-exchange — deferred to Phase 9; Lever B — verified-status
- * gating — rejected; see PHASE_7_5_PLAN.md §C.5).
+ * This is the chosen placement-incentive lever (Lever A  analytics
+ * value-exchange  deferred to Phase 9; Lever B  verified-status
+ * gating  rejected; see PHASE_7_5_PLAN.md §C.5).
  */
 
 import "server-only";
@@ -59,13 +59,13 @@ export async function placementNudgeState(
   if (daysSinceReveal < NUDGE_AFTER_DAYS) {
     return { show: false, daysSinceReveal, daysRemaining };
   }
-  // (3) Past the gate? Nudging would be pointless — the action is locked.
+  // (3) Past the gate? Nudging would be pointless  the action is locked.
   if (daysSinceReveal > REVEAL_GATE_DAYS) {
     return { show: false, daysSinceReveal, daysRemaining };
   }
 
   // (4) Has this org already logged a placement for this profile?
-  // (employer_confirmed OR seeker_reported — either counts as "done").
+  // (employer_confirmed OR seeker_reported  either counts as "done").
   const placementRows = await db
     .select({ id: schema.placements.id })
     .from(schema.placements)

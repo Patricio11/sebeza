@@ -104,7 +104,7 @@ export async function removeProfilePhoto(): Promise<ActionResult> {
     try {
       await deleteStorageObject(profile.key);
     } catch {
-      // Not fatal — Phase 8 cron sweeps orphans.
+      // Not fatal  Phase 8 cron sweeps orphans.
     }
   }
 

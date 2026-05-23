@@ -12,7 +12,7 @@ const NOTIFICATIONS_HREF: Record<DashboardRole, string> = {
   seeker: "/dashboard/notifications",
   employer: "/employer/notifications",
   admin: "/admin/notifications",
-  // Phase 9 — gov shares the admin notifications surface for now (same
+  // Phase 9  gov shares the admin notifications surface for now (same
   // catalog of relevant kinds). Promote to its own page when gov-only
   // kinds appear.
   gov: "/admin/notifications",
@@ -21,7 +21,7 @@ const NOTIFICATIONS_HREF: Record<DashboardRole, string> = {
 /**
  * Fetches the initial bell state on the server so the first paint is
  * accurate. Returns `null` if the read fails (suspended user, DB
- * hiccup) — the bell silently disappears rather than erroring out the
+ * hiccup)  the bell silently disappears rather than erroring out the
  * entire dashboard.
  */
 async function BellSlot({ role }: { role: DashboardRole }) {
@@ -69,7 +69,7 @@ interface Props {
 /**
  * Civic Editorial dashboard shell. Sidebar on desktop, top tab strip on mobile.
  * Role accent strip down the left edge of the sidebar makes the workspace
- * unmistakeably one of the three user types — no generic SaaS sidebar.
+ * unmistakeably one of the three user types  no generic SaaS sidebar.
  */
 export function DashboardShell({
   role,
@@ -96,7 +96,7 @@ export function DashboardShell({
       </a>
 
       <div className="md:grid md:grid-cols-[272px_1fr]">
-        {/* Sidebar (desktop) — sticky to viewport; only the main column scrolls */}
+        {/* Sidebar (desktop)  sticky to viewport; only the main column scrolls */}
         <aside
           aria-label={`${workspaceLabel} navigation`}
           className="hidden border-r border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] md:sticky md:top-0 md:flex md:h-screen md:flex-col md:overflow-y-auto"
@@ -231,7 +231,7 @@ export function DashboardShell({
                   );
                 })}
               </ul>
-              {/* Fade-edge cue — signals there's more to scroll */}
+              {/* Fade-edge cue  signals there's more to scroll */}
               <div
                 aria-hidden="true"
                 className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-[color:var(--color-surface)] to-transparent"
@@ -271,7 +271,7 @@ export function DashboardShell({
                 )}
               </div>
               <div className="flex flex-wrap items-center gap-3">
-                {/* Desktop-only bell — mobile uses the top strip placement above. */}
+                {/* Desktop-only bell  mobile uses the top strip placement above. */}
                 <div className="hidden md:block">
                   <BellSlot role={role} />
                 </div>
@@ -305,7 +305,7 @@ const ROLE_ACCENT: Record<
     strip: "bg-[color:var(--color-ink)]",
     text: "text-[color:var(--color-ink)]",
   },
-  // Phase 9 — distinct accent for the gov workspace (deeper green
+  // Phase 9  distinct accent for the gov workspace (deeper green
   // than the brand to differentiate from seeker, lighter than admin).
   gov: {
     strip: "bg-[color:var(--color-brand-strong)]",

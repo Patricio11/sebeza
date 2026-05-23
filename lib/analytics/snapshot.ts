@@ -7,7 +7,7 @@
  * triggerable manually from the Phase 7 admin surface, or from a
  * one-shot script during a deploy.
  *
- * Verified-admin-only — capture writes an audit row tagged with the
+ * Verified-admin-only  capture writes an audit row tagged with the
  * acting admin so it's clear who initiated each manual snapshot.
  */
 

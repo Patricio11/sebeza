@@ -1,5 +1,5 @@
 /**
- * Back-compat shim — every guard now lives in `lib/auth/dal.ts`.
+ * Back-compat shim  every guard now lives in `lib/auth/dal.ts`.
  *
  * Why this file still exists:
  *   - Existing code (Phase 2 + Phase 3) imports `getSessionUser`, `requireRole`,
@@ -25,7 +25,7 @@ export {
   type OrgContext,
 } from "./dal";
 
-/** Legacy authorization error — kept for any catch blocks that still reference it. */
+/** Legacy authorization error  kept for any catch blocks that still reference it. */
 export class AuthorizationError extends Error {
   constructor(public readonly reason: string) {
     super(reason);

@@ -1,14 +1,14 @@
 @import "tailwindcss";
 
 /* ---------------------------------------------------------
-   Sebenza Design Tokens — "Mzansi National"
+   Sebenza Design Tokens  "Mzansi National"
    Inspired by the SA flag (deep green primary, gold accent,
    red for alerts only). Charcoal + cream for ink and paper.
    AA contrast on every pair. NEVER a literal flag.
    --------------------------------------------------------- */
 @theme {
   /* Surfaces */
-  --color-paper: #fbf8f0;         /* SA cream — sunnier than warm-paper */
+  --color-paper: #fbf8f0;         /* SA cream  sunnier than warm-paper */
   --color-surface: #ffffff;
   --color-surface-sunk: #f3efe7;
 
@@ -17,12 +17,12 @@
   --color-ink-soft: #5a5249;
   --color-hairline: #e4ded4;
 
-  /* Brand — SA flag-green (slightly desaturated for screens) */
+  /* Brand  SA flag-green (slightly desaturated for screens) */
   --color-brand: #006b3c;
   --color-brand-strong: #003d1f;
   --color-brand-tint: #e1f0e7;
 
-  /* Accent — SA gold (warmer + readable on cream) */
+  /* Accent  SA gold (warmer + readable on cream) */
   --color-accent: #c98214;
   --color-accent-tint: #fff3d7;
 
@@ -33,11 +33,11 @@
   --color-self-employed: #5e7a31;
   --color-studying: #2f5e8a;
   --color-stale: #b45f3c;
-  --color-danger: #de3831;         /* SA red — alerts only */
+  --color-danger: #de3831;         /* SA red  alerts only */
   --color-verified: #006b3c;
 
   /* ─────────────────────────────────────────────────────────
-     SA flag-inspired palette (new — landing page only for now).
+     SA flag-inspired palette (new  landing page only for now).
      Inspired by, never literal. Government-grade trust meets
      consumer-grade usability.
      ───────────────────────────────────────────────────────── */
@@ -48,7 +48,7 @@
   --color-sa-gold: #f5a623;           /* SA gold, warmer than the flag's literal yellow */
   --color-sa-gold-deep: #c98214;
   --color-sa-gold-tint: #fff3d7;
-  --color-sa-red: #de3831;            /* alerts only — never decorative */
+  --color-sa-red: #de3831;            /* alerts only  never decorative */
   --color-sa-cream: #fbf8f0;          /* lighter, sunnier than the editorial paper */
   --color-sa-charcoal: #14110d;       /* deep, near-black, for dark sections */
 
@@ -58,7 +58,7 @@
   --radius-lg: 18px;
   --radius-pill: 999px;
 
-  /* Fonts — next/font provides the underlying variables.
+  /* Fonts  next/font provides the underlying variables.
      Display = Fraunces (editorial gravitas). Body = Hanken Grotesk. */
   --font-display: var(--font-fraunces), Georgia, serif;
   --font-body: var(--font-hanken), system-ui, -apple-system, sans-serif;
@@ -115,7 +115,7 @@
   }
 
   /* Suppress iOS Safari's font-size-auto-zoom on focused form controls.
-     Any input/select/textarea under 16px triggers a zoom on iPhones — keeps
+     Any input/select/textarea under 16px triggers a zoom on iPhones  keeps
      mobile forms thumb-friendly. Below the md breakpoint only. */
   @media (max-width: 767px) {
     input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
@@ -165,7 +165,7 @@
 }
 
 /* ---------------------------------------------------------
-   Motion — minimal, purposeful, reduced-motion aware.
+   Motion  minimal, purposeful, reduced-motion aware.
    One orchestrated landing reveal; nothing loops.
    --------------------------------------------------------- */
 @layer utilities {
@@ -245,7 +245,7 @@
       0 14px 32px -8px rgba(0, 61, 31, 0.18);
   }
 
-  /* Used on the landing pulse strip — a subtle grain that makes the
+  /* Used on the landing pulse strip  a subtle grain that makes the
      deep-green block feel like printed paper, not flat web colour. */
   .grain-overlay {
     position: relative;

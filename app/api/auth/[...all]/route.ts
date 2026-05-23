@@ -1,7 +1,7 @@
 /**
  * Better Auth catch-all handler.
  *
- * Mounts Better Auth's REST endpoints at /api/auth/* — sign-in, sign-up,
+ * Mounts Better Auth's REST endpoints at /api/auth/*  sign-in, sign-up,
  * verification, password-reset, session, sign-out, all delegated here.
  *
  * Server Actions in `lib/auth/actions.ts` use the same `auth` instance for

@@ -1,10 +1,10 @@
 /**
- * Audit logging — every PII access writes a row to `audit_log`.
+ * Audit logging  every PII access writes a row to `audit_log`.
  *
  * POPIA-First Rule + Redaction Rule (TO_START_EVERY_SESSION.md §4, §5): any
  * code path that reads or exposes special-category PII MUST call
  * `logAccess()`. Search, profile-view, contact reveal, document download,
- * analytics export, consent change, sign-in / sign-up / sign-out — all of
+ * analytics export, consent change, sign-in / sign-up / sign-out  all of
  * them.
  *
  * Persistence:
@@ -32,7 +32,7 @@ export type AuditKind =
   | "auth.signout"
   | "consent.grant"
   | "consent.revoke"
-  // Phase 3 — self-edit events on the seeker dashboard.
+  // Phase 3  self-edit events on the seeker dashboard.
   | "profile.update"
   | "profile.skills.update"
   | "profile.status.update"
@@ -47,11 +47,11 @@ export type AuditKind =
   | "profile.qualification.document.upload"
   | "profile.photo.upload"
   | "profile.photo.remove"
-  // Phase 5 — employer reveal flow + placement + org tooling.
+  // Phase 5  employer reveal flow + placement + org tooling.
   | "profile.contact.request"
   | "placement.confirm"
   | "placement.delete"
-  // Phase 7.5 — seeker self-reported placement (softer signal,
+  // Phase 7.5  seeker self-reported placement (softer signal,
   // excluded from official analytics + outcomes dataset).
   | "placement.self_report"
   | "profile.shortlist.add"
@@ -61,7 +61,7 @@ export type AuditKind =
   | "search.saved.delete"
   | "pool.create"
   | "pool.delete"
-  // Phase 7 — admin actions (moderation, verification, taxonomy, users, settings).
+  // Phase 7  admin actions (moderation, verification, taxonomy, users, settings).
   | "report.flag"
   | "report.close"
   | "account.suspend"
@@ -74,25 +74,25 @@ export type AuditKind =
   | "taxonomy.add"
   | "taxonomy.remove"
   | "setting.update"
-  // Phase 7 (Task 7.2) — admin escape hatch when a user loses device + codes.
+  // Phase 7 (Task 7.2)  admin escape hatch when a user loses device + codes.
   | "account.2fa.reset"
-  // Phase 8 — nightly cron tombstones (system-of-record proof of erasure).
+  // Phase 8  nightly cron tombstones (system-of-record proof of erasure).
   | "account.hard_delete"
-  // Phase 8 — self-service erasure path (seeker /dashboard/privacy).
+  // Phase 8  self-service erasure path (seeker /dashboard/privacy).
   | "account.self_erase"
-  // Phase 8 — POPIA data-export download.
+  // Phase 8  POPIA data-export download.
   | "account.data_export"
-  // Phase 8 — KYC verification lifecycle.
+  // Phase 8  KYC verification lifecycle.
   | "kyc.verify"
   | "kyc.revoke"
-  // Phase 8 — SAQA worker lifecycle.
+  // Phase 8  SAQA worker lifecycle.
   | "verification.approve.saqa"
   | "verification.reject.saqa"
   | "verification.approve.manual_override";
 
 export interface AuditEvent {
   kind: AuditKind;
-  /** "anonymous" | userId | "system" — never raw IP/email here. */
+  /** "anonymous" | userId | "system"  never raw IP/email here. */
   actor: string;
   /** The thing being accessed: a handle, an orgId, a documentId, etc. */
   subject?: string;

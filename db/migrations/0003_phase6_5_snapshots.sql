@@ -1,4 +1,4 @@
--- Phase 6.5 — time-series snapshots for the skills-gap engine.
+-- Phase 6.5  time-series snapshots for the skills-gap engine.
 --
 -- Each row is one entry in a top-N gap snapshot. Comparing two captures
 -- by `captured_at` (e.g. yesterday vs 8 days ago) produces the week-over-week

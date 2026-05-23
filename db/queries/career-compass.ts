@@ -1,22 +1,22 @@
 /**
- * Phase 6 — Career compass on real data.
+ * Phase 6  Career compass on real data.
  *
  * Replaces the Phase 1.5 `getCompassForHandle` (which returned a
  * MOCK_COMPASS constant for every user). This function reads the same
- * shape — `CompassSnapshot` from `lib/mock/growth.ts` — but composes it
+ * shape  `CompassSnapshot` from `lib/mock/growth.ts`  but composes it
  * from live DB queries so the page UI doesn't have to change.
  *
  * Inputs the seeker's profile + province; queries:
  *   1. Skills they DON'T have, ranked by recent search demand (last 90d)
- *      that hits the skill label as a free-text term — the "demand_high"
+ *      that hits the skill label as a free-text term  the "demand_high"
  *      reason chip.
  *   2. Skills common to higher-ranked profiles in the same profession +
- *      province — the "common_among_top_ranked" reason chip.
+ *      province  the "common_among_top_ranked" reason chip.
  *   3. Adjacent professions where the seeker's existing skill set
- *      overlaps ≥40% — the "adjacent_role" reason chip.
+ *      overlaps ≥40%  the "adjacent_role" reason chip.
  *
  * Learning paths stay from the static SA-grounded catalog
- * (`lib/mock/growth.ts` LEARNING_PATHS) — Phase 7+ when an admin can
+ * (`lib/mock/growth.ts` LEARNING_PATHS)  Phase 7+ when an admin can
  * manage them is when that data moves to a DB table. For now the static
  * catalog is the right thing.
  */
@@ -180,7 +180,7 @@ export async function getCompassForProfile(
     recommendations.push({
       skill: { slug: row.skill_slug, label: row.skill_label },
       reason: "demand_high",
-      detail: `${row.searches} searches over the last ${DEMAND_WINDOW_DAYS} days mention this skill — and only ${row.matches} ${row.matches === 1 ? "person" : "people"} on Sebenza carries it.`,
+      detail: `${row.searches} searches over the last ${DEMAND_WINDOW_DAYS} days mention this skill  and only ${row.matches} ${row.matches === 1 ? "person" : "people"} on Sebenza carries it.`,
       demandSignal: { searches: row.searches, matches: row.matches },
     });
   }
@@ -295,7 +295,7 @@ async function loadAdjacentProfessions(
   const slugByLabel = new Map(PROFESSIONS.map((p) => [p.label, p.slug]));
   const skillLabelBySlug = new Map(SKILLS.map((s) => [s.slug, s.label]));
 
-  // We need the "missing skills" list per profession — one extra query for
+  // We need the "missing skills" list per profession  one extra query for
   // each row, but capped at MAX_ADJACENT so it's tiny.
   const out: AdjacentProfession[] = [];
   for (const row of overlapRows) {

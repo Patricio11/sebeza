@@ -6,7 +6,7 @@
  * Lists pools with their member chips, lets the user create a pool
  * (name + optional description) and delete a pool. Adding/removing
  * individual members from search results or the dossier comes in the
- * Phase 5 follow-up — the action already exists in
+ * Phase 5 follow-up  the action already exists in
  * `lib/employer/shortlists.ts` (`addToPool`).
  */
 
@@ -75,7 +75,7 @@ export function ShortlistsManager({ initial }: Props) {
   function handleDelete(poolId: string, name: string) {
     if (
       !window.confirm(
-        `Delete pool "${name}"? Members are not deleted — they just lose their place in this pool.`,
+        `Delete pool "${name}"? Members are not deleted  they just lose their place in this pool.`,
       )
     )
       return;
@@ -186,7 +186,7 @@ export function ShortlistsManager({ initial }: Props) {
           <Link href="/search" className="underline">
             /search
           </Link>{" "}
-          → click a candidate → "Add to pool" — wires up alongside the Phase
+          → click a candidate → "Add to pool"  wires up alongside the Phase
           5 follow-up).
         </div>
       ) : (

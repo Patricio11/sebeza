@@ -9,14 +9,14 @@ interface FieldShellProps {
   badge?: React.ReactNode;
   /** Optional helper text under the field. */
   hint?: string;
-  /** Optional error message — overrides hint visual treatment. */
+  /** Optional error message  overrides hint visual treatment. */
   error?: string;
   optional?: boolean;
   children: React.ReactNode;
   className?: string;
 }
 
-/** Editorial form field — hairline-divided composition with optional chip badge. */
+/** Editorial form field  hairline-divided composition with optional chip badge. */
 export function FieldShell({
   id,
   label,
@@ -108,7 +108,7 @@ interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
  * every call site still passes `<option>` children + the standard
  * `onChange={(e) => …}` event handler. Internally we extract the options
  * and hand the data to `<CustomSelect>` so every dropdown in Sebenza uses
- * the same Mzansi National popover / mobile bottom sheet — never a native
+ * the same Mzansi National popover / mobile bottom sheet  never a native
  * OS dropdown.
  *
  * Note: `CustomSelect`'s `onChange` is `(value: string) => void`. We
@@ -204,7 +204,7 @@ export function TextareaField({
  * Walks the `<option>` children passed to <SelectField> and turns them into
  * the `{value,label,disabled}` data CustomSelect expects. The first option
  * with an empty `value` is treated as the placeholder rather than a real
- * option — matches the convention every call site already uses.
+ * option  matches the convention every call site already uses.
  */
 function extractOptions(children: React.ReactNode): {
   options: CustomSelectOption[];

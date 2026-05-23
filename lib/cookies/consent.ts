@@ -1,7 +1,7 @@
 "use server";
 
 /**
- * Phase 9 — Cookie consent persistence.
+ * Phase 9  Cookie consent persistence.
  *
  * One first-party cookie (`sebenza_cookie_consent`) holds the user's
  * choice. Two scopes: essential (always on, can't be opted out) and
@@ -20,7 +20,7 @@ const ONE_YEAR_SECONDS = 60 * 60 * 24 * 365;
 export type ConsentScope = "essential" | "analytics";
 
 export interface CookieConsentState {
-  essential: true; // Always granted — site doesn't work without it.
+  essential: true; // Always granted  site doesn't work without it.
   analytics: boolean;
   /** ISO timestamp of when the choice was made. */
   recordedAt: string | null;

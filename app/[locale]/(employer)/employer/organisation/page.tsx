@@ -92,7 +92,7 @@ export default async function OrganisationPage({
             </div>
             <p className="mt-3 text-sm text-[color:var(--color-ink-soft)]">
               {org.orgVerified
-                ? "Your organisation is verified. You can reveal candidate contact details and request documents — every access is audit-logged."
+                ? "Your organisation is verified. You can reveal candidate contact details and request documents  every access is audit-logged."
                 : "You haven't submitted for verification yet. Until then, contact reveal and document requests stay locked."}
             </p>
             {!org.orgVerified && (

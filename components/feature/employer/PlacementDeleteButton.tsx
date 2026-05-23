@@ -19,7 +19,7 @@ export function PlacementDeleteButton({ placementId, candidateName }: Props) {
       onClick={() => {
         if (
           !window.confirm(
-            `Remove ${candidateName}'s placement record? This bumps the national hire count back down — only do this if logged in error.`,
+            `Remove ${candidateName}'s placement record? This bumps the national hire count back down  only do this if logged in error.`,
           )
         )
           return;

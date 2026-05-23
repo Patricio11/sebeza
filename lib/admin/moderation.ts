@@ -1,7 +1,7 @@
 "use server";
 
 /**
- * Phase 7 — Admin moderation queue actions.
+ * Phase 7  Admin moderation queue actions.
  *
  *   - flagProfile: public (anonymous OR signed-in) Report-this-profile
  *     button from `/p/[handle]`. Writes a `reports` row and audit-logs.
@@ -37,7 +37,7 @@ function fail(message: string): { ok: false; message: string } {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// flagProfile — called from the public /p/[handle] Report button
+// flagProfile  called from the public /p/[handle] Report button
 // ─────────────────────────────────────────────────────────────────────────────
 
 const flagSchema = z.object({
@@ -52,7 +52,7 @@ export async function flagProfile(
   const parsed = flagSchema.safeParse(input);
   if (!parsed.success) return fail("Please pick a reason and try again.");
 
-  // Optional session — reports can be filed anonymously.
+  // Optional session  reports can be filed anonymously.
   const session = await getSessionUser();
   const db = getDb();
 
@@ -88,7 +88,7 @@ export async function flagProfile(
   await notifyAllAdmins({
     kind: "moderation.reported",
     title: "A profile was reported",
-    body: `@${parsed.data.handle} — reason: ${parsed.data.reason.replace("_", " ")}`,
+    body: `@${parsed.data.handle}  reason: ${parsed.data.reason.replace("_", " ")}`,
     link: "/admin/moderation",
     meta: { handle: parsed.data.handle, reason: parsed.data.reason, reportId: id },
   });
@@ -134,7 +134,7 @@ export async function suspendUser(
   const user = rows[0];
   if (!user) return fail("User not found.");
 
-  // Admins can't suspend other admins from this surface — that's an
+  // Admins can't suspend other admins from this surface  that's an
   // org-handover decision documented in the Phase 9 launch checklist.
   if (user.role === "admin") {
     return fail("Suspending another admin requires a manual ops procedure.");
@@ -158,7 +158,7 @@ export async function suspendUser(
   });
 
   // Queue the notification so the user sees it when (if) restored.
-  // The bell can only render once they sign in again — the row sits
+  // The bell can only render once they sign in again  the row sits
   // unread in the meantime, by design.
   await createNotification({
     userId: user.id,
@@ -280,7 +280,7 @@ export async function closeReport(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// eraseUser — soft-delete via app_user.deleted_at; Phase 8 cron hard-deletes
+// eraseUser  soft-delete via app_user.deleted_at; Phase 8 cron hard-deletes
 // after the 30-day grace period. Lives next to suspend/restore because it
 // shares the account-lifecycle category.
 // ─────────────────────────────────────────────────────────────────────────────

@@ -1,11 +1,11 @@
 "use client";
 
 /**
- * Profile photo editor — client island for the dashboard.
+ * Profile photo editor  client island for the dashboard.
  *
  * Flow:
  *   1. User picks a file (camera roll on mobile, file picker on desktop)
- *   2. Client-side resize to 512×512 (canvas) — keeps upload small, respects
+ *   2. Client-side resize to 512×512 (canvas)  keeps upload small, respects
  *      the No-Flash / low-bandwidth rule
  *   3. Send as multipart FormData to `uploadProfilePhoto`
  *   4. On success, update the on-screen preview from the new signed URL

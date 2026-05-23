@@ -26,7 +26,7 @@ export default async function GovProvincesIndexPage({
       activeKey="provinces"
       pageEyebrow="Geography"
       pageTitle="Provinces"
-      pageSubtitle="Per-province deep dives — supply, top local gaps, freshness, monthly trend."
+      pageSubtitle="Per-province deep dives  supply, top local gaps, freshness, monthly trend."
     >
       <ul className="grid gap-3 md:grid-cols-3">
         {PROVINCES.map((p) => (

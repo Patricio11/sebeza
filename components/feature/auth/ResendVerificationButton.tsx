@@ -25,7 +25,7 @@ export function ResendVerificationButton({
         });
       }}
     >
-      {sent ? "Sent — check your inbox" : pending ? "Sending…" : label}
+      {sent ? "Sent  check your inbox" : pending ? "Sending…" : label}
     </Button>
   );
 }

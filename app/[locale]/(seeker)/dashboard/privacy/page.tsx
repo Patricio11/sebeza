@@ -18,7 +18,7 @@ interface ConsentSnapshot {
   version: string;
 }
 
-/** Fallback when a consent row doesn't exist for the user yet — shows
+/** Fallback when a consent row doesn't exist for the user yet  shows
     `none` so the UI is honest, not pre-populated as granted. */
 const FALLBACK_CONSENT: Record<
   (typeof CONSENT_PURPOSES)[number],
@@ -52,7 +52,7 @@ const PURPOSE_BODY: Record<(typeof CONSENT_PURPOSES)[number], string> = {
     "Include me in education-to-employment outcomes research. " +
     "What's shared: cohort-level numbers (programme × institution × province × graduation year, never under 10 people per cell). " +
     "What's never shared: any individual record, my name, my profile. " +
-    "Withholding this consent does not weaken job-search in any way — it's a separate, optional contribution to the public-good dataset.",
+    "Withholding this consent does not weaken job-search in any way  it's a separate, optional contribution to the public-good dataset.",
 };
 
 export default async function PrivacyPage({

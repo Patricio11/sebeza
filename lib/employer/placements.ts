@@ -1,7 +1,7 @@
 "use server";
 
 /**
- * Phase 5 — Placement confirmation. The data-quality lever.
+ * Phase 5  Placement confirmation. The data-quality lever.
  *
  * Placement-Truth Rule (`TO_START_EVERY_SESSION.md §8`): analytics only
  * count a hire when the employer logs it on Sebenza. Self-reported
@@ -13,7 +13,7 @@
  *   The employer must have revealed this candidate's contact in the last
  *   30 days. We look up the audit_log for a prior `profile.contact.reveal`
  *   event with subject = profileId AND meta->>orgId = orgId. Without one,
- *   marking a hire is rejected — you can't log a placement for someone
+ *   marking a hire is rejected  you can't log a placement for someone
  *   whose details you never saw.
  *
  * Side-effects:
@@ -53,7 +53,7 @@ const markAsHiredSchema = z.object({
     .string()
     .regex(/^\d{4}-\d{2}-\d{2}$/, "Use YYYY-MM-DD")
     .optional(),
-  /** Optional, kept private — never in any public read. */
+  /** Optional, kept private  never in any public read. */
   salaryBand: z.string().max(80).optional(),
 });
 
@@ -81,7 +81,7 @@ export async function markAsHired(
   if (!profile) return fail("Profile not found.");
 
   // Gate: must have revealed contact in the last 30 days for THIS org.
-  // We look up the audit_log directly — single source of truth for who
+  // We look up the audit_log directly  single source of truth for who
   // saw whose contact and when.
   const since = new Date(Date.now() - REVEAL_GATE_DAYS * 24 * 60 * 60 * 1000);
   const reveals = await db
@@ -112,7 +112,7 @@ export async function markAsHired(
     city: v.city,
     hiredAt: v.hiredAt ? new Date(v.hiredAt) : new Date(),
     salaryBand: v.salaryBand ?? null,
-    // Phase 7.5 — explicit. Only employer-confirmed placements count
+    // Phase 7.5  explicit. Only employer-confirmed placements count
     // in official analytics + the Phase 7.5.4 outcomes dataset.
     source: "employer_confirmed",
   });
@@ -165,7 +165,7 @@ export async function deletePlacement(input: {
   if (!input?.placementId) return fail("Missing placement id.");
   const db = getDb();
 
-  // Scope deletion to this org — never delete another org's placement.
+  // Scope deletion to this org  never delete another org's placement.
   const rows = await db
     .select({
       id: schema.placements.id,

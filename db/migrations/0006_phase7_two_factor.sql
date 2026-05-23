@@ -1,4 +1,4 @@
--- Phase 7 (Task 7.2) — Two-factor authentication.
+-- Phase 7 (Task 7.2)  Two-factor authentication.
 --
 -- Adds the `two_factor` table (Better Auth's twoFactor plugin storage)
 -- plus the `app_user.two_factor_enabled` flag. The plugin handles all

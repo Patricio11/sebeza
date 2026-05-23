@@ -1,5 +1,5 @@
 /**
- * Phase 8 — Shared CRON_SECRET guard for /api/cron/* routes.
+ * Phase 8  Shared CRON_SECRET guard for /api/cron/* routes.
  *
  * Vercel Cron sets the `Authorization: Bearer ${CRON_SECRET}` header on
  * every scheduled invocation (per Vercel docs). We require it.
@@ -18,7 +18,7 @@ export function isAuthorizedCron(request: Request):
   const secret = process.env.CRON_SECRET;
   if (!secret) {
     // eslint-disable-next-line no-console
-    console.error("[cron] CRON_SECRET is not set — refusing all cron requests.");
+    console.error("[cron] CRON_SECRET is not set  refusing all cron requests.");
     return {
       ok: false,
       response: NextResponse.json(

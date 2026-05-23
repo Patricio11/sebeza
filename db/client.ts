@@ -1,7 +1,7 @@
 /**
  * Neon Postgres + Drizzle client.
  *
- * Phase 1 does NOT connect — the dataProvider seam stays on `mock`. This file
+ * Phase 1 does NOT connect  the dataProvider seam stays on `mock`. This file
  * exists so the moment Phase 4 begins, `lib/data/provider.ts` can flip to `db`
  * and pull queries from `db/queries/*` using this client.
  *

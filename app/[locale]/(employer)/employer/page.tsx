@@ -121,7 +121,7 @@ export default async function EmployerOverviewPage({
         ) : null
       }
     >
-      {/* KPIs — live from DB */}
+      {/* KPIs  live from DB */}
       <section
         aria-label="Headline numbers"
         className="grid gap-4 md:grid-cols-4"
@@ -151,11 +151,11 @@ export default async function EmployerOverviewPage({
         />
       </section>
 
-      {/* Recent matches — live search */}
+      {/* Recent matches  live search */}
       <section className="mt-12" aria-labelledby="recent-h">
         <header className="mb-4 flex flex-wrap items-baseline justify-between gap-3 border-b-2 border-[color:var(--color-ink)] pb-3">
           <h2 id="recent-h" className="font-display text-2xl">
-            {t("overview.recent")} — Software Developer, Gauteng
+            {t("overview.recent")}  Software Developer, Gauteng
           </h2>
           <Link
             href={{
@@ -246,7 +246,7 @@ export default async function EmployerOverviewPage({
         <QuickLink
           title={t("nav.placements")}
           href="/employer/placements"
-          body="Log a hire — feeds national analytics."
+          body="Log a hire  feeds national analytics."
         />
         <QuickLink
           title={t("nav.organisation")}

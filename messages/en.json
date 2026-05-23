@@ -18,7 +18,7 @@
       "lineOne": "Find skilled people.",
       "lineTwo": "Near you.",
       "lineThree": "For real.",
-      "subhead": "Sebenza matches South African talent to work by skill and place — with employment data you can actually trust."
+      "subhead": "Sebenza matches South African talent to work by skill and place  with employment data you can actually trust."
     },
     "search": {
       "professionLabel": "Profession or skill",
@@ -30,7 +30,7 @@
     },
     "pulseStrip": {
       "heading": "National pulse",
-      "subheading": "Live, freshness-weighted — never stale, never spun.",
+      "subheading": "Live, freshness-weighted  never stale, never spun.",
       "totalActive": "Active profiles",
       "confirmedHires": "Confirmed hires this month",
       "skillsInDemand": "Skills in active demand"
@@ -38,7 +38,7 @@
     "valueCards": {
       "trusted": {
         "title": "Trusted profiles",
-        "body": "Every qualification carries an honest verification state — never \"Verified\" by default."
+        "body": "Every qualification carries an honest verification state  never \"Verified\" by default."
       },
       "live": {
         "title": "Live availability",
@@ -46,20 +46,20 @@
       },
       "real": {
         "title": "Real employment data",
-        "body": "Hires are counted only when confirmed on the platform — analytics you can act on."
+        "body": "Hires are counted only when confirmed on the platform  analytics you can act on."
       }
     },
     "split": {
       "employer": {
         "eyebrow": "Employers & recruiters",
         "heading": "Find verified, available talent in your city.",
-        "body": "Search by skill and location. Reveal contact details only after the candidate has consented — and every access is recorded.",
+        "body": "Search by skill and location. Reveal contact details only after the candidate has consented  and every access is recorded.",
         "cta": "Start hiring"
       },
       "government": {
         "eyebrow": "Government & policy",
         "heading": "Workforce intelligence in real time.",
-        "body": "Real-time employment analytics by skill, location, and freshness — exportable, aggregate, never personal.",
+        "body": "Real-time employment analytics by skill, location, and freshness  exportable, aggregate, never personal.",
         "cta": "See the insights"
       }
     },
@@ -115,7 +115,7 @@
         "body": "Search verified talent by skill and location. Two-factor auth required. Your organisation must be verified before contact details unlock.",
         "cta": "Register an organisation"
       },
-      "adminNotice": "Administrator accounts are issued by Sebenza — not self-registered. If you've been invited, sign in with the credentials in your invitation email.",
+      "adminNotice": "Administrator accounts are issued by Sebenza  not self-registered. If you've been invited, sign in with the credentials in your invitation email.",
       "haveAccount": "Already have an account?",
       "signInLink": "Sign in"
     },
@@ -131,10 +131,10 @@
         "subhead": "Your profile is not searchable until you say it can be. You can revoke consent any time from your privacy centre.",
         "next": "Grant consent & continue",
         "purposes": {
-          "searchability": "Searchability — let employers find me by skill + location",
-          "contact_reveal": "Contact reveal — allow verified employers to request my contact details, audit-logged",
-          "document_sharing": "Document sharing — allow verified employers to request my qualifications",
-          "analytics_aggregate": "Aggregate analytics — count me in national employment statistics (no personal data shared)"
+          "searchability": "Searchability  let employers find me by skill + location",
+          "contact_reveal": "Contact reveal  allow verified employers to request my contact details, audit-logged",
+          "document_sharing": "Document sharing  allow verified employers to request my qualifications",
+          "analytics_aggregate": "Aggregate analytics  count me in national employment statistics (no personal data shared)"
         },
         "required": "Required for your profile to appear in search results."
       },
@@ -146,7 +146,7 @@
         "locationLabel": "Where do you live / want to work?",
         "statusLabel": "What's your employment status today?",
         "studentToggle": "I'm currently a student",
-        "studentToggleHint": "Tick this if you're enrolled in a SA university, university of technology, TVET, UNISA, or INDLELA programme. We'll capture your academic details so Sebenza can recommend electives, internships and graduate programmes — not just full hires.",
+        "studentToggleHint": "Tick this if you're enrolled in a SA university, university of technology, TVET, UNISA, or INDLELA programme. We'll capture your academic details so Sebenza can recommend electives, internships and graduate programmes  not just full hires.",
         "academic": {
           "heading": "Your studies",
           "institutionLabel": "Institution",
@@ -161,8 +161,8 @@
         }
       },
       "stepHints": {
-        "name": "Goes on your profile as \"First L.\" by default — your full surname only appears after you grant contact consent.",
-        "id": "We'll encrypt this immediately. It is never displayed back — even to you, even to admins."
+        "name": "Goes on your profile as \"First L.\" by default  your full surname only appears after you grant contact consent.",
+        "id": "We'll encrypt this immediately. It is never displayed back  even to you, even to admins."
       }
     },
     "employerSignUp": {
@@ -215,7 +215,7 @@
     "states": {
       "loading": "Loading talent…",
       "empty": "No matches yet",
-      "emptyBody": "Try broadening the location or removing a filter. Your search is also being recorded — anonymised — so we can show policymakers where the skill gaps are.",
+      "emptyBody": "Try broadening the location or removing a filter. Your search is also being recorded  anonymised  so we can show policymakers where the skill gaps are.",
       "error": "Something went wrong",
       "errorBody": "We couldn't reach the talent index. Please try again.",
       "retry": "Try again"
@@ -240,8 +240,8 @@
       "ageing": "Ageing",
       "stale": "Stale",
       "freshHelp": "Confirmed within the last 30 days.",
-      "ageingHelp": "30 to 90 days old — slight down-rank, nudge sent.",
-      "staleHelp": "90+ days old — strongly down-ranked, flagged in analytics."
+      "ageingHelp": "30 to 90 days old  slight down-rank, nudge sent.",
+      "staleHelp": "90+ days old  strongly down-ranked, flagged in analytics."
     }
   },
   "verification": {
@@ -270,7 +270,7 @@
       "documents": "Documents & certificates",
       "lockedBody": "Verified employers can request to view this. Every access is consent-checked and recorded.",
       "lockedCta": "Sign in as a verified employer",
-      "seekerHint": "We never show your ID number, documents, or contact details in search results — even to verified employers, until you consent."
+      "seekerHint": "We never show your ID number, documents, or contact details in search results  even to verified employers, until you consent."
     },
     "report": "Report this profile",
     "redacted": "(Surname is hidden in public search until you consent to be contacted.)"
@@ -288,12 +288,12 @@
       "account": "Account"
     },
     "overview": {
-      "greeting": "Hello, {name} — your private workspace",
+      "greeting": "Hello, {name}  your private workspace",
       "completeness": "Profile completeness",
       "nextAction": "Add {n} more {n, plural, =1 {skill} other {skills}} to rank higher in search.",
       "pulse": "Talent Pulse",
       "pulseQuestion": "Are you still open to work?",
-      "confirmFresh": "Yes — confirm",
+      "confirmFresh": "Yes  confirm",
       "lastConfirmed": "Last confirmed {when}",
       "publicLink": "View my public profile →",
       "viewedBy": "Who's viewed you",
@@ -306,7 +306,7 @@
     },
     "profileEditor": {
       "title": "Profile editor",
-      "subtitle": "Everything here flows into your public dossier and the national analytics. We never display your ID number — it's encrypted on save.",
+      "subtitle": "Everything here flows into your public dossier and the national analytics. We never display your ID number  it's encrypted on save.",
       "sections": {
         "identity": "Identity basics",
         "professional": "Professional summary",
@@ -316,7 +316,7 @@
       },
       "academic": {
         "heading": "Your studies",
-        "subhead": "Tell us where and what you're studying — Sebenza will tune your Career compass to your programme and your remaining time before graduation.",
+        "subhead": "Tell us where and what you're studying  Sebenza will tune your Career compass to your programme and your remaining time before graduation.",
         "institution": "Institution",
         "kindHint": "Recognised SA institutions only: public universities, universities of technology, TVET colleges, UNISA, INDLELA.",
         "programme": "Programme of study",
@@ -334,7 +334,7 @@
         "displayName": "Public display name",
         "displayNameHelp": "How you appear in public search (e.g. \"Thandeka M.\"). Your surname only reveals after contact consent.",
         "nationalId": "South African ID number (or passport)",
-        "nationalIdHelp": "Encrypted at rest with AES-256-GCM the moment you save. Never displayed back. Used only for verification — never shared.",
+        "nationalIdHelp": "Encrypted at rest with AES-256-GCM the moment you save. Never displayed back. Used only for verification  never shared.",
         "dob": "Date of birth",
         "nationality": "Nationality",
         "citizen": "I am a South African citizen",
@@ -345,7 +345,7 @@
         "seniority": "Seniority",
         "headline": "Public headline",
         "bio": "About",
-        "bioHelp": "Two or three sentences — what you're great at, and what you're looking for.",
+        "bioHelp": "Two or three sentences  what you're great at, and what you're looking for.",
         "addSkill": "Add a skill",
         "removeSkill": "Remove",
         "proficiency": "Self-rated proficiency"
@@ -365,7 +365,7 @@
     },
     "qualifications": {
       "title": "Qualifications & documents",
-      "subtitle": "Upload certificates as PDFs or images. Files are stored in a private bucket — only verified employers can request to view them, and every access is audit-logged.",
+      "subtitle": "Upload certificates as PDFs or images. Files are stored in a private bucket  only verified employers can request to view them, and every access is audit-logged.",
       "add": "Add a qualification",
       "uploadCert": "Upload certificate",
       "empty": "No qualifications yet. Adding at least one trade certificate or diploma builds employer trust.",
@@ -383,7 +383,7 @@
       "title": "Privacy & consent",
       "subtitle": "You control what Sebenza can do with your data. Revoke any consent below at any time.",
       "consents": "Active consents",
-      "noConsent": "No active consents — your profile is not searchable.",
+      "noConsent": "No active consents  your profile is not searchable.",
       "revoke": "Revoke",
       "granted": "Granted {date}",
       "version": "Version {v}",
@@ -392,7 +392,7 @@
       "exportBody": "We'll generate a JSON file with your profile, experience, qualifications, consents and audit log. Delivered to your registered email within 30 days (POPIA section 23).",
       "exportCta": "Request data export",
       "deleteTitle": "Erase my account",
-      "deleteBody": "Soft-deletes your profile immediately (no longer searchable). A 30-day grace period applies — after that we permanently erase. Audit logs are retained anonymised, as POPIA requires.",
+      "deleteBody": "Soft-deletes your profile immediately (no longer searchable). A 30-day grace period applies  after that we permanently erase. Audit logs are retained anonymised, as POPIA requires.",
       "deleteCta": "Request erasure"
     },
     "account": {
@@ -409,7 +409,7 @@
     },
     "grow": {
       "title": "Career compass",
-      "subtitle": "What to learn next — grounded in real employer demand near you. We don't sell courses; we point at what's working.",
+      "subtitle": "What to learn next  grounded in real employer demand near you. We don't sell courses; we point at what's working.",
       "eyebrow": "Skills growth · demand-driven",
       "headline": "Learn {n, plural, =1 {# skill} other {# skills}} → move from #{from} to #{to}",
       "headlineSub": "Projected rank in your local pool: {pool}",
@@ -425,35 +425,35 @@
       "rankIfLearned": "If you add this: rank → #{projected} in {pool}",
       "openProfileEditor": "Add to my profile →",
       "pathsTitle": "Learning paths",
-      "pathsSub": "Free and subsidised options listed first. SA-recognised programmes only — SETA, TVET, INDLELA, SAQA-recognised, and open-source resources.",
+      "pathsSub": "Free and subsidised options listed first. SA-recognised programmes only  SETA, TVET, INDLELA, SAQA-recognised, and open-source resources.",
       "duration": "{weeks, plural, =1 {# week} other {# weeks}}",
       "national": "National",
       "providerKind": "Provider type",
       "cost": "Cost",
       "outcome": "Outcome",
       "adjacentTitle": "Adjacent professions",
-      "adjacentSub": "Roles your current skills overlap with — usually one or two skills away.",
+      "adjacentSub": "Roles your current skills overlap with  usually one or two skills away.",
       "overlap": "{percent}% skill overlap",
       "missing": "Missing",
       "cityDemandTitle": "What employers are looking for in your province",
-      "cityDemandSub": "The gap column is the policy lever — and the seeker's opportunity.",
+      "cityDemandSub": "The gap column is the policy lever  and the seeker's opportunity.",
       "cityDemandColSkill": "Skill",
       "cityDemandColSearches": "Searches",
       "cityDemandColMatches": "Matches",
       "cityDemandColGap": "Gap",
       "honestNote": "Honesty note",
-      "honestBody": "Sebenza doesn't accept money from learning providers. We list public, SA-recognised paths first because they're real and reachable. If a course isn't here, it isn't necessarily bad — but we won't surface it without evidence it works.",
+      "honestBody": "Sebenza doesn't accept money from learning providers. We list public, SA-recognised paths first because they're real and reachable. If a course isn't here, it isn't necessarily bad  but we won't surface it without evidence it works.",
       "student": {
         "lane": "Student mode",
         "headline": "Bridge your degree to the market",
         "subhead": "You're {months, plural, =0 {graduating this month} =1 {one month from graduation} other {# months from graduation}}. Sebenza re-tunes the recommendations to what {programme} graduates actually need next.",
         "graduating": "Graduating",
         "electivesTitle": "Electives in your programme",
-        "electivesSub": "Subjects you can still pick — chosen because the market is screaming for them in your province.",
+        "electivesSub": "Subjects you can still pick  chosen because the market is screaming for them in your province.",
         "curriculumHint": "Where in the curriculum",
         "demandSignal": "{searches} searches vs {matches} matches this month",
         "programmesTitle": "Internships & graduate programmes",
-        "programmesSub": "Real SA programmes — public sector first, then corporates and startups. Eligibility is shown honestly — we'd rather tell you upfront if you don't qualify than waste your time.",
+        "programmesSub": "Real SA programmes  public sector first, then corporates and startups. Eligibility is shown honestly  we'd rather tell you upfront if you don't qualify than waste your time.",
         "duration": "{months, plural, =1 {# month} other {# months}}",
         "eligibility": "Eligibility",
         "applicationOpen": "Open",
@@ -461,7 +461,7 @@
         "applicationClosed": "Closed",
         "saqaChip": "SAQA-recognised",
         "destinationsTitle": "Where {programme} graduates go",
-        "destinationsSub": "Aggregated from confirmed placements on Sebenza. No personal data is exposed — only the destination type and share.",
+        "destinationsSub": "Aggregated from confirmed placements on Sebenza. No personal data is exposed  only the destination type and share.",
         "medianMonths": "{months, plural, =1 {≈1 month to placement} other {≈# months to placement}}",
         "notPlaced": "Not yet placed",
         "supplementaryTitle": "Supplementary free learning",
@@ -495,14 +495,14 @@
       },
       "recent": "Recent matches",
       "refineInSearch": "Refine in search →",
-      "placementNudge": "Hired this candidate? Confirming hires keeps national data honest — and earns your organisation a small analytics credit.",
+      "placementNudge": "Hired this candidate? Confirming hires keeps national data honest  and earns your organisation a small analytics credit.",
       "markHired": "Mark as hired",
       "noMatches": "No matches in this saved search",
-      "broadenHelp": "Broaden your filters, or save the gap — we feed it into national skills-gap analytics."
+      "broadenHelp": "Broaden your filters, or save the gap  we feed it into national skills-gap analytics."
     },
     "savedSearches": {
       "title": "Saved searches",
-      "subtitle": "Reusable filter sets. New matches alert you by email — you decide the cadence.",
+      "subtitle": "Reusable filter sets. New matches alert you by email  you decide the cadence.",
       "add": "Save a new search",
       "lastRun": "Last run {when}",
       "newMatches": "{n} new {n, plural, =1 {match} other {matches}} since last visit",
@@ -608,7 +608,7 @@
       "reportedWhen": "Reported {when}",
       "suspend": "Suspend",
       "restore": "Restore",
-      "closeNoAction": "Close — no action"
+      "closeNoAction": "Close  no action"
     },
     "taxonomy": {
       "title": "Reference data",
@@ -626,7 +626,7 @@
       "subtitle": "Every PII access, in chronological order. POPIA-compliant retention applies.",
       "filterKind": "Kind",
       "filterActor": "Actor",
-      "noEvents": "No PII access yet this session. Visit /search or open a profile and reload — every event will appear here."
+      "noEvents": "No PII access yet this session. Visit /search or open a profile and reload  every event will appear here."
     },
     "users": {
       "title": "Users",

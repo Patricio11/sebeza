@@ -32,7 +32,7 @@ function SeekerSignUpDossier() {
     {
       n: "01",
       title: "Identity, encrypted",
-      body: "Your full name and ID number are captured once, encrypted on save with AES-256-GCM, and never displayed back — even to you, even to admins.",
+      body: "Your full name and ID number are captured once, encrypted on save with AES-256-GCM, and never displayed back  even to you, even to admins.",
     },
     {
       n: "02",
@@ -42,7 +42,7 @@ function SeekerSignUpDossier() {
     {
       n: "03",
       title: "Just the start",
-      body: "After these three fields, your full profile editor lives in the dashboard — experience, qualifications, skills, headline, bio.",
+      body: "After these three fields, your full profile editor lives in the dashboard  experience, qualifications, skills, headline, bio.",
     },
   ];
   return (

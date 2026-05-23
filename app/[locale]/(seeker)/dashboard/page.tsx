@@ -39,13 +39,13 @@ export default async function SeekerOverviewPage({
   const t = await getTranslations("seekerDash");
   const lastConfirmed = formatRelativeTime(me.statusConfirmedAt, locale);
   const freshness = freshnessSummary(me.statusConfirmedAt);
-  // Phase 6: real compass — recommendations come from live search-event
+  // Phase 6: real compass  recommendations come from live search-event
   // demand intersected with the controlled skill taxonomy, scoped to the
   // seeker's profession + province.
   const compass = await getCompassForProfile(me);
   const topRec = compass.recommendations[0];
 
-  // Derive Next steps from real profile state — never lie about what's done.
+  // Derive Next steps from real profile state  never lie about what's done.
   const nextSteps: { text: string; done: boolean; href?: string }[] = [
     {
       text: "Verify your email address",
@@ -95,7 +95,7 @@ export default async function SeekerOverviewPage({
   // Empty until Phase 5 starts writing reveal / download events.
   const activity = await getSeekerActivity(me, 6);
 
-  // Real rank in the (profession × province) pool — same blend the search
+  // Real rank in the (profession × province) pool  same blend the search
   // SQL uses, projected with a +2-skill completeness boost.
   const rank = await rankInPoolQuery({
     handle: me.handle,
@@ -125,7 +125,7 @@ export default async function SeekerOverviewPage({
     >
       <StatusNudgeBanner band={freshness.band} days={freshness.days} />
       <div className="grid gap-6 md:grid-cols-3">
-        {/* Completeness — anchor card */}
+        {/* Completeness  anchor card */}
         <section
           aria-labelledby="vis-h"
           className="md:col-span-2 rounded-[var(--radius-md)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-6 md:p-8"
@@ -141,7 +141,7 @@ export default async function SeekerOverviewPage({
             <div className="max-w-md text-[color:var(--color-ink-soft)]">
               <p>
                 {me.completeness >= 80
-                  ? "Your profile is in excellent shape — recruiters will see it first."
+                  ? "Your profile is in excellent shape  recruiters will see it first."
                   : me.completeness >= 50
                     ? "Solid foundation. A few more touches put you in the top tier."
                     : "Let's get the essentials in. Each section below adds visible weight."}
@@ -157,7 +157,7 @@ export default async function SeekerOverviewPage({
           </div>
         </section>
 
-        {/* Talent Pulse — live; calls setStatus / reconfirmStatus */}
+        {/* Talent Pulse  live; calls setStatus / reconfirmStatus */}
         <StatusCard
           status={me.status}
           statusConfirmedAt={me.statusConfirmedAt}
@@ -166,11 +166,11 @@ export default async function SeekerOverviewPage({
           lastConfirmedLabel={lastConfirmed}
         />
 
-        {/* Phase 7.5 — Self-report a placement when employed. Stored as
+        {/* Phase 7.5  Self-report a placement when employed. Stored as
             seeker_reported; excluded from official analytics. */}
         {me.status === "employed" && <SelfReportPlacementCard />}
 
-        {/* Rank in search — real position in the (profession × province) pool */}
+        {/* Rank in search  real position in the (profession × province) pool */}
         <section
           aria-labelledby="rank-h"
           className="md:col-span-2 rounded-[var(--radius-md)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-6 md:p-8"
@@ -193,7 +193,7 @@ export default async function SeekerOverviewPage({
             <span className="text-[color:var(--color-ink)]">
               freshness × completeness × citizen boost
             </span>{" "}
-            — same blend that drives `/search`.
+             same blend that drives `/search`.
           </p>
           {rank ? (
             <div className="grid grid-cols-[auto_1fr_auto] items-baseline gap-4">
@@ -216,7 +216,7 @@ export default async function SeekerOverviewPage({
                   ) : rank.rank === 1 ? (
                     "You're top of the pool. Keep your status fresh."
                   ) : (
-                    "Your completeness is already maxed in this pool — keep status confirmed."
+                    "Your completeness is already maxed in this pool  keep status confirmed."
                   )}
                 </div>
               </div>
@@ -231,13 +231,13 @@ export default async function SeekerOverviewPage({
             </div>
           ) : (
             <div className="text-sm text-[color:var(--color-ink-soft)]">
-              Your profile isn't ranked yet — confirm your status to enter
+              Your profile isn't ranked yet  confirm your status to enter
               the pool.
             </div>
           )}
         </section>
 
-        {/* Career compass — strategic glance, drills into /dashboard/grow */}
+        {/* Career compass  strategic glance, drills into /dashboard/grow */}
         <section
           aria-labelledby="compass-h"
           className="md:col-span-3 grid grid-cols-1 gap-0 overflow-hidden rounded-[var(--radius-md)] border-2 border-[color:var(--color-ink)] bg-[color:var(--color-paper)] md:grid-cols-[auto_1fr_auto]"
@@ -277,7 +277,7 @@ export default async function SeekerOverviewPage({
               </>
             ) : (
               <h2 id="compass-h" className="mt-1 font-display text-2xl">
-                Your skills are already strong — explore adjacent roles.
+                Your skills are already strong  explore adjacent roles.
               </h2>
             )}
           </div>
@@ -310,7 +310,7 @@ export default async function SeekerOverviewPage({
           </div>
         </section>
 
-        {/* Next steps — derived from real profile state */}
+        {/* Next steps  derived from real profile state */}
         <section
           aria-labelledby="next-h"
           className="rounded-[var(--radius-md)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface-sunk)] p-6"
@@ -336,7 +336,7 @@ export default async function SeekerOverviewPage({
           </ol>
         </section>
 
-        {/* Activity — real audit log filtered to this seeker */}
+        {/* Activity  real audit log filtered to this seeker */}
         <ActivitySection
           icon={<Eye className="size-4" aria-hidden="true" />}
           title={t("overview.viewedBy")}

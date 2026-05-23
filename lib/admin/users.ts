@@ -1,5 +1,5 @@
 /**
- * Phase 7 — Admin user-list query + overview KPI counts.
+ * Phase 7  Admin user-list query + overview KPI counts.
  *
  * `listUsersQuery` replaces the hardcoded `EXTRA_USERS` array on
  * `/admin/users` with a real DB join: app_user × profiles (for seekers)
@@ -9,7 +9,7 @@
  * `adminOverviewCounts` powers the `/admin` overview KPIs.
  *
  * Lifecycle actions (suspend / restore / erase) live in
- * `lib/admin/moderation.ts` — that file is `"use server"` and groups
+ * `lib/admin/moderation.ts`  that file is `"use server"` and groups
  * everything that mutates user state.
  */
 
@@ -47,7 +47,7 @@ export interface AdminUsersListOpts {
 }
 
 /**
- * Server-side loader for `/admin/users` — admin-guarded list with
+ * Server-side loader for `/admin/users`  admin-guarded list with
  * search + filter. Returns a unified row shape across all roles.
  */
 export async function listUsersQuery(

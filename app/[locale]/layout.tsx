@@ -8,7 +8,7 @@ import { CookieConsentBanner } from "@/components/feature/legal/CookieConsentBan
 import { readCookieConsent } from "@/lib/cookies/consent";
 import "../globals.css";
 
-// Subset to latin (Tier 1 locales — en/zu/xh/af — all use latin).
+// Subset to latin (Tier 1 locales  en/zu/xh/af  all use latin).
 // Tier 3 locales (esp. Tshivenda diacritics) extend this subset.
 const fraunces = Fraunces({
   subsets: ["latin"],
@@ -31,7 +31,7 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   title: {
-    default: "Sebenza — South African talent platform",
+    default: "Sebenza  South African talent platform",
     template: "%s · Sebenza",
   },
   description:
@@ -61,7 +61,7 @@ export default async function LocaleLayout({
       <body className="min-h-screen bg-[color:var(--color-paper)] text-[color:var(--color-ink)]">
         <NextIntlClientProvider locale={locale} messages={messages}>
           {children}
-          {/* Phase 9 — cookie consent banner. Renders only when no
+          {/* Phase 9  cookie consent banner. Renders only when no
               choice has been made yet (consent.recordedAt === null). */}
           <CookieConsentBanner alreadyDecided={Boolean(consent.recordedAt)} />
         </NextIntlClientProvider>

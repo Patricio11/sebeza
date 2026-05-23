@@ -1,5 +1,5 @@
 /**
- * Phase 8 — Shared email shell.
+ * Phase 8  Shared email shell.
  *
  * Lifted from `lib/auth/server.ts` (Phase 2) so the notification
  * templates can reuse the brand chrome. Keep this file presentation-

@@ -92,7 +92,7 @@ export function SiteFooter() {
             </div>
             <p className="mt-4 text-[0.72rem] leading-snug text-[color:var(--color-paper)]/60">
               Tier 1 launch locales. Tier 2 &amp; 3 follow per ROADMAP §10.
-              Legal copy is professionally translated — never machine-translated.
+              Legal copy is professionally translated  never machine-translated.
             </p>
           </div>
         </div>

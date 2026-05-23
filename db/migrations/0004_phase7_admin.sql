@@ -1,11 +1,11 @@
--- Phase 7 (Part 1) — Admin actions, moderation, platform settings.
+-- Phase 7 (Part 1)  Admin actions, moderation, platform settings.
 --
 -- Adds the schema needed for:
---   1. `reports` — public Report-this-profile button (from /p/[handle])
+--   1. `reports`  public Report-this-profile button (from /p/[handle])
 --      plus admin moderation queue.
---   2. `app_user.suspended_at` + `app_user.suspended_reason` — admin
+--   2. `app_user.suspended_at` + `app_user.suspended_reason`  admin
 --      suspend/restore flow; suspended users are bounced at sign-in.
---   3. `platform_settings` — key/value JSONB store for freshness band
+--   3. `platform_settings`  key/value JSONB store for freshness band
 --      thresholds, ranking weights, feature flags. Replaces the
 --      hardcoded constants the Phase 6.5 rank query carries.
 
@@ -81,7 +81,7 @@ CREATE TABLE IF NOT EXISTS "platform_settings" (
 );
 
 -- Seed default values for the existing UI fields on /admin/settings.
--- Re-runnable — ON CONFLICT preserves any admin-set values from prior runs.
+-- Re-runnable  ON CONFLICT preserves any admin-set values from prior runs.
 INSERT INTO "platform_settings" ("key", "value")
 VALUES
   ('freshness_band_days_fresh',  '30'::jsonb),

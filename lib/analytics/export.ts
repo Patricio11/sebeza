@@ -1,11 +1,11 @@
 "use server";
 
 /**
- * Phase 6 — CSV export of aggregate analytics.
+ * Phase 6  CSV export of aggregate analytics.
  *
  * Stream-style return: the Server Action returns a `{ ok, filename, csv }`
  * payload; the client component triggers a download via a Blob. All exports
- * are aggregate-only — never per-row PII.
+ * are aggregate-only  never per-row PII.
  *
  * Every export writes an `analytics.export` audit row with:
  *   - `actor` = userId (or "anonymous" for the public /insights button)
@@ -59,7 +59,7 @@ export async function exportInsightsCsv(): Promise<
   );
   lines.push("");
 
-  // Section 1 — Status breakdown
+  // Section 1  Status breakdown
   lines.push("Section,Status,Count,FreshnessConfidence");
   for (const [status, bucket] of Object.entries(snapshot.byStatus)) {
     lines.push(
@@ -68,7 +68,7 @@ export async function exportInsightsCsv(): Promise<
   }
   lines.push("");
 
-  // Section 2 — Skills gap
+  // Section 2  Skills gap
   lines.push("Section,Skill,Searches,Matches,FreshMatches,Gap");
   for (const r of skillsGap) {
     lines.push(
@@ -77,7 +77,7 @@ export async function exportInsightsCsv(): Promise<
   }
   lines.push("");
 
-  // Section 3 — Supply heatmap (province × profession)
+  // Section 3  Supply heatmap (province × profession)
   lines.push("Section,Province,Profession,Supply,Freshness");
   for (const c of heatmap) {
     lines.push(
@@ -86,7 +86,7 @@ export async function exportInsightsCsv(): Promise<
   }
   lines.push("");
 
-  // Section 4 — Freshness breakdown
+  // Section 4  Freshness breakdown
   lines.push("Section,Band,Count");
   lines.push(`freshness,fresh,${freshness.fresh}`);
   lines.push(`freshness,ageing,${freshness.ageing}`);
@@ -94,13 +94,13 @@ export async function exportInsightsCsv(): Promise<
   lines.push(`freshness,total,${freshness.total}`);
   lines.push("");
 
-  // Section 5 — Trend
+  // Section 5  Trend
   lines.push("Section,Month,Registrations,Placements");
   for (const t of snapshot.trend) {
     lines.push(`trend,${csvCell(t.month)},${t.registrations},${t.placements}`);
   }
 
-  // RFC 4180 line endings — Excel on Windows needs CRLF, others accept it.
+  // RFC 4180 line endings  Excel on Windows needs CRLF, others accept it.
   const csv = lines.join("\r\n");
   const rowCount =
     skillsGap.length +
@@ -134,7 +134,7 @@ export async function exportInsightsCsv(): Promise<
  * CSV-escape per RFC 4180 + formula-injection guard.
  *
  * Cells starting with `=` `+` `-` `@` `\t` are executed as formulas by
- * Excel / LibreOffice when the CSV is opened — a malicious search term in
+ * Excel / LibreOffice when the CSV is opened  a malicious search term in
  * `search_events.terms` would otherwise pop calc on an analyst's machine.
  * OWASP-recommended fix: prefix the cell with a single quote, which Excel
  * displays as content and never interprets.

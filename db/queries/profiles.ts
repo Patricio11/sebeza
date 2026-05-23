@@ -1,8 +1,8 @@
 /**
- * Phase 4 — Postgres-backed profile queries.
+ * Phase 4  Postgres-backed profile queries.
  *
  * Every function here is the **canonical public read path**. The shape we
- * return is `PublicProfile` (with `profilePhotoUrl` as a raw storage key —
+ * return is `PublicProfile` (with `profilePhotoUrl` as a raw storage key 
  * the dbProvider wrapper signs it before handing to consumers).
  *
  * Redaction Rule (`docs/SECURITY.md`): every SELECT here enumerates the
@@ -64,7 +64,7 @@ export async function searchProfilesQuery(
   const hasQuery = q.length > 0;
 
   // The ranking expression. When there's no query, ts_rank_cd would be 0 for
-  // all rows and the WHERE @@ clause would match nothing — so we branch.
+  // all rows and the WHERE @@ clause would match nothing  so we branch.
   const rankExpr = hasQuery
     ? sql`ts_rank_cd(p.search_vector, websearch_to_tsquery('simple', ${q}))`
     : sql`1.0::numeric`;
@@ -73,7 +73,7 @@ export async function searchProfilesQuery(
     ? sql`CASE WHEN p.is_citizen THEN 1.08 ELSE 1.0 END`
     : sql`1.0::numeric`;
 
-  // WHERE clauses — assembled conditionally so a missing filter doesn't
+  // WHERE clauses  assembled conditionally so a missing filter doesn't
   // narrow the result set.
   const conditions = [sql`p.deleted_at IS NULL`];
 
@@ -116,7 +116,7 @@ export async function searchProfilesQuery(
       sql`EXISTS (SELECT 1 FROM academic_profiles ap WHERE ap.profile_id = p.id AND ap.open_to_graduate_programmes = true)`,
     );
   }
-  // Phase 7.5 — multi-select work-availability filter. Empty array
+  // Phase 7.5  multi-select work-availability filter. Empty array
   // (or absent) means no filter. The `&&` operator is array overlap:
   // a profile matches if ANY of its availability kinds is in the
   // requested set. Backed by the GIN index on `work_availability`.
@@ -187,7 +187,7 @@ export async function searchProfilesQuery(
 
   // Pull top-skills for the matched profiles in one extra query.
   // We bound the list (max 5 per profile, in proficiency order) to keep the
-  // payload light — public/search reads don't need every skill.
+  // payload light  public/search reads don't need every skill.
   const ids = rows.map((r) => r.id);
   const skillsByProfile = ids.length > 0 ? await topSkillsByProfile(ids) : new Map();
 
@@ -212,7 +212,7 @@ export async function searchProfilesQuery(
     score: Number(r.score),
   }));
 
-  // Skills-gap signal — every search writes a row. Phase 6 builds on this.
+  // Skills-gap signal  every search writes a row. Phase 6 builds on this.
   // Best-effort: write must not block the response.
   try {
     await db.insert(schema.searchEvents).values({
@@ -318,7 +318,7 @@ export async function recentProfilesQuery(limit = 6): Promise<PublicProfile[]> {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Helpers — child-table loaders
+// Helpers  child-table loaders
 // ─────────────────────────────────────────────────────────────────────────────
 
 async function loadTopSkills(profileId: string): Promise<SkillRef[]> {
@@ -340,7 +340,7 @@ async function loadTopSkills(profileId: string): Promise<SkillRef[]> {
 
 /**
  * Top skills for many profiles in one round-trip. Returns a Map keyed by
- * profile id. Each list is capped at 5 entries (in proficiency order) — the
+ * profile id. Each list is capped at 5 entries (in proficiency order)  the
  * search-results card shows ~3 anyway.
  */
 async function topSkillsByProfile(
@@ -401,7 +401,7 @@ async function loadQualifications(profileId: string): Promise<QualificationItem[
       institution: schema.qualifications.institution,
       awardedYear: schema.qualifications.awardedYear,
       verification: schema.qualifications.verification,
-      // documentStorageKey intentionally NOT in the public read — only
+      // documentStorageKey intentionally NOT in the public read  only
       // an audited employer-reveal flow (Phase 5) gets to see the file.
     })
     .from(schema.qualifications)

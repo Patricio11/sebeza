@@ -1,9 +1,9 @@
--- Phase 5 — Employer portal: reveal flow, placements, saved searches, shortlists.
+-- Phase 5  Employer portal: reveal flow, placements, saved searches, shortlists.
 --
 -- 1. `placements.actor_user_id` + `placements.salary_band` (new cols on
---    an existing table — both nullable so seeded rows survive).
--- 2. `saved_searches` — per-org saved-search definitions.
--- 3. `shortlist_pools` + `shortlist_members` — per-org talent pools.
+--    an existing table  both nullable so seeded rows survive).
+-- 2. `saved_searches`  per-org saved-search definitions.
+-- 3. `shortlist_pools` + `shortlist_members`  per-org talent pools.
 --
 -- See `docs/PHASE_5_PLAN.md` for the rationale on each table.
 

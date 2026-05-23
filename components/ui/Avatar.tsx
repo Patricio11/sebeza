@@ -8,16 +8,16 @@ import type { VerificationStatus } from "@/lib/mock/types";
  * Renders an actual photo when `photoUrl` is set; otherwise paints a
  * deterministic SA-palette block with Fraunces initials. Optional verification
  * ring (green for verified, gold for pending, none otherwise) sits around the
- * avatar in a way that's honest and never lies — Verification-Honesty Rule.
+ * avatar in a way that's honest and never lies  Verification-Honesty Rule.
  */
 export type AvatarSize = "xs" | "sm" | "md" | "lg" | "xl" | "2xl";
 
 interface Props {
-  /** Name or display name — used to seed the initials + palette. */
+  /** Name or display name  used to seed the initials + palette. */
   name: string;
   /** Optional photo URL. When set, image takes precedence over initials. */
   photoUrl?: string | null;
-  /** Verification state of the profile — drives the ring colour, honestly. */
+  /** Verification state of the profile  drives the ring colour, honestly. */
   verification?: VerificationStatus;
   size?: AvatarSize;
   /** Whether to render the verification ring at all. */
@@ -110,7 +110,7 @@ function InitialsBlock({
         </linearGradient>
       </defs>
       <rect width={dims} height={dims} fill={`url(#grad-${palette.id})`} />
-      {/* Faint chevron in the lower-right — Sebenza's signature mark on every
+      {/* Faint chevron in the lower-right  Sebenza's signature mark on every
           generated avatar, sits at ~6% opacity so it's a watermark, not a logo. */}
       <path
         d={`M ${dims * 0.55} ${dims * 0.7} L ${dims * 0.92} ${dims * 0.85} L ${dims * 0.55} ${dims}`}
@@ -156,7 +156,7 @@ interface Palette {
 }
 
 // Six deterministic palettes drawing from the SA flag palette. Each name hashes
-// to one — same person gets the same avatar across renders.
+// to one  same person gets the same avatar across renders.
 const PALETTES: Palette[] = [
   {
     id: "green",

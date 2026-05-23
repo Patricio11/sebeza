@@ -1,4 +1,4 @@
--- Phase 9 — Add `gov` to the user_role enum.
+-- Phase 9  Add `gov` to the user_role enum.
 --
 -- Isolated migration (same pattern as Phase 7.5's outcomes_research)
 -- because PG enum extensions are transaction-sensitive on older PG.

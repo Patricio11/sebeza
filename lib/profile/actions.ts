@@ -38,7 +38,7 @@ function fail(message: string): { ok: false; message: string } {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// updateProfileBasics — identity + professional + location + bio in one save
+// updateProfileBasics  identity + professional + location + bio in one save
 // ─────────────────────────────────────────────────────────────────────────────
 
 const basicsSchema = z.object({
@@ -78,7 +78,7 @@ export async function updateProfileBasics(
     experience: [],
     qualifications: [],
   });
-  // Skills + experience + qualifications haven't changed in this action —
+  // Skills + experience + qualifications haven't changed in this action 
   // we mix the old counts back in by re-reading them. (Tiny cost; keeps the
   // user's headline number accurate after every save.)
   const liveCompleteness = await recomputeCompleteness(db, profile.id, {
@@ -114,7 +114,7 @@ export async function updateProfileBasics(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// updateSkills — replaces the set in a transaction
+// updateSkills  replaces the set in a transaction
 // ─────────────────────────────────────────────────────────────────────────────
 
 const skillsSchema = z.object({
@@ -134,7 +134,7 @@ export async function updateSkills(
   const session = await getSessionUser();
   if (!session) return fail("Not signed in.");
   const parsed = skillsSchema.safeParse(input);
-  if (!parsed.success) return fail("Skill list invalid — try again.");
+  if (!parsed.success) return fail("Skill list invalid  try again.");
   const db = getDb();
   const profile = await loadOwnedProfile(db, session.id);
   if (!profile) return fail("Profile not found.");
@@ -175,7 +175,7 @@ export async function updateSkills(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Phase 7.5 — Work-availability (independent of employment status)
+// Phase 7.5  Work-availability (independent of employment status)
 // ─────────────────────────────────────────────────────────────────────────────
 
 const WORK_AVAILABILITY_VALUES = [
@@ -307,7 +307,7 @@ export async function changeNationalId(
   if (!v.ok) {
     return fail(
       v.reason === "bad_checksum"
-        ? "That ID number's checksum doesn't match — please double-check."
+        ? "That ID number's checksum doesn't match  please double-check."
         : v.reason === "wrong_length"
           ? "An SA ID number is 13 digits."
           : v.reason === "not_digits"
@@ -359,7 +359,7 @@ export async function removeNationalId(): Promise<ActionResult> {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Phase 7.5 — Seeker self-reported placement.
+// Phase 7.5  Seeker self-reported placement.
 //
 // Softer signal than the employer-confirmed `markAsHired` flow. Stored
 // in the same `placements` table with `source = 'seeker_reported'` so

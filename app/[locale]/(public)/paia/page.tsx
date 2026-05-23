@@ -11,7 +11,7 @@ export const metadata = {
 };
 
 /**
- * Phase 9 — PAIA manual.
+ * Phase 9  PAIA manual.
  *
  * South Africa's Promotion of Access to Information Act (Act 2 of 2000)
  * requires every public AND private body to publish a manual describing:
@@ -101,36 +101,36 @@ export default async function PaiaManualPage({
             <p>The records held fall into the following categories:</p>
             <ul className="my-4 list-disc pl-6 space-y-2">
               <li>
-                <strong>User account records</strong> — name, email, role,
+                <strong>User account records</strong>  name, email, role,
                 hashed password, two-factor secrets, KYC transaction
                 references.
               </li>
               <li>
-                <strong>Profile records</strong> — handle, profession,
+                <strong>Profile records</strong>  handle, profession,
                 skills, experience, qualifications, employment status,
                 work availability, encrypted national ID (where supplied).
               </li>
               <li>
-                <strong>Organisation records</strong> — registered employer
+                <strong>Organisation records</strong>  registered employer
                 organisations and members.
               </li>
               <li>
-                <strong>Activity records</strong> — sign-ins, search events,
+                <strong>Activity records</strong>  sign-ins, search events,
                 contact reveals, document downloads, placement confirmations,
                 consent grants/revocations, administrator actions.
               </li>
               <li>
-                <strong>File uploads</strong> — CVs, qualification documents,
+                <strong>File uploads</strong>  CVs, qualification documents,
                 profile photos (stored privately in Supabase Storage; access
                 via short-lived signed URLs only).
               </li>
               <li>
-                <strong>Audit log</strong> — every access to special-category
+                <strong>Audit log</strong>  every access to special-category
                 personal information, with actor + subject + timestamp.
                 Retained for 5 years.
               </li>
               <li>
-                <strong>Aggregate analytics</strong> — anonymised cohort
+                <strong>Aggregate analytics</strong>  anonymised cohort
                 statistics for the longitudinal outcomes dataset (suppressed
                 below 10 individuals per cell, per Phase 7.5.4).
               </li>
@@ -153,7 +153,7 @@ export default async function PaiaManualPage({
                 <Link href="/insights" className="underline">
                   /insights
                 </Link>{" "}
-                — freshness band counts, skills-gap demand vs supply,
+                 freshness band counts, skills-gap demand vs supply,
                 supply heatmap, longitudinal outcomes (suppressed cells
                 only).
               </li>
@@ -173,7 +173,7 @@ export default async function PaiaManualPage({
               circumstances, to records of other persons (subject to PAIA's
               third-party-protection regime).
             </p>
-            <h3 className="mt-5 font-display text-lg">Your own records — easiest path</h3>
+            <h3 className="mt-5 font-display text-lg">Your own records  easiest path</h3>
             <p>
               Sign in and use{" "}
               <Link href="/dashboard/privacy" className="underline">
@@ -183,7 +183,7 @@ export default async function PaiaManualPage({
               with every row referencing your account. This is free, instant,
               and audit-logged (PAIA + POPIA §23 satisfied in one click).
             </p>
-            <h3 className="mt-5 font-display text-lg">Records about a third party — formal PAIA request</h3>
+            <h3 className="mt-5 font-display text-lg">Records about a third party  formal PAIA request</h3>
             <p>
               Complete Form 2 of the PAIA Regulations and submit it to the
               Information Officer at{" "}

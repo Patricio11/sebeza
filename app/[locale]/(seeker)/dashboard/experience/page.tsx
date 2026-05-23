@@ -25,7 +25,7 @@ export default async function ExperiencePage({
   const t = await getTranslations("seekerDash.experience");
 
   // We re-query experiences here (rather than re-using me.experience) so we
-  // capture each row's `id` — needed for edit/delete.
+  // capture each row's `id`  needed for edit/delete.
   const db = getDb();
   const rows = await db
     .select()

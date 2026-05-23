@@ -1,7 +1,7 @@
 /**
- * Phase 7.5.6 — Compliance assertions for the outcomes dataset.
+ * Phase 7.5.6  Compliance assertions for the outcomes dataset.
  *
- * These are runnable functions (not Vitest tests yet — Phase 11.4 wires
+ * These are runnable functions (not Vitest tests yet  Phase 11.4 wires
  * the test runner). They live alongside the query they verify so any
  * future change to `outcomesQuery()` can be checked in a one-liner:
  *
@@ -12,7 +12,7 @@
  *
  * What we assert:
  *   1. NO cohort cell below the suppression floor is ever returned by
- *      `outcomesQuery()` — primary k-anonymity guarantee.
+ *      `outcomesQuery()`  primary k-anonymity guarantee.
  *   2. The CSV export route returns the same cohort set as the query
  *      (no bypass).
  *   3. A profile that has NOT granted `outcomes_research` cannot
@@ -133,7 +133,7 @@ export async function assertWorkAvailabilityPubliclySafe(): Promise<AssertResult
     name: "work-availability-publicly-safe",
     message:
       unexpected.length === 0
-        ? `All work_availability values in [${Array.from(seen).join(", ") || "—"}] are in the controlled enum.`
+        ? `All work_availability values in [${Array.from(seen).join(", ") || ""}] are in the controlled enum.`
         : `Schema drift: unexpected work_availability value(s) ${unexpected.join(", ")}.`,
   };
 }
@@ -150,7 +150,7 @@ export async function runAll(): Promise<void> {
   for (const c of checks) {
     const tag = c.ok ? "✓" : "✗";
     // eslint-disable-next-line no-console
-    console.log(`${tag} ${c.name} — ${c.message}`);
+    console.log(`${tag} ${c.name}  ${c.message}`);
     if (!c.ok) failed++;
   }
   if (failed > 0) {

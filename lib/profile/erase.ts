@@ -1,7 +1,7 @@
 "use server";
 
 /**
- * Phase 8 — Self-service POPIA §24 right to deletion.
+ * Phase 8  Self-service POPIA §24 right to deletion.
  *
  * Mirrors the admin `eraseUser` flow: soft-delete via
  * `app_user.deleted_at`. The Phase 8 hard-delete cron sweeps the row
@@ -64,7 +64,7 @@ export async function eraseMyAccount(
     const h = await nextHeaders();
     await auth.api.signOut({ headers: h });
   } catch {
-    // Ignore — the user is soft-deleted regardless.
+    // Ignore  the user is soft-deleted regardless.
   }
 
   redirect("/");

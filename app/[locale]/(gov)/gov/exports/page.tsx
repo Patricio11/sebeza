@@ -34,7 +34,7 @@ export default async function GovExportsPage({
         <ExportCard
           title="Sebenza LMI (latest)"
           href="/api/lmi"
-          desc="Composite index + components + previous snapshot delta. JSON. Public — no auth required."
+          desc="Composite index + components + previous snapshot delta. JSON. Public  no auth required."
         />
         <ExportCard
           title="Audit log (admin only)"

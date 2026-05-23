@@ -47,7 +47,7 @@ export default async function InsightsPage({
   const t = await getTranslations("insights");
   const tStatus = await getTranslations("status");
 
-  // Phase 7 (A.6) — Freshness band thresholds come from platform_settings
+  // Phase 7 (A.6)  Freshness band thresholds come from platform_settings
   // so admins can tune the bands without a deploy. Read first so the
   // breakdown query honours the current values.
   const [freshDays, ageingDays] = await Promise.all([
@@ -55,7 +55,7 @@ export default async function InsightsPage({
     getSetting<number>("freshness_band_days_ageing"),
   ]);
 
-  // Parallel load — all six aggregates ship at once. `skillsGapTrendQuery`
+  // Parallel load  all six aggregates ship at once. `skillsGapTrendQuery`
   // is `skillsGapQuery` plus the week-over-week delta arrow column (falls
   // back to no-delta when there's no prior snapshot yet).
   const [analytics, skillsGap, skillDemand, heatmap, freshness, outcomes] =
@@ -173,7 +173,7 @@ export default async function InsightsPage({
             />
           </section>
 
-          {/* Freshness band breakdown — "data you can trust" honesty */}
+          {/* Freshness band breakdown  "data you can trust" honesty */}
           <section className="mt-14" aria-labelledby="freshness-h">
             <header className="mb-4 flex items-baseline justify-between border-b-2 border-[color:var(--color-ink)] pb-2">
               <h2 id="freshness-h" className="font-display text-2xl">
@@ -211,7 +211,7 @@ export default async function InsightsPage({
             </div>
           </section>
 
-          {/* By status table — editorial, dense, honest */}
+          {/* By status table  editorial, dense, honest */}
           <section className="mt-14" aria-labelledby="by-status-h">
             <header className="mb-4 flex items-baseline justify-between border-b-2 border-[color:var(--color-ink)] pb-2">
               <h2 id="by-status-h" className="font-display text-2xl">
@@ -292,7 +292,7 @@ export default async function InsightsPage({
             </ul>
           </section>
 
-          {/* ── Skills-gap engine — the government wedge ─────────────────── */}
+          {/* ── Skills-gap engine  the government wedge ─────────────────── */}
           <section className="mt-16" aria-labelledby="gap-h">
             <header className="mb-4 flex items-baseline justify-between border-b-2 border-[color:var(--color-ink)] pb-2">
               <h2 id="gap-h" className="font-display text-2xl">
@@ -501,7 +501,7 @@ export default async function InsightsPage({
                               className="p-0 text-center"
                               style={{
                                 // CSS color-mix scales opacity off the
-                                // design-system brand colour — no hardcoded
+                                // design-system brand colour  no hardcoded
                                 // RGB literals that drift on theme changes.
                                 background: `color-mix(in srgb, var(--color-brand) ${mixPercent}%, transparent)`,
                                 color:
@@ -514,7 +514,7 @@ export default async function InsightsPage({
                               <a
                                 href={`/search?q=${encodeURIComponent(prof)}&province=${encodeURIComponent(provSlug)}`}
                                 className="block px-2 py-2 hover:underline"
-                                aria-label={`${cell.supply} ${prof} in ${prov} — open in search`}
+                                aria-label={`${cell.supply} ${prof} in ${prov}  open in search`}
                               >
                                 {cell.supply}
                               </a>
@@ -529,7 +529,7 @@ export default async function InsightsPage({
             </section>
           )}
 
-          {/* ── Skill-level demand — finer than profession granularity ─── */}
+          {/* ── Skill-level demand  finer than profession granularity ─── */}
           {skillDemand.length > 0 && (
             <section className="mt-16" aria-labelledby="skill-demand-h">
               <header className="mb-4 flex items-baseline justify-between border-b-2 border-[color:var(--color-ink)] pb-2">
@@ -578,7 +578,7 @@ export default async function InsightsPage({
             </section>
           )}
 
-          {/* Phase 7.5.4 — Education-to-employment outcomes (consented + k-anonymised) */}
+          {/* Phase 7.5.4  Education-to-employment outcomes (consented + k-anonymised) */}
           <section className="mt-16" aria-labelledby="outcomes-h">
             <header className="mb-3 flex flex-wrap items-baseline justify-between gap-3 border-b-2 border-[color:var(--color-ink)] pb-2">
               <div>
@@ -667,10 +667,10 @@ export default async function InsightsPage({
                         <td className="px-4 py-2 text-right font-mono tabular text-[color:var(--color-ink-soft)]">
                           {c.medianTimeToHireDays != null
                             ? c.medianTimeToHireDays
-                            : "—"}
+                            : ""}
                         </td>
                         <td className="px-4 py-2 text-[color:var(--color-ink-soft)]">
-                          {c.topDestinationProfession ?? "—"}
+                          {c.topDestinationProfession ?? ""}
                         </td>
                       </tr>
                     ))}
@@ -687,7 +687,7 @@ export default async function InsightsPage({
             )}
           </section>
 
-          {/* Charts (client island — trend + demand) */}
+          {/* Charts (client island  trend + demand) */}
           <section className="mt-16">
             <InsightsCharts
               trend={analytics.trend}
@@ -731,7 +731,7 @@ export default async function InsightsPage({
 
 /**
  * Δ arrow for the skills-gap table.
- * - `null` → "—" muted (no prior snapshot to compare against)
+ * - `null` → "" muted (no prior snapshot to compare against)
  * - `> 0`  → ⬆ red (gap is widening; demand outpacing supply)
  * - `< 0`  → ⬇ green (gap is shrinking; supply catching up)
  * - `= 0`  → − muted (unchanged)
@@ -743,7 +743,7 @@ function DeltaCell({ delta }: { delta: number | null }) {
         className="inline-flex items-center text-[color:var(--color-ink-soft)]"
         title="No prior snapshot to compare against yet"
       >
-        —
+        
       </span>
     );
   }

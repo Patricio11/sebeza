@@ -107,7 +107,7 @@ export default async function ProfileEditorPage({
         </aside>
 
         <div className="space-y-12">
-          {/* Avatar — sits above the editorial numbered sections */}
+          {/* Avatar  sits above the editorial numbered sections */}
           <section id="avatar" aria-labelledby="avatar-h">
             <header className="mb-5 border-b-2 border-[color:var(--color-ink)] pb-3">
               <div className="flex items-baseline gap-3">
@@ -125,7 +125,7 @@ export default async function ProfileEditorPage({
             <AvatarEditor name={me.displayName} initialUrl={photoUrl} />
           </section>
 
-          {/* Phase 8 — surface the user's email (read-only, from session)
+          {/* Phase 8  surface the user's email (read-only, from session)
               so it's obvious where notifications + reset links go. */}
           <section
             aria-labelledby="email-h"
@@ -164,14 +164,14 @@ export default async function ProfileEditorPage({
               <SectionHeading
                 eyebrow="01"
                 title={t("sections.identity")}
-                hint="Display name + nationality. ID number lives in its own section below — encrypted, never displayed back."
+                hint="Display name + nationality. ID number lives in its own section below  encrypted, never displayed back."
               />
             }
             locationHeading={
               <SectionHeading
                 eyebrow="02"
                 title={t("sections.locationTitle")}
-                hint="Where you live and want to work. Sebenza matches by location + skill — never by nationality."
+                hint="Where you live and want to work. Sebenza matches by location + skill  never by nationality."
               />
             }
             professionalHeading={
@@ -203,7 +203,7 @@ export default async function ProfileEditorPage({
             <SectionHeading
               eyebrow="04"
               title={t("sections.skillsTitle")}
-              hint="Skills must come from our controlled taxonomy — keeps search and analytics clean."
+              hint="Skills must come from our controlled taxonomy  keeps search and analytics clean."
             />
             <SkillsEditor initial={initialSkills} />
           </section>
@@ -213,7 +213,7 @@ export default async function ProfileEditorPage({
             <SectionHeading
               eyebrow="05"
               title="Work availability"
-              hint="What kinds of work you're open to — independent of your current employment status."
+              hint="What kinds of work you're open to  independent of your current employment status."
             />
             <WorkAvailabilityEditor initialValues={me.workAvailability ?? []} />
           </section>
@@ -235,7 +235,7 @@ export default async function ProfileEditorPage({
             </div>
           </section>
 
-          {/* Studies — student mode (read-only display for now;
+          {/* Studies  student mode (read-only display for now;
               dedicated academic actions wire in Phase 8 alongside SAQA). */}
           {academic && (
             <section id="academic">

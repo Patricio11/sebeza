@@ -1,5 +1,5 @@
 /**
- * Phase 8 — Notification email templates.
+ * Phase 8  Notification email templates.
  *
  * One template per kind that's flagged `defaultEmail: true (Phase 8)`
  * in the notification catalog. The shape is intentionally small: each

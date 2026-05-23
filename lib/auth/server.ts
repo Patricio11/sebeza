@@ -11,7 +11,7 @@
  *   - Better Auth `verification`→ `verification` table
  *
  * The `app_user` table carries an extra `role` column (`seeker | employer |
- * admin`) — Better Auth exposes it through `additionalFields` so the user
+ * admin`)  Better Auth exposes it through `additionalFields` so the user
  * object on the client/server carries `user.role`.
  */
 
@@ -55,7 +55,7 @@ export const auth = betterAuth({
         type: "string",
         required: false,
         defaultValue: "seeker",
-        input: false, // never settable from client sign-up — server-set only
+        input: false, // never settable from client sign-up  server-set only
       },
     },
   },
@@ -82,7 +82,7 @@ export const auth = betterAuth({
     sendVerificationEmail: async ({ user, url }) => {
       await sendEmail({
         to: user.email,
-        subject: "Verify your email — Sebenza",
+        subject: "Verify your email  Sebenza",
         html: verifyEmailTemplate({ name: user.name || user.email, url }),
       });
     },
@@ -100,7 +100,7 @@ export const auth = betterAuth({
   advanced: {
     // Use Better Auth's default cookie name (`better-auth.session_token`).
     // A custom `cookiePrefix` requires every code path that reads cookies
-    // (proxy/middleware, getSessionCookie, etc.) to know about it — easier
+    // (proxy/middleware, getSessionCookie, etc.) to know about it  easier
     // to silently break than to keep working. Defaults are fine.
     useSecureCookies: process.env.NODE_ENV === "production",
   },
@@ -110,7 +110,7 @@ export const auth = betterAuth({
    *
    * Without this plugin, calling `auth.api.signInEmail()` /
    * `signUpEmail()` etc. from a Server Action returns success but the
-   * Set-Cookie header is dropped — the session cookie never reaches the
+   * Set-Cookie header is dropped  the session cookie never reaches the
    * browser. Sign-in appears to work, but every subsequent request is
    * unauthenticated, causing the proxy to bounce the user back to /sign-in
    * in an infinite loop.
@@ -124,7 +124,7 @@ export const auth = betterAuth({
    * **Must be the last plugin in the array** per the same docs.
    */
   plugins: [
-    // Phase 7 (Task 7.2) — TOTP + backup codes. Forced enrollment for
+    // Phase 7 (Task 7.2)  TOTP + backup codes. Forced enrollment for
     // employer + admin sessions runs at the DAL layer; this plugin
     // just provides the endpoints (/two-factor/enable, /verify-totp,
     // /verify-backup-code, /generate-backup-codes, /disable).
@@ -204,7 +204,7 @@ function verifyEmailTemplate({
       <span style="word-break:break-all;color:#006b3c;">${url}</span>
     </p>
     <p style="font-size:12px;line-height:1.6;color:#5a5249;margin:24px 0 0;font-style:italic;">
-      Didn't sign up for Sebenza? You can ignore this email — no account will be created.
+      Didn't sign up for Sebenza? You can ignore this email  no account will be created.
     </p>
   `);
 }
@@ -233,7 +233,7 @@ function resetPasswordEmail({
       <span style="word-break:break-all;color:#006b3c;">${url}</span>
     </p>
     <p style="font-size:12px;line-height:1.6;color:#5a5249;margin:24px 0 0;font-style:italic;">
-      Didn't request this? You can safely ignore the email — your current password still works.
+      Didn't request this? You can safely ignore the email  your current password still works.
     </p>
   `);
 }

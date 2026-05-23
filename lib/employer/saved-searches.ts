@@ -1,7 +1,7 @@
 "use server";
 
 /**
- * Phase 5 — Saved searches.
+ * Phase 5  Saved searches.
  *
  * Per-org: every member of the same organization shares the same saved
  * searches. Filters are stored as JSONB so we don't migrate every time
@@ -9,7 +9,7 @@
  *
  * `runSavedSearch` re-executes the stored filters against the live
  * profile pool and updates `newMatchesCount + lastRunAt` on the row.
- * We never snapshot the result set — a profile that gets removed later
+ * We never snapshot the result set  a profile that gets removed later
  * would otherwise haunt the saved-search count forever.
  */
 
@@ -174,7 +174,7 @@ export async function deleteSavedSearch(input: {
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Loader (server-side helper for the page; not a Server Action since it
-// doesn't mutate — exposed as a regular async fn).
+// doesn't mutate  exposed as a regular async fn).
 // ─────────────────────────────────────────────────────────────────────────────
 
 export interface SavedSearchRow {

@@ -1,10 +1,10 @@
 /**
- * Phase 9 — Sentry initialisation (env-gated).
+ * Phase 9  Sentry initialisation (env-gated).
  *
  * We don't take a hard dependency on `@sentry/nextjs` until the project
  * has a DSN; the init is a no-op when `SENTRY_DSN` is unset (dev +
  * fresh-fork case). The PII scrubber in `beforeSend` drops the fields
- * that should never reach a third-party observability platform —
+ * that should never reach a third-party observability platform 
  * email, national_id, phone, every audit-log meta JSONB.
  *
  * Wire-up checklist (run when Sentry account exists):
@@ -14,7 +14,7 @@
  *      `sentry.edge.config.ts` each calling `initSentry({ runtime })`.
  *   4. `next build` uploads source maps via `withSentryConfig`.
  *
- * Until then the helpers below are safe no-ops — typecheck stays
+ * Until then the helpers below are safe no-ops  typecheck stays
  * clean, build stays dep-free, and the day Sentry is provisioned is a
  * config change, not a feature add.
  */
@@ -71,7 +71,7 @@ export function scrubPii<T>(value: T): T {
  * sanitised copy, or the original event when nothing matched.
  */
 export function beforeSend(event: SentryEvent): SentryEvent | null {
-  // Drop credential-bearing 4xx events outright — they're noise.
+  // Drop credential-bearing 4xx events outright  they're noise.
   if (event.message && /\b(401|403)\b/.test(event.message)) return null;
   // Strip cookies + auth headers wholesale.
   if (event.request?.headers) {
@@ -94,7 +94,7 @@ interface InitOptions {
  */
 export async function initSentry(opts: InitOptions): Promise<void> {
   const dsn = process.env.SENTRY_DSN;
-  if (!dsn) return; // Default state — Sentry off in dev / fresh fork.
+  if (!dsn) return; // Default state  Sentry off in dev / fresh fork.
 
   // Lazy-import so we don't take the dep until it's actually wanted.
   try {
@@ -110,7 +110,7 @@ export async function initSentry(opts: InitOptions): Promise<void> {
       beforeSend,
     });
   } catch {
-    // @sentry/nextjs not installed yet — silent no-op, audited by the
+    // @sentry/nextjs not installed yet  silent no-op, audited by the
     // launch checklist before going live.
     // eslint-disable-next-line no-console
     console.warn(

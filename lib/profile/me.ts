@@ -8,7 +8,7 @@
  * This is the **self-read** path. The public-read path goes through
  * `dataProvider.getProfile(handle)` which enforces redaction. Self-read can
  * surface fields the public payload omits (in Phase 3+ we may add e.g.
- * the encrypted-but-decryptable-by-self bits — for now `PublicProfile` is the
+ * the encrypted-but-decryptable-by-self bits  for now `PublicProfile` is the
  * superset we need).
  */
 
@@ -35,9 +35,9 @@ export type MyProfile = PublicProfile & {
   profileId: string;
   /** Whether a national ID is on file. Never echo back the value itself. */
   hasNationalId: boolean;
-  /** Phase 8 — KYC verification timestamp (ISO). null = not verified. */
+  /** Phase 8  KYC verification timestamp (ISO). null = not verified. */
   kycVerifiedAt: string | null;
-  /** Phase 8 — read-only email surfaced from the auth session. */
+  /** Phase 8  read-only email surfaced from the auth session. */
   email: string;
 };
 
@@ -48,7 +48,7 @@ export async function getMyProfile(): Promise<MyProfile | null> {
 }
 
 /**
- * Direct load by user id — used after sign-up flows where the session was just
+ * Direct load by user id  used after sign-up flows where the session was just
  * minted and we want to bypass the cookie cache.
  */
 export async function loadProfileForUser(userId: string): Promise<MyProfile | null> {
@@ -62,7 +62,7 @@ export async function loadProfileForUser(userId: string): Promise<MyProfile | nu
   const p = profileRows[0];
   if (!p) return null;
 
-  // Phase 8 — surface email + KYC verification from app_user. Single
+  // Phase 8  surface email + KYC verification from app_user. Single
   // extra round-trip; the data is cheap and the seeker's account
   // surfaces depend on both.
   const userRows = await db

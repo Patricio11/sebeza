@@ -1,11 +1,11 @@
 /**
- * Phase 8 — Identity / KYC verifier interface.
+ * Phase 8  Identity / KYC verifier interface.
  *
  * The boundary we own. Implementations: `MockIdentityVerifier` (always
  * the dev path; also the prod fallback when the partnership flag is
  * off) and `ThirdPartyKycVerifier` (one of truID / SmileID / iiDENTIFii
- * — picked at deploy via `KYC_PROVIDER` env). We do NOT call Home
- * Affairs directly — the licensed SA SaaS providers all wrap the
+ *  picked at deploy via `KYC_PROVIDER` env). We do NOT call Home
+ * Affairs directly  the licensed SA SaaS providers all wrap the
  * eHANIS integration and carry the necessary DPA terms.
  *
  * Provider switch is BOTH:

@@ -1,10 +1,10 @@
 /**
- * Phase 8 — Nightly hard-delete cron.
+ * Phase 8  Nightly hard-delete cron.
  *
  * Selects every `app_user` row with `deleted_at < now() - interval '30 days'`
  * (soft-deleted via Phase 7 admin "Erase") and DELETEs the user. Cascades
  * remove the profile, experiences, qualifications, placements (cascade
- * isn't set on placements — we handle it manually), consents,
+ * isn't set on placements  we handle it manually), consents,
  * notifications, sessions, accounts, verification, two_factor.
  *
  * One `account.hard_delete` audit row per user, written BEFORE the
@@ -47,7 +47,7 @@ export async function GET(request: Request) {
   let processed = 0;
   for (const user of due) {
     try {
-      // Audit FIRST — system-of-record proof of erasure.
+      // Audit FIRST  system-of-record proof of erasure.
       await logAccess({
         kind: "account.hard_delete",
         actor: "system",
@@ -60,7 +60,7 @@ export async function GET(request: Request) {
         },
       });
 
-      // placements has no ON DELETE CASCADE — drop the user's rows manually.
+      // placements has no ON DELETE CASCADE  drop the user's rows manually.
       // The FK is profileId, so we resolve through profiles.
       await db.execute(sql`
         DELETE FROM placements

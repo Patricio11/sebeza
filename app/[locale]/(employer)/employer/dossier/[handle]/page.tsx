@@ -89,7 +89,7 @@ export default async function EmployerDossierPage({
     .limit(1);
 
   const priorRevealRow = priorRevealRows[0];
-  // Cache the contact card initial state — saves a round-trip click for
+  // Cache the contact card initial state  saves a round-trip click for
   // employers who've already revealed within the window.
   let initialReveal: ContactReveal | null = null;
   if (priorRevealRow) {
@@ -158,7 +158,7 @@ export default async function EmployerDossierPage({
     meta: { orgId: session.orgId, surface: "dossier", handle },
   });
 
-  // Phase 7 (C.5) — Notify the seeker. createNotification dedupes
+  // Phase 7 (C.5)  Notify the seeker. createNotification dedupes
   // per (userId, kind, dedupeKey) inside the catalog's 24h window,
   // so an employer reloading the dossier 12 times in a day produces
   // ONE notification, not 12.
@@ -178,7 +178,7 @@ export default async function EmployerDossierPage({
     dedupeKey: session.orgId,
   });
 
-  // Phase 7.5 (Lever C) — placement-logging nudge.
+  // Phase 7.5 (Lever C)  placement-logging nudge.
   const nudge = await placementNudgeState(session.orgId, profileRow.id);
 
   // ── Render ───────────────────────────────────────────────────────────────

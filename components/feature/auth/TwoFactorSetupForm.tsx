@@ -1,13 +1,13 @@
 "use client";
 
 /**
- * Phase 7 (Task 7.2) — /setup-2fa flow.
+ * Phase 7 (Task 7.2)  /setup-2fa flow.
  *
  * Three stages, all on one page:
- *   1. password       — confirm current password to unlock the secret
- *   2. show-codes     — display the otpauth URL + backup codes; user
+ *   1. password        confirm current password to unlock the secret
+ *   2. show-codes      display the otpauth URL + backup codes; user
  *                       scans the QR and saves the codes
- *   3. verify         — verify the first TOTP code so the plugin
+ *   3. verify          verify the first TOTP code so the plugin
  *                       flips two_factor_enabled = true
  */
 
@@ -107,7 +107,7 @@ export function TwoFactorSetupForm({ email, postSetupHref }: Props) {
         <div>
           <h2 className="font-display text-xl">1. Scan in your authenticator</h2>
           <p className="mt-1 text-sm text-[color:var(--color-ink-soft)]">
-            Google Authenticator, 1Password, Authy — any TOTP app works.
+            Google Authenticator, 1Password, Authy  any TOTP app works.
           </p>
           <div className="mt-4 flex flex-col items-center gap-4 rounded-[var(--radius-md)] border border-[color:var(--color-hairline)] bg-white p-5 md:flex-row md:items-start">
             {qrSrc && (
@@ -133,7 +133,7 @@ export function TwoFactorSetupForm({ email, postSetupHref }: Props) {
         <div>
           <h2 className="font-display text-xl">2. Save your backup codes</h2>
           <p className="mt-1 text-sm text-[color:var(--color-ink-soft)]">
-            One-time use. Store them in your password manager —{" "}
+            One-time use. Store them in your password manager {" "}
             <strong>we will never show them again</strong>.
           </p>
           <div className="mt-4 grid grid-cols-2 gap-2 rounded-[var(--radius-md)] border border-[color:var(--color-hairline)] bg-white p-4 md:grid-cols-5">
@@ -164,7 +164,7 @@ export function TwoFactorSetupForm({ email, postSetupHref }: Props) {
             setError(null);
           }}
         >
-          I have saved my codes — continue
+          I have saved my codes  continue
         </Button>
       </div>
     );

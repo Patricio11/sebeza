@@ -1,4 +1,4 @@
-# Phase 3 — Live Smoke Test (Profile CRUD + Storage)
+# Phase 3  Live Smoke Test (Profile CRUD + Storage)
 
 > Run after the Phase 2 smoke passes. Every box ticked = Phase 3 verifiably works end-to-end against the live Neon DB + Supabase bucket.
 
@@ -23,11 +23,11 @@ Then open `http://localhost:3000/sign-in` and log in as **Andile** (`andile-z@ex
 1. Visit `/dashboard/profile`
 2. In the **Identity basics** section, change the **Display name** to e.g. `Andile Z. (test)` → click **Save changes**
 3. Page reloads with the new value showing
-4. Refresh — value still there
+4. Refresh  value still there
 5. In **Location**, change Province → city dropdown updates → click Save → reloads with new city
 6. In **Professional**, edit the **bio** to something obviously different (>40 chars to bump completeness) → Save
-7. Look at the completeness number — should reflect the new bio
-8. Visit `/admin/audit-log` (sign out, sign in as Admin) — you should see `profile.update` rows for each save
+7. Look at the completeness number  should reflect the new bio
+8. Visit `/admin/audit-log` (sign out, sign in as Admin)  you should see `profile.update` rows for each save
 
 ✅:
 - ☐ Each save persists across reload
@@ -43,7 +43,7 @@ Then open `http://localhost:3000/sign-in` and log in as **Andile** (`andile-z@ex
 3. Pick a new skill from the dropdown → click **Add** → it appears
 4. Click some proficiency dots to change levels
 5. Click **Save skills**
-6. Reload — the skills state is exactly what you set
+6. Reload  the skills state is exactly what you set
 7. Audit log shows `profile.skills.update`
 
 ✅:
@@ -52,13 +52,13 @@ Then open `http://localhost:3000/sign-in` and log in as **Andile** (`andile-z@ex
 
 ---
 
-## 3 · National ID — encrypted, never echoed back
+## 3 · National ID  encrypted, never echoed back
 
 1. As Andile, visit `/dashboard/profile` → scroll to **National ID**
 2. If ID already on file: shows "ID number on file · encrypted, never shown back"
 3. Click **Change**
 4. Try entering a deliberately wrong number (e.g. `1234567890123`) → should fail with "Checksum doesn't match"
-5. Enter a valid SA ID (any well-formed 13-digit number that passes Luhn — e.g. `9001015009087` is a known valid test format)
+5. Enter a valid SA ID (any well-formed 13-digit number that passes Luhn  e.g. `9001015009087` is a known valid test format)
 6. Click **Save & encrypt** → returns to the "on file" view; **the value is never displayed back**
 7. Audit log: `profile.national_id.update`
 
@@ -79,8 +79,8 @@ Then open `http://localhost:3000/sign-in` and log in as **Andile** (`andile-z@ex
 
 This needs a stale-status seeded profile to actually see the banner. Easiest path:
 
-1. Sign in as **Sipho K.** (`sipho-k@example.co.za` / `sebenza-dev-2026`) — the seed sets his status confirmed in Jan 2026, so against today (2026-05-22) he's ~130 days stale
-2. Visit `/dashboard` — you should see the **red urgent banner** at the top: "It's been 127 days…"
+1. Sign in as **Sipho K.** (`sipho-k@example.co.za` / `sebenza-dev-2026`)  the seed sets his status confirmed in Jan 2026, so against today (2026-05-22) he's ~130 days stale
+2. Visit `/dashboard`  you should see the **red urgent banner** at the top: "It's been 127 days…"
 3. Click **Yes, still accurate** in the banner → banner disappears, Talent Pulse card shows "fresh"
 4. Audit log: `profile.status.reconfirm`
 
@@ -88,7 +88,7 @@ This needs a stale-status seeded profile to actually see the banner. Easiest pat
 6. Pick a different status → it saves immediately → card re-renders with the new state + fresh band
 7. Audit log: `profile.status.update`
 
-For Andile (statusConfirmedAt set to ~10 days ago in the seed), the banner won't show — he's fresh. That's the correct behaviour.
+For Andile (statusConfirmedAt set to ~10 days ago in the seed), the banner won't show  he's fresh. That's the correct behaviour.
 
 ✅:
 - ☐ Stale profile shows red banner with day count
@@ -125,11 +125,11 @@ For Andile (statusConfirmedAt set to ~10 days ago in the seed), the banner won't
 5. Spinner shows briefly → badge flips to **pending** + "Document on file" indicator appears
 6. Audit log: `profile.qualification.add`, `profile.qualification.document.upload`
 
-7. In Supabase Dashboard → Storage → `sebenza-private` → navigate `<your-user-id>/documents/` — your file is there
+7. In Supabase Dashboard → Storage → `sebenza-private` → navigate `<your-user-id>/documents/`  your file is there
 8. Click the row's **Replace** button → upload a different file → old object cleaned up; new key on the row
 
 9. Try uploading a file >10 MB → rejected client-side won't even POST; server-side: "File is larger than 10 MB."
-10. Rename a `.pdf` to `.jpg` and try to upload as a JPEG → rejected: "Mismatched file content — please re-upload." (magic-byte sniff catches it)
+10. Rename a `.pdf` to `.jpg` and try to upload as a JPEG → rejected: "Mismatched file content  please re-upload." (magic-byte sniff catches it)
 
 11. Click trash → row deletes; Supabase object cleaned up best-effort
 
@@ -145,9 +145,9 @@ For Andile (statusConfirmedAt set to ~10 days ago in the seed), the banner won't
 ## 7 · Profile photo upload
 
 1. As Andile, visit `/dashboard/profile` → top **Photo** section
-2. Click **Upload photo** → pick any JPEG/PNG/WebP (any size — it'll be downsized client-side to 512 px)
+2. Click **Upload photo** → pick any JPEG/PNG/WebP (any size  it'll be downsized client-side to 512 px)
 3. Avatar preview updates immediately; brief "Uploading…" state
-4. Refresh — photo is still there (signed URL is freshly minted)
+4. Refresh  photo is still there (signed URL is freshly minted)
 5. Supabase Storage → `<your-user-id>/photos/avatar.jpg` exists
 6. Click **Change photo** → pick a different image → old object swapped
 7. Click **Remove** → avatar reverts to initials; bucket object cleaned up
@@ -165,7 +165,7 @@ For Andile (statusConfirmedAt set to ~10 days ago in the seed), the banner won't
 
 - ☐ `npm run typecheck` clean
 - ☐ `npm run build` clean
-- ☐ Mobile view (360 px) of `/dashboard/qualifications` and `/dashboard/experience` — no horizontal scroll, tap targets ≥44 px
+- ☐ Mobile view (360 px) of `/dashboard/qualifications` and `/dashboard/experience`  no horizontal scroll, tap targets ≥44 px
 - ☐ Sign out works from sidebar AND mobile top strip (from Phase 2 polish)
 
 ---
@@ -178,9 +178,9 @@ Tell Claude **"Phase 3 smoke passes"**. I'll then commit with `Phase 3 complete 
 
 ## If something fails
 
-- **"Supabase Storage isn't configured"** — check `.env.local` has both `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`; restart dev server (env vars only re-read on boot)
-- **"new row violates row-level security policy"** — you pasted the anon key instead of the service-role key. Decode the JWT payload; if `role: anon`, swap for the service_role key from Supabase Dashboard → Project Settings → API
-- **Upload succeeds but bucket is empty** — confirm `SUPABASE_STORAGE_BUCKET=sebenza-private` matches the bucket name you created
-- **"File is larger than 10 MB" on a small file** — check the browser's network tab; some encodings (PNG of a photo) blow up to >10 MB even when the picked file looked smaller. Re-export as JPEG.
-- **Status banner doesn't show as expected** — bands are date-driven; if you're running this in May 2026 and your seed timestamps were set further back, the math may already put everyone at stale. The seed is dated relative to Andile being ~10 days fresh and Sipho being ~130 days stale on 2026-05-22.
-- **Audit-log page is empty** — `recentAuditEventsFromDb()` reads from the `audit_log` table; if you wiped the DB between phases, prior events are gone. Trigger fresh events by editing your profile.
+- **"Supabase Storage isn't configured"**  check `.env.local` has both `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`; restart dev server (env vars only re-read on boot)
+- **"new row violates row-level security policy"**  you pasted the anon key instead of the service-role key. Decode the JWT payload; if `role: anon`, swap for the service_role key from Supabase Dashboard → Project Settings → API
+- **Upload succeeds but bucket is empty**  confirm `SUPABASE_STORAGE_BUCKET=sebenza-private` matches the bucket name you created
+- **"File is larger than 10 MB" on a small file**  check the browser's network tab; some encodings (PNG of a photo) blow up to >10 MB even when the picked file looked smaller. Re-export as JPEG.
+- **Status banner doesn't show as expected**  bands are date-driven; if you're running this in May 2026 and your seed timestamps were set further back, the math may already put everyone at stale. The seed is dated relative to Andile being ~10 days fresh and Sipho being ~130 days stale on 2026-05-22.
+- **Audit-log page is empty**  `recentAuditEventsFromDb()` reads from the `audit_log` table; if you wiped the DB between phases, prior events are gone. Trigger fresh events by editing your profile.

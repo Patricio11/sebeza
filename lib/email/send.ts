@@ -1,5 +1,5 @@
 /**
- * Transactional email transport — env-driven.
+ * Transactional email transport  env-driven.
  *
  * Picks transport from `EMAIL_TRANSPORT`:
  *   - "mailtrap" → SMTP via nodemailer to the captured sandbox inbox (dev)
@@ -57,7 +57,7 @@ function htmlToText(html: string): string {
  * Send an email. Resolves with the transport used + provider message id
  * (when the provider returns one).
  *
- * Never throws on a console-transport "send" — that's by design so dev
+ * Never throws on a console-transport "send"  that's by design so dev
  * flows aren't blocked by missing provider credentials.
  */
 export async function sendEmail(input: SendEmailInput): Promise<{
@@ -116,13 +116,13 @@ export async function sendEmail(input: SendEmailInput): Promise<{
     return { transport: "mailtrap", id: info.messageId };
   }
 
-  // console — fallback
+  // console  fallback
   // POPIA: print recipient + subject + a short preview only. Real PII in
   // the email body still goes to the terminal in HTML form for dev links
   // to be clickable, but we keep the LOG line itself concise.
   // eslint-disable-next-line no-console
   console.info(
-    `\n📧 [email:console] ${input.to} — "${input.subject}"\n` +
+    `\n📧 [email:console] ${input.to}  "${input.subject}"\n` +
       `   from: ${from}\n` +
       `   preview: ${text.slice(0, 80)}${text.length > 80 ? "…" : ""}\n` +
       `   html:\n${indentLines(input.html, "     ")}\n`,

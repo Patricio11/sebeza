@@ -19,13 +19,13 @@ interface SettingRow {
 const ROWS: SettingRow[] = [
   {
     key: "freshness_band_days_fresh",
-    label: "Fresh — confirmed within",
+    label: "Fresh  confirmed within",
     type: "number",
     hint: "Days (≥1, ≤365)",
   },
   {
     key: "freshness_band_days_ageing",
-    label: "Ageing — older than",
+    label: "Ageing  older than",
     type: "number",
     hint: "Days (must be > fresh)",
   },

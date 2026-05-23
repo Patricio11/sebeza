@@ -3,7 +3,7 @@
  *
  * Reads are short-lived (DOCUMENT_URL_TTL = 60s, PHOTO_URL_TTL = 5min).
  * Every callsite that reveals a document SHOULD be wrapped in a `logAccess()`
- * — Redaction Rule + audit trail.
+ *  Redaction Rule + audit trail.
  */
 
 import "server-only";

@@ -1,5 +1,5 @@
 /**
- * Employment-status freshness engine — the platform's differentiator.
+ * Employment-status freshness engine  the platform's differentiator.
  *
  * Status-Freshness Rule (TO_START_EVERY_SESSION.md §7): every public profile
  * carries a `statusConfirmedAt` timestamp. The age of that timestamp drives:

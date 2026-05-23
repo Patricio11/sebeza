@@ -1,9 +1,9 @@
 /**
- * Phase 8 — KYC provider resolver.
+ * Phase 8  KYC provider resolver.
  *
  * Provider switch obeys BOTH gates:
  *   1. `platform_settings.feature_flag_kyc_provider` (admin-controlled
- *      master switch — flipped only after partnership confirmation).
+ *      master switch  flipped only after partnership confirmation).
  *   2. `KYC_PROVIDER` env var (which SaaS to call when the flag is on).
  *
  * Until both align, the Mock provider runs. This is the user's standing
@@ -37,7 +37,7 @@ export async function resolveIdentityVerifier(): Promise<IdentityVerifier> {
   if (!provider) {
     // eslint-disable-next-line no-console
     console.warn(
-      `[kyc] Flag is ON but KYC_PROVIDER="${choice}" not registered — falling back to mock.`,
+      `[kyc] Flag is ON but KYC_PROVIDER="${choice}" not registered  falling back to mock.`,
     );
     return mockIdentityVerifier;
   }

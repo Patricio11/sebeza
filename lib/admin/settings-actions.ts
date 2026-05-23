@@ -1,7 +1,7 @@
 "use server";
 
 /**
- * Phase 7 — Platform settings write Server Action.
+ * Phase 7  Platform settings write Server Action.
  *
  * Lives separately from `lib/admin/settings.ts` (which is `"server-only"`
  * and imported by ranking SQL / freshness band code) because a single
@@ -42,7 +42,7 @@ const KEY_SCHEMAS = {
   feature_flag_2fa_enforced: z.boolean(),
   feature_flag_email_notifications: z.boolean(),
   feature_flag_gov_portal: z.boolean(),
-  // Phase 7.5 — never lower than 5 (a 5-person cell still allows
+  // Phase 7.5  never lower than 5 (a 5-person cell still allows
   // re-identification of small SA programmes). 10 is the documented
   // default; admins can raise it but should think very hard before
   // dropping it.

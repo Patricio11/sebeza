@@ -1,5 +1,5 @@
 /**
- * Phase 7 — Read-side loaders for the admin verification queue.
+ * Phase 7  Read-side loaders for the admin verification queue.
  *
  * Split from `lib/admin/verifications.ts` because that file is
  * `"use server"` (all exports must be Server Actions). These are plain
@@ -20,7 +20,7 @@ export interface AdminPendingQualification {
   candidateName: string;
   handle: string | null;
   submittedAt: Date | null;
-  /** Phase 8 — latest SAQA job state, when any. NULL = never enqueued. */
+  /** Phase 8  latest SAQA job state, when any. NULL = never enqueued. */
   saqaJobStatus:
     | "queued"
     | "in_flight"

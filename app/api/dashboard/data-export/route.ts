@@ -1,5 +1,5 @@
 /**
- * Phase 8 — POPIA §23 right to data portability.
+ * Phase 8  POPIA §23 right to data portability.
  *
  *   GET /api/dashboard/data-export
  *
@@ -9,7 +9,7 @@
  * (subject = userId OR profileId), notifications. The dump is the
  * seeker's by right; we audit-log the export as `account.data_export`.
  *
- * The encrypted national ID is included as ciphertext only — POPIA
+ * The encrypted national ID is included as ciphertext only  POPIA
  * doesn't require us to decrypt back. The seeker already has the
  * cleartext (it's their own ID number).
  */

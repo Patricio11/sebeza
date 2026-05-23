@@ -1,5 +1,5 @@
 /**
- * Phase 8 — Daily saved-search match rollup.
+ * Phase 8  Daily saved-search match rollup.
  *
  * For every saved search, re-run the stored filters. Hash the sorted
  * set of result profile-ids and compare with `last_match_hash`. If new
@@ -7,7 +7,7 @@
  * to every org member (so the whole hiring team sees it) with the count.
  *
  * Storing the hash (not the result rows themselves) means saved-searches
- * stay snapshot-free — the search runs live every time. Hash drift =
+ * stay snapshot-free  the search runs live every time. Hash drift =
  * new matches; rate-limit handled by the per-kind dedupe window in
  * `createNotification`.
  */

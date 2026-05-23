@@ -40,9 +40,9 @@ interface Props {
   className?: string;
   /**
    * Trigger style:
-   *  - "default" — bordered field, matches `<TextField>` height (48 px).
-   *  - "compact" — inline pill (e.g. locale switcher).
-   *  - "bare"    — no border or background; blends into a parent composition
+   *  - "default"  bordered field, matches `<TextField>` height (48 px).
+   *  - "compact"  inline pill (e.g. locale switcher).
+   *  - "bare"     no border or background; blends into a parent composition
    *                like the search bar's hairline-divided field cells.
    */
   variant?: "default" | "compact" | "bare";
@@ -56,8 +56,8 @@ interface Props {
 
 /**
  * Custom select used throughout Sebenza. Replaces native `<select>` so every
- * dropdown matches the Mzansi National design — chevron mark, hairline border,
- * the SA palette — and feels the same on iOS, Android, macOS, Windows.
+ * dropdown matches the Mzansi National design  chevron mark, hairline border,
+ * the SA palette  and feels the same on iOS, Android, macOS, Windows.
  *
  * Behaviour:
  *  - Desktop (≥md): popover panel anchored to the trigger.
@@ -339,7 +339,7 @@ export function CustomSelect({
               className="fixed inset-0 z-[60] bg-[color:var(--color-ink)]/40 anim-fade md:hidden"
             />
 
-            {/* Panel — bottom sheet on mobile, anchored popover on desktop.
+            {/* Panel  bottom sheet on mobile, anchored popover on desktop.
                 Portaled out of the trigger's DOM so no ancestor's overflow,
                 stacking context, or transform (e.g. our hero animation) can
                 push it back into document flow. Desktop coords come from the
@@ -349,7 +349,7 @@ export function CustomSelect({
                 "z-[70] overflow-hidden bg-[color:var(--color-surface)] shadow-press anim-rise-soft",
                 // Mobile bottom sheet (default)
                 "fixed inset-x-0 bottom-0 max-h-[80vh] rounded-t-2xl border-t-2 border-[color:var(--color-ink)]",
-                // Desktop popover — clear bottom-sheet positioning + apply
+                // Desktop popover  clear bottom-sheet positioning + apply
                 // measured viewport coords via CSS custom properties.
                 "md:inset-auto md:bottom-auto md:top-[var(--cs-top)] md:left-[var(--cs-left)] md:min-w-[var(--cs-min-w)]",
                 "md:max-h-80 md:max-w-md md:rounded-2xl md:border md:border-[color:var(--color-hairline)] md:border-t-2 md:border-t-[color:var(--color-ink)]",

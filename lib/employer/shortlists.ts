@@ -1,7 +1,7 @@
 "use server";
 
 /**
- * Phase 5 — Shortlist pools (talent pools).
+ * Phase 5  Shortlist pools (talent pools).
  *
  * Per-org, like saved searches. Adding a profile to a pool writes
  * `profile.shortlist.add`; removing writes `profile.shortlist.remove`.
@@ -130,7 +130,7 @@ export async function addToPool(input: {
   )[0];
   if (!profile) return fail("Profile not found.");
 
-  // ON CONFLICT DO NOTHING — adding the same profile twice is a no-op.
+  // ON CONFLICT DO NOTHING  adding the same profile twice is a no-op.
   await db
     .insert(schema.shortlistMembers)
     .values({

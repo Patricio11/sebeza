@@ -12,18 +12,18 @@ import { PrintActions } from "@/components/feature/PrintActions";
 export const revalidate = 300;
 
 export const metadata = {
-  title: "Sebenza Insights — print briefing",
+  title: "Sebenza Insights  print briefing",
   robots: { index: false, follow: false },
 };
 
 /**
- * Phase 9 — Print-friendly briefing of `/insights`.
+ * Phase 9  Print-friendly briefing of `/insights`.
  *
  * Single column, A4-paged layout. Browser's File → Print → Save as PDF
- * produces a real PDF — no server-side library required. The dynamic
+ * produces a real PDF  no server-side library required. The dynamic
  * <PrintActions /> button calls window.print() for one-tap convenience.
  *
- * No header / nav / chrome — `@media print` already trims those, but
+ * No header / nav / chrome  `@media print` already trims those, but
  * we ship them out unconditionally here too so the print preview is
  * accurate even when someone hits "Print preview".
  */

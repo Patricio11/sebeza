@@ -3,7 +3,7 @@ import { hasLocale } from "next-intl";
 import { routing } from "./routing";
 
 // Deep-merges per-locale overrides onto the English base catalog.
-// This lets non-English catalogs be incomplete during rollout — missing keys
+// This lets non-English catalogs be incomplete during rollout  missing keys
 // fall back to English instead of breaking the build. As professional human
 // translations arrive, the per-locale files get filled in.
 // NEVER machine-translate consent / POPIA / legal copy (see TO_START_EVERY_SESSION.md).

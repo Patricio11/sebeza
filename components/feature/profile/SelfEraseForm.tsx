@@ -1,10 +1,10 @@
 "use client";
 
 /**
- * Phase 8 — Self-service POPIA §24 erase form.
+ * Phase 8  Self-service POPIA §24 erase form.
  *
  * Confirmation gate: the seeker must type ERASE in capitals. We
- * intentionally don't use a single-click destructive button — this
+ * intentionally don't use a single-click destructive button  this
  * action is irreversible after the 30-day cron sweep.
  */
 
@@ -22,7 +22,7 @@ export function SelfEraseForm() {
     e.preventDefault();
     setError(null);
     startTransition(async () => {
-      // eraseMyAccount redirects to "/" on success — we don't get a
+      // eraseMyAccount redirects to "/" on success  we don't get a
       // result back when it succeeds.
       const res = await eraseMyAccount({ confirm });
       if (!res.ok) {
@@ -48,7 +48,7 @@ export function SelfEraseForm() {
     <form onSubmit={submit} className="mt-4 flex flex-col gap-3">
       <p className="text-xs text-[color:var(--color-ink-soft)]">
         This will soft-delete your account immediately. The nightly cron
-        hard-deletes after 30 days — within that window an administrator can
+        hard-deletes after 30 days  within that window an administrator can
         restore you. After 30 days everything is gone. To confirm, type
         <strong className="ml-1">ERASE</strong> in capital letters below.
       </p>

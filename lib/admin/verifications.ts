@@ -1,7 +1,7 @@
 "use server";
 
 /**
- * Phase 7 — Admin verification queue actions.
+ * Phase 7  Admin verification queue actions.
  *
  * Flips `qualifications.verification` and `organizations.verification`
  * between `unverified`/`pending` → `verified`/`rejected`. Every flip
@@ -44,7 +44,7 @@ function fail(message: string): { ok: false; message: string } {
 const approveQualSchema = z.object({
   qualificationId: z.string().min(1),
   note: z.string().max(280).optional(),
-  /** Phase 8 — admin escape hatch to bypass the SAQA queue and verify
+  /** Phase 8  admin escape hatch to bypass the SAQA queue and verify
    *  directly even when the worker is on. Audit-logged distinctly. */
   forceApprove: z.boolean().optional(),
 });
@@ -74,7 +74,7 @@ export async function approveQualification(
   const row = rows[0];
   if (!row) return fail("Qualification not found.");
 
-  // Phase 8 — when the SAQA worker flag is ON and the admin didn't
+  // Phase 8  when the SAQA worker flag is ON and the admin didn't
   // explicitly force-approve, enqueue a verification job instead of
   // flipping the column. The cron worker calls SAQA and writes the
   // result back asynchronously. When the flag is OFF (default), we
@@ -190,7 +190,7 @@ export async function rejectQualification(
       userId: row.ownerUserId,
       kind: "qualification.rejected",
       title: "A qualification was rejected",
-      body: `${row.title} — admin note: ${parsed.data.reason}`,
+      body: `${row.title}  admin note: ${parsed.data.reason}`,
       link: "/dashboard/qualifications",
       meta: { qualificationId: row.id, reason: parsed.data.reason },
     });
@@ -291,7 +291,7 @@ export async function rejectOrganisation(
   await notifyOrgMembers(row.id, {
     kind: "org.rejected",
     title: "Organisation verification was rejected",
-    body: `${row.name} — admin note: ${parsed.data.reason}`,
+    body: `${row.name}  admin note: ${parsed.data.reason}`,
     link: "/employer/organisation",
     meta: { orgId: row.id, orgName: row.name, reason: parsed.data.reason },
   });

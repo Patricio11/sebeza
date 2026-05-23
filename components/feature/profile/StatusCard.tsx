@@ -1,12 +1,12 @@
 "use client";
 
 /**
- * Talent Pulse status card — replaces the static seeker-dashboard card.
+ * Talent Pulse status card  replaces the static seeker-dashboard card.
  * Reads the live `status` + `statusConfirmedAt` from the DB; lets the seeker
  * change status (which auto-reconfirms) or re-confirm the existing status.
  *
  * Drives the freshness band shown on the dashboard. When a profile drifts to
- * `ageing` or `stale`, the StatusNudgeBanner picks it up too — single source
+ * `ageing` or `stale`, the StatusNudgeBanner picks it up too  single source
  * of truth lives in `lib/status.ts`.
  */
 
@@ -46,7 +46,7 @@ export function StatusCard({
 
   function handleSelect(next: EmploymentStatus) {
     if (next === status) {
-      // No status change — just re-confirm the existing one.
+      // No status change  just re-confirm the existing one.
       handleReconfirm();
       return;
     }

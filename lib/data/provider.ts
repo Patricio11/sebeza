@@ -3,11 +3,11 @@
  *
  * Every public-read page calls through this module. Phase 1 shipped with
  * `mockProvider`. Phase 4 lights up `dbProvider` against the Postgres queries
- * in `db/queries/*`. Pages don't change — same interface, same shape.
+ * in `db/queries/*`. Pages don't change  same interface, same shape.
  *
  * The active provider is picked at boot from `SEBENZA_DATA_PROVIDER`:
- *   - `db`   (recommended)        — Phase 4+: live Neon + FTS ranking
- *   - `mock` (fallback)           — Phase 1-style mock fixtures; useful
+ *   - `db`   (recommended)         Phase 4+: live Neon + FTS ranking
+ *   - `mock` (fallback)            Phase 1-style mock fixtures; useful
  *                                   for off-DB local dev / fixture tests
  *
  * Photo URLs: the DB stores raw Supabase Storage keys; this layer signs
@@ -39,7 +39,7 @@ export interface DataProvider {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Mock provider — Phase 1 fixtures. Kept as a fallback for off-DB dev.
+// Mock provider  Phase 1 fixtures. Kept as a fallback for off-DB dev.
 // ─────────────────────────────────────────────────────────────────────────────
 
 const mockProvider: DataProvider = {
@@ -71,7 +71,7 @@ const mockProvider: DataProvider = {
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
-// DB provider — Phase 4: real Neon + ranking SQL.
+// DB provider  Phase 4: real Neon + ranking SQL.
 //
 // On top of the raw query layer, this provider:
 //   - Mints short-lived signed URLs for any photo keys in the payload
@@ -107,7 +107,7 @@ const dbProvider: DataProvider = {
 // overhead is one round-trip regardless of result count.
 //
 // If Supabase isn't configured (dev without SUPABASE_URL), photo URLs
-// degrade to `null` and the Avatar component falls back to initials —
+// degrade to `null` and the Avatar component falls back to initials 
 // the page still renders cleanly.
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -134,9 +134,9 @@ function selectProvider(): DataProvider {
   const choice = process.env.SEBENZA_DATA_PROVIDER ?? "mock";
   if (choice === "db") return dbProvider;
   if (choice === "mock") return mockProvider;
-  // Unknown value — fail closed to mock so dev doesn't crash on a typo.
+  // Unknown value  fail closed to mock so dev doesn't crash on a typo.
   console.warn(
-    `[dataProvider] Unknown SEBENZA_DATA_PROVIDER="${choice}" — falling back to mock.`,
+    `[dataProvider] Unknown SEBENZA_DATA_PROVIDER="${choice}"  falling back to mock.`,
   );
   return mockProvider;
 }

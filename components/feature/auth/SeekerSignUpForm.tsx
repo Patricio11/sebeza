@@ -57,7 +57,7 @@ interface FormState {
   profession: string;
   province: string;
   status: "open_to_work" | "employed" | "self_employed" | "studying" | "unemployed";
-  /** Phase 7.5 — optional work-availability set captured at sign-up. */
+  /** Phase 7.5  optional work-availability set captured at sign-up. */
   workAvailability: ("casual" | "part_time" | "contract" | "full_time")[];
   academic: AcademicState;
 }
@@ -593,7 +593,7 @@ export function SeekerSignUpForm({ professions }: Props = {}) {
                     </span>
                   </label>
 
-                  {/* Phase 7.5 — work-availability while studying. The casual /
+                  {/* Phase 7.5  work-availability while studying. The casual /
                       part-time path: students taking shifts (waitressing,
                       retail, etc.) for income now, not deferred to graduation. */}
                   <fieldset className="mt-2 rounded-[var(--radius-sm)] border border-[color:var(--color-hairline)] p-3">

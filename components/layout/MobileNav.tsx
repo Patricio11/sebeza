@@ -11,7 +11,7 @@ import { Menu, X } from "lucide-react";
  * Mobile navigation drawer.
  *
  * Renders only on `<md`. The drawer is built as a fullscreen panel that
- * slides up from the bottom edge — far more thumb-reachable than a top-down
+ * slides up from the bottom edge  far more thumb-reachable than a top-down
  * hamburger drawer, especially on tall Android phones. Body scroll is locked
  * while it's open; the X closes it; tapping outside closes it; pressing Esc
  * closes it. Honours `prefers-reduced-motion` via the global CSS rule.
@@ -86,7 +86,7 @@ export function MobileNav({
             className="absolute inset-0 bg-[color:var(--color-ink)]/40 anim-fade"
           />
 
-          {/* Panel — full screen on small phones, comfortable on larger */}
+          {/* Panel  full screen on small phones, comfortable on larger */}
           <div className="relative ml-auto flex h-full w-full max-w-md flex-col overflow-y-auto bg-[color:var(--color-paper)] anim-rise-soft">
             {/* Top flag stripe inside drawer */}
             <div aria-hidden="true" className="flex h-[3px] w-full shrink-0">
@@ -128,7 +128,7 @@ export function MobileNav({
               </div>
             </div>
 
-            {/* Nav links — big, thumb-sized */}
+            {/* Nav links  big, thumb-sized */}
             <nav
               aria-label="Primary"
               className="flex-1 overflow-y-auto px-5 py-2"
@@ -152,7 +152,7 @@ export function MobileNav({
               </ul>
             </nav>
 
-            {/* Auth actions — large, thumb-sized */}
+            {/* Auth actions  large, thumb-sized */}
             <div className="flex flex-col gap-3 border-t border-[color:var(--color-hairline)] px-5 py-5">
               <Link
                 href="/sign-up"
@@ -171,7 +171,7 @@ export function MobileNav({
               </Link>
             </div>
 
-            {/* Footer band — locale + trust strip */}
+            {/* Footer band  locale + trust strip */}
             <div className="border-t border-[color:var(--color-hairline)] bg-[color:var(--color-surface-sunk)] px-5 py-5">
               <div className="flex items-center justify-between gap-3">
                 <LocaleSwitcher />

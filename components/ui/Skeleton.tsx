@@ -5,7 +5,7 @@ interface Props {
 }
 
 /**
- * Loading placeholders. Always prefer a skeleton over a spinner — UX_UI_SPEC §2.8.
+ * Loading placeholders. Always prefer a skeleton over a spinner  UX_UI_SPEC §2.8.
  * Pulse uses CSS only; respects `prefers-reduced-motion` via globals.css.
  */
 export function Skeleton({ className }: Props) {

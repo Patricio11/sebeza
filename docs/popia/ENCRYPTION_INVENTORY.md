@@ -72,7 +72,7 @@ the keyring (currently single-key; multi-key for rotation below).
    Deploy.
 
 3. **Verify both keys decrypt.** Run a smoke test from
-   `/api/admin/outcomes-compliance` style — pick three real IDs and
+   `/api/admin/outcomes-compliance` style  pick three real IDs and
    confirm `decryptField` produces the right plaintext.
 
 4. **Re-encrypt at rest.** Run a one-shot script:
@@ -95,7 +95,7 @@ the keyring (currently single-key; multi-key for rotation below).
 
 1. Cut a new key immediately (step 1 above).
 2. Deploy step 2 with the new key prioritised in the keyring.
-3. Run step 4 (re-encrypt) in a single sustained job — block until
+3. Run step 4 (re-encrypt) in a single sustained job  block until
    complete. The compromised key MUST come out of the keyring as soon
    as no row references it.
 4. Trigger the breach response runbook (`BREACH_RESPONSE.md`).

@@ -5,7 +5,7 @@
  *
  * Calls `downloadQualification` which (a) re-checks document_sharing
  * consent, (b) mints a 60-second signed URL, (c) audit-logs the access.
- * The client then `window.open()`s the URL — the file streams directly
+ * The client then `window.open()`s the URL  the file streams directly
  * from Supabase Storage; we never proxy the bytes through Sebenza.
  */
 

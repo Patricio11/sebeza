@@ -1,9 +1,9 @@
--- Phase 4 — Postgres FTS + ranking infrastructure.
+-- Phase 4  Postgres FTS + ranking infrastructure.
 --
 -- What this migration adds:
 --   1. `pg_trgm` extension (typo-tolerant matching for taxonomy labels)
 --   2. `profiles.search_vector` switched from text → tsvector
---   3. `sebenza_profile_tsvector(text)` function — composes the vector
+--   3. `sebenza_profile_tsvector(text)` function  composes the vector
 --      from profession + seniority + bio + city + province + skill labels
 --      with weighted setweight() priorities
 --   4. Triggers on `profiles` + `profile_skills` keep the vector fresh on
@@ -11,12 +11,12 @@
 --   5. GIN index on `search_vector` (FTS lookups) + trigram indices on
 --      profession / professions.label / skills.label (typo-tolerant) +
 --      btree on the common filter columns
---   6. `sebenza_freshness_confidence(timestamp)` SQL function — mirrors
+--   6. `sebenza_freshness_confidence(timestamp)` SQL function  mirrors
 --      `lib/status.ts` confidence weights (1.0 / 0.6 / 0.25) so the
 --      ranking SQL and Phase 6 analytics share one source of truth
 --   7. Backfill: recompute search_vector for every existing seeded row
 --
--- Idempotent — uses IF NOT EXISTS / OR REPLACE everywhere so re-running it
+-- Idempotent  uses IF NOT EXISTS / OR REPLACE everywhere so re-running it
 -- against a partially-migrated DB is safe.
 --
 -- See `docs/PHASE_4_PLAN.md` re-check #2 (trigger-only, no GENERATED column).
@@ -37,12 +37,12 @@ ALTER TABLE "profiles" DROP COLUMN IF EXISTS "search_vector";
 ALTER TABLE "profiles" ADD COLUMN "search_vector" tsvector;
 
 -- ─────────────────────────────────────────────────────────────────────────────
--- 3. Compose function — single source of truth for a profile's tsvector.
+-- 3. Compose function  single source of truth for a profile's tsvector.
 --
 -- Weighting (per Postgres ts_rank conventions):
---   A — strongest: profession, aggregated skill labels
---   B — medium:    seniority, location
---   C — weakest:   bio
+--   A  strongest: profession, aggregated skill labels
+--   B  medium:    seniority, location
+--   C  weakest:   bio
 --
 -- We use the `simple` dictionary (no stemming) so e.g. "developer" and
 -- "developers" remain distinct matches. Phase 7 may swap in `english` once
@@ -77,7 +77,7 @@ AS $$
 $$;
 
 -- ─────────────────────────────────────────────────────────────────────────────
--- 4. Triggers — keep search_vector fresh on every write.
+-- 4. Triggers  keep search_vector fresh on every write.
 -- ─────────────────────────────────────────────────────────────────────────────
 
 -- 4a. Profile row changes (profession / seniority / bio / city / province)
@@ -98,7 +98,7 @@ CREATE TRIGGER profiles_search_vector_trigger
   FOR EACH ROW
   EXECUTE FUNCTION sebenza_profiles_search_vector_fn();
 
--- 4b. Skill-set changes — the aggregation lives in another table so we
+-- 4b. Skill-set changes  the aggregation lives in another table so we
 --     update the profile's vector from outside.
 CREATE OR REPLACE FUNCTION sebenza_profile_skills_search_vector_fn()
 RETURNS trigger
@@ -168,7 +168,7 @@ CREATE INDEX IF NOT EXISTS skills_label_trgm_idx
   ON skills USING GIN (label gin_trgm_ops);
 
 -- ─────────────────────────────────────────────────────────────────────────────
--- 6. Freshness confidence — SQL mirror of `lib/status.ts`.
+-- 6. Freshness confidence  SQL mirror of `lib/status.ts`.
 --
 -- Bands (days since last status confirmation):
 --   < 30  → 1.00 fresh
@@ -192,7 +192,7 @@ AS $$
     END;
 $$;
 
--- Overload for timestamptz too — Drizzle's timestamp{withTimezone:true}
+-- Overload for timestamptz too  Drizzle's timestamp{withTimezone:true}
 -- and timestamp without timezone both appear in our schema, and Postgres
 -- won't auto-cast for function dispatch.
 CREATE OR REPLACE FUNCTION sebenza_freshness_confidence(confirmed_at timestamptz)
@@ -204,7 +204,7 @@ AS $$
 $$;
 
 -- ─────────────────────────────────────────────────────────────────────────────
--- 7. Backfill — recompute search_vector for every row that already exists.
+-- 7. Backfill  recompute search_vector for every row that already exists.
 --    The triggers above will keep it fresh from here on; this populates the
 --    seeded data from db/seed.ts.
 -- ─────────────────────────────────────────────────────────────────────────────

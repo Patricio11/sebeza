@@ -2,7 +2,7 @@
 
 > Triggered when partnership / commercial pilot lands. Until then the
 > system runs on Neon (EU). Everything in this runbook is engineered
-> to be a one-day operation with zero remaining POPIA work to do —
+> to be a one-day operation with zero remaining POPIA work to do 
 > all the compliance, encryption, audit-logging, and consent surfaces
 > are already shipped against the current DB and stay identical
 > against the destination.
@@ -25,22 +25,22 @@ import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 ```
 
-The schema, the queries, the seed script, the migrations table — all
+The schema, the queries, the seed script, the migrations table  all
 identical. The application code never knows we moved.
 
 What also doesn't change on migration day:
 
-- **Privacy Policy** (`/privacy`) — section 7 already promises this
+- **Privacy Policy** (`/privacy`)  section 7 already promises this
   exact move; no copy edit needed.
-- **PAIA manual** (`/paia`) — section 4 already lists the destination.
-- **DPIA** (`docs/popia/DPIA.md`) — explicitly notes the move as a
+- **PAIA manual** (`/paia`)  section 4 already lists the destination.
+- **DPIA** (`docs/popia/DPIA.md`)  explicitly notes the move as a
   risk mitigation.
-- **Encryption inventory** (`docs/popia/ENCRYPTION_INVENTORY.md`) —
+- **Encryption inventory** (`docs/popia/ENCRYPTION_INVENTORY.md`) 
   AES-256-GCM application layer is identical; provider-level
   encryption-at-rest moves from Neon-managed to AWS-managed,
   documented as such.
 - **All audit-log retention, consent gates, cron jobs, KYC / SAQA
-  adapters** — DB-agnostic; carry over verbatim.
+  adapters**  DB-agnostic; carry over verbatim.
 
 What DOES change:
 
@@ -69,22 +69,22 @@ What DOES change:
       staging RDS instance to confirm every migration in
       `db/migrations/` applies cleanly to a fresh PG 16.
 - [ ] DPA + sub-processor agreement on file with AWS for the
-      `af-south-1` region — confirm POPIA alignment in writing.
+      `af-south-1` region  confirm POPIA alignment in writing.
 
 ## Cutover day (sized for ~4 hours including verification)
 
-### Step 1 — Freeze writes (T+0)
+### Step 1  Freeze writes (T+0)
 Set `MAINTENANCE_MODE=true` in Vercel env; deploy. The proxy already
 has the hook (commented in `proxy.ts`) to return a 503 with a JSON
 "maintenance" body for every non-read endpoint.
 
-### Step 2 — Final Neon snapshot (T+10 min)
+### Step 2  Final Neon snapshot (T+10 min)
 ```bash
-# Latest Neon backup snapshot via Neon console — this is the rollback.
+# Latest Neon backup snapshot via Neon console  this is the rollback.
 # Note the snapshot ID + creation timestamp.
 ```
 
-### Step 3 — pg_dump → pg_restore (T+30 min)
+### Step 3  pg_dump → pg_restore (T+30 min)
 ```bash
 # From an admin laptop with both connection strings in env:
 pg_dump "$NEON_URL" \
@@ -105,14 +105,14 @@ pg_restore \
 Re-run `npm run db:migrate` against the AWS DB to confirm the
 migrations table state is honest.
 
-### Step 4 — Smoke against staging Vercel preview pointed at AWS
+### Step 4  Smoke against staging Vercel preview pointed at AWS
 ```bash
 # Spin up a Vercel preview with DATABASE_URL set to the new instance.
 # Confirm /insights renders, /admin loads, /api/lmi returns,
 # /api/admin/outcomes-compliance returns ok:true on every check.
 ```
 
-### Step 5 — Cutover (T+2 hours)
+### Step 5  Cutover (T+2 hours)
 - Update production `DATABASE_URL` in Vercel env to AWS RDS.
 - Edit `db/client.ts` to use `drizzle-orm/postgres-js`:
   ```ts
@@ -126,16 +126,16 @@ migrations table state is honest.
 - Push to main → Vercel redeploys.
 - Set `MAINTENANCE_MODE=false`; deploy.
 
-### Step 6 — Verify (T+3 hours)
+### Step 6  Verify (T+3 hours)
 - Sign in as admin → run `/api/admin/outcomes-compliance` → confirm
   all 4 assertions pass.
 - Trigger a cron manually with the CRON_SECRET header → confirm a
   successful response.
 - Confirm `/insights` renders the LMI + outcomes section + heatmap
   with the same numbers as pre-cutover.
-- Check Sentry (if wired) — no error spike.
+- Check Sentry (if wired)  no error spike.
 
-### Step 7 — Keep Neon as read-only rollback (30 days)
+### Step 7  Keep Neon as read-only rollback (30 days)
 - Don't deprovision Neon for 30 days.
 - If a regression surfaces, revert `db/client.ts` + `DATABASE_URL`,
   redeploy.
@@ -148,7 +148,7 @@ migrations table state is honest.
       bullet to past-tense.
 - [ ] Update `docs/popia/RETENTION_POLICY.md` "Sub-processor data"
       section: Neon row removed, AWS RDS row added.
-- [ ] Update `/privacy` Section 7 — change "before commercial launch
+- [ ] Update `/privacy` Section 7  change "before commercial launch
       we migrate" to "we host on AWS Cape Town (`af-south-1`)".
 - [ ] Update `/paia` Section 6 → Sub-processors → swap Neon for AWS.
 - [ ] Tag the commit `aws-cape-town-cutover-YYYY-MM-DD`.
@@ -162,11 +162,11 @@ If anything is wrong inside the first 30 days:
 1. Revert `db/client.ts` to the Neon driver.
 2. Revert `DATABASE_URL` to the Neon connection string.
 3. Redeploy.
-4. Re-run any cron jobs that fired during the AWS window — they're
+4. Re-run any cron jobs that fired during the AWS window  they're
    idempotent (skill-gap-snapshot, outcome-snapshots, lmi-snapshot
    all just append).
 5. Audit-log entries from the AWS window can be `pg_dump`'d and
-   appended to Neon — see `pg_dump --table=audit_log`.
+   appended to Neon  see `pg_dump --table=audit_log`.
 
 ---
 

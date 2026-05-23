@@ -1,5 +1,5 @@
 /**
- * Seeker-side view of the audit log — "who saw what about me, and when".
+ * Seeker-side view of the audit log  "who saw what about me, and when".
  *
  * Reads from `audit_log` filtered to events where this seeker's profile is
  * the `subject` (e.g. an employer viewed their dossier, downloaded a doc,
@@ -8,7 +8,7 @@
  * `profile.document.download` events with real `actor = orgId`.
  *
  * Phase 4 already writes `search.profiles` rows on every search, but those
- * aren't per-seeker — they don't have a `subject`. Those don't show up
+ * aren't per-seeker  they don't have a `subject`. Those don't show up
  * here. Only events whose `subject = profile.handle` or `subject =
  * profile.id` are surfaced.
  */
@@ -33,7 +33,7 @@ export interface SeekerActivityKpis {
   contacts: number;
   reveals: number;
   downloads: number;
-  /** "+N this week" deltas — null when the bucket didn't change. */
+  /** "+N this week" deltas  null when the bucket didn't change. */
   viewersDelta: number | null;
   contactsDelta: number | null;
 }
@@ -55,7 +55,7 @@ const ONE_WEEK_MS = 7 * 24 * 60 * 60 * 1000;
  * Compute KPI deltas + recent event feed for the signed-in seeker.
  *
  * Returns zeros / empty until Phase 5 starts writing real reveal events.
- * That's correct behaviour — we never inflate the numbers with mock rows.
+ * That's correct behaviour  we never inflate the numbers with mock rows.
  */
 export async function getSeekerActivity(
   profile: Pick<MyProfile, "handle" | "profileId">,
@@ -105,7 +105,7 @@ export async function getSeekerActivity(
     recent.map((r) => [r.kind, r.count]),
   );
 
-  // 7-day "viewer" delta — count this-week vs prior-week
+  // 7-day "viewer" delta  count this-week vs prior-week
   const priorWeekViewers = await db
     .select({ count: sql<number>`COUNT(*)::int` })
     .from(auditLog)

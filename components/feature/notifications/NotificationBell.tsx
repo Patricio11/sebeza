@@ -1,13 +1,13 @@
 "use client";
 
 /**
- * Phase 7 (Task 7.6) — Bell icon + unread badge + dropdown panel.
+ * Phase 7 (Task 7.6)  Bell icon + unread badge + dropdown panel.
  *
  * Every notification originates in a specific Server Action (reveal,
  * download, approval, etc.) which calls `revalidatePath` on the
  * relevant surfaces. The bell's initial state is server-fetched on
  * every render, so simply navigating around the app refreshes it
- * naturally — no polling or WebSocket required. The local
+ * naturally  no polling or WebSocket required. The local
  * `markRead`/`markAllRead` Server Actions update state optimistically
  * and then revalidate.
  */
@@ -22,7 +22,7 @@ interface Props {
   fullPageHref: string;
   initialUnreadCount: number;
   initialItems: NotificationItem[];
-  /** Visual variant — desktop masthead vs mobile top strip. */
+  /** Visual variant  desktop masthead vs mobile top strip. */
   variant?: "default" | "compact";
 }
 
@@ -93,7 +93,7 @@ export function NotificationBell({
         type="button"
         aria-haspopup="true"
         aria-expanded={open}
-        aria-label={`Notifications${unread > 0 ? ` — ${unread} unread` : ""}`}
+        aria-label={`Notifications${unread > 0 ? `  ${unread} unread` : ""}`}
         onClick={() => setOpen((v) => !v)}
         className={`relative inline-flex ${sizeClasses} items-center justify-center rounded-full border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] text-[color:var(--color-ink)] hover:border-[color:var(--color-ink)]`}
       >

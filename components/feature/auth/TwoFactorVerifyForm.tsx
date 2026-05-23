@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * Phase 7 (Task 7.2) — /verify-2fa form (sign-in step 2).
+ * Phase 7 (Task 7.2)  /verify-2fa form (sign-in step 2).
  *
  * Two modes: TOTP (default) and backup-code (link toggles). Both
  * Server Actions return the post-success path so we can navigate

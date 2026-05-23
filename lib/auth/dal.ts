@@ -1,5 +1,5 @@
 /**
- * Data Access Layer (DAL) — Sebenza's canonical session + authorisation guard.
+ * Data Access Layer (DAL)  Sebenza's canonical session + authorisation guard.
  *
  * Built per the Next.js authentication guide
  * (https://nextjs.org/docs/app/guides/authentication#creating-a-data-access-layer-dal):
@@ -15,17 +15,17 @@
  *
  * Architecture:
  *
- *   Layer 1 — proxy.ts (optional)        : optimistic redirect on cookie absence
+ *   Layer 1  proxy.ts (optional)        : optimistic redirect on cookie absence
  *                                          (UX speed-up, NOT a security boundary)
  *
- *   Layer 2 — DAL (this file)            : authoritative validation
+ *   Layer 2  DAL (this file)            : authoritative validation
  *                                          (`auth.api.getSession` → DB)
  *                                          called at the top of every protected
  *                                          page + by every PII-touching data
  *                                          fetch
  *
- *   Layer 3 — Server Actions              : each action calls verifySession()
- *                                          before any mutation — Server Actions
+ *   Layer 3  Server Actions              : each action calls verifySession()
+ *                                          before any mutation  Server Actions
  *                                          are public-facing endpoints
  *
  * **Never call `auth.api.getSession()` directly in app code.** Always go through
@@ -51,7 +51,7 @@ export interface SessionUser {
   name: string;
   emailVerified: boolean;
   role: UserRole;
-  /** Phase 7 (Task 7.2) — `true` once the user has confirmed their first
+  /** Phase 7 (Task 7.2)  `true` once the user has confirmed their first
       TOTP code. Drives the forced-setup gate for employer/admin roles. */
   twoFactorEnabled: boolean;
 }
@@ -59,12 +59,12 @@ export interface SessionUser {
 export interface OrgContext {
   /** organization_members.organization_id */
   orgId: string;
-  /** organizations.verification — `"verified"` lets PII flows through */
+  /** organizations.verification  `"verified"` lets PII flows through */
   verification: "unverified" | "pending" | "verified" | "rejected";
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 1. Session — memoized per render pass via React's cache()
+// 1. Session  memoized per render pass via React's cache()
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
@@ -100,7 +100,7 @@ export const getSessionUser = cache(async (): Promise<SessionUser | null> => {
     };
   } catch (e) {
     // Next.js throws `DynamicServerError` (and `NEXT_REDIRECT`) as control-flow
-    // signals — `headers()` triggers it during a static prerender so Next knows
+    // signals  `headers()` triggers it during a static prerender so Next knows
     // to mark the route dynamic. We MUST rethrow these or static generation
     // silently treats the page as "not signed in" and redirects to /sign-in
     // at build time.
@@ -115,7 +115,7 @@ export const getSessionUser = cache(async (): Promise<SessionUser | null> => {
 function isNextControlFlowError(e: unknown): boolean {
   if (!e || typeof e !== "object") return false;
   // Match Next's DynamicServerError / NEXT_REDIRECT / NEXT_NOT_FOUND signals
-  // by the conventional `digest` / `name` shape rather than instanceof — the
+  // by the conventional `digest` / `name` shape rather than instanceof  the
   // class isn't a stable public export across Next versions.
   const err = e as { digest?: unknown; name?: unknown; message?: unknown };
   if (typeof err.digest === "string" && err.digest.startsWith("NEXT_")) {
@@ -137,7 +137,7 @@ function isNextControlFlowError(e: unknown): boolean {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 2. Authoritative guards — call these at the top of every protected page
+// 2. Authoritative guards  call these at the top of every protected page
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
@@ -167,7 +167,7 @@ export async function verifyRole(role: UserRole): Promise<SessionUser> {
 }
 
 /**
- * Strict admin guard. No role fall-through — admin only.
+ * Strict admin guard. No role fall-through  admin only.
  */
 export async function verifyAdmin(): Promise<SessionUser> {
   const user = await verifySession();
@@ -177,13 +177,13 @@ export async function verifyAdmin(): Promise<SessionUser> {
 }
 
 /**
- * Phase 9 — Government / policy / SETA-partner workspace gate.
+ * Phase 9  Government / policy / SETA-partner workspace gate.
  *
  * Admins are allowed (operational override); everyone else gets
  * redirected to their own role home. The `/gov` route group is
  * always behind this guard.
  *
- * Note: enforceTwoFactorSetup gates gov + admin alike — POPIA-grade
+ * Note: enforceTwoFactorSetup gates gov + admin alike  POPIA-grade
  * accounts should never sign in without a second factor.
  */
 export async function verifyGov(): Promise<SessionUser> {
@@ -196,7 +196,7 @@ export async function verifyGov(): Promise<SessionUser> {
 }
 
 /**
- * Phase 7 (Task 7.2) — Forced 2FA enrollment gate for employer + admin.
+ * Phase 7 (Task 7.2)  Forced 2FA enrollment gate for employer + admin.
  *
  * Seekers are not in scope (they use Sebenza on low-end mobile data;
  * forcing TOTP would lock out the user-base the platform exists for).

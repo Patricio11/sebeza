@@ -13,7 +13,7 @@ interface Props {
 /**
  * Verification-Honesty Rule (TO_START_EVERY_SESSION.md §6): never display
  * "Verified" for self-reported data. Default is `unverified`. Badges must
- * reflect reality — this component refuses to lie.
+ * reflect reality  this component refuses to lie.
  */
 export function VerificationBadge({ state, showLabel = true, className }: Props) {
   const t = useTranslations("verification");

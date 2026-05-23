@@ -1,4 +1,4 @@
--- Phase 7.5 — `outcomes_research` consent purpose.
+-- Phase 7.5  `outcomes_research` consent purpose.
 --
 -- A student consenting to "be found for jobs" has NOT consented to
 -- "be a longitudinal data point in a government outcomes study."

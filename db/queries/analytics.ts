@@ -1,15 +1,15 @@
 /**
- * Phase 4 — Aggregate analytics queries.
+ * Phase 4  Aggregate analytics queries.
  *
  * Drives `/insights` (public dashboard) and the landing pulse strip.
  *
  * Rules:
- *  - Aggregates only — never expose individual PII. Counts, weighted sums,
+ *  - Aggregates only  never expose individual PII. Counts, weighted sums,
  *    trend buckets. No per-row data in the response.
  *  - Freshness-weighted: each `byStatus` bucket carries the average
  *    `sebenza_freshness_confidence` for the rows that contribute. Lets
  *    `/insights` show "data you can trust" honestly.
- *  - One round-trip per logical aggregate (counts / demandBySkill / trend) —
+ *  - One round-trip per logical aggregate (counts / demandBySkill / trend) 
  *    Phase 6 may swap these for materialised views once row counts grow.
  *
  * `demandBySkill` is intentionally derived from `search_events` (what
@@ -81,7 +81,7 @@ export async function analyticsSnapshotQuery(): Promise<AnalyticsSnapshot> {
   );
 
   // ── Placements this month ────────────────────────────────────────────────
-  // Phase 7.5 — Placement-Truth: only `employer_confirmed` rows count
+  // Phase 7.5  Placement-Truth: only `employer_confirmed` rows count
   // in the trustworthy headline + government-facing analytics.
   const placementsRows = unwrap<{ count: number }>(
     await db.execute(sql`
@@ -152,7 +152,7 @@ export async function analyticsSnapshotQuery(): Promise<AnalyticsSnapshot> {
         GROUP BY 1
       ),
       places AS (
-        -- Phase 7.5 — employer_confirmed only (Placement-Truth Rule).
+        -- Phase 7.5  employer_confirmed only (Placement-Truth Rule).
         SELECT to_char(date_trunc('month', hired_at), 'YYYY-MM') AS month,
                COUNT(*)::int AS placements
         FROM placements
@@ -183,7 +183,7 @@ export async function analyticsSnapshotQuery(): Promise<AnalyticsSnapshot> {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Phase 6 — Skills-gap engine + supply heatmap + freshness breakdown.
+// Phase 6  Skills-gap engine + supply heatmap + freshness breakdown.
 //
 // These power the rebuilt `/insights` page (the government wedge):
 //   - skillsGapQuery: what employers SEARCH for vs what's available, sorted
@@ -191,7 +191,7 @@ export async function analyticsSnapshotQuery(): Promise<AnalyticsSnapshot> {
 //   - supplyHeatmapQuery: sparse (province × profession) grid of supply
 //     counts + freshness; frontend builds the matrix.
 //   - freshnessBreakdownQuery: how many active profiles are fresh / ageing /
-//     stale right now — drives the "data you can trust" headline metric.
+//     stale right now  drives the "data you can trust" headline metric.
 //   - skillsGapDeltaQuery: change in gap-size between this week and last
 //     week, for the "Trending gaps" callout.
 //
@@ -207,7 +207,7 @@ export interface SkillsGapRow {
   searches: number;
   /** How many profiles currently match (raw count). */
   matches: number;
-  /** Same as `matches` but freshness-weighted — what's actually deliverable. */
+  /** Same as `matches` but freshness-weighted  what's actually deliverable. */
   freshMatches: number;
   /** `searches - matches`. Positive = unfilled demand. Negative = oversupply. */
   gap: number;
@@ -272,7 +272,7 @@ export async function skillsGapQuery(opts: {
         LEFT JOIN searches x ON TRUE
         GROUP BY s.profession, s.matches, s.fresh_matches
       ),
-      -- Terms that didn't match any profession — orphan demand: skills
+      -- Terms that didn't match any profession  orphan demand: skills
       -- employers are looking for that don't map to the taxonomy yet.
       orphan_terms AS (
         SELECT x.term, x.hits
@@ -402,11 +402,11 @@ export async function freshnessBreakdownQuery(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Phase 6.5 — Skill-level demand, skills-gap snapshots + trend deltas.
+// Phase 6.5  Skill-level demand, skills-gap snapshots + trend deltas.
 //
 // `skillsGapQuery` operates at PROFESSION granularity. `skillDemandQuery`
 // is the same idea but joins search terms against the controlled SKILL
-// taxonomy (`skills.label`) — finer-grained, surfaces gaps like
+// taxonomy (`skills.label`)  finer-grained, surfaces gaps like
 // "Cybersecurity" that don't map to any profession yet.
 //
 // `captureSkillGapSnapshot` writes the current top-N skills-gap rows to
@@ -415,7 +415,7 @@ export async function freshnessBreakdownQuery(
 // `lib/analytics/snapshot.ts` Server Action.
 //
 // `skillsGapTrendQuery` reads the two most recent captures separated by
-// at least N days and computes per-skill delta — drives the "Δ" arrow
+// at least N days and computes per-skill delta  drives the "Δ" arrow
 // column on `/insights`.
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -433,7 +433,7 @@ export interface SkillDemandRow {
 }
 
 /**
- * Skill-level demand vs supply. More granular than `skillsGapQuery` —
+ * Skill-level demand vs supply. More granular than `skillsGapQuery` 
  * surfaces gaps that don't map to a profession (e.g. "Cybersecurity").
  */
 export async function skillDemandQuery(opts: {
@@ -544,7 +544,7 @@ export interface SkillsGapTrendRow extends SkillsGapRow {
 /**
  * Top-N skills-gap with week-over-week (or whatever's most recent within
  * the lookback window) deltas. Falls back to the current `skillsGapQuery`
- * result when there's no comparison snapshot yet — the page never breaks.
+ * result when there's no comparison snapshot yet  the page never breaks.
  */
 export async function skillsGapTrendQuery(opts: {
   top?: number;
@@ -603,7 +603,7 @@ export async function skillsGapTrendQuery(opts: {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Rank in pool — for the seeker's "you're #4 of 312" headline
+// Rank in pool  for the seeker's "you're #4 of 312" headline
 // ─────────────────────────────────────────────────────────────────────────────
 
 export interface PoolRank {
@@ -624,7 +624,7 @@ export interface PoolRank {
  *
  * Used by the Career compass headline + the dashboard "Rank in search" tile.
  * Returns null if the profile isn't in the pool (e.g. completeness scoring
- * pushed them out — defensive but unlikely).
+ * pushed them out  defensive but unlikely).
  */
 export async function rankInPoolQuery(opts: {
   handle: string;

@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * Phase 8 — KYC panel on /dashboard/profile.
+ * Phase 8  KYC panel on /dashboard/profile.
  *
  * Three states:
  *   - No ID on file → CTA to the National-ID section, no submit button.
@@ -23,7 +23,7 @@ interface Props {
   hasNationalId: boolean;
   /** ISO when kycVerifiedAt was last set. null = not verified. */
   kycVerifiedAt: string | null;
-  /** Master flag — when off, real SaaS not in use; mock returns "pending". */
+  /** Master flag  when off, real SaaS not in use; mock returns "pending". */
   realProviderEnabled: boolean;
 }
 

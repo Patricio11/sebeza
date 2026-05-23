@@ -1,7 +1,7 @@
--- Phase 7 (Task 7.6) — In-app notifications.
+-- Phase 7 (Task 7.6)  In-app notifications.
 --
 -- Adds the `notifications` table + the `notification_prefs` JSONB
--- column on `app_user`. Notifications are UX state — the audit log
+-- column on `app_user`. Notifications are UX state  the audit log
 -- remains authoritative for any PII access. See docs/PHASE_7_PLAN.md
 -- §C for the design rationale (separate table over an audit_log view,
 -- polling over WebSockets, idempotency-aware createNotification, etc.).
@@ -33,7 +33,7 @@ CREATE INDEX IF NOT EXISTS notifications_user_unread_idx
   ON notifications (user_id, created_at DESC)
   WHERE read_at IS NULL;
 
--- Supports the dedupe lookup inside `createNotification` — find the
+-- Supports the dedupe lookup inside `createNotification`  find the
 -- most-recent matching kind for a user.
 CREATE INDEX IF NOT EXISTS notifications_user_kind_at_idx
   ON notifications (user_id, kind, created_at DESC);

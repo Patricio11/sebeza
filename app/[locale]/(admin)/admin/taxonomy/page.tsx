@@ -79,7 +79,7 @@ export default async function TaxonomyPage({
 
       <p className="mt-4 text-xs italic text-[color:var(--color-ink-soft)]">
         Free-text in search is intentionally disabled. The controlled vocabulary
-        here is what keeps national analytics meaningful — every search and
+        here is what keeps national analytics meaningful  every search and
         profile must reduce to a slug.{" "}
         {active === "provinces" && (
           <span>

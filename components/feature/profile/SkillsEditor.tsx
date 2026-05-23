@@ -1,10 +1,10 @@
 "use client";
 
 /**
- * Skills editor — managed local state, single "Save skills" submit.
+ * Skills editor  managed local state, single "Save skills" submit.
  *
  * Only allows skills from the controlled taxonomy (SKILLS in `lib/mock/taxonomy.ts`).
- * Per Phase 3 plan re-check #5: no free-text — keeps search and analytics clean.
+ * Per Phase 3 plan re-check #5: no free-text  keeps search and analytics clean.
  */
 
 import { useMemo, useState, useTransition } from "react";

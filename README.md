@@ -1,12 +1,12 @@
 # Sebenza
 
-South Africa's talent-intelligence platform — a fast, accessible, POPIA-compliant
+South Africa's talent-intelligence platform  a fast, accessible, POPIA-compliant
 search and analytics surface for matching people to work by skill and location.
 
 > The trustworthy, real-time layer for South African work.
 
 This is the **Phase 1** build: clickable end-to-end on mock data. Backend slots in
-behind a typed `dataProvider` seam — see [lib/data/provider.ts](lib/data/provider.ts).
+behind a typed `dataProvider` seam  see [lib/data/provider.ts](lib/data/provider.ts).
 
 ## Run
 
@@ -30,16 +30,16 @@ npm run typecheck
 | Admin (audit log viewer) | `/admin` | partial |
 
 All routes are localised at `/[locale]/...` for `en`, `zu`, `xh`, `af`. Non-English
-catalogs are placeholders pending professional translation — never machine-translate
+catalogs are placeholders pending professional translation  never machine-translate
 POPIA / consent / legal copy.
 
 ## Documentation
 
 The three documents in the parent directory are load-bearing:
 
-1. **`../TO_START_EVERY_SESSION.md`** — non-negotiable rules and tone.
-2. **`../ROADMAP.md`** — the phased build plan.
-3. **`../UX_UI_SPEC.md`** — design system + screen-by-screen UX.
+1. **`../TO_START_EVERY_SESSION.md`**  non-negotiable rules and tone.
+2. **`../ROADMAP.md`**  the phased build plan.
+3. **`../UX_UI_SPEC.md`**  design system + screen-by-screen UX.
 
 Read them together. Every architectural choice in this repo traces back to one
 of those documents. See also [CLAUDE.md](CLAUDE.md) for a per-session brief.

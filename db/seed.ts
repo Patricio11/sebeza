@@ -1,5 +1,5 @@
 /**
- * Seed script — turns the mock data into Postgres rows.
+ * Seed script  turns the mock data into Postgres rows.
  *
  * Reads from `lib/mock/*` (the same modules the running app uses today) so the
  * dataset stays single-sourced. Idempotent: truncates first, then inserts.
@@ -12,7 +12,7 @@
  *   2. `npm run db:generate` (drizzle-kit) and `npm run db:migrate`
  *   3. `npm run db:seed`
  *
- * Seed credentials (dev only — NEVER deploy these):
+ * Seed credentials (dev only  NEVER deploy these):
  *   - Password for every seeded account: "sebenza-dev-2026"
  *   - Admin: admin@sebenza.co.za
  *   - Employer (Discovery Bank owner): naledi.khumalo@discovery.co.za
@@ -23,7 +23,7 @@
  */
 import { config as loadEnv } from "dotenv";
 // Load .env.local first (developer overrides), then .env (committed defaults).
-// `dotenv/config` would only auto-load .env — we need .env.local too.
+// `dotenv/config` would only auto-load .env  we need .env.local too.
 loadEnv({ path: ".env.local" });
 loadEnv();
 import { neon } from "@neondatabase/serverless";
@@ -71,7 +71,7 @@ const id = (prefix: string, slug: string) => `${prefix}_${slug}`;
 async function truncate() {
   console.log("⌫  Truncating tables…");
   // Order respects FK dependencies. RESTART IDENTITY is harmless here.
-  // We deliberately DO NOT truncate `platform_settings` — the migration
+  // We deliberately DO NOT truncate `platform_settings`  the migration
   // seeds default values that should survive a re-seed, and the schema
   // doesn't reference any user-scoped data here.
   await db.execute(sql`
@@ -135,7 +135,7 @@ async function seedTaxonomy() {
 async function seedUsersAndProfiles() {
   console.log("👤 Users + Better Auth accounts (hashed passwords)…");
 
-  // Hash the dev password once — all seeded accounts share it.
+  // Hash the dev password once  all seeded accounts share it.
   const pwHash = await hashPassword(SEED_PASSWORD);
 
   // Admin + employer-owner + every seeker get a user + a credential account.
@@ -165,7 +165,7 @@ async function seedUsersAndProfiles() {
 
   await db.insert(schema.appUser).values(userRows);
 
-  // Better Auth credential accounts — one per user, holding the password hash.
+  // Better Auth credential accounts  one per user, holding the password hash.
   await db.insert(schema.account).values(
     userRows.map((u) => ({
       id: `acc_${u.id}`,
@@ -176,7 +176,7 @@ async function seedUsersAndProfiles() {
     })),
   );
 
-  // Profiles (seekers only — admin + employer-owner don't have public profiles).
+  // Profiles (seekers only  admin + employer-owner don't have public profiles).
   console.log("📄 Profiles…");
   await db.insert(schema.profiles).values(
     mockProfiles.map((p) => ({
@@ -212,7 +212,7 @@ async function seedProfileChildren() {
       .map((s) => {
         const slug = skillSlugByLabel.get(s.name);
         if (!slug) {
-          // Skill not in the controlled vocab — Phase 7 admin would add it
+          // Skill not in the controlled vocab  Phase 7 admin would add it
           // before allowing it on a profile. For the seed, skip it (the
           // canonical mock profiles use known slugs).
           return null;
@@ -309,7 +309,7 @@ async function seedOrgsAndPlacements() {
     twoFactorActive: true,
   });
 
-  console.log("🤝 Placements (illustrative — match the landing outcomes)…");
+  console.log("🤝 Placements (illustrative  match the landing outcomes)…");
   await db.insert(schema.placements).values([
     {
       id: id("plc", "thandeka"),
@@ -335,7 +335,7 @@ async function seedConsents() {
   // Every seeker who has a profile granted the base 'searchability' consent
   // so they show up in /search. Other purposes start as 'none'.
   //
-  // Phase 7.5 — the two final-year BSc CS students (andile-z, lerato-n)
+  // Phase 7.5  the two final-year BSc CS students (andile-z, lerato-n)
   // are seeded with `outcomes_research` granted, paired with the synthetic
   // cohort below so the dataset actually demos something on /insights.
   const outcomesGranters = new Set(["andile-z", "lerato-n", "zinhle-m"]);
@@ -373,7 +373,7 @@ async function seedConsents() {
  * → size 12, placed 3, rate 25%.
  */
 async function seedPhase7_5OutcomesCohort() {
-  console.log("🎓 Phase 7.5 — synthetic graduate cohort for /insights outcomes…");
+  console.log("🎓 Phase 7.5  synthetic graduate cohort for /insights outcomes…");
   const pwHash = await hashPassword(SEED_PASSWORD);
   const orgId = id("org", "discovery-bank");
   const institutionSlug = "wits";
@@ -449,7 +449,7 @@ async function seedPhase7_5OutcomesCohort() {
     })),
   );
 
-  // consents — searchability + outcomes_research granted; rest 'none'.
+  // consents  searchability + outcomes_research granted; rest 'none'.
   await db.insert(schema.consents).values(
     cohortHandles.flatMap((handle) =>
       CONSENT_PURPOSES.map((purpose) => {
@@ -503,7 +503,7 @@ function provinceSlugByLabel(label: string): string {
 // ────────────────────────────────────────────────────────────────────────────
 
 async function seedPhase7Reports() {
-  console.log("🚩 Phase 7 sample reports (open + closed — for /admin/moderation)…");
+  console.log("🚩 Phase 7 sample reports (open + closed  for /admin/moderation)…");
   await db.insert(schema.reports).values([
     {
       id: id("rep", "amara-spam"),
@@ -528,7 +528,7 @@ async function seedPhase7Reports() {
 
 async function main() {
   const started = Date.now();
-  console.log("🌱 Sebenza seed — Phase 2 starting database\n");
+  console.log("🌱 Sebenza seed  Phase 2 starting database\n");
 
   await truncate();
   await seedTaxonomy();
@@ -538,7 +538,7 @@ async function main() {
   await seedOrgsAndPlacements();
   await seedConsents();
   await seedPhase7Reports();
-  // Phase 7.5 — synthetic cohort that clears the k=10 floor so the
+  // Phase 7.5  synthetic cohort that clears the k=10 floor so the
   // /insights outcomes section renders a real row in the dev demo.
   // Runs after seedOrgsAndPlacements because it inserts placements
   // referencing the Discovery Bank org id.
@@ -546,7 +546,7 @@ async function main() {
 
   const ms = Date.now() - started;
   console.log(
-    `\n✅ Seed complete in ${ms} ms — ${mockProfiles.length} profiles, ` +
+    `\n✅ Seed complete in ${ms} ms  ${mockProfiles.length} profiles, ` +
       `${PROVINCES.length} provinces, ${PROFESSIONS.length} professions, ` +
       `${SKILLS.length} skills, ${INSTITUTIONS.length} institutions.`,
   );

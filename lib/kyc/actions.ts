@@ -1,13 +1,13 @@
 "use server";
 
 /**
- * Phase 8 — KYC Server Actions.
+ * Phase 8  KYC Server Actions.
  *
  *   - submitMyIdForVerification: seeker-side. Reads the encrypted ID
  *     off `profiles.nationalIdEnc`, decrypts in-memory, hands to the
  *     resolved provider, writes the result back.
  *   - adminVerifyIdManually: admin-side escape hatch when the SaaS
- *     flag is off (default) — admin can still approve based on
+ *     flag is off (default)  admin can still approve based on
  *     out-of-band documents.
  *   - revokeMyKyc: seeker can clear their own verification.
  *
@@ -78,7 +78,7 @@ export async function submitMyIdForVerification(): Promise<
   if (!result.ok) return fail(result.message);
 
   // Record the outcome. "pending" means the provider needs more time
-  // (or — when running the mock — admin manual approval is required).
+  // (or  when running the mock  admin manual approval is required).
   // "verified" updates the user-level columns + audit-logs with the
   // provider transaction id.
   if (result.status === "verified") {

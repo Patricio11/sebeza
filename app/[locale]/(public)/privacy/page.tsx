@@ -11,7 +11,7 @@ export const metadata = {
 };
 
 /**
- * Phase 9 — Privacy Policy.
+ * Phase 9  Privacy Policy.
  *
  * Plain-language POPIA-aligned policy. Sections map to POPIA's eight
  * conditions for lawful processing. This is the public-facing legal
@@ -73,7 +73,7 @@ export default async function PrivacyPolicyPage({
 
           <Section title="2. What we collect, and why">
             <p>
-              Sebenza is special-category PII territory by design — we
+              Sebenza is special-category PII territory by design  we
               process ID numbers, qualifications, and employment status to
               make the SA talent pool visible. Each data category is
               attached to a specific lawful purpose:
@@ -81,22 +81,22 @@ export default async function PrivacyPolicyPage({
             <ul className="my-4 list-disc pl-6 space-y-2">
               <li>
                 <strong>Identity</strong> (name, email, encrypted national ID)
-                — to create an account, verify you, and link your profile to
+                 to create an account, verify you, and link your profile to
                 a real person.
               </li>
               <li>
                 <strong>Professional</strong> (profession, skills, experience,
-                qualifications, work availability) — to make your profile
+                qualifications, work availability)  to make your profile
                 findable to employers searching for that talent.
               </li>
               <li>
                 <strong>Status</strong> (employed / open-to-work / studying,
-                with confirmation timestamps) — to drive the freshness signal
+                with confirmation timestamps)  to drive the freshness signal
                 that down-ranks stale records.
               </li>
               <li>
                 <strong>Activity</strong> (sign-ins, profile views, contact
-                reveals, document downloads) — to maintain the audit ledger
+                reveals, document downloads)  to maintain the audit ledger
                 you can see on <code>/dashboard/activity</code>.
               </li>
             </ul>
@@ -107,7 +107,7 @@ export default async function PrivacyPolicyPage({
             </p>
           </Section>
 
-          <Section title="3. Consent — granular, revocable, never weaponised">
+          <Section title="3. Consent  granular, revocable, never weaponised">
             <p>
               We separate consent into independent purposes. You can grant or
               revoke any of them at any time from{" "}
@@ -118,23 +118,23 @@ export default async function PrivacyPolicyPage({
             </p>
             <ul className="my-4 list-disc pl-6 space-y-2">
               <li>
-                <strong>Searchability</strong> — required for your profile to
+                <strong>Searchability</strong>  required for your profile to
                 appear in employer search results.
               </li>
               <li>
-                <strong>Contact reveal</strong> — lets verified employers see
+                <strong>Contact reveal</strong>  lets verified employers see
                 your email and phone. Every reveal is audit-logged.
               </li>
               <li>
-                <strong>Document sharing</strong> — lets verified employers
+                <strong>Document sharing</strong>  lets verified employers
                 download qualification documents you upload.
               </li>
               <li>
-                <strong>Aggregate analytics</strong> — lets us count you in
+                <strong>Aggregate analytics</strong>  lets us count you in
                 anonymised national employment statistics.
               </li>
               <li>
-                <strong>Outcomes research</strong> (Phase 7.5) — opt-in
+                <strong>Outcomes research</strong> (Phase 7.5)  opt-in
                 inclusion in the longitudinal education-to-employment
                 dataset. Suppressed below cohorts of 10. Withholding does not
                 weaken your job-search experience in any way.
@@ -163,7 +163,7 @@ export default async function PrivacyPolicyPage({
               <li>The reveal is recorded in our audit log.</li>
             </ol>
             <p>
-              No condition skipped — ever. The audit log is the system of
+              No condition skipped  ever. The audit log is the system of
               record and you can review your own entries at{" "}
               <code>/dashboard/activity</code>.
             </p>
@@ -235,7 +235,7 @@ export default async function PrivacyPolicyPage({
           <Section title="8. Your rights under POPIA">
             <ul className="my-4 list-disc pl-6 space-y-2">
               <li>
-                <strong>Section 23 — access:</strong> download a JSON file
+                <strong>Section 23  access:</strong> download a JSON file
                 of every row we hold about you from{" "}
                 <Link href="/dashboard/privacy" className="underline">
                   your privacy dashboard
@@ -243,12 +243,12 @@ export default async function PrivacyPolicyPage({
                 . Audit-logged.
               </li>
               <li>
-                <strong>Section 24 — correction:</strong> edit any profile
+                <strong>Section 24  correction:</strong> edit any profile
                 field from <code>/dashboard/profile</code>. Re-confirm your
                 national ID and consent versions from the same surface.
               </li>
               <li>
-                <strong>Section 24 — deletion:</strong> erase your account
+                <strong>Section 24  deletion:</strong> erase your account
                 from <code>/dashboard/privacy</code>. 30-day grace window
                 during which an administrator can restore; after that the
                 row is gone.
@@ -260,7 +260,7 @@ export default async function PrivacyPolicyPage({
               </li>
               <li>
                 <strong>Complain to the Regulator:</strong> Information
-                Regulator (South Africa) —{" "}
+                Regulator (South Africa) {" "}
                 <a
                   href="https://inforegulator.org.za/"
                   className="underline"
@@ -279,7 +279,7 @@ export default async function PrivacyPolicyPage({
               consent state) without which the site cannot work. We do not
               use third-party advertising trackers. If you accept analytics
               cookies on the banner, we use a privacy-respecting tool to
-              count page views — no personal profile is built from your
+              count page views  no personal profile is built from your
               browsing.
             </p>
           </Section>
@@ -291,24 +291,24 @@ export default async function PrivacyPolicyPage({
             </p>
             <ul className="my-4 list-disc pl-6 space-y-2">
               <li>
-                <strong>Database</strong> — Neon (EU, build phase) → AWS
+                <strong>Database</strong>  Neon (EU, build phase) → AWS
                 Cape Town (<code>af-south-1</code>, launch). See Section 7.
               </li>
               <li>
-                <strong>File storage</strong> — Supabase Storage (private
+                <strong>File storage</strong>  Supabase Storage (private
                 buckets, signed-URL reads).
               </li>
               <li>
-                <strong>Email</strong> — Resend (transactional only;
+                <strong>Email</strong>  Resend (transactional only;
                 domain auth via SPF + DKIM + DMARC).
               </li>
               <li>
-                <strong>KYC verification</strong> — TBC SA-registered
+                <strong>KYC verification</strong>  TBC SA-registered
                 provider (Home Affairs eHANIS adapter). Currently inactive
                 pending partnership confirmation.
               </li>
               <li>
-                <strong>SAQA qualification verification</strong> — SAQA NLRD
+                <strong>SAQA qualification verification</strong>  SAQA NLRD
                 via the partnership API. Currently inactive pending
                 partnership confirmation.
               </li>
@@ -337,7 +337,7 @@ export default async function PrivacyPolicyPage({
             <a href="mailto:popia@sebenza.co.za" className="underline">
               popia@sebenza.co.za
             </a>{" "}
-            — our Information Officer responds within 5 business days. For
+             our Information Officer responds within 5 business days. For
             a copy of the records-management arrangement see our{" "}
             <Link href="/paia" className="underline">
               PAIA manual

@@ -16,7 +16,7 @@ interface Props {
   kind: Kind;
   approveLabel: string;
   rejectLabel: string;
-  /** Phase 8 — render a secondary "Force approve" affordance when the
+  /** Phase 8  render a secondary "Force approve" affordance when the
    *  SAQA worker flag is on (qualification rows only). When false (or
    *  not a qualification), the secondary button is omitted. */
   showSaqaOverride?: boolean;

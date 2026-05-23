@@ -1,7 +1,7 @@
 "use server";
 
 /**
- * Phase 5 — Employer reveal flows.
+ * Phase 5  Employer reveal flows.
  *
  * Three locks gate every reveal (`docs/PHASE_5_PLAN.md` re-check #1):
  *   1. Employer's organisation is verified
@@ -43,7 +43,7 @@ function fail(message: string): { ok: false; message: string } {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// revealContact — emits the email + city after consent check
+// revealContact  emits the email + city after consent check
 // ─────────────────────────────────────────────────────────────────────────────
 
 export interface ContactReveal {
@@ -51,7 +51,7 @@ export interface ContactReveal {
   city: string;
   /** Catalog version of the consent the seeker actually granted. */
   consentVersion: string;
-  /** ISO timestamp — for the audit-log surface on the reveal card. */
+  /** ISO timestamp  for the audit-log surface on the reveal card. */
   revealedAt: string;
 }
 
@@ -61,13 +61,13 @@ export async function revealContact(input: {
   if (!input?.handle) return fail("Missing profile handle.");
   const session = await verifyOrgVerified();
 
-  // Phase 9 review (2026-05-23) — rate limiting deliberately NOT
+  // Phase 9 review (2026-05-23)  rate limiting deliberately NOT
   // enforced anywhere by default. The infrastructure exists in
   // `lib/rate-limit/` ready to wire when abuse is observed; until
   // then the existing protections (verified-org gate + per-reveal
   // consent check + audit log + 30-day reveal-gate window) carry the
   // load. Re-enable by importing `enforce("reveal", …)` and gating
-  // the action — but only after observing real abuse patterns to
+  // the action  but only after observing real abuse patterns to
   // size the budget. See docs/popia/DPIA.md R-series.
 
   const db = getDb();
@@ -88,7 +88,7 @@ export async function revealContact(input: {
   const row = profileRows[0];
   if (!row) return fail("Profile not found.");
 
-  // Consent check — must be explicitly granted (not 'none' or 'revoked').
+  // Consent check  must be explicitly granted (not 'none' or 'revoked').
   const consentRows = await db
     .select({
       state: schema.consents.state,
@@ -156,7 +156,7 @@ export async function revealContact(input: {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// downloadQualification — mints a 60-second signed URL for the file
+// downloadQualification  mints a 60-second signed URL for the file
 // ─────────────────────────────────────────────────────────────────────────────
 
 export async function downloadQualification(input: {
@@ -229,7 +229,7 @@ export async function downloadQualification(input: {
     userId: row.userId,
     kind: "document.downloaded",
     title: `${orgName} downloaded one of your documents`,
-    body: `${row.title} — every download is audit-logged on your activity timeline.`,
+    body: `${row.title}  every download is audit-logged on your activity timeline.`,
     link: "/dashboard/activity",
     meta: {
       orgId: session.orgId,

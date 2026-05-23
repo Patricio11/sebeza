@@ -33,7 +33,7 @@ export function ReportProfileButton({ handle, label }: Props) {
     return (
       <span className="inline-flex items-center gap-2 text-sm text-[color:var(--color-ink-soft)]">
         <Flag className="size-4" aria-hidden="true" />
-        Thanks — our trust &amp; integrity team will review.
+        Thanks  our trust &amp; integrity team will review.
       </span>
     );
   }

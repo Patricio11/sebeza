@@ -1,8 +1,8 @@
-# Phase 8 — Verification & Integrations · ✅ COMPLETE (2026-05-23)
+# Phase 8  Verification & Integrations · ✅ COMPLETE (2026-05-23)
 
-> Shipped 2026-05-23. Companion doc: `docs/completed/PHASE_8_COMPLETE.md`. KYC + SAQA adapters intentionally stay dormant behind `feature_flag_kyc_provider` and `feature_flag_saqa_worker` until partnerships confirm — per user standing instruction.
+> Shipped 2026-05-23. Companion doc: `docs/completed/PHASE_8_COMPLETE.md`. KYC + SAQA adapters intentionally stay dormant behind `feature_flag_kyc_provider` and `feature_flag_saqa_worker` until partnerships confirm  per user standing instruction.
 
-**Goal:** Turn the deferred Phase-7 hooks into real work — flip on transactional email, run the cron jobs that close every "Phase 8 follow-up" comment we left in the code, and stand up the KYC / SAQA adapters so an admin's "Verified" decision can be machine-confirmed first.
+**Goal:** Turn the deferred Phase-7 hooks into real work  flip on transactional email, run the cron jobs that close every "Phase 8 follow-up" comment we left in the code, and stand up the KYC / SAQA adapters so an admin's "Verified" decision can be machine-confirmed first.
 
 After Phase 8 ships:
 - Notifications also reach inboxes.
@@ -14,27 +14,27 @@ After Phase 8 ships:
 
 ## Re-checks (decide before kickoff)
 
-### Re-check #1 — Resend SDK over `nodemailer` in production
-We already env-switch between Mailtrap (`nodemailer` SMTP for dev) and Resend (HTTP API for prod). The transport boundary lives at `lib/email/send.ts`. Phase 8 doesn't move that boundary — it just adds new templates that flow through it. Verify Resend domain auth (SPF + DKIM + DMARC) lives in `.env.example` as a runbook, not as live creds.
+### Re-check #1  Resend SDK over `nodemailer` in production
+We already env-switch between Mailtrap (`nodemailer` SMTP for dev) and Resend (HTTP API for prod). The transport boundary lives at `lib/email/send.ts`. Phase 8 doesn't move that boundary  it just adds new templates that flow through it. Verify Resend domain auth (SPF + DKIM + DMARC) lives in `.env.example` as a runbook, not as live creds.
 
-### Re-check #2 — Cron host
+### Re-check #2  Cron host
 Three options:
-1. **Vercel Cron** — declarative `vercel.json` blocks, zero infra. Best for the simple nightly tasks.
-2. **A `pg_cron` extension on Neon** — pure SQL, no HTTP. Best for the 30-day hard-delete (single query).
+1. **Vercel Cron**  declarative `vercel.json` blocks, zero infra. Best for the simple nightly tasks.
+2. **A `pg_cron` extension on Neon**  pure SQL, no HTTP. Best for the 30-day hard-delete (single query).
 3. **A small Node cron worker** in the AWS Cape Town move (Phase 9).
 
-For Phase 8 we pick (1) — Vercel Cron — for portability, and migrate to (3) in Phase 9 when we leave Neon. Every cron task ends up as a `/api/cron/<task>` route guarded by `CRON_SECRET` header.
+For Phase 8 we pick (1)  Vercel Cron  for portability, and migrate to (3) in Phase 9 when we leave Neon. Every cron task ends up as a `/api/cron/<task>` route guarded by `CRON_SECRET` header.
 
-### Re-check #3 — KYC adapter shape
-We do NOT call Home Affairs directly. We design an `IdentityVerifier` interface with one method (`verify({ idNumber, fullName, dob }): VerificationResult`) and ship two implementations: `MockIdentityVerifier` (current behaviour, returns pending) and `ThirdPartyKycVerifier` (a paid KYC SaaS that already has the Home Affairs eHANIS integration — most SA fintechs go this route).
+### Re-check #3  KYC adapter shape
+We do NOT call Home Affairs directly. We design an `IdentityVerifier` interface with one method (`verify({ idNumber, fullName, dob }): VerificationResult`) and ship two implementations: `MockIdentityVerifier` (current behaviour, returns pending) and `ThirdPartyKycVerifier` (a paid KYC SaaS that already has the Home Affairs eHANIS integration  most SA fintechs go this route).
 
 The point: the adapter contract is what we build. Swapping to a direct Home Affairs API later is a one-file change.
 
-### Re-check #4 — SAQA adapter has stricter latency
-SAQA's National Learners' Records Database (NLRD) is slow and rate-limited. We don't call it on demand from `/admin/verifications` — we call it asynchronously via a cron + a `qualification_kyc_jobs` queue table. Admin sees a "Submitted to SAQA — checking…" state; result comes back minutes later.
+### Re-check #4  SAQA adapter has stricter latency
+SAQA's National Learners' Records Database (NLRD) is slow and rate-limited. We don't call it on demand from `/admin/verifications`  we call it asynchronously via a cron + a `qualification_kyc_jobs` queue table. Admin sees a "Submitted to SAQA  checking…" state; result comes back minutes later.
 
-### Re-check #5 — Email-channel default state stays "off" for now
-The notification prefs panel ships the email toggle disabled with a Phase-8 pill. When Phase 8 ships, we flip the toggle to enabled — but the **default** for each kind stays `false` so existing users opt-in rather than getting blasted. Admins can opt themselves in immediately via /admin/account.
+### Re-check #5  Email-channel default state stays "off" for now
+The notification prefs panel ships the email toggle disabled with a Phase-8 pill. When Phase 8 ships, we flip the toggle to enabled  but the **default** for each kind stays `false` so existing users opt-in rather than getting blasted. Admins can opt themselves in immediately via /admin/account.
 
 ---
 
@@ -45,7 +45,7 @@ The notification prefs panel ships the email toggle disabled with a Phase-8 pill
 #### A.1 Resend templates
 - Reuse the existing `shell()` HTML helper in `lib/auth/server.ts` (factor it into `lib/email/templates/shell.ts` first).
 - One template per notification kind that has `defaultEmail: true (Phase 8)` in the catalog: `contact.revealed`, `document.downloaded`, `placement.confirmed`, `qualification.verified`, `qualification.rejected`, `account.suspended`, `org.verified`, `status.stale.warning`, `saved_search.new_matches`.
-- Templates take the same `meta` JSONB the in-app notification gets — single source of truth for copy.
+- Templates take the same `meta` JSONB the in-app notification gets  single source of truth for copy.
 
 #### A.2 Email dispatch in `createNotification`
 - After the in-app insert, check `effectivePref(kind).email`. If `true` AND we have a working transport, call `sendNotificationEmail({ userId, kind, meta })`.
@@ -61,7 +61,7 @@ The notification prefs panel ships the email toggle disabled with a Phase-8 pill
 #### B.1 Nightly hard-delete (`/api/cron/hard-delete-erased`)
 - Selects `app_user` rows with `deleted_at < now() - interval '30 days'`.
 - For each: DELETE cascade through `profiles`, `experiences`, `qualifications`, `placements`, `consents`, `notifications`, `audit_log` rows where `subject = user.id`. Better Auth's `session`, `account`, `verification`, `twoFactor` cascade automatically via FK.
-- Writes a single `account.hard_delete` audit row per user (the only audit record that survives, by design — we keep the tombstone for legal proof of erasure).
+- Writes a single `account.hard_delete` audit row per user (the only audit record that survives, by design  we keep the tombstone for legal proof of erasure).
 
 #### B.2 Status-stale nudges (`/api/cron/status-stale-warning`)
 - Daily. For every seeker whose `status_confirmed_at` crossed `freshness_band_days_ageing` since the last cron run (idempotent via a `status_stale_last_sent_at` column on `profiles`), fire `status.stale.warning` notification.
@@ -75,7 +75,7 @@ The notification prefs panel ships the email toggle disabled with a Phase-8 pill
 - Calls `captureSkillGapSnapshot()` (already shipped Phase 6.5, currently triggered manually). Daily.
 
 #### B.5 Reveal-gate cleanup (optional)
-- Phase 5 reveal-gate is computed live from `audit_log`. No cleanup needed — keeps the system stateless. Skip.
+- Phase 5 reveal-gate is computed live from `audit_log`. No cleanup needed  keeps the system stateless. Skip.
 
 ### C. KYC adapter (Task 8.1)
 
@@ -85,13 +85,13 @@ The notification prefs panel ships the email toggle disabled with a Phase-8 pill
 - `lib/kyc/provider.ts` env-switches between mock and the real provider based on `KYC_PROVIDER=mock|truid|smileid|…`.
 
 #### C.2 Real provider (one of)
-- **truID, Smile ID, or iiDENTIFii** — all have SA Home Affairs eHANIS as their backend. Pick one based on price + DPA terms. Whichever we pick, the wrapper module is < 100 lines.
+- **truID, Smile ID, or iiDENTIFii**  all have SA Home Affairs eHANIS as their backend. Pick one based on price + DPA terms. Whichever we pick, the wrapper module is < 100 lines.
 - Encrypt + store the provider's transaction ID in `app_user.kyc_transaction_id` for audit trail.
 
 #### C.3 Wire into sign-up + `/dashboard/account → ID verification`
-- Optional during sign-up (not blocking — seekers can complete sign-up without verifying ID).
-- Surfaced as a banner on the dashboard: "Verify your ID — 2 minutes, increases your profile completeness by 15%."
-- Admin can no longer manually flip ID to verified — the only `verified` state has to carry a provider transaction ID.
+- Optional during sign-up (not blocking  seekers can complete sign-up without verifying ID).
+- Surfaced as a banner on the dashboard: "Verify your ID  2 minutes, increases your profile completeness by 15%."
+- Admin can no longer manually flip ID to verified  the only `verified` state has to carry a provider transaction ID.
 
 ### D. SAQA / qualifications adapter (Task 8.2)
 
@@ -106,8 +106,8 @@ The notification prefs panel ships the email toggle disabled with a Phase-8 pill
 - On `mismatch` → flips to `rejected` + the admin sees the SAQA `result_json` reason in `/admin/verifications`.
 
 #### D.3 Admin UI change
-- `/admin/verifications` qualification row now shows the SAQA job status ("Submitted to SAQA — 4 min ago") instead of immediately reflecting the admin's click.
-- Admin can override with "Force approve" (skips SAQA — audit-logged as `verification.approve.manual_override`).
+- `/admin/verifications` qualification row now shows the SAQA job status ("Submitted to SAQA  4 min ago") instead of immediately reflecting the admin's click.
+- Admin can override with "Force approve" (skips SAQA  audit-logged as `verification.approve.manual_override`).
 
 ### E. Misc polish & follow-ups
 
@@ -151,8 +151,8 @@ The notification prefs panel ships the email toggle disabled with a Phase-8 pill
 
 ## Out of scope for Phase 8
 
-- **Real-time delivery (WebSocket / SSE)** — Phase 9 if traffic justifies
-- **Push notifications (web push / native)** — out of scope entirely until product validates demand
+- **Real-time delivery (WebSocket / SSE)**  Phase 9 if traffic justifies
+- **Push notifications (web push / native)**  out of scope entirely until product validates demand
 - **Rate limiting via Upstash** → Phase 9 (Better Auth's in-memory limit + 2FA brute-force protection holds for Phase 8)
 - **Postgres → AWS Cape Town migration** → Phase 9
 - **CSP / Sentry / loading.tsx / robots / sitemap** → Phase 9
@@ -165,9 +165,9 @@ The notification prefs panel ships the email toggle disabled with a Phase-8 pill
 - **`pg_cron` vs Vercel Cron drift.** If we end up using both (Vercel for HTTP-triggered tasks, `pg_cron` for the hard-delete SQL), make sure exactly one schedules each task. Document in `lib/cron/README.md`.
 - **KYC provider DPA.** Whichever provider we pick, their data-processing agreement must explicitly support POPIA. Add as a contract checkbox in the launch checklist.
 - **SAQA rate limiting.** The NLRD endpoint is not well-documented; we may need to throttle harder than 10/run. Make the per-run cap a `platform_settings` key so ops can tune without a deploy.
-- **Email-template translation.** Templates need the same Tier-1 locale coverage (`en` / `zu` / `xh` / `af`) as the UI. POPIA/legal language must be human-translated — don't ship the password-reset template in machine-translated isiZulu.
-- **Hard-delete is permanent.** Triple-check the cron's `WHERE deleted_at < now() - interval '30 days'` filter — accidentally dropping the interval comparator deletes every active user. Add an `INSERT INTO audit_log` BEFORE the DELETE so we always have proof of what we removed.
+- **Email-template translation.** Templates need the same Tier-1 locale coverage (`en` / `zu` / `xh` / `af`) as the UI. POPIA/legal language must be human-translated  don't ship the password-reset template in machine-translated isiZulu.
+- **Hard-delete is permanent.** Triple-check the cron's `WHERE deleted_at < now() - interval '30 days'` filter  accidentally dropping the interval comparator deletes every active user. Add an `INSERT INTO audit_log` BEFORE the DELETE so we always have proof of what we removed.
 
 ---
 
-*When this ships: write `docs/completed/PHASE_8_COMPLETE.md` and open `docs/PHASE_9_PLAN.md` (already partially written — the Tier 3 strategic adds from Phase 6.5 audit are queued there).*
+*When this ships: write `docs/completed/PHASE_8_COMPLETE.md` and open `docs/PHASE_9_PLAN.md` (already partially written  the Tier 3 strategic adds from Phase 6.5 audit are queued there).*

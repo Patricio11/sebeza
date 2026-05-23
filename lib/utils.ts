@@ -6,7 +6,7 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 // Relative-time formatter (used by StatusChip + freshness UIs).
-// Locale-aware via Intl.RelativeTimeFormat — no extra runtime cost.
+// Locale-aware via Intl.RelativeTimeFormat  no extra runtime cost.
 const DIVISIONS: { amount: number; unit: Intl.RelativeTimeFormatUnit }[] = [
   { amount: 60, unit: "second" },
   { amount: 60, unit: "minute" },

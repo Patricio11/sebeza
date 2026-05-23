@@ -4,7 +4,7 @@ import type { PublicProfile, SearchFilters } from "./types";
 import { freshnessBand, freshnessConfidence } from "@/lib/status";
 export { freshnessBand, freshnessConfidence };
 
-/** Deterministic completeness score — shared between client + server. */
+/** Deterministic completeness score  shared between client + server. */
 export function computeCompleteness(p: Pick<
   PublicProfile,
   "bio" | "topSkills" | "experience" | "qualifications" | "city"

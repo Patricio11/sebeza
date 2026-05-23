@@ -14,7 +14,7 @@ interface Props {
 
 /**
  * Thumb-reachable bottom tab bar for seeker contexts on mobile (UX_UI_SPEC §2.4).
- * Desktop ignores this entirely — use the sidebar.
+ * Desktop ignores this entirely  use the sidebar.
  */
 export function MobileTabBar({ active = "home" }: Props) {
   const items: (TabItem & { key: Props["active"] })[] = [

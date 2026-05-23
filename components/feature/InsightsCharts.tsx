@@ -26,7 +26,7 @@ interface Props {
  * accent for placements, ink for registrations. No glow effects, no 3D.
  */
 export function InsightsCharts({ trend, demand }: Props) {
-  // Recharts' ResponsiveContainer can't measure during SSR — gate to client mount.
+  // Recharts' ResponsiveContainer can't measure during SSR  gate to client mount.
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 

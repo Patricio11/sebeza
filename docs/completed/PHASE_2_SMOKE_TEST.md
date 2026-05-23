@@ -1,4 +1,4 @@
-# Phase 2 — Live Sign-In Smoke Test
+# Phase 2  Live Sign-In Smoke Test
 
 > Run this after `npm run db:migrate && npm run db:seed` have completed against your real Neon database. Every box ticked = Phase 2 is verifiably done end-to-end and we can commit.
 
@@ -16,7 +16,7 @@ Then open `http://localhost:3000` in a browser.
 
 ## 1 · Sign-in routes by role (the headline check)
 
-The seed password is `sebenza-dev-2026` for **every** seeded account. The `/sign-in` page has **no role chip** — credentials identify the user; the server routes by `app_user.role`.
+The seed password is `sebenza-dev-2026` for **every** seeded account. The `/sign-in` page has **no role chip**  credentials identify the user; the server routes by `app_user.role`.
 
 Visit `http://localhost:3000/sign-in` and try each account in turn:
 
@@ -34,7 +34,7 @@ Between accounts, sign out via the account-page button (top-right user menu → 
 
 ## 2 · Proxy guards (unauthenticated bounce)
 
-While signed out, open each URL — every one should redirect to `/sign-in?next=<original-path>` (URL-encoded):
+While signed out, open each URL  every one should redirect to `/sign-in?next=<original-path>` (URL-encoded):
 
 | URL | Expected redirect | ✅ |
 |---|---|---|
@@ -67,13 +67,13 @@ The proxy strips the locale prefix when deciding whether to guard, so locale-pre
 
 ---
 
-## 4 · Email transport — verification email lands in Mailtrap
+## 4 · Email transport  verification email lands in Mailtrap
 
 1. Sign out
 2. Visit `http://localhost:3000/sign-up` → choose **Job seeker**
 3. Fill the 3-step form with a throwaway email (e.g. `smoketest@example.co.za`) + password `smoketest-9999`
-4. Submit step 3 — should redirect to `/verify-email?email=smoketest@example.co.za`
-5. Open Mailtrap → your sandbox inbox should have a branded **"Verify your email — Sebenza"** email (SA flag stripe header, Fraunces "One tap to confirm…")
+4. Submit step 3  should redirect to `/verify-email?email=smoketest@example.co.za`
+5. Open Mailtrap → your sandbox inbox should have a branded **"Verify your email  Sebenza"** email (SA flag stripe header, Fraunces "One tap to confirm…")
 6. Click the verify link in the email → should land on `/dashboard` (auto-sign-in after verification)
 
 ✅ Boxes:
@@ -84,7 +84,7 @@ The proxy strips the locale prefix when deciding whether to guard, so locale-pre
 
 ---
 
-## 5 · Forgot password — anti-enumeration + branded email
+## 5 · Forgot password  anti-enumeration + branded email
 
 1. Sign out
 2. Visit `http://localhost:3000/forgot-password`
@@ -111,7 +111,7 @@ Anti-enumeration check:
 
 1. Sign in as **Naledi** (`naledi.khumalo@discovery.co.za`)
 2. Land on `/employer`
-3. Check the orange unverified banner appears at the top *(Discovery Bank seed status is `verified` — if the banner shows, the seed needs updating; if not, the gate is correctly off)*
+3. Check the orange unverified banner appears at the top *(Discovery Bank seed status is `verified`  if the banner shows, the seed needs updating; if not, the gate is correctly off)*
 4. Visit `/employer/team` → should render the team page with Naledi as Owner
 5. Sign out
 
@@ -126,7 +126,7 @@ Anti-enumeration check:
 
 1. Sign in as **Admin**
 2. Land on `/admin`
-3. Visit each tab — every page should render with no DB errors:
+3. Visit each tab  every page should render with no DB errors:
    - `/admin/verifications`
    - `/admin/moderation`
    - `/admin/taxonomy`
@@ -145,7 +145,7 @@ Anti-enumeration check:
 
 - ☐ `npm run typecheck` clean (`npx tsc --noEmit`)
 - ☐ `npm run build` clean
-- ☐ `next start` (after build) — every smoke-test path above still works on the production build
+- ☐ `next start` (after build)  every smoke-test path above still works on the production build
 - ☐ Open the page on a mobile-sized window (360 px); confirm no horizontal scroll on `/dashboard/privacy` or `/admin/audit-log`
 
 ---
@@ -164,9 +164,9 @@ Tell Claude: **"All smoke tests pass."** I will then:
 
 Common gotchas:
 
-- **`DATABASE_URL not loaded` from `db:seed` or `db:migrate`** — both scripts load `.env.local` explicitly now (see `drizzle.config.ts` + `db/seed.ts`). If you still hit this, check the file is at the project root and the `DATABASE_URL` line is uncommented.
-- **Sign-in returns "Email or password is incorrect" for a seeded account** — Better Auth requires `email_verified = true` to sign in. The seed sets every seeded account verified, but if you re-ran migrate without re-running seed (or vice versa) you may be out of sync. Re-run `npm run db:seed` to start clean.
-- **Verification email doesn't arrive in Mailtrap** — confirm `EMAIL_TRANSPORT=mailtrap` in `.env.local` and that `MAILTRAP_USER` + `MAILTRAP_PASS` are set. The fallback when those are blank is the `console` transport — emails would log to your terminal instead.
-- **`/dashboard` doesn't redirect when signed out** — confirm `proxy.ts` is at the project root (Next.js Edge middleware location); restart `npm run dev` if you just edited it.
-- **Locale URL (`/en/dashboard`) skips the guard** — the proxy's regex `/^\/(?:en|zu|xh|af)(?=\/|$)/` strips the locale before matching. If a locale you've added isn't in that list, add it.
-- **Consent toggle errors in the browser console** — check the browser network tab for the Server Action call; the action returns `{ ok: false, message }` on failure (e.g. "Not signed in" if the session cookie expired).
+- **`DATABASE_URL not loaded` from `db:seed` or `db:migrate`**  both scripts load `.env.local` explicitly now (see `drizzle.config.ts` + `db/seed.ts`). If you still hit this, check the file is at the project root and the `DATABASE_URL` line is uncommented.
+- **Sign-in returns "Email or password is incorrect" for a seeded account**  Better Auth requires `email_verified = true` to sign in. The seed sets every seeded account verified, but if you re-ran migrate without re-running seed (or vice versa) you may be out of sync. Re-run `npm run db:seed` to start clean.
+- **Verification email doesn't arrive in Mailtrap**  confirm `EMAIL_TRANSPORT=mailtrap` in `.env.local` and that `MAILTRAP_USER` + `MAILTRAP_PASS` are set. The fallback when those are blank is the `console` transport  emails would log to your terminal instead.
+- **`/dashboard` doesn't redirect when signed out**  confirm `proxy.ts` is at the project root (Next.js Edge middleware location); restart `npm run dev` if you just edited it.
+- **Locale URL (`/en/dashboard`) skips the guard**  the proxy's regex `/^\/(?:en|zu|xh|af)(?=\/|$)/` strips the locale before matching. If a locale you've added isn't in that list, add it.
+- **Consent toggle errors in the browser console**  check the browser network tab for the Server Action call; the action returns `{ ok: false, message }` on failure (e.g. "Not signed in" if the session cookie expired).

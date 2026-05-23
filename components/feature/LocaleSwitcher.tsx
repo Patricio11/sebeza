@@ -9,7 +9,7 @@ import { CustomSelect } from "@/components/ui/CustomSelect";
 import type { AppLocale } from "@/i18n/routing";
 
 /**
- * Persistent language switcher. UX_UI_SPEC §3.1 — every language labelled
+ * Persistent language switcher. UX_UI_SPEC §3.1  every language labelled
  * in its own name (Zulu shows "isiZulu"). Uses CustomSelect so the dropdown
  * looks like Sebenza on every platform, not the OS default.
  */

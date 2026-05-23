@@ -28,7 +28,7 @@ export interface TaxonomyRow {
 interface Props {
   kind: TaxonomyKind;
   rows: TaxonomyRow[];
-  /** For cities only — list of provinces to pick from. */
+  /** For cities only  list of provinces to pick from. */
   provinces?: Array<{ slug: string; label: string }>;
 }
 
@@ -184,7 +184,7 @@ export function TaxonomyManager({ kind, rows, provinces }: Props) {
                 </td>
                 {kind === "cities" && (
                   <td className="px-5 py-2.5 text-[color:var(--color-ink-soft)]">
-                    {row.provinceLabel ?? "—"}
+                    {row.provinceLabel ?? ""}
                   </td>
                 )}
                 <td className="px-5 py-2.5 text-right">

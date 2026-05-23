@@ -1,5 +1,5 @@
 /**
- * Phase 8 — Daily status-stale nudge.
+ * Phase 8  Daily status-stale nudge.
  *
  * For every seeker whose `status_confirmed_at` is older than the current
  * `freshness_band_days_ageing` setting AND who hasn't already received

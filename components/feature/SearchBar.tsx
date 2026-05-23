@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 import { CustomSelect } from "@/components/ui/CustomSelect";
 
 interface Props {
-  /** "hero" sits inside the landing hero — large + editorial. "compact" is for the search header. */
+  /** "hero" sits inside the landing hero  large + editorial. "compact" is for the search header. */
   variant?: "hero" | "compact";
   defaultQuery?: string;
   defaultLocation?: string;
@@ -18,11 +18,11 @@ interface Props {
 
 /**
  * Search-First Rule (TO_START_EVERY_SESSION.md §1). The search bar IS the
- * landing hero. Composed inline with hairline dividers — deliberately not a
+ * landing hero. Composed inline with hairline dividers  deliberately not a
  * pill input. Profession is a datalist (real autocomplete from the taxonomy),
  * location is a province select.
  *
- * Progressive enhancement: it's a plain <form method="GET"> — submits without JS.
+ * Progressive enhancement: it's a plain <form method="GET">  submits without JS.
  */
 export function SearchBar({
   variant = "hero",

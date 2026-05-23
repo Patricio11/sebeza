@@ -1,5 +1,5 @@
 /**
- * Phase 7 (A.4) — Public read-side loaders for the taxonomy.
+ * Phase 7 (A.4)  Public read-side loaders for the taxonomy.
  *
  * Sign-up forms + search filters read from these so adding a row in
  * /admin/taxonomy surfaces immediately, without a deploy or seed.
@@ -20,7 +20,7 @@ export interface TaxonomyOption {
 }
 
 /**
- * Returns every profession in label order. Cached for 5 minutes — the
+ * Returns every profession in label order. Cached for 5 minutes  the
  * admin Server Actions in `lib/admin/taxonomy.ts` revalidate
  * `/admin/taxonomy`; new entries here surface on the next sign-up
  * page render within that window.
@@ -35,7 +35,7 @@ export const getProfessions = unstable_cache(
         .orderBy(asc(schema.professions.label));
       if (rows.length > 0) return rows;
     } catch {
-      // DB unavailable — fall through to the mock list so the form still renders.
+      // DB unavailable  fall through to the mock list so the form still renders.
     }
     return MOCK_PROFESSIONS.map((p) => ({ slug: p.slug, label: p.label }));
   },

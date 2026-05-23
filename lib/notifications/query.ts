@@ -1,5 +1,5 @@
 /**
- * Phase 7 (Task 7.6) — Read-side: list + unread count.
+ * Phase 7 (Task 7.6)  Read-side: list + unread count.
  *
  * Both queries scope to the signed-in user via `verifySession()`.
  * Cross-user reads are impossible from this surface.
@@ -27,7 +27,7 @@ export interface NotificationItem {
 export interface ListOpts {
   /** Default 20, max 100. */
   limit?: number;
-  /** Cursor — ISO string. Returns items strictly older than this. */
+  /** Cursor  ISO string. Returns items strictly older than this. */
   before?: string;
 }
 
@@ -64,7 +64,7 @@ export async function listForUser(opts: ListOpts = {}): Promise<NotificationItem
 }
 
 /**
- * Unread count — drives the bell badge. Memoised per render so a
+ * Unread count  drives the bell badge. Memoised per render so a
  * layout call + a header call only run once.
  */
 export const unreadCount = cache(async (): Promise<number> => {
@@ -84,7 +84,7 @@ export const unreadCount = cache(async (): Promise<number> => {
 
 /**
  * Reads the signed-in user's stored `notification_prefs` JSONB.
- * Returns `null` when no row has been written yet — the catalog
+ * Returns `null` when no row has been written yet  the catalog
  * defaults apply.
  */
 export async function getMyNotificationPrefs(): Promise<NotificationPrefMap | null> {

@@ -1,8 +1,8 @@
-# SEBENZA — UX/UI DESIGN SPECIFICATION (v2.0 — "Mzansi National")
+# SEBENZA  UX/UI DESIGN SPECIFICATION (v2.0  "Mzansi National")
 **Companion to `ROADMAP.md`. Deep dive on Phase 1, plus expanded build detail for Phases 2–6.**
 **Working name: Sebenza. National South African talent-intelligence platform.**
 
-> Read `TO_START_EVERY_SESSION.md` first. Every rule there governs this document — especially the
+> Read `TO_START_EVERY_SESSION.md` first. Every rule there governs this document  especially the
 > **No-Flash Rule** (works on a low-end Android over 3G) and the **POPIA-First / Redaction Rules**.
 >
 > **The set:** `TO_START_EVERY_SESSION.md` (context + rules) · `ROADMAP.md` (phased tasks) ·
@@ -10,21 +10,21 @@
 > **this file** (design system + screen-by-screen + mock data).
 
 > **v2.0 note.** v1 of this spec called the design *"Civic Editorial"* with an institutional teal palette.
-> In May 2026 we evolved to **"Mzansi National"** — bolder national identity, SA-flag-derived palette,
+> In May 2026 we evolved to **"Mzansi National"**  bolder national identity, SA-flag-derived palette,
 > chevron motif, sharper editorial typography. v1 lives in git history; this doc reflects the built state.
 
 ---
 
-## 0. AESTHETIC DIRECTION — "MZANSI NATIONAL"
+## 0. AESTHETIC DIRECTION  "MZANSI NATIONAL"
 
 One sentence: *the quiet authority of a national institution, with the warmth and clarity of a great
 modern editorial product, dressed in the colours of the South African flag.* Proudly South African
-without kitsch. Trustworthy, human, distinctive — and unmistakeably *ours*.
+without kitsch. Trustworthy, human, distinctive  and unmistakeably *ours*.
 
 **The two things people remember:**
-1. The **Talent Pulse** glyph — an honest, living employment-status visual (freshness rings + status
+1. The **Talent Pulse** glyph  an honest, living employment-status visual (freshness rings + status
    chips) that runs through every screen. The product's mark.
-2. The **abstracted Y-chevron** — derived from the SA flag (deep green outer triangle + gold inner
+2. The **abstracted Y-chevron**  derived from the SA flag (deep green outer triangle + gold inner
    triangle apex), used as the platform's signature: anchored in the landing hero, beside the
    wordmark, behind every dashboard masthead, watermarked into every generated initials avatar,
    shaped into section dividers.
@@ -49,9 +49,9 @@ Mobile target enforced in `MOBILE_PLAN.md` (M1–M7, all done).
 ### 1.1 Typography
 Two variable fonts only, subset + preloaded + `font-display: swap`. Distinctive, not Inter/Roboto/system.
 
-- **Display (headings, hero, numbers that matter):** **Fraunces** — a warm, characterful variable serif.
+- **Display (headings, hero, numbers that matter):** **Fraunces**  a warm, characterful variable serif.
   Gives editorial gravitas + humanity. Use optical sizing on large sizes.
-- **Body / UI:** **Hanken Grotesk** — a warm, highly legible variable grotesque. Excellent on small screens.
+- **Body / UI:** **Hanken Grotesk**  a warm, highly legible variable grotesque. Excellent on small screens.
 
 ```css
 --font-display: "Fraunces", Georgia, serif;
@@ -69,28 +69,28 @@ Type scale (fluid, clamp-based):
 | `small` | 0.875rem | Meta, labels |
 | `mono-stat` | tabular-nums | Analytics numbers (Hanken tabular) |
 
-### 1.2 Colour — Mzansi National (SA flag-derived, never literal)
+### 1.2 Colour  Mzansi National (SA flag-derived, never literal)
 Light-default (public trust reads better in light). Optional dark mode (Phase 10). All pairs meet WCAG AA.
 The semantic tokens (`--color-brand`, `--color-paper`, `--color-ink`) resolve to SA-palette values
 across the whole app; the explicit `--color-sa-*` tokens are also available for landing flourishes.
 
 ```css
-/* Surfaces — SA cream, sunnier than warm paper */
+/* Surfaces  SA cream, sunnier than warm paper */
 --color-paper:        #FBF8F0;   /* page background */
 --color-surface:      #FFFFFF;   /* cards */
 --color-surface-sunk: #F3EFE7;   /* wells, inputs */
 
-/* Ink — deep SA charcoal, near-black */
+/* Ink  deep SA charcoal, near-black */
 --color-ink:          #14110D;
 --color-ink-soft:     #5A5249;
 --color-hairline:     #E4DED4;
 
-/* Brand — SA flag-green (slightly desaturated for screens) */
+/* Brand  SA flag-green (slightly desaturated for screens) */
 --color-brand:        #006B3C;
 --color-brand-strong: #003D1F;
 --color-brand-tint:   #E1F0E7;
 
-/* Accent — SA gold (warmer + readable on cream) */
+/* Accent  SA gold (warmer + readable on cream) */
 --color-accent:       #C98214;
 --color-accent-tint:  #FFF3D7;
 
@@ -102,7 +102,7 @@ across the whole app; the explicit `--color-sa-*` tokens are also available for 
 --color-sa-gold:         #F5A623;
 --color-sa-gold-deep:    #C98214;
 --color-sa-gold-tint:    #FFF3D7;
---color-sa-red:          #DE3831;   /* alerts only — never decorative */
+--color-sa-red:          #DE3831;   /* alerts only  never decorative */
 --color-sa-cream:        #FBF8F0;
 --color-sa-charcoal:     #14110D;
 
@@ -113,7 +113,7 @@ across the whole app; the explicit `--color-sa-*` tokens are also available for 
 --color-self-employed: #5E7A31;
 --color-studying:      #2F5E8A;
 --color-stale:         #B45F3C;   /* low-confidence clay */
---color-danger:        #DE3831;   /* SA red — alerts only */
+--color-danger:        #DE3831;   /* SA red  alerts only */
 --color-verified:      #006B3C;
 ```
 
@@ -129,61 +129,61 @@ across the whole app; the explicit `--color-sa-*` tokens are also available for 
 - Talent Pulse: a subtle, slow ring draw on load for fresh statuses; **no loop**.
 - All wrapped in `@media (prefers-reduced-motion: reduce) { animation: none; transition: none; }`.
 
-### 1.5 Signature components (all built — see `components/ui/*`)
-- **`<SAChevron>`** — the abstracted Y-chevron motif derived from the SA flag. Four variants:
+### 1.5 Signature components (all built  see `components/ui/*`)
+- **`<SAChevron>`**  the abstracted Y-chevron motif derived from the SA flag. Four variants:
   `mark` (14 × 14 wordmark accent), `inline` (24 × 24 inline glyph), `signature` (oversized hero
   watermark with a hairline draw-in animation), `divider` (banded green/gold/red strip used as a
   flag stripe at the top of every header, footer, error page).
-- **`<StatusChip>`** — the Talent Pulse. Encodes status + freshness in one honest glyph:
+- **`<StatusChip>`**  the Talent Pulse. Encodes status + freshness in one honest glyph:
   - Fresh (< 30d): solid filled ring, status colour. Ageing (30–90d): half ring.
     Stale (≥ 90d): dashed outline + small dot.
   - Always carries text + ARIA + relative time ("confirmed 12 days ago"). Never colour-only.
-- **`<VerificationBadge>`** — `unverified` (outline, grey) / `pending` (dotted, amber) /
-  `verified` (solid SA-green check) / `rejected` (red x). Never lies — never default-verified.
-- **`<ProfileCompleteness>`** — slim bar or 96 px arc, 0–100 %, nudges toward completion.
-- **`<Avatar>`** — photo-first with a deterministic SA-palette initials fallback. Six palettes
+- **`<VerificationBadge>`**  `unverified` (outline, grey) / `pending` (dotted, amber) /
+  `verified` (solid SA-green check) / `rejected` (red x). Never lies  never default-verified.
+- **`<ProfileCompleteness>`**  slim bar or 96 px arc, 0–100 %, nudges toward completion.
+- **`<Avatar>`**  photo-first with a deterministic SA-palette initials fallback. Six palettes
   hash by name so the same person renders the same avatar across the platform. Optional
   verification ring (green for `verified`, gold for `pending`). Faint chevron watermark in every
-  generated fallback — the Sebenza signature, even on initials.
-- **`<TalentRosterItem>`** — the search-result row (see §2.2). Uses `<Avatar>` + `<StatusChip>` +
+  generated fallback  the Sebenza signature, even on initials.
+- **`<TalentRosterItem>`**  the search-result row (see §2.2). Uses `<Avatar>` + `<StatusChip>` +
   `<VerificationBadge>` + `<ProfileCompleteness>`. The product's signature list element.
-- **`<StatCard>`** — Fraunces tabular numeral + tiny inline-SVG sparkline + optional freshness
+- **`<StatCard>`**  Fraunces tabular numeral + tiny inline-SVG sparkline + optional freshness
   confidence meter. Lives on `/insights` and the landing pulse strip.
-- **`<DataSpine>`** — left-aligned vertical meta rail (`<dl>`), editorial cadence.
+- **`<DataSpine>`**  left-aligned vertical meta rail (`<dl>`), editorial cadence.
 - **`<EmptyState>`**, **`<Skeleton>`** / **`<RosterSkeleton>`**, **`<Button>`** (CVA: primary /
   secondary / ghost / accent × sm / md / lg).
-- **`<FormField>`** family — `TextField`, `SelectField`, `TextareaField`, `FieldShell`,
+- **`<FormField>`** family  `TextField`, `SelectField`, `TextareaField`, `FieldShell`,
   `EncryptedBadge` (the chip rendered next to the ID-number input).
-- **`<CustomSelect>`** — replaces every native `<select>` on the platform. Portaled into
+- **`<CustomSelect>`**  replaces every native `<select>` on the platform. Portaled into
   `document.body` (so no ancestor `transform` / `overflow` ever displaces it). Desktop:
   anchored popover from measured trigger rect. Mobile: full-screen bottom sheet with backdrop
   + thumb-sized Close. Three variants: `default` (h-12, matches `TextField`), `compact` (h-10
-  pill), `bare` (no chrome — used inside the SearchBar's hairline-divided cells).
-- **`<AnimatedCount>`** — single client island for IntersectionObserver-triggered count-up on
+  pill), `bare` (no chrome  used inside the SearchBar's hairline-divided cells).
+- **`<AnimatedCount>`**  single client island for IntersectionObserver-triggered count-up on
   stat numerals. Honours `prefers-reduced-motion`.
 
 ### 1.6 Layout shells (chrome that wraps every page)
-- **`<LandingHeader>`** — absolute over the hero, chevron-marked wordmark, transparent until
+- **`<LandingHeader>`**  absolute over the hero, chevron-marked wordmark, transparent until
   scroll; `MobileNav` trigger below `md`.
-- **`<SiteHeader>`** — sticky internal-pages header with the SA flag stripe across its top edge.
-- **`<SiteFooter>`** — charcoal ink, flag stripe at the top, chevron mark, trust strip
+- **`<SiteHeader>`**  sticky internal-pages header with the SA flag stripe across its top edge.
+- **`<SiteFooter>`**  charcoal ink, flag stripe at the top, chevron mark, trust strip
   (POPIA-first · WCAG 2.2 AA · Works on 3G · 4 launch languages).
-- **`<MobileNav>`** — full-screen drawer used by both headers below `md`. Body-scroll-locked.
+- **`<MobileNav>`**  full-screen drawer used by both headers below `md`. Body-scroll-locked.
   Closes on Esc, scrim, X, or route change.
-- **`<DashboardShell>`** — role-themed accent strip on the sidebar (seeker = green, employer =
+- **`<DashboardShell>`**  role-themed accent strip on the sidebar (seeker = green, employer =
   gold, admin = ink), chevron-marked workspace label, mobile top tab strip with fade-edge cue.
   Used by every seeker / employer / admin route.
-- **`<AuthShell>`** — flag stripe, chevron motif bleed, demo-mode banner, chevron-marked
+- **`<AuthShell>`**  flag stripe, chevron motif bleed, demo-mode banner, chevron-marked
   eyebrow + Fraunces editorial headline. Wraps every `/sign-in`, `/sign-up*`, `/verify-email`,
   `/forgot-password`.
-- **`<OrgVerificationBanner>`** — persistent yellow banner on every employer page when the
+- **`<OrgVerificationBanner>`**  persistent yellow banner on every employer page when the
   organisation is unverified.
-- **`<DataSpine>`** — left-aligned vertical meta rail used on results + profile for an editorial feel.
-- **`<StatCard>`** — analytics number block; Fraunces numeral, tabular, tiny trend sparkline (SVG).
+- **`<DataSpine>`**  left-aligned vertical meta rail used on results + profile for an editorial feel.
+- **`<StatCard>`**  analytics number block; Fraunces numeral, tabular, tiny trend sparkline (SVG).
 
 ---
 
-## 2. PHASE 1 — SCREEN BY SCREEN (production-grade UI, mock data)
+## 2. PHASE 1  SCREEN BY SCREEN (production-grade UI, mock data)
 
 All screens: mobile-first (design at 360px → scale up), AA accessible, redaction-enforced, mock-data-driven
 so the backend slots in behind typed fixtures (see §4).
@@ -197,14 +197,14 @@ Layout (top → bottom):
 2. **Hero (editorial, no media):**
    - `display-xl` headline in Fraunces: *"Find skilled people. Near you. For real."* (staggered reveal)
    - One-line subhead in Hanken (`ink-soft`).
-   - **The search bar IS the hero** — large, central: `[ Profession / skill ]  [ Location ]  [ Search ]`.
+   - **The search bar IS the hero**  large, central: `[ Profession / skill ]  [ Location ]  [ Search ]`.
      Autocomplete from taxonomy; recent/popular searches as chips below ("Chefs · Cape Town", "Developers · Joburg").
 3. **Live national pulse strip** (3 `StatCard`s, mock now): "X profiles · Y confirmed hires this month ·
    Z skills in demand." Tabular numerals, tiny sparkline. This is the credibility hook for government.
-4. **Three honest value cards** (no glassmorphism — flat, warm surfaces, accent hairline):
+4. **Three honest value cards** (no glassmorphism  flat, warm surfaces, accent hairline):
    - "Trusted profiles" (verification), "Live availability" (Talent Pulse), "Real employment data" (analytics).
-5. **For employers / For government** split section — two clear paths.
-6. **Footer:** POPIA/privacy, PAIA manual, persistent language switcher (Tier 1: English · isiZulu · isiXhosa · Afrikaans — see §3.1).
+5. **For employers / For government** split section  two clear paths.
+6. **Footer:** POPIA/privacy, PAIA manual, persistent language switcher (Tier 1: English · isiZulu · isiXhosa · Afrikaans  see §3.1).
 
 States: fonts-not-loaded fallback; JS-off the search still submits (progressive enhancement).
 
@@ -214,7 +214,7 @@ States: fonts-not-loaded fallback; JS-off the search still submits (progressive 
 - **Sticky search header:** the query stays editable; result count in Fraunces ("**142** chefs in Cape Town").
 - **Left filter rail (desktop) / filter sheet (mobile):** skill, location (province→city), employment status,
   seniority, verification level, nationality (optional, never default-on). "Citizens highlighted" toggle (per rules).
-- **The Talent Roster** (NOT a card grid — a refined editorial list). Each `<TalentRosterItem>`:
+- **The Talent Roster** (NOT a card grid  a refined editorial list). Each `<TalentRosterItem>`:
   ```
   ┌───────────────────────────────────────────────────────────┐
   │ [avatar/initials]  Thandeka M.            ● Verified        │
@@ -226,12 +226,12 @@ States: fonts-not-loaded fallback; JS-off the search still submits (progressive 
   ```
   - Ranking: relevance × status freshness × completeness × citizen-highlight.
   - **Redaction enforced:** no surname in full until reveal, no ID, no docs, no contact in payload.
-  - Stale statuses visibly lower + dashed chip — honesty is the differentiator.
-- **States:** loading = skeleton roster rows; empty = helpful "no chefs in Cape Town yet — broaden location?"
+  - Stale statuses visibly lower + dashed chip  honesty is the differentiator.
+- **States:** loading = skeleton roster rows; empty = helpful "no chefs in Cape Town yet  broaden location?"
   with suggestions (this empty state also feeds `searchEvents` = skills-gap signal).
 - Pagination: cursor-based, data-light, "load more."
 
-### 2.3 Public Profile  `/p/[handle]`  — "the civic dossier"
+### 2.3 Public Profile  `/p/[handle]`   "the civic dossier"
 - **Header:** name (redacted by viewer role), profession, location, `VerificationBadge`, `StatusChip`.
 - **DataSpine layout:** left rail = at-a-glance (location, status freshness, completeness, member since);
   right = bio, skills (chips with proficiency), experience timeline, qualifications.
@@ -241,8 +241,8 @@ States: fonts-not-loaded fallback; JS-off the search still submits (progressive 
 - **Report / privacy** affordances visible.
 
 ### 2.4 Seeker Dashboard  `/dashboard` (seeker)
-- **Top:** "Your visibility" — completeness arc + a single clear next action ("Add 2 skills to rank higher").
-- **Talent Pulse card:** big honest status control — "Are you still open to work?" one-tap confirm →
+- **Top:** "Your visibility"  completeness arc + a single clear next action ("Add 2 skills to rank higher").
+- **Talent Pulse card:** big honest status control  "Are you still open to work?" one-tap confirm →
   updates `statusConfirmedAt`. This is the freshness engine's human surface. Nudge banner if stale.
 - **Who's viewed you / contacted you** (transparency).
 - **Profile editor entry, qualifications, privacy/consent center.**
@@ -252,7 +252,7 @@ States: fonts-not-loaded fallback; JS-off the search still submits (progressive 
 - **Org verification banner** if `unverified` (can search, cannot reveal contact/docs until verified).
 - **Search + saved searches + shortlists (talent pools).**
 - **"Mark as hired"** prompt on a shortlisted candidate → writes `placements` (the analytics gold).
-  Make this one tap with a tiny incentive nudge ("Help map SA's job market — confirm this hire").
+  Make this one tap with a tiny incentive nudge ("Help map SA's job market  confirm this hire").
 - Contact reveal flow → consent + audit log, with clear "this access is recorded" notice.
 
 ### 2.6 Analytics / Policy Dashboard  `/insights` (gov/admin; public aggregate view later)
@@ -260,7 +260,7 @@ States: fonts-not-loaded fallback; JS-off the search still submits (progressive 
 - `StatCard` row: total active talent, confirmed hires (period), unemployment-by-status (freshness-weighted).
 - **Charts (Recharts, lightweight):** registrations & placements over time; demand by skill/location
   (from `searchEvents`); skills-gap leaderboard ("most-searched, least-filled").
-- **Freshness disclosure:** every figure shows a confidence indicator — we never present stale data as fact.
+- **Freshness disclosure:** every figure shows a confidence indicator  we never present stale data as fact.
   This single honesty feature is the platform's wedge.
 - Exports: aggregate-only CSV/PDF, audit-logged, zero PII.
 
@@ -282,15 +282,15 @@ never a broken layout). A national system is judged on its edge cases.
   labelled form fields; `StatusChip` and `VerificationBadge` carry text + ARIA, never colour-only.
 - `prefers-reduced-motion` honoured everywhere. Tap targets ≥ 44px.
 
-### 3.1 Localization (next-intl) — a national platform speaks the nation's languages
+### 3.1 Localization (next-intl)  a national platform speaks the nation's languages
 - **Routing:** `app/[locale]/…`; locale detected from `Accept-Language`, overridable; choice persisted per user.
 - **Switcher:** persistent, in header and footer, each language labelled in its own name (Zulu shows "isiZulu").
 - **Launch (Tier 1):** English (base) · isiZulu · isiXhosa · Afrikaans. Fast-follow + full official set per `ROADMAP.md` Phase 10.
-- **All UI text in catalogs** (`messages/en.json`, `zu.json`, …) — zero hardcoded strings. **ICU message format**
-  for plurals and noun-class agreement (Bantu languages decline by noun class — naive interpolation reads wrong).
+- **All UI text in catalogs** (`messages/en.json`, `zu.json`, …)  zero hardcoded strings. **ICU message format**
+  for plurals and noun-class agreement (Bantu languages decline by noun class  naive interpolation reads wrong).
 - **Legal/consent copy = human translation only.** A mistranslated POPIA/consent screen is a legal liability, not a polish bug.
 - **Fonts:** confirm Fraunces + Hanken Grotesk cover required diacritics (esp. Tshivenda ṅ ḓ ṱ ḽ ṋ in Tier 3); subset per locale.
-- **Layout:** all SA languages are LTR (no RTL work). Budget ~30% text expansion (isiXhosa/Afrikaans run longer) — flexible labels, never fixed-width.
+- **Layout:** all SA languages are LTR (no RTL work). Budget ~30% text expansion (isiXhosa/Afrikaans run longer)  flexible labels, never fixed-width.
 
 ---
 
@@ -299,13 +299,13 @@ Typed fixtures in `lib/mock/`, shaped to the Drizzle schema so Phase 4 swaps moc
 Components read from a `dataProvider` interface; flip an env flag from `mock` to `db`.
 
 ```ts
-// lib/mock/types.ts  — mirrors the schema, redaction-aware
+// lib/mock/types.ts   mirrors the schema, redaction-aware
 export type EmploymentStatus = "employed" | "unemployed" | "self_employed" | "studying" | "open_to_work";
 export type VerificationStatus = "unverified" | "pending" | "verified" | "rejected";
 
 export interface PublicProfile {            // what search/public CAN expose (redacted)
   handle: string;
-  displayName: string;                       // "Thandeka M." — redacted surname
+  displayName: string;                       // "Thandeka M."  redacted surname
   profession: string;
   seniority: "junior" | "intermediate" | "senior" | null;
   city: string; province: string;
@@ -316,7 +316,7 @@ export interface PublicProfile {            // what search/public CAN expose (re
   statusConfirmedAt: string;                  // ISO → freshness band derived in UI
   verification: VerificationStatus;
   completeness: number;                       // 0..100
-  // NO id number, NO documents, NO contact here — ever.
+  // NO id number, NO documents, NO contact here  ever.
 }
 
 export interface AnalyticsSnapshot {
@@ -329,7 +329,7 @@ export interface AnalyticsSnapshot {
 ```
 
 ```ts
-// lib/mock/profiles.ts  — representative, realistic SA data
+// lib/mock/profiles.ts   representative, realistic SA data
 export const mockProfiles: PublicProfile[] = [
   { handle: "thandeka-m", displayName: "Thandeka M.", profession: "Chef", seniority: "senior",
     city: "Cape Town", province: "Western Cape", nationality: "South African", isCitizen: true,
@@ -379,23 +379,23 @@ Phase 4 is a swap, not a rewrite.
 
 ---
 
-## 5. EXPANDED BUILD DETAIL — PHASES 2–6
+## 5. EXPANDED BUILD DETAIL  PHASES 2–6
 *(More granular than `ROADMAP.md`, now that the UI contracts above define the data each phase must serve.)*
 
-### PHASE 2 — IDENTITY, AUTH & CONSENT (expanded)
+### PHASE 2  IDENTITY, AUTH & CONSENT (expanded)
 - **2.1 Better Auth config:** email+password + email OTP; sessions in Postgres via Drizzle adapter;
   `appRole` plugin/field; 2FA (TOTP) required for `employer`/`admin`. Pin ≥1.6.5.
 - **2.2 Route protection:** middleware maps route groups → roles; `requireRole()` + `requireOrgVerified()`
   server guards; every PII-touching loader calls `logAccess()`.
 - **2.3 Consent state machine:** states `none → granted(version) → revoked`. Profile is **not searchable**
   until `searchability` consent granted. Store purpose + version + timestamp in `consents`.
-- **2.4 Seeker onboarding:** 3 steps — identity basics → consent → first profile fields. Each step writes
+- **2.4 Seeker onboarding:** 3 steps  identity basics → consent → first profile fields. Each step writes
   partial state (resumable). ID number captured → encrypted immediately, never echoed back.
 - **2.5 Employer onboarding:** creates `organization (unverified)`; explains the verification gate up front.
 - **2.6 Privacy center:** view/revoke each consent, export my data (JSON), request erasure (soft-delete → job).
 - **UI contract met:** §2.4/§2.5 dashboards depend on role + consent + org-verification flags from here.
 
-### PHASE 3 — THE TALENT PROFILE (expanded)
+### PHASE 3  THE TALENT PROFILE (expanded)
 - **3.1 Profile editor:** autosave (debounced Server Actions), Zod-validated, optimistic UI with rollback.
 - **3.2 Skills:** typeahead bound to controlled `skills` taxonomy; reject free-text (keeps search/analytics clean);
   proficiency 1–5; drives `topSkills` in the redacted payload.
@@ -407,7 +407,7 @@ Phase 4 is a swap, not a rewrite.
   - Search ranking + analytics both consume the freshness confidence.
 - **3.5 Completeness:** deterministic scoring fn (shared client/server) powering `<ProfileCompleteness>` and nudges.
 
-### PHASE 4 — DATA ENGINE (expanded — the swap behind the mock seam)
+### PHASE 4  DATA ENGINE (expanded  the swap behind the mock seam)
 - **4.1 Schema** per `ROADMAP.md` §4.1; add generated `searchVector` + GIN, trigram indices, FK btrees.
 - **4.2 `dataProvider` real impl** matching the mock interface from §4 exactly → UI unchanged.
 - **4.3 Search query:** `websearch_to_tsquery` + `pg_trgm` similarity; ranking SQL mirrors `rankProfiles()`;
@@ -415,14 +415,14 @@ Phase 4 is a swap, not a rewrite.
 - **4.4 `searchEvents` capture** on every query (terms, filters, resultCount, employerId?) → powers §2.6 gap analysis.
 - **4.5 Integrity:** all mutations via Server Actions + Zod; typed query fns in `db/`; `logAccess()` enforced; tests assert no PII leaks (Phase 11 §11.4).
 
-### PHASE 5 — EMPLOYER PORTAL (expanded)
+### PHASE 5  EMPLOYER PORTAL (expanded)
 - **5.1 Org KYC slot:** pluggable provider behind `organizations.verification`; manual admin fallback for MVP.
 - **5.2 Reveal flow:** request contact/docs → consent check → audit-logged reveal → seeker notified (transparency).
 - **5.3 Placement logging:** "Mark as hired" → `placements` row; prompts seeker status update (closes the freshness loop);
-  **incentive design is the open product question** — solve before build (e.g., free analytics credits, recognition).
+  **incentive design is the open product question**  solve before build (e.g., free analytics credits, recognition).
 - **5.4 Shortlists / saved searches:** talent pools, reusable filters.
 
-### PHASE 6 — ANALYTICS & POLICY (expanded)
+### PHASE 6  ANALYTICS & POLICY (expanded)
 - **6.1 Aggregation layer:** materialized views / scheduled rollups for §2.6 `StatCard`s and charts (fast, PII-free).
 - **6.2 Freshness-weighted metrics:** every count carries a confidence; UI must surface it (honesty = the wedge).
 - **6.3 Skills-gap engine:** `demandBySkill` from `searchEvents` (searches ≫ matches = gap) → training-partnership product + the killer government-pitch slide.
@@ -435,14 +435,14 @@ Phase 4 is a swap, not a rewrite.
 2. `dataProvider` seam + mock fixtures (§4).
 3. Signature components: `StatusChip`, `VerificationBadge`, `ProfileCompleteness`, `TalentRosterItem`, `StatCard`.
 4. Landing (`/`) with live search bar + pulse strip.
-5. Search results (`/search`) — the roster, filters, all states.
-6. Public profile (`/p/[handle]`) — civic dossier, redaction + locked panels.
+5. Search results (`/search`)  the roster, filters, all states.
+6. Public profile (`/p/[handle]`)  civic dossier, redaction + locked panels.
 7. Seeker dashboard + Employer dashboard shells (mock).
 8. Insights (`/insights`) with mock analytics + charts.
 9. Accessibility + 3G performance pass before calling Phase 1 done.
 
 Ship Phase 1 as a clickable, mock-driven product you could demo to the Department tomorrow. Then Phase 2
-makes it real — and because of the `dataProvider` seam, the UI doesn't change.
+makes it real  and because of the `dataProvider` seam, the UI doesn't change.
 
 ---
 

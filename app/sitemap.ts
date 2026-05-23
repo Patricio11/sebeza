@@ -1,5 +1,5 @@
 /**
- * Phase 9 — Generated sitemap.
+ * Phase 9  Generated sitemap.
  *
  * Public surfaces only: landing, /search, /insights, /privacy, /paia,
  * and every consented profile at /p/<handle>. We do NOT list dashboard
@@ -57,7 +57,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: s.priority,
   }));
 
-  // Per-profile entries — only consented, non-deleted profiles. We
+  // Per-profile entries  only consented, non-deleted profiles. We
   // join consents to confirm `searchability = granted` before
   // surfacing the handle in the sitemap.
   let profileEntries: MetadataRoute.Sitemap = [];
@@ -86,7 +86,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.6,
     }));
   } catch {
-    // Build-time DB unreachable — fall back to static surfaces only.
+    // Build-time DB unreachable  fall back to static surfaces only.
   }
 
   return [...staticEntries, ...profileEntries];

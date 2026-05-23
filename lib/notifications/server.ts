@@ -1,19 +1,19 @@
 /**
- * Phase 7 (Task 7.6) — In-app notifications: write-side core.
+ * Phase 7 (Task 7.6)  In-app notifications: write-side core.
  *
  * `createNotification` is the canonical entry point for every action
  * that needs to surface a bell-icon notification. It:
  *   1. Looks up the recipient's `notification_prefs` JSONB.
  *   2. Resolves the effective preference (catalog default ⊕ user override).
  *   3. Silently skips if `inApp: false` (the underlying audit-log row
- *      is still written by the calling action — audits are separate
+ *      is still written by the calling action  audits are separate
  *      by design).
  *   4. Idempotency dedupes by `(userId, kind, dedupeKey)` inside the
  *      kind's catalog `dedupeWindowSeconds`.
  *   5. Inserts.
  *
  * The fan-out helpers (`notifyOrgMembers`, `notifyAllAdmins`) live here
- * for the multi-recipient cases. Each writes one row per recipient —
+ * for the multi-recipient cases. Each writes one row per recipient 
  * cheap at our scale and keeps the read query trivially fast.
  *
  * This file is `"server-only"` (helpers, not Server Actions). The
@@ -45,7 +45,7 @@ export interface CreateNotificationInput {
   title: string;
   body?: string;
   link?: string;
-  /** Display-only context — never raw PII. */
+  /** Display-only context  never raw PII. */
   meta?: Record<string, unknown>;
   /**
    * Optional dedupe discriminator (e.g. `orgId` so two different orgs
@@ -57,7 +57,7 @@ export interface CreateNotificationInput {
 
 /**
  * Insert one notification. Honours user preferences + dedupe window.
- * Never throws — a notification-write failure must not break the
+ * Never throws  a notification-write failure must not break the
  * calling Server Action's main mutation.
  */
 export async function createNotification(
@@ -69,7 +69,7 @@ export async function createNotification(
 
     // Honour user preferences (catalog default ⊕ user override).
     // Suspended/deleted users still get rows queued so they see them
-    // on restore — only `inApp: false` skips.
+    // on restore  only `inApp: false` skips.
     const userRows = await db
       .select({
         notificationPrefs: schema.appUser.notificationPrefs,
@@ -82,8 +82,8 @@ export async function createNotification(
       .where(eq(schema.appUser.id, input.userId))
       .limit(1);
     const user = userRows[0];
-    if (!user) return; // recipient gone — nothing to do
-    if (user.deletedAt) return; // erased — never write to a tombstone
+    if (!user) return; // recipient gone  nothing to do
+    if (user.deletedAt) return; // erased  never write to a tombstone
 
     const pref = effectivePref(
       user.notificationPrefs as NotificationPrefMap | null,
@@ -111,7 +111,7 @@ export async function createNotification(
         .limit(20);
 
       if (input.dedupeKey) {
-        // Per-(kind,dedupeKey) dedupe — e.g. one `profile.viewed` per org per day.
+        // Per-(kind,dedupeKey) dedupe  e.g. one `profile.viewed` per org per day.
         const hit = existing.find(
           (e) =>
             (e.meta as Record<string, unknown> | null)?.dedupeKey ===
@@ -136,7 +136,7 @@ export async function createNotification(
       },
     });
 
-    // ── Phase 8 — email channel ────────────────────────────────────────
+    // ── Phase 8  email channel ────────────────────────────────────────
     // Gated on:
     //   1. The master `feature_flag_email_notifications` platform flag
     //      (off until Resend is configured + DPA in place).

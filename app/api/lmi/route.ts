@@ -1,9 +1,9 @@
 /**
- * Phase 9 — Sebenza Labour Market Index public endpoint.
+ * Phase 9  Sebenza Labour Market Index public endpoint.
  *
  *   GET /api/lmi → { value, components, computedAt, previous }
  *
- * Unauthenticated by design — media + researchers + the policy team
+ * Unauthenticated by design  media + researchers + the policy team
  * pull this. ISR'd via the response Cache-Control header. The formula
  * is documented at /privacy and in the source comments; this endpoint
  * does NOT return individual-level data, only the cohort-level index.

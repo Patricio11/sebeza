@@ -27,7 +27,7 @@ const VERIFICATIONS: VerificationStatus[] = ["verified", "pending", "unverified"
 
 /**
  * Search filter rail. Mobile = bottom sheet (native <dialog>), desktop = sticky
- * left column. Filters propagate via URL params — shareable links, no client state.
+ * left column. Filters propagate via URL params  shareable links, no client state.
  */
 export function SearchFilters({ defaultFilters, query }: Props) {
   const t = useTranslations("search.filters");
@@ -210,7 +210,7 @@ export function SearchFilters({ defaultFilters, query }: Props) {
           );
         })}
         <p className="mt-2 text-xs italic text-[color:var(--color-ink-soft)]">
-          Self-declared by each seeker — independent of employment status.
+          Self-declared by each seeker  independent of employment status.
         </p>
       </FilterGroup>
 

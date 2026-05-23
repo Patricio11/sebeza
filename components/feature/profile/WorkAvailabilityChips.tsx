@@ -1,5 +1,5 @@
 /**
- * Phase 7.5 — Read-only display of a profile's work-availability set.
+ * Phase 7.5  Read-only display of a profile's work-availability set.
  *
  * Plain inline chips. Honest copy: self-declared preference, not a
  * verified credential. Renders nothing when the array is empty so the

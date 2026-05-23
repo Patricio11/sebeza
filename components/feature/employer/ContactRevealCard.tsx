@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * Contact reveal card — the headline Phase 5 control.
+ * Contact reveal card  the headline Phase 5 control.
  *
  * Three render states:
  *   - already-revealed (this org saw the contact recently)
@@ -46,7 +46,7 @@ export function ContactRevealCard({
     });
   }
 
-  // 1. Already revealed — show contact + the audit-log indicator
+  // 1. Already revealed  show contact + the audit-log indicator
   if (reveal) {
     return (
       <div className="rounded-[var(--radius-md)] border-2 border-[color:var(--color-brand)] bg-[color:var(--color-brand-tint)] p-5">
@@ -77,7 +77,7 @@ export function ContactRevealCard({
     );
   }
 
-  // 2. Consent not granted — block honestly
+  // 2. Consent not granted  block honestly
   if (consentState !== "granted") {
     return (
       <div className="rounded-[var(--radius-md)] border-2 border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-5">
@@ -92,7 +92,7 @@ export function ContactRevealCard({
         </div>
         <p className="mt-2 text-sm text-[color:var(--color-ink)]">
           This seeker hasn't granted contact-reveal consent. Sebenza won't
-          surface their email or phone — even to verified employers — until
+          surface their email or phone  even to verified employers  until
           they explicitly opt in.
         </p>
         <button

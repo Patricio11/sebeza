@@ -34,7 +34,7 @@ export default async function VerificationsPage({
 
   const relTime = new Intl.RelativeTimeFormat(locale, { numeric: "auto" });
   function relative(d: Date | string | null | undefined): string {
-    if (!d) return "—";
+    if (!d) return "";
     const at = typeof d === "string" ? new Date(d) : d;
     const diffMs = Date.now() - at.getTime();
     const mins = Math.round(diffMs / 60_000);

@@ -10,19 +10,19 @@ import { overallFreshnessConfidence } from "@/lib/mock/analytics";
 import { ArrowUpRight, MapPin, Clock, Sparkles, Quote } from "lucide-react";
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Landing page — Mzansi National.
+// Landing page  Mzansi National.
 //
 // A national platform asks for a national-feeling landing. Inspired by the SA
 // flag without ever literally rendering it: deep flag-green primary, SA-gold
 // accent, an abstracted Y-chevron as the structural mark, charcoal + cream
 // for surface and text.
 //
-// Composition is deliberately editorial-asymmetric — never centered SaaS hero,
+// Composition is deliberately editorial-asymmetric  never centered SaaS hero,
 // never card-grid feature blocks. Motion is reserved: a one-time stagger on
 // the hero text, count-up numerals on the pulse strip, and the chevron's
 // hairline drawing in. All else is still.
 //
-// This is the landing only — `SiteHeader`/styling on every other page stays
+// This is the landing only  `SiteHeader`/styling on every other page stays
 // untouched until you approve, so you can review side-by-side.
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -115,7 +115,7 @@ async function Hero({
             />
           </div>
 
-          {/* Headline — broken on purpose, last line italic in gold */}
+          {/* Headline  broken on purpose, last line italic in gold */}
           <h1 className="mt-7 font-display text-[color:var(--color-sa-charcoal)]">
             <span className="anim-rise-soft anim-delay-2 block leading-[0.95] tracking-[-0.025em] text-[clamp(3rem,9vw,7.2rem)]">
               South Africa&apos;s
@@ -164,7 +164,7 @@ async function Hero({
           </div>
         </div>
 
-        {/* Right column — floating "live national pulse" mini-dossier */}
+        {/* Right column  floating "live national pulse" mini-dossier */}
         <aside className="anim-rise-soft anim-delay-6 col-span-12 mt-12 md:col-span-5 md:mt-0">
           <div className="relative md:translate-y-32 lg:translate-y-44">
             <div className="relative rounded-2xl border border-[color:var(--color-sa-charcoal)]/10 bg-white p-7 shadow-press md:p-8">
@@ -244,7 +244,7 @@ async function Hero({
                 </div>
                 <p className="mt-2 text-[0.7rem] leading-snug text-[color:var(--color-sa-green-deep)]/85">
                   Weighted share of statuses confirmed in the last 30 days.
-                  Stale data is honestly down-ranked — never spun.
+                  Stale data is honestly down-ranked  never spun.
                 </p>
               </div>
 
@@ -301,7 +301,7 @@ function DossierStat({
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// PULSE STRIP — the high-contrast moment
+// PULSE STRIP  the high-contrast moment
 // ─────────────────────────────────────────────────────────────────────────────
 
 async function PulseStrip({
@@ -328,7 +328,7 @@ async function PulseStrip({
       aria-labelledby="pulse-h"
       className="grain-overlay relative overflow-hidden bg-[color:var(--color-sa-green-deep)] text-[color:var(--color-sa-cream)]"
     >
-      {/* Gold underline at top, deep stripe — a band echoing the flag */}
+      {/* Gold underline at top, deep stripe  a band echoing the flag */}
       <div className="absolute inset-x-0 top-0 h-[3px] bg-[color:var(--color-sa-gold)]" />
 
       <div className="relative mx-auto max-w-[1320px] px-5 py-20 md:px-10 md:py-28">
@@ -496,7 +496,7 @@ function BigStat({
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// PRINCIPLES — what Sebenza commits to, in its own voice
+// PRINCIPLES  what Sebenza commits to, in its own voice
 // ─────────────────────────────────────────────────────────────────────────────
 
 const PRINCIPLES: { dimension: string; commitment: string }[] = [
@@ -510,7 +510,7 @@ const PRINCIPLES: { dimension: string; commitment: string }[] = [
   },
   {
     dimension: "Verification",
-    commitment: "Honest states — “unverified” is the default.",
+    commitment: "Honest states  “unverified” is the default.",
   },
   {
     dimension: "Built for",
@@ -542,7 +542,7 @@ function Principles() {
             principles.
           </h2>
           <p className="mt-4 max-w-2xl text-[color:var(--color-ink-soft)]">
-            A national platform is judged by what its data shows — and by
+            A national platform is judged by what its data shows  and by
             what it refuses to show. Sebenza commits to these four.
           </p>
         </header>
@@ -578,7 +578,7 @@ function Principles() {
             The trustworthy, real-time layer for South African work.
           </p>
           <cite className="mt-3 block text-[0.72rem] uppercase not-italic tracking-[0.24em] text-[color:var(--color-ink-soft)]">
-            — Sebenza · strategy brief, 2026
+             Sebenza · strategy brief, 2026
           </cite>
         </blockquote>
       </div>
@@ -587,7 +587,7 @@ function Principles() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// PILLARS — three commitments that define the platform
+// PILLARS  three commitments that define the platform
 // ─────────────────────────────────────────────────────────────────────────────
 
 function Pillars({
@@ -676,7 +676,7 @@ function Pillars({
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// OUTCOMES — humanise the platform
+// OUTCOMES  humanise the platform
 // ─────────────────────────────────────────────────────────────────────────────
 
 interface Outcome {
@@ -757,7 +757,7 @@ function Outcomes() {
           <p className="text-[color:var(--color-ink-soft)]">
             Three anonymised placements logged on Sebenza this month. We
             count hires only when both the employer and the candidate
-            confirm them — that is how the freshness numbers stay honest.
+            confirm them  that is how the freshness numbers stay honest.
           </p>
         </header>
 
@@ -830,7 +830,7 @@ function DualSplit({
   return (
     <section className="bg-[color:var(--color-sa-cream)]">
       <div className="mx-auto grid max-w-[1320px] grid-cols-1 md:grid-cols-2">
-        {/* Employer — cream + green */}
+        {/* Employer  cream + green */}
         <article className="relative overflow-hidden bg-[color:var(--color-sa-green-tint)] p-10 md:p-16">
           <div className="text-[0.7rem] uppercase tracking-[0.28em] text-[color:var(--color-sa-green-deep)]">
             {t("split.employer.eyebrow")}
@@ -855,7 +855,7 @@ function DualSplit({
           />
         </article>
 
-        {/* Government — charcoal + gold */}
+        {/* Government  charcoal + gold */}
         <article className="relative overflow-hidden bg-[color:var(--color-sa-charcoal)] p-10 text-[color:var(--color-sa-cream)] md:p-16">
           <div className="text-[0.7rem] uppercase tracking-[0.28em] text-[color:var(--color-sa-gold)]">
             {t("split.government.eyebrow")}
@@ -914,7 +914,7 @@ function FinalCTA() {
           </span>
         </h2>
         <p className="mx-auto mt-5 max-w-xl text-lg text-[color:var(--color-ink-soft)]">
-          Whether you&apos;re looking for work or looking for people — the
+          Whether you&apos;re looking for work or looking for people  the
           fastest way to a real, verified, current match is one search away.
         </p>
         <div className="mt-9 flex flex-wrap items-center justify-center gap-3">

@@ -17,7 +17,7 @@ interface Props {
 
 /**
  * Count-up number that animates only once, when it enters the viewport.
- * Single client island — cheap, no library. Honours prefers-reduced-motion:
+ * Single client island  cheap, no library. Honours prefers-reduced-motion:
  * users who don't want motion see the final number immediately.
  */
 export function AnimatedCount({

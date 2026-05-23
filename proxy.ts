@@ -6,7 +6,7 @@ import { routing } from "./i18n/routing";
 const intl = createIntlMiddleware(routing);
 
 /**
- * Edge proxy — optimistic auth + next-intl.
+ * Edge proxy  optimistic auth + next-intl.
  *
  * Per Better Auth's own guidance:
  *
@@ -27,7 +27,7 @@ const intl = createIntlMiddleware(routing);
  *    authoritative validation against the database
  *
  * The page-level guard is the real security boundary. The proxy could be
- * removed entirely without compromising security — it's a UX nicety.
+ * removed entirely without compromising security  it's a UX nicety.
  */
 function isProtected(pathname: string): boolean {
   // Strip the locale prefix if present (`/en/dashboard` → `/dashboard`).
@@ -39,24 +39,24 @@ function isProtected(pathname: string): boolean {
     withoutLocale.startsWith("/employer/") ||
     withoutLocale === "/admin" ||
     withoutLocale.startsWith("/admin/") ||
-    // Phase 9 — gov workspace
+    // Phase 9  gov workspace
     withoutLocale === "/gov" ||
     withoutLocale.startsWith("/gov/")
   );
 }
 
 /**
- * Phase 9 — Security headers applied to every response.
+ * Phase 9  Security headers applied to every response.
  *
  * Strict CSP that allows:
  *   - script-src 'self' (plus 'unsafe-inline' for Next's hydration
- *     bootstrap until we wire nonce-based CSP — documented below)
+ *     bootstrap until we wire nonce-based CSP  documented below)
  *   - connect-src 'self' + Supabase + Resend + the configured app URL
  *   - frame-ancestors 'none' (with X-Frame-Options as legacy fallback)
  *   - object-src 'none' (no Flash, no plugins)
  *   - base-uri 'self' (anti-injection)
  *
- * HSTS sticks at 2 years with includeSubDomains + preload — once we
+ * HSTS sticks at 2 years with includeSubDomains + preload  once we
  * cut over to production this is one-way. Permissions-Policy disables
  * camera / microphone / geolocation by default (we don't use them).
  *
@@ -112,7 +112,7 @@ export default function proxy(request: NextRequest) {
     // We use Better Auth's default cookie config (no custom `cookiePrefix`
     // in lib/auth/server.ts), so `getSessionCookie(request)` with no opts
     // finds `better-auth.session_token`. Drift here is the bug class that
-    // bounces every authenticated user back to /sign-in — see commit history.
+    // bounces every authenticated user back to /sign-in  see commit history.
     const cookie = getSessionCookie(request);
     if (!cookie) {
       const url = request.nextUrl.clone();

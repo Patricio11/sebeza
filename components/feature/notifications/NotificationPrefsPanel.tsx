@@ -1,15 +1,15 @@
 "use client";
 
 /**
- * Phase 7 (C.6) — Notification preferences panel.
+ * Phase 7 (C.6)  Notification preferences panel.
  *
  * One row per catalog kind, two columns: In-app · Email. The Email
- * column is disabled with a "Phase 8" pill until Resend lands — the
+ * column is disabled with a "Phase 8" pill until Resend lands  the
  * column exists today so the schema doesn't churn when email ships.
  *
  * The seeker / employer / admin account pages pick which kinds to
  * show (some are admin-only, e.g. `moderation.reported`). The panel
- * itself stays role-agnostic — caller filters the catalog.
+ * itself stays role-agnostic  caller filters the catalog.
  */
 
 import { useState, useTransition } from "react";
@@ -23,11 +23,11 @@ import {
 } from "@/lib/notifications/catalog";
 
 interface Props {
-  /** The user's stored prefs JSON (raw — we resolve effective values inside). */
+  /** The user's stored prefs JSON (raw  we resolve effective values inside). */
   initialPrefs: NotificationPrefMap | null;
   /** Catalog keys to render. Caller decides which kinds are relevant to the role. */
   kinds: NotificationKind[];
-  /** Phase 8 — whether the master email-channel flag is on. When off,
+  /** Phase 8  whether the master email-channel flag is on. When off,
    *  the email column stays disabled with a "Phase 8" pill. */
   emailChannelEnabled?: boolean;
 }

@@ -1,17 +1,17 @@
 "use server";
 
 /**
- * Phase 7 (Task 7.2) — Server Actions for the 2FA flow.
+ * Phase 7 (Task 7.2)  Server Actions for the 2FA flow.
  *
- *   - enableTwoFactor({ password }) — issues a TOTP secret + backup
+ *   - enableTwoFactor({ password })  issues a TOTP secret + backup
  *     codes. Returns the otpauth URL (for the QR) and the plaintext
  *     backup codes (shown once on the setup page; never again).
- *   - confirmTwoFactor({ code }) — verifies the first TOTP code; on
+ *   - confirmTwoFactor({ code })  verifies the first TOTP code; on
  *     success Better Auth flips `app_user.two_factor_enabled = true`.
- *   - verifyTotp({ code }) — used by /verify-2fa after sign-in.
- *   - verifyBackupCode({ code }) — recovery path on /verify-2fa.
- *   - disableTwoFactor({ password }) — turn 2FA off from /account.
- *   - reset2faForUser({ userId, reason }) — admin-only escape hatch
+ *   - verifyTotp({ code })  used by /verify-2fa after sign-in.
+ *   - verifyBackupCode({ code })  recovery path on /verify-2fa.
+ *   - disableTwoFactor({ password })  turn 2FA off from /account.
+ *   - reset2faForUser({ userId, reason })  admin-only escape hatch
  *     when a user has lost both the device and the backup codes.
  */
 
@@ -38,7 +38,7 @@ function fail(message: string): { ok: false; message: string } {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// enableTwoFactor — first step: get the secret + backup codes
+// enableTwoFactor  first step: get the secret + backup codes
 // ─────────────────────────────────────────────────────────────────────────────
 
 const enableSchema = z.object({
@@ -68,9 +68,9 @@ export async function enableTwoFactor(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// confirmTwoFactor — verify the first TOTP code so the plugin flips
+// confirmTwoFactor  verify the first TOTP code so the plugin flips
 // `app_user.two_factor_enabled = true`. Until this succeeds, 2FA is
-// "pending" — the plugin still requires confirmation before adding the
+// "pending"  the plugin still requires confirmation before adding the
 // `twoFactorRedirect` step to future sign-ins.
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -101,7 +101,7 @@ export async function confirmTwoFactor(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// verifyTotp / verifyBackupCode — used on /verify-2fa
+// verifyTotp / verifyBackupCode  used on /verify-2fa
 // ─────────────────────────────────────────────────────────────────────────────
 
 const verifySchema = z.object({
@@ -163,7 +163,7 @@ export async function verifyBackupCode(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// disableTwoFactor — turn 2FA off from /account (re-enrollment required
+// disableTwoFactor  turn 2FA off from /account (re-enrollment required
 // after; the plugin clears `app_user.two_factor_enabled` and drops the
 // `two_factor` row).
 // ─────────────────────────────────────────────────────────────────────────────
@@ -195,7 +195,7 @@ export async function disableTwoFactor(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// reset2faForUser — admin escape hatch when a user loses device + codes.
+// reset2faForUser  admin escape hatch when a user loses device + codes.
 // Wipes the user's `two_factor` row + flips `two_factor_enabled = false`
 // so the next sign-in skips the 2FA step. If the user is employer/admin,
 // the DAL forced-setup gate will immediately re-enrol them on next visit.

@@ -1,7 +1,7 @@
 "use server";
 
 /**
- * Phase 7 — Admin taxonomy CRUD.
+ * Phase 7  Admin taxonomy CRUD.
  *
  * Skills, professions, cities all back the search & ranking surfaces.
  * The admin taxonomy page on `/admin/taxonomy` (until this phase a static
@@ -12,7 +12,7 @@
  *   - addCity / removeCity (city requires a province slug)
  *
  * Slug uniqueness is enforced at the DB layer (primary key). Removals
- * are blocked when a row is still referenced by another table — the user
+ * are blocked when a row is still referenced by another table  the user
  * gets a friendly "still in use by N profiles" message instead of a 500.
  */
 
@@ -241,7 +241,7 @@ export async function removeCity(input: { slug: string }): Promise<ActionResult>
   if (!input?.slug) return fail("Missing slug.");
   const db = getDb();
 
-  // Cities are referenced by profiles.city (text label, not FK) — match by slug
+  // Cities are referenced by profiles.city (text label, not FK)  match by slug
   // OR by label so we don't strand profiles. We accept either column lookup
   // because seed/legacy data mixed both.
   const [usage] = await db

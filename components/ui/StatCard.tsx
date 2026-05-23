@@ -6,7 +6,7 @@ interface Props {
   value: string | number;
   /** Optional eyebrow / unit suffix. */
   hint?: string;
-  /** Tiny sparkline values (0..1 normalised) — drawn as a pure SVG polyline. */
+  /** Tiny sparkline values (0..1 normalised)  drawn as a pure SVG polyline. */
   spark?: number[];
   /** Optional 0..1 confidence indicator. Renders as a thin meter under the label. */
   confidence?: number;
@@ -15,7 +15,7 @@ interface Props {
 
 /**
  * Editorial stat block. Fraunces numeral, tabular, optional sparkline.
- * Always cheap: no chart library used — just an inline SVG polyline.
+ * Always cheap: no chart library used  just an inline SVG polyline.
  */
 export function StatCard({ label, value, hint, spark, confidence, className }: Props) {
   return (

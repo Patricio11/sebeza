@@ -1,5 +1,5 @@
 /**
- * Phase 8 — SAQA verification worker (gated cron).
+ * Phase 8  SAQA verification worker (gated cron).
  *
  * Claims `queued` rows from `qualification_kyc_jobs`, calls the SAQA
  * NLRD adapter, and writes the result back. Rate-limited (max 10 per
@@ -9,7 +9,7 @@
  * Gated TWO ways:
  *   1. `CRON_SECRET` header (standard for every /api/cron/*).
  *   2. `feature_flag_saqa_worker` platform setting must be ON. When
- *      OFF, the worker no-ops — the partnership flag stays the gate.
+ *      OFF, the worker no-ops  the partnership flag stays the gate.
  *
  * Real SAQA calls aren't implemented yet (no partnership). For now the
  * worker resolves every queued job to `verified` so the demo path is
@@ -55,7 +55,7 @@ async function runSaqaCheck(qualification: {
   return {
     status: "verified",
     providerTxId: `mock-saqa-${qualification.id}`,
-    raw: { note: "SAQA worker mock — partnership not yet active." },
+    raw: { note: "SAQA worker mock  partnership not yet active." },
   };
 }
 
@@ -63,14 +63,14 @@ export async function GET(request: Request) {
   const auth = isAuthorizedCron(request);
   if (!auth.ok) return auth.response;
 
-  // Gate #2 — partnership flag. When off, no-op.
+  // Gate #2  partnership flag. When off, no-op.
   const enabled = await getSetting<boolean>("feature_flag_saqa_worker");
   if (!enabled) {
     return NextResponse.json({
       ok: true,
       ranAt: new Date().toISOString(),
       skipped: true,
-      reason: "feature_flag_saqa_worker is OFF — worker is dormant until partnership.",
+      reason: "feature_flag_saqa_worker is OFF  worker is dormant until partnership.",
     });
   }
 
@@ -179,13 +179,13 @@ export async function GET(request: Request) {
             userId: job.ownerUserId,
             kind: "qualification.rejected",
             title: "SAQA could not verify a qualification",
-            body: `${job.title} — SAQA reason: ${result.reason}`,
+            body: `${job.title}  SAQA reason: ${result.reason}`,
             link: "/dashboard/qualifications",
             meta: { qualificationId: job.qualificationId, source: "saqa", reason: result.reason },
           });
         }
       } else {
-        // error — leave the qualification as 'pending'; mark job error.
+        // error  leave the qualification as 'pending'; mark job error.
         await db
           .update(schema.qualificationKycJobs)
           .set({

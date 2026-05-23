@@ -1,14 +1,14 @@
 /**
- * Student mode — academic-context recommendations.
+ * Student mode  academic-context recommendations.
  *
  * When a seeker has an `academic` block, the Career compass runs through a
  * student-specific layer on top of the demand-driven recommendations:
  *
  *  1. Recommended electives / specialisations *within* their programme that
  *     line up with high-demand market skills.
- *  2. Internships + graduate programmes — real SA programmes from credible
+ *  2. Internships + graduate programmes  real SA programmes from credible
  *     organisations across private + public sectors.
- *  3. "Where graduates from your programme go" — the destinations dataset
+ *  3. "Where graduates from your programme go"  the destinations dataset
  *     that the Department of Higher Education currently does not have.
  *  4. Supplementary free learning that complements the syllabus.
  *
@@ -23,7 +23,7 @@ import type {
 } from "./types";
 
 // ──────────────────────────────────────────────────────────────────────────────
-// Programme electives / specialisations — what to take *within* the degree.
+// Programme electives / specialisations  what to take *within* the degree.
 
 export interface ProgrammeElective {
   skill: TaxonomyEntry;
@@ -43,17 +43,17 @@ export type ProgrammeKind = "internship" | "graduate_programme" | "learnership";
 export interface OpportunityProgramme {
   title: string;
   organisation: string;
-  /** Public sector / corporate / NGO / startup — gives context, never a hard filter. */
+  /** Public sector / corporate / NGO / startup  gives context, never a hard filter. */
   sector: "public" | "corporate" | "ngo" | "startup";
   kind: ProgrammeKind;
   /** Months. */
   durationMonths: number;
   cities: string[];
-  /** Open / closing soon / closed — never invented, sourced from programme listings (Phase 4). */
+  /** Open / closing soon / closed  never invented, sourced from programme listings (Phase 4). */
   applicationStatus: "open" | "closing_soon" | "closed";
-  /** "Closes in 3 weeks", "Year-round intake" — display-only context. */
+  /** "Closes in 3 weeks", "Year-round intake"  display-only context. */
   applicationHint: string;
-  /** Eligibility framing — be honest about who is NOT eligible. */
+  /** Eligibility framing  be honest about who is NOT eligible. */
   eligibility: string;
   /** Tags surface fit; matched against the student's `fieldOfStudy`. */
   fieldTags: string[];
@@ -62,10 +62,10 @@ export interface OpportunityProgramme {
 }
 
 // ──────────────────────────────────────────────────────────────────────────────
-// Graduate destinations — where past graduates of this programme ended up.
+// Graduate destinations  where past graduates of this programme ended up.
 
 export interface GraduateDestination {
-  /** Aggregated, anonymised — never a per-person trace. */
+  /** Aggregated, anonymised  never a per-person trace. */
   destination: string;
   share: number; // 0..1
   /** "Median months from graduation to first confirmed placement." */
@@ -88,7 +88,7 @@ export interface StudentSnapshot {
 }
 
 // ──────────────────────────────────────────────────────────────────────────────
-// Mock data — generic-enough to fit either student in the fixture set; the
+// Mock data  generic-enough to fit either student in the fixture set; the
 // Phase 4 implementation reads from `searchEvents` × `profiles.academic`.
 
 const CS_SNAPSHOT: StudentSnapshot = {
@@ -98,7 +98,7 @@ const CS_SNAPSHOT: StudentSnapshot = {
   electives: [
     {
       skill: { slug: "comp3007-distributed", label: "Distributed Systems (COMS3007)" },
-      curriculumHint: "Year 3, Wits CS — taken in your second semester",
+      curriculumHint: "Year 3, Wits CS  taken in your second semester",
       detail:
         "Container orchestration and the Kubernetes lab module map almost 1:1 to the senior-developer demand in Gauteng.",
       demandSignal: { searches: 1240, matches: 410 },
@@ -112,7 +112,7 @@ const CS_SNAPSHOT: StudentSnapshot = {
     },
     {
       skill: { slug: "comp4001-accessibility", label: "Inclusive Computing (COMS4001H)" },
-      curriculumHint: "Honours-level elective — open to high-performing third-years",
+      curriculumHint: "Honours-level elective  open to high-performing third-years",
       detail:
         "Almost no other graduate carries WCAG fluency. Big differentiator for public-sector and Discovery-style fintech work.",
       demandSignal: { searches: 320, matches: 110 },
@@ -132,7 +132,7 @@ const CS_SNAPSHOT: StudentSnapshot = {
       fieldTags: ["Computer Science", "Software Engineering", "Information Systems"],
     },
     {
-      title: "Discovery Graduate Programme — Tech & Data",
+      title: "Discovery Graduate Programme  Tech & Data",
       organisation: "Discovery",
       sector: "corporate",
       kind: "graduate_programme",
@@ -162,7 +162,7 @@ const CS_SNAPSHOT: StudentSnapshot = {
       sector: "public",
       kind: "learnership",
       durationMonths: 12,
-      cities: ["National — host employer dependent"],
+      cities: ["National  host employer dependent"],
       applicationStatus: "open",
       applicationHint: "Quarterly intake · paying stipend throughout",
       eligibility:
@@ -203,18 +203,18 @@ const CS_SNAPSHOT: StudentSnapshot = {
 const ACCOUNTING_SNAPSHOT: StudentSnapshot = {
   graduationHeadline: { monthsLeft: 6, expectedGraduation: "2026-11" },
   bridgeHeadline:
-    "BCom Honours qualifies you for SAICA articles — most leverage now is choosing the right traineeship.",
+    "BCom Honours qualifies you for SAICA articles  most leverage now is choosing the right traineeship.",
   electives: [
     {
       skill: { slug: "afm4001-data-analytics", label: "Accounting Data Analytics" },
-      curriculumHint: "Honours elective — UCT BCom Hons",
+      curriculumHint: "Honours elective  UCT BCom Hons",
       detail:
         "Bridges Excel + IFRS into Power BI / SQL. Currently the deciding factor between traineeships at the Big Four.",
       demandSignal: { searches: 540, matches: 180 },
     },
     {
       skill: { slug: "afm4002-tax", label: "Advanced Tax Practice" },
-      curriculumHint: "Honours elective — UCT BCom Hons",
+      curriculumHint: "Honours elective  UCT BCom Hons",
       detail:
         "SARS + private-sector tax practice still has the deepest persistent skills gap in the accounting market.",
       demandSignal: { searches: 410, matches: 140 },

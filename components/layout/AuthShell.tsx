@@ -29,7 +29,7 @@ export function AuthShell({
 }: Props) {
   return (
     <div className="relative min-h-screen overflow-hidden bg-[color:var(--color-paper)]">
-      {/* Flag stripe — same as the site header */}
+      {/* Flag stripe  same as the site header */}
       <div aria-hidden="true" className="flex h-[3px] w-full">
         <div className="flex-[3] bg-[color:var(--color-brand)]" />
         <div className="flex-[2] bg-[color:var(--color-accent)]" />

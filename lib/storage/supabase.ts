@@ -2,7 +2,7 @@
  * Server-only Supabase Storage client.
  *
  * Vendor decision (Phase 1.5): Supabase Storage for documents + photos.
- * Used standalone — auth is Better Auth, DB is Neon. Only the Storage feature
+ * Used standalone  auth is Better Auth, DB is Neon. Only the Storage feature
  * of Supabase is in play.
  *
  * Why a separate file:
@@ -17,9 +17,9 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
 export const BUCKET = process.env.SUPABASE_STORAGE_BUCKET ?? "sebenza-private";
 
-/** Signed-URL TTL (seconds). Short by design — Critical UX Rule §3. */
-export const DOCUMENT_URL_TTL = 60; // 1 min — for direct download / preview
-export const PHOTO_URL_TTL = 300; // 5 min — long enough for the public profile render cycle
+/** Signed-URL TTL (seconds). Short by design  Critical UX Rule §3. */
+export const DOCUMENT_URL_TTL = 60; // 1 min  for direct download / preview
+export const PHOTO_URL_TTL = 300; // 5 min  long enough for the public profile render cycle
 
 let _client: SupabaseClient | null = null;
 

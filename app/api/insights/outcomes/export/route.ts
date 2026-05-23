@@ -1,9 +1,9 @@
 /**
- * Phase 7.5.4 — CSV export of the longitudinal outcomes dataset.
+ * Phase 7.5.4  CSV export of the longitudinal outcomes dataset.
  *
  * Reuses `outcomesQuery()` so the EXACT same suppression filter applies
  * to the export. There is no way to bypass the floor from this route
- * — that's the compliance contract.
+ *  that's the compliance contract.
  *
  * Hardened CSV path (Phase 6.5 pattern): OWASP injection guard,
  * UTF-8 BOM, CRLF line endings, RFC-4180 double-quote escaping.
@@ -23,7 +23,7 @@ function safeCell(value: unknown): string {
 }
 
 export async function GET() {
-  // Surface is public — `/insights` itself is unauthenticated. Audit
+  // Surface is public  `/insights` itself is unauthenticated. Audit
   // log records who triggered the export when known.
   const session = await getSessionUser();
 

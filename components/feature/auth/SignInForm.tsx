@@ -8,12 +8,12 @@ import { Button } from "@/components/ui/Button";
 import { signIn } from "@/lib/auth/actions";
 
 interface Props {
-  /** ?next=/some-path — preserved across the sign-in roundtrip. */
+  /** ?next=/some-path  preserved across the sign-in roundtrip. */
   next?: string;
 }
 
 /**
- * Sign-in form. Email + password only — role is identified server-side from
+ * Sign-in form. Email + password only  role is identified server-side from
  * `app_user.role` and the redirect happens after Better Auth verifies
  * credentials. No role chip (was theatre + a quiet enumeration vector).
  */

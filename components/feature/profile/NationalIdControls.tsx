@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * National ID controls — Phase 3 re-check #3.
+ * National ID controls  Phase 3 re-check #3.
  *
  * Rules:
  *  - The ID is encrypted at rest (AES-GCM) and NEVER echoed back, not even
@@ -9,7 +9,7 @@
  *  - Showing "ID on file · encrypted" is the most we expose.
  *  - "Change ID number" reveals a single field (client-side SA ID validation
  *    + server-side checksum + re-encryption).
- *  - Removing the ID is allowed but warned — verification cannot proceed
+ *  - Removing the ID is allowed but warned  verification cannot proceed
  *    without an ID on file.
  */
 
@@ -43,7 +43,7 @@ export function NationalIdControls({ hasNationalId }: Props) {
           : v.reason === "not_digits"
             ? "Only digits, please."
             : v.reason === "bad_checksum"
-              ? "Checksum doesn't match — double-check the number."
+              ? "Checksum doesn't match  double-check the number."
               : "That doesn't look like a valid SA ID number.",
       );
       return;
@@ -91,7 +91,7 @@ export function NationalIdControls({ hasNationalId }: Props) {
               </span>
             ) : (
               <span className="text-[color:var(--color-ink-soft)]">
-                No ID on file — verification cannot proceed until one is captured.
+                No ID on file  verification cannot proceed until one is captured.
               </span>
             )}
           </div>

@@ -1,5 +1,5 @@
 /**
- * Phase 7 (Task 7.6) — Notification kinds catalog.
+ * Phase 7 (Task 7.6)  Notification kinds catalog.
  *
  * Single source of truth for: the in-app default, the email default
  * (currently always off; Phase 8 wires Resend and flips these),
@@ -13,7 +13,7 @@
  *   3. If it's a new audit-log shape too, extend `AuditKind` in
  *      `lib/audit/index.ts`.
  *
- * NEVER reference a kind in code without an entry here — the type
+ * NEVER reference a kind in code without an entry here  the type
  * checker enforces this via `NotificationKind`.
  */
 
@@ -38,7 +38,7 @@ export interface NotificationKindMeta {
    * Dedupe window in seconds. If the same `(userId, kind)` (and
    * dedupeKey, when set) has fired inside this window, we silently
    * collapse the duplicate. `0` = no dedupe (every event is its own
-   * notification — placements, suspensions etc).
+   * notification  placements, suspensions etc).
    */
   dedupeWindowSeconds: number;
 }
@@ -76,7 +76,7 @@ export const NOTIFICATION_CATALOG = {
     audience: "seeker",
     label: "A placement was confirmed for you",
     description:
-      "The employer logged the hire through Sebenza — this counts toward the national placement total.",
+      "The employer logged the hire through Sebenza  this counts toward the national placement total.",
     dedupeWindowSeconds: 0,
   },
   "qualification.verified": {

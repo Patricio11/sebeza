@@ -1,7 +1,7 @@
 /**
- * Phase 9 — Sebenza Labour Market Index (LMI).
+ * Phase 9  Sebenza Labour Market Index (LMI).
  *
- * One number, 0..1 (we display it as 0.00 — 1.00, two decimals), that
+ * One number, 0..1 (we display it as 0.00  1.00, two decimals), that
  * summarises the health of the SA labour-market signal Sebenza
  * surfaces:
  *
@@ -25,7 +25,7 @@
  *
  * Not an official statistic; an opinionated index. Stats SA owns the
  * official numbers. We surface the LMI as "Sebenza Labour Market
- * Index" everywhere — never "South African" without the qualifier.
+ * Index" everywhere  never "South African" without the qualifier.
  */
 
 import "server-only";
@@ -41,7 +41,7 @@ import { getSetting } from "@/lib/admin/settings";
 export interface LmiBreakdown {
   /** Composite index, 0..1. */
   value: number;
-  /** Components — exposed for transparency. */
+  /** Components  exposed for transparency. */
   components: {
     freshnessRatio: number;
     metDemand: number;
@@ -85,7 +85,7 @@ export async function computeLmi(): Promise<LmiBreakdown> {
     : 0;
   const metDemand = clamp01(1 - unmetRatio);
 
-  // placement velocity — confirmed hires this month / active pool
+  // placement velocity  confirmed hires this month / active pool
   const activePool = freshness.total || 1;
   const placementRate = snapshot.confirmedHiresThisMonth / activePool;
   const placementVelocity = clamp01(placementRate / SATURATION_PLACEMENT_RATE);
@@ -132,7 +132,7 @@ export async function lmiWithTrend(): Promise<LmiTrend> {
       };
     }
   } catch {
-    // lmi_snapshots may not have rows yet — caller renders with previous=null.
+    // lmi_snapshots may not have rows yet  caller renders with previous=null.
   }
   return { current, previous };
 }

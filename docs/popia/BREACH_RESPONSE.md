@@ -54,13 +54,13 @@ is documented in this folder all the same.
 
 ## Notification (within 72 hours of confirmed materiality)
 
-1. **Information Regulator** — Form for breach notification published by
+1. **Information Regulator**  Form for breach notification published by
    the Regulator. Submit electronically. Reference incident ID + scope.
-2. **Affected data subjects** — direct email via the existing transport
+2. **Affected data subjects**  direct email via the existing transport
    (`lib/email/send.ts`). Template at the bottom of this file. Plain
    language, no PR padding. Include: what happened, what data, what
    we've done, what they should do, who to contact.
-3. **Public-surface note** — if material to ALL users (e.g. service-
+3. **Public-surface note**  if material to ALL users (e.g. service-
    wide credential rotation needed), banner on the landing page until
    the incident is closed.
 
@@ -76,7 +76,7 @@ is documented in this folder all the same.
 
 ## Notification template (data subject)
 
-> Subject: Important — there was a security incident at Sebenza
+> Subject: Important  there was a security incident at Sebenza
 >
 > Hi {{name}},
 >
@@ -85,7 +85,7 @@ is documented in this folder all the same.
 >
 > We have already: {{containment actions}}.
 >
-> You should: {{recommended actions — likely reset your password and
+> You should: {{recommended actions  likely reset your password and
 > review your audit log at /dashboard/activity}}.
 >
 > We have notified the Information Regulator. The incident reference is

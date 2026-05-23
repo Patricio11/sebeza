@@ -30,7 +30,7 @@ interface Props {
   initial: InitialValues;
   /** Slug list for the profession select (full set in Phase 7 admin). */
   professions: { slug: string; label: string }[];
-  /** Where the SectionHeading lives — left intact so the existing eyebrow numbering is unaffected. */
+  /** Where the SectionHeading lives  left intact so the existing eyebrow numbering is unaffected. */
   identityHeading: React.ReactNode;
   locationHeading: React.ReactNode;
   professionalHeading: React.ReactNode;
@@ -120,7 +120,7 @@ export function ProfileBasicsForm({
             name="nationality"
             autoComplete="off"
             placeholder="e.g. South African"
-            hint="Free text — Sebenza matches by location + skill, never by nationality."
+            hint="Free text  Sebenza matches by location + skill, never by nationality."
           />
           <label className="mt-2 inline-flex items-center gap-2 text-sm md:mt-auto md:pb-3">
             <input

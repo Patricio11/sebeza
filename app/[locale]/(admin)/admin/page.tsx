@@ -241,7 +241,7 @@ function RecentRow({
       </span>
       <span>
         <span className="font-medium">{who}</span>{" "}
-        <span className="text-[color:var(--color-ink-soft)]">— {detail}</span>
+        <span className="text-[color:var(--color-ink-soft)]"> {detail}</span>
       </span>
     </li>
   );

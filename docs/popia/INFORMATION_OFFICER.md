@@ -11,7 +11,7 @@ Last updated 2026-05-23.
 
 ## Status
 
-**Pre-launch — to be designated before commercial pilot.**
+**Pre-launch  to be designated before commercial pilot.**
 
 A working email is published already at `popia@sebenza.co.za` and surfaced on
 `/privacy` and `/paia` so individuals can exercise their rights today. The

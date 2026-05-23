@@ -22,7 +22,7 @@ export type UserRole = "seeker" | "employer" | "admin" | "gov";
 export type FreshnessBand = "fresh" | "ageing" | "stale";
 
 /**
- * Phase 7.5 — What kinds of work this person will take. Independent of
+ * Phase 7.5  What kinds of work this person will take. Independent of
  * `EmploymentStatus`. Multi-select on the profile editor; published on
  * `/p/[handle]` + queryable on `/search`.
  */
@@ -47,7 +47,7 @@ export interface SkillRef {
 /**
  * What the public/search payload CAN expose.
  * Redaction Rule (TO_START_EVERY_SESSION.md §5): never include ID, documents,
- * or raw contact details here — even for verified employers. Contact reveal is
+ * or raw contact details here  even for verified employers. Contact reveal is
  * a separate, audit-logged code path (Phase 5).
  */
 export interface PublicProfile {
@@ -72,13 +72,13 @@ export interface PublicProfile {
   /** One-paragraph bio for the profile page (still PII-light). */
   bio?: string;
   status: EmploymentStatus;
-  /** ISO timestamp. Freshness band derives from this — see helpers.freshnessBand(). */
+  /** ISO timestamp. Freshness band derives from this  see helpers.freshnessBand(). */
   statusConfirmedAt: string;
   /**
-   * Phase 7.5 — Work-availability dimension. Decoupled from `status`:
+   * Phase 7.5  Work-availability dimension. Decoupled from `status`:
    * a `studying` person can be `["casual"]`; a `full_time` employee
    * can be `["contract"]`. Empty = no signal. Publicly readable, never
-   * a sensitive attribute — it's a self-set preference.
+   * a sensitive attribute  it's a self-set preference.
    */
   workAvailability: WorkAvailabilityKind[];
   verification: VerificationStatus;
@@ -89,7 +89,7 @@ export interface PublicProfile {
   experience?: ExperienceItem[];
   qualifications?: QualificationItem[];
   /**
-   * Active or recent academic enrolment. Optional — only set for student seekers.
+   * Active or recent academic enrolment. Optional  only set for student seekers.
    * Surfaces Student mode in the dashboard + Career compass.
    */
   academic?: AcademicProfile;
@@ -132,7 +132,7 @@ export type InstitutionKind =
 /**
  * Active academic enrolment. Only present when the seeker is (or recently was)
  * a student. Status-Freshness Rule still applies: `expectedGraduation` is the
- * freshness anchor here — past it = profile needs an update.
+ * freshness anchor here  past it = profile needs an update.
  */
 export interface AcademicProfile {
   institutionSlug: string;
@@ -142,9 +142,9 @@ export interface AcademicProfile {
   /** Free-text discipline (will become a controlled taxonomy in Phase 7). */
   fieldOfStudy: string;
   nqfLevel: NqfLevel;
-  /** 1, 2, 3, 4, 5 — academic year of study. null for postgrad without year structure. */
+  /** 1, 2, 3, 4, 5  academic year of study. null for postgrad without year structure. */
   currentYear: number | null;
-  /** ISO yyyy-mm — expected graduation. Drives freshness for student profiles. */
+  /** ISO yyyy-mm  expected graduation. Drives freshness for student profiles. */
   expectedGraduation: string;
   /** True if studying via NSFAS-funded route. Shown as a chip for context. */
   nsfas: boolean;

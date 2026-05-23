@@ -17,7 +17,7 @@ interface Props {
  * - ageing  (30–90d): half ring
  * - stale   (≥90d):   dashed outline + small dot
  *
- * Carries text + ARIA — never colour-only (Critical UX Rule §5, WCAG 1.4.1).
+ * Carries text + ARIA  never colour-only (Critical UX Rule §5, WCAG 1.4.1).
  */
 export function StatusChip({ status, confirmedAt, locale = "en", className }: Props) {
   const tStatus = useTranslations("status");
@@ -30,14 +30,14 @@ export function StatusChip({ status, confirmedAt, locale = "en", className }: Pr
   const days = daysSince(confirmedAt);
   const a11y =
     band === "stale"
-      ? `${label}. Status is stale — confirmed ${days} days ago.`
+      ? `${label}. Status is stale  confirmed ${days} days ago.`
       : `${label}. Confirmed ${relative}.`;
 
   return (
     <span
       role="status"
       aria-label={a11y}
-      title={`${label} — ${tStatus("confirmedRelative", { when: relative })}`}
+      title={`${label}  ${tStatus("confirmedRelative", { when: relative })}`}
       className={cn(
         "inline-flex items-center gap-1.5 rounded-[var(--radius-pill)] px-2.5 py-1 text-[0.78rem] leading-none",
         "border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] text-[color:var(--color-ink)]",

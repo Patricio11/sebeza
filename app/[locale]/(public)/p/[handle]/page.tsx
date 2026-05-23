@@ -38,7 +38,7 @@ export async function generateMetadata({ params }: Props) {
   const p = await dataProvider.getProfile(handle);
   if (!p) return { title: "Profile" };
   const title = `${p.displayName} · ${p.profession}`;
-  const description = `${p.displayName} — ${p.profession} based in ${p.city}, ${p.province}. Trust-verified Sebenza profile.`;
+  const description = `${p.displayName}  ${p.profession} based in ${p.city}, ${p.province}. Trust-verified Sebenza profile.`;
   return {
     title,
     description,
@@ -61,7 +61,7 @@ export async function generateMetadata({ params }: Props) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Public profile — "civic dossier" redesign.
+// Public profile  "civic dossier" redesign.
 //
 // The previous layout was a flat editorial column. This redesign:
 //   - leads with a hero avatar (with honest verification ring)
@@ -83,7 +83,7 @@ export default async function ProfilePage({ params }: Props) {
   // Route the CTAs based on who's looking. Public visitors → sign-in
   // with a ?next= cursor back to the dossier. Verified employers →
   // straight into the dossier. Everyone else (seekers viewing public
-  // profiles) keeps the locked-state copy — the action only makes
+  // profiles) keeps the locked-state copy  the action only makes
   // sense for employers.
   const viewer = await getSessionUser();
   const dossierHref = `/employer/dossier/${profile.handle}`;
@@ -230,7 +230,7 @@ async function ProfileHero({
                 </span>
               </p>
 
-              {/* Honest redaction note — quiet, italic */}
+              {/* Honest redaction note  quiet, italic */}
               <p className="mt-2 text-[0.78rem] italic text-[color:var(--color-ink-soft)]">
                 {t("redacted")}
               </p>
@@ -382,7 +382,7 @@ async function ProfileBody({
   return (
     <div className="mx-auto max-w-[1320px] px-5 py-16 md:px-10 md:py-24">
       <div className="grid grid-cols-12 gap-8 md:gap-16">
-        {/* Single main column — sections stacked, full-width, editorial */}
+        {/* Single main column  sections stacked, full-width, editorial */}
         <div className="col-span-12 space-y-20 md:col-span-9">
           {profile.bio && (
             <Section eyebrow="On the candidate" title={t("bio")}>
@@ -416,7 +416,7 @@ async function ProfileBody({
           <ProfileFooter handle={profile.handle} t={t} />
         </div>
 
-        {/* Sticky right rail — at-a-glance stats and recent activity teaser */}
+        {/* Sticky right rail  at-a-glance stats and recent activity teaser */}
         <aside className="hidden md:sticky md:top-24 md:col-span-3 md:block md:self-start">
           <div className="rounded-2xl bg-[color:var(--color-brand-tint)] p-6">
             <div className="text-[0.7rem] uppercase tracking-[0.24em] text-[color:var(--color-brand-strong)]">
@@ -680,7 +680,7 @@ function SkillsSection({
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// EXPERIENCE — proper vertical timeline
+// EXPERIENCE  proper vertical timeline
 // ─────────────────────────────────────────────────────────────────────────────
 
 function ExperienceTimeline({
@@ -802,7 +802,7 @@ function QualificationsSection({
         ))}
       </ul>
       <p className="mt-4 text-xs italic text-[color:var(--color-ink-soft)]">
-        Document files are gated. Only verified employers can request them —
+        Document files are gated. Only verified employers can request them 
         every access is audit-logged.
       </p>
     </Section>
@@ -810,7 +810,7 @@ function QualificationsSection({
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// GATED ACCESS — consolidated locked panels
+// GATED ACCESS  consolidated locked panels
 // ─────────────────────────────────────────────────────────────────────────────
 
 function GatedSection({

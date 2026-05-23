@@ -5,7 +5,7 @@ import type { PublicProfile } from "./types";
 // - a stale-status citizen (down-ranked, honestly)
 // - a verified Nigerian resident in Cape Town (Location-Not-Nationality Rule)
 // - cross-province spread to exercise filter combinations.
-// Names are intentionally generic ("Thandeka M.") — Redaction Rule.
+// Names are intentionally generic ("Thandeka M.")  Redaction Rule.
 export const mockProfiles: PublicProfile[] = [
   {
     handle: "thandeka-m",
@@ -239,7 +239,7 @@ export const mockProfiles: PublicProfile[] = [
     memberSince: "2026-04-02",
     experience: [
       {
-        role: "Teaching Assistant — COMS1015 Algorithms",
+        role: "Teaching Assistant  COMS1015 Algorithms",
         organization: "Wits · School of CS & Applied Maths",
         city: "Johannesburg",
         startedAt: "2025-02",
@@ -248,7 +248,7 @@ export const mockProfiles: PublicProfile[] = [
           "Tutoring ~40 first-years; grading weekly assignments; co-authored two practical worksheets.",
       },
       {
-        role: "Vacation Work — Software Intern",
+        role: "Vacation Work  Software Intern",
         organization: "Yebo Fresh",
         city: "Cape Town (remote)",
         startedAt: "2024-12",

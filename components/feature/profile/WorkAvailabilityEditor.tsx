@@ -1,11 +1,11 @@
 "use client";
 
 /**
- * Phase 7.5 — Editable checkbox group for /dashboard/profile.
+ * Phase 7.5  Editable checkbox group for /dashboard/profile.
  *
  * Optimistic toggle: clicking flips local state immediately, then
  * fires the Server Action. Roll back on error. Plain checkboxes (not
- * a custom widget) for max accessibility — keyboard + screen reader
+ * a custom widget) for max accessibility  keyboard + screen reader
  * support comes free.
  */
 
@@ -64,7 +64,7 @@ export function WorkAvailabilityEditor({ initialValues }: Props) {
         What work are you open to?
       </legend>
       <p className="mb-4 text-xs text-[color:var(--color-ink-soft)]">
-        Independent of your employment status. Pick everything that fits — a
+        Independent of your employment status. Pick everything that fits  a
         full-time employee can still be open to contract work, a student can
         signal casual shifts.
       </p>

@@ -604,7 +604,7 @@ function AdjacentProfessionCard({
 }
 
 // ──────────────────────────────────────────────────────────────────────────────
-// Student lane — the academic-context section of the Career compass.
+// Student lane  the academic-context section of the Career compass.
 
 function StudentLane({
   academic,

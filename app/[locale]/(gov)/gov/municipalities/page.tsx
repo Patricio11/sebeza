@@ -28,7 +28,7 @@ export default async function GovMunicipalitiesPage({
         <p className="mt-2 text-sm text-[color:var(--color-ink-soft)]">
           We have the data shape (`supply_heatmap_by_city` query reuses the
           province pattern) and the suppression contract. The cell counts
-          aren't there yet — most cities have under 10 active profiles per
+          aren't there yet  most cities have under 10 active profiles per
           profession in the current dataset. Surface unlocks when the
           population threshold is met; we'll never publish a city × profession
           cell with fewer than 10 distinct profiles, by policy.

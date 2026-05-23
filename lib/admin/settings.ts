@@ -1,5 +1,5 @@
 /**
- * Phase 7 — Platform settings loader (read side).
+ * Phase 7  Platform settings loader (read side).
  *
  * Reads from `platform_settings`. The write Server Action lives at
  * `lib/admin/settings-actions.ts` so this file can stay `"server-only"`
@@ -8,7 +8,7 @@
  *
  * Cache: per-request memoisation via React `cache()`. The DB hit is cheap
  * (a single primary-key lookup) and we don't want to over-engineer
- * invalidation — the admin write Action calls `revalidatePath` for every
+ * invalidation  the admin write Action calls `revalidatePath` for every
  * surface that consumes a setting.
  */
 
@@ -27,16 +27,16 @@ export type SettingKey =
   | "feature_flag_2fa_enforced"
   | "feature_flag_email_notifications"
   | "feature_flag_gov_portal"
-  // Phase 7.5 — k-anonymity floor for the longitudinal outcomes
+  // Phase 7.5  k-anonymity floor for the longitudinal outcomes
   // dataset. Cells with fewer than this many distinct profiles
   // are suppressed, with complementary suppression to stop value
   // recovery from row/column totals. Default 10.
   | "outcomes_min_cohort_size"
-  // Phase 8 — gate the real KYC SaaS adapter. Off by default until
+  // Phase 8  gate the real KYC SaaS adapter. Off by default until
   // partnership + provider are confirmed; until then the mock
   // verifier runs (admin manual approval flow).
   | "feature_flag_kyc_provider"
-  // Phase 8 — gate the SAQA async worker. Off by default until
+  // Phase 8  gate the SAQA async worker. Off by default until
   // SAQA NLRD partnership is confirmed; until then admin "Approve"
   // on /admin/verifications flips qualifications directly (Phase 7
   // behaviour).
@@ -59,7 +59,7 @@ const DEFAULTS: Record<SettingKey, unknown> = {
 /**
  * Read a single setting. Returns the JSONB value as-is; the caller
  * narrows the type. Falls back to the bundled default if the row is
- * missing — so a brand-new DB without seeds still boots.
+ * missing  so a brand-new DB without seeds still boots.
  */
 export const getSetting = cache(async <T = unknown>(key: SettingKey): Promise<T> => {
   const db = getDb();

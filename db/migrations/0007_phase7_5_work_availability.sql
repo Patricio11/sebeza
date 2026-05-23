@@ -1,4 +1,4 @@
--- Phase 7.5 — Work-availability dimension + placement source split.
+-- Phase 7.5  Work-availability dimension + placement source split.
 --
 -- New axis on profiles, decoupled from employment_status: a `studying`
 -- person can signal `casual`; a `full_time` employee can signal
@@ -32,7 +32,7 @@ ALTER TABLE "profiles"
   NOT NULL DEFAULT '{}'::work_availability_kind[];
 
 -- GIN index supports `&&` (overlaps) + `@>` (contains) array predicates
--- — the shape `searchProfilesQuery` uses for multi-select filters.
+--  the shape `searchProfilesQuery` uses for multi-select filters.
 CREATE INDEX IF NOT EXISTS profiles_work_availability_gin_idx
   ON profiles USING GIN (work_availability);
 

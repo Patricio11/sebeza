@@ -1,5 +1,5 @@
 /**
- * Phase 9 — Rate limiter interface.
+ * Phase 9  Rate limiter interface.
  *
  * Provider-agnostic so we can swap the storage layer without touching
  * the call sites. Default implementation is an in-memory sliding
@@ -34,19 +34,19 @@ export interface RateLimiter {
 
 export const BUCKETS = {
   /**
-   * revealContact action — per (org member × profile) per hour.
+   * revealContact action  per (org member × profile) per hour.
    * Catches accidental tab-loops + deliberate scrape attempts. No
    * legitimate-user collision (revealing one person 20+ times in an
    * hour is the failure mode, not the use case).
    */
   "reveal": { limit: 20, windowSeconds: 60 * 60 },
   /**
-   * uploadDocument / uploadPhoto — keeps storage costs sane against
+   * uploadDocument / uploadPhoto  keeps storage costs sane against
    * a single user accidentally or maliciously pushing a flood.
    */
   "upload": { limit: 5, windowSeconds: 10 * 60 },
   /**
-   * Public search GET — scraper guard. Generous; legitimate users
+   * Public search GET  scraper guard. Generous; legitimate users
    * never hit this.
    */
   "search": { limit: 30, windowSeconds: 60 },

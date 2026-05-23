@@ -1,12 +1,12 @@
 "use server";
 
 /**
- * Phase 7 (Task 7.6) — Server Actions for the bell + preferences UI.
+ * Phase 7 (Task 7.6)  Server Actions for the bell + preferences UI.
  *
- *   - markRead({ id })       — flip one row's read_at.
- *   - markAllRead()          — flip every unread row for the user.
- *   - updateNotificationPref — toggle inApp / email for one kind.
- *   - getUnreadCountForBell  — wrapper around the cached query so the
+ *   - markRead({ id })        flip one row's read_at.
+ *   - markAllRead()           flip every unread row for the user.
+ *   - updateNotificationPref  toggle inApp / email for one kind.
+ *   - getUnreadCountForBell   wrapper around the cached query so the
  *                              client-side bell can re-poll cheaply.
  *
  * Every action calls `verifySession()`. Notifications belong to one
@@ -58,7 +58,7 @@ export async function markRead(input: { id: string }): Promise<ActionResult> {
     );
 
   // The bell mounts inside DashboardShell across every dashboard
-  // surface — revalidate broadly so the unread badge re-renders on
+  // surface  revalidate broadly so the unread badge re-renders on
   // the next navigation (no polling needed).
   revalidatePath("/dashboard", "layout");
   revalidatePath("/employer", "layout");
@@ -81,7 +81,7 @@ export async function markAllRead(): Promise<ActionResult> {
     );
 
   // The bell mounts inside DashboardShell across every dashboard
-  // surface — revalidate broadly so the unread badge re-renders on
+  // surface  revalidate broadly so the unread badge re-renders on
   // the next navigation (no polling needed).
   revalidatePath("/dashboard", "layout");
   revalidatePath("/employer", "layout");
