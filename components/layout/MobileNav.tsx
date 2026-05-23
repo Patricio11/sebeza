@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/i18n/navigation";
 import { LocaleSwitcher } from "@/components/feature/LocaleSwitcher";
 import { SAChevron } from "@/components/ui/SAChevron";
+import { SebenzaLogo } from "@/components/ui/SebenzaLogo";
 import { Menu, X } from "lucide-react";
 
 /**
@@ -100,15 +101,10 @@ export function MobileNav({
               <Link
                 href="/"
                 onClick={() => setOpen(false)}
-                className="flex items-baseline gap-2"
+                aria-label="Sebenza  home"
+                className="flex items-center"
               >
-                <SAChevron variant="mark" className="size-3.5 translate-y-[1px]" />
-                <span className="font-display text-[1.5rem] leading-none">
-                  Sebenza
-                </span>
-                <span className="text-[0.62rem] uppercase tracking-[0.24em] text-[color:var(--color-ink-soft)]">
-                  ZA
-                </span>
+                <SebenzaLogo width={130} />
               </Link>
               <button
                 type="button"

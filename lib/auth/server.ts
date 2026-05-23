@@ -159,8 +159,7 @@ function shell(body: string): string {
             </tr>
             <tr>
               <td style="padding:32px 32px 8px;">
-                <span style="font-family:'Fraunces',Georgia,serif;font-size:24px;font-weight:600;color:#14110d;">Sebenza</span>
-                <span style="display:inline-block;margin-left:4px;font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:#5a5249;vertical-align:middle;">ZA</span>
+                <img src="${(process.env.BETTER_AUTH_URL ?? "http://localhost:3000").replace(/\/$/, "")}/sebenza-logo.svg" alt="Sebenza" width="170" height="35" style="display:block;border:0;outline:none;text-decoration:none;height:35px;width:170px;" />
               </td>
             </tr>
             <tr>

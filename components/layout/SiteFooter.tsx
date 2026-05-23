@@ -2,6 +2,7 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { LocaleSwitcher } from "@/components/feature/LocaleSwitcher";
 import { SAChevron } from "@/components/ui/SAChevron";
+import { SebenzaLogo } from "@/components/ui/SebenzaLogo";
 
 /**
  * Editorial multi-column footer. Carries the same flag stripe at its top edge
@@ -34,15 +35,10 @@ export function SiteFooter() {
           <div className="col-span-2 md:col-span-5">
             <Link
               href="/"
-              className="inline-flex items-baseline gap-2 rounded-sm focus-visible:outline-none"
+              aria-label="Sebenza  home"
+              className="inline-flex items-center rounded-sm focus-visible:outline-none"
             >
-              <SAChevron variant="mark" className="size-3.5 translate-y-[1px]" />
-              <span className="font-display text-[1.75rem] leading-none">
-                Sebenza
-              </span>
-              <span className="text-[0.62rem] uppercase tracking-[0.24em] text-[color:var(--color-paper)]/60">
-                ZA
-              </span>
+              <SebenzaLogo tone="light" width={170} />
             </Link>
             <p className="mt-5 max-w-md text-[color:var(--color-paper)]/75">
               {tMeta("description")}

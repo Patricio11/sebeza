@@ -1,7 +1,7 @@
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { LocaleSwitcher } from "@/components/feature/LocaleSwitcher";
-import { SAChevron } from "@/components/ui/SAChevron";
+import { SebenzaLogo } from "@/components/ui/SebenzaLogo";
 import { MobileNav } from "@/components/layout/MobileNav";
 
 /**
@@ -26,15 +26,10 @@ export function LandingHeader() {
       <div className="mx-auto flex max-w-[1320px] items-center justify-between px-5 py-5 md:px-10">
         <Link
           href="/"
-          className="group flex items-baseline gap-2 rounded-sm focus-visible:outline-none"
+          aria-label="Sebenza  home"
+          className="group flex items-center rounded-sm focus-visible:outline-none"
         >
-          <SAChevron variant="mark" className="size-3.5 translate-y-[1px]" />
-          <span className="font-display text-[1.75rem] leading-none tracking-tight text-[color:var(--color-sa-charcoal)]">
-            Sebenza
-          </span>
-          <span className="text-[0.62rem] uppercase tracking-[0.28em] text-[color:var(--color-ink-soft)]">
-            ZA
-          </span>
+          <SebenzaLogo width={170} />
         </Link>
 
         <nav

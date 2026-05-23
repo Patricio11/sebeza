@@ -5,10 +5,16 @@
  * templates can reuse the brand chrome. Keep this file presentation-
  * only; logic stays in `lib/email/send.ts`.
  *
- * Standard SA-flag stripe top border + Fraunces/Hanken-style stack
- * fallback chain (we can't web-font from email so the cascade picks
- * up the best system serif/sans).
+ * Standard SA-flag stripe top border + brand wordmark loaded from the
+ * deployed origin. Note: Outlook (Win) doesn't render SVG  the alt
+ * text degrades to "Sebenza" there. A PNG fallback can be generated and
+ * dropped at `/sebenza-logo.png` if Outlook becomes a priority surface.
  */
+
+function logoSrc(): string {
+  const base = process.env.BETTER_AUTH_URL ?? "http://localhost:3000";
+  return `${base.replace(/\/$/, "")}/sebenza-logo.svg`;
+}
 
 export function emailShell(body: string): string {
   return `<!DOCTYPE html>
@@ -23,8 +29,7 @@ export function emailShell(body: string): string {
             </tr>
             <tr>
               <td style="padding:32px 32px 8px;">
-                <span style="font-family:'Fraunces',Georgia,serif;font-size:24px;font-weight:600;color:#14110d;">Sebenza</span>
-                <span style="display:inline-block;margin-left:4px;font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:#5a5249;vertical-align:middle;">ZA</span>
+                <img src="${logoSrc()}" alt="Sebenza" width="170" height="35" style="display:block;border:0;outline:none;text-decoration:none;height:35px;width:170px;" />
               </td>
             </tr>
             <tr>

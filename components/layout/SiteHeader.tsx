@@ -1,7 +1,7 @@
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { LocaleSwitcher } from "@/components/feature/LocaleSwitcher";
-import { SAChevron } from "@/components/ui/SAChevron";
+import { SebenzaLogo } from "@/components/ui/SebenzaLogo";
 import { MobileNav } from "@/components/layout/MobileNav";
 
 interface Props {
@@ -36,15 +36,10 @@ export function SiteHeader({ variant = "default" }: Props) {
         <div className="mx-auto flex max-w-[1320px] items-center justify-between gap-6 px-5 py-3 md:px-8">
           <Link
             href="/"
-            className="group flex items-baseline gap-2 rounded-sm focus-visible:outline-none"
+            aria-label="Sebenza  home"
+            className="group flex items-center rounded-sm focus-visible:outline-none"
           >
-            <SAChevron variant="mark" className="size-3.5 translate-y-[1px]" />
-            <span className="font-display text-[1.6rem] leading-none tracking-tight text-[color:var(--color-ink)]">
-              Sebenza
-            </span>
-            <span className="text-[0.62rem] uppercase tracking-[0.24em] text-[color:var(--color-ink-soft)]">
-              ZA
-            </span>
+            <SebenzaLogo width={140} />
           </Link>
 
           {variant === "default" && (

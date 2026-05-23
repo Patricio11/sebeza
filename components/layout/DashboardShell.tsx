@@ -1,6 +1,7 @@
 import { Link } from "@/i18n/navigation";
 import { LocaleSwitcher } from "@/components/feature/LocaleSwitcher";
 import { SAChevron } from "@/components/ui/SAChevron";
+import { SebenzaLogo } from "@/components/ui/SebenzaLogo";
 import { SignOutButton } from "@/components/feature/auth/SignOutButton";
 import { NotificationBell } from "@/components/feature/notifications/NotificationBell";
 import { listForUser, unreadCount } from "@/lib/notifications/query";
@@ -113,12 +114,12 @@ export function DashboardShell({
               aria-hidden="true"
               className={cn("absolute inset-y-0 left-0 w-1", roleAccent.strip)}
             />
-            <Link href="/" className="flex items-baseline gap-2">
-              <SAChevron variant="mark" className="size-3 translate-y-[1px]" />
-              <span className="font-display text-xl leading-none">Sebenza</span>
-              <span className="text-[0.62rem] uppercase tracking-[0.24em] text-[color:var(--color-ink-soft)]">
-                ZA
-              </span>
+            <Link
+              href="/"
+              aria-label="Sebenza  home"
+              className="flex items-center"
+            >
+              <SebenzaLogo width={120} />
             </Link>
           </div>
 
@@ -188,9 +189,12 @@ export function DashboardShell({
               <div className="flex-[1] bg-[color:var(--color-danger)]" />
             </div>
             <div className="flex items-center justify-between gap-3 px-5 py-3">
-              <Link href="/" className="flex items-baseline gap-1.5">
-                <SAChevron variant="mark" className="size-3 translate-y-[1px]" />
-                <span className="font-display text-lg">Sebenza</span>
+              <Link
+                href="/"
+                aria-label="Sebenza  home"
+                className="flex items-center"
+              >
+                <SebenzaLogo width={110} />
               </Link>
               <div className="flex items-center gap-2">
                 <span
