@@ -36,8 +36,27 @@ interface Props {
 export async function generateMetadata({ params }: Props) {
   const { handle } = await params;
   const p = await dataProvider.getProfile(handle);
+  if (!p) return { title: "Profile" };
+  const title = `${p.displayName} · ${p.profession}`;
+  const description = `${p.displayName} — ${p.profession} based in ${p.city}, ${p.province}. Trust-verified Sebenza profile.`;
   return {
-    title: p ? `${p.displayName} · ${p.profession}` : "Profile",
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      type: "profile",
+      siteName: "Sebenza",
+    },
+    twitter: {
+      card: "summary",
+      title,
+      description,
+    },
+    alternates: {
+      canonical: `/p/${p.handle}`,
+    },
+    robots: { index: true, follow: true },
   };
 }
 

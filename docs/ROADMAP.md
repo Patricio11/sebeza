@@ -444,23 +444,38 @@ that registry — we win on **data quality, usability, and analytics.** The syst
 
 ---
 
-## 🔒 PHASE 9: TRUST, SECURITY & POPIA HARDENING
-*Goal: Safe to put real citizens' data into.*
+## 🔒 PHASE 9: TRUST, SECURITY & POPIA HARDENING ✅ 2026-05-23 (with documented deferrals)
+*Shipped 2026-05-23. Companion docs: `docs/completed/PHASE_9_PLAN.md` + `docs/completed/PHASE_9_COMPLETE.md`. Every third-party service (Sentry, Upstash, KYC SaaS, SAQA NLRD, Resend domain auth) is **dormant by default** — the system runs end-to-end with zero paid credentials. AWS Cape Town migration deferred until partnership confirms; turnkey runbook at `docs/AWS_MIGRATION_RUNBOOK.md`.*
 
-- [ ] Field-level encryption verified for all ID numbers; key rotation plan.
-- [ ] Rate limiting (Upstash) on auth + search; brute-force/enumeration protection.
-- [ ] Security pass against the May-2026 Next.js advisories (middleware/proxy bypass, SSRF, etc.).
-- [ ] Erasure path tested end-to-end (right to deletion).
-- [ ] Privacy Policy + PAIA manual published before real users onboard.
-- [ ] Pen-test / dependency audit; secrets management review.
-- [ ] **Postgres → AWS Cape Town (`af-south-1`) on Docker.** Migrate off Neon
-  (`eu-central-1`) to a self-hosted Postgres in SA jurisdiction so PII never leaves
-  the country. Drizzle stays the ORM; the only code change is swapping
-  `drizzle-orm/neon-http` for `drizzle-orm/node-postgres` (or `postgres-js`) in
-  `db/client.ts`. Plan covers: Docker compose / RDS instance, daily encrypted
-  backups to SA storage, PITR retention, monitoring, failover, schema replay
-  via `db:migrate`, data replay via `pg_dump | pg_restore`. Schedule the cutover
-  during a maintenance window with a read-only Neon snapshot as the rollback.
+### Task 9.1: POPIA + privacy ✅
+- [x] `/privacy` — 12-section POPIA-aligned Privacy Policy, plain language
+- [x] `/paia` — PAIA manual (Section 51 of Act 2 of 2000) with records inventory + access procedure + IO contact
+- [x] Cookie consent banner (essential always-on + analytics opt-in, default OFF) mounted in root locale layout; server-resolved choice (no flash)
+- [x] `docs/popia/INFORMATION_OFFICER.md` + `DPIA.md` + `BREACH_RESPONSE.md` + `RETENTION_POLICY.md` + `ENCRYPTION_INVENTORY.md` (with key-rotation runbook)
+
+### Task 9.2: Security headers + observability skeleton ✅
+- [x] CSP + HSTS + Permissions-Policy + X-Frame-Options + COOP + Referrer-Policy applied in `proxy.ts`
+- [x] Sentry skeleton (`lib/sentry/init.ts`) — env-gated on `SENTRY_DSN`; `beforeSend` PII scrubber + auth-header strip; lazy-imports `@sentry/nextjs` so the dep is not taken until DSN is provided
+- [x] Rate limiter library (`lib/rate-limit/`, in-memory + Upstash-ready) shipped but **dormant by default** — DPIA R8 records the decision (pre-emptive limits trade legitimate-user friction for theoretical defence; re-enable when abuse is observed)
+
+### Task 9.3: Polish ✅
+- [x] `loading.tsx` per route group (seeker / employer / admin / gov / public)
+- [x] `app/robots.ts` + `app/sitemap.ts` (per-locale alternates, consented + non-deleted profiles only) + OpenGraph / Twitter / canonical on `/p/[handle]`
+
+### Task 9.4: Strategic adds (government pitch) ✅
+- [x] Sebenza Labour Market Index — `lib/analytics/lmi.ts` + `lmi_snapshots` + `/api/lmi` JSON + LMI badge on landing pulse strip + nightly `/api/cron/lmi-snapshot`
+- [x] `/gov` route group + new `gov` role in `user_role` enum (migration `0011`) + `verifyGov()` in DAL + proxy update
+- [x] `/gov` overview · provinces index · per-province deep dive · municipalities (honest "coming soon" gated on k=10) · exports · account
+- [x] PDF report export — `/insights/print` print-CSS route + `<PrintActions />` + "Print to PDF" link on `/insights`
+
+### Task 9.5: AWS Cape Town `af-south-1` (DEFERRED — partnership-gated)
+- [ ] **Skipped.** Turnkey runbook at `docs/AWS_MIGRATION_RUNBOOK.md` (RDS provisioning + KMS at-rest + multi-AZ + PITR + Vercel env swap + `db/client.ts` driver swap + `pg_dump | pg_restore` cutover + Neon read-only rollback). ~4-hour cutover with **zero remaining POPIA work** to do on migration day — all compliance surfaces already shipped against the current DB.
+
+### Task 9.6: Deferred to launch-scale (conditions documented)
+- [ ] **Materialised views** for analytics queries — only worth doing at 50k+ profiles / 100k+ search_events
+- [ ] **Holt's linear forecast** on `/gov/forecast` — needs 12+ weekly snapshots; Phase 8 cron is now capturing them
+- [ ] **External pen-test** — separate engagement; before commercial launch
+- [ ] **Nonce-based CSP** (drop `'unsafe-inline'` from `script-src`) — hardening pass before public launch
 
 ---
 

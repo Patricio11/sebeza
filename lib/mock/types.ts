@@ -17,7 +17,7 @@ export type VerificationStatus =
 
 export type Seniority = "junior" | "intermediate" | "senior";
 
-export type UserRole = "seeker" | "employer" | "admin";
+export type UserRole = "seeker" | "employer" | "admin" | "gov";
 
 export type FreshnessBand = "fresh" | "ageing" | "stale";
 

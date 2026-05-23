@@ -4,6 +4,8 @@ import { getMessages, setRequestLocale } from "next-intl/server";
 import { Fraunces, Hanken_Grotesk } from "next/font/google";
 import { notFound } from "next/navigation";
 import { routing, type AppLocale } from "@/i18n/routing";
+import { CookieConsentBanner } from "@/components/feature/legal/CookieConsentBanner";
+import { readCookieConsent } from "@/lib/cookies/consent";
 import "../globals.css";
 
 // Subset to latin (Tier 1 locales — en/zu/xh/af — all use latin).
@@ -52,12 +54,16 @@ export default async function LocaleLayout({
   setRequestLocale(locale);
 
   const messages = await getMessages();
+  const consent = await readCookieConsent();
 
   return (
     <html lang={locale} className={`${fraunces.variable} ${hanken.variable}`}>
       <body className="min-h-screen bg-[color:var(--color-paper)] text-[color:var(--color-ink)]">
         <NextIntlClientProvider locale={locale} messages={messages}>
           {children}
+          {/* Phase 9 — cookie consent banner. Renders only when no
+              choice has been made yet (consent.recordedAt === null). */}
+          <CookieConsentBanner alreadyDecided={Boolean(consent.recordedAt)} />
         </NextIntlClientProvider>
       </body>
     </html>

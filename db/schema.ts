@@ -47,7 +47,14 @@ export const verificationStatus = pgEnum("verification_status", [
   "rejected",
 ]);
 
-export const userRole = pgEnum("user_role", ["seeker", "employer", "admin"]);
+// Phase 9 — added `gov` for the government / policy / SETA-partner
+// workspace. Admins promote a user to `gov` from the admin users surface.
+export const userRole = pgEnum("user_role", [
+  "seeker",
+  "employer",
+  "admin",
+  "gov",
+]);
 
 export const consentPurpose = pgEnum("consent_purpose", [
   "searchability",
@@ -638,6 +645,23 @@ export const outcomeSnapshots = pgTable("outcome_snapshots", {
   topDestinationProfession: text("top_destination_profession"),
   /** k value applied at capture — for honesty when the floor changes later. */
   minCohortSize: integer("min_cohort_size").notNull(),
+});
+
+/**
+ * Phase 9 — Sebenza Labour Market Index time-series.
+ *
+ * One row per snapshot. The composite `value` is stored as text so
+ * PG numeric rounding doesn't drift the index across the wire. The
+ * three component scores are kept alongside so anyone questioning the
+ * index can drill into what moved.
+ */
+export const lmiSnapshots = pgTable("lmi_snapshots", {
+  id: text("id").primaryKey(),
+  capturedAt: timestamp("captured_at").notNull().defaultNow(),
+  value: text("value").notNull(),
+  freshnessRatio: text("freshness_ratio").notNull(),
+  metDemand: text("met_demand").notNull(),
+  placementVelocity: text("placement_velocity").notNull(),
 });
 
 /**

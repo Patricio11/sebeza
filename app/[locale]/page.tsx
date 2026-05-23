@@ -304,7 +304,7 @@ function DossierStat({
 // PULSE STRIP — the high-contrast moment
 // ─────────────────────────────────────────────────────────────────────────────
 
-function PulseStrip({
+async function PulseStrip({
   t,
   analytics,
   confidence,
@@ -318,6 +318,11 @@ function PulseStrip({
   const currentMonth = new Intl.DateTimeFormat(locale, { month: "long" }).format(
     new Date(),
   );
+  const { lmiWithTrend } = await import("@/lib/analytics/lmi");
+  const lmi = await lmiWithTrend();
+  const lmiDelta = lmi.previous
+    ? lmi.current.value - lmi.previous.value
+    : null;
   return (
     <section
       aria-labelledby="pulse-h"
@@ -329,9 +334,30 @@ function PulseStrip({
       <div className="relative mx-auto max-w-[1320px] px-5 py-20 md:px-10 md:py-28">
         <div className="grid gap-8 md:grid-cols-[1fr_auto] md:items-end">
           <div>
-            <div className="flex items-center gap-3 text-[0.72rem] uppercase tracking-[0.28em] text-[color:var(--color-sa-gold)]">
+            <div className="flex flex-wrap items-center gap-3 text-[0.72rem] uppercase tracking-[0.28em] text-[color:var(--color-sa-gold)]">
               <SAChevron variant="mark" className="size-3" />
               Bulletin · {new Date().toISOString().slice(0, 10)}
+              <span className="rounded-[var(--radius-pill)] border border-[color:var(--color-sa-gold)]/40 px-2 py-0.5 text-[0.6rem] normal-case tracking-normal text-[color:var(--color-sa-cream)]/90">
+                Sebenza LMI{" "}
+                <span className="font-mono tabular text-[color:var(--color-sa-gold)]">
+                  {lmi.current.value.toFixed(2)}
+                </span>
+                {lmiDelta != null && (
+                  <span
+                    className={
+                      "ml-1 " +
+                      (lmiDelta > 0
+                        ? "text-[color:var(--color-sa-gold)]"
+                        : lmiDelta < 0
+                          ? "text-[color:var(--color-sa-red)]"
+                          : "text-[color:var(--color-sa-cream)]/70")
+                    }
+                  >
+                    ({lmiDelta > 0 ? "+" : ""}
+                    {lmiDelta.toFixed(2)})
+                  </span>
+                )}
+              </span>
             </div>
             <h2
               id="pulse-h"

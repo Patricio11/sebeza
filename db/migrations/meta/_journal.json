@@ -71,6 +71,20 @@
       "when": 1779740000000,
       "tag": "0009_phase8",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1779750000000,
+      "tag": "0010_phase9",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1779750500000,
+      "tag": "0011_phase9_gov_role",
+      "breakpoints": false
     }
   ]
 }

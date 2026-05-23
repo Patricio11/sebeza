@@ -38,8 +38,71 @@ function isProtected(pathname: string): boolean {
     withoutLocale === "/employer" ||
     withoutLocale.startsWith("/employer/") ||
     withoutLocale === "/admin" ||
-    withoutLocale.startsWith("/admin/")
+    withoutLocale.startsWith("/admin/") ||
+    // Phase 9 — gov workspace
+    withoutLocale === "/gov" ||
+    withoutLocale.startsWith("/gov/")
   );
+}
+
+/**
+ * Phase 9 — Security headers applied to every response.
+ *
+ * Strict CSP that allows:
+ *   - script-src 'self' (plus 'unsafe-inline' for Next's hydration
+ *     bootstrap until we wire nonce-based CSP — documented below)
+ *   - connect-src 'self' + Supabase + Resend + the configured app URL
+ *   - frame-ancestors 'none' (with X-Frame-Options as legacy fallback)
+ *   - object-src 'none' (no Flash, no plugins)
+ *   - base-uri 'self' (anti-injection)
+ *
+ * HSTS sticks at 2 years with includeSubDomains + preload — once we
+ * cut over to production this is one-way. Permissions-Policy disables
+ * camera / microphone / geolocation by default (we don't use them).
+ *
+ * NOTE: `'unsafe-inline'` on `script-src` is the standard Next.js
+ * starting position because Next emits inline bootstrap scripts. The
+ * Phase 9.x hardening pass swaps to nonce-based CSP once we verify
+ * nothing legitimate breaks under report-only mode. Tracked at
+ * docs/popia/ENCRYPTION_INVENTORY.md "Open items".
+ */
+function securityHeaders(): Record<string, string> {
+  const supabaseHost = process.env.NEXT_PUBLIC_SUPABASE_URL
+    ? new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).origin
+    : "https://*.supabase.co";
+  const csp = [
+    "default-src 'self'",
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+    "style-src 'self' 'unsafe-inline'",
+    "img-src 'self' data: blob: https:",
+    "font-src 'self' data:",
+    `connect-src 'self' ${supabaseHost} https://api.resend.com https://api.qrserver.com`,
+    "frame-ancestors 'none'",
+    "form-action 'self'",
+    "base-uri 'self'",
+    "object-src 'none'",
+    "upgrade-insecure-requests",
+  ].join("; ");
+
+  return {
+    "Content-Security-Policy": csp,
+    "Strict-Transport-Security":
+      "max-age=63072000; includeSubDomains; preload",
+    "X-Frame-Options": "DENY",
+    "X-Content-Type-Options": "nosniff",
+    "Referrer-Policy": "strict-origin-when-cross-origin",
+    "Permissions-Policy":
+      "camera=(), microphone=(), geolocation=(), interest-cohort=()",
+    "Cross-Origin-Opener-Policy": "same-origin",
+  };
+}
+
+function withSecurityHeaders(response: NextResponse): NextResponse {
+  const headers = securityHeaders();
+  for (const [k, v] of Object.entries(headers)) {
+    response.headers.set(k, v);
+  }
+  return response;
 }
 
 export default function proxy(request: NextRequest) {
@@ -55,11 +118,11 @@ export default function proxy(request: NextRequest) {
       const url = request.nextUrl.clone();
       url.pathname = "/sign-in";
       url.search = `?next=${encodeURIComponent(pathname + search)}`;
-      return NextResponse.redirect(url);
+      return withSecurityHeaders(NextResponse.redirect(url));
     }
   }
 
-  return intl(request);
+  return withSecurityHeaders(intl(request));
 }
 
 export const config = {

@@ -710,7 +710,17 @@ export default async function InsightsPage({
                 <code>analytics.export</code> audit row.
               </p>
             </div>
-            <InsightsExportButton label={t("export")} />
+            <div className="flex flex-wrap items-center gap-3">
+              <InsightsExportButton label={t("export")} />
+              <a
+                href="/insights/print"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex h-10 items-center gap-2 rounded-[var(--radius-pill)] border border-[color:var(--color-ink)] px-4 text-sm font-medium hover:bg-[color:var(--color-ink)] hover:text-[color:var(--color-paper)]"
+              >
+                Print to PDF
+              </a>
+            </div>
           </section>
         </div>
       </main>

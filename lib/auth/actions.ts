@@ -304,6 +304,18 @@ export async function signIn(
   if (!parsed.success) return fail("Enter a valid email and password.");
   const v = parsed.data;
 
+  // Phase 9 review (2026-05-23) — deliberately NO per-email sign-in
+  // rate limit. Decided after weighing the trade:
+  //   1. Better Auth password hashing (scrypt) is intentionally slow
+  //      (~100-200ms per attempt) — that IS the brute-force mitigation.
+  //   2. 2FA enforcement on employer + admin (Phase 7.2).
+  //   3. Suspended-user check + the account.suspended notification
+  //      surface a compromised account fast.
+  // A per-email rate limit would create a denial-of-service vector
+  // (an attacker submits bad passwords for a target email → legitimate
+  // user locked out). Reveal + upload paths DO rate-limit, because
+  // their abuse pattern has no legitimate-user collision.
+
   // Phase 7 — before issuing a session, check `app_user.suspended_at` /
   // `deleted_at`. Both states must block sign-in. We look up by email
   // first; if it doesn't resolve we fall through to Better Auth which

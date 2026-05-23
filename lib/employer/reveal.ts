@@ -60,6 +60,16 @@ export async function revealContact(input: {
 }): Promise<ActionResult<{ contact: ContactReveal }>> {
   if (!input?.handle) return fail("Missing profile handle.");
   const session = await verifyOrgVerified();
+
+  // Phase 9 review (2026-05-23) — rate limiting deliberately NOT
+  // enforced anywhere by default. The infrastructure exists in
+  // `lib/rate-limit/` ready to wire when abuse is observed; until
+  // then the existing protections (verified-org gate + per-reveal
+  // consent check + audit log + 30-day reveal-gate window) carry the
+  // load. Re-enable by importing `enforce("reveal", …)` and gating
+  // the action — but only after observing real abuse patterns to
+  // size the budget. See docs/popia/DPIA.md R-series.
+
   const db = getDb();
 
   // Look up the target profile + owning user + active consent.

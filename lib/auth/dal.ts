@@ -177,6 +177,25 @@ export async function verifyAdmin(): Promise<SessionUser> {
 }
 
 /**
+ * Phase 9 — Government / policy / SETA-partner workspace gate.
+ *
+ * Admins are allowed (operational override); everyone else gets
+ * redirected to their own role home. The `/gov` route group is
+ * always behind this guard.
+ *
+ * Note: enforceTwoFactorSetup gates gov + admin alike — POPIA-grade
+ * accounts should never sign in without a second factor.
+ */
+export async function verifyGov(): Promise<SessionUser> {
+  const user = await verifySession();
+  if (user.role !== "gov" && user.role !== "admin") {
+    redirect(roleHome(user.role));
+  }
+  await enforceTwoFactorSetup(user);
+  return user;
+}
+
+/**
  * Phase 7 (Task 7.2) — Forced 2FA enrollment gate for employer + admin.
  *
  * Seekers are not in scope (they use Sebenza on low-end mobile data;
@@ -282,8 +301,11 @@ export async function verifyEmployer(): Promise<SessionUser & Partial<OrgContext
 // 3. Helpers
 // ─────────────────────────────────────────────────────────────────────────────
 
-export function roleHome(role: UserRole): "/dashboard" | "/employer" | "/admin" {
+export function roleHome(
+  role: UserRole,
+): "/dashboard" | "/employer" | "/admin" | "/gov" {
   if (role === "employer") return "/employer";
   if (role === "admin") return "/admin";
+  if (role === "gov") return "/gov";
   return "/dashboard";
 }
