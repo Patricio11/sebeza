@@ -40,6 +40,27 @@ import { randomUUID } from "node:crypto";
 
 const SEARCH_LIMIT = 50;
 
+/**
+ * Parse a Postgres array literal coming back from a raw `db.execute()`
+ * call. The Neon HTTP driver auto-decodes built-in array types (e.g.
+ * `text[]`), but custom-enum arrays like `work_availability_kind[]`
+ * come back as the literal string  e.g. `'{casual,part_time}'` or
+ * `'{}'` for an empty array. Drizzle's typed `db.select()` path runs
+ * the right column mappers; raw execute does not.
+ *
+ * The enum values themselves are plain identifiers (no commas, no
+ * quoting), so a naive split-on-comma is correct.
+ */
+function parsePgEnumArray(raw: unknown): string[] {
+  if (Array.isArray(raw)) return raw as string[];
+  if (typeof raw !== "string") return [];
+  const trimmed = raw.trim();
+  if (!trimmed.startsWith("{") || !trimmed.endsWith("}")) return [];
+  const inner = trimmed.slice(1, -1).trim();
+  if (inner === "") return [];
+  return inner.split(",").map((s) => s.trim().replace(/^"|"$/g, ""));
+}
+
 export interface SearchResultRow extends PublicProfile {
   /** Score is exposed for debug / display but not part of the canonical type. */
   score: number;
@@ -166,8 +187,10 @@ export async function searchProfilesQuery(
   `);
   // Neon's raw `execute()` returns timestamp columns as ISO strings, not
   // Date objects (the typed `db.select()` path applies Drizzle column
-  // mappers; raw execute skips them). Type these as `string | Date` and
-  // normalise through `new Date()` below.
+  // mappers; raw execute skips them). Custom-enum arrays
+  // (work_availability_kind[]) come back as PG array literal strings
+  // (e.g. `{casual,part_time}`), not parsed JS arrays. Normalise both
+  // through helpers below.
   const rows = (result as unknown as { rows: Array<{
     id: string;
     handle: string;
@@ -182,7 +205,7 @@ export async function searchProfilesQuery(
     bio: string | null;
     status: string;
     status_confirmed_at: string | Date;
-    work_availability: string[] | null;
+    work_availability: string[] | string | null;
     verification: string;
     completeness: number;
     member_since: string | Date;
@@ -208,7 +231,7 @@ export async function searchProfilesQuery(
     bio: r.bio ?? undefined,
     status: r.status as EmploymentStatus,
     statusConfirmedAt: new Date(r.status_confirmed_at).toISOString(),
-    workAvailability: (r.work_availability ?? []) as WorkAvailabilityKind[],
+    workAvailability: parsePgEnumArray(r.work_availability) as WorkAvailabilityKind[],
     verification: r.verification as VerificationStatus,
     completeness: r.completeness,
     memberSince: new Date(r.member_since).toISOString(),
