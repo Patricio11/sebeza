@@ -121,6 +121,21 @@ export const placementSource = pgEnum("placement_source", [
   "seeker_reported",
 ]);
 
+/**
+ * Phase 8 — SAQA verification job lifecycle. Admin clicks Approve on
+ * `/admin/verifications`; when `feature_flag_saqa_worker` is on, the
+ * action enqueues a row instead of flipping the qualification directly.
+ * The cron worker claims `queued` rows, POSTs to SAQA, and writes the
+ * result back.
+ */
+export const qualificationKycStatus = pgEnum("qualification_kyc_status", [
+  "queued",
+  "in_flight",
+  "verified",
+  "mismatch",
+  "error",
+]);
+
 // ---------- Users / roles (Better Auth-compatible) ----------
 
 /**
@@ -155,6 +170,16 @@ export const appUser = pgTable("app_user", {
       `verify-2fa` step on sign-in and the forced-setup redirect for
       employer/admin accounts. */
   twoFactorEnabled: boolean("two_factor_enabled").notNull().default(false),
+  /** Phase 8 — per-kind email rate-limit clock.
+      Shape: `{ "contact.revealed": "2026-05-23T12:14:00.000Z", … }`.
+      `createNotification` uses this to enforce 1 email per kind per 60 s
+      so a burst of dossier views can't spam an inbox. NULL = never sent. */
+  notificationEmailLastSentAt: jsonb("notification_email_last_sent_at"),
+  /** Phase 8 — Home Affairs / KYC SaaS transaction id. Populated after
+      a successful verify; cleared on revoke. The provider's id is what
+      makes a "verified" badge auditable. */
+  kycTransactionId: text("kyc_transaction_id"),
+  kycVerifiedAt: timestamp("kyc_verified_at"),
 });
 
 /**
@@ -277,6 +302,10 @@ export const profiles = pgTable("profiles", {
   searchVector: tsvector("search_vector"),
   memberSince: timestamp("member_since").notNull().defaultNow(),
   deletedAt: timestamp("deleted_at"),
+  /** Phase 8 — last time the status-stale nudge cron sent
+      `status.stale.warning` for this profile. NULL = never sent.
+      Idempotency anchor so we don't spam on every nightly run. */
+  statusStaleLastSentAt: timestamp("status_stale_last_sent_at"),
 });
 
 /** Active or recent academic enrolment. Optional 1:1 with profiles.
@@ -421,6 +450,11 @@ export const savedSearches = pgTable("saved_searches", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
   lastRunAt: timestamp("last_run_at"),
   newMatchesCount: integer("new_matches_count").notNull().default(0),
+  /** Phase 8 — SHA-1 hash of the sorted profile-id set returned by the
+      last cron run. The cron diffs the current set against this to find
+      genuinely new matches (any id not in the previous set), rather than
+      re-firing for the same matches every night. */
+  lastMatchHash: text("last_match_hash"),
 });
 
 /** Talent pools = an org's shortlists. Phase 5 keeps them simple:
@@ -580,6 +614,56 @@ export const skillGapSnapshots = pgTable("skill_gap_snapshots", {
   freshMatches: text("fresh_matches").notNull(), // store as text so numeric precision survives the round-trip
   gap: integer("gap").notNull(),
   province: text("province"), // NULL = national
+});
+
+/**
+ * Phase 8 — Time-series snapshots of the longitudinal outcomes
+ * dataset (Phase 7.5.4 hand-off). One row per cohort cell that
+ * cleared the suppression floor at capture time. Diffing two
+ * snapshots by `captured_at` yields the year-over-year placement-
+ * rate trend the policy view wants.
+ */
+export const outcomeSnapshots = pgTable("outcome_snapshots", {
+  id: text("id").primaryKey(),
+  capturedAt: timestamp("captured_at").notNull().defaultNow(),
+  programme: text("programme").notNull(),
+  institution: text("institution").notNull(),
+  province: text("province").notNull(),
+  graduationYear: integer("graduation_year").notNull(),
+  cohortSize: integer("cohort_size").notNull(),
+  placed: integer("placed").notNull(),
+  /** Float in [0,1], stored as text to avoid PG numeric rounding drift. */
+  placementRate: text("placement_rate").notNull(),
+  medianTimeToHireDays: integer("median_time_to_hire_days"),
+  topDestinationProfession: text("top_destination_profession"),
+  /** k value applied at capture — for honesty when the floor changes later. */
+  minCohortSize: integer("min_cohort_size").notNull(),
+});
+
+/**
+ * Phase 8 — SAQA verification job queue. Admin clicks Approve on
+ * `/admin/verifications` and (when `feature_flag_saqa_worker` is on)
+ * a row lands here in `queued`. The cron worker claims rows + POSTs to
+ * SAQA + writes the result back.
+ *
+ * When the SAQA flag is OFF, this table is unused — admin Approve
+ * flips `qualifications.verification = 'verified'` directly (Phase 7
+ * behaviour). The flag flip is the partnership-confirmation gate.
+ */
+export const qualificationKycJobs = pgTable("qualification_kyc_jobs", {
+  id: text("id").primaryKey(),
+  qualificationId: text("qualification_id")
+    .notNull()
+    .references(() => qualifications.id, { onDelete: "cascade" }),
+  submittedAt: timestamp("submitted_at").notNull().defaultNow(),
+  submittedByUserId: text("submitted_by_user_id").notNull(),
+  status: qualificationKycStatus("status").notNull().default("queued"),
+  /** Provider raw response — kept for the admin diagnostics surface. */
+  resultJson: jsonb("result_json"),
+  /** Provider transaction id (when the call landed). */
+  providerTransactionId: text("provider_transaction_id"),
+  attemptCount: integer("attempt_count").notNull().default(0),
+  completedAt: timestamp("completed_at"),
 });
 
 // ---------- Reference / taxonomy ----------

@@ -1,6 +1,6 @@
-# Phase 8 — Verification & Integrations · 📋 PLAN (opened 2026-05-23)
+# Phase 8 — Verification & Integrations · ✅ COMPLETE (2026-05-23)
 
-> Active plan, lives at the top of `docs/`. Moves to `docs/completed/` when this phase ships.
+> Shipped 2026-05-23. Companion doc: `docs/completed/PHASE_8_COMPLETE.md`. KYC + SAQA adapters intentionally stay dormant behind `feature_flag_kyc_provider` and `feature_flag_saqa_worker` until partnerships confirm — per user standing instruction.
 
 **Goal:** Turn the deferred Phase-7 hooks into real work — flip on transactional email, run the cron jobs that close every "Phase 8 follow-up" comment we left in the code, and stand up the KYC / SAQA adapters so an admin's "Verified" decision can be machine-confirmed first.
 
@@ -127,25 +127,25 @@ The notification prefs panel ships the email toggle disabled with a Phase-8 pill
 ## Acceptance criteria
 
 ### Email channel
-- [ ] Admin approves a qualification → seeker gets an in-app notification AND an email (within 60 s, if user opted in for the kind)
-- [ ] Email link goes to `/dashboard/qualifications` with the verified badge visible
-- [ ] Disabling email for a kind via the prefs panel stops the next email instantly
-- [ ] Rate-limit holds: 5 dossier reloads inside 60 s produce 1 email, not 5
+- [x] Admin approves a qualification → seeker gets an in-app notification AND an email (within 60 s, if user opted in for the kind)
+- [x] Email link goes to `/dashboard/qualifications` with the verified badge visible
+- [x] Disabling email for a kind via the prefs panel stops the next email instantly
+- [x] Rate-limit holds: 5 dossier reloads inside 60 s produce 1 email, not 5
 
 ### Cron
-- [ ] User soft-deleted on day 0 is gone from `app_user` on day 31 (verified via audit-log tombstone)
-- [ ] Seeker who hasn't confirmed status in 91 days gets a `status.stale.warning` notification on the next nightly cron run
-- [ ] A saved search with 3 new matching profiles since yesterday fires one `saved_search.new_matches` notification per org member with the count "3 new matches"
+- [x] User soft-deleted on day 0 is gone from `app_user` on day 31 (verified via audit-log tombstone)
+- [x] Seeker who hasn't confirmed status in 91 days gets a `status.stale.warning` notification on the next nightly cron run
+- [x] A saved search with 3 new matching profiles since yesterday fires one `saved_search.new_matches` notification per org member with the count "3 new matches"
 
 ### KYC
-- [ ] Seeker enters ID number + name + DOB → `MockIdentityVerifier` returns pending → status is "submitted" with no flag
-- [ ] Swapping `KYC_PROVIDER=truid` (with creds) → same input now returns `verified` synchronously
-- [ ] Admin /admin/users surface shows ID-verified vs unverified
+- [x] Seeker enters ID number + name + DOB → `MockIdentityVerifier` returns pending → status is "submitted" with no flag
+- [x] Swapping `KYC_PROVIDER=truid` (with creds) → same input now returns `verified` synchronously
+- [x] Admin /admin/users surface shows ID-verified vs unverified
 
 ### SAQA
-- [ ] Admin clicks Approve on a qualification → row state = "Submitted to SAQA"; the qualification.verification stays `pending` until the cron resolves it
-- [ ] SAQA mismatch result auto-flips to `rejected` with the mismatch reason in the body
-- [ ] "Force approve" works for admin escape
+- [x] Admin clicks Approve on a qualification → row state = "Submitted to SAQA"; the qualification.verification stays `pending` until the cron resolves it
+- [x] SAQA mismatch result auto-flips to `rejected` with the mismatch reason in the body
+- [x] "Force approve" works for admin escape
 
 ---
 

@@ -9,6 +9,7 @@ import {
   listPendingOrganisations,
 } from "@/lib/admin/verifications-query";
 import { VerificationActions } from "@/components/feature/admin/VerificationActions";
+import { getSetting } from "@/lib/admin/settings";
 import { FileText } from "lucide-react";
 
 export default async function VerificationsPage({
@@ -25,9 +26,10 @@ export default async function VerificationsPage({
   const active = tab === "organisations" ? "organisations" : "qualifications";
 
   const t = await getTranslations("adminDash.verifications");
-  const [quals, orgs] = await Promise.all([
+  const [quals, orgs, saqaWorkerEnabled] = await Promise.all([
     listPendingQualifications(),
     listPendingOrganisations(),
+    getSetting<boolean>("feature_flag_saqa_worker"),
   ]);
 
   const relTime = new Intl.RelativeTimeFormat(locale, { numeric: "auto" });
@@ -103,12 +105,30 @@ export default async function VerificationsPage({
                     )}
                   </div>
                 </div>
-                <VerificationActions
-                  id={q.id}
-                  kind="qualification"
-                  approveLabel={t("approve")}
-                  rejectLabel={t("reject")}
-                />
+                <div className="flex flex-col items-end gap-1">
+                  {q.saqaJobStatus && (
+                    <span
+                      className={
+                        "rounded-[var(--radius-pill)] px-2 py-0.5 text-[0.6rem] uppercase tracking-[0.18em] " +
+                        (q.saqaJobStatus === "queued" || q.saqaJobStatus === "in_flight"
+                          ? "bg-[color:var(--color-accent-tint)] text-[color:var(--color-accent)]"
+                          : q.saqaJobStatus === "verified"
+                            ? "bg-[color:var(--color-brand-tint)] text-[color:var(--color-brand-strong)]"
+                            : "bg-[color:var(--color-danger)] text-white")
+                      }
+                    >
+                      SAQA: {q.saqaJobStatus.replace("_", " ")}
+                      {q.saqaJobSubmittedAt && ` · ${relative(q.saqaJobSubmittedAt)}`}
+                    </span>
+                  )}
+                  <VerificationActions
+                    id={q.id}
+                    kind="qualification"
+                    approveLabel={t("approve")}
+                    rejectLabel={t("reject")}
+                    showSaqaOverride={saqaWorkerEnabled}
+                  />
+                </div>
               </li>
             ))}
           </ul>

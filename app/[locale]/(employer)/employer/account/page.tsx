@@ -23,6 +23,7 @@ export default async function EmployerAccountPage({
   const me = await getSessionUser();
   const enforced = await getSetting<boolean>("feature_flag_2fa_enforced");
   const prefs = await getMyNotificationPrefs();
+  const emailChannelEnabled = await getSetting<boolean>("feature_flag_email_notifications");
   const t = await getTranslations("employerDash.account");
   const tOuter = await getTranslations("employerDash");
 
@@ -92,6 +93,7 @@ export default async function EmployerAccountPage({
           <NotificationPrefsPanel
             initialPrefs={prefs}
             kinds={EMPLOYER_NOTIFICATION_KINDS}
+            emailChannelEnabled={emailChannelEnabled}
           />
         </section>
 

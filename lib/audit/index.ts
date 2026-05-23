@@ -75,7 +75,20 @@ export type AuditKind =
   | "taxonomy.remove"
   | "setting.update"
   // Phase 7 (Task 7.2) — admin escape hatch when a user loses device + codes.
-  | "account.2fa.reset";
+  | "account.2fa.reset"
+  // Phase 8 — nightly cron tombstones (system-of-record proof of erasure).
+  | "account.hard_delete"
+  // Phase 8 — self-service erasure path (seeker /dashboard/privacy).
+  | "account.self_erase"
+  // Phase 8 — POPIA data-export download.
+  | "account.data_export"
+  // Phase 8 — KYC verification lifecycle.
+  | "kyc.verify"
+  | "kyc.revoke"
+  // Phase 8 — SAQA worker lifecycle.
+  | "verification.approve.saqa"
+  | "verification.reject.saqa"
+  | "verification.approve.manual_override";
 
 export interface AuditEvent {
   kind: AuditKind;

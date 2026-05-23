@@ -27,9 +27,16 @@ interface Props {
   initialPrefs: NotificationPrefMap | null;
   /** Catalog keys to render. Caller decides which kinds are relevant to the role. */
   kinds: NotificationKind[];
+  /** Phase 8 — whether the master email-channel flag is on. When off,
+   *  the email column stays disabled with a "Phase 8" pill. */
+  emailChannelEnabled?: boolean;
 }
 
-export function NotificationPrefsPanel({ initialPrefs, kinds }: Props) {
+export function NotificationPrefsPanel({
+  initialPrefs,
+  kinds,
+  emailChannelEnabled = false,
+}: Props) {
   return (
     <ul className="divide-y divide-[color:var(--color-hairline)] overflow-hidden rounded-[var(--radius-md)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)]">
       {kinds.map((kind) => (
@@ -37,6 +44,7 @@ export function NotificationPrefsPanel({ initialPrefs, kinds }: Props) {
           key={kind}
           kind={kind}
           initialEffective={effectivePref(initialPrefs, kind)}
+          emailChannelEnabled={emailChannelEnabled}
         />
       ))}
     </ul>
@@ -46,9 +54,11 @@ export function NotificationPrefsPanel({ initialPrefs, kinds }: Props) {
 function PrefRow({
   kind,
   initialEffective,
+  emailChannelEnabled,
 }: {
   kind: NotificationKind;
   initialEffective: NotificationPref;
+  emailChannelEnabled: boolean;
 }) {
   const meta = NOTIFICATION_CATALOG[kind];
   const [pref, setPref] = useState<NotificationPref>(initialEffective);
@@ -61,6 +71,19 @@ function PrefRow({
     setPref((p) => ({ ...p, inApp: next }));
     startTransition(async () => {
       const res = await updateNotificationPref({ kind, inApp: next });
+      if (!res.ok) {
+        setPref(previous);
+        setError(res.message);
+      }
+    });
+  }
+
+  function toggleEmail(next: boolean) {
+    setError(null);
+    const previous = pref;
+    setPref((p) => ({ ...p, email: next }));
+    startTransition(async () => {
+      const res = await updateNotificationPref({ kind, email: next });
       if (!res.ok) {
         setPref(previous);
         setError(res.message);
@@ -92,10 +115,10 @@ function PrefRow({
 
       <Toggle
         label="Email"
-        on={false}
-        disabled
-        pill="Phase 8"
-        onChange={() => {}}
+        on={emailChannelEnabled && pref.email}
+        disabled={!emailChannelEnabled || pending}
+        pill={emailChannelEnabled ? undefined : "Phase 8"}
+        onChange={toggleEmail}
       />
     </li>
   );

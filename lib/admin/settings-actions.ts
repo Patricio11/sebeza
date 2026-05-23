@@ -47,6 +47,8 @@ const KEY_SCHEMAS = {
   // default; admins can raise it but should think very hard before
   // dropping it.
   outcomes_min_cohort_size: z.number().int().min(5).max(200),
+  feature_flag_kyc_provider: z.boolean(),
+  feature_flag_saqa_worker: z.boolean(),
 } as const satisfies Record<SettingKey, z.ZodTypeAny>;
 
 const updateSchema = z.object({
@@ -60,6 +62,8 @@ const updateSchema = z.object({
     "feature_flag_email_notifications",
     "feature_flag_gov_portal",
     "outcomes_min_cohort_size",
+    "feature_flag_kyc_provider",
+    "feature_flag_saqa_worker",
   ] as const),
   value: z.unknown(),
 });

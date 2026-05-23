@@ -16,19 +16,33 @@ interface Props {
   kind: Kind;
   approveLabel: string;
   rejectLabel: string;
+  /** Phase 8 — render a secondary "Force approve" affordance when the
+   *  SAQA worker flag is on (qualification rows only). When false (or
+   *  not a qualification), the secondary button is omitted. */
+  showSaqaOverride?: boolean;
 }
 
-export function VerificationActions({ id, kind, approveLabel, rejectLabel }: Props) {
+export function VerificationActions({
+  id,
+  kind,
+  approveLabel,
+  rejectLabel,
+  showSaqaOverride = false,
+}: Props) {
   const [pending, startTransition] = useTransition();
   const [mode, setMode] = useState<"idle" | "rejecting">("idle");
   const [reason, setReason] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [done, setDone] = useState<"approved" | "rejected" | null>(null);
+  const [done, setDone] = useState<"approved" | "queued" | "rejected" | null>(null);
 
   if (done) {
     return (
       <span className="text-xs uppercase tracking-[0.18em] text-[color:var(--color-ink-soft)]">
-        {done === "approved" ? "Approved" : "Rejected"}
+        {done === "approved"
+          ? "Approved"
+          : done === "queued"
+            ? "Sent to SAQA"
+            : "Rejected"}
       </span>
     );
   }
@@ -92,17 +106,47 @@ export function VerificationActions({ id, kind, approveLabel, rejectLabel }: Pro
         onClick={() => {
           setError(null);
           startTransition(async () => {
-            const res =
-              kind === "qualification"
-                ? await approveQualification({ qualificationId: id })
-                : await approveOrganisation({ orgId: id });
-            if (!res.ok) setError(res.message);
-            else setDone("approved");
+            if (kind === "qualification") {
+              const res = await approveQualification({ qualificationId: id });
+              if (!res.ok) setError(res.message);
+              else setDone(res.queued ? "queued" : "approved");
+            } else {
+              const res = await approveOrganisation({ orgId: id });
+              if (!res.ok) setError(res.message);
+              else setDone("approved");
+            }
           });
         }}
       >
         {pending ? "Saving…" : approveLabel}
       </Button>
+      {showSaqaOverride && kind === "qualification" && (
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          disabled={pending}
+          onClick={() => {
+            if (
+              !window.confirm(
+                "Force approve bypasses the SAQA worker and flips the qualification directly. Use only when SAQA returned an error or you have out-of-band evidence. The action is audit-logged distinctly.",
+              )
+            )
+              return;
+            setError(null);
+            startTransition(async () => {
+              const res = await approveQualification({
+                qualificationId: id,
+                forceApprove: true,
+              });
+              if (!res.ok) setError(res.message);
+              else setDone("approved");
+            });
+          }}
+        >
+          Force approve
+        </Button>
+      )}
       <Button
         type="button"
         variant="secondary"

@@ -18,11 +18,13 @@
 import { getDb } from "@/db/client";
 import * as schema from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { verifyAdmin } from "@/lib/auth/dal";
 import { logAccess } from "@/lib/audit";
 import { createNotification, notifyOrgMembers } from "@/lib/notifications/server";
+import { getSetting } from "@/lib/admin/settings";
 
 export type ActionResult<T extends object = object> =
   | ({ ok: true } & T)
@@ -42,11 +44,14 @@ function fail(message: string): { ok: false; message: string } {
 const approveQualSchema = z.object({
   qualificationId: z.string().min(1),
   note: z.string().max(280).optional(),
+  /** Phase 8 — admin escape hatch to bypass the SAQA queue and verify
+   *  directly even when the worker is on. Audit-logged distinctly. */
+  forceApprove: z.boolean().optional(),
 });
 
 export async function approveQualification(
   input: z.infer<typeof approveQualSchema>,
-): Promise<ActionResult> {
+): Promise<ActionResult<{ queued?: boolean }>> {
   const session = await verifyAdmin();
   const parsed = approveQualSchema.safeParse(input);
   if (!parsed.success) return fail("Invalid input.");
@@ -69,19 +74,49 @@ export async function approveQualification(
   const row = rows[0];
   if (!row) return fail("Qualification not found.");
 
+  // Phase 8 — when the SAQA worker flag is ON and the admin didn't
+  // explicitly force-approve, enqueue a verification job instead of
+  // flipping the column. The cron worker calls SAQA and writes the
+  // result back asynchronously. When the flag is OFF (default), we
+  // fall through to the direct-verify Phase 7 path.
+  const saqaWorkerEnabled = await getSetting<boolean>("feature_flag_saqa_worker");
+  if (saqaWorkerEnabled && !parsed.data.forceApprove) {
+    await db
+      .update(schema.qualifications)
+      .set({ verification: "pending" })
+      .where(eq(schema.qualifications.id, row.id));
+    await db.insert(schema.qualificationKycJobs).values({
+      id: `qkj_${randomUUID()}`,
+      qualificationId: row.id,
+      submittedByUserId: session.id,
+      status: "queued",
+    });
+    await logAccess({
+      kind: "verification.approve.saqa",
+      actor: session.id,
+      subject: row.profileId,
+      meta: { qualificationId: row.id, title: row.title, stage: "queued" },
+    });
+    revalidatePath("/admin/verifications");
+    return ok({ queued: true });
+  }
+
   await db
     .update(schema.qualifications)
     .set({ verification: "verified" })
     .where(eq(schema.qualifications.id, row.id));
 
   await logAccess({
-    kind: "verification.approve",
+    kind: parsed.data.forceApprove
+      ? "verification.approve.manual_override"
+      : "verification.approve",
     actor: session.id,
     subject: row.profileId,
     meta: {
       qualificationId: row.id,
       title: row.title,
       note: parsed.data.note ?? null,
+      forceApprove: parsed.data.forceApprove ?? false,
     },
   });
 

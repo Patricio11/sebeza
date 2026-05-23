@@ -23,6 +23,7 @@ export default async function AdminAccountPage({
   setRequestLocale(locale);
   const me = await verifyAdmin();
   const enforced = await getSetting<boolean>("feature_flag_2fa_enforced");
+  const emailChannelEnabled = await getSetting<boolean>("feature_flag_email_notifications");
   const prefs = await getMyNotificationPrefs();
 
   return (
@@ -85,6 +86,7 @@ export default async function AdminAccountPage({
           <NotificationPrefsPanel
             initialPrefs={prefs}
             kinds={ADMIN_NOTIFICATION_KINDS}
+            emailChannelEnabled={emailChannelEnabled}
           />
         </section>
       </div>

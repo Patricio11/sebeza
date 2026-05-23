@@ -2,7 +2,6 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 import { DashboardShell } from "@/components/layout/DashboardShell";
 import { SEEKER_NAV } from "@/components/layout/seekerNav";
-import { Button } from "@/components/ui/Button";
 import { ConsentRow } from "@/components/feature/auth/ConsentRow";
 import { getMyProfile } from "@/lib/profile/me";
 import { CONSENT_PURPOSES, type ConsentState } from "@/lib/consent";
@@ -10,7 +9,8 @@ import { verifyRole } from "@/lib/auth/dal";
 import { getDb } from "@/db/client";
 import { consents } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import { Trash2, Download } from "lucide-react";
+import { Download } from "lucide-react";
+import { SelfEraseForm } from "@/components/feature/profile/SelfEraseForm";
 
 interface ConsentSnapshot {
   state: ConsentState;
@@ -122,22 +122,16 @@ export default async function PrivacyPage({
             <p className="mt-2 text-sm text-[color:var(--color-ink-soft)]">
               {t("exportBody")}
             </p>
-            <Button
-              type="button"
-              variant="primary"
-              size="md"
-              className="mt-4"
-              disabled
+            <a
+              href="/api/dashboard/data-export"
+              className="mt-4 inline-flex items-center gap-2 rounded-[var(--radius-pill)] bg-[color:var(--color-ink)] px-4 py-2 text-sm font-medium text-[color:var(--color-paper)]"
             >
               <Download className="size-4" aria-hidden="true" />
-              {t("exportCta")}{" "}
-              <span className="ml-2 text-[0.62rem] uppercase tracking-[0.18em]">
-                Phase 8
-              </span>
-            </Button>
+              {t("exportCta")}
+            </a>
             <p className="mt-2 text-xs text-[color:var(--color-ink-soft)]">
-              Data-export job wires up in Phase 8 alongside the transactional
-              email pipeline (we email you a signed download link).
+              Streams a JSON file with every row that references your account.
+              The download is audit-logged as <code>account.data_export</code>.
             </p>
           </div>
 
@@ -149,20 +143,11 @@ export default async function PrivacyPage({
             <p className="mt-2 text-sm text-[color:var(--color-ink-soft)]">
               {t("deleteBody")}
             </p>
-            <button
-              type="button"
-              disabled
-              className="mt-4 inline-flex items-center gap-2 rounded-[var(--radius-pill)] border border-[color:var(--color-danger)] px-4 py-2 text-sm font-medium text-[color:var(--color-danger)] opacity-50 cursor-not-allowed"
-            >
-              <Trash2 className="size-4" aria-hidden="true" />
-              {t("deleteCta")}{" "}
-              <span className="ml-2 text-[0.62rem] uppercase tracking-[0.18em]">
-                Phase 8
-              </span>
-            </button>
+            <SelfEraseForm />
             <p className="mt-2 text-xs text-[color:var(--color-ink-soft)]">
-              Soft-delete + 30-day grace period + hard-delete cron all land in
-              Phase 8.
+              Soft-delete now; the nightly cron hard-deletes after the 30-day
+              grace window. An administrator can restore your account inside
+              that window if you change your mind.
             </p>
           </div>
         </div>

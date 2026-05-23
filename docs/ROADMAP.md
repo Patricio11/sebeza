@@ -411,18 +411,36 @@ that registry — we win on **data quality, usability, and analytics.** The syst
 
 ---
 
-## 🔗 PHASE 8: VERIFICATION & INTEGRATIONS
-*Goal: Upgrade trust as partnerships unlock.*
+## 🔗 PHASE 8: VERIFICATION & INTEGRATIONS ✅ 2026-05-23
+*Shipped 2026-05-23. KYC + SAQA adapters ship behind admin-controlled platform flags so they remain dormant until partnerships are confirmed. Companion docs: `docs/completed/PHASE_8_PLAN.md` + `docs/completed/PHASE_8_COMPLETE.md`.*
 
-### Task 8.1: Third-Party KYC (private path)
-- [ ] Pluggable SA identity/KYC provider behind the `verifiedBy` slot (no schema change needed).
+### Task 8.1: Third-Party KYC (gated) ✅
+- [x] `IdentityVerifier` interface + `MockIdentityVerifier` + provider env-switch resolved via `resolveIdentityVerifier()` (gated on `feature_flag_kyc_provider`, default OFF — admin flips after partnership confirmation).
+- [x] Admin escape hatch `adminVerifyIdManually` for the off-flag world; seeker self-service via `<KycPanel>` on `/dashboard/profile` with all three states (no-ID / not-verified / verified).
+- [x] Audit kinds `kyc.verify` + `kyc.revoke` record provider name so admins can tell a SaaS verify from a manual one.
 
-### Task 8.2: Government Hooks (post-partnership)
-- [ ] SAQA (qualifications) + Home Affairs (ID) verification — **only available via Dept. partnership.**
-  Design adapters now; activate when granted. This is the leverage in the government pitch.
+### Task 8.2: Government Hooks (gated) ✅
+- [x] `qualification_kyc_jobs` queue + `qualification_kyc_status` enum + `/api/cron/saqa-worker` (claims up to 10 jobs per run, rate-limited per SAQA NLRD constraints).
+- [x] `approveQualification` branches on `feature_flag_saqa_worker`: OFF (default) flips directly (Phase 7 behaviour); ON enqueues. Real HTTP call to SAQA is a one-function swap when partnership lands.
+- [x] **Force approve** override on `/admin/verifications` qualification rows (only visible when the flag is on), audit-logged as `verification.approve.manual_override`. Latest SAQA job status surfaces as a coloured pill.
 
-### Task 8.3: Email & Comms
-- [ ] Resend templates: verification, contact, status nudge, placement confirmation.
+### Task 8.3: Email & Comms ✅
+- [x] Per-kind Resend templates for the 9 catalog kinds with `defaultEmail: true (Phase 8)`. Shared `lib/email/templates/shell.ts` lifts the brand chrome.
+- [x] Email dispatch tail in `createNotification`: rate-limited 1/kind/60 s via `app_user.notification_email_last_sent_at`; gated on `feature_flag_email_notifications` + per-user pref.
+- [x] Prefs UI email column flips live when the master flag is on; per-user defaults stay `false` (opt-in).
+
+### Task 8.4: Cron jobs (`/api/cron/*` routes, all `CRON_SECRET`-guarded) ✅
+- [x] `/api/cron/hard-delete-erased` — soft-deleted users past 30 days; audit-logs `account.hard_delete` BEFORE the DELETE
+- [x] `/api/cron/status-stale-warning` — fires `status.stale.warning` when `status_confirmed_at` crosses ageing band, idempotent via `status_stale_last_sent_at`
+- [x] `/api/cron/saved-search-matches` — re-runs each saved search, hashes the result set, fires `saved_search.new_matches` to org members on hash change
+- [x] `/api/cron/skill-gap-snapshot` — wraps Phase 6.5's `captureSkillGapSnapshot()`
+- [x] `/api/cron/outcome-snapshots` — Phase 7.5.4 hand-off; writes one row per visible cohort to `outcome_snapshots`
+- [x] `/api/cron/saqa-worker` — gated (no-ops when `feature_flag_saqa_worker` is off)
+
+### Task 8.5: Misc polish (audit follow-ups) ✅
+- [x] `/dashboard/profile` — read-only email field surfaced from the auth session
+- [x] `/api/dashboard/data-export` — POPIA §23 streamed JSON dump of every row referencing the user; national ID stays as ciphertext
+- [x] `<SelfEraseForm>` on `/dashboard/privacy` — POPIA §24 self-service erase with type-`ERASE`-to-confirm gate; soft-deletes then signs out
 
 ---
 

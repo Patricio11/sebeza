@@ -35,6 +35,10 @@ export type MyProfile = PublicProfile & {
   profileId: string;
   /** Whether a national ID is on file. Never echo back the value itself. */
   hasNationalId: boolean;
+  /** Phase 8 — KYC verification timestamp (ISO). null = not verified. */
+  kycVerifiedAt: string | null;
+  /** Phase 8 — read-only email surfaced from the auth session. */
+  email: string;
 };
 
 export async function getMyProfile(): Promise<MyProfile | null> {
@@ -57,6 +61,19 @@ export async function loadProfileForUser(userId: string): Promise<MyProfile | nu
     .limit(1);
   const p = profileRows[0];
   if (!p) return null;
+
+  // Phase 8 — surface email + KYC verification from app_user. Single
+  // extra round-trip; the data is cheap and the seeker's account
+  // surfaces depend on both.
+  const userRows = await db
+    .select({
+      email: schema.appUser.email,
+      kycVerifiedAt: schema.appUser.kycVerifiedAt,
+    })
+    .from(schema.appUser)
+    .where(eq(schema.appUser.id, userId))
+    .limit(1);
+  const u = userRows[0];
 
   // Parallel: skills, experience, qualifications, academic.
   const [skillRows, expRows, qualRows, acadRows] = await Promise.all([
@@ -130,6 +147,8 @@ export async function loadProfileForUser(userId: string): Promise<MyProfile | nu
   return {
     profileId: p.id,
     hasNationalId: !!p.nationalIdEnc,
+    email: u?.email ?? "",
+    kycVerifiedAt: u?.kycVerifiedAt?.toISOString() ?? null,
     handle: p.handle,
     displayName: p.displayName,
     profilePhotoUrl: p.profilePhotoUrl,

@@ -17,6 +17,8 @@ import { ProfileBasicsForm } from "@/components/feature/profile/ProfileBasicsFor
 import { SkillsEditor } from "@/components/feature/profile/SkillsEditor";
 import { WorkAvailabilityEditor } from "@/components/feature/profile/WorkAvailabilityEditor";
 import { NationalIdControls } from "@/components/feature/profile/NationalIdControls";
+import { KycPanel } from "@/components/feature/profile/KycPanel";
+import { getSetting } from "@/lib/admin/settings";
 import { AvatarEditor } from "@/components/feature/profile/AvatarEditor";
 import { signedPhotoUrl } from "@/lib/storage/signed";
 import { isStorageConfigured } from "@/lib/storage/supabase";
@@ -35,6 +37,7 @@ export default async function ProfileEditorPage({
 
   const me = await getMyProfile();
   if (!me) redirect("/sign-in?next=/dashboard/profile");
+  const kycProviderEnabled = await getSetting<boolean>("feature_flag_kyc_provider");
 
   const t = await getTranslations("seekerDash.profileEditor");
   const tAcademic = await getTranslations("seekerDash.profileEditor.academic");
@@ -122,6 +125,28 @@ export default async function ProfileEditorPage({
             <AvatarEditor name={me.displayName} initialUrl={photoUrl} />
           </section>
 
+          {/* Phase 8 — surface the user's email (read-only, from session)
+              so it's obvious where notifications + reset links go. */}
+          <section
+            aria-labelledby="email-h"
+            className="rounded-[var(--radius-md)] border border-dashed border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-5"
+          >
+            <div className="flex flex-wrap items-baseline justify-between gap-3">
+              <div>
+                <div className="text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--color-ink-soft)]">
+                  Sign-in email
+                </div>
+                <div id="email-h" className="mt-1 font-mono text-sm">
+                  {me.email}
+                </div>
+              </div>
+              <p className="text-xs text-[color:var(--color-ink-soft)]">
+                Read-only. Email change wires up in Phase 9 alongside the
+                domain-verified Resend campaign domain.
+              </p>
+            </div>
+          </section>
+
           <ProfileBasicsForm
             initial={{
               displayName: me.displayName,
@@ -201,6 +226,13 @@ export default async function ProfileEditorPage({
               hint="Captured once, encrypted on save, never displayed back. POPIA special-category data."
             />
             <NationalIdControls hasNationalId={me.hasNationalId} />
+            <div className="mt-4">
+              <KycPanel
+                hasNationalId={me.hasNationalId}
+                kycVerifiedAt={me.kycVerifiedAt}
+                realProviderEnabled={kycProviderEnabled}
+              />
+            </div>
           </section>
 
           {/* Studies — student mode (read-only display for now;

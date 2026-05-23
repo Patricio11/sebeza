@@ -9,7 +9,7 @@
 import "server-only";
 import { getDb } from "@/db/client";
 import * as schema from "@/db/schema";
-import { asc, eq } from "drizzle-orm";
+import { asc, desc, eq, sql } from "drizzle-orm";
 import { verifyAdmin } from "@/lib/auth/dal";
 
 export interface AdminPendingQualification {
@@ -20,6 +20,15 @@ export interface AdminPendingQualification {
   candidateName: string;
   handle: string | null;
   submittedAt: Date | null;
+  /** Phase 8 — latest SAQA job state, when any. NULL = never enqueued. */
+  saqaJobStatus:
+    | "queued"
+    | "in_flight"
+    | "verified"
+    | "mismatch"
+    | "error"
+    | null;
+  saqaJobSubmittedAt: Date | null;
 }
 
 export interface AdminPendingOrganisation {
@@ -35,33 +44,56 @@ export async function listPendingQualifications(): Promise<
 > {
   await verifyAdmin();
   const db = getDb();
-  const rows = await db
-    .select({
-      id: schema.qualifications.id,
-      title: schema.qualifications.title,
-      institution: schema.qualifications.institution,
-      awardedYear: schema.qualifications.awardedYear,
-      handle: schema.profiles.handle,
-      candidateName: schema.profiles.displayName,
-    })
-    .from(schema.qualifications)
-    .leftJoin(
-      schema.profiles,
-      eq(schema.profiles.id, schema.qualifications.profileId),
-    )
-    .where(eq(schema.qualifications.verification, "pending"))
-    .orderBy(asc(schema.qualifications.id))
-    .limit(100);
 
-  return rows.map((r) => ({
-    id: r.id,
-    title: r.title,
-    institution: r.institution,
-    awardedYear: r.awardedYear,
-    candidateName: r.candidateName ?? "Unknown candidate",
-    handle: r.handle,
-    submittedAt: null,
-  }));
+  // Two queries: pending qualifications, and the latest SAQA job per
+  // qualification when SAQA is in use. Merged in app code to keep the
+  // SQL simple.
+  const [rows, jobs] = await Promise.all([
+    db
+      .select({
+        id: schema.qualifications.id,
+        title: schema.qualifications.title,
+        institution: schema.qualifications.institution,
+        awardedYear: schema.qualifications.awardedYear,
+        handle: schema.profiles.handle,
+        candidateName: schema.profiles.displayName,
+      })
+      .from(schema.qualifications)
+      .leftJoin(
+        schema.profiles,
+        eq(schema.profiles.id, schema.qualifications.profileId),
+      )
+      .where(eq(schema.qualifications.verification, "pending"))
+      .orderBy(asc(schema.qualifications.id))
+      .limit(100),
+    db
+      .select({
+        qualificationId: schema.qualificationKycJobs.qualificationId,
+        status: schema.qualificationKycJobs.status,
+        submittedAt: schema.qualificationKycJobs.submittedAt,
+        rowNumber: sql<number>`ROW_NUMBER() OVER (PARTITION BY ${schema.qualificationKycJobs.qualificationId} ORDER BY ${schema.qualificationKycJobs.submittedAt} DESC)`,
+      })
+      .from(schema.qualificationKycJobs)
+      .orderBy(desc(schema.qualificationKycJobs.submittedAt)),
+  ]);
+  const latestJobByQualId = new Map(
+    jobs.filter((j) => j.rowNumber === 1).map((j) => [j.qualificationId, j]),
+  );
+
+  return rows.map((r) => {
+    const job = latestJobByQualId.get(r.id);
+    return {
+      id: r.id,
+      title: r.title,
+      institution: r.institution,
+      awardedYear: r.awardedYear,
+      candidateName: r.candidateName ?? "Unknown candidate",
+      handle: r.handle,
+      submittedAt: null,
+      saqaJobStatus: (job?.status as AdminPendingQualification["saqaJobStatus"]) ?? null,
+      saqaJobSubmittedAt: job?.submittedAt ?? null,
+    };
+  });
 }
 
 export async function listPendingOrganisations(): Promise<

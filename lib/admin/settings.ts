@@ -31,7 +31,16 @@ export type SettingKey =
   // dataset. Cells with fewer than this many distinct profiles
   // are suppressed, with complementary suppression to stop value
   // recovery from row/column totals. Default 10.
-  | "outcomes_min_cohort_size";
+  | "outcomes_min_cohort_size"
+  // Phase 8 — gate the real KYC SaaS adapter. Off by default until
+  // partnership + provider are confirmed; until then the mock
+  // verifier runs (admin manual approval flow).
+  | "feature_flag_kyc_provider"
+  // Phase 8 — gate the SAQA async worker. Off by default until
+  // SAQA NLRD partnership is confirmed; until then admin "Approve"
+  // on /admin/verifications flips qualifications directly (Phase 7
+  // behaviour).
+  | "feature_flag_saqa_worker";
 
 const DEFAULTS: Record<SettingKey, unknown> = {
   freshness_band_days_fresh: 30,
@@ -43,6 +52,8 @@ const DEFAULTS: Record<SettingKey, unknown> = {
   feature_flag_email_notifications: false,
   feature_flag_gov_portal: false,
   outcomes_min_cohort_size: 10,
+  feature_flag_kyc_provider: false,
+  feature_flag_saqa_worker: false,
 };
 
 /**

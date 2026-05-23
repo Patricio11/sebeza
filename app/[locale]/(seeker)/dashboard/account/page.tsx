@@ -13,6 +13,7 @@ import { TwoFactorAccountPanel } from "@/components/feature/auth/TwoFactorAccoun
 import { NotificationPrefsPanel } from "@/components/feature/notifications/NotificationPrefsPanel";
 import { getMyNotificationPrefs } from "@/lib/notifications/query";
 import type { NotificationKind } from "@/lib/notifications/catalog";
+import { getSetting } from "@/lib/admin/settings";
 
 export default async function AccountPage({
   params,
@@ -26,6 +27,7 @@ export default async function AccountPage({
   if (!me) redirect("/sign-in?next=/dashboard/account");
   const t = await getTranslations("seekerDash.account");
   const prefs = await getMyNotificationPrefs();
+  const emailChannelEnabled = await getSetting<boolean>("feature_flag_email_notifications");
 
   const SEEKER_NOTIFICATION_KINDS: NotificationKind[] = [
     "contact.revealed",
@@ -121,6 +123,7 @@ export default async function AccountPage({
           <NotificationPrefsPanel
             initialPrefs={prefs}
             kinds={SEEKER_NOTIFICATION_KINDS}
+            emailChannelEnabled={emailChannelEnabled}
           />
         </section>
 

@@ -31,6 +31,13 @@ import {
   type NotificationPrefMap,
   effectivePref,
 } from "./catalog";
+import { getSetting } from "@/lib/admin/settings";
+import { sendEmail } from "@/lib/email/send";
+import { emailContentFor } from "@/lib/email/templates/notifications";
+
+/** Per-kind email rate limit. Phase 8 requirement: max 1 email per
+ *  (user × kind) per 60 s so dossier-reload bursts can't spam. */
+const EMAIL_RATE_LIMIT_SECONDS = 60;
 
 export interface CreateNotificationInput {
   userId: string;
@@ -67,6 +74,9 @@ export async function createNotification(
       .select({
         notificationPrefs: schema.appUser.notificationPrefs,
         deletedAt: schema.appUser.deletedAt,
+        email: schema.appUser.email,
+        name: schema.appUser.name,
+        notificationEmailLastSentAt: schema.appUser.notificationEmailLastSentAt,
       })
       .from(schema.appUser)
       .where(eq(schema.appUser.id, input.userId))
@@ -79,6 +89,9 @@ export async function createNotification(
       user.notificationPrefs as NotificationPrefMap | null,
       input.kind,
     );
+    // We still queue the in-app row even when inApp = false ONLY for the
+    // narrow "queued for restore" case. For genuine off-by-pref, skip
+    // the row entirely.
     if (!pref.inApp) return;
 
     // Dedupe inside the catalog window.
@@ -122,6 +135,57 @@ export async function createNotification(
         ...(input.dedupeKey ? { dedupeKey: input.dedupeKey } : {}),
       },
     });
+
+    // ── Phase 8 — email channel ────────────────────────────────────────
+    // Gated on:
+    //   1. The master `feature_flag_email_notifications` platform flag
+    //      (off until Resend is configured + DPA in place).
+    //   2. The user's per-kind email preference (catalog default = off).
+    //   3. A template existing for this kind (some kinds are in-app-only).
+    //   4. The per-(user × kind) 60 s rate-limit clock.
+    if (pref.email && (await getSetting<boolean>("feature_flag_email_notifications"))) {
+      const tpl = emailContentFor(input.kind, {
+        recipientName: user.name ?? null,
+        title: input.title,
+        body: input.body ?? null,
+        link: input.link ?? null,
+        meta: input.meta ?? null,
+      });
+      if (tpl) {
+        const clocks =
+          (user.notificationEmailLastSentAt as
+            | Record<string, string>
+            | null) ?? {};
+        const lastIso = clocks[input.kind];
+        const lastMs = lastIso ? Date.parse(lastIso) : 0;
+        const sinceMs = Date.now() - lastMs;
+        if (sinceMs >= EMAIL_RATE_LIMIT_SECONDS * 1000) {
+          try {
+            await sendEmail({
+              to: user.email,
+              subject: tpl.subject,
+              html: tpl.html,
+            });
+            await db
+              .update(schema.appUser)
+              .set({
+                notificationEmailLastSentAt: {
+                  ...clocks,
+                  [input.kind]: new Date().toISOString(),
+                },
+              })
+              .where(eq(schema.appUser.id, input.userId));
+          } catch (e) {
+            // eslint-disable-next-line no-console
+            console.error(
+              "[notifications] email dispatch failed:",
+              input.kind,
+              e,
+            );
+          }
+        }
+      }
+    }
   } catch (e) {
     // POPIA: a notifications-write failing must NEVER break the request
     // path (audit-log is the system of record). Log and swallow.

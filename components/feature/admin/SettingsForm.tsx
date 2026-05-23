@@ -63,6 +63,16 @@ const ROWS: SettingRow[] = [
     type: "boolean",
   },
   {
+    key: "feature_flag_kyc_provider",
+    label: "Real KYC provider (requires partnership + creds)",
+    type: "boolean",
+  },
+  {
+    key: "feature_flag_saqa_worker",
+    label: "SAQA NLRD verification worker (requires partnership + creds)",
+    type: "boolean",
+  },
+  {
     key: "outcomes_min_cohort_size",
     label: "Outcomes minimum cohort size (k-anonymity floor)",
     type: "number",
