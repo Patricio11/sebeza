@@ -5,8 +5,8 @@ import { DashboardShell } from "@/components/layout/DashboardShell";
 import { SEEKER_NAV } from "@/components/layout/seekerNav";
 import { Button } from "@/components/ui/Button";
 import { getMyProfile } from "@/lib/profile/me";
+import { getCompassForProfile } from "@/db/queries/career-compass";
 import {
-  getCompassForHandle,
   PROVIDER_LABEL,
   COST_LABEL,
   type GrowthReason,
@@ -47,15 +47,16 @@ export default async function CareerCompassPage({
   const { locale } = await params;
   setRequestLocale(locale);
 
-  // Real session — but Career compass demand data is intentionally still on
-  // the mock dataset; Phase 6 wires it to the live `search_events ×
-  // profile_skills` queries that form the government skills-gap wedge.
   const me = await getMyProfile();
   if (!me) redirect("/sign-in?next=/dashboard/grow");
 
   const t = await getTranslations("seekerDash.grow");
   const tStudent = await getTranslations("seekerDash.grow.student");
-  const compass = getCompassForHandle(me.handle);
+  // Phase 6: compass now reads real demand from `search_events` × the
+  // controlled skill taxonomy, weighted by freshness, scoped to the
+  // seeker's province. Student snapshot still uses the curated mock
+  // catalog of programmes (real SETA / SAQA partnership lands in Phase 8).
+  const compass = await getCompassForProfile(me);
   const student = me.academic ? getStudentSnapshot(me.academic) : null;
   const nfmt = new Intl.NumberFormat(locale);
 

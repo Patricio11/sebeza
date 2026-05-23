@@ -40,6 +40,8 @@ export default async function SearchPage({ params, searchParams }: SearchPagePro
     seniority: (asString(sp.seniority) as Seniority) ?? null,
     verification: (asString(sp.verification) as VerificationStatus) ?? null,
     highlightCitizens: sp.highlight === "1",
+    openToInternships: sp.internships === "1",
+    openToGraduateProgrammes: sp.graduates === "1",
   };
 
   const result = await dataProvider.searchProfiles(filters);

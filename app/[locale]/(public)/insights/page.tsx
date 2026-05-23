@@ -5,8 +5,14 @@ import { StatCard } from "@/components/ui/StatCard";
 import { SAChevron } from "@/components/ui/SAChevron";
 import { dataProvider } from "@/lib/data/provider";
 import { overallFreshnessConfidence } from "@/lib/mock/analytics";
+import {
+  skillsGapQuery,
+  supplyHeatmapQuery,
+  freshnessBreakdownQuery,
+} from "@/db/queries/analytics";
 import { InsightsCharts } from "@/components/feature/InsightsCharts";
-import { Download } from "lucide-react";
+import { InsightsExportButton } from "@/components/feature/InsightsExportButton";
+import { TrendingUp, AlertCircle } from "lucide-react";
 
 /**
  * Re-prerender /insights every 5 min. Aggregates over the live DB; doesn't
@@ -24,6 +30,9 @@ const STATUS_ORDER = [
   "studying",
 ] as const;
 
+const HEATMAP_TOP_PROFESSIONS = 8;
+const HEATMAP_TOP_PROVINCES = 9; // all of them
+
 export default async function InsightsPage({
   params,
 }: {
@@ -34,10 +43,54 @@ export default async function InsightsPage({
 
   const t = await getTranslations("insights");
   const tStatus = await getTranslations("status");
-  const analytics = await dataProvider.getAnalyticsSnapshot();
+
+  // Parallel load — all four aggregates ship at once.
+  const [analytics, skillsGap, heatmap, freshness] = await Promise.all([
+    dataProvider.getAnalyticsSnapshot(),
+    skillsGapQuery({ top: 20 }),
+    supplyHeatmapQuery(),
+    freshnessBreakdownQuery(),
+  ]);
+
   const conf = overallFreshnessConfidence(analytics);
   const nfmt = new Intl.NumberFormat(locale);
-  const today = new Date().toISOString().slice(0, 10);
+  const now = new Date();
+  const today = now.toISOString().slice(0, 10);
+  const currentMonth = new Intl.DateTimeFormat(locale, {
+    month: "long",
+    year: "numeric",
+  }).format(now);
+
+  // ── Heatmap matrix construction ─────────────────────────────────────────
+  // Build the sparse data into a Map for O(1) lookup, then derive the
+  // top N professions + provinces from the present data so the matrix is
+  // never larger than what's actually populated.
+  const cellByKey = new Map<string, { supply: number; freshness: number }>();
+  const professionTotals = new Map<string, number>();
+  const provinceTotals = new Map<string, number>();
+  for (const c of heatmap) {
+    cellByKey.set(`${c.province}__${c.profession}`, {
+      supply: c.supply,
+      freshness: c.freshness,
+    });
+    professionTotals.set(
+      c.profession,
+      (professionTotals.get(c.profession) ?? 0) + c.supply,
+    );
+    provinceTotals.set(
+      c.province,
+      (provinceTotals.get(c.province) ?? 0) + c.supply,
+    );
+  }
+  const topProfessions = [...professionTotals.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, HEATMAP_TOP_PROFESSIONS)
+    .map(([p]) => p);
+  const topProvinces = [...provinceTotals.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, HEATMAP_TOP_PROVINCES)
+    .map(([p]) => p);
+  const maxSupply = Math.max(1, ...heatmap.map((c) => c.supply));
 
   return (
     <>
@@ -95,13 +148,51 @@ export default async function InsightsPage({
               label={t("stat.confirmedHires")}
               value={nfmt.format(analytics.confirmedHiresThisMonth)}
               spark={analytics.trend.map((m) => m.placements)}
-              hint="May 2026"
+              hint={currentMonth}
             />
             <StatCard
               label={t("stat.openToWork")}
               value={nfmt.format(analytics.byStatus.open_to_work.count)}
               confidence={analytics.byStatus.open_to_work.freshnessConfidence}
             />
+          </section>
+
+          {/* Freshness band breakdown — "data you can trust" honesty */}
+          <section className="mt-14" aria-labelledby="freshness-h">
+            <header className="mb-4 flex items-baseline justify-between border-b-2 border-[color:var(--color-ink)] pb-2">
+              <h2 id="freshness-h" className="font-display text-2xl">
+                Data freshness
+              </h2>
+              <span className="text-[0.7rem] uppercase tracking-[0.24em] text-[color:var(--color-ink-soft)]">
+                Of {nfmt.format(freshness.total)} active profiles
+              </span>
+            </header>
+            <div className="grid gap-4 md:grid-cols-3">
+              <FreshnessTile
+                label="Fresh"
+                hint="Confirmed in the last 30 days"
+                count={freshness.fresh}
+                total={freshness.total}
+                tone="brand"
+                nfmt={nfmt}
+              />
+              <FreshnessTile
+                label="Ageing"
+                hint="30–90 days since confirmation"
+                count={freshness.ageing}
+                total={freshness.total}
+                tone="accent"
+                nfmt={nfmt}
+              />
+              <FreshnessTile
+                label="Stale"
+                hint="90+ days · down-ranked in search"
+                count={freshness.stale}
+                total={freshness.total}
+                tone="danger"
+                nfmt={nfmt}
+              />
+            </div>
           </section>
 
           {/* By status table — editorial, dense, honest */}
@@ -185,7 +276,225 @@ export default async function InsightsPage({
             </ul>
           </section>
 
-          {/* Charts (client island) */}
+          {/* ── Skills-gap engine — the government wedge ─────────────────── */}
+          <section className="mt-16" aria-labelledby="gap-h">
+            <header className="mb-4 flex items-baseline justify-between border-b-2 border-[color:var(--color-ink)] pb-2">
+              <h2 id="gap-h" className="font-display text-2xl">
+                Skills gap · demand vs supply
+              </h2>
+              <span className="hidden text-[0.7rem] uppercase tracking-[0.24em] text-[color:var(--color-ink-soft)] md:inline">
+                Ranked by unfilled demand
+              </span>
+            </header>
+            <p className="mb-5 max-w-3xl text-sm text-[color:var(--color-ink-soft)]">
+              Every employer search writes to <code>search_events</code>; every
+              profile contributes freshness-weighted supply. Where demand
+              outstrips supply is where Sebenza can direct training,
+              learnership intake, and policy attention.
+            </p>
+
+            {skillsGap.length === 0 ? (
+              <div className="rounded-[var(--radius-md)] border border-dashed border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-8 text-center text-[color:var(--color-ink-soft)]">
+                Not enough search activity yet to surface skills-gap signal.
+                Demand data accumulates as employers search.
+              </div>
+            ) : (
+              <>
+                {/* Desktop table */}
+                <div className="hidden overflow-hidden rounded-[var(--radius-md)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] md:block">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b-2 border-[color:var(--color-ink)] text-left text-[0.7rem] uppercase tracking-[0.18em] text-[color:var(--color-ink-soft)]">
+                        <th className="px-5 py-3 font-normal">Skill / profession</th>
+                        <th className="px-5 py-3 font-normal tabular text-right">Searches</th>
+                        <th className="px-5 py-3 font-normal tabular text-right">Matches</th>
+                        <th className="px-5 py-3 font-normal tabular text-right">Fresh matches</th>
+                        <th className="px-5 py-3 font-normal">Gap</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {skillsGap.map((r) => {
+                        const gapPositive = r.gap > 0;
+                        const barWidth = Math.min(
+                          100,
+                          Math.round(
+                            (Math.abs(r.gap) / Math.max(1, r.searches)) * 100,
+                          ),
+                        );
+                        return (
+                          <tr
+                            key={r.skill}
+                            className="border-t border-[color:var(--color-hairline)]"
+                          >
+                            <td className="px-5 py-3">{r.skill}</td>
+                            <td className="px-5 py-3 tabular text-right">
+                              {nfmt.format(r.searches)}
+                            </td>
+                            <td className="px-5 py-3 tabular text-right text-[color:var(--color-ink-soft)]">
+                              {nfmt.format(r.matches)}
+                            </td>
+                            <td className="px-5 py-3 tabular text-right text-[color:var(--color-ink-soft)]">
+                              {r.freshMatches.toFixed(1)}
+                            </td>
+                            <td className="px-5 py-3">
+                              <div className="flex items-center justify-end gap-3">
+                                <div
+                                  className="h-1.5 w-40 overflow-hidden rounded-full bg-[color:var(--color-surface-sunk)]"
+                                  aria-hidden="true"
+                                >
+                                  <div
+                                    className={`h-full ${gapPositive ? "bg-[color:var(--color-danger)]" : "bg-[color:var(--color-brand)]"}`}
+                                    style={{ width: `${barWidth}%` }}
+                                  />
+                                </div>
+                                <span
+                                  className={`font-display tabular text-base ${gapPositive ? "text-[color:var(--color-danger)]" : "text-[color:var(--color-brand-strong)]"}`}
+                                >
+                                  {gapPositive ? "+" : ""}
+                                  {nfmt.format(r.gap)}
+                                </span>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Mobile cards */}
+                <ul className="space-y-3 md:hidden">
+                  {skillsGap.map((r) => {
+                    const gapPositive = r.gap > 0;
+                    return (
+                      <li
+                        key={r.skill}
+                        className="rounded-xl border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-4"
+                      >
+                        <div className="flex items-baseline justify-between gap-3">
+                          <span className="font-medium">{r.skill}</span>
+                          <span
+                            className={`font-display tabular text-2xl ${gapPositive ? "text-[color:var(--color-danger)]" : "text-[color:var(--color-brand-strong)]"}`}
+                          >
+                            {gapPositive ? "+" : ""}
+                            {nfmt.format(r.gap)}
+                          </span>
+                        </div>
+                        <dl className="mt-3 grid grid-cols-3 gap-2 border-t border-dashed border-[color:var(--color-hairline)] pt-3 text-xs">
+                          <div>
+                            <dt className="text-[0.62rem] uppercase tracking-[0.18em] text-[color:var(--color-ink-soft)]">
+                              Searches
+                            </dt>
+                            <dd className="tabular">{nfmt.format(r.searches)}</dd>
+                          </div>
+                          <div>
+                            <dt className="text-[0.62rem] uppercase tracking-[0.18em] text-[color:var(--color-ink-soft)]">
+                              Matches
+                            </dt>
+                            <dd className="tabular text-[color:var(--color-ink-soft)]">
+                              {nfmt.format(r.matches)}
+                            </dd>
+                          </div>
+                          <div>
+                            <dt className="text-[0.62rem] uppercase tracking-[0.18em] text-[color:var(--color-ink-soft)]">
+                              Fresh
+                            </dt>
+                            <dd className="tabular text-[color:var(--color-ink-soft)]">
+                              {r.freshMatches.toFixed(1)}
+                            </dd>
+                          </div>
+                        </dl>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </>
+            )}
+          </section>
+
+          {/* ── Supply heatmap (Province × Profession) ───────────────────── */}
+          {topProvinces.length > 0 && topProfessions.length > 0 && (
+            <section className="mt-16" aria-labelledby="heat-h">
+              <header className="mb-4 flex items-baseline justify-between border-b-2 border-[color:var(--color-ink)] pb-2">
+                <h2 id="heat-h" className="font-display text-2xl">
+                  Supply heatmap · province × profession
+                </h2>
+                <span className="hidden text-[0.7rem] uppercase tracking-[0.24em] text-[color:var(--color-ink-soft)] md:inline">
+                  Top {topProvinces.length} provinces · top {topProfessions.length} professions
+                </span>
+              </header>
+              <p className="mb-5 max-w-3xl text-sm text-[color:var(--color-ink-soft)]">
+                Where the people are. Darker = more supply; cells with no data
+                shown blank.
+              </p>
+              <div className="overflow-x-auto rounded-[var(--radius-md)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)]">
+                <table className="w-full min-w-[640px] text-xs">
+                  <thead>
+                    <tr className="border-b-2 border-[color:var(--color-ink)] text-left text-[0.62rem] uppercase tracking-[0.18em] text-[color:var(--color-ink-soft)]">
+                      <th className="px-3 py-3 font-normal">Province</th>
+                      {topProfessions.map((p) => (
+                        <th
+                          key={p}
+                          className="px-2 py-3 text-center font-normal"
+                          scope="col"
+                        >
+                          {p}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {topProvinces.map((prov) => (
+                      <tr
+                        key={prov}
+                        className="border-t border-[color:var(--color-hairline)]"
+                      >
+                        <th
+                          className="px-3 py-2 text-left font-medium text-[color:var(--color-ink)]"
+                          scope="row"
+                        >
+                          {prov}
+                        </th>
+                        {topProfessions.map((prof) => {
+                          const cell = cellByKey.get(`${prov}__${prof}`);
+                          if (!cell) {
+                            return (
+                              <td
+                                key={prof}
+                                className="px-2 py-2 text-center text-[color:var(--color-ink-soft)]/40"
+                              >
+                                ·
+                              </td>
+                            );
+                          }
+                          const intensity = cell.supply / maxSupply; // 0–1
+                          const alpha = 0.15 + intensity * 0.55;
+                          return (
+                            <td
+                              key={prof}
+                              className="px-2 py-2 text-center"
+                              style={{
+                                background: `rgba(0, 107, 60, ${alpha})`,
+                                color:
+                                  intensity > 0.55
+                                    ? "var(--color-paper)"
+                                    : "var(--color-ink)",
+                              }}
+                              title={`${cell.supply} profile${cell.supply === 1 ? "" : "s"} · ${Math.round(cell.freshness * 100)}% fresh`}
+                            >
+                              {cell.supply}
+                            </td>
+                          );
+                        })}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          )}
+
+          {/* Charts (client island — trend + demand) */}
           <section className="mt-16">
             <InsightsCharts
               trend={analytics.trend}
@@ -203,21 +512,57 @@ export default async function InsightsPage({
                 Policy export
               </div>
               <h2 className="font-display text-xl">{t("export")}</h2>
-              <p className="mt-1 text-sm text-[color:var(--color-ink-soft)]">
-                {t("exportNote")}
+              <p className="mt-1 max-w-2xl text-sm text-[color:var(--color-ink-soft)]">
+                {t("exportNote")} Every export writes an{" "}
+                <code>analytics.export</code> audit row.
               </p>
             </div>
-            <button
-              type="button"
-              className="inline-flex items-center gap-2 rounded-[var(--radius-pill)] bg-[color:var(--color-ink)] px-5 py-2.5 text-sm font-medium text-[color:var(--color-paper)]"
-            >
-              <Download className="size-4" aria-hidden="true" />
-              {t("export")}
-            </button>
+            <InsightsExportButton label={t("export")} />
           </section>
         </div>
       </main>
       <SiteFooter />
     </>
+  );
+}
+
+function FreshnessTile({
+  label,
+  hint,
+  count,
+  total,
+  tone,
+  nfmt,
+}: {
+  label: string;
+  hint: string;
+  count: number;
+  total: number;
+  tone: "brand" | "accent" | "danger";
+  nfmt: Intl.NumberFormat;
+}) {
+  const pct = total > 0 ? Math.round((count / total) * 100) : 0;
+  const toneClass = {
+    brand: "border-[color:var(--color-brand)] text-[color:var(--color-brand-strong)]",
+    accent: "border-[color:var(--color-accent)] text-[color:var(--color-accent)]",
+    danger: "border-[color:var(--color-danger)] text-[color:var(--color-danger)]",
+  }[tone];
+  const Icon = tone === "danger" ? AlertCircle : TrendingUp;
+  return (
+    <div className={`rounded-[var(--radius-md)] border-2 ${toneClass} bg-[color:var(--color-paper)] p-5`}>
+      <div className="flex items-center gap-2 text-[0.7rem] uppercase tracking-[0.22em]">
+        <Icon className="size-3.5" aria-hidden="true" />
+        {label}
+      </div>
+      <div className="mt-2 flex items-baseline gap-2">
+        <span className="font-display tabular text-3xl text-[color:var(--color-ink)]">
+          {nfmt.format(count)}
+        </span>
+        <span className="text-sm text-[color:var(--color-ink-soft)]">
+          · {pct}%
+        </span>
+      </div>
+      <p className="mt-1 text-xs text-[color:var(--color-ink-soft)]">{hint}</p>
+    </div>
   );
 }

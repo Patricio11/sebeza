@@ -103,6 +103,18 @@ export async function searchProfilesQuery(
   if (filters.verification) {
     conditions.push(sql`p.verification = ${filters.verification}`);
   }
+  if (filters.openToInternships) {
+    // EXISTS-join against academic_profiles. We use EXISTS (not INNER JOIN)
+    // so the parent select-list redaction stays clean.
+    conditions.push(
+      sql`EXISTS (SELECT 1 FROM academic_profiles ap WHERE ap.profile_id = p.id AND ap.open_to_internships = true)`,
+    );
+  }
+  if (filters.openToGraduateProgrammes) {
+    conditions.push(
+      sql`EXISTS (SELECT 1 FROM academic_profiles ap WHERE ap.profile_id = p.id AND ap.open_to_graduate_programmes = true)`,
+    );
+  }
 
   const whereClause = sql.join(conditions, sql` AND `);
 

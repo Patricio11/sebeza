@@ -48,6 +48,8 @@ export function SearchFilters({ defaultFilters, query }: Props) {
     if (merged.seniority) params.set("seniority", merged.seniority);
     if (merged.verification) params.set("verification", merged.verification);
     if (merged.highlightCitizens) params.set("highlight", "1");
+    if (merged.openToInternships) params.set("internships", "1");
+    if (merged.openToGraduateProgrammes) params.set("graduates", "1");
     startTransition(() => {
       router.replace(`${pathname}?${params.toString()}` as never);
     });
@@ -133,6 +135,46 @@ export function SearchFilters({ defaultFilters, query }: Props) {
             {t("highlightCitizens")}
             <span className="mt-1 block text-xs text-[color:var(--color-ink-soft)]">
               {t("nationalityHelp")}
+            </span>
+          </span>
+        </label>
+      </FilterGroup>
+
+      {/* Phase 6: scope to seekers in Student mode who opted in to the
+          internship or graduate-programme intake. Strictly opt-in by the
+          seeker; never default; never inferred. */}
+      <FilterGroup label="Early-career opt-ins">
+        <label className="flex items-start gap-2 text-sm">
+          <input
+            type="checkbox"
+            checked={defaultFilters.openToInternships ?? false}
+            onChange={(e) =>
+              update({ openToInternships: e.target.checked || undefined })
+            }
+            className="mt-1"
+          />
+          <span>
+            Open to internships
+            <span className="mt-1 block text-xs text-[color:var(--color-ink-soft)]">
+              Currently-enrolled students who've explicitly opted in.
+            </span>
+          </span>
+        </label>
+        <label className="mt-3 flex items-start gap-2 text-sm">
+          <input
+            type="checkbox"
+            checked={defaultFilters.openToGraduateProgrammes ?? false}
+            onChange={(e) =>
+              update({
+                openToGraduateProgrammes: e.target.checked || undefined,
+              })
+            }
+            className="mt-1"
+          />
+          <span>
+            Open to graduate programmes
+            <span className="mt-1 block text-xs text-[color:var(--color-ink-soft)]">
+              Final-year + recent graduates open to formal grad-track roles.
             </span>
           </span>
         </label>

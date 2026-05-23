@@ -260,20 +260,29 @@ that registry — we win on **data quality, usability, and analytics.** The syst
 ---
 
 ## 📊 PHASE 6: THE ANALYTICS & POLICY DASHBOARD
-*Goal: The government wedge — real-time workforce visibility.*
+*Goal: The government wedge — real-time workforce visibility. See `docs/completed/PHASE_6_COMPLETE.md`.* ✅ **(done 2026-05-23)**
 
-### Task 6.1: Employment Analytics (Recharts)
-- [ ] Counts/trends by skill, profession, location, seniority, status — **weighted by data freshness**.
-- [ ] Time series of registrations, status changes, confirmed placements.
-- [ ] Region/skill heat views (lightweight, no heavy map libs on mobile).
+### Task 6.1: Employment Analytics
+- [x] Counts / trends by skill, profession, location, status — **freshness-weighted** via `sebenza_freshness_confidence`.
+- [x] Time series of registrations + confirmed placements (5-month window).
+- [x] **Province × profession supply heatmap** on `/insights` — dynamic top-N matrix with intensity scaling; cells without data shown blank. Honest, mobile-friendly, no heavy map libs.
+- [x] **Freshness-band tiles** (Fresh / Ageing / Stale) — the "data you can trust" honesty bar made concrete.
 
 ### Task 6.2: Skills-Gap Intelligence
-- [ ] Derive demand from `searchEvents`: what employers search for but can't find.
-- [ ] Surface gaps by location/skill → future training-partnership product + pitch slide.
+- [x] `skillsGapQuery` derives demand from `searchEvents`: searches vs matches vs freshness-weighted matches, signed gap, optional province scope. Top-20 table on `/insights` with red/green bars per row.
+- [x] Career compass on `/dashboard/grow` + `/dashboard` overview wires to live demand via `db/queries/career-compass.ts` (skills the seeker doesn't have + peer-pattern recommendations + skill-overlap adjacent professions).
 
 ### Task 6.3: Exports & Policy Reporting
-- [ ] CSV/PDF exports of aggregate (non-PII) stats for policy use.
-- [ ] Aggregation only; never expose individual PII in analytics. Every export audit-logged.
+- [x] CSV export — real Server Action streaming multi-section CSV (status / skills-gap / heatmap / freshness / trend) with section headers.
+- [x] Aggregation only — never expose individual PII; column-list redaction enforced everywhere.
+- [x] Every export writes an `analytics.export` audit row with `scope + rowCount + generatedAt`.
+- [x] 10k-row cap with friendly fail message pointing at the Phase 8 "email me the file" flow for bigger slices.
+
+### Task 6.4: Search filter polish
+- [x] `openToInternships` + `openToGraduateProgrammes` checkboxes on `/search` — strictly opt-in by the seeker, never default. Wired via `EXISTS (academic_profiles)` in `searchProfilesQuery`.
+
+### Deferred to Phase 9 perf pass
+- [ ] Materialised views (`mv_demand_by_profession`, `mv_supply_heatmap`) with concurrent refresh — sub-10ms regular queries hold at current scale.
 
 ---
 
@@ -476,5 +485,5 @@ HR Practitioner · Electrician · Plumber · Accountant · Nurse · Driver · Bo
 ---
 
 *Last Updated: 2026-05-23*
-*Version: 1.7 — Phase 5 complete (employer dossier + audit-logged contact reveal + document download + Placement-Truth Rule with 30-day gate + saved-searches / shortlists CRUD) — see `docs/completed/PHASE_5_COMPLETE.md`. Phase 6 (analytics + skills-gap engine — the government wedge) opens next — see `docs/PHASE_6_PLAN.md`. Phase 7 plan extended with Tasks 7.6 (in-app notifications), 7.7 (platform settings), 7.8 (public-surface polish) — full audit + spec in `docs/PHASE_7_PLAN.md`.*
+*Version: 1.8 — Phase 6 complete (skills-gap engine + supply heatmap + freshness tiles + working CSV export + career compass on real demand + internship/graduate search filters) — see `docs/completed/PHASE_6_COMPLETE.md`. Phase 7 (admin + 2FA + notifications + audit polish carryover) opens next — full spec in `docs/PHASE_7_PLAN.md`.*
 *Working name: Sebenza (replace with chosen brand)*

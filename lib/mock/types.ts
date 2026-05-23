@@ -139,6 +139,11 @@ export interface SearchFilters {
   seniority?: Seniority | null;
   verification?: VerificationStatus | null;
   highlightCitizens?: boolean;
+  /** Phase 6: scope to seekers whose `academic_profiles.openToInternships`
+      is true. Surfaces the student-mode pool for graduate-programme intake. */
+  openToInternships?: boolean;
+  /** Phase 6: scope to seekers open to a full graduate-track role. */
+  openToGraduateProgrammes?: boolean;
 }
 
 export interface SearchResult {

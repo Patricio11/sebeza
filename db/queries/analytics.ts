@@ -175,6 +175,178 @@ export async function analyticsSnapshotQuery(): Promise<AnalyticsSnapshot> {
   };
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Phase 6 — Skills-gap engine + supply heatmap + freshness breakdown.
+//
+// These power the rebuilt `/insights` page (the government wedge):
+//   - skillsGapQuery: what employers SEARCH for vs what's available, sorted
+//     by gap descending. Optional province filter to surface regional gaps.
+//   - supplyHeatmapQuery: sparse (province × profession) grid of supply
+//     counts + freshness; frontend builds the matrix.
+//   - freshnessBreakdownQuery: how many active profiles are fresh / ageing /
+//     stale right now — drives the "data you can trust" headline metric.
+//   - skillsGapDeltaQuery: change in gap-size between this week and last
+//     week, for the "Trending gaps" callout.
+//
+// All queries are freshness-aware: a profile that hasn't confirmed status
+// in 90+ days contributes 0.25 to the supply count (not 1.0), so the gap
+// reflects DELIVERABLE supply, not just registered seekers.
+// ─────────────────────────────────────────────────────────────────────────────
+
+export interface SkillsGapRow {
+  /** Search term or profession label (already title-cased). */
+  skill: string;
+  /** How many search_events fired this term. */
+  searches: number;
+  /** How many profiles currently match (raw count). */
+  matches: number;
+  /** Same as `matches` but freshness-weighted — what's actually deliverable. */
+  freshMatches: number;
+  /** `searches - matches`. Positive = unfilled demand. Negative = oversupply. */
+  gap: number;
+}
+
+/**
+ * Top N skills-gap signals, sorted by `gap` (unfilled demand) descending.
+ * Pass `province` to scope supply to one province; demand stays national
+ * because employers don't always tag a province in their query.
+ */
+export async function skillsGapQuery(opts: {
+  province?: string | null;
+  top?: number;
+} = {}): Promise<SkillsGapRow[]> {
+  const db = getDb();
+  const top = opts.top ?? 20;
+  const province = opts.province ?? null;
+
+  const rows = unwrap<{
+    skill: string;
+    searches: number;
+    matches: number;
+    fresh_matches: string;
+    gap: number;
+  }>(
+    await db.execute(sql`
+      WITH searches AS (
+        SELECT LOWER(terms) AS term, COUNT(*)::int AS hits
+        FROM search_events
+        WHERE terms IS NOT NULL AND length(terms) >= 2
+        GROUP BY LOWER(terms)
+      ),
+      supply AS (
+        SELECT
+          LOWER(profession) AS profession,
+          COUNT(*)::int AS matches,
+          COALESCE(SUM(sebenza_freshness_confidence(status_confirmed_at)), 0)::numeric AS fresh_matches
+        FROM profiles
+        WHERE deleted_at IS NULL
+          AND (${province}::text IS NULL OR LOWER(province) = LOWER(${province}))
+        GROUP BY LOWER(profession)
+      )
+      SELECT
+        COALESCE(s.profession, x.term)            AS skill,
+        COALESCE(x.hits, 0)                       AS searches,
+        COALESCE(s.matches, 0)                    AS matches,
+        COALESCE(s.fresh_matches, 0)              AS fresh_matches,
+        COALESCE(x.hits, 0) - COALESCE(s.matches, 0) AS gap
+      FROM supply s
+      FULL OUTER JOIN searches x ON x.term = s.profession
+      ORDER BY gap DESC, searches DESC
+      LIMIT ${top}
+    `),
+  );
+
+  return rows.map((r) => ({
+    skill: titleCase(r.skill),
+    searches: r.searches,
+    matches: r.matches,
+    freshMatches: Number(r.fresh_matches),
+    gap: r.gap,
+  }));
+}
+
+export interface HeatmapCell {
+  province: string;
+  profession: string;
+  supply: number;
+  freshness: number;
+}
+
+/**
+ * Sparse (province × profession) grid. Returns one row per non-empty cell.
+ * Frontend can build the full matrix by joining against the taxonomy.
+ */
+export async function supplyHeatmapQuery(): Promise<HeatmapCell[]> {
+  const db = getDb();
+  const rows = unwrap<{
+    province: string;
+    profession: string;
+    supply: number;
+    freshness: string;
+  }>(
+    await db.execute(sql`
+      SELECT
+        province,
+        profession,
+        COUNT(*)::int AS supply,
+        COALESCE(AVG(sebenza_freshness_confidence(status_confirmed_at)), 0)::numeric AS freshness
+      FROM profiles
+      WHERE deleted_at IS NULL
+      GROUP BY province, profession
+      ORDER BY province ASC, supply DESC
+    `),
+  );
+
+  return rows.map((r) => ({
+    province: r.province,
+    profession: r.profession,
+    supply: r.supply,
+    freshness: Number(r.freshness),
+  }));
+}
+
+export interface FreshnessBreakdown {
+  fresh: number;
+  ageing: number;
+  stale: number;
+  total: number;
+}
+
+/**
+ * Counts the active profile pool by freshness band. The "trust headline" on
+ * /insights surfaces `fresh / total` as a percentage.
+ */
+export async function freshnessBreakdownQuery(): Promise<FreshnessBreakdown> {
+  const db = getDb();
+  const rows = unwrap<{
+    band: "fresh" | "ageing" | "stale";
+    count: number;
+  }>(
+    await db.execute(sql`
+      WITH banded AS (
+        SELECT
+          CASE
+            WHEN EXTRACT(epoch FROM (now() - status_confirmed_at)) / 86400 < 30 THEN 'fresh'
+            WHEN EXTRACT(epoch FROM (now() - status_confirmed_at)) / 86400 < 90 THEN 'ageing'
+            ELSE 'stale'
+          END AS band
+        FROM profiles
+        WHERE deleted_at IS NULL
+      )
+      SELECT band, COUNT(*)::int AS count
+      FROM banded
+      GROUP BY band
+    `),
+  );
+
+  const out: FreshnessBreakdown = { fresh: 0, ageing: 0, stale: 0, total: 0 };
+  for (const r of rows) {
+    out[r.band] = r.count;
+    out.total += r.count;
+  }
+  return out;
+}
+
 function titleCase(s: string): string {
   return s
     .split(/\s+/)

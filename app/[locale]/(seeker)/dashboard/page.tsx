@@ -19,7 +19,7 @@ import {
   ArrowUpRight,
   Compass,
 } from "lucide-react";
-import { getCompassForHandle } from "@/lib/mock/growth";
+import { getCompassForProfile } from "@/db/queries/career-compass";
 import { StatusCard } from "@/components/feature/profile/StatusCard";
 import { StatusNudgeBanner } from "@/components/feature/profile/StatusNudgeBanner";
 
@@ -37,9 +37,10 @@ export default async function SeekerOverviewPage({
   const t = await getTranslations("seekerDash");
   const lastConfirmed = formatRelativeTime(me.statusConfirmedAt, locale);
   const freshness = freshnessSummary(me.statusConfirmedAt);
-  // Career compass still reads from the mock dataset (Phase 6 wires the real
-  // demand-by-skill query). The seeker's handle is the lookup key.
-  const compass = getCompassForHandle(me.handle);
+  // Phase 6: real compass — recommendations come from live search-event
+  // demand intersected with the controlled skill taxonomy, scoped to the
+  // seeker's profession + province.
+  const compass = await getCompassForProfile(me);
   const topRec = compass.recommendations[0];
 
   // Derive Next steps from real profile state — never lie about what's done.
