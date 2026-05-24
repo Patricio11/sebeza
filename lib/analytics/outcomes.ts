@@ -24,6 +24,7 @@ import "server-only";
 import { getDb } from "@/db/client";
 import { sql } from "drizzle-orm";
 import { getSetting } from "@/lib/admin/settings";
+import { suppress, type SuppressionAxis } from "./suppress";
 
 export interface OutcomeCohort {
   programme: string;
@@ -63,6 +64,24 @@ interface RawRow {
   median_time_to_hire_days: number | null;
   top_destination_profession: string | null;
 }
+
+// Two complementary-suppression passes  the contract the outcomes
+// engine has always run. Lifted to a module-scope constant so the
+// shape is obvious from the call site and unit-testable in isolation.
+const OUTCOMES_AXES: SuppressionAxis<RawRow>[] = [
+  {
+    // Row pass: within a (programme, institution, year) row, drop the
+    // only surviving province if any sibling province was suppressed.
+    groupBy: ["programme", "institution", "graduation_year"],
+    complementOver: "province",
+  },
+  {
+    // Column pass: within a (programme, institution, province) column,
+    // drop the only surviving year if any sibling year was suppressed.
+    groupBy: ["programme", "institution", "province"],
+    complementOver: "graduation_year",
+  },
+];
 
 export async function outcomesQuery(): Promise<OutcomesQueryResult> {
   const db = getDb();
@@ -136,46 +155,20 @@ export async function outcomesQuery(): Promise<OutcomesQueryResult> {
 
   const consentedProfileCount = rawRows.reduce((sum, r) => sum + r.cohort_size, 0);
 
-  // ── Primary suppression: drop any cell below k.
-  const passed = rawRows.filter((r) => r.cohort_size >= minCohortSize);
-  let suppressedCount = rawRows.length - passed.length;
+  // Suppression: primary k-floor + two complementary passes (row across
+  // provinces, column across graduation years). Algorithm extracted to
+  // `lib/analytics/suppress.ts` in Phase 9.7.1 so the rest of 9.7
+  // (nationality dimension, Justification Index) reuses the same engine.
+  // Behaviour is unchanged  the test fixtures in `suppress.test.ts`
+  // codify the contract, and the outcomes-compliance assertions still
+  // verify it end-to-end at runtime.
+  const { passed, suppressedCount } = suppress(rawRows, {
+    countKey: "cohort_size",
+    k: minCohortSize,
+    axes: OUTCOMES_AXES,
+  });
 
-  // ── Complementary suppression.
-  //
-  // For each (programme × institution × graduation_year) row, if there
-  // is exactly ONE surviving province cell AND we suppressed at least
-  // one province at this row, the surviving cell's value can be recovered
-  // by subtracting the visible cells from the row total. Drop it too.
-  //
-  // Same logic for each (programme × institution × province) column
-  // across graduation years.
-  const survivors = new Map<string, RawRow>();
-  for (const r of passed) {
-    survivors.set(rowKey(r), r);
-  }
-
-  function dropIfDerivable(group: Map<string, RawRow[]>): void {
-    for (const cells of group.values()) {
-      if (cells.length === 1 && hasSuppressedSiblingInGroup(cells[0]!, rawRows, group === byRow ? "province" : "graduation_year")) {
-        survivors.delete(rowKey(cells[0]!));
-        suppressedCount++;
-      }
-    }
-  }
-
-  // Group the survivors two ways: by row (drop province) and by column
-  // (drop graduation year).
-  const byRow = groupSurvivorsBy(passed, (r) =>
-    `${r.programme}::${r.institution}::${r.graduation_year}`,
-  );
-  const byCol = groupSurvivorsBy(passed, (r) =>
-    `${r.programme}::${r.institution}::${r.province}`,
-  );
-
-  dropIfDerivable(byRow);
-  dropIfDerivable(byCol);
-
-  const cohorts: OutcomeCohort[] = Array.from(survivors.values()).map((r) => ({
+  const cohorts: OutcomeCohort[] = passed.map((r) => ({
     programme: r.programme,
     institution: r.institution,
     province: r.province,
@@ -199,53 +192,4 @@ export async function outcomesQuery(): Promise<OutcomesQueryResult> {
     suppressedCohorts: suppressedCount,
     consentedProfileCount,
   };
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Helpers
-// ─────────────────────────────────────────────────────────────────────────────
-
-function rowKey(r: RawRow): string {
-  return `${r.programme}::${r.institution}::${r.province}::${r.graduation_year}`;
-}
-
-function groupSurvivorsBy(
-  rows: RawRow[],
-  key: (r: RawRow) => string,
-): Map<string, RawRow[]> {
-  const out = new Map<string, RawRow[]>();
-  for (const r of rows) {
-    const k = key(r);
-    const list = out.get(k);
-    if (list) list.push(r);
-    else out.set(k, [r]);
-  }
-  return out;
-}
-
-/**
- * Returns true when the row's parent group (same programme +
- * institution + the "other" axis) had at least one suppressed
- * sibling  meaning the visible cell's value is derivable from
- * the row/column total. `axis` says whether the dropped sibling
- * varied by province (row group) or by graduation_year (col group).
- */
-function hasSuppressedSiblingInGroup(
-  row: RawRow,
-  allRows: RawRow[],
-  axis: "province" | "graduation_year",
-): boolean {
-  return allRows.some((r) => {
-    if (r === row) return false;
-    if (r.programme !== row.programme) return false;
-    if (r.institution !== row.institution) return false;
-    if (axis === "province") {
-      if (r.graduation_year !== row.graduation_year) return false;
-      // Sibling province at this row; was it suppressed?
-      return r.cohort_size < row.cohort_size; // suppressed siblings are below k
-    } else {
-      if (r.province !== row.province) return false;
-      return r.cohort_size < row.cohort_size;
-    }
-  });
 }
