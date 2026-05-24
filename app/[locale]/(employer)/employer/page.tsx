@@ -168,8 +168,8 @@ export default async function EmployerOverviewPage({
       </section>
 
       {/* Phase 9.7.5  "Your hiring on Sebenza" self-view. Own data
-          only, EEA §1 + ESA §8 framing (draft pending DPIA R9 counsel
-          review). */}
+          only, neutral "for your own records" framing per the
+          2026-05-24 reframing (DPIA R9). */}
       {ownMix && (
         <section className="mt-10">
           <EmployerHiringMixCard data={ownMix} />

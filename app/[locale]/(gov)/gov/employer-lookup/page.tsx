@@ -20,7 +20,7 @@ import { GOV_NAV } from "@/components/layout/govNav";
 import { verifyGov } from "@/lib/auth/dal";
 import { getSetting } from "@/lib/admin/settings";
 import { EmployerLookupForm } from "@/components/feature/gov/EmployerLookupForm";
-import { AlertTriangle, Scale } from "lucide-react";
+import { AlertTriangle, ShieldCheck } from "lucide-react";
 
 export const revalidate = 0; // Always dynamic  the flag may change.
 
@@ -45,18 +45,19 @@ export default async function GovEmployerLookupPage({
       workspaceEyebrow="Government / policy workspace"
       nav={GOV_NAV}
       activeKey="employer-lookup"
-      pageEyebrow="Regulated · ESA §8 evidence aid"
+      pageEyebrow="Regulated · single-employer query"
       pageTitle="Per-employer mix lookup"
-      pageSubtitle="One employer at a time. Exact-match input only  no autocomplete, no browse, no leaderboard. Every lookup writes an audit row carrying the stated reason; the 9.7.7 oversight log makes the trail itself reviewable."
+      pageSubtitle="One employer at a time. Exact-match input only  no autocomplete, no browse, no leaderboard. Every lookup writes an audit row carrying the stated reason; the oversight log makes the trail itself reviewable."
     >
-      {/* ESA §8 framing strip  same shape as /gov/opportunity. */}
+      {/* Bounded-query framing strip  what this surface is and isn't,
+          without making specific regulatory-mandate claims. */}
       <section
         aria-labelledby="framing-h"
         className="rounded-[var(--radius-md)] border border-[color:var(--color-brand-strong)] bg-[color:var(--color-brand-tint)] p-5 md:p-6"
       >
         <div className="flex items-center gap-2 text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--color-brand-strong)]">
-          <Scale className="size-3.5" aria-hidden="true" />
-          Employment Services Act 4 of 2014 · §8
+          <ShieldCheck className="size-3.5" aria-hidden="true" />
+          Bounded query · audit-logged
         </div>
         <h2
           id="framing-h"
@@ -66,13 +67,12 @@ export default async function GovEmployerLookupPage({
         </h2>
         <p className="mt-2 text-sm text-[color:var(--color-ink-soft)]">
           <strong className="text-[color:var(--color-ink)]">What it is:</strong>{" "}
-          a bounded ESA §8 evidence aid. For a specific Department of
-          Employment &amp; Labour inquiry into a specific employer, the
-          lookup returns the SA-citizen / foreign-national split of that
-          employer&rsquo;s Sebenza-confirmed placements, when the
-          placement count is above the small-numbers floor (k ={" "}
-          {floor}). Below the floor: the count is shown but never the
-          split  that would re-identify individuals.
+          a bounded per-employer query for a specific compliance or
+          policy follow-up. Returns the SA-citizen / foreign-national
+          split of an employer&rsquo;s Sebenza-confirmed placements,
+          when the placement count is above the small-numbers floor
+          (k = {floor}). Below the floor: the count is shown but never
+          the split  that would re-identify individuals.
         </p>
         <p className="mt-2 text-sm text-[color:var(--color-ink-soft)]">
           <strong className="text-[color:var(--color-ink)]">
@@ -81,11 +81,8 @@ export default async function GovEmployerLookupPage({
           a way to audit a company&rsquo;s &ldquo;foreigner ratio,&rdquo;
           a fishing tool, or a list. The query layer has no endpoint
           that ranks or pages employers by nationality mix; only
-          single-employer exact-match lookups are possible.
-        </p>
-        <p className="mt-2 text-[0.7rem] italic text-[color:var(--color-ink-soft)]">
-          Legal framing is engineering-team reading, pending counsel
-          review (DPIA R9). Copy may soften before public-facing use.
+          single-employer exact-match lookups are possible. Every
+          query is audit-logged with the stated reason.
         </p>
       </section>
 
@@ -124,10 +121,10 @@ function DormantNotice() {
               feature_flag_employer_mix_lookup
             </code>{" "}
             off. The engine + UI are built and tested; activation pairs
-            with a formal Department of Employment &amp; Labour
-            partnership workflow where purpose-limitation, retention
-            windows, and named operators become concrete. Same dormant-
-            by-default posture as the KYC and SAQA adapters from Phase 8.
+            with a concrete operational need  purpose-limitation,
+            retention windows, and named operators become concrete at
+            that point. Same dormant-by-default posture as the KYC and
+            SAQA adapters from Phase 8.
           </p>
           <p className="mt-3 text-sm text-[color:var(--color-ink-soft)]">
             An admin can flip the flag in{" "}

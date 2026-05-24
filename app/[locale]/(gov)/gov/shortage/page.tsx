@@ -9,20 +9,23 @@
  *
  * Classified per D1 (PHASE_9_7_PLAN.md):
  *
- *   Genuine local shortage  ESA §8 evidence is genuinely hard to
- *                            satisfy  policy response is training
- *                            investment, not blame.
- *   Local supply available  ESA §8 has practical force here  policy
- *                            can credibly ask "could this role have
- *                            been filled locally?"
+ *   Genuine local shortage  local pool isn't there to fill, so
+ *                            policy follow-up here should focus on
+ *                            building local capacity rather than
+ *                            tightening enforcement.
+ *   Local supply available  local-hiring incentive policy can land
+ *                            cleanly  the talent is there.
  *   Indeterminate           below k OR below the placement floor OR
  *                            doesn't meet the demand floor. Honest
  *                            blank, never guessed.
  *
  * Formula published verbatim on this page. Per-cell tooltip carries
  * its own component values so no classification is mysterious.
- * Counsel sign-off on the EEA §1 / ESA §8 framing is tracked as
- * DPIA R9; copy may need to soften before public-facing use.
+ *
+ * Reframed 2026-05-24: original draft cited EEA §1 + ESA §8
+ * explicitly. Per operator direction we don't make specific
+ * regulatory-mandate claims  the page is neutral policy
+ * intelligence. See DPIA R9 + PHASE_9_7_COMPLETE.md.
  */
 
 import { setRequestLocale } from "next-intl/server";
@@ -67,7 +70,7 @@ export default async function GovShortagePage({
       activeKey="shortage"
       pageEyebrow="Policy intelligence"
       pageTitle="Skills-Shortage Justification Index"
-      pageSubtitle="One row per profession × province cell. Honest classifier  shortages are training-investment signals; local-supply-available cells are where ESA §8 (reasonable local-hiring efforts) has practical force. Never a foreigners-vs-locals scoreboard."
+      pageSubtitle="One row per profession × province cell. Honest classifier  shortages are training-investment signals; local-supply-available cells are where local-hiring incentive policy can land cleanly. Never a foreigners-vs-locals scoreboard."
       pageActions={
         <Link
           href={

@@ -119,31 +119,45 @@ covered by this DPIA:
 - **Residual risk**: low at pre-launch traffic. Mandatory re-assessment
   before public launch and at every phase boundary thereafter.
 
-### R9  Legal framing of nationality analytics is engineering-team reading, not counsel opinion
+### R9  Drift into specific legal-mandate or racial-framing claims on policy surfaces
 - **Risk**: Phase 9.7 (nationality analytics & local-hiring intelligence)
-  ships copy on the employer self-view (9.7.5) and the `gov` per-employer
-  lookup (9.7.6) that refers to **Employment Equity Act 55/1998 §1**
-  (designated-group qualification) and **Employment Services Act 4/2014
-  §8** (reasonable-efforts to hire locally). The engineering team's
-  reading of those statutes is sturdy enough to *build* against, but
-  the *exact wording* surfaced to users  and any framing in pitch
-  decks or PAIA materials  carries legal weight that must be reviewed
-  by qualified labour-law counsel before public exposure.
-- **Mitigation (in code)**:
-  - 9.7.6 ships behind `feature_flag_employer_mix_lookup`, default OFF;
-    activation paired with a real Department of Employment & Labour
-    partnership workflow (which is also when purpose limitation and
-    retention windows become concrete).
-  - 9.7.5 (employer self-view) engine + UI may build; the copy itself
-    is held until counsel sign-off.
-  - 9.7.3 / 9.7.4 (market views) can ship without waiting  they carry
-    no per-employer surface and no legal-claim copy.
-- **Mitigation (process)**: counsel review of the EEA §1 / ESA §8
-  framing logged here. Status tracked alongside Phase 9.7 sign-off;
-  the COMPLETE doc records the reviewer + date.
-- **Residual risk**: low while the per-employer lookup stays dormant
-  and the market-view copy avoids legal-mandate claims. Re-assess
-  the moment 9.7.5 copy ships or the 9.7.6 flag flips on.
+  ships nationality-aware analytics. The earliest draft framed those
+  surfaces around the Employment Equity Act §1 designated-group
+  qualification (which references "Black people") and the Employment
+  Services Act §8 reasonable-efforts obligation. Both are real,
+  current South African statutes, but two distinct risks emerge from
+  citing them in the platform copy:
+    1. **Racial framing on a national platform.** Sebenza is for every
+       South African worker. Pulling the EEA §1 "Black people"
+       definition into the platform's framing drags racial categories
+       into a tool whose product line is non-racial by design.
+    2. **Overclaiming a regulatory relationship.** Citing ESA §8 +
+       Department of Employment & Labour by name implies a partnership
+       or sanctioned-evidence-trail role that does not, in fact, exist.
+- **Decision (operator review, 2026-05-24)**: **REFRAMED.** Both
+  surfaces (employer self-view, gov per-employer lookup) and the
+  policy-intelligence views (`/gov/shortage`, `/gov/opportunity`,
+  `/gov/brief`) now ship with **neutral copy**: "for your own records,"
+  "bounded compliance query," "local-hiring policy intelligence."
+  No EEA §1 / ESA §8 / DEL references in user-facing copy. The
+  reason-enum on the per-employer lookup uses generic values
+  (`compliance_check`, `incentive_verification`, `mandated_audit`,
+  `other`)  not statute-specific.
+- **What's preserved**: every structural defence (2-class split,
+  k-floor, complementary suppression, employer-min-placements floor,
+  dormant-by-default flag, audit log on every gov query, oversight log).
+  Those don't depend on the legal framing; they remain the trust
+  posture.
+- **What's gone**: any user-facing claim that ties Sebenza data to a
+  specific regulatory mandate or quotes a statute. If a regulator ever
+  formally asks for tailored framing, that lands as its own
+  intentional, counsel-reviewed change rather than as a default copy
+  choice.
+- **Residual risk**: low. The platform now describes itself honestly
+  as policy intelligence, not a regulatory enforcement tool. The
+  per-employer lookup remains dormant by default; activation is paired
+  with a concrete operational need rather than a hypothetical
+  partnership.
 
 ## 4. Sign-off
 

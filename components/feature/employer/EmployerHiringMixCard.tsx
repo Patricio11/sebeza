@@ -5,16 +5,18 @@
  * (SA-citizen vs foreign-national) plus role/city breakdowns. Their
  * own data only  scoped to `session.org` by the query layer.
  *
- * Framing copy follows D2 (PHASE_9_7_PLAN.md, 2026-05-24): EEA §1
- * designated-group qualification + ESA §8 record-keeping. The
- * wording itself is currently engineering-team draft  counsel
- * review (DPIA R9) closes before this copy ships publicly. The
- * DRAFT banner at the top of the card is the visible reminder; it
- * comes off in a follow-up commit once sign-off is recorded.
+ * Framing reframed 2026-05-24: the original draft cited EEA §1
+ * (designated-group qualification) and ESA §8 (reasonable-efforts).
+ * Per operator direction we don't make racial-framing or specific
+ * regulatory-mandate claims. The card now ships with neutral
+ * "for your own records" copy. The platform stays a non-racial
+ * national talent platform for everyone; if a regulator ever
+ * formally asks for the specific legal framing, it lands as its
+ * own intentional change. See DPIA R9 + PHASE_9_7_COMPLETE.md.
  */
 
 import type { EmployerOwnMix } from "@/db/queries/employerMix";
-import { Scale, Info, AlertTriangle } from "lucide-react";
+import { Info } from "lucide-react";
 
 export function EmployerHiringMixCard({ data }: { data: EmployerOwnMix }) {
   if (data.total === 0) {
@@ -52,10 +54,7 @@ export function EmployerHiringMixCard({ data }: { data: EmployerOwnMix }) {
       aria-labelledby="own-mix-h"
       className="rounded-[var(--radius-md)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-5 md:p-7"
     >
-      {/* DRAFT banner  removed once counsel signs off (DPIA R9). */}
-      <DraftBanner />
-
-      <header className="mt-3 flex flex-wrap items-baseline justify-between gap-3 border-b border-[color:var(--color-hairline)] pb-3">
+      <header className="flex flex-wrap items-baseline justify-between gap-3 border-b border-[color:var(--color-hairline)] pb-3">
         <h2
           id="own-mix-h"
           className="font-display text-xl text-[color:var(--color-ink)]"
@@ -90,10 +89,6 @@ export function EmployerHiringMixCard({ data }: { data: EmployerOwnMix }) {
             {nfmt.format(data.sa_citizen)}
             <span className="ml-2 text-base">({pctSa.toFixed(0)}%)</span>
           </div>
-          <p className="mt-1 text-xs text-[color:var(--color-ink-soft)]">
-            EEA §1 designated-group qualification applies only to
-            SA citizens
-          </p>
         </div>
         <div className="rounded-[var(--radius-sm)] border border-[color:var(--color-accent)] bg-[color:var(--color-paper)] p-4">
           <div className="text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--color-accent)]">
@@ -103,9 +98,6 @@ export function EmployerHiringMixCard({ data }: { data: EmployerOwnMix }) {
             {nfmt.format(data.foreign_national)}
             <span className="ml-2 text-base">({pctForeign.toFixed(0)}%)</span>
           </div>
-          <p className="mt-1 text-xs text-[color:var(--color-ink-soft)]">
-            ESA §8 reasonable-efforts evidence trail
-          </p>
         </div>
       </div>
 
@@ -130,64 +122,16 @@ export function EmployerHiringMixCard({ data }: { data: EmployerOwnMix }) {
         <Breakdown title="By city" rows={data.byCity} nfmt={nfmt} />
       </div>
 
-      {/* EEA §1 + ESA §8 framing copy. Draft per D2. */}
-      <section
-        aria-labelledby="framing-h"
-        className="mt-6 rounded-[var(--radius-sm)] border border-[color:var(--color-hairline)] bg-[color:var(--color-paper)] p-4"
-      >
-        <h3
-          id="framing-h"
-          className="flex items-center gap-2 text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--color-brand-strong)]"
-        >
-          <Scale className="size-3.5" aria-hidden="true" />
-          What this is useful for
-        </h3>
-        <p className="mt-2 text-xs text-[color:var(--color-ink-soft)]">
-          <strong className="text-[color:var(--color-ink)]">
-            EEA §1 designated-group qualification.
-          </strong>{" "}
-          The Employment Equity Act &rsquo;s definition of
-          &ldquo;Black people&rdquo; applies only to SA citizens (plus a
-          narrow pre-1994 qualification). Your SA-citizen split above
-          maps directly to who counts toward that designated group in
-          your representation calculations.
-        </p>
-        <p className="mt-2 text-xs text-[color:var(--color-ink-soft)]">
-          <strong className="text-[color:var(--color-ink)]">
-            ESA §8 record-keeping.
-          </strong>{" "}
-          The Employment Services Act requires reasonable efforts to
-          recruit South African citizens or permanent residents before
-          hiring a foreign national, and the Department can request
-          evidence. Sebenza-confirmed placements are part of that
-          trail.
-        </p>
-        <p className="mt-3 inline-flex items-start gap-1.5 rounded-[var(--radius-sm)] bg-[color:var(--color-surface-sunk)] px-3 py-2 text-[0.7rem] italic text-[color:var(--color-ink-soft)]">
-          <Info className="mt-0.5 size-3 shrink-0" aria-hidden="true" />
-          Sebenza-confirmed placements only  not a substitute for
-          your EEA-1 filing or your Department of Home Affairs
-          documentation.
-        </p>
-      </section>
+      {/* Neutral framing  for the employer's own records, no
+          specific regulatory-mandate claims. */}
+      <p className="mt-6 inline-flex items-start gap-1.5 rounded-[var(--radius-sm)] bg-[color:var(--color-surface-sunk)] px-3 py-2 text-[0.7rem] italic text-[color:var(--color-ink-soft)]">
+        <Info className="mt-0.5 size-3 shrink-0" aria-hidden="true" />
+        Your hiring mix on Sebenza, for your own records  useful
+        when HR or compliance needs a quick split of confirmed
+        placements. Sebenza-confirmed placements only; not a
+        substitute for any official filing.
+      </p>
     </section>
-  );
-}
-
-function DraftBanner() {
-  return (
-    <div className="flex items-start gap-2 rounded-[var(--radius-sm)] border border-[color:var(--color-accent)] bg-[color:var(--color-accent)]/10 px-3 py-2 text-[0.7rem] text-[color:var(--color-ink)]">
-      <AlertTriangle
-        className="mt-0.5 size-3.5 shrink-0 text-[color:var(--color-accent)]"
-        aria-hidden="true"
-      />
-      <span>
-        <strong className="uppercase tracking-[0.18em]">Draft framing.</strong>{" "}
-        The EEA §1 + ESA §8 wording below is engineering-team reading,
-        pending labour-law counsel review (DPIA R9). The card is shown
-        for engineering testing; the legal-claim wording will be
-        finalised before public-facing use.
-      </span>
-    </div>
   );
 }
 

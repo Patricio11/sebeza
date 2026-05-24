@@ -37,7 +37,7 @@ export function EmployerLookupForm() {
   const [pending, startTransition] = useTransition();
   const [orgName, setOrgName] = useState("");
   const [registrationNumber, setRegistrationNumber] = useState("");
-  const [reason, setReason] = useState<LookupReason>("esa_s8_compliance");
+  const [reason, setReason] = useState<LookupReason>("compliance_check");
   const [reasonNote, setReasonNote] = useState("");
   const [result, setResult] = useState<LookupResult | null>(null);
 

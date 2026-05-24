@@ -4,9 +4,10 @@
  * The actionable flip side of the Justification Index. Same data
  * source (`justificationIndexQuery`); this view filters to cells
  * classified `supply_available` and groups them by province so a
- * policy user can see WHERE Employment Services Act §8 has practical
- * force  the (profession × province) cells where SA-citizen supply
- * can plausibly meet employer demand.
+ * policy user can see WHERE local SA-citizen supply can plausibly
+ * meet employer demand  the cells where local-hiring incentive
+ * policy can land cleanly without harming employers in genuine
+ * shortage cells (see /gov/shortage for the complement).
  *
  * Layout: one province per section, cells sorted by sa_supply
  * descending. Each cell carries a visual SA-supply bar (normalised

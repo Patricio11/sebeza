@@ -26,9 +26,13 @@
  *                  `employer.own_mix.view` (9.7.5) so the 9.7.7
  *                  oversight log can correlate.
  *
- * Framing per D2: ESA §8 evidence aid for DEL inquiries  not
- * "audit a company's foreigner ratio." Counsel review of the
- * legal-claim wording is tracked as DPIA R9.
+ * Reframed 2026-05-24 (post-operator review): the original draft
+ * was framed as an ESA §8 evidence aid for DEL inquiries. Per
+ * operator direction we don't make specific regulatory-mandate
+ * claims; the surface is a generic bounded compliance query, used
+ * sparingly, audit-logged in full. If a regulator ever formally
+ * asks for a tailored framing, that lands as its own intentional
+ * change. See DPIA R9 + PHASE_9_7_COMPLETE.md.
  */
 
 import { z } from "zod";
@@ -45,7 +49,7 @@ const inputSchema = z
     orgName: z.string().trim().max(200).optional(),
     registrationNumber: z.string().trim().max(40).optional(),
     reason: z.enum([
-      "esa_s8_compliance",
+      "compliance_check",
       "incentive_verification",
       "mandated_audit",
       "other",
@@ -84,7 +88,7 @@ export async function performEmployerLookup(
     return {
       ok: false,
       message:
-        "Per-employer mix lookup is dormant. An admin must enable feature_flag_employer_mix_lookup in /admin/settings (activation pairs with a real DEL §8 partnership workflow).",
+        "Per-employer mix lookup is dormant. An admin must enable feature_flag_employer_mix_lookup in /admin/settings before this surface is callable. Activation pairs with a concrete operational need.",
     };
   }
 

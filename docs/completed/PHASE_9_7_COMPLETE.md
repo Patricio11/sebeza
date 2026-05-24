@@ -214,16 +214,70 @@ Compliance assertion (a) "no nationality cell below k" + (e) "no raw country in 
 
 ---
 
+## Reframing decision — 2026-05-24 (post-operator review)
+
+The first draft framed the employer self-view + the gov per-employer
+lookup + the opportunity / shortage / brief pages around two specific
+South African statutes: **Employment Equity Act §1** (designated-group
+qualification — uses the term "Black people") and **Employment Services
+Act §8** (reasonable-efforts to recruit South African citizens, enforced
+by the Department of Employment & Labour).
+
+The operator (Patricio) called this out the moment it surfaced in
+public-facing copy review. Two distinct concerns, both correct:
+
+1. **Racial framing on a national platform.** Sebenza is for every South
+   African worker. Pulling EEA §1's "Black people" definition into the
+   platform's copy drags racial categories into a tool whose product
+   line is non-racial by design.
+2. **Overclaiming a regulatory relationship.** Citing ESA §8 + DEL by
+   name implies a partnership / sanctioned-evidence-trail role that
+   does not exist today. If a regulator ever formally asks for tailored
+   framing, that lands as its own intentional, counsel-reviewed change
+   rather than as a default copy choice.
+
+**Outcome**: every user-facing surface was reframed to neutral
+policy-intelligence + employer-records language **on the same day Phase
+9.7 closed**. The DRAFT banner on `<EmployerHiringMixCard>` came off
+(removed entirely; not needed). The reason-enum on the per-employer
+lookup dropped `esa_s8_compliance` in favour of `compliance_check`.
+DPIA R9 was revised to record the reframing as the mitigation — the
+legal-claims-unverified risk is now formally addressed by the *absence*
+of those claims in the platform's copy.
+
+**What's preserved**: every structural defence (2-class split,
+k-anonymity floor, complementary suppression, employer-min-placements
+floor, dormant-by-default flag, audit log on every gov query, oversight
+log). Those don't depend on the legal framing; they remain the trust
+posture.
+
+**What's gone**: EEA §1 + "Black people" + ESA §8 + DEL references on
+any user-facing surface or audit-log enum value. Code comments retain
+historical context (the journey is honest) but UI strings do not.
+
+Reframing commit: `<TBD>` (this commit). Original framing decision
+recorded in [PHASE_9_7_PLAN.md](PHASE_9_7_PLAN.md) §D2 as the historical
+record of what was considered.
+
+---
+
 ## Outstanding (not in Phase 9.7's scope)
 
-1. **DPIA R9 counsel review** — the EEA §1 / ESA §8 framing copy on:
-   - `<EmployerHiringMixCard>` (DRAFT banner removed when sign-off lands)
-   - `/gov/employer-lookup` framing strip
-   - `/gov/opportunity` framing strip
-   - `/gov/brief` footer caveat
-2. **`feature_flag_employer_mix_lookup` activation** — pairs with a formal DEL §8 partnership workflow. Engine + UI built and tested; flag-flip in `/admin/settings` is the activation step.
-3. **9.7.8 cron + email distribution** — recurring monthly brief delivery. The page is the artefact today; the LMI nightly cron is the template when scheduling lands.
-4. **Genuine "Local shortage" classifications** — require more diverse employer-confirmed placement data than is reasonable to seed. Will emerge organically as more employers log hires across more (profession × province) cells.
+1. **`feature_flag_employer_mix_lookup` activation** — pairs with a
+   concrete operational need rather than a hypothetical partnership.
+   Engine + UI built and tested; flag-flip in `/admin/settings` is the
+   activation step. The dormant page itself renders an informative
+   notice so users handed the URL after activation get the right
+   context.
+2. **9.7.8 cron + email distribution** — recurring monthly brief
+   delivery. The page is the artefact today; the LMI nightly cron is
+   the template when scheduling lands.
+3. **Genuine "Local shortage" classifications** — require more diverse
+   employer-confirmed placement data than is reasonable to seed
+   synthetically. Will emerge organically as more employers log hires
+   across more (profession × province) cells. The seed currently lights
+   up *Local supply available* classifications cleanly; *Local shortage*
+   awaits real data.
 
 ---
 

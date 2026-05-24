@@ -63,9 +63,9 @@ export type SettingKey =
   // not two diverging knobs.
   | "employer_mix_min_placements"
   // Phase 9.7.6  per-employer governed lookup gate. Default OFF;
-  // ships dormant per D3 (PHASE_9_7_PLAN.md, 2026-05-24). Activation
-  // pairs with a real Department of Employment & Labour partnership
-  // workflow  same dormant-by-default posture as KYC + SAQA.
+  // ships dormant. Activation pairs with a concrete operational need
+  // (purpose-limitation, retention, named operators become concrete
+  // at that point). Same dormant-by-default posture as KYC + SAQA.
   | "feature_flag_employer_mix_lookup";
 
 const DEFAULTS: Record<SettingKey, unknown> = {

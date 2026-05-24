@@ -7,15 +7,15 @@
  */
 
 export type LookupReason =
-  | "esa_s8_compliance"
+  | "compliance_check"
   | "incentive_verification"
   | "mandated_audit"
   | "other";
 
 export const REASON_LABELS: Record<LookupReason, string> = {
-  esa_s8_compliance: "ESA §8 reasonable-efforts inquiry",
+  compliance_check: "Compliance check (general policy follow-up)",
   incentive_verification: "Local-hiring incentive verification",
-  mandated_audit: "Mandated audit (Dept of Employment & Labour)",
+  mandated_audit: "Mandated audit (regulator request)",
   other: "Other (note required)",
 };
 

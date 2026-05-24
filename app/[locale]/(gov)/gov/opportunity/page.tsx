@@ -3,14 +3,16 @@
  *
  * Same data source as `/gov/shortage` (the Justification Index); this
  * view filters to cells classified `supply_available` so policy users
- * see WHERE Employment Services Act §8 has practical force  the
- * (profession × province) cells where SA-citizen supply can plausibly
- * meet employer demand without harming employers who genuinely can't
- * find local talent.
+ * see WHERE local SA-citizen supply can plausibly meet employer
+ * demand. The complement view on /gov/shortage flags cells where the
+ * local pool isn't there to fill  the two together inform local-
+ * hiring incentive design without misfiring against employers who
+ * genuinely can't find local talent.
  *
- * ESA §8 framing per D2 (PHASE_9_7_PLAN.md). Counsel sign-off tracked
- * as DPIA R9; the copy here is the engineering team's reading and
- * may need to soften before public-facing use.
+ * Reframed 2026-05-24: the original draft cited Employment Services
+ * Act §8 explicitly. Per operator direction we don't make specific
+ * regulatory-mandate claims; framing is now neutral policy-
+ * intelligence. See DPIA R9 + PHASE_9_7_COMPLETE.md.
  */
 
 import { setRequestLocale } from "next-intl/server";
@@ -21,7 +23,7 @@ import { verifyGov } from "@/lib/auth/dal";
 import { justificationIndexQuery } from "@/db/queries/justification";
 import { PROVINCES } from "@/lib/mock/taxonomy";
 import { OpportunityHeatmap } from "@/components/feature/gov/OpportunityHeatmap";
-import { Download, Scale } from "lucide-react";
+import { Download, Sprout } from "lucide-react";
 
 export const revalidate = 300;
 
@@ -64,7 +66,7 @@ export default async function GovOpportunityPage({
       activeKey="opportunity"
       pageEyebrow="Policy intelligence"
       pageTitle="Local-Hiring Opportunity Map"
-      pageSubtitle="Where SA-citizen talent can plausibly meet employer demand. The cells highlighted here are the ones where Employment Services Act §8 (reasonable local-hiring efforts) has practical force  policy can credibly ask 'could this role have been filled locally?'."
+      pageSubtitle="Where SA-citizen talent can plausibly meet employer demand. The cells highlighted here are the ones where local-hiring incentive policy lands without harming employers who genuinely can't find local talent."
       pageActions={
         <Link
           href={
@@ -104,38 +106,33 @@ export default async function GovOpportunityPage({
         />
       </section>
 
-      {/* ESA §8 framing strip. Honest about the legal context  the
-          page's whole framing rests on this Act. */}
+      {/* Neutral policy-intelligence framing  no specific regulatory-
+          mandate claims, just an honest read of demand vs supply. */}
       <section
-        aria-labelledby="esa-h"
+        aria-labelledby="frame-h"
         className="mt-8 rounded-[var(--radius-md)] border border-[color:var(--color-brand-strong)] bg-[color:var(--color-brand-tint)] p-5 md:p-6"
       >
         <div className="flex items-center gap-2 text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--color-brand-strong)]">
-          <Scale className="size-3.5" aria-hidden="true" />
-          Employment Services Act 4 of 2014 · §8
+          <Sprout className="size-3.5" aria-hidden="true" />
+          Local-hiring policy intelligence
         </div>
         <h2
-          id="esa-h"
+          id="frame-h"
           className="mt-2 font-display text-lg text-[color:var(--color-ink)]"
         >
-          Where §8 has practical force
+          Where local supply can meet demand
         </h2>
         <p className="mt-2 text-sm text-[color:var(--color-ink-soft)]">
-          ESA §8 requires employers to demonstrate reasonable efforts to
-          recruit South African citizens or permanent residents before
-          hiring a foreign national. The Department of Employment &amp;
-          Labour can request that evidence. The cells below are where
-          Sebenza data suggests local talent is genuinely available
-          policy can credibly enquire about §8 compliance for the
-          professions + provinces flagged here, without harming
-          employers in cells classified as <em>genuine local shortage</em>
-          on <Link href="/gov/shortage" className="underline">
+          The cells below are where Sebenza data suggests SA-citizen
+          talent is genuinely available  useful for designing local-
+          hiring incentives, training programmes, and policy follow-up
+          in (profession × province) cells where the supply is there
+          to back the intervention. The complement view on{" "}
+          <Link href="/gov/shortage" className="underline">
             /gov/shortage
-          </Link> where the local pool isn&rsquo;t there to fill.
-        </p>
-        <p className="mt-2 text-[0.7rem] italic text-[color:var(--color-ink-soft)]">
-          Legal framing is engineering-team reading, pending counsel
-          review (DPIA R9). Copy may soften before public-facing use.
+          </Link>{" "}
+          flags cells where the local pool isn&rsquo;t there to fill
+          a training-investment signal, not an enforcement one.
         </p>
       </section>
 

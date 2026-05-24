@@ -4,7 +4,7 @@
  * The honest classifier for each (profession × province) cell. Three
  * inputs, four thresholds, three possible labels. No ML, no opaque
  * scoring  the rule below is the rule that ships on `/gov` and the
- * one Department of Employment & Labour can argue with.
+ * one a policy team can read off the page and argue with.
  *
  * Per D1 (PHASE_9_7_PLAN.md, closed 2026-05-24):
  *
