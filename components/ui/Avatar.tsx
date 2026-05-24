@@ -1,3 +1,4 @@
+import { useId } from "react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import type { VerificationStatus } from "@/lib/mock/types";
@@ -88,6 +89,15 @@ function InitialsBlock({
   fontSize: number;
   dims: number;
 }) {
+  // SVG ids are document-global. Two avatars rendering the same palette
+  // (e.g. mobile + desktop responsive variants of the same person) used to
+  // collide on `id="grad-{paletteId}"`, leaving the `fill="url(#...)"`
+  // unresolved on one of them  the rect went transparent and the
+  // light-on-cream initials disappeared into the page background. useId()
+  // gives every instance a unique gradient id and fixes that.
+  const reactId = useId();
+  const gradId = `grad-${palette.id}-${reactId.replace(/:/g, "")}`;
+
   // Slightly off-center initials + a subtle Y-chevron mark in the corner give
   // the fallback character without it screaming "generated avatar".
   return (
@@ -99,7 +109,7 @@ function InitialsBlock({
     >
       <defs>
         <linearGradient
-          id={`grad-${palette.id}`}
+          id={gradId}
           x1="0"
           y1="0"
           x2="1"
@@ -109,7 +119,7 @@ function InitialsBlock({
           <stop offset="100%" stopColor={palette.to} />
         </linearGradient>
       </defs>
-      <rect width={dims} height={dims} fill={`url(#grad-${palette.id})`} />
+      <rect width={dims} height={dims} fill={`url(#${gradId})`} />
       {/* Faint chevron in the lower-right  Sebenza's signature mark on every
           generated avatar, sits at ~6% opacity so it's a watermark, not a logo. */}
       <path
