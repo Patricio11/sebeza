@@ -145,23 +145,49 @@ Server Action.
 
 ---
 
-## ✅ PRE-FLIGHT RECHECK (run before writing code)
+## ✅ PRE-FLIGHT RECHECK ✅ ALL CLEAR 2026-05-24
 
 - [x] **Workspace-role taxonomy** confirmed: `orgMemberRole` enum already exists (`db/schema.ts:85`,
       values `owner` / `recruiter` / `viewer`). See D7.
-- [ ] Confirm `consentPurpose` enum + the `ALTER TYPE … ADD VALUE IF NOT EXISTS` migration pattern (per
-      `0008_phase7_5_outcomes_consent.sql`). 9.8 adds `vacancy_matching`.
-- [ ] Confirm `notification_prefs` JSONB shape + `createNotification` kind catalog + dedupe window. 9.8 adds
-      kinds `vacancy.invite`, `vacancy.response`, `vacancy.reconsider`, `vacancy.invite.expired`,
-      `vacancy.invite.unanswered`.
-- [ ] Confirm `placements` columns + `placement_source` + the vacancy linkage point (9.8 adds
-      `placement.vacancy_id` nullable FK — a placement may exist without a vacancy, and vice-versa).
-- [ ] Confirm the search query + ranking entrypoint so "Find matches" can reuse it with a vacancy's filters
-      (no parallel search path — one ranking source of truth).
-- [ ] Confirm `searchSnapshot ≠ result-set` rule so the vacancy pipeline is modelled as explicit
-      membership rows, not a stored search blob.
-- [ ] Confirm audit action naming + the hardened CSV export path (for the response-reasons export).
-- [ ] Confirm Phase 8 cron infra + `CRON_SECRET` pattern (the new invite-expiry cron reuses it).
+- [x] **`consentPurpose` enum + migration pattern** confirmed: enum at `db/schema.ts:59`; the additive
+      pattern is `ALTER TYPE "consent_purpose" ADD VALUE IF NOT EXISTS '<value>';` in a dedicated
+      isolated migration (per `0008_phase7_5_outcomes_consent.sql`). PG 16 (Neon) handles enum extension
+      in-transaction; `IF NOT EXISTS` keeps the migration re-runnable. 9.8 adds `vacancy_matching` via
+      this exact pattern.
+- [x] **`notification_prefs` JSONB + `createNotification`** confirmed: `notification_prefs` is a JSONB
+      column on `appUser` (`db/schema.ts:174`). `createNotification` at `lib/notifications/server.ts:63`
+      honours catalog defaults ⊕ user overrides, dedupes inside the catalog's `dedupeWindowSeconds`, and
+      respects suspended/deleted user state. Fan-out helpers (`notifyOrgMembers`, `notifyAllAdmins`)
+      already exist for multi-recipient cases. **Adding a kind = one entry in `NOTIFICATION_CATALOG` +
+      one AuditKind union member.** 9.8 adds: `vacancy.invite`, `vacancy.response`, `vacancy.reconsider`,
+      `vacancy.invite.expired`, `vacancy.invite.unanswered`.
+- [x] **`placements` columns + linkage point** confirmed: table at `db/schema.ts:415` with
+      `id` / `profileId` / `organizationId` / `actorUserId` / `role` / `city` / `hiredAt` / `salaryBand` /
+      `source` (placementSource enum, defaults to `employer_confirmed`). **`vacancy_id` does NOT exist
+      today** — 9.8.1 adds it as `text("vacancy_id").references(() => vacancies.id)` nullable, in the
+      same migration that creates the `vacancies` table. Cardinality preserved (1 vacancy : 0..N
+      placements; 1 placement : 0..1 vacancy).
+- [x] **Search query + ranking entrypoint** confirmed: `searchProfilesQuery` at
+      `db/queries/profiles.ts:80` is the single source of truth. The ranking blend
+      (`ts_rank_cd × sebenza_freshness_confidence × completeness × citizen_boost`) is encoded in raw SQL
+      inside that function. "Find matches" on a vacancy calls this with the vacancy's filters mapped to
+      `SearchFilters` — no parallel matcher.
+- [x] **`searchSnapshot ≠ result-set` rule** confirmed: explicit at `db/schema.ts:441` 
+      *"Stored filters get re-run by `runSavedSearch` to update `newMatchesCount` — we don't snapshot
+      result rows."* Saved searches store `filters` JSONB + `lastRunAt` + `newMatchesCount` + a SHA-1
+      hash for diffing (`db/schema.ts:460`), never the result set. The vacancy pipeline is the opposite:
+      a *persistent candidate list* with explicit accept/decline state per (vacancy × seeker). New table
+      (`vacancy_invitations`) with explicit membership rows, not a stored search blob.
+- [x] **Audit naming + hardened CSV path** confirmed: `AuditKind` union at `lib/audit/index.ts:24`
+      (dot-separated `category.action` or `category.sub.action`; see Phase 5 / 7 / 9.7 patterns).
+      Shared CSV helpers at `lib/analytics/csv.ts` (`safeCell`, `csvFromRows`, `csvDisposition` — OWASP
+      injection guard + UTF-8 BOM + CRLF + RFC 4180). 9.8 reuses both unchanged.
+- [x] **Phase 8 cron infra + `CRON_SECRET`** confirmed: `isAuthorizedCron(request)` at
+      `lib/cron/auth.ts:15`. Convention: `const auth = isAuthorizedCron(request); if (!auth.ok) return
+      auth.response;` at the top of every `/api/cron/*` route. Fail-closed if `CRON_SECRET` env unset.
+      Already used by six existing cron routes (hard-delete-erased, status-stale-warning,
+      saved-search-matches, skill-gap-snapshot, outcome-snapshots, lmi-snapshot, saqa-worker). 9.8 adds
+      `/api/cron/vacancy-invite-expiry` following the same pattern.
 
 ---
 
