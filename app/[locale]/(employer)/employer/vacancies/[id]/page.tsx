@@ -37,10 +37,12 @@ import {
 import { VacancyForm } from "@/components/feature/employer/vacancies/VacancyForm";
 import { VacancyStatusChip } from "@/components/feature/employer/vacancies/VacancyStatusChip";
 import { VacancyInvitationsPanel } from "@/components/feature/employer/vacancies/VacancyInvitationsPanel";
+import { VacancyPlacementsPanel } from "@/components/feature/employer/vacancies/VacancyPlacementsPanel";
 import {
   listInvitationsForVacancy,
   withdrawInvitation,
 } from "@/lib/employer/invitations";
+import { getPlacementsForVacancy } from "@/lib/employer/placements";
 import { getProfessions } from "@/lib/taxonomy/query";
 import { PROVINCES, PROFESSIONS, SKILLS } from "@/lib/mock/taxonomy";
 import { ChevronLeft, Lock, MapPin, Users } from "lucide-react";
@@ -63,7 +65,10 @@ export default async function VacancyDetailPage({
   if (!vacancy) notFound();
   const canEdit = canEditVacancies(role);
   const showSalary = canSeeSalary(role);
-  const invitations = await listInvitationsForVacancy(vacancy.id);
+  const [invitations, placements] = await Promise.all([
+    listInvitationsForVacancy(vacancy.id),
+    getPlacementsForVacancy(vacancy.id),
+  ]);
 
   const professions = await getProfessions();
 
@@ -165,6 +170,22 @@ export default async function VacancyDetailPage({
           }}
         />
       )}
+
+      {/* Phase 9.8.6  Vacancy → Placement linkage. Closes the loop:
+          accepted invitees become one-tap "Log this hire" CTAs that
+          deep-link to the existing dossier mark-as-hired flow with
+          ?vacancyId=… so the placement row carries the linkage
+          automatically. When status=filled and nothing's logged yet,
+          the panel renders as a prominent prompt (the plan's "mark
+          filled → prompt to log placement" requirement). */}
+      <VacancyPlacementsPanel
+        vacancyId={vacancy.id}
+        vacancyStatus={vacancy.status}
+        canEdit={canEdit}
+        placements={placements}
+        invitations={invitations}
+        locale={locale}
+      />
 
       {/* Status transition actions  Owner/Recruiter only */}
       {canEdit && NEXT_STATES[vacancy.status].length > 0 && (

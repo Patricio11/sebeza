@@ -9,6 +9,7 @@
  * nationalIdEnc)  never retrofitted. See TO_START_EVERY_SESSION.md §4.
  */
 import {
+  type AnyPgColumn,
   boolean,
   customType,
   index,
@@ -452,8 +453,20 @@ export const placements = pgTable("placements", {
    * directly (Phase 5 flow, vacancy_id NULL) or tied to a specific
    * vacancy whose pipeline produced the hire. ON DELETE SET NULL so
    * deleting a vacancy never breaks Placement-Truth history.
+   *
+   * Cardinality: 1 vacancy : 0..N placements (an employer might hire
+   * multiple chefs from one posting); 1 placement : 0..1 vacancy
+   * (the pre-9.8 placement flow continues unchanged). No UNIQUE
+   * constraint  asserted by FK shape.
+   *
+   * NB: the migration `0015_phase9_8_vacancies.sql` already created
+   * the actual FK in Postgres; this `.references(...)` keeps the
+   * Drizzle schema honest with the DB so future migration diffs
+   * don't try to re-add the constraint.
    */
-  vacancyId: text("vacancy_id"),
+  vacancyId: text("vacancy_id").references((): AnyPgColumn => vacancies.id, {
+    onDelete: "set null",
+  }),
 });
 
 // ─────────────────────────────────────────────────────────────────────────────

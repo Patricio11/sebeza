@@ -412,16 +412,46 @@ Server Action.
 - [x] Verified: `npm test` 22/22 green · `npm run typecheck` clean · `npm run build` clean (routes
       `/[locale]/dashboard/invitations` + `/[locale]/dashboard/invitations/[id]` registered).
 
-### Task 9.8.6: Vacancy outcome → placement linkage
-- [ ] When an employer marks a vacancy `filled`, prompt to log the `placement` (reuse Phase 5/7.5.5 flow)
-      with `vacancy_id` set. Keeps Placement-Truth intact (still employer-confirmed) and ties the loop:
-      vacancy → invites → accepted → placement.
-- [ ] **Cardinality:** a vacancy may have **0..N placements** (an employer might hire 3 chefs from one
-      posting), a placement has **0..1 vacancy** (`placement.vacancy_id` nullable so the pre-9.8 placement
-      flow continues to work unchanged). Asserted by FK shape, not just code.
-- [ ] Vacancy fill metrics derive from `employer_confirmed` placements only (7.5.5 honesty rule inherited).
-- [ ] **Mobile-first:** "Mark vacancy as filled" is one tap from the vacancy detail, the placement-log
-      prompt is the same bottom-sheet pattern as 9.7.5's mark-as-hired flow.
+### Task 9.8.6: Vacancy outcome → placement linkage ✅ 2026-05-24
+- [x] **Existing Phase 5 `markAsHired()` Server Action extended** (not rebuilt) with an optional
+      `vacancyId` field on its Zod schema. When set, the action re-fetches the vacancy under the
+      caller's org scope and silently nulls cross-org / stale ids (an attacker can't probe foreign
+      vacancy ids via the placement form). The placement row now carries `vacancyId` and the
+      `placement.confirm` audit-log meta includes it when present. Source stays hard-coded
+      `employer_confirmed` so the 7.5.5 honesty rule is inherited unchanged.
+- [x] **Cardinality enforced by FK shape**: `placements.vacancyId` is `text("vacancy_id")
+      .references(() => vacancies.id, { onDelete: "set null" })`, nullable, no UNIQUE constraint.
+      A vacancy may have 0..N placements (one posting → multiple hires), a placement has 0..1 vacancy
+      (pre-9.8 placements flow continues unchanged). The DB-level FK + ON DELETE SET NULL shipped in
+      migration `0015`; the Drizzle schema now mirrors it via `.references(...)` so future
+      migration-diff runs don't re-add the constraint. **No new migration required for 9.8.6.**
+- [x] **Vacancy-fill metrics** derive from `employer_confirmed` placements only (7.5.5 honesty rule
+      inherited by virtue of the unchanged source default). Compliance assertion (e) in 9.8.8 will
+      lock this in alongside the `accepted_with_notice` rule.
+- [x] **Vacancy detail page**: new `<VacancyPlacementsPanel>` renders below the invitations pipeline.
+      Three modes: (1) **filled + nothing logged yet**  prominent accent-coloured prompt with
+      per-accepted-invitee "Log this hire" CTAs deep-linking to
+      `/employer/dossier/[handle]?vacancyId=<id>#mark-as-hired`; (2) **≥ 1 placement linked** 
+      placements list + the per-invitee CTAs remain (an employer might hire multiple people from one
+      posting); (3) **no accepted invitees + no placements**  panel hidden entirely (nothing
+      meaningful to surface). Visible to all roles including Viewers; "Log hire" CTAs are
+      Owner / Recruiter only.
+- [x] **`MarkAsHiredCard` extended** with optional `vacancyId` + `vacancyTitle` props. When `vacancyId`
+      is present, the form opens pre-armed (the click on the vacancy-side CTA was the
+      confirmation), pre-fills the role with the vacancy title, and shows a brand-tinted banner
+      *"Linking this hire to vacancy: <Title>. The pipeline loop closes automatically."* so the
+      recruiter knows the link is wired. The dossier page reads `?vacancyId` from search params,
+      resolves the title via `getMyVacancy()` (org-scoped, so a cross-org id resolves to null and
+      the banner just doesn't render), and threads both props through.
+- [x] **New read helper** `getPlacementsForVacancy(vacancyId)` in `lib/employer/placements.ts` (org-
+      scoped via `verifyOrgVerified` + double-checked at the query level by filtering on both the
+      vacancy id and the placement's `organizationId`  defence in depth).
+- [x] **Mobile-first**: the placements panel cards stack on phones, the per-invitee "Log this hire"
+      button is ≥ 40px tall (thumb-reachable), and the fallback note for hires logged from outside
+      the invitation list keeps the canonical entry point on the dossier (no new surface to maintain).
+- [x] Verified: `npm test` 22/22 green · `npm run typecheck` clean · `npm run build` clean. **No new
+      migration required**  the FK already shipped in `0015`; this task is read/action logic +
+      one UI panel.
 
 ### Task 9.8.7: "Why roles go unfilled" analytics (the policy payoff)
 - [ ] Aggregate decline-reason distribution by profession × province (e.g. *"Welders · EC: 60% declined —

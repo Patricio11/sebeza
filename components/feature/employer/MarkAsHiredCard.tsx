@@ -11,7 +11,7 @@
  */
 
 import { useState, useTransition } from "react";
-import { Briefcase, Check, AlertTriangle } from "lucide-react";
+import { Briefcase, Check, AlertTriangle, Link as LinkIcon } from "lucide-react";
 import { TextField } from "@/components/ui/FormField";
 import { markAsHired } from "@/lib/employer/placements";
 import type { ContactReveal } from "@/lib/employer/reveal";
@@ -31,6 +31,11 @@ interface Props {
   priorReveal: ContactReveal | null;
   /** Server-side: any existing placement this org already logged. */
   existingPlacement: ExistingPlacement | null;
+  /** Phase 9.8.6  optional vacancy linkage. When present, the form
+   *  opens pre-armed with the link + a "Linking to vacancy: …" banner
+   *  so the recruiter knows the hire will close the pipeline loop. */
+  vacancyId?: string;
+  vacancyTitle?: string;
 }
 
 export function MarkAsHiredCard({
@@ -39,14 +44,19 @@ export function MarkAsHiredCard({
   defaultCity,
   priorReveal,
   existingPlacement,
+  vacancyId,
+  vacancyTitle,
 }: Props) {
   const [form, setForm] = useState({
-    role: defaultRole,
+    role: vacancyTitle || defaultRole,
     city: defaultCity,
     hiredAt: new Date().toISOString().slice(0, 10),
     salaryBand: "",
   });
-  const [open, setOpen] = useState(false);
+  // When the user lands here from "Log this hire" on a vacancy detail
+  // (?vacancyId=…), open the form straight away  the click was the
+  // confirmation. Otherwise the card stays collapsed by default.
+  const [open, setOpen] = useState(Boolean(vacancyId));
   const [done, setDone] = useState<ExistingPlacement | null>(existingPlacement);
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -114,6 +124,7 @@ export function MarkAsHiredCard({
         city: form.city,
         hiredAt: form.hiredAt,
         salaryBand: form.salaryBand || undefined,
+        vacancyId,
       });
       if (r.ok) {
         setDone({
@@ -132,6 +143,16 @@ export function MarkAsHiredCard({
       <div className="text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--color-ink)]">
         Mark as hired
       </div>
+      {vacancyId && vacancyTitle && (
+        <div className="mt-2 flex items-start gap-2 rounded-[var(--radius-sm)] border border-[color:var(--color-brand)] bg-[color:var(--color-brand-tint)] px-3 py-2 text-xs text-[color:var(--color-brand-strong)]">
+          <LinkIcon className="mt-0.5 size-3.5 shrink-0" aria-hidden="true" />
+          <span>
+            Linking this hire to vacancy:{" "}
+            <strong>{vacancyTitle}</strong>. The pipeline loop closes
+            automatically.
+          </span>
+        </div>
+      )}
       {!open ? (
         <>
           <p className="mt-2 text-sm text-[color:var(--color-ink-soft)]">

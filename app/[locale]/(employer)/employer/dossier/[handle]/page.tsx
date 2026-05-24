@@ -31,12 +31,28 @@ const REVEAL_GATE_DAYS = 30;
 
 export default async function EmployerDossierPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string; handle: string }>;
+  searchParams: Promise<{ vacancyId?: string }>;
 }) {
   const { locale, handle } = await params;
+  const sp = await searchParams;
   setRequestLocale(locale);
   const session = await verifyOrgVerified();
+
+  // Phase 9.8.6  optional vacancy linkage from ?vacancyId=… The
+  // server resolves the vacancy title here (org-scoped via
+  // getMyVacancy) so the MarkAsHiredCard banner reads "Linking this
+  // hire to vacancy: <Title>" instead of an opaque id. Cross-org or
+  // stale ids resolve to null and the linkage banner just doesn't
+  // render  the markAsHired action also re-verifies server-side.
+  let linkedVacancy: { id: string; title: string } | null = null;
+  if (sp.vacancyId) {
+    const { getMyVacancy } = await import("@/lib/employer/vacancies");
+    const v = await getMyVacancy(sp.vacancyId);
+    if (v) linkedVacancy = { id: v.id, title: v.title };
+  }
 
   const profile = await dataProvider.getProfile(handle);
   if (!profile) notFound();
@@ -391,6 +407,8 @@ export default async function EmployerDossierPage({
                   }
                 : null
             }
+            vacancyId={linkedVacancy?.id}
+            vacancyTitle={linkedVacancy?.title}
           />
 
           {/* Dossier vitals */}

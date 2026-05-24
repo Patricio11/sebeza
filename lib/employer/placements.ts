@@ -55,6 +55,14 @@ const markAsHiredSchema = z.object({
     .optional(),
   /** Optional, kept private  never in any public read. */
   salaryBand: z.string().max(80).optional(),
+  /**
+   * Phase 9.8.6  optional linkage to the vacancy whose pipeline
+   * produced this hire. NULL when the hire was logged directly
+   * (Phase 5 flow). When set, the action verifies the vacancy belongs
+   * to the caller's org before writing  cross-org vacancy_id values
+   * are silently nulled out, never just trusted.
+   */
+  vacancyId: z.string().min(1).optional(),
 });
 
 export async function markAsHired(
@@ -102,6 +110,25 @@ export async function markAsHired(
     );
   }
 
+  // Phase 9.8.6  resolve + verify vacancy linkage, if any. We accept
+  // cross-org vacancy_id values silently (null them out) rather than
+  // failing the action  prevents an attacker from probing for the
+  // existence of another org's vacancy via the placement form.
+  let safeVacancyId: string | null = null;
+  if (v.vacancyId) {
+    const vacancyRows = await db
+      .select({ id: schema.vacancies.id })
+      .from(schema.vacancies)
+      .where(
+        and(
+          eq(schema.vacancies.id, v.vacancyId),
+          eq(schema.vacancies.organizationId, session.orgId),
+        ),
+      )
+      .limit(1);
+    if (vacancyRows[0]) safeVacancyId = vacancyRows[0].id;
+  }
+
   const id = `plc_${randomUUID()}`;
   await db.insert(schema.placements).values({
     id,
@@ -115,6 +142,7 @@ export async function markAsHired(
     // Phase 7.5  explicit. Only employer-confirmed placements count
     // in official analytics + the Phase 7.5.4 outcomes dataset.
     source: "employer_confirmed",
+    vacancyId: safeVacancyId,
   });
 
   await logAccess({
@@ -126,6 +154,7 @@ export async function markAsHired(
       handle: v.handle,
       role: v.role,
       city: v.city,
+      ...(safeVacancyId ? { vacancyId: safeVacancyId } : {}),
     },
   });
 
@@ -156,6 +185,80 @@ export async function markAsHired(
   revalidatePath("/insights"); // ISR triggers recompute next visit
 
   return ok({ placementId: id });
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Phase 9.8.6  read helper for the vacancy detail panel.
+// ─────────────────────────────────────────────────────────────────────────────
+
+export interface VacancyPlacementRow {
+  id: string;
+  profileId: string;
+  handle: string;
+  displayName: string;
+  role: string;
+  city: string;
+  hiredAt: string;
+  salaryBand: string | null;
+  source: string;
+}
+
+/**
+ * Every placement linked to the given vacancy, newest hire first.
+ * Joins to `profiles` for the display name + handle. Org-scoping is
+ * enforced by both the parent vacancy's organisation_id AND the
+ * placement's organisation_id (defence in depth).
+ *
+ * Caller is responsible for the prior org-ownership check on the
+ * vacancy (the vacancy detail page passes a vacancy already loaded
+ * via `getMyVacancy()`). The query still filters by
+ * `placements.organizationId = session.orgId` so a leaked vacancyId
+ * cross-org join can't smuggle rows through.
+ */
+export async function getPlacementsForVacancy(
+  vacancyId: string,
+): Promise<VacancyPlacementRow[]> {
+  const session = await verifyOrgVerified();
+  const db = getDb();
+  const rows = await db
+    .select({
+      id: schema.placements.id,
+      profileId: schema.placements.profileId,
+      handle: schema.profiles.handle,
+      displayName: schema.profiles.displayName,
+      role: schema.placements.role,
+      city: schema.placements.city,
+      hiredAt: schema.placements.hiredAt,
+      salaryBand: schema.placements.salaryBand,
+      source: schema.placements.source,
+    })
+    .from(schema.placements)
+    .innerJoin(
+      schema.profiles,
+      eq(schema.profiles.id, schema.placements.profileId),
+    )
+    .where(
+      and(
+        eq(schema.placements.vacancyId, vacancyId),
+        eq(schema.placements.organizationId, session.orgId),
+      ),
+    )
+    .orderBy(sql`${schema.placements.hiredAt} DESC`);
+
+  return rows.map((r) => ({
+    id: r.id,
+    profileId: r.profileId,
+    handle: r.handle,
+    displayName: r.displayName,
+    role: r.role,
+    city: r.city,
+    hiredAt:
+      r.hiredAt instanceof Date
+        ? r.hiredAt.toISOString()
+        : new Date(r.hiredAt).toISOString(),
+    salaryBand: r.salaryBand,
+    source: r.source,
+  }));
 }
 
 export async function deletePlacement(input: {
