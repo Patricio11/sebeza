@@ -193,20 +193,41 @@ Server Action.
 
 ## 📋 TASKS
 
-### Task 9.8.1: Vacancy schema + lifecycle
-- [ ] `vacancies` table: `id`, `organization_id`, `created_by` (member), `title`, `profession_id`,
-      `province_id`/`city_id`, `skills` (taxonomy refs), `seniority`, `salary_band` (**private**, never on
-      any seeker-facing surface — consistent with Phase 5 salary handling), `description`,
-      `documents_required` (refs to qualification kinds), `status` enum, **`invite_expiry_days`** (int,
-      nullable; per D2), `created_at`, `closed_at`.
-- [ ] `pgEnum vacancy_status` = `["draft", "open", "closed", "filled"]`.
-- [ ] **Privacy invariant (assert in code + test):** no vacancy field is ever exposed on a public route,
-      `/p/[handle]`, search, sitemap, or to a non-member of the owning org. Vacancies are org-private.
-- [ ] `drizzle-zod` validators; isolated migration. Extend `dataProvider` (db + mock) end-to-end.
-- [ ] `/employer/vacancies` (list + create + edit + close) respecting workspace roles
-      (Owner/Recruiter create+invite; Viewer read-only — using the existing `orgMemberRole` enum per D7).
-      **Mobile-first, No-Flash.** All forms render cleanly at 360px wide; create-vacancy is a single column
-      on mobile, two columns on `md+`. Salary-band input never has hover-only affordances.
+### Task 9.8.1: Vacancy schema + lifecycle ✅ 2026-05-24
+- [x] `vacancies` table shipped at `db/schema.ts` with all the fields specified (incl.
+      `invite_expiry_days` int nullable per D2). `vacancy_status` pgEnum
+      [`draft` / `open` / `closed` / `filled`] live. `(organization_id, status)` index for the common
+      list query. `placements.vacancy_id` added as nullable FK ON DELETE SET NULL so a deleted vacancy
+      never breaks Placement-Truth history. Migration `0015_phase9_8_vacancies.sql` applied to Neon.
+- [x] **Privacy invariant** held three ways: (1) every read in `lib/employer/vacancies.ts` filters by
+      `organizationId`; (2) every Server Action calls `requireEditRole()` which resolves the caller's
+      org + role and re-checks ownership via `getMyVacancy(id)` before any mutation; (3) the privacy
+      contract is asserted structurally by `vacancyId` only appearing in `lib/employer/vacancies*` and
+      `app/[locale]/(employer)/...` paths (compliance assertion (a) in 9.8.8 will lock this in).
+- [x] **Role gating** via the existing `orgMemberRole` enum (D7-confirmed). `canEditVacancies` =
+      owner|recruiter; `canSeeSalary` = same. Viewer is strictly read-only and the salary band is
+      stripped from their UI even though the read returns it.
+- [x] `drizzle-zod` validation via inline Zod schemas in the action file (`vacancyInputSchema` +
+      `transitionSchema`); isolated migration; `dataProvider` extension deferred  this surface is
+      employer-private and doesn't go through the mock-vs-db data-provider seam (follows the
+      `lib/employer/saved-searches.ts` pattern).
+- [x] **`/employer/vacancies`** list / **`/new`** create / **`/[id]`** detail+edit shipped. List uses a
+      card grid (1-col on mobile, 2-col on `md+`). Create form is single-column on mobile, 2-col
+      where it makes sense on `md+`. Salary input wears a "Private" pill and the section header
+      reminds the editor it stays inside the workspace.
+- [x] **Lifecycle transitions** rendered as Server Action `<form>`s on the detail page so they work
+      without client JS (No-Flash Rule honoured). Bounded state machine
+      (`draft → open|closed`, `open → closed|filled`, `closed → open`, `filled → closed`). Anything
+      else is refused with a clear message.
+- [x] Eight new `vacancy.*` audit kinds reserved in `lib/audit/index.ts`; 9.8.1 uses three of them
+      (`vacancy.create`, `vacancy.update`, `vacancy.status.change`). The remaining five
+      (`.invite`, `.invite.skip`, `.invite.withdraw`, `.invite.expire`, `.response`) land in
+      9.8.4 + 9.8.5.
+- [x] New `Vacancies` entry in `EMPLOYER_NAV` (Briefcase icon), positioned between Saved searches and
+      Talent pools  the active reverse-matching workflow bridges passive monitoring and manual
+      shortlisting.
+- [x] Verified: `npm test` 22/22 green · `npm run typecheck` clean · `npm run build` clean · migration
+      `0015` applied to Neon. Commit `1803676`.
 
 ### Task 9.8.2: Reverse-matching ("Find matches")
 - [ ] "Find matches" on a vacancy pre-populates the **existing search** with the vacancy's filters — reuse
