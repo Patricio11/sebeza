@@ -80,6 +80,39 @@ const ROWS: SettingRow[] = [
       "5 – 200 (default 10). Cohort cells below this are suppressed " +
       "on /insights and exports. Lower with extreme care.",
   },
+  {
+    key: "lmi_demand_floor",
+    label: "Demand floor (Justification Index)",
+    type: "number",
+    hint:
+      "0.3 – 10 (default 1.0). 1.0 = 10 distinct employers searched / " +
+      "province / 30 days. Cells below this floor are not classified.",
+  },
+  {
+    key: "lmi_local_supply_threshold",
+    label: "Local supply ratio threshold",
+    type: "number",
+    hint:
+      "0.1 – 5 (default 0.5). Below this ratio (SA supply ÷ demand × 10) " +
+      "AND the other shortage conditions = 'genuine local shortage'.",
+  },
+  {
+    key: "lmi_foreign_fill_floor",
+    label: "Foreign-fill share floor",
+    type: "number",
+    hint:
+      "0.1 – 1 (default 0.5). Share of confirmed placements that went to " +
+      "foreign nationals before the fill-pattern condition fires.",
+  },
+  {
+    key: "employer_mix_min_placements",
+    label: "Employer-mix minimum placements",
+    type: "number",
+    hint:
+      "3 – 200 (default 5). Minimum employer-confirmed placements before " +
+      "the Justification Index OR per-employer lookup will classify the " +
+      "cell. Single source of truth for both surfaces.",
+  },
 ];
 
 export function SettingsForm({ values }: Props) {
@@ -113,6 +146,29 @@ export function SettingsForm({ values }: Props) {
         </h2>
         <div className="grid gap-4 md:grid-cols-2">
           {ROWS.filter((r) => r.key === "outcomes_min_cohort_size").map((row) => (
+            <SettingRow key={row.key} row={row} value={values[row.key]} />
+          ))}
+        </div>
+      </section>
+
+      <section className="md:col-span-2">
+        <h2 className="mb-4 border-b-2 border-[color:var(--color-ink)] pb-2 font-display text-xl">
+          Shortage Justification Index (Phase 9.7.3)
+        </h2>
+        <p className="mb-4 text-sm text-[color:var(--color-ink-soft)]">
+          Explicit, plain-language thresholds that drive the cell
+          classifier on <code>/gov/shortage</code>. Same values feed the
+          per-employer lookup in 9.7.6.
+          <strong> The formula is published verbatim on /gov</strong>
+           policy users can argue with these numbers from the page,
+          which is the point.
+        </p>
+        <div className="grid gap-4 md:grid-cols-2">
+          {ROWS.filter((r) =>
+            ["lmi_demand_floor", "lmi_local_supply_threshold", "lmi_foreign_fill_floor", "employer_mix_min_placements"].includes(
+              r.key,
+            ),
+          ).map((row) => (
             <SettingRow key={row.key} row={row} value={values[row.key]} />
           ))}
         </div>

@@ -225,20 +225,40 @@ carry no per-employer surface and no public-facing legal-claim copy.
 - [x] Verified: `npm test` 11/11 green · `npm run typecheck` clean · `npm run build` clean
       (new `/api/gov/nationality-mix/export` route present in build output). Commit `<TBD>`.
 
-### Task 9.7.3: Skills-Shortage Justification Index (the centerpiece)
-For each `profession × province` cell, combine three already-collected signals as per **D1** above.
-- [ ] **Demand** from `search_events` weighted by `COUNT(DISTINCT actor_org_id)` (not raw event count).
-- [ ] **Local supply** = freshness-weighted count of SA-citizen profiles available for that
-      profession/province.
-- [ ] **Fill pattern** = `nationality_class` split of `employer_confirmed` placements for that cell.
-- [ ] Classification per cell per the D1 rule. Plain-language legend frames shortages as
-      *training/opportunity signals*, never as blame. (Tone rule applies: this is policy intelligence,
-      not a foreigners-vs-locals scoreboard.)
-- [ ] **Formula published verbatim on `/gov`** next to the classification table. Each row carries its
-      own `demand_score / local_supply_ratio / foreign_fill_share` in a tooltip.
-- [ ] Every classification cell is suppressed (k=10) and freshness-weighted.
-- [ ] Four new `platform_settings` keys land here (per D1): `lmi_demand_floor`,
-      `lmi_local_supply_threshold`, `lmi_foreign_fill_floor`, `employer_mix_min_placements`.
+### Task 9.7.3: Skills-Shortage Justification Index (the centerpiece) ✅ 2026-05-24
+- [x] Demand from `search_events` weighted by `COUNT(DISTINCT actor_org_id)` in the trailing 30
+      days, scoped to the cell's province via `filters->>'province'`. Per-org distinct closes the
+      demand-inflation vector.
+- [x] Local supply = freshness-weighted (via `sebenza_freshness_confidence`) count of SA-citizen
+      profiles in the cell with `status='open_to_work'` OR `cardinality(work_availability) > 0`.
+- [x] Fill pattern = foreign-national share of `employer_confirmed` placements, joined to profiles
+      for the `is_citizen` flag.
+- [x] Pure classifier extracted to `lib/analytics/justification.ts` with **11 unit fixtures**
+      covering shortage / supply-available / indeterminate paths + boundary conditions + a
+      tunable-thresholds test. Vitest: 22/22 green (11 suppress + 11 classifier).
+- [x] SQL plumbing in `db/queries/justification.ts`. Returns one row per `(profession × province)`
+      cell with `demand_score / local_supply_ratio / foreign_fill_share / sa_supply /
+      total_placements / foreign_placements / label`.
+- [x] k-floor + complementary suppression applied to the SA-supply count via `suppress()` (two
+      axes: row=province within profession, col=profession within province).
+- [x] `/gov/shortage` page with: formula-published-verbatim section at the top, province filter
+      chips, classified-cells table sorted shortage  supply-available  indeterminate, per-row
+      tooltip carrying the three component values + the raw counts. Tone-rule applied: legend
+      frames shortages as training-investment signals.
+- [x] Drill-down per row to `/search?q=<profession>&province=<province>` so policy users see the
+      actual talent behind the number.
+- [x] Four new `platform_settings` keys land via migration `0012_phase9_7_lmi_thresholds.sql`:
+      `lmi_demand_floor (1.0)`, `lmi_local_supply_threshold (0.5)`, `lmi_foreign_fill_floor (0.5)`,
+      `employer_mix_min_placements (5)`. All tunable from `/admin/settings`; bounds enforced by
+      Zod schemas in `lib/admin/settings-actions.ts`. New "Shortage Justification Index" section
+      on the admin settings page surfaces the four knobs with hint copy explaining each one.
+- [x] CSV export at `GET /api/gov/justification-index/export?province?=`. Suppression + classifier
+      run INSIDE the query so the route physically cannot bypass either. Audit-logged as
+      `analytics.export`. Surfaced on `/gov/exports`.
+- [x] New nav entry `Shortage justification` (Scale icon) added to `GOV_NAV`.
+- [x] Verified: `npm test` 22/22 green · `npm run typecheck` clean · `npm run db:migrate` applied
+      to Neon · `npm run build` clean (`/api/gov/justification-index/export` in the route
+      manifest). Commit `<TBD>`.
 
 ### Task 9.7.4: Local-Hiring Opportunity Map (the actionable flip side)
 - [ ] A `/gov` view highlighting `profession × province` cells classified *Local supply available* —

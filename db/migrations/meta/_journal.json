@@ -85,6 +85,13 @@
       "when": 1779750500000,
       "tag": "0011_phase9_gov_role",
       "breakpoints": false
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1779840000000,
+      "tag": "0012_phase9_7_lmi_thresholds",
+      "breakpoints": false
     }
   ]
 }

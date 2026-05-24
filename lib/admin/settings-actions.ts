@@ -49,6 +49,22 @@ const KEY_SCHEMAS = {
   outcomes_min_cohort_size: z.number().int().min(5).max(200),
   feature_flag_kyc_provider: z.boolean(),
   feature_flag_saqa_worker: z.boolean(),
+  // Phase 9.7.3  Justification Index thresholds.
+  //   demand floor is a "tens of distinct employers" scale; under 0.3
+  //   means fewer than 3 different employers searched in 30 days
+  //   too thin to call a shortage anywhere.
+  lmi_demand_floor: z.number().min(0.3).max(10),
+  //   ratio < 1.0 = under-supplied; 0.5 is the documented default.
+  //   Capped at 5 so an admin can't make every cell a "shortage" by
+  //   raising the threshold above any realistic supply ratio.
+  lmi_local_supply_threshold: z.number().min(0.1).max(5),
+  //   share of confirmed placements that went to foreign nationals;
+  //   defaults to 0.5 (majority). Floor of 0.1 so the cell-tag
+  //   condition is not effectively-always-true.
+  lmi_foreign_fill_floor: z.number().min(0.1).max(1),
+  //   never lower than 3  a 2-placement cell with a 50/50 split
+  //   re-identifies via the platform's own audit log.
+  employer_mix_min_placements: z.number().int().min(3).max(200),
 } as const satisfies Record<SettingKey, z.ZodTypeAny>;
 
 const updateSchema = z.object({
@@ -64,6 +80,10 @@ const updateSchema = z.object({
     "outcomes_min_cohort_size",
     "feature_flag_kyc_provider",
     "feature_flag_saqa_worker",
+    "lmi_demand_floor",
+    "lmi_local_supply_threshold",
+    "lmi_foreign_fill_floor",
+    "employer_mix_min_placements",
   ] as const),
   value: z.unknown(),
 });

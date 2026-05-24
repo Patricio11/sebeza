@@ -40,7 +40,28 @@ export type SettingKey =
   // SAQA NLRD partnership is confirmed; until then admin "Approve"
   // on /admin/verifications flips qualifications directly (Phase 7
   // behaviour).
-  | "feature_flag_saqa_worker";
+  | "feature_flag_saqa_worker"
+  // Phase 9.7.3  Skills-Shortage Justification Index thresholds.
+  // All four are explicit, plain-language knobs (no black-box score):
+  //   demand_score          = COUNT(DISTINCT actor_org_id) / 10 in
+  //                           the trailing 30-day window
+  //   local_supply_ratio    = sa_supply / (demand_score × 10)
+  //   foreign_fill_share    = foreign_placements / total_placements
+  //   total_placements      = employer_confirmed only
+  // Classifier (D1, 2026-05-24):
+  //   shortage          if demand >= demand_floor
+  //                     AND local_supply_ratio < local_supply_threshold
+  //                     AND foreign_fill_share >= foreign_fill_floor
+  //                     AND total_placements >= employer_mix_min_placements
+  //   supply_available  if demand >= demand_floor
+  //                     AND local_supply_ratio >= 1.0
+  //   indeterminate     otherwise (shown blank, not guessed)
+  | "lmi_demand_floor"
+  | "lmi_local_supply_threshold"
+  | "lmi_foreign_fill_floor"
+  // Reused by 9.7.6 (per-employer governed lookup)  one floor,
+  // not two diverging knobs.
+  | "employer_mix_min_placements";
 
 const DEFAULTS: Record<SettingKey, unknown> = {
   freshness_band_days_fresh: 30,
@@ -54,6 +75,11 @@ const DEFAULTS: Record<SettingKey, unknown> = {
   outcomes_min_cohort_size: 10,
   feature_flag_kyc_provider: false,
   feature_flag_saqa_worker: false,
+  // Phase 9.7.3  see SettingKey doc-comments above.
+  lmi_demand_floor: 1.0,
+  lmi_local_supply_threshold: 0.5,
+  lmi_foreign_fill_floor: 0.5,
+  employer_mix_min_placements: 5,
 };
 
 /**

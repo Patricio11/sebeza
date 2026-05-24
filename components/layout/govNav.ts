@@ -4,6 +4,7 @@ import {
   Building2,
   Download,
   UserCog,
+  Scale,
 } from "lucide-react";
 import type { DashboardNavItem } from "./DashboardShell";
 
@@ -14,6 +15,12 @@ export const GOV_NAV: DashboardNavItem[] = [
     label: "Provinces",
     href: "/gov/provinces",
     icon: MapPin,
+  },
+  {
+    key: "shortage",
+    label: "Shortage justification",
+    href: "/gov/shortage",
+    icon: Scale,
   },
   {
     key: "municipalities",

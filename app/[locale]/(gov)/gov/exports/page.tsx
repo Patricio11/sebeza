@@ -51,6 +51,11 @@ export default async function GovExportsPage({
           href="/api/gov/nationality-mix/export?dim=supply"
           desc="Province × profession × SA-citizen / foreign-national supply. 2-class only. Suppressed at k = floor. Add ?province=Gauteng for a single-province slice."
         />
+        <ExportCard
+          title="Skills-Shortage Justification Index"
+          href="/api/gov/justification-index/export"
+          desc="Per (profession × province) cell: classification + demand_score + local_supply_ratio + foreign_fill_share + placement counts. Same suppression + threshold rules as /gov/shortage. Add ?province=Gauteng for a province slice."
+        />
       </ul>
     </DashboardShell>
   );
