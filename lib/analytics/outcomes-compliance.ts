@@ -139,6 +139,64 @@ export async function assertWorkAvailabilityPubliclySafe(): Promise<AssertResult
 }
 
 /**
+ * Phase 9.7.9 (e)  no raw country-level `nationality` in any
+ * aggregate / list analytics response.
+ *
+ * Structural defence against country-level analytics regressions.
+ * Every nationality-bearing analytics query MUST expose only the
+ * 2-class `nationality_class` derivation (sa_citizen / foreign_national)
+ * and NEVER the raw `profiles.nationality` country string. Country-
+ * level cells re-identify faster AND convert the surface into a
+ * targeting tool.
+ *
+ * Runtime check: walk the keys of a sample row from each nationality-
+ * bearing analytics query and fail if `nationality` appears. The TS
+ * types make this nearly impossible to introduce by accident, but
+ * this assertion catches any future regression at runtime  including
+ * one that smuggles the field in via `as unknown` casts.
+ */
+export async function assertNoRawCountryInAnalytics(): Promise<AssertResult> {
+  const { statusMixByNationalityQuery, supplyByNationalityQuery } = await import(
+    "@/db/queries/nationality"
+  );
+  const { justificationIndexQuery } = await import(
+    "@/db/queries/justification"
+  );
+  const [status, supply, justification] = await Promise.all([
+    statusMixByNationalityQuery(),
+    supplyByNationalityQuery(),
+    justificationIndexQuery(),
+  ]);
+
+  const offenders: string[] = [];
+  function check(label: string, sample: unknown): void {
+    if (sample && typeof sample === "object") {
+      const keys = Object.keys(sample as Record<string, unknown>);
+      if (keys.includes("nationality")) offenders.push(label);
+    }
+  }
+  check("statusMixByNationalityQuery cell", status.cells[0]);
+  check("supplyByNationalityQuery cell", supply.cells[0]);
+  check("justificationIndexQuery cell", justification.cells[0]);
+
+  // We also walk every cell (not just the first) in case a row-shape
+  // divergence is hiding behind the scalar-empty edge case.
+  for (const c of status.cells) check("status.cells[]", c);
+  for (const c of supply.cells) check("supply.cells[]", c);
+  for (const c of justification.cells) check("justification.cells[]", c);
+
+  const unique = Array.from(new Set(offenders));
+  return {
+    ok: unique.length === 0,
+    name: "no-raw-country-in-analytics",
+    message:
+      unique.length === 0
+        ? `No 'nationality' key found in any analytics cell (status=${status.cells.length}, supply=${supply.cells.length}, justification=${justification.cells.length}). 2-class derivation only.`
+        : `LEAK: raw 'nationality' key surfaced in: ${unique.join(", ")}. The 2-class derivation is the only nationality field allowed in aggregate analytics.`,
+  };
+}
+
+/**
  * Phase 9.7.2 (a)  no nationality cell below k anywhere.
  *
  * Calls both market-view query functions and confirms every returned
@@ -185,6 +243,7 @@ export async function runAll(): Promise<void> {
     await assertSeekerReportedExcluded(),
     await assertWorkAvailabilityPubliclySafe(),
     await assertNoNationalityCellBelowFloor(),
+    await assertNoRawCountryInAnalytics(),
   ];
 
   let failed = 0;

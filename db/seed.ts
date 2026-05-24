@@ -502,6 +502,189 @@ function provinceSlugByLabel(label: string): string {
 // Run
 // ────────────────────────────────────────────────────────────────────────────
 
+/**
+ * Phase 9.7.9 demo data. Without this, every nationality-related
+ * /gov surface (status mix split, Justification Index, Opportunity
+ * Map, employer-mix lookup) renders blank because the existing
+ * cohort is 100% SA-citizen and there's no demand signal from
+ * verified employer searches.
+ *
+ * Adds:
+ *   - 3 foreign-national profiles: Zimbabwean welder (Gauteng),
+ *     Nigerian software developer (Gauteng), Kenyan chef (Western
+ *     Cape). Each grants searchability so they show up in /search.
+ *   - 2 foreign-national placements at Discovery Bank so the per-
+ *     employer mix lookup has a non-trivial sa_citizen / foreign-
+ *     national breakdown at the floor (5 confirmed placements: 3
+ *     SA citizens from the BSc cohort + 2 foreign nationals).
+ *   - ~15 synthetic employer-search events with distinct actor_org_id
+ *     values driving demand_score >= 1.0 for the (Software developer,
+ *     Gauteng) cell. With the 12-strong BSc CS cohort as SA supply,
+ *     that cell classifies as "Local supply available" on
+ *     /gov/shortage and /gov/opportunity out of the box.
+ *
+ * Genuine "Local shortage" classifications need more diverse
+ * employer-confirmed placement data than is reasonable to seed
+ * synthetically; those emerge organically as real employers log
+ * hires across more professions.
+ */
+async function seedPhase9_7NationalityDemo() {
+  console.log("🌍 Phase 9.7  foreign-national profiles + demand seeds…");
+  const pwHash = await hashPassword(SEED_PASSWORD);
+  const discoveryOrgId = id("org", "discovery-bank");
+  const memberSince = new Date("2024-02-01");
+
+  const foreignProfiles = [
+    {
+      handle: "tendai-m",
+      displayName: "Tendai M.",
+      profession: "Welder",
+      city: "Johannesburg",
+      province: "Gauteng",
+      nationality: "Zimbabwean",
+      status: "open_to_work" as const,
+    },
+    {
+      handle: "chiamaka-o",
+      displayName: "Chiamaka O.",
+      profession: "Software developer",
+      city: "Johannesburg",
+      province: "Gauteng",
+      nationality: "Nigerian",
+      status: "employed" as const,
+    },
+    {
+      handle: "kemi-a",
+      displayName: "Kemi A.",
+      profession: "Software developer",
+      city: "Johannesburg",
+      province: "Gauteng",
+      nationality: "Nigerian",
+      status: "employed" as const,
+    },
+    {
+      handle: "aisha-k",
+      displayName: "Aisha K.",
+      profession: "Chef",
+      city: "Cape Town",
+      province: "Western Cape",
+      nationality: "Kenyan",
+      status: "open_to_work" as const,
+    },
+  ];
+
+  // app_user + credential account
+  await db.insert(schema.appUser).values(
+    foreignProfiles.map((p) => ({
+      id: id("user", p.handle),
+      name: p.displayName,
+      email: `${p.handle}@example.co.za`,
+      emailVerified: true,
+      role: "seeker" as const,
+    })),
+  );
+  await db.insert(schema.account).values(
+    foreignProfiles.map((p) => ({
+      id: `acc_${id("user", p.handle)}`,
+      accountId: id("user", p.handle),
+      providerId: "credential",
+      userId: id("user", p.handle),
+      password: pwHash,
+    })),
+  );
+
+  // profiles
+  await db.insert(schema.profiles).values(
+    foreignProfiles.map((p) => ({
+      id: id("prof", p.handle),
+      userId: id("user", p.handle),
+      handle: p.handle,
+      displayName: p.displayName,
+      profession: p.profession,
+      seniority: null,
+      city: p.city,
+      province: p.province,
+      nationality: p.nationality,
+      isCitizen: false,
+      bio: null,
+      status: p.status,
+      statusConfirmedAt: new Date("2026-05-15"),
+      workAvailability: ["full_time" as const],
+      verification: "unverified" as const,
+      completeness: 45,
+      memberSince,
+    })),
+  );
+
+  // consents  searchability granted so they appear in /search;
+  // outcomes_research not granted (not students).
+  await db.insert(schema.consents).values(
+    foreignProfiles.flatMap((p) =>
+      CONSENT_PURPOSES.map((purpose) => {
+        const isGranted = purpose === "searchability";
+        return {
+          id: id("cns", `${p.handle}-${purpose}`),
+          userId: id("user", p.handle),
+          purpose,
+          state: (isGranted ? "granted" : "none") as "granted" | "none",
+          version: "v2.1",
+          grantedAt: isGranted ? new Date() : null,
+          revokedAt: null,
+        };
+      }),
+    ),
+  );
+
+  // 2 foreign-national placements at Discovery Bank. Combined with
+  // the 3 BSc CS cohort placements already seeded, Discovery sits
+  // at exactly the employer_mix_min_placements floor (default 5),
+  // so the /gov per-employer lookup demo returns a real split: 3
+  // SA citizens (60%) + 2 foreign nationals (40%).
+  await db.insert(schema.placements).values([
+    {
+      id: id("plc", "chiamaka-o"),
+      profileId: id("prof", "chiamaka-o"),
+      organizationId: discoveryOrgId,
+      actorUserId: id("user", "naledi-k"),
+      role: "Full-stack developer",
+      city: "Sandton",
+      hiredAt: new Date("2026-03-20"),
+      salaryBand: "R 480k600k",
+      source: "employer_confirmed" as const,
+    },
+    {
+      id: id("plc", "kemi-a"),
+      profileId: id("prof", "kemi-a"),
+      organizationId: discoveryOrgId,
+      actorUserId: id("user", "naledi-k"),
+      role: "Junior backend developer",
+      city: "Sandton",
+      hiredAt: new Date("2026-04-22"),
+      salaryBand: "R 360k480k",
+      source: "employer_confirmed" as const,
+    },
+  ]);
+
+  // Demand seeds: 12 distinct synthetic actor_org_id values, each
+  // searching for "Software developer" in Gauteng in the trailing
+  // 30 days. demand_score = 12 / 10 = 1.2, above lmi_demand_floor.
+  // With the 12-strong BSc CS cohort as SA supply,
+  // local_supply_ratio comfortably >= 1.0  the cell classifies
+  // as "Local supply available" out of the box.
+  const now = Date.now();
+  const oneDayMs = 24 * 60 * 60 * 1000;
+  await db.insert(schema.searchEvents).values(
+    Array.from({ length: 12 }, (_, i) => ({
+      id: id("srch", `demo-sw-gauteng-${String(i + 1).padStart(2, "0")}`),
+      terms: "software developer",
+      filters: { province: "Gauteng" } as Record<string, unknown>,
+      resultCount: 12,
+      actorOrgId: `org_demo_employer_${String(i + 1).padStart(3, "0")}`,
+      at: new Date(now - (i + 1) * oneDayMs),
+    })),
+  );
+}
+
 async function seedPhase7Reports() {
   console.log("🚩 Phase 7 sample reports (open + closed  for /admin/moderation)…");
   await db.insert(schema.reports).values([
@@ -543,6 +726,12 @@ async function main() {
   // Runs after seedOrgsAndPlacements because it inserts placements
   // referencing the Discovery Bank org id.
   await seedPhase7_5OutcomesCohort();
+  // Phase 9.7  foreign-national profiles + demand seeds so the
+  // nationality + Justification Index surfaces render real (suppressed)
+  // rows in the dev demo. Runs last because it depends on the BSc CS
+  // cohort being present (uses one cohort handle as the placeholder
+  // profile for the second foreign-fill placement at Discovery).
+  await seedPhase9_7NationalityDemo();
 
   const ms = Date.now() - started;
   console.log(

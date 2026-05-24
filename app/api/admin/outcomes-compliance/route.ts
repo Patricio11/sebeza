@@ -21,6 +21,7 @@ import {
   assertSeekerReportedExcluded,
   assertWorkAvailabilityPubliclySafe,
   assertNoNationalityCellBelowFloor,
+  assertNoRawCountryInAnalytics,
 } from "@/lib/analytics/outcomes-compliance";
 
 export async function GET() {
@@ -31,6 +32,7 @@ export async function GET() {
     await assertSeekerReportedExcluded(),
     await assertWorkAvailabilityPubliclySafe(),
     await assertNoNationalityCellBelowFloor(),
+    await assertNoRawCountryInAnalytics(),
   ];
   const ok = checks.every((c) => c.ok);
   return NextResponse.json(

@@ -479,37 +479,37 @@ that registry  we win on **data quality, usability, and analytics.** The system 
 
 ---
 
-## 🌐 PHASE 9.7: NATIONALITY ANALYTICS & LOCAL-HIRING INTELLIGENCE (in flight  plan approved 2026-05-24)
-*Side-phase between Phase 9 and Phase 10. Mirrors the 6.5 / 7.5 pattern (analytics enrichment on shipped infra; must not muddy the public-launch phase). Numbered 9.7 to avoid colliding with `Task 9.5` (AWS migration, deferred) + `Task 9.6` (launch-scale deferrals) above. Companion docs: `docs/PHASE_9_7_PLAN.md` + `docs/popia/DPIA.md` (R9 added with this phase).*
+## 🌐 PHASE 9.7: NATIONALITY ANALYTICS & LOCAL-HIRING INTELLIGENCE ✅ 2026-05-24
+*Side-phase between Phase 9 and Phase 10. Mirrors the 6.5 / 7.5 pattern (analytics enrichment on shipped infra; must not muddy the public-launch phase). Numbered 9.7 to avoid colliding with `Task 9.5` (AWS migration, deferred) + `Task 9.6` (launch-scale deferrals) above. Companion docs: `docs/completed/PHASE_9_7_PLAN.md` + `docs/completed/PHASE_9_7_COMPLETE.md` + `docs/popia/DPIA.md` (R9 added with this phase).*
 
 **Strategic frame:** turn nationality from a *search filter* (already shipped, unchanged) into a *governed policy lens*. Anti-xenophobia tool by construction  shows where SA citizens can fill demand AND where a genuine local shortage means foreign nationals are filling a real gap. Built on EEA §1 (designated-group qualification) and ESA §8 (reasonable-efforts to hire locally) framings, both verified-in-engineering-reading and pending counsel sign-off per DPIA R9.
 
 ### Task 9.7.1: Reusable suppression utility (test-first refactor)
-- [ ] Unit-test fixtures against existing inlined outcomes path, then extract `lib/analytics/suppress.ts` (`suppress(rows, { dims, countKey, k })` with k-floor + complementary suppression). Zero behaviour change  outcomes-compliance route still passes.
+- [x] Unit-test fixtures against existing inlined outcomes path, then extract `lib/analytics/suppress.ts` (`suppress(rows, { dims, countKey, k })` with k-floor + complementary suppression). Zero behaviour change  outcomes-compliance route still passes.
 
 ### Task 9.7.2: Nationality dimension on market analytics (`/gov`, `/insights`)
-- [ ] 2-class `nationality_class` derivation (`sa_citizen` / `foreign_national`)  never raw country in analytics. Optional split on supply / placement-rate / time-to-hire / status-mix views, all suppressed (k=10), freshness-weighted, hardened-CSV-exported.
+- [x] 2-class `nationality_class` derivation (`sa_citizen` / `foreign_national`)  never raw country in analytics. Optional split on supply / placement-rate / time-to-hire / status-mix views, all suppressed (k=10), freshness-weighted, hardened-CSV-exported.
 
 ### Task 9.7.3: Skills-Shortage Justification Index (centerpiece)
-- [ ] Explicit, plain-language classifier (`Genuine local shortage` / `Local supply available` / `Indeterminate`) driven by three thresholds, all tunable from `/admin/settings`: `lmi_demand_floor` (1.0 = 10 distinct employer-searches/30d), `lmi_local_supply_threshold` (0.5), `lmi_foreign_fill_floor` (0.5). Formula published verbatim on `/gov`. Per-cell `demand_score / local_supply_ratio / foreign_fill_share` surfaced in tooltips. Demand weighted by `DISTINCT actor_org_id` (not raw event count)  closes the demand-inflation vector.
+- [x] Explicit, plain-language classifier (`Genuine local shortage` / `Local supply available` / `Indeterminate`) driven by three thresholds, all tunable from `/admin/settings`: `lmi_demand_floor` (1.0 = 10 distinct employer-searches/30d), `lmi_local_supply_threshold` (0.5), `lmi_foreign_fill_floor` (0.5). Formula published verbatim on `/gov`. Per-cell `demand_score / local_supply_ratio / foreign_fill_share` surfaced in tooltips. Demand weighted by `DISTINCT actor_org_id` (not raw event count)  closes the demand-inflation vector.
 
 ### Task 9.7.4: Local-Hiring Opportunity Map
-- [ ] `/gov` heatmap of `Local supply available` cells with drill-down to `/search?q=…&province=…`. ESA §8 framing in legend ("where §8 has practical force").
+- [x] `/gov` heatmap of `Local supply available` cells with drill-down to `/search?q=…&province=…`. ESA §8 framing in legend ("where §8 has practical force").
 
 ### Task 9.7.5: Employer self-view ("Your hiring on Sebenza")
-- [ ] Their-org-only placement mix card on the employer dashboard. EEA §1 + ESA §8 framing copy. Engine + UI build; final wording held until counsel sign-off on DPIA R9.
+- [x] Their-org-only placement mix card on the employer dashboard. EEA §1 + ESA §8 framing copy. Engine + UI build; final wording held until counsel sign-off on DPIA R9.
 
 ### Task 9.7.6: Governed per-employer compliance lookup (`gov` only, ships dormant)
-- [ ] Behind `feature_flag_employer_mix_lookup` (default OFF). Exact-match input only (full org name OR CIPC reg number, string equality)  no autocomplete, no browse, no leaderboard. `employer_mix_min_placements` floor (default 5). Purpose-bound: actor + employer + reason + timestamp logged as `gov.employer_mix.lookup`. ESA §8 evidence-aid framing.
+- [x] Behind `feature_flag_employer_mix_lookup` (default OFF). Exact-match input only (full org name OR CIPC reg number, string equality)  no autocomplete, no browse, no leaderboard. `employer_mix_min_placements` floor (default 5). Purpose-bound: actor + employer + reason + timestamp logged as `gov.employer_mix.lookup`. ESA §8 evidence-aid framing.
 
 ### Task 9.7.7: Sensitive-query oversight log (`/admin`)
-- [ ] All `gov.employer_mix.lookup` + nationality-split export events surfaced + filterable + CSV-exportable for the watchers' watchers. Trust rationale: powerful lens is safe *because* its use is itself observable.
+- [x] All `gov.employer_mix.lookup` + nationality-split export events surfaced + filterable + CSV-exportable for the watchers' watchers. Trust rationale: powerful lens is safe *because* its use is itself observable.
 
 ### Task 9.7.8: Scheduled LMI / nationality brief (kept in scope)
-- [ ] `/gov/brief` print-CSS page composing LMI headline + shortage/opportunity highlights + suppressed nationality dimension. Cron-to-PDF distribution = optional extension.
+- [x] `/gov/brief` print-CSS page composing LMI headline + shortage/opportunity highlights + suppressed nationality dimension. Cron-to-PDF distribution = optional extension.
 
 ### Task 9.7.9: Wiring, verification, doc convention
-- [ ] Five compliance assertions extended (no cell below k anywhere · no ranked-employer endpoint · no per-employer split below floor · every gov lookup carries a reason · **no raw country in any list/aggregate response**  structural defence against country-level regressions). `npm run build` clean; seed includes mixed-nationality cohort. On ship: `PHASE_9_7_COMPLETE.md`, tick this header ✅ + date, refresh Current State, commit `Phase 9.7 complete + Phase 10 opens`.
+- [x] Five compliance assertions extended (no cell below k anywhere · no ranked-employer endpoint · no per-employer split below floor · every gov lookup carries a reason · **no raw country in any list/aggregate response**  structural defence against country-level regressions). `npm run build` clean; seed includes mixed-nationality cohort. On ship: `PHASE_9_7_COMPLETE.md`, tick this header ✅ + date, refresh Current State, commit `Phase 9.7 complete + Phase 10 opens`.
 
 **Open dependencies before any public-facing copy ships:**
 - DPIA R9 counsel review on the EEA §1 / ESA §8 framing  blocks 9.7.5 copy + 9.7.6 activation. 9.7.1–9.7.4 (market views) can ship in parallel; they carry no per-employer surface and no legal-claim copy.
