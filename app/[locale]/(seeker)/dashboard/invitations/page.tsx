@@ -149,9 +149,11 @@ function InvitationCard({
     PROVINCES.find((p) => p.slug === inv.provinceSlug)?.label ??
     inv.provinceSlug;
 
+  const stateLabel = STATE_COPY[inv.state]?.label ?? inv.state;
   return (
     <Link
       href={`/dashboard/invitations/${inv.id}` as never}
+      aria-label={`${stateLabel}  ${inv.vacancyTitle} at ${inv.orgName} in ${provinceLabel}. Open invitation details.`}
       className={
         "block rounded-[var(--radius-md)] border bg-[color:var(--color-surface)] p-4 transition-colors hover:border-[color:var(--color-ink)] md:p-5 " +
         (active

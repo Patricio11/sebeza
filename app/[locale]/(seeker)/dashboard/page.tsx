@@ -24,6 +24,8 @@ import { getCompassForProfile } from "@/db/queries/career-compass";
 import { StatusCard } from "@/components/feature/profile/StatusCard";
 import { SelfReportPlacementCard } from "@/components/feature/profile/SelfReportPlacementCard";
 import { StatusNudgeBanner } from "@/components/feature/profile/StatusNudgeBanner";
+import { listMyInvitations } from "@/lib/seeker/invitations";
+import { Inbox } from "lucide-react";
 
 export default async function SeekerOverviewPage({
   params,
@@ -104,6 +106,14 @@ export default async function SeekerOverviewPage({
     projectedSkillBoost: 2,
   });
 
+  // Phase 9.9 sweep  count pending vacancy invites so the overview
+  // surfaces a callout when the seeker has something waiting. We
+  // count "invited" (awaiting response) separately from
+  // "reconsidering" (already actioned but still active)  the
+  // callout copy distinguishes them.
+  const allInvites = await listMyInvitations();
+  const pendingInvites = allInvites.filter((i) => i.state === "invited");
+
   return (
     <DashboardShell
       role="seeker"
@@ -124,6 +134,39 @@ export default async function SeekerOverviewPage({
       }
     >
       <StatusNudgeBanner band={freshness.band} days={freshness.days} />
+
+      {/* Phase 9.9 sweep  vacancy-invite callout. Only renders when
+          there's at least one pending invite. Mobile-first: stacks
+          full-width on phones, action button stays thumb-reachable. */}
+      {pendingInvites.length > 0 && (
+        <Link
+          href="/dashboard/invitations"
+          aria-label={`You have ${pendingInvites.length} pending vacancy invitation${pendingInvites.length === 1 ? "" : "s"}. Open inbox to respond.`}
+          className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-[var(--radius-md)] border-2 border-[color:var(--color-ink)] bg-[color:var(--color-brand-tint)] p-4 transition-colors hover:bg-[color:var(--color-brand-tint)]/80"
+        >
+          <div className="flex items-start gap-3">
+            <Inbox
+              className="mt-0.5 size-5 shrink-0 text-[color:var(--color-brand-strong)]"
+              aria-hidden="true"
+            />
+            <div>
+              <p className="font-display text-base leading-tight text-[color:var(--color-ink)]">
+                {pendingInvites.length === 1
+                  ? `1 vacancy invitation waiting for your response`
+                  : `${pendingInvites.length} vacancy invitations waiting for your response`}
+              </p>
+              <p className="mt-1 text-xs text-[color:var(--color-ink-soft)]">
+                Accept, decline, or decline with a reason. Declining is free.
+              </p>
+            </div>
+          </div>
+          <span className="inline-flex h-9 items-center gap-1 rounded-[var(--radius-pill)] border-2 border-[color:var(--color-ink)] bg-[color:var(--color-ink)] px-3 text-xs font-medium text-[color:var(--color-paper)]">
+            Open inbox
+            <ArrowUpRight className="size-3" aria-hidden="true" />
+          </span>
+        </Link>
+      )}
+
       <div className="grid gap-6 md:grid-cols-3">
         {/* Completeness  anchor card */}
         <section

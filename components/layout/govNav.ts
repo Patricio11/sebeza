@@ -1,7 +1,7 @@
 import {
   LayoutDashboard,
   MapPin,
-  Building2,
+  // Building2,  // Phase 9.9 sweep  uncomment when /gov/municipalities ships
   Download,
   UserCog,
   Scale,
@@ -40,12 +40,17 @@ export const GOV_NAV: DashboardNavItem[] = [
     href: "/gov/employer-lookup",
     icon: FileSearch,
   },
-  {
-    key: "municipalities",
-    label: "Municipalities",
-    href: "/gov/municipalities",
-    icon: Building2,
-  },
+  // Phase 9.9 sweep  /gov/municipalities is a "Coming soon" stub;
+  // hidden from nav so the public-launch surface doesn't expose a
+  // dead-end link. The route still exists (typed import + analytics
+  // discoverable via direct URL) so the post-launch build can flip
+  // it back in one line when the page actually ships.
+  // {
+  //   key: "municipalities",
+  //   label: "Municipalities",
+  //   href: "/gov/municipalities",
+  //   icon: Building2,
+  // },
   {
     key: "exports",
     label: "Exports",
