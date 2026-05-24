@@ -263,6 +263,95 @@ export async function searchProfilesQuery(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Phase 9.8.2  citizenship-bucketed match count
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Returns counts of matching profiles bucketed by `is_citizen`, used by the
+ * vacancy match view's "honest supply line" ("N SA citizens · M total
+ * candidates match this vacancy").
+ *
+ * Mirrors the WHERE-clause assembly of `searchProfilesQuery` exactly so the
+ * count is consistent with what the ranked list returns; the only differences
+ * are (1) no ranking expression, (2) no LIMIT, (3) we don't write a
+ * search_events row from this path (the page's ranked-search call already
+ * wrote one). Honest-supply at any data scale, regardless of SEARCH_LIMIT.
+ */
+export async function countMatchesByCitizenship(
+  filters: SearchFilters,
+): Promise<{ saCitizen: number; foreignNational: number; total: number }> {
+  const db = getDb();
+  const q = (filters.query ?? "").trim();
+  const hasQuery = q.length > 0;
+
+  const conditions = [sql`p.deleted_at IS NULL`];
+  if (hasQuery) {
+    conditions.push(
+      sql`p.search_vector @@ websearch_to_tsquery('simple', ${q})`,
+    );
+  }
+  if (filters.province) {
+    const label = filters.province.replace(/-/g, " ");
+    conditions.push(sql`lower(p.province) = lower(${label})`);
+  }
+  if (filters.city) {
+    const label = filters.city.replace(/-/g, " ");
+    conditions.push(sql`lower(p.city) = lower(${label})`);
+  }
+  if (filters.status) {
+    conditions.push(sql`p.status = ${filters.status}`);
+  }
+  if (filters.seniority) {
+    conditions.push(sql`p.seniority = ${filters.seniority}`);
+  }
+  if (filters.verification) {
+    conditions.push(sql`p.verification = ${filters.verification}`);
+  }
+  if (filters.openToInternships) {
+    conditions.push(
+      sql`EXISTS (SELECT 1 FROM academic_profiles ap WHERE ap.profile_id = p.id AND ap.open_to_internships = true)`,
+    );
+  }
+  if (filters.openToGraduateProgrammes) {
+    conditions.push(
+      sql`EXISTS (SELECT 1 FROM academic_profiles ap WHERE ap.profile_id = p.id AND ap.open_to_graduate_programmes = true)`,
+    );
+  }
+  if (filters.availableFor && filters.availableFor.length > 0) {
+    const kindsLiteral = sql.raw(
+      `ARRAY[${filters.availableFor
+        .map((k) => `'${k.replace(/'/g, "''")}'`)
+        .join(",")}]::work_availability_kind[]`,
+    );
+    conditions.push(sql`p.work_availability && ${kindsLiteral}`);
+  }
+  const whereClause = sql.join(conditions, sql` AND `);
+
+  const result = await db.execute(sql`
+    SELECT
+      COUNT(*)::int                                            AS total,
+      COUNT(*) FILTER (WHERE p.is_citizen = true)::int         AS sa_citizen,
+      COUNT(*) FILTER (WHERE p.is_citizen = false)::int        AS foreign_national
+    FROM profiles p
+    WHERE ${whereClause}
+  `);
+  const row = (
+    result as unknown as {
+      rows: Array<{
+        total: number;
+        sa_citizen: number;
+        foreign_national: number;
+      }>;
+    }
+  ).rows[0]!;
+  return {
+    total: row.total,
+    saCitizen: row.sa_citizen,
+    foreignNational: row.foreign_national,
+  };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Public profile read by handle
 // ─────────────────────────────────────────────────────────────────────────────
 

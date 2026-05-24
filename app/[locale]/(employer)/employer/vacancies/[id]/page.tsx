@@ -38,7 +38,7 @@ import { VacancyForm } from "@/components/feature/employer/vacancies/VacancyForm
 import { VacancyStatusChip } from "@/components/feature/employer/vacancies/VacancyStatusChip";
 import { getProfessions } from "@/lib/taxonomy/query";
 import { PROVINCES, PROFESSIONS, SKILLS } from "@/lib/mock/taxonomy";
-import { ChevronLeft, Lock, MapPin } from "lucide-react";
+import { ChevronLeft, Lock, MapPin, Users } from "lucide-react";
 
 export const revalidate = 0;
 
@@ -111,6 +111,34 @@ export default async function VacancyDetailPage({
           <MapPin className="size-3" aria-hidden="true" />
           {provinceLabel}
         </span>
+      </div>
+
+      {/* Find-matches CTA  visible to all roles. Reverse-matching is a
+          read of the public talent pool through the existing redaction
+          layer, so Viewers can browse matches even though they cannot
+          edit the vacancy itself. */}
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-[var(--radius-md)] border-2 border-[color:var(--color-ink)] bg-[color:var(--color-brand-tint)] p-4">
+        <div className="flex items-start gap-3">
+          <Users
+            className="mt-0.5 size-5 text-[color:var(--color-brand-strong)]"
+            aria-hidden="true"
+          />
+          <div>
+            <p className="font-display text-base leading-tight text-[color:var(--color-ink)]">
+              Find candidates for this vacancy
+            </p>
+            <p className="mt-1 text-xs text-[color:var(--color-ink-soft)]">
+              Reverse-matched against the live talent pool  ranked, redacted,
+              SA citizens highlighted first.
+            </p>
+          </div>
+        </div>
+        <Link
+          href={`/employer/vacancies/${vacancy.id}/match` as never}
+          className="inline-flex h-10 items-center gap-2 rounded-[var(--radius-pill)] border-2 border-[color:var(--color-ink)] bg-[color:var(--color-ink)] px-4 text-sm font-medium text-[color:var(--color-paper)] hover:bg-[color:var(--color-brand-strong)] hover:border-[color:var(--color-brand-strong)]"
+        >
+          Find matches
+        </Link>
       </div>
 
       {!canEdit && <ViewerNotice />}

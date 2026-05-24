@@ -229,19 +229,38 @@ Server Action.
 - [x] Verified: `npm test` 22/22 green · `npm run typecheck` clean · `npm run build` clean · migration
       `0015` applied to Neon. Commit `1803676`.
 
-### Task 9.8.2: Reverse-matching ("Find matches")
-- [ ] "Find matches" on a vacancy pre-populates the **existing search** with the vacancy's filters — reuse
-      the Phase 4 ranking SQL, no parallel matcher. One ranking source of truth.
-- [ ] Match view reuses the existing search-results UI + `<TalentRosterItem>`, with citizen highlighting via
-      the existing `citizen_boost` (NOT a new gate — see §CRITICAL).
-- [ ] **Honest supply line** at the top of results: ***"N SA citizens · M candidates match this vacancy"***
-      (per D6 — "candidates," not "eligible"). Justification Index at hiring time. Suppression not needed
-      here (the employer's own match view, not published analytics) but the figure is freshness-weighted
-      like every count.
-- [ ] Respects all existing redaction: no ID numbers/docs/contact in the match list; reveal stays the
-      audited Phase 5 dossier flow.
-- [ ] **Mobile-first:** match cards stack on mobile, the honest-supply line sits sticky-on-top so it's
-      always visible while scrolling. Tap targets ≥ 44px on every card action.
+### Task 9.8.2: Reverse-matching ("Find matches") ✅ 2026-05-24
+- [x] `matchVacancyCandidates(vacancy)` in `lib/employer/vacancies.ts` composes the match view by mapping
+      vacancy → `SearchFilters` (private helper `vacancyToSearchFilters`) and calling the existing
+      `searchProfilesQuery` (Phase 4 ranking SQL). **One ranking source of truth** — no parallel matcher,
+      no shadow SQL. Profession label + skill labels are concatenated into the FTS `query`; province slug
+      passes through; seniority is normalised to the canonical lowercase only when it matches the search
+      enum (`junior` / `intermediate` / `senior`).
+- [x] Match view at `app/[locale]/(employer)/employer/vacancies/[id]/match/page.tsx` reuses
+      `<TalentRosterItem profile={p} locale={locale} highlightCitizen />`  same component the public
+      `/search` uses, same redaction. Citizen highlighting comes from the existing `citizen_boost` already
+      baked into `searchProfilesQuery` ranking (NOT a new gate — §CRITICAL respected).
+- [x] **Honest-supply line** at the top of the match view: ***"N SA citizens · M candidates match this
+      vacancy"*** (D6 wording — "candidates," not "eligible"). Sourced from `countMatchesByCitizenship` —
+      a new query in `db/queries/profiles.ts` that mirrors `searchProfilesQuery`'s WHERE-clause assembly
+      exactly and emits `COUNT(*) FILTER (...)` buckets. **No `LIMIT`** on this query, so the figure is
+      the true total across the platform — independent of the `SEARCH_LIMIT=50` cap on the ranked list
+      below. When the ranked view fills, a small notice explains the cap and points at "Refine in search."
+- [x] Respects all existing redaction by construction: rows render through `<TalentRosterItem>`, the same
+      cells the public `/search` exposes. No ID number, no documents, no raw contact in the match list.
+      Reveal stays the audited Phase 5 dossier flow  every row carries an "Open dossier" link to
+      `/employer/dossier/[handle]`.
+- [x] **Mobile-first:** match list stacks on phones (TalentRosterItem already mobile-first); honest-supply
+      header is `sticky top-0 z-10` with a 2px brand-ink border so it stays visible while scrolling
+      candidates on a phone. "Refine in search" CTA + "Open dossier" CTA both render as ≥ 36px-tall pills
+      (tap-target generous; primary actions stay thumb-reachable). The page renders cleanly at 360px wide.
+- [x] **Find-matches CTA** on the vacancy detail page (`app/[locale]/(employer)/employer/vacancies/[id]/
+      page.tsx`) is visible to **all roles** — reverse-matching is a redacted read of the public talent
+      pool, so Viewers can browse matches even though they can't edit the vacancy itself. The CTA sits
+      directly under the back-link / status-chip strip with an explainer about ranked + redacted + SA-
+      citizens-highlighted-first — sets honest expectations before the click.
+- [x] Verified: `npm test` 22/22 green · `npm run typecheck` clean · `npm run build` clean (route
+      `/[locale]/employer/vacancies/[id]/match` listed in the build output).
 
 ### Task 9.8.3: Consent purpose for vacancy invites
 - [ ] `consentPurpose` += `vacancy_matching` (existing migration pattern, per

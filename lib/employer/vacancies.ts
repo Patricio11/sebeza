@@ -28,6 +28,16 @@ import { randomUUID } from "node:crypto";
 import { z } from "zod";
 import { verifyEmployer } from "@/lib/auth/dal";
 import { logAccess } from "@/lib/audit";
+import {
+  countMatchesByCitizenship,
+  searchProfilesQuery,
+  type SearchResultRow,
+} from "@/db/queries/profiles";
+import {
+  PROFESSIONS as MOCK_PROFESSIONS,
+  SKILLS as MOCK_SKILLS,
+} from "@/lib/mock/taxonomy";
+import type { SearchFilters, Seniority } from "@/lib/mock/types";
 import type {
   OrgMemberRole,
   VacancyStatus,
@@ -323,6 +333,83 @@ export async function updateVacancy(
   revalidatePath("/employer/vacancies");
   revalidatePath(`/employer/vacancies/${vacancyId}`);
   return ok();
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 9.8.2  Reverse-matching ("Find matches")
+// ─────────────────────────────────────────────────────────────────────────────
+
+const VALID_SENIORITY: Seniority[] = ["junior", "intermediate", "senior"];
+
+/**
+ * Build the public-search filter set from a vacancy. One ranking source of
+ * truth: the same `searchProfilesQuery` used by /search runs against these
+ * filters. Profession + required skills get concatenated into the FTS
+ * `query` (they live in the search_vector index already). Province is the
+ * slug; the query layer ILIKE-matches it against the human label.
+ *
+ * Seniority is only forwarded if the vacancy uses the canonical lowercase
+ * value (`junior` / `intermediate` / `senior`)  the create-form catalog
+ * shows title-case strings, so we normalise here.
+ */
+// Not exported: a "use server" module exposes only async Server Actions to
+// callers. This is a pure sync mapping used by matchVacancyCandidates()
+// below; if a caller ever needs the filters directly, move to a sibling
+// plain module rather than re-exporting from here.
+function vacancyToSearchFilters(
+  vacancy: VacancyRow,
+): SearchFilters {
+  const professionLabel =
+    MOCK_PROFESSIONS.find((p) => p.slug === vacancy.professionSlug)?.label ??
+    vacancy.professionSlug;
+  const skillLabels = vacancy.skillSlugs
+    .map((s) => MOCK_SKILLS.find((sk) => sk.slug === s)?.label)
+    .filter((s): s is string => Boolean(s));
+  const query = [professionLabel, ...skillLabels].join(" ").trim();
+
+  const seniorityNormalised =
+    vacancy.seniority && VALID_SENIORITY.includes(
+      vacancy.seniority.toLowerCase() as Seniority,
+    )
+      ? (vacancy.seniority.toLowerCase() as Seniority)
+      : null;
+
+  return {
+    query: query || undefined,
+    province: vacancy.provinceSlug,
+    city: vacancy.citySlug ?? null,
+    seniority: seniorityNormalised,
+    highlightCitizens: true,
+  };
+}
+
+export interface VacancyMatchResult {
+  filters: SearchFilters;
+  /** Top-ranked candidates (capped by SEARCH_LIMIT inside searchProfilesQuery). */
+  candidates: SearchResultRow[];
+  /** Honest-supply counts over the full match set (not just the visible page). */
+  counts: { total: number; saCitizen: number; foreignNational: number };
+}
+
+/**
+ * Compose the match view for a given vacancy. Two queries: the ranked
+ * list (capped) + the full-match citizenship buckets (for the honest-
+ * supply line). Both use identical WHERE clauses so the figures are
+ * internally consistent.
+ *
+ * Caller is responsible for the org-ownership check on the vacancy
+ * before calling (the page passes a vacancy already loaded via
+ * getMyVacancy()).
+ */
+export async function matchVacancyCandidates(
+  vacancy: VacancyRow,
+): Promise<VacancyMatchResult> {
+  const filters = vacancyToSearchFilters(vacancy);
+  const [search, counts] = await Promise.all([
+    searchProfilesQuery(filters),
+    countMatchesByCitizenship(filters),
+  ]);
+  return { filters, candidates: search.profiles, counts };
 }
 
 export async function transitionVacancyStatus(
