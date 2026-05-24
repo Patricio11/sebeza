@@ -145,7 +145,18 @@ export default async function ProfilePage({ params }: Props) {
           isOwner={isOwner}
         />
 
-        <ProfileBody profile={profile} t={t} locale={locale} isOwner={isOwner} />
+        <ProfileBody
+          profile={profile}
+          t={t}
+          locale={locale}
+          isOwner={isOwner}
+          viewerSignedInAsNonEmployer={
+            !!viewer &&
+            viewer.role !== "employer" &&
+            viewer.role !== "admin" &&
+            !isOwner
+          }
+        />
       </main>
       <SiteFooter />
     </>
@@ -472,11 +483,16 @@ async function ProfileBody({
   t,
   locale,
   isOwner,
+  viewerSignedInAsNonEmployer,
 }: {
   profile: NonNullable<Awaited<ReturnType<typeof dataProvider.getProfile>>>;
   t: Awaited<ReturnType<typeof getTranslations<"profile">>>;
   locale: string;
   isOwner: boolean;
+  /** Seeker (or other non-employer role) is signed in viewing this profile,
+   *  and they're not the owner. Drives the calm "employer-only feature"
+   *  variant of the gated panel  no "sign in as employer" CTAs. */
+  viewerSignedInAsNonEmployer: boolean;
 }) {
   return (
     <div className="mx-auto max-w-[1320px] px-5 py-16 md:px-10 md:py-24">
@@ -510,7 +526,11 @@ async function ProfileBody({
             />
           )}
 
-          <GatedSection t={t} isOwner={isOwner} />
+          <GatedSection
+            t={t}
+            isOwner={isOwner}
+            softVisitor={viewerSignedInAsNonEmployer}
+          />
 
           <ProfileFooter handle={profile.handle} t={t} isOwner={isOwner} />
         </div>
@@ -915,13 +935,18 @@ function QualificationsSection({
 function GatedSection({
   t,
   isOwner,
+  softVisitor,
 }: {
   t: Awaited<ReturnType<typeof getTranslations<"profile">>>;
   isOwner: boolean;
+  /** Signed-in non-employer viewing someone else's profile  no
+   *  "sign in as employer" CTAs (they're already signed in). */
+  softVisitor: boolean;
 }) {
-  // Owner view: explain WHAT employers see locked, without the "you're
-  // locked out" tone. Visitor / employer view: the original gated panel
-  // with the sign-in / register-org CTAs.
+  // Three modes:
+  //   isOwner       → calm cream "your contact stays private" explainer
+  //   softVisitor   → calm cream "this section is employer-only" notice
+  //   otherwise     → original dark panel with sign-in / register-org CTAs
   if (isOwner) {
     return (
       <section
@@ -983,6 +1008,53 @@ function GatedSection({
               Back to dashboard
             </Link>
           </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (softVisitor) {
+    return (
+      <section
+        aria-labelledby="gated-h"
+        className="relative overflow-hidden rounded-2xl border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-8 md:p-12"
+      >
+        <SAChevron
+          variant="signature"
+          className="pointer-events-none absolute -right-20 -top-20 size-[420px] opacity-[0.04]"
+        />
+        <div className="relative max-w-2xl">
+          <div className="flex items-center gap-2 text-[0.72rem] uppercase tracking-[0.28em] text-[color:var(--color-brand-strong)]">
+            <Lock className="size-3.5" aria-hidden="true" />
+            Recorded access  employer-only
+          </div>
+          <h2
+            id="gated-h"
+            className="mt-3 font-display text-[clamp(1.8rem,4vw,2.6rem)] leading-tight text-[color:var(--color-ink)]"
+          >
+            Contact reveals are an employer feature.
+          </h2>
+          <p className="mt-3 text-[color:var(--color-ink-soft)]">
+            Verified employer accounts can request to reveal this candidate&rsquo;s
+            contact details and documents, post-consent. Your account
+            doesn&rsquo;t have that action  every reveal is audit-logged and
+            surfaced back to the candidate in their activity feed.
+          </p>
+
+          <ul className="mt-6 grid gap-3 text-sm md:grid-cols-2">
+            <GatedItem
+              tone="light"
+              icon={<Lock className="size-3.5" />}
+              title={t("locked.contact")}
+              body="Email, mobile, response time."
+            />
+            <GatedItem
+              tone="light"
+              icon={<ShieldAlert className="size-3.5" />}
+              title={t("locked.documents")}
+              body="CV, qualifications, references."
+            />
+          </ul>
         </div>
       </section>
     );

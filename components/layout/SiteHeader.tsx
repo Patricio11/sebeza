@@ -1,8 +1,11 @@
-import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { LocaleSwitcher } from "@/components/feature/LocaleSwitcher";
 import { SebenzaLogo } from "@/components/ui/SebenzaLogo";
 import { MobileNav } from "@/components/layout/MobileNav";
+import { getSessionUser } from "@/lib/auth/dal";
+import { roleHome } from "@/lib/auth/dal";
+import { ArrowUpRight } from "lucide-react";
 
 interface Props {
   variant?: "default" | "minimal";
@@ -11,10 +14,18 @@ interface Props {
 /**
  * Internal-pages header. Carries the same SA-flag-derived chrome as the
  * landing: a slim flag band at the very top, then a sticky editorial bar
- * with the chevron-marked wordmark.
+ * with the wordmark.
+ *
+ * Session-aware: when the viewer is signed in, the Sign-in/Sign-up
+ * actions on the right swap for a Dashboard link to the role-home so
+ * the public-page chrome doesn't read as "logged out" to a logged-in
+ * user.
  */
-export function SiteHeader({ variant = "default" }: Props) {
-  const t = useTranslations("nav");
+export async function SiteHeader({ variant = "default" }: Props) {
+  const t = await getTranslations("nav");
+  const viewer = await getSessionUser();
+  const homeHref = viewer ? roleHome(viewer.role) : null;
+  const dashboardLabel = labelForRoleHome(viewer?.role);
 
   return (
     <header className="sticky top-0 z-30 bg-[color:var(--color-paper)]/95 backdrop-blur supports-[backdrop-filter]:bg-[color:var(--color-paper)]/80">
@@ -59,12 +70,14 @@ export function SiteHeader({ variant = "default" }: Props) {
               >
                 {t("insights")}
               </Link>
-              <Link
-                href="/dashboard"
-                className="rounded-sm transition-colors hover:text-[color:var(--color-brand)]"
-              >
-                {t("createProfile")}
-              </Link>
+              {!viewer && (
+                <Link
+                  href="/dashboard"
+                  className="rounded-sm transition-colors hover:text-[color:var(--color-brand)]"
+                >
+                  {t("createProfile")}
+                </Link>
+              )}
             </nav>
           )}
 
@@ -72,23 +85,58 @@ export function SiteHeader({ variant = "default" }: Props) {
             <div className="hidden md:block">
               <LocaleSwitcher />
             </div>
-            <Link
-              href="/sign-in"
-              className="hidden md:inline-flex items-center rounded-full px-3 py-1.5 text-sm font-medium text-[color:var(--color-ink)] transition-colors hover:bg-[color:var(--color-brand-tint)]"
-            >
-              {t("signIn")}
-            </Link>
-            <Link
-              href="/sign-up"
-              className="hidden md:inline-flex items-center gap-1.5 rounded-full bg-[color:var(--color-ink)] px-4 py-1.5 text-sm font-medium text-[color:var(--color-paper)] shadow-press transition-transform hover:-translate-y-0.5"
-            >
-              {t("signUp")}
-              <span aria-hidden="true">↗</span>
-            </Link>
-            <MobileNav />
+            {viewer && homeHref ? (
+              <Link
+                href={homeHref}
+                className="hidden md:inline-flex items-center gap-1.5 rounded-full bg-[color:var(--color-ink)] px-4 py-1.5 text-sm font-medium text-[color:var(--color-paper)] shadow-press transition-transform hover:-translate-y-0.5"
+              >
+                {dashboardLabel}
+                <ArrowUpRight className="size-3.5" aria-hidden="true" />
+              </Link>
+            ) : (
+              <>
+                <Link
+                  href="/sign-in"
+                  className="hidden md:inline-flex items-center rounded-full px-3 py-1.5 text-sm font-medium text-[color:var(--color-ink)] transition-colors hover:bg-[color:var(--color-brand-tint)]"
+                >
+                  {t("signIn")}
+                </Link>
+                <Link
+                  href="/sign-up"
+                  className="hidden md:inline-flex items-center gap-1.5 rounded-full bg-[color:var(--color-ink)] px-4 py-1.5 text-sm font-medium text-[color:var(--color-paper)] shadow-press transition-transform hover:-translate-y-0.5"
+                >
+                  {t("signUp")}
+                  <span aria-hidden="true">↗</span>
+                </Link>
+              </>
+            )}
+            <MobileNav
+              session={
+                viewer && homeHref
+                  ? {
+                      name: viewer.name,
+                      homeHref,
+                      homeLabel: dashboardLabel,
+                    }
+                  : null
+              }
+            />
           </div>
         </div>
       </div>
     </header>
   );
+}
+
+function labelForRoleHome(role: string | undefined): string {
+  switch (role) {
+    case "employer":
+      return "Employer workspace";
+    case "admin":
+      return "Admin console";
+    case "gov":
+      return "Gov workspace";
+    default:
+      return "Dashboard";
+  }
 }

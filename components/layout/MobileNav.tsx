@@ -19,11 +19,24 @@ import { Menu, X } from "lucide-react";
  *
  * Used by both `SiteHeader` (internal pages) and `LandingHeader` (the landing).
  */
+export interface MobileNavSession {
+  /** Display name surfaced inside the drawer. */
+  name: string;
+  /** Role-home href the dashboard CTA jumps to. */
+  homeHref: string;
+  /** Label for the dashboard CTA (e.g. "Dashboard", "Employer workspace"). */
+  homeLabel: string;
+}
+
 export function MobileNav({
   tone = "default",
+  session = null,
 }: {
   /** "default" matches the SiteHeader's ink-on-paper trigger; "hero" matches the LandingHeader's transparent overlay. */
   tone?: "default" | "hero";
+  /** When set, the drawer swaps Sign-in / Sign-up actions for a Dashboard
+   *  CTA. Headers compute this server-side and pass it down. */
+  session?: MobileNavSession | null;
 }) {
   const t = useTranslations("nav");
   const pathname = usePathname();
@@ -140,31 +153,55 @@ export function MobileNav({
                   label={t("insights")}
                   hint="National employment bulletin"
                 />
-                <DrawerLink
-                  href="/dashboard"
-                  label={t("createProfile")}
-                  hint="Get found for the work you do"
-                />
+                {!session && (
+                  <DrawerLink
+                    href="/dashboard"
+                    label={t("createProfile")}
+                    hint="Get found for the work you do"
+                  />
+                )}
               </ul>
             </nav>
 
-            {/* Auth actions  large, thumb-sized */}
+            {/* Auth actions  large, thumb-sized. Swaps to a Dashboard CTA
+                when the viewer is signed in. */}
             <div className="flex flex-col gap-3 border-t border-[color:var(--color-hairline)] px-5 py-5">
-              <Link
-                href="/sign-up"
-                onClick={() => setOpen(false)}
-                className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[color:var(--color-ink)] px-6 py-4 text-base font-medium text-[color:var(--color-paper)] shadow-press"
-              >
-                {t("signUp")}
-                <span aria-hidden="true">↗</span>
-              </Link>
-              <Link
-                href="/sign-in"
-                onClick={() => setOpen(false)}
-                className="inline-flex w-full items-center justify-center rounded-full border border-[color:var(--color-ink)] px-6 py-4 text-base font-medium text-[color:var(--color-ink)]"
-              >
-                {t("signIn")}
-              </Link>
+              {session ? (
+                <>
+                  <div className="text-[0.62rem] uppercase tracking-[0.24em] text-[color:var(--color-ink-soft)]">
+                    Signed in as
+                  </div>
+                  <div className="font-display text-lg leading-tight text-[color:var(--color-ink)]">
+                    {session.name}
+                  </div>
+                  <Link
+                    href={session.homeHref}
+                    onClick={() => setOpen(false)}
+                    className="mt-1 inline-flex w-full items-center justify-center gap-2 rounded-full bg-[color:var(--color-ink)] px-6 py-4 text-base font-medium text-[color:var(--color-paper)] shadow-press"
+                  >
+                    {session.homeLabel}
+                    <span aria-hidden="true">↗</span>
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <Link
+                    href="/sign-up"
+                    onClick={() => setOpen(false)}
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[color:var(--color-ink)] px-6 py-4 text-base font-medium text-[color:var(--color-paper)] shadow-press"
+                  >
+                    {t("signUp")}
+                    <span aria-hidden="true">↗</span>
+                  </Link>
+                  <Link
+                    href="/sign-in"
+                    onClick={() => setOpen(false)}
+                    className="inline-flex w-full items-center justify-center rounded-full border border-[color:var(--color-ink)] px-6 py-4 text-base font-medium text-[color:var(--color-ink)]"
+                  >
+                    {t("signIn")}
+                  </Link>
+                </>
+              )}
             </div>
 
             {/* Footer band  locale + trust strip */}
