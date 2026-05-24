@@ -2,6 +2,7 @@ import {
   LayoutDashboard,
   Search,
   Bookmark,
+  Briefcase,
   Users2,
   CheckCircle2,
   Building2,
@@ -15,6 +16,10 @@ export const EMPLOYER_NAV: DashboardNavItem[] = [
   { key: "overview", label: "Overview", href: "/employer", icon: LayoutDashboard },
   { key: "search", label: "Search talent", href: "/search", icon: Search },
   { key: "savedSearches", label: "Saved searches", href: "/employer/saved-searches", icon: Bookmark },
+  // Phase 9.8  vacancies sit between saved searches (passive
+  // monitoring) and talent pools (manual shortlisting) because they
+  // are the active reverse-matching workflow that bridges the two.
+  { key: "vacancies", label: "Vacancies", href: "/employer/vacancies", icon: Briefcase },
   { key: "shortlists", label: "Talent pools", href: "/employer/shortlists", icon: Users2 },
   { key: "placements", label: "Placements", href: "/employer/placements", icon: CheckCircle2 },
   { key: "organisation", label: "Organisation", href: "/employer/organisation", icon: Building2 },

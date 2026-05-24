@@ -11,6 +11,7 @@
 import {
   boolean,
   customType,
+  index,
   integer,
   jsonb,
   pgEnum,
@@ -436,7 +437,100 @@ export const placements = pgTable("placements", {
    * flagged as such, and excluded from official aggregates.
    */
   source: placementSource("source").notNull().default("employer_confirmed"),
+  /**
+   * Phase 9.8  optional vacancy linkage. A placement may be logged
+   * directly (Phase 5 flow, vacancy_id NULL) or tied to a specific
+   * vacancy whose pipeline produced the hire. ON DELETE SET NULL so
+   * deleting a vacancy never breaks Placement-Truth history.
+   */
+  vacancyId: text("vacancy_id"),
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Phase 9.8  Vacancies & demand-driven matching
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Vacancy lifecycle:
+ *   draft   employer is drafting; not yet visible to anyone (incl. team)
+ *   open    accepting invitations + responses; visible to org members
+ *   closed  no new invites; pipeline preserved (was-not-filled signal)
+ *   filled  a placement was logged for this vacancy
+ */
+export const vacancyStatus = pgEnum("vacancy_status", [
+  "draft",
+  "open",
+  "closed",
+  "filled",
+]);
+
+/**
+ * Vacancies are STRICTLY ORG-PRIVATE. No vacancy field is exposed on any
+ * public route, /p/[handle], /search, sitemap, or to a non-member of
+ * `organizationId`. Salary band, like Phase 5 placements, never leaves the
+ * org workspace. Enforced by the read functions in
+ * `lib/employer/vacancies.ts` (every read filters by orgId) + a 9.8.8
+ * compliance assertion that confirms no public/seeker surface imports
+ * the table.
+ */
+export const vacancies = pgTable(
+  "vacancies",
+  {
+    id: text("id").primaryKey(),
+    organizationId: text("organization_id")
+      .notNull()
+      .references(() => organizations.id, { onDelete: "cascade" }),
+    /** Member who created the vacancy. References app_user for auditability;
+        vacancy persists if the creator later leaves the org. */
+    createdByUserId: text("created_by_user_id")
+      .notNull()
+      .references(() => appUser.id),
+    title: text("title").notNull(),
+    professionSlug: text("profession_slug")
+      .notNull()
+      .references(() => professions.slug),
+    provinceSlug: text("province_slug")
+      .notNull()
+      .references(() => provinces.slug),
+    /** City refinement is optional  some vacancies are province-wide. */
+    citySlug: text("city_slug").references(() => cities.slug),
+    /** Free-form skill slugs from the controlled vocabulary. Stored as a
+        Postgres text[] so filter-shape matches `SearchFilters.skills`. */
+    skillSlugs: text("skill_slugs").array().notNull().default(sql`'{}'::text[]`),
+    /** Free text for now; could enum (junior/intermediate/senior) later. */
+    seniority: text("seniority"),
+    /**
+     * PRIVATE  never on any seeker-facing surface (consistent with the
+     * Phase 5 placements.salary_band rule). Visible to Owners + Recruiters
+     * inside the org; suppressed for Viewers.
+     */
+    salaryBand: text("salary_band"),
+    description: text("description"),
+    /** Document refs (e.g. "drivers_licence", "trade_certificate"). Stored
+        as a Postgres text[] so the qualification taxonomy stays additive. */
+    documentsRequired: text("documents_required")
+      .array()
+      .notNull()
+      .default(sql`'{}'::text[]`),
+    status: vacancyStatus("status").notNull().default("draft"),
+    /**
+     * Phase 9.8.4  per-vacancy invite expiry window (employer-set per D2).
+     * NULL = "invites never expire on this vacancy." When non-null, the
+     * /api/cron/vacancy-invite-expiry job computes expires_at on each
+     * vacancy_invitations row at send time.
+     */
+    inviteExpiryDays: integer("invite_expiry_days"),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    closedAt: timestamp("closed_at"),
+  },
+  (t) => ({
+    // Common query: list this org's vacancies grouped by status.
+    orgStatusIdx: index("vacancies_org_status_idx").on(
+      t.organizationId,
+      t.status,
+    ),
+  }),
+);
 
 /** Saved-search definitions per organisation. Stored filters get re-run
     by `runSavedSearch` to update `newMatchesCount`  we don't snapshot

@@ -1,0 +1,338 @@
+"use client";
+
+/**
+ * Phase 9.8.1  Shared create / edit vacancy form (client island).
+ *
+ * Mobile-first: single-column on phones, two-column grid on `md+`.
+ * Forms render cleanly at 360px wide. Salary input has a clear PRIVATE
+ * pill and the helper text reminds the editor it stays private.
+ *
+ * The form is generic over create vs edit  caller supplies the
+ * `onSubmit` handler that wraps the Server Action (createVacancy or
+ * updateVacancy). The component knows nothing about routing.
+ */
+
+import { useState, useTransition } from "react";
+import { useRouter } from "@/i18n/navigation";
+import {
+  TextField,
+  TextareaField,
+  SelectField,
+} from "@/components/ui/FormField";
+import { Button } from "@/components/ui/Button";
+import { Lock } from "lucide-react";
+import type { TaxonomyEntry, Province } from "@/lib/mock/types";
+
+export interface VacancyFormValue {
+  title: string;
+  professionSlug: string;
+  provinceSlug: string;
+  citySlug?: string | null;
+  skillSlugs: string[];
+  seniority?: string | null;
+  salaryBand?: string | null;
+  description?: string | null;
+  documentsRequired: string[];
+  inviteExpiryDays?: number | null;
+}
+
+export interface VacancyFormProps {
+  initial?: Partial<VacancyFormValue>;
+  professions: TaxonomyEntry[];
+  provinces: Province[];
+  skills: TaxonomyEntry[];
+  /** Server Action wrapper. Returns the result to surface errors. */
+  onSubmit: (
+    value: VacancyFormValue,
+  ) => Promise<{ ok: true } | { ok: false; message: string }>;
+  /** Where to navigate on success. */
+  redirectTo: string;
+  /** Submit button label. Defaults to "Save vacancy". */
+  submitLabel?: string;
+  /** Cancel button href. Defaults to /employer/vacancies. */
+  cancelHref?: string;
+}
+
+const SENIORITY_OPTIONS = [
+  "Junior",
+  "Intermediate",
+  "Senior",
+  "Lead / Manager",
+];
+
+export function VacancyForm({
+  initial,
+  professions,
+  provinces,
+  skills,
+  onSubmit,
+  redirectTo,
+  submitLabel = "Save vacancy",
+  cancelHref = "/employer/vacancies",
+}: VacancyFormProps) {
+  const router = useRouter();
+  const [pending, startTransition] = useTransition();
+  const [error, setError] = useState<string | null>(null);
+
+  // Controlled fields  needed for the skills multi-select +
+  // conditional rendering. Province / city are simple selects.
+  const [title, setTitle] = useState(initial?.title ?? "");
+  const [profession, setProfession] = useState(
+    initial?.professionSlug ?? "",
+  );
+  const [province, setProvince] = useState(initial?.provinceSlug ?? "");
+  const [seniority, setSeniority] = useState(initial?.seniority ?? "");
+  const [salaryBand, setSalaryBand] = useState(initial?.salaryBand ?? "");
+  const [description, setDescription] = useState(
+    initial?.description ?? "",
+  );
+  const [inviteExpiryDays, setInviteExpiryDays] = useState<string>(
+    initial?.inviteExpiryDays != null
+      ? String(initial.inviteExpiryDays)
+      : "14",
+  );
+  const [skillSet, setSkillSet] = useState<Set<string>>(
+    new Set(initial?.skillSlugs ?? []),
+  );
+
+  function toggleSkill(slug: string) {
+    setSkillSet((prev) => {
+      const next = new Set(prev);
+      if (next.has(slug)) next.delete(slug);
+      else next.add(slug);
+      return next;
+    });
+  }
+
+  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setError(null);
+
+    const expiryRaw = inviteExpiryDays.trim();
+    const expiryNum =
+      expiryRaw === "" || expiryRaw === "0" ? null : Number(expiryRaw);
+    if (expiryNum !== null && (!Number.isFinite(expiryNum) || expiryNum < 1)) {
+      setError("Invite expiry must be empty or a positive number of days.");
+      return;
+    }
+
+    const value: VacancyFormValue = {
+      title: title.trim(),
+      professionSlug: profession,
+      provinceSlug: province,
+      citySlug: null, // city refinement is Phase 9.8 vNext  province only for now
+      skillSlugs: Array.from(skillSet),
+      seniority: seniority || null,
+      salaryBand: salaryBand.trim() || null,
+      description: description.trim() || null,
+      documentsRequired: [], // vNext  for now the matching uses skills + profession
+      inviteExpiryDays: expiryNum,
+    };
+
+    startTransition(async () => {
+      const res = await onSubmit(value);
+      if (!res.ok) {
+        setError(res.message);
+        return;
+      }
+      router.push(redirectTo as never);
+    });
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+      {error && (
+        <div
+          role="alert"
+          className="rounded-[var(--radius-sm)] border border-[color:var(--color-danger)] bg-[color:var(--color-danger)]/10 px-4 py-3 text-sm text-[color:var(--color-danger)]"
+        >
+          {error}
+        </div>
+      )}
+
+      <section className="flex flex-col gap-5">
+        <div className="text-[0.72rem] uppercase tracking-[0.22em] text-[color:var(--color-ink)]">
+          The role
+        </div>
+        <TextField
+          id="title"
+          name="title"
+          label="Role title"
+          placeholder="e.g. Senior Pastry Chef"
+          required
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          disabled={pending}
+          hint="The label your team sees on the vacancy list."
+        />
+        <div className="grid gap-5 md:grid-cols-2">
+          <SelectField
+            id="profession"
+            name="profession"
+            label="Profession"
+            required
+            value={profession}
+            onChange={(e) => setProfession(e.target.value)}
+            disabled={pending}
+          >
+            <option value="">Select…</option>
+            {professions.map((p) => (
+              <option key={p.slug} value={p.slug}>
+                {p.label}
+              </option>
+            ))}
+          </SelectField>
+          <SelectField
+            id="province"
+            name="province"
+            label="Province"
+            required
+            value={province}
+            onChange={(e) => setProvince(e.target.value)}
+            disabled={pending}
+          >
+            <option value="">Select…</option>
+            {provinces.map((p) => (
+              <option key={p.slug} value={p.slug}>
+                {p.label}
+              </option>
+            ))}
+          </SelectField>
+        </div>
+        <SelectField
+          id="seniority"
+          name="seniority"
+          label="Seniority"
+          value={seniority ?? ""}
+          onChange={(e) => setSeniority(e.target.value)}
+          disabled={pending}
+        >
+          <option value="">Any / not specified</option>
+          {SENIORITY_OPTIONS.map((s) => (
+            <option key={s} value={s}>
+              {s}
+            </option>
+          ))}
+        </SelectField>
+
+        {/* Skills  taxonomy-controlled multi-chip selector */}
+        <fieldset className="flex flex-col gap-2">
+          <legend className="text-[0.72rem] uppercase tracking-[0.22em] text-[color:var(--color-ink)]">
+            Required skills
+          </legend>
+          <p className="text-xs text-[color:var(--color-ink-soft)]">
+            Tap to add or remove. These drive the &ldquo;Find matches&rdquo;
+            ranking in 9.8.2.
+          </p>
+          <ul className="-mb-2 flex flex-wrap gap-2 pt-1">
+            {skills.map((s) => {
+              const on = skillSet.has(s.slug);
+              return (
+                <li key={s.slug}>
+                  <button
+                    type="button"
+                    onClick={() => toggleSkill(s.slug)}
+                    disabled={pending}
+                    aria-pressed={on}
+                    className={
+                      "rounded-[var(--radius-pill)] border px-3 py-1.5 text-xs transition-colors " +
+                      (on
+                        ? "border-[color:var(--color-brand)] bg-[color:var(--color-brand-tint)] text-[color:var(--color-brand-strong)]"
+                        : "border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] text-[color:var(--color-ink)] hover:border-[color:var(--color-ink)]")
+                    }
+                  >
+                    {s.label}
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </fieldset>
+
+        <TextareaField
+          id="description"
+          name="description"
+          label="Description"
+          optional
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          disabled={pending}
+          placeholder="What the role does, who it reports to, what success looks like in the first 90 days. Internal-only  no seeker ever sees this."
+          maxLength={4000}
+        />
+      </section>
+
+      <hr className="hairline" />
+
+      <section className="flex flex-col gap-5">
+        <div className="flex items-center gap-2 text-[0.72rem] uppercase tracking-[0.22em] text-[color:var(--color-ink)]">
+          <Lock className="size-3" aria-hidden="true" />
+          Private to your organisation
+        </div>
+        <p className="text-xs text-[color:var(--color-ink-soft)]">
+          Salary band stays inside your workspace  consistent with how
+          Sebenza already handles placement salaries (Phase 5 rule). It
+          is never on any seeker-facing surface, never in /search,
+          never in /p/[handle].
+        </p>
+        <TextField
+          id="salaryBand"
+          name="salaryBand"
+          label="Salary band"
+          placeholder="e.g. R 480k  R 600k / year"
+          optional
+          value={salaryBand}
+          onChange={(e) => setSalaryBand(e.target.value)}
+          disabled={pending}
+          badge={
+            <span className="inline-flex items-center gap-1 rounded-[var(--radius-pill)] border border-[color:var(--color-accent)] bg-[color:var(--color-accent)]/10 px-2 py-0.5 text-[0.62rem] uppercase tracking-[0.18em] text-[color:var(--color-accent)]">
+              <Lock className="size-2.5" aria-hidden="true" />
+              Private
+            </span>
+          }
+        />
+      </section>
+
+      <hr className="hairline" />
+
+      <section className="flex flex-col gap-5">
+        <div className="text-[0.72rem] uppercase tracking-[0.22em] text-[color:var(--color-ink)]">
+          Invite expiry
+        </div>
+        <p className="text-xs text-[color:var(--color-ink-soft)]">
+          How long an invite stays open if the seeker hasn&rsquo;t responded.
+          When it expires, both sides get a notification. Leave empty (or 0)
+          to keep invites open indefinitely.
+        </p>
+        <TextField
+          id="inviteExpiryDays"
+          name="inviteExpiryDays"
+          label="Days until invite expires"
+          type="number"
+          inputMode="numeric"
+          min={0}
+          max={365}
+          value={inviteExpiryDays}
+          onChange={(e) => setInviteExpiryDays(e.target.value)}
+          disabled={pending}
+          hint="14 days is the typical default; 0 or empty = never expires."
+        />
+      </section>
+
+      <div className="flex flex-wrap items-center justify-end gap-3 border-t border-[color:var(--color-hairline)] pt-5">
+        <Button
+          type="button"
+          variant="secondary"
+          size="md"
+          onClick={() => router.push(cancelHref as never)}
+          disabled={pending}
+        >
+          Cancel
+        </Button>
+        <Button type="submit" variant="primary" size="lg" disabled={pending}>
+          {pending ? "Saving" : submitLabel}
+        </Button>
+      </div>
+    </form>
+  );
+}

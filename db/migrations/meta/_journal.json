@@ -106,6 +106,13 @@
       "when": 1779860000000,
       "tag": "0014_phase9_7_audit_log_indices",
       "breakpoints": false
+    },
+    {
+      "idx": 15,
+      "version": "7",
+      "when": 1779870000000,
+      "tag": "0015_phase9_8_vacancies",
+      "breakpoints": false
     }
   ]
 }

@@ -103,7 +103,21 @@ export type AuditKind =
   // is the trust mechanism that makes the surface defensible. Meta
   // carries `reason`, `inputMethod`, `placementCount`, `aboveFloor`,
   // `floor`, `orgFound` for the 9.7.7 oversight log.
-  | "gov.employer_mix.lookup";
+  | "gov.employer_mix.lookup"
+  // Phase 9.8  vacancies + invite lifecycle. Org-private vacancy
+  // operations + per-invite traceability for accept / decline / expire
+  // patterns. `subject` is the vacancy id; meta carries the lifecycle
+  // delta + (for invite events) the profile id + (for decline) the
+  // response reason. The invite.skip event captures non-consented
+  // skips per D5  per-seeker reason in the audit log, never in UI.
+  | "vacancy.create"
+  | "vacancy.update"
+  | "vacancy.status.change"
+  | "vacancy.invite"
+  | "vacancy.invite.skip"
+  | "vacancy.invite.withdraw"
+  | "vacancy.invite.expire"
+  | "vacancy.response";
 
 export interface AuditEvent {
   kind: AuditKind;
