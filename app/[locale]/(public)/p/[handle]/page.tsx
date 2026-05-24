@@ -22,12 +22,16 @@ import {
   ShieldCheck,
   ArrowUpRight,
   Bookmark,
+  Eye,
+  ArrowLeft,
+  Pencil,
 } from "lucide-react";
 import { INSTITUTION_KIND_LABEL } from "@/lib/mock/taxonomy";
 import { monthsUntil, nqfShort } from "@/lib/mock/academic";
 import { ReportProfileButton } from "@/components/feature/profile/ReportProfileButton";
 import { WorkAvailabilityChips } from "@/components/feature/profile/WorkAvailabilityChips";
 import { getSessionUser } from "@/lib/auth/dal";
+import { getMyProfile } from "@/lib/profile/me";
 
 interface Props {
   params: Promise<{ locale: string; handle: string }>;
@@ -82,10 +86,14 @@ export default async function ProfilePage({ params }: Props) {
 
   // Route the CTAs based on who's looking. Public visitors → sign-in
   // with a ?next= cursor back to the dossier. Verified employers →
-  // straight into the dossier. Everyone else (seekers viewing public
-  // profiles) keeps the locked-state copy  the action only makes
-  // sense for employers.
+  // straight into the dossier. The profile owner gets an entirely
+  // different right-rail (preview controls) instead of the
+  // request-to-engage card  it's their own profile.
   const viewer = await getSessionUser();
+  // Only seekers can own a handle; cheap query, only fired when there's a session.
+  const me = viewer?.role === "seeker" ? await getMyProfile() : null;
+  const isOwner = !!me && me.handle === handle;
+
   const dossierHref = `/employer/dossier/${profile.handle}`;
   const ctaHref =
     viewer?.role === "employer" || viewer?.role === "admin"
@@ -106,14 +114,18 @@ export default async function ProfilePage({ params }: Props) {
     <>
       <SiteHeader />
       <main id="main" className="bg-[color:var(--color-paper)]">
-        {/* Breadcrumb / dossier tag */}
+        {/* Owner-preview banner  proves they're signed in and gives them the
+            way back. Renders only when the viewer owns this handle. */}
+        {isOwner && <OwnerPreviewBanner />}
+
+        {/* Breadcrumb / dossier tag  destination depends on who's looking. */}
         <div className="border-b border-[color:var(--color-hairline)]">
           <div className="mx-auto flex max-w-[1320px] items-center gap-3 px-5 py-3 text-[0.7rem] uppercase tracking-[0.24em] text-[color:var(--color-ink-soft)] md:px-10">
             <Link
-              href="/search"
+              href={isOwner ? "/dashboard" : "/search"}
               className="transition-colors hover:text-[color:var(--color-brand)]"
             >
-              ← {tNav("findTalent")}
+              ← {isOwner ? "Back to dashboard" : tNav("findTalent")}
             </Link>
             <span aria-hidden="true">·</span>
             <span>Dossier № {profile.handle}</span>
@@ -130,12 +142,53 @@ export default async function ProfilePage({ params }: Props) {
           ctaHref={ctaHref}
           ctaEnabled={ctaEnabled}
           viewerSignedIn={Boolean(viewer)}
+          isOwner={isOwner}
         />
 
-        <ProfileBody profile={profile} t={t} locale={locale} />
+        <ProfileBody profile={profile} t={t} locale={locale} isOwner={isOwner} />
       </main>
       <SiteFooter />
     </>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// OWNER PREVIEW BANNER
+// ─────────────────────────────────────────────────────────────────────────────
+
+function OwnerPreviewBanner() {
+  return (
+    <div className="border-b border-[color:var(--color-hairline)] bg-[color:var(--color-brand-tint)]">
+      <div className="mx-auto flex max-w-[1320px] flex-wrap items-center justify-between gap-4 px-5 py-3 md:px-10">
+        <div className="flex items-center gap-2.5 text-sm text-[color:var(--color-ink)]">
+          <span className="inline-flex size-7 items-center justify-center rounded-full bg-[color:var(--color-brand)] text-[color:var(--color-paper)]">
+            <Eye className="size-3.5" aria-hidden="true" />
+          </span>
+          <span>
+            <span className="font-medium">You&rsquo;re previewing your public profile.</span>
+            <span className="ml-1.5 text-[color:var(--color-ink-soft)]">
+              This is how verified employers see you.
+            </span>
+          </span>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <Link
+            href="/dashboard"
+            className="inline-flex items-center gap-1.5 rounded-full border border-[color:var(--color-ink)] px-3.5 py-1.5 text-xs font-medium text-[color:var(--color-ink)] transition-colors hover:bg-[color:var(--color-ink)] hover:text-[color:var(--color-paper)]"
+          >
+            <ArrowLeft className="size-3.5" aria-hidden="true" />
+            Back to dashboard
+          </Link>
+          <Link
+            href="/dashboard/profile"
+            className="inline-flex items-center gap-1.5 rounded-full bg-[color:var(--color-ink)] px-3.5 py-1.5 text-xs font-medium text-[color:var(--color-paper)] shadow-press transition-transform hover:-translate-y-0.5"
+          >
+            <Pencil className="size-3.5" aria-hidden="true" />
+            Edit profile
+          </Link>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -153,6 +206,7 @@ async function ProfileHero({
   ctaHref,
   ctaEnabled,
   viewerSignedIn,
+  isOwner,
 }: {
   profile: NonNullable<Awaited<ReturnType<typeof dataProvider.getProfile>>>;
   memberSinceFmt: string;
@@ -165,6 +219,8 @@ async function ProfileHero({
   /** Whether to surface CTAs at all (false hides them for signed-in seekers). */
   ctaEnabled: boolean;
   viewerSignedIn: boolean;
+  /** True when the signed-in viewer owns this handle  swaps the right rail. */
+  isOwner: boolean;
 }) {
   return (
     <section
@@ -249,7 +305,9 @@ async function ProfileHero({
           </div>
         </div>
 
-        {/* Trust dossier / action panel */}
+        {/* Right-rail panel  swaps between owner-preview and the employer
+            request-to-engage card. Same trust-signal block at the bottom in
+            both modes  the owner should see what employers see. */}
         <aside className="col-span-12 md:col-span-5">
           <div className="relative rounded-2xl border border-[color:var(--color-ink)]/10 bg-[color:var(--color-surface)] p-7 shadow-press md:p-8">
             {/* Tiny flag mark inside */}
@@ -259,48 +317,85 @@ async function ProfileHero({
               <div className="flex-[1] bg-[color:var(--color-danger)]" />
             </div>
 
-            <div className="flex items-center gap-2 text-[0.7rem] uppercase tracking-[0.24em] text-[color:var(--color-brand-strong)]">
-              <ShieldCheck className="size-3.5" aria-hidden="true" />
-              Recorded access · employer-only
-            </div>
-
-            <h2 className="mt-2 font-display text-xl leading-tight">
-              Request to engage
-            </h2>
-            <p className="mt-2 text-sm text-[color:var(--color-ink-soft)]">
-              {t("locked.lockedBody")}
-            </p>
-
-            {/* Primary actions */}
-            <div className="mt-5 flex flex-col gap-2.5">
-              {ctaEnabled ? (
-                <Link
-                  href={ctaHref}
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[color:var(--color-ink)] px-5 py-3 text-sm font-medium text-[color:var(--color-paper)] shadow-press transition-transform hover:-translate-y-0.5"
-                >
-                  <Lock className="size-3.5" aria-hidden="true" />
-                  {viewerSignedIn ? "Open employer dossier" : "Sign in to request contact"}
-                </Link>
-              ) : (
-                <div className="rounded-md border border-dashed border-[color:var(--color-hairline)] px-4 py-3 text-center text-xs text-[color:var(--color-ink-soft)]">
-                  Contact reveal is an employer flow. Your seeker workspace
-                  doesn't see this action.
+            {isOwner ? (
+              <>
+                <div className="flex items-center gap-2 text-[0.7rem] uppercase tracking-[0.24em] text-[color:var(--color-brand-strong)]">
+                  <Eye className="size-3.5" aria-hidden="true" />
+                  Preview mode · owner view
                 </div>
-              )}
-              {ctaEnabled && (
-                <Link
-                  href={ctaHref}
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-[color:var(--color-ink)] px-5 py-3 text-sm font-medium text-[color:var(--color-ink)] transition-colors hover:bg-[color:var(--color-ink)] hover:text-[color:var(--color-paper)]"
-                >
-                  <Bookmark className="size-3.5" aria-hidden="true" />
-                  {viewerSignedIn ? "Save to talent pool" : "Sign in to save"}
-                </Link>
-              )}
-            </div>
+
+                <h2 className="mt-2 font-display text-xl leading-tight">
+                  Your public profile
+                </h2>
+                <p className="mt-2 text-sm text-[color:var(--color-ink-soft)]">
+                  This is the dossier verified employers see. The
+                  request-to-engage card lives here for them  contact reveals
+                  and document requests are gated behind your consent and
+                  every action is audit-logged.
+                </p>
+
+                <div className="mt-5 flex flex-col gap-2.5">
+                  <Link
+                    href="/dashboard/profile"
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[color:var(--color-ink)] px-5 py-3 text-sm font-medium text-[color:var(--color-paper)] shadow-press transition-transform hover:-translate-y-0.5"
+                  >
+                    <Pencil className="size-3.5" aria-hidden="true" />
+                    Edit profile
+                  </Link>
+                  <Link
+                    href="/dashboard"
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-[color:var(--color-ink)] px-5 py-3 text-sm font-medium text-[color:var(--color-ink)] transition-colors hover:bg-[color:var(--color-ink)] hover:text-[color:var(--color-paper)]"
+                  >
+                    <ArrowLeft className="size-3.5" aria-hidden="true" />
+                    Back to dashboard
+                  </Link>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="flex items-center gap-2 text-[0.7rem] uppercase tracking-[0.24em] text-[color:var(--color-brand-strong)]">
+                  <ShieldCheck className="size-3.5" aria-hidden="true" />
+                  Recorded access · employer-only
+                </div>
+
+                <h2 className="mt-2 font-display text-xl leading-tight">
+                  Request to engage
+                </h2>
+                <p className="mt-2 text-sm text-[color:var(--color-ink-soft)]">
+                  {t("locked.lockedBody")}
+                </p>
+
+                <div className="mt-5 flex flex-col gap-2.5">
+                  {ctaEnabled ? (
+                    <Link
+                      href={ctaHref}
+                      className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[color:var(--color-ink)] px-5 py-3 text-sm font-medium text-[color:var(--color-paper)] shadow-press transition-transform hover:-translate-y-0.5"
+                    >
+                      <Lock className="size-3.5" aria-hidden="true" />
+                      {viewerSignedIn ? "Open employer dossier" : "Sign in to request contact"}
+                    </Link>
+                  ) : (
+                    <div className="rounded-md border border-dashed border-[color:var(--color-hairline)] px-4 py-3 text-center text-xs text-[color:var(--color-ink-soft)]">
+                      Contact reveal is an employer flow. Your seeker workspace
+                      doesn&rsquo;t see this action.
+                    </div>
+                  )}
+                  {ctaEnabled && (
+                    <Link
+                      href={ctaHref}
+                      className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-[color:var(--color-ink)] px-5 py-3 text-sm font-medium text-[color:var(--color-ink)] transition-colors hover:bg-[color:var(--color-ink)] hover:text-[color:var(--color-paper)]"
+                    >
+                      <Bookmark className="size-3.5" aria-hidden="true" />
+                      {viewerSignedIn ? "Save to talent pool" : "Sign in to save"}
+                    </Link>
+                  )}
+                </div>
+              </>
+            )}
 
             <div className="my-6 h-px bg-[color:var(--color-hairline)]" />
 
-            {/* Trust signals */}
+            {/* Trust signals  shown in both modes. */}
             <dl className="space-y-3 text-sm">
               <DossierRow label="Status">
                 <span className="capitalize">
@@ -335,13 +430,15 @@ async function ProfileHero({
               Every reveal of contact or documents is audit-logged
             </p>
 
-            <Link
-              href="/sign-in?as=employer"
-              className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-[color:var(--color-brand-strong)] hover:underline"
-            >
-              Sign in as a verified employer
-              <ArrowUpRight className="size-3.5" aria-hidden="true" />
-            </Link>
+            {!isOwner && (
+              <Link
+                href="/sign-in?as=employer"
+                className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-[color:var(--color-brand-strong)] hover:underline"
+              >
+                Sign in as a verified employer
+                <ArrowUpRight className="size-3.5" aria-hidden="true" />
+              </Link>
+            )}
           </div>
         </aside>
       </div>
@@ -374,10 +471,12 @@ async function ProfileBody({
   profile,
   t,
   locale,
+  isOwner,
 }: {
   profile: NonNullable<Awaited<ReturnType<typeof dataProvider.getProfile>>>;
   t: Awaited<ReturnType<typeof getTranslations<"profile">>>;
   locale: string;
+  isOwner: boolean;
 }) {
   return (
     <div className="mx-auto max-w-[1320px] px-5 py-16 md:px-10 md:py-24">
@@ -411,7 +510,7 @@ async function ProfileBody({
             />
           )}
 
-          <GatedSection t={t} />
+          <GatedSection t={t} isOwner={isOwner} />
 
           <ProfileFooter handle={profile.handle} t={t} />
         </div>
@@ -815,9 +914,80 @@ function QualificationsSection({
 
 function GatedSection({
   t,
+  isOwner,
 }: {
   t: Awaited<ReturnType<typeof getTranslations<"profile">>>;
+  isOwner: boolean;
 }) {
+  // Owner view: explain WHAT employers see locked, without the "you're
+  // locked out" tone. Visitor / employer view: the original gated panel
+  // with the sign-in / register-org CTAs.
+  if (isOwner) {
+    return (
+      <section
+        aria-labelledby="gated-h"
+        className="relative overflow-hidden rounded-2xl border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-8 md:p-12"
+      >
+        <SAChevron
+          variant="signature"
+          className="pointer-events-none absolute -right-20 -top-20 size-[420px] opacity-[0.04]"
+        />
+
+        <div className="relative max-w-2xl">
+          <div className="flex items-center gap-2 text-[0.72rem] uppercase tracking-[0.28em] text-[color:var(--color-brand-strong)]">
+            <ShieldCheck className="size-3.5" aria-hidden="true" />
+            What employers see  redacted
+          </div>
+          <h2
+            id="gated-h"
+            className="mt-3 font-display text-[clamp(1.8rem,4vw,2.6rem)] leading-tight text-[color:var(--color-ink)]"
+          >
+            Your contact and documents stay private until you consent.
+          </h2>
+          <p className="mt-3 text-[color:var(--color-ink-soft)]">
+            Verified employers see a locked panel where this section sits.
+            Your email, mobile, un-redacted surname, CV and certificate
+            files are revealed only after they request access and you
+            approve  every reveal is audit-logged and surfaced back to
+            you in your activity feed.
+          </p>
+
+          <ul className="mt-6 grid gap-3 text-sm md:grid-cols-2">
+            <GatedItem
+              tone="light"
+              icon={<Lock className="size-3.5" />}
+              title={t("locked.contact")}
+              body="Email, mobile, response time."
+            />
+            <GatedItem
+              tone="light"
+              icon={<ShieldAlert className="size-3.5" />}
+              title={t("locked.documents")}
+              body="CV, qualifications, references."
+            />
+          </ul>
+
+          <div className="mt-7 flex flex-wrap gap-3">
+            <Link
+              href="/dashboard/profile"
+              className="inline-flex items-center gap-2 rounded-full bg-[color:var(--color-ink)] px-6 py-3 text-sm font-medium text-[color:var(--color-paper)] shadow-press transition-transform hover:-translate-y-0.5"
+            >
+              <Pencil className="size-3.5" aria-hidden="true" />
+              Edit profile
+            </Link>
+            <Link
+              href="/dashboard"
+              className="inline-flex items-center gap-2 rounded-full border border-[color:var(--color-ink)] px-6 py-3 text-sm font-medium text-[color:var(--color-ink)] hover:bg-[color:var(--color-ink)] hover:text-[color:var(--color-paper)]"
+            >
+              <ArrowLeft className="size-3.5" aria-hidden="true" />
+              Back to dashboard
+            </Link>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section
       aria-labelledby="gated-h"
@@ -883,11 +1053,25 @@ function GatedItem({
   icon,
   title,
   body,
+  tone = "dark",
 }: {
   icon: React.ReactNode;
   title: string;
   body: string;
+  /** `dark` = on the black gated panel (visitor); `light` = on the cream owner panel. */
+  tone?: "dark" | "light";
 }) {
+  if (tone === "light") {
+    return (
+      <li className="rounded-xl border border-[color:var(--color-hairline)] bg-[color:var(--color-paper)] p-4">
+        <div className="flex items-center gap-1.5 text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--color-brand-strong)]">
+          {icon}
+          {title}
+        </div>
+        <p className="mt-1 text-sm text-[color:var(--color-ink-soft)]">{body}</p>
+      </li>
+    );
+  }
   return (
     <li className="rounded-xl border border-[color:var(--color-paper)]/15 bg-[color:var(--color-paper)]/[0.04] p-4">
       <div className="flex items-center gap-1.5 text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--color-accent)]">
