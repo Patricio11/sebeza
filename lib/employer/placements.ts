@@ -28,7 +28,7 @@ import { and, eq, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
-import { verifyOrgVerified } from "@/lib/auth/dal";
+import { verifyEmployer, verifyOrgVerified } from "@/lib/auth/dal";
 import { logAccess } from "@/lib/audit";
 import { createNotification } from "@/lib/notifications/server";
 
@@ -218,7 +218,16 @@ export interface VacancyPlacementRow {
 export async function getPlacementsForVacancy(
   vacancyId: string,
 ): Promise<VacancyPlacementRow[]> {
-  const session = await verifyOrgVerified();
+  // Use the permissive guard: this is a READ that scopes by the
+  // caller's orgId. An unverified employer with no placements gets
+  // back []; cross-org leakage is impossible because the SQL filters
+  // on placements.organizationId. The hard `verifyOrgVerified()`
+  // gate is reserved for writes (`markAsHired`, `deletePlacement`)
+  // and PII-reveal flows. Without this distinction, surfacing
+  // placements on the vacancy detail page would redirect any
+  // unverified employer away from a page they're meant to see.
+  const session = await verifyEmployer();
+  if (!session.orgId) return [];
   const db = getDb();
   const rows = await db
     .select({
