@@ -212,26 +212,28 @@ export function SeekerSignUpForm({ professions }: Props = {}) {
             hint={t("stepHints.name")}
             disabled={pending}
           />
-          <TextField
-            id="email"
-            label={tCommon("email")}
-            value={state.email}
-            onChange={(e) => setState({ ...state, email: e.target.value })}
-            type="email"
-            autoComplete="email"
-            required
-            disabled={pending}
-          />
-          <TextField
-            id="phone"
-            label={tCommon("phone")}
-            value={state.phone}
-            onChange={(e) => setState({ ...state, phone: e.target.value })}
-            type="tel"
-            autoComplete="tel"
-            placeholder="+27 …"
-            disabled={pending}
-          />
+          <div className="grid gap-5 md:grid-cols-2">
+            <TextField
+              id="email"
+              label={tCommon("email")}
+              value={state.email}
+              onChange={(e) => setState({ ...state, email: e.target.value })}
+              type="email"
+              autoComplete="email"
+              required
+              disabled={pending}
+            />
+            <TextField
+              id="phone"
+              label={tCommon("phone")}
+              value={state.phone}
+              onChange={(e) => setState({ ...state, phone: e.target.value })}
+              type="tel"
+              autoComplete="tel"
+              placeholder="+27 …"
+              disabled={pending}
+            />
+          </div>
           <TextField
             id="nationalId"
             label="South African ID number (or passport)"
