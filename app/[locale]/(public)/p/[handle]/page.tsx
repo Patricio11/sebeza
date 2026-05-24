@@ -512,7 +512,7 @@ async function ProfileBody({
 
           <GatedSection t={t} isOwner={isOwner} />
 
-          <ProfileFooter handle={profile.handle} t={t} />
+          <ProfileFooter handle={profile.handle} t={t} isOwner={isOwner} />
         </div>
 
         {/* Sticky right rail  at-a-glance stats and recent activity teaser */}
@@ -1090,13 +1090,19 @@ function GatedItem({
 function ProfileFooter({
   handle,
   t,
+  isOwner,
 }: {
   handle: string;
   t: Awaited<ReturnType<typeof getTranslations<"profile">>>;
+  isOwner: boolean;
 }) {
   return (
     <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-dashed border-[color:var(--color-hairline)] pt-5 text-xs text-[color:var(--color-ink-soft)]">
-      <ReportProfileButton handle={handle} label={t("report")} />
+      {isOwner ? (
+        <span />
+      ) : (
+        <ReportProfileButton handle={handle} label={t("report")} />
+      )}
       <span className="uppercase tracking-[0.18em]">
         Every reveal on this profile is audit-logged.
       </span>
