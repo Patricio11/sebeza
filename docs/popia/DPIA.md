@@ -119,6 +119,32 @@ covered by this DPIA:
 - **Residual risk**: low at pre-launch traffic. Mandatory re-assessment
   before public launch and at every phase boundary thereafter.
 
+### R9  Legal framing of nationality analytics is engineering-team reading, not counsel opinion
+- **Risk**: Phase 9.7 (nationality analytics & local-hiring intelligence)
+  ships copy on the employer self-view (9.7.5) and the `gov` per-employer
+  lookup (9.7.6) that refers to **Employment Equity Act 55/1998 §1**
+  (designated-group qualification) and **Employment Services Act 4/2014
+  §8** (reasonable-efforts to hire locally). The engineering team's
+  reading of those statutes is sturdy enough to *build* against, but
+  the *exact wording* surfaced to users  and any framing in pitch
+  decks or PAIA materials  carries legal weight that must be reviewed
+  by qualified labour-law counsel before public exposure.
+- **Mitigation (in code)**:
+  - 9.7.6 ships behind `feature_flag_employer_mix_lookup`, default OFF;
+    activation paired with a real Department of Employment & Labour
+    partnership workflow (which is also when purpose limitation and
+    retention windows become concrete).
+  - 9.7.5 (employer self-view) engine + UI may build; the copy itself
+    is held until counsel sign-off.
+  - 9.7.3 / 9.7.4 (market views) can ship without waiting  they carry
+    no per-employer surface and no legal-claim copy.
+- **Mitigation (process)**: counsel review of the EEA §1 / ESA §8
+  framing logged here. Status tracked alongside Phase 9.7 sign-off;
+  the COMPLETE doc records the reviewer + date.
+- **Residual risk**: low while the per-employer lookup stays dormant
+  and the market-view copy avoids legal-mandate claims. Re-assess
+  the moment 9.7.5 copy ships or the 9.7.6 flag flips on.
+
 ## 4. Sign-off
 
 To be signed by the Information Officer once designated. Until then,
