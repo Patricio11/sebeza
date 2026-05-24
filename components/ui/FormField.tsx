@@ -132,6 +132,31 @@ export function SelectField({
   onChange,
 }: SelectProps) {
   const { options, placeholder } = extractOptions(children);
+  // Only synthesize an onChange wrapper when the caller passed one.
+  // SelectField is a Server Component; passing a function literal to
+  // <CustomSelect> (a Client Component) crashes the RSC renderer
+  // ("Event handlers cannot be passed to Client Component props").
+  // Server-side callers that just want a read-only / form-submit
+  // <select> (e.g. /employer/organisation) pass no onChange  the
+  // CustomSelect renders without an onChange and stays uncontrolled.
+  // Client-side callers (any component already inside a `"use client"`
+  // tree) pass their onChange and it threads through as before.
+  const handleChange = onChange
+    ? (nextValue: string) => {
+        // Synthesize a ChangeEvent shape so existing call-sites can write
+        // `onChange={(e) => setX((e.target as HTMLSelectElement).value)}`
+        // and have it Just Work, the same as they would with a native select.
+        const fakeTarget = {
+          value: nextValue,
+          name: typeof name === "string" ? name : "",
+          id,
+        } as unknown as HTMLSelectElement;
+        onChange({
+          target: fakeTarget,
+          currentTarget: fakeTarget,
+        } as unknown as React.ChangeEvent<HTMLSelectElement>);
+      }
+    : undefined;
   return (
     <FieldShell id={id} label={label} hint={hint} badge={badge} optional={optional}>
       <CustomSelect
@@ -141,21 +166,7 @@ export function SelectField({
           typeof defaultValue === "string" ? defaultValue : undefined
         }
         value={typeof value === "string" ? value : undefined}
-        onChange={(nextValue) => {
-          if (!onChange) return;
-          // Synthesize a ChangeEvent shape so existing call-sites can write
-          // `onChange={(e) => setX((e.target as HTMLSelectElement).value)}`
-          // and have it Just Work, the same as they would with a native select.
-          const fakeTarget = {
-            value: nextValue,
-            name: typeof name === "string" ? name : "",
-            id,
-          } as unknown as HTMLSelectElement;
-          onChange({
-            target: fakeTarget,
-            currentTarget: fakeTarget,
-          } as unknown as React.ChangeEvent<HTMLSelectElement>);
-        }}
+        onChange={handleChange}
         options={options}
         placeholder={placeholder ?? "Select…"}
         required={required}
