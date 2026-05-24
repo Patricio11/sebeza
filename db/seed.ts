@@ -79,6 +79,8 @@ async function truncate() {
       reports,
       audit_log,
       consents,
+      vacancy_invitations,
+      vacancies,
       placements,
       organization_members,
       organizations,
@@ -338,13 +340,28 @@ async function seedConsents() {
   // Phase 7.5  the two final-year BSc CS students (andile-z, lerato-n)
   // are seeded with `outcomes_research` granted, paired with the synthetic
   // cohort below so the dataset actually demos something on /insights.
+  //
+  // Phase 9.8.8  a curated subset grants `vacancy_matching` so the
+  // bulk-invite demo on /employer/vacancies/[id]/match has real
+  // candidates to invite (and the compliance assertion (b) "invite
+  // requires consent" has live rows to walk). NB: we keep most of the
+  // pool *without* this consent so the bulk-invite "soft summary"
+  // ("N invites sent · M not eligible") demos a non-zero skip count
+  // too  the audit-log only path for the per-seeker reason matters.
   const outcomesGranters = new Set(["andile-z", "lerato-n", "zinhle-m"]);
+  const vacancyGranters = new Set([
+    "andile-z",
+    "lerato-n",
+    "sipho-k",
+    "thandeka-m",
+  ]);
   await db.insert(schema.consents).values(
     mockProfiles.flatMap((p) =>
       CONSENT_PURPOSES.map((purpose) => {
         const isGranted =
           purpose === "searchability" ||
-          (purpose === "outcomes_research" && outcomesGranters.has(p.handle));
+          (purpose === "outcomes_research" && outcomesGranters.has(p.handle)) ||
+          (purpose === "vacancy_matching" && vacancyGranters.has(p.handle));
         return {
           id: id("cns", `${p.handle}-${purpose}`),
           userId: id("user", p.handle),
@@ -450,11 +467,22 @@ async function seedPhase7_5OutcomesCohort() {
   );
 
   // consents  searchability + outcomes_research granted; rest 'none'.
+  // Phase 9.8.8  cohort members 0407 also grant `vacancy_matching`
+  // (they're open-to-work post-graduation in late 2026). 0103 are
+  // already employed via the historical placements below  no
+  // invitations make sense for them. 0812 stay un-consented for the
+  // bulk-invite skip demo.
+  const vacancyInviteCohortHandles = new Set(
+    cohortHandles.slice(3, 7), // 04..07 (0-indexed 3..6)
+  );
   await db.insert(schema.consents).values(
     cohortHandles.flatMap((handle) =>
       CONSENT_PURPOSES.map((purpose) => {
         const isGranted =
-          purpose === "searchability" || purpose === "outcomes_research";
+          purpose === "searchability" ||
+          purpose === "outcomes_research" ||
+          (purpose === "vacancy_matching" &&
+            vacancyInviteCohortHandles.has(handle));
         return {
           id: id("cns", `${handle}-${purpose}`),
           userId: id("user", handle),
@@ -617,11 +645,19 @@ async function seedPhase9_7NationalityDemo() {
   );
 
   // consents  searchability granted so they appear in /search;
-  // outcomes_research not granted (not students).
+  // outcomes_research not granted (not students). Phase 9.8.8
+  // chiamaka-o + kemi-a also grant `vacancy_matching` so the
+  // bulk-invite demo can include foreign-national candidates
+  // structurally proving §CRITICAL "highlight, not gate" (compliance
+  // check (c)).
+  const foreignVacancyGranters = new Set(["chiamaka-o", "kemi-a"]);
   await db.insert(schema.consents).values(
     foreignProfiles.flatMap((p) =>
       CONSENT_PURPOSES.map((purpose) => {
-        const isGranted = purpose === "searchability";
+        const isGranted =
+          purpose === "searchability" ||
+          (purpose === "vacancy_matching" &&
+            foreignVacancyGranters.has(p.handle));
         return {
           id: id("cns", `${p.handle}-${purpose}`),
           userId: id("user", p.handle),
@@ -685,6 +721,335 @@ async function seedPhase9_7NationalityDemo() {
   );
 }
 
+/**
+ * Phase 9.8.8  vacancies + invitation pipeline + retroactively-
+ * linked placements. Lands real (suppressed) rows on:
+ *
+ *   /employer/vacancies                 list + decline-reason card
+ *   /employer/vacancies/[id]            pipeline panel + placements panel
+ *   /employer/vacancies/[id]/match      bulk-invite candidate list
+ *   /dashboard/invitations              seeker inbox (per recipient)
+ *   /gov/shortage#why-roles-go-unfilled cross-market decline aggregate
+ *   /api/admin/outcomes-compliance      every 9.8.8 assertion has rows
+ *                                       to walk
+ *
+ * The fixture set:
+ *   V1  "Senior Software Engineer" (Gauteng, open). Invitations:
+ *        - wits-bsc-cs-2026-04        → accepted
+ *        - wits-bsc-cs-2026-05        → declined (salary_not_competitive,
+ *                                       with a 200-char note flagged
+ *                                       seekerAuthoredFreeText: true)
+ *        - chiamaka-o                 → accepted_with_notice (3 months)
+ *                                       (foreign-national  proves the
+ *                                       "highlight, not gate" rule by
+ *                                       construction)
+ *   V2  "Backend Developer" (Western Cape, open). Invitations:
+ *        - wits-bsc-cs-2026-06        → still invited (pending)
+ *        - wits-bsc-cs-2026-07        → expired (backdated expires_at)
+ *   V3  "Graduate Software Developer Programme" (Gauteng, filled)
+ *        synthetic vacancy whose only purpose is to retroactively
+ *        link the three pre-existing BSc CS cohort placements
+ *        (01, 02, 03) so the vacancyplacement loop has real
+ *        history immediately. No invitations on this one.
+ *
+ * Audit-log rows mirror what the production action handlers would
+ * write (vacancy.create, vacancy.invite, vacancy.response with the
+ * variant in meta.responseKind, vacancy.invite.expire for the
+ * cron'd row).
+ */
+async function seedPhase9_8Vacancies() {
+  console.log("📝 Phase 9.8.8  vacancies + invitations + linked placements…");
+  const orgId = id("org", "discovery-bank");
+  const recruiterUserId = id("user", "naledi-k");
+  const now = Date.now();
+  const day = 24 * 60 * 60 * 1000;
+
+  const v1 = id("vac", "senior-software-engineer");
+  const v2 = id("vac", "backend-developer");
+  const v3 = id("vac", "grad-sw-dev-programme");
+
+  await db.insert(schema.vacancies).values([
+    {
+      id: v1,
+      organizationId: orgId,
+      createdByUserId: recruiterUserId,
+      title: "Senior Software Engineer",
+      professionSlug: "software-developer",
+      provinceSlug: "gauteng",
+      citySlug: null,
+      skillSlugs: ["typescript", "postgres"],
+      seniority: "Senior",
+      salaryBand: "R 720k900k",
+      description:
+        "Senior individual contributor. You'll own a slice of the platform end-to-end. SQL fluency + production TypeScript expected. Private to Discovery Bank.",
+      documentsRequired: [],
+      status: "open" as const,
+      inviteExpiryDays: 14,
+      createdAt: new Date(now - 10 * day),
+    },
+    {
+      id: v2,
+      organizationId: orgId,
+      createdByUserId: recruiterUserId,
+      title: "Backend Developer",
+      professionSlug: "software-developer",
+      provinceSlug: "western-cape",
+      citySlug: null,
+      skillSlugs: ["typescript", "postgres"],
+      seniority: "Intermediate",
+      salaryBand: "R 480k600k",
+      description: "Backend role on the payments platform. Cape Town team.",
+      documentsRequired: [],
+      status: "open" as const,
+      inviteExpiryDays: 7,
+      createdAt: new Date(now - 14 * day),
+    },
+    {
+      id: v3,
+      organizationId: orgId,
+      createdByUserId: recruiterUserId,
+      title: "Graduate Software Developer Programme",
+      professionSlug: "software-developer",
+      provinceSlug: "gauteng",
+      citySlug: null,
+      skillSlugs: [],
+      seniority: "Junior",
+      salaryBand: "R 300k360k",
+      description:
+        "12-month graduate rotation through the platform team. Open to recent BSc CS / IT grads.",
+      documentsRequired: [],
+      status: "filled" as const,
+      inviteExpiryDays: 14,
+      createdAt: new Date(now - 60 * day),
+      closedAt: new Date(now - 7 * day),
+    },
+  ]);
+
+  // Retroactively link the three BSc CS cohort placements (01, 02,
+  // 03) to V3  closes the vacancyplacement loop with real
+  // history. The placements themselves were seeded earlier; we
+  // patch the vacancy_id column here.
+  await db.execute(sql`
+    UPDATE placements
+    SET vacancy_id = ${v3}
+    WHERE id IN (
+      ${id("plc", "wits-bsc-cs-2026-01")},
+      ${id("plc", "wits-bsc-cs-2026-02")},
+      ${id("plc", "wits-bsc-cs-2026-03")}
+    )
+  `);
+
+  // Invitations  one of each lifecycle state across V1 + V2.
+  const inv1Accepted = id("inv", "v1-cohort-04");
+  const inv1Declined = id("inv", "v1-cohort-05");
+  const inv1WithNotice = id("inv", "v1-chiamaka");
+  const inv2Invited = id("inv", "v2-cohort-06");
+  const inv2Expired = id("inv", "v2-cohort-07");
+
+  await db.insert(schema.vacancyInvitations).values([
+    // V1  accepted (5 days ago)
+    {
+      id: inv1Accepted,
+      vacancyId: v1,
+      profileId: id("prof", "wits-bsc-cs-2026-04"),
+      invitedByUserId: recruiterUserId,
+      invitedAt: new Date(now - 7 * day),
+      expiresAt: new Date(now + 7 * day),
+      state: "accepted" as const,
+      respondedAt: new Date(now - 5 * day),
+    },
+    // V1  declined with reason + note (3 days ago)
+    {
+      id: inv1Declined,
+      vacancyId: v1,
+      profileId: id("prof", "wits-bsc-cs-2026-05"),
+      invitedByUserId: recruiterUserId,
+      invitedAt: new Date(now - 7 * day),
+      expiresAt: new Date(now + 7 * day),
+      state: "declined" as const,
+      respondedAt: new Date(now - 3 * day),
+      declineReason: "salary_not_competitive" as const,
+      declineNote:
+        "Comparing to a competing offer; band needs to move ~15 % for me to seriously consider.",
+    },
+    // V1  accepted with 3-month notice (foreign-national  highlight-not-gate)
+    {
+      id: inv1WithNotice,
+      vacancyId: v1,
+      profileId: id("prof", "chiamaka-o"),
+      invitedByUserId: recruiterUserId,
+      invitedAt: new Date(now - 7 * day),
+      expiresAt: new Date(now + 7 * day),
+      state: "accepted_with_notice" as const,
+      respondedAt: new Date(now - 2 * day),
+      noticePeriodMonths: 3,
+    },
+    // V2  still invited
+    {
+      id: inv2Invited,
+      vacancyId: v2,
+      profileId: id("prof", "wits-bsc-cs-2026-06"),
+      invitedByUserId: recruiterUserId,
+      invitedAt: new Date(now - 2 * day),
+      expiresAt: new Date(now + 5 * day),
+      state: "invited" as const,
+    },
+    // V2  expired (backdated expires_at; cron would have flipped it)
+    {
+      id: inv2Expired,
+      vacancyId: v2,
+      profileId: id("prof", "wits-bsc-cs-2026-07"),
+      invitedByUserId: recruiterUserId,
+      invitedAt: new Date(now - 14 * day),
+      expiresAt: new Date(now - 7 * day),
+      state: "expired" as const,
+      respondedAt: new Date(now - 7 * day),
+    },
+  ]);
+
+  // Audit log  one row per significant state change, mirroring what
+  // the production action handlers + the cron write. The
+  // assertDeclineNoteFlaggedPII compliance check walks these rows.
+  await db.insert(schema.auditLog).values([
+    {
+      id: id("aud", "v1-create"),
+      kind: "vacancy.create",
+      actor: recruiterUserId,
+      subject: v1,
+      meta: {
+        orgId,
+        title: "Senior Software Engineer",
+        profession: "software-developer",
+        province: "gauteng",
+      },
+      at: new Date(now - 10 * day),
+    },
+    {
+      id: id("aud", "v2-create"),
+      kind: "vacancy.create",
+      actor: recruiterUserId,
+      subject: v2,
+      meta: {
+        orgId,
+        title: "Backend Developer",
+        profession: "software-developer",
+        province: "western-cape",
+      },
+      at: new Date(now - 14 * day),
+    },
+    // Invitations + responses
+    {
+      id: id("aud", inv1Accepted + "-invite"),
+      kind: "vacancy.invite",
+      actor: recruiterUserId,
+      subject: inv1Accepted,
+      meta: {
+        orgId,
+        vacancyId: v1,
+        profileId: id("prof", "wits-bsc-cs-2026-04"),
+      },
+      at: new Date(now - 7 * day),
+    },
+    {
+      id: id("aud", inv1Accepted + "-response"),
+      kind: "vacancy.response",
+      actor: id("user", "wits-bsc-cs-2026-04"),
+      subject: inv1Accepted,
+      meta: {
+        responseKind: "accept",
+        vacancyId: v1,
+        orgId,
+      },
+      at: new Date(now - 5 * day),
+    },
+    {
+      id: id("aud", inv1Declined + "-invite"),
+      kind: "vacancy.invite",
+      actor: recruiterUserId,
+      subject: inv1Declined,
+      meta: {
+        orgId,
+        vacancyId: v1,
+        profileId: id("prof", "wits-bsc-cs-2026-05"),
+      },
+      at: new Date(now - 7 * day),
+    },
+    {
+      id: id("aud", inv1Declined + "-response"),
+      kind: "vacancy.response",
+      actor: id("user", "wits-bsc-cs-2026-05"),
+      subject: inv1Declined,
+      meta: {
+        responseKind: "decline",
+        vacancyId: v1,
+        orgId,
+        declineReason: "salary_not_competitive",
+        declineNote:
+          "Comparing to a competing offer; band needs to move ~15 % for me to seriously consider.",
+        // 9.8.8 (f) contract: PII flag on every decline-note row.
+        seekerAuthoredFreeText: true,
+      },
+      at: new Date(now - 3 * day),
+    },
+    {
+      id: id("aud", inv1WithNotice + "-invite"),
+      kind: "vacancy.invite",
+      actor: recruiterUserId,
+      subject: inv1WithNotice,
+      meta: {
+        orgId,
+        vacancyId: v1,
+        profileId: id("prof", "chiamaka-o"),
+      },
+      at: new Date(now - 7 * day),
+    },
+    {
+      id: id("aud", inv1WithNotice + "-response"),
+      kind: "vacancy.response",
+      actor: id("user", "chiamaka-o"),
+      subject: inv1WithNotice,
+      meta: {
+        responseKind: "accept_with_notice",
+        vacancyId: v1,
+        orgId,
+      },
+      at: new Date(now - 2 * day),
+    },
+    {
+      id: id("aud", inv2Invited + "-invite"),
+      kind: "vacancy.invite",
+      actor: recruiterUserId,
+      subject: inv2Invited,
+      meta: {
+        orgId,
+        vacancyId: v2,
+        profileId: id("prof", "wits-bsc-cs-2026-06"),
+      },
+      at: new Date(now - 2 * day),
+    },
+    {
+      id: id("aud", inv2Expired + "-invite"),
+      kind: "vacancy.invite",
+      actor: recruiterUserId,
+      subject: inv2Expired,
+      meta: {
+        orgId,
+        vacancyId: v2,
+        profileId: id("prof", "wits-bsc-cs-2026-07"),
+      },
+      at: new Date(now - 14 * day),
+    },
+    {
+      id: id("aud", inv2Expired + "-expire"),
+      kind: "vacancy.invite.expire",
+      actor: "cron:vacancy-invite-expiry",
+      subject: inv2Expired,
+      meta: { orgId, vacancyId: v2 },
+      at: new Date(now - 7 * day),
+    },
+  ]);
+}
+
 async function seedPhase7Reports() {
   console.log("🚩 Phase 7 sample reports (open + closed  for /admin/moderation)…");
   await db.insert(schema.reports).values([
@@ -732,6 +1097,13 @@ async function main() {
   // cohort being present (uses one cohort handle as the placeholder
   // profile for the second foreign-fill placement at Discovery).
   await seedPhase9_7NationalityDemo();
+  // Phase 9.8.8  vacancies + invitations + retroactively-linked
+  // placements. Runs LAST because it needs the BSc CS cohort
+  // (recipients of most invitations), the foreign-national profiles
+  // (chiamaka-o invitation), AND the consent rows from seedConsents
+  // / seedPhase7_5OutcomesCohort / seedPhase9_7NationalityDemo (the
+  // vacancy_matching consent gate the invite action enforces).
+  await seedPhase9_8Vacancies();
 
   const ms = Date.now() - started;
   console.log(

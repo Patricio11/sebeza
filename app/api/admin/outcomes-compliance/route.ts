@@ -22,6 +22,13 @@ import {
   assertWorkAvailabilityPubliclySafe,
   assertNoNationalityCellBelowFloor,
   assertNoRawCountryInAnalytics,
+  // Phase 9.8.8  vacancy / invitation compliance
+  assertNoVacancyFieldOnPublicSurfaces,
+  assertInviteRequiresConsent,
+  assertNoNationalityInviteGate,
+  assertNoDeclineReasonCellBelowFloor,
+  assertAcceptWithNoticeNotInUnfilled,
+  assertDeclineNoteFlaggedPII,
 } from "@/lib/analytics/outcomes-compliance";
 
 export async function GET() {
@@ -33,6 +40,13 @@ export async function GET() {
     await assertWorkAvailabilityPubliclySafe(),
     await assertNoNationalityCellBelowFloor(),
     await assertNoRawCountryInAnalytics(),
+    // Phase 9.8.8
+    await assertNoVacancyFieldOnPublicSurfaces(),
+    await assertInviteRequiresConsent(),
+    await assertNoNationalityInviteGate(),
+    await assertNoDeclineReasonCellBelowFloor(),
+    await assertAcceptWithNoticeNotInUnfilled(),
+    await assertDeclineNoteFlaggedPII(),
   ];
   const ok = checks.every((c) => c.ok);
   return NextResponse.json(

@@ -516,7 +516,7 @@ that registry  we win on **data quality, usability, and analytics.** The system 
 
 ---
 
-## 🧷 PHASE 9.8: VACANCIES & DEMAND-DRIVEN MATCHING (in flight  plan approved 2026-05-24)
+## 🧷 PHASE 9.8: VACANCIES & DEMAND-DRIVEN MATCHING ✅ (shipped 2026-05-24)
 *Side-phase between Phase 9.7 and Phase 10. Mirrors the 6.5 / 7.5 / 9.7 pattern (capability enrichment on shipped infra; must not muddy the public-launch phase). Companion docs: `docs/PHASE_9_8_PLAN.md` (open questions Q1Q4 + senior-review push-back items D1D8 all closed same-day) + `docs/popia/DPIA.md`.*
 
 **Strategic frame:** turn Sebenza from ad-hoc search-and-contact into a structured demand-driven matching system. **Not a job board** (the comparison table at the top of the plan doc is the whole product call): vacancies are *org-private*; employers reverse-match against the talent base and *invite specific people*; seekers accept / decline / decline-with-reason. The decline-reason data is the labour-market intelligence no job board has  it tells government *why* roles go unfilled (salary-driven gap vs supply-driven gap are different policy signals), and it's the data that unblocks 9.7.3's "Local shortage" classifications on real (not seeded) data.
