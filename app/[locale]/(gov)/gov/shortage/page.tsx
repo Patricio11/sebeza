@@ -36,6 +36,8 @@ import { verifyGov } from "@/lib/auth/dal";
 import { justificationIndexQuery } from "@/db/queries/justification";
 import { PROVINCES } from "@/lib/mock/taxonomy";
 import { JustificationTable } from "@/components/feature/gov/JustificationTable";
+import { DeclineReasonsCard } from "@/components/feature/analytics/DeclineReasonsCard";
+import { declineReasonAggregateQuery } from "@/db/queries/decline-reasons";
 import { Download } from "lucide-react";
 
 export const revalidate = 300;
@@ -57,9 +59,15 @@ export default async function GovShortagePage({
     (p) => p.label === provinceFilterParam || p.slug === provinceFilterParam,
   );
 
-  const result = await justificationIndexQuery({
-    province: provinceFilter?.label,
-  });
+  const [result, declineData] = await Promise.all([
+    justificationIndexQuery({
+      province: provinceFilter?.label,
+    }),
+    // Phase 9.8.7  cross-market decline-reason breakdown (suppressed).
+    // Reuses the existing k-floor from outcomes_min_cohort_size (one
+    // knob across the system).
+    declineReasonAggregateQuery(),
+  ]);
 
   return (
     <DashboardShell
@@ -183,6 +191,28 @@ export default async function GovShortagePage({
           </span>
         </header>
         <JustificationTable data={result} />
+      </section>
+
+      {/* Phase 9.8.7  Decline-reason breakdown. Read together with
+          the Justification Index above: a (profession × province)
+          local-shortage cell + the same cell showing 60 % declines
+          for "salary not competitive" = the gap is real but
+          salary-driven. The card carries its own cross-reference
+          footer pointing back here for the loop. */}
+      <section className="mt-8">
+        <header className="mb-3 flex items-baseline justify-between gap-3 border-b-2 border-[color:var(--color-ink)] pb-2">
+          <h2 className="font-display text-2xl">Why roles go unfilled</h2>
+          <span className="text-xs text-[color:var(--color-ink-soft)]">
+            {declineData.cells.length > 0
+              ? `${declineData.cells.length} reason-cells · ${declineData.suppressed} suppressed (k = ${declineData.k})`
+              : `0 reason-cells · ${declineData.suppressed} suppressed (k = ${declineData.k})`}
+          </span>
+        </header>
+        <DeclineReasonsCard
+          data={declineData}
+          locale={locale}
+          exportHref="/api/gov/decline-reasons/export"
+        />
       </section>
     </DashboardShell>
   );

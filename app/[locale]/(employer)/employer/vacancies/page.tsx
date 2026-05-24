@@ -25,6 +25,8 @@ import {
   canSeeSalary,
 } from "@/lib/employer/vacancies-types";
 import { VacancyStatusChip } from "@/components/feature/employer/vacancies/VacancyStatusChip";
+import { DeclineReasonsCard } from "@/components/feature/analytics/DeclineReasonsCard";
+import { declineReasonAggregateQuery } from "@/db/queries/decline-reasons";
 import { Plus, MapPin, Briefcase, Calendar } from "lucide-react";
 import { PROVINCES, PROFESSIONS } from "@/lib/mock/taxonomy";
 
@@ -45,6 +47,14 @@ export default async function VacanciesListPage({
   ]);
   const canEdit = canEditVacancies(role);
   const showSalary = canSeeSalary(role);
+
+  // Phase 9.8.7  employer-private decline-reason breakdown across all
+  // of this org's vacancies. Scoped by orgId so it's the recruiter's
+  // own data (no suppression  they're allowed to see their full
+  // picture). Hidden entirely when there's no data to show.
+  const declineData = session.orgId
+    ? await declineReasonAggregateQuery({ orgId: session.orgId })
+    : null;
 
   return (
     <DashboardShell
@@ -86,6 +96,17 @@ export default async function VacanciesListPage({
             </li>
           ))}
         </ul>
+      )}
+
+      {/* Phase 9.8.7  decline-reason breakdown across all your
+          vacancies. Loud signal: a (profession × province) cell where
+          most declines cite "salary not competitive" tells you to
+          re-think the band before you re-invite. Hidden when there's
+          nothing to show. */}
+      {declineData && declineData.cells.length > 0 && (
+        <div className="mt-10">
+          <DeclineReasonsCard data={declineData} locale={locale} />
+        </div>
       )}
     </DashboardShell>
   );

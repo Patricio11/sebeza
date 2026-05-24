@@ -453,21 +453,51 @@ Server Action.
       migration required**  the FK already shipped in `0015`; this task is read/action logic +
       one UI panel.
 
-### Task 9.8.7: "Why roles go unfilled" analytics (the policy payoff)
-- [ ] Aggregate decline-reason distribution by profession × province (e.g. *"Welders · EC: 60% declined —
-      salary not competitive"*). Surfaced on `/insights` (employer-private aggregate of their own vacancies)
-      and `/gov` (cross-market, **k=10 + complementary suppression reused from `lib/analytics/suppress.ts`**).
-- [ ] Freshness-weighted; CSV export reuses the hardened path (`lib/analytics/csv.ts`); suppression applies
-      to exports identically.
-- [ ] Feeds the existing skills-gap narrative: a gap that's *salary-driven* is a different policy signal
-      than one that's *supply-driven*. This is genuinely new intelligence.
-- [ ] **Cross-references 9.7.3's classifier**: a (profession × province) cell where 60% of declines cite
-      `salary_not_competitive` reinforces (not contradicts) the 9.7 Justification Index — the gap is real,
-      it's just *salary-driven* rather than supply-driven. The COMPLETE doc will spell out how to read the
-      two together.
-- [ ] **Mobile-first:** the decline-reason breakdown renders as horizontal-bar list (one row per reason)
-      so it reads cleanly stacked on phones. No charting library; reuse the same bar-pattern idiom from
-      the 9.7 nationality cards.
+### Task 9.8.7: "Why roles go unfilled" analytics (the policy payoff) ✅ 2026-05-24
+- [x] New aggregate query `declineReasonAggregateQuery({ orgId? })` in
+      `db/queries/decline-reasons.ts`. WHERE `state='declined' AND responded_at IS NOT NULL`  the
+      9.8.5 / D1 rule that `accepted_with_notice` is a yes (never a decline) is baked into the
+      query, not policed downstream (compliance check (e) in 9.8.8 will assert from a fixture).
+      Aggregates by (profession_slug × province_slug × reason) and emits both `count` and a
+      freshness-weighted average. **Two callers, one function**: pass `orgId` for the employer-
+      private view; omit it for the cross-market suppressed view.
+- [x] **Surfaced on `/employer/vacancies`** (employer-private, org-scoped, no suppression  the
+      recruiter sees their own org's full decline picture) and **on `/gov/shortage`** (cross-market,
+      suppressed) under a new *Why roles go unfilled* section right below the Justification Index.
+      Two surfaces; one component; the card reads its own `data.orgScoped` flag to switch wording
+      ("Your org's vacancies" vs "Cross-market"). Plan said `/insights` for the employer side; we
+      put it on `/employer/vacancies` instead because `/insights` is the public ISR-cached
+      cross-market page and an employer-scoped card there would either leak (if shown to all) or
+      silently miss employers landing on `/insights` from a logged-out session. `/employer/vacancies`
+      is the natural recruiter surface and the audit log records org context cleanly.
+- [x] **k=10 + complementary suppression** wired via the existing `suppress()` engine from
+      `lib/analytics/suppress.ts` with two complementary axes: (a) within (profession_slug,
+      province_slug) over the reason axis  prevents reconstructing one surviving reason from row
+      totals; (b) within (profession_slug, reason) over the province axis  prevents same trick
+      across the province dimension. k comes from `outcomes_min_cohort_size` (the single platform
+      knob, same as outcomes + nationality).
+- [x] **Freshness-weighted** via `sebenza_freshness_confidence(responded_at)`  the same SQL
+      function the Phase 4 ranking + 9.7 nationality cells use (30 d = 1.00, 90 d = 0.60, else
+      0.25). Recent declines dominate; two-year-old declines are still counted but down-weighted
+      so the market signal stays *current*. Footer prints "freshness-weighted" on both views.
+- [x] **CSV export** at `/api/gov/decline-reasons/export` reuses `csvFromRows()` + `csvDisposition()`
+      from `lib/analytics/csv.ts` (UTF-8 BOM + RFC 4180 + CRLF + OWASP injection guard). The query
+      function already returns suppressed cells  there's no way to bypass the k floor from this
+      route. Audit-logged as `analytics.export` with `surface`, `rowCount`, `k`, `suppressed` in
+      meta for the 9.7.7 oversight log. `gov` / `admin` only.
+- [x] **Cross-references 9.7.3's Justification Index** in the card's brand-tinted footer: *"A
+      (profession × province) cell where most declines cite Salary not competitive reinforces a
+      local shortage  the gap is real, it's just salary-driven rather than supply-driven."* The
+      footer links back to `/gov/shortage` so the loop reads cleanly in either direction. COMPLETE
+      doc will spell out the joint reading discipline.
+- [x] **Mobile-first**: horizontal-bar list, one row per reason inside each (profession × province)
+      cell  3-column grid wraps cleanly at 360 px wide. No charting library  pure CSS bars with
+      width-% via inline style, same idiom as the 9.7 nationality cards. Each cell carries a
+      headline like *"Welders · EC  60 % salary not competitive"* so the punchline is visible
+      without scanning the bars.
+- [x] Verified: `npm test` 22/22 green · `npm run typecheck` clean · `npm run build` clean (route
+      `/api/gov/decline-reasons/export` registered). No new migration  the query reads existing
+      `vacancy_invitations` columns shipped in `0017`.
 
 ### Task 9.8.8: Wiring, verification, doc convention
 - [ ] All new strings in `messages/en.json`; `zu/xh/af` deepMerge fallback (full translation Phase 10;
