@@ -61,7 +61,12 @@ export type SettingKey =
   | "lmi_foreign_fill_floor"
   // Reused by 9.7.6 (per-employer governed lookup)  one floor,
   // not two diverging knobs.
-  | "employer_mix_min_placements";
+  | "employer_mix_min_placements"
+  // Phase 9.7.6  per-employer governed lookup gate. Default OFF;
+  // ships dormant per D3 (PHASE_9_7_PLAN.md, 2026-05-24). Activation
+  // pairs with a real Department of Employment & Labour partnership
+  // workflow  same dormant-by-default posture as KYC + SAQA.
+  | "feature_flag_employer_mix_lookup";
 
 const DEFAULTS: Record<SettingKey, unknown> = {
   freshness_band_days_fresh: 30,
@@ -80,6 +85,7 @@ const DEFAULTS: Record<SettingKey, unknown> = {
   lmi_local_supply_threshold: 0.5,
   lmi_foreign_fill_floor: 0.5,
   employer_mix_min_placements: 5,
+  feature_flag_employer_mix_lookup: false,
 };
 
 /**

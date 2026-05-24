@@ -73,6 +73,12 @@ const ROWS: SettingRow[] = [
     type: "boolean",
   },
   {
+    key: "feature_flag_employer_mix_lookup",
+    label:
+      "Gov per-employer mix lookup (9.7.6  ships dormant; activate when DEL §8 partnership lands)",
+    type: "boolean",
+  },
+  {
     key: "outcomes_min_cohort_size",
     label: "Outcomes minimum cohort size (k-anonymity floor)",
     type: "number",

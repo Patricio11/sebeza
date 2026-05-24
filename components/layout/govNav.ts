@@ -6,6 +6,7 @@ import {
   UserCog,
   Scale,
   Sprout,
+  FileSearch,
 } from "lucide-react";
 import type { DashboardNavItem } from "./DashboardShell";
 
@@ -28,6 +29,15 @@ export const GOV_NAV: DashboardNavItem[] = [
     label: "Local-hiring opportunity",
     href: "/gov/opportunity",
     icon: Sprout,
+  },
+  // Phase 9.7.6  ships dormant; the page itself renders an informative
+  // notice when the feature flag is off, so the nav entry is honest about
+  // platform capability without hiding it as "secret feature."
+  {
+    key: "employer-lookup",
+    label: "Per-employer lookup",
+    href: "/gov/employer-lookup",
+    icon: FileSearch,
   },
   {
     key: "municipalities",

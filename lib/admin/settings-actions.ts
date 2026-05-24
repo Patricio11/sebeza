@@ -65,6 +65,9 @@ const KEY_SCHEMAS = {
   //   never lower than 3  a 2-placement cell with a 50/50 split
   //   re-identifies via the platform's own audit log.
   employer_mix_min_placements: z.number().int().min(3).max(200),
+  // Phase 9.7.6  dormant-by-default gate on the per-employer
+  // governed lookup. Engine + UI ship; flag enables the form.
+  feature_flag_employer_mix_lookup: z.boolean(),
 } as const satisfies Record<SettingKey, z.ZodTypeAny>;
 
 const updateSchema = z.object({
@@ -84,6 +87,7 @@ const updateSchema = z.object({
     "lmi_local_supply_threshold",
     "lmi_foreign_fill_floor",
     "employer_mix_min_placements",
+    "feature_flag_employer_mix_lookup",
   ] as const),
   value: z.unknown(),
 });

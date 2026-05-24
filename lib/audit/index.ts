@@ -92,10 +92,18 @@ export type AuditKind =
   // Phase 9.7.5  employer self-view (Your hiring on Sebenza).
   // Self-data read, logged for symmetry  the employer sees their own
   // org's placement nationality mix; logging it means every analytics
-  // surface, even self-views, leaves a trail. Pairs with the eventual
-  // gov.employer_mix.lookup audit kind (9.7.6) so the 9.7.7 oversight
+  // surface, even self-views, leaves a trail. Pairs with the gov
+  // gov.employer_mix.lookup audit kind below so the 9.7.7 oversight
   // log can correlate self-views with regulator inquiries.
-  | "employer.own_mix.view";
+  | "employer.own_mix.view"
+  // Phase 9.7.6  per-employer governed lookup. Highest-sensitivity
+  // surface of Phase 9.7. Ships dormant behind
+  // `feature_flag_employer_mix_lookup`. EVERY call writes this row
+  // (lookup found-or-not, above-or-below floor)  the audit trail
+  // is the trust mechanism that makes the surface defensible. Meta
+  // carries `reason`, `inputMethod`, `placementCount`, `aboveFloor`,
+  // `floor`, `orgFound` for the 9.7.7 oversight log.
+  | "gov.employer_mix.lookup";
 
 export interface AuditEvent {
   kind: AuditKind;

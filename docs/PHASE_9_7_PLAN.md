@@ -316,28 +316,41 @@ framing. Until then, the card renders the framing for engineering testing but th
 the legal-claim caveat explicit. Once counsel signs off, remove the `<DraftBanner />` call in
 `EmployerHiringMixCard.tsx` and tighten any wording counsel changes.
 
-### Task 9.7.6: Governed per-employer compliance lookup (`gov` only — highest sensitivity, ships dormant)
-The legitimate version of "how many nationals/non-nationals has *this* company hired" — built so it can't
-become surveillance or a leak of an individual record. **Ships behind `feature_flag_employer_mix_lookup`,
-default OFF**, per **D3**.
-
-- [ ] **Access:** `verifyGov()` only AND `feature_flag_employer_mix_lookup === true`. Not on any
-      employer or public surface.
-- [ ] **Input is exact-match only.** The lookup takes *one* full org name OR CIPC registration number,
-      string-equality match. **No partial-match autocomplete, no faceted browse, no list endpoint.**
-      Otherwise "no leaderboard" becomes "no leaderboard except the org-picker." (Enforced at the
-      query layer — there is no SQL that orders or pages employers by nationality mix.)
-- [ ] **Small-numbers guard (hard):** show the citizen/foreign-national split for an employer **only if**
-      their `employer_confirmed` placement count ≥ `employer_mix_min_placements` (default 5). Below it:
-      "Too few platform-confirmed placements to break down" — never the raw split. *(Rationale: at
-      employer granularity, cells are tiny; a 2-hire company with 1 foreign national + audited dossier
-      reveals can re-identify the individual.)*
-- [ ] **Purpose-bound:** the lookup requires selecting a reason (ESA §8 compliance check / incentive
-      verification / mandated audit); reason + actor + employer + timestamp written to the audit log as
-      `gov.employer_mix.lookup`. No reason → no result.
-- [ ] Framing per **D2**: "ESA §8 evidence aid for DEL inquiries." Not "audit a company's foreigner
-      ratio."
-- [ ] Freshness note shown alongside (placements age).
+### Task 9.7.6: Governed per-employer compliance lookup (`gov` only) ✅ 2026-05-24 (ships dormant)
+- [x] **Access:** double-gated. `verifyGov()` for role + 2FA, AND `feature_flag_employer_mix_lookup ===
+      true` for the dormant flag. The Server Action re-checks the flag (defence in depth), so the page
+      can never accidentally bypass policy if a future refactor forgets a check.
+- [x] **Input is exact-match only.** Form has two fields  org name OR CIPC registration number  and
+      submitting requires EXACTLY one filled. The other is disabled while one is being typed (UX hint
+      that they are mutually exclusive). Name match is `ILIKE` with no wildcards (case-folded equality);
+      registration number is strict `=`. No autocomplete, no faceted browse, no list endpoint at any
+      layer  the query layer literally has no `ORDER BY` or `LIMIT` that pages employers by mix.
+- [x] **Small-numbers guard (hard):** when the org is found, the placement count is fetched. If count
+      `< employer_mix_min_placements` (default 5), the result returns `aboveFloor: false`  the UI
+      surfaces the *count* but **never** the SA-citizen / foreign-national split. The audit log still
+      records the raw count for the regulator-of-the-regulator (visible only via admin audit-log + the
+      9.7.7 oversight log).
+- [x] **Purpose-bound:** reason enum (`esa_s8_compliance` / `incentive_verification` / `mandated_audit`
+      / `other`). `other` requires a free-text note ≥ 5 chars. Reason + actor + employer + timestamp +
+      placement count + above-floor flag + floor value all written to `gov.employer_mix.lookup` audit
+      row. No reason  no result (validated server-side; the form blocks submit too).
+- [x] ESA §8 framing per D2 baked into the page header strip ("What this surface is, and what it
+      isn't"). Counsel-review caveat (DPIA R9) printed beneath.
+- [x] Freshness note (first hire  last hire date range + employer-confirmed-only disclaimer) shown
+      alongside the above-floor split. Below-floor result is a clear amber notice explaining the
+      suppression, not a sterile "no data."
+- [x] Dormant notice when the flag is off: the page still renders (so URLs handed off after activation
+      work), with an honest "dormant by default" panel explaining the activation path and the audit-log
+      contract that fires from the first test query after the flip.
+- [x] New nav entry "Per-employer lookup" (FileSearch icon) added to `GOV_NAV` and shows regardless of
+      flag  the dormant page is informative, not a broken link. Surface the platform's capability
+      transparently rather than hide it as a "secret feature."
+- [x] Files: `lib/gov/employer-lookup.ts` (Server Action), `lib/gov/employer-lookup-types.ts` (types +
+      reason catalog), `components/feature/gov/EmployerLookupForm.tsx` (client form + result panel),
+      `app/[locale]/(gov)/gov/employer-lookup/page.tsx` (page shell + dormant notice), settings + audit
+      kind + admin toggle row, migration `0013_phase9_7_employer_mix_lookup_flag.sql` (seed false).
+- [x] Verified: `npm test` 22/22 green · `npm run typecheck` clean · `npm run build` clean · migration
+      0013 applied to Neon. Commit `<TBD>`.
 
 ### Task 9.7.7: Sensitive-query oversight log (watch the watchers)
 - [ ] An `/admin` view surfacing all `gov.employer_mix.lookup` + nationality-split export events from the
