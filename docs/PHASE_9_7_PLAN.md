@@ -176,26 +176,54 @@ carry no per-employer surface and no public-facing legal-claim copy.
 
 ## 📋 TASKS
 
-### Task 9.7.1: Reusable suppression utility (groundwork, zero behaviour change)
-- [ ] **Test fixtures first.** Write the unit tests against the *existing* inlined outcomes path
-      (known-input → known-output fixtures). Make them green against the current code.
-- [ ] Extract the 7.5.4 suppression logic into a generic `lib/analytics/suppress.ts`:
-      `suppress(rows, { dims, countKey, k })` applying the k-floor **and** complementary suppression across
-      the given dimension groups. Outcomes query refactored to call it (identical output — assert via the
-      pre-existing `outcomes-compliance` checks AND the new unit fixtures).
-- [ ] No behaviour change. Outcomes-compliance route still passes.
+### Task 9.7.1: Reusable suppression utility (groundwork, zero behaviour change) ✅ 2026-05-24
+- [x] **Test fixtures first.** Wrote 11 unit tests in `lib/analytics/suppress.test.ts` codifying the
+      contract: empty input, all-pass, all-fail, primary alone, row-axis complementary, col-axis
+      complementary, multi-survivor non-derivable, lone survivor no-suppressed-sibling, group
+      independence, no-axes-only-primary, k=10 boundary, row+col-pass independence.
+- [x] Extracted to `lib/analytics/suppress.ts`. Generic shape:
+      `suppress(rows, { countKey, k, axes })` where each axis is one complementary pass
+      (`{ groupBy: dims[], complementOver: dim }`). Pure function, no DB, no I/O.
+- [x] `outcomesQuery()` refactored to declare its two axes (row=province, col=graduation_year) and
+      call `suppress()` once. ~50 lines of dead helpers removed.
+- [x] vitest added as devDep + `npm test` / `npm run test:watch` scripts (Phase 11.4 will formalise).
+- [x] Verified: `npm test` 11/11 green · `npm run typecheck` clean · `npm run build` clean.
+      Outcomes-compliance route compiles against the refactored `outcomesQuery`. Commit `3e83485`.
 
-### Task 9.7.2: Nationality dimension on market analytics (`/gov`, `/insights`)
-- [ ] Add a `nationality_class` derivation (`sa_citizen` / `foreign_national`) — a 2-class split, **not**
-      raw country, for analytics. (Raw `nationality` stays available only on the individual profile under
-      existing redaction; analytics never needs country-level granularity and country-level cells
-      re-identify faster.)
-- [ ] Extend the existing `/gov` aggregate views (supply by province × profession, placement rate,
-      time-to-hire, status mix) with an optional citizen/foreign-national split. **All cells run through
-      `suppress()` (k=10).** Default view stays un-split; the split is a toggle.
-- [ ] Freshness-weighted via `sebenza_freshness_confidence()` like every other analytic.
-- [ ] CSV export reuses the hardened path; `suppress()` runs **before** the safeCell encoder so the
-      filter is structurally impossible to bypass via the URL.
+### Task 9.7.2: Nationality dimension on market analytics (`/gov`, `/insights`) ✅ 2026-05-24
+- [x] `nationality_class` derivation lives inline in the SQL of both query functions
+      (`CASE WHEN is_citizen THEN 'sa_citizen' ELSE 'foreign_national' END AS nationality_class`).
+      2-class only, never raw country. Raw `nationality` stays redacted on the individual profile.
+- [x] Two new query functions in `db/queries/nationality.ts`:
+      - `supplyByNationalityQuery({ province? })` → province × profession × nationality_class supply,
+        freshness-weighted, suppressed via two complementary axes
+        (row=nationality_class within (province, profession); col=province within (profession, nationality_class)).
+      - `statusMixByNationalityQuery()` → status × nationality_class count, suppressed across
+        the nationality_class axis within each status bucket.
+- [x] Both reuse `outcomes_min_cohort_size` as the analytics k-floor (one knob across the system;
+      a separate `analytics_min_cell_size` was considered, deferred until policy needs differ).
+- [x] `/gov` overview gets a status-mix card; toggle via `?split=nationality`. Default view is the
+      "use the toggle above" hint card  no surprise PII-shaped split on first load.
+      New component: `<NationalityStatusMixCard>`.
+- [x] `/gov/provinces/[slug]` gets a supply-by-profession × nationality table; same `?split=nationality`
+      toggle pattern. Province-scoped query so suppression runs against this province's cell counts.
+      New component: `<NationalitySupplyTable>`.
+- [x] **Placement rate + time-to-hire deferred**: those live in `outcomesQuery()` which is cohort-shaped
+      (programme × institution × province × graduation_year). Splitting a Wits 2024 BSc CS cohort by
+      nationality_class blanks almost every cell at k=10 with current data density. Note for 9.7.5 (or
+      later when placement volume scales).
+- [x] CSV export at `GET /api/gov/nationality-mix/export?dim=supply|status&province?=<label>`. `gov`
+      / `admin` only via `verifyGov()`; runs the suppressed query, encodes via the shared CSV helper,
+      audit-logs as `analytics.export` for the 9.7.7 oversight log. **`suppress()` runs inside the
+      query function, before any caller (including this route) sees the rows**  structurally impossible
+      to bypass by hitting the URL.
+- [x] Shared CSV helper extracted to `lib/analytics/csv.ts` (`safeCell`, `csvFromRows`, `csvDisposition`).
+      Audit-log + outcomes export routes refactored to call it  3 export routes, 1 encoder.
+- [x] Compliance assertion (a) added: `assertNoNationalityCellBelowFloor()` in
+      `lib/analytics/outcomes-compliance.ts`, wired into the admin compliance route.
+- [x] Exports surface in `/gov/exports` updated with two new cards (nationality status + supply).
+- [x] Verified: `npm test` 11/11 green · `npm run typecheck` clean · `npm run build` clean
+      (new `/api/gov/nationality-mix/export` route present in build output). Commit `<TBD>`.
 
 ### Task 9.7.3: Skills-Shortage Justification Index (the centerpiece)
 For each `profession × province` cell, combine three already-collected signals as per **D1** above.

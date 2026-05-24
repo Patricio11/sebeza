@@ -138,12 +138,53 @@ export async function assertWorkAvailabilityPubliclySafe(): Promise<AssertResult
   };
 }
 
+/**
+ * Phase 9.7.2 (a)  no nationality cell below k anywhere.
+ *
+ * Calls both market-view query functions and confirms every returned
+ * cell carries count >= k. The query functions themselves run
+ * `suppress()` so this is belt-and-braces  if it ever fires, the
+ * extraction is regressing.
+ */
+export async function assertNoNationalityCellBelowFloor(): Promise<AssertResult> {
+  const { statusMixByNationalityQuery, supplyByNationalityQuery } = await import(
+    "@/db/queries/nationality"
+  );
+  const [status, supply] = await Promise.all([
+    statusMixByNationalityQuery(),
+    supplyByNationalityQuery(),
+  ]);
+
+  const statusOffender = status.cells.find((c) => c.count < status.k);
+  if (statusOffender) {
+    return {
+      ok: false,
+      name: "no-nationality-cell-below-floor",
+      message: `LEAK: status mix returned ${statusOffender.status}/${statusOffender.nationality_class} at count ${statusOffender.count} (floor=${status.k}).`,
+    };
+  }
+  const supplyOffender = supply.cells.find((c) => c.supply < supply.k);
+  if (supplyOffender) {
+    return {
+      ok: false,
+      name: "no-nationality-cell-below-floor",
+      message: `LEAK: supply returned ${supplyOffender.province}/${supplyOffender.profession}/${supplyOffender.nationality_class} at supply ${supplyOffender.supply} (floor=${supply.k}).`,
+    };
+  }
+  return {
+    ok: true,
+    name: "no-nationality-cell-below-floor",
+    message: `Status mix: ${status.cells.length} cells, all ≥ ${status.k}. Supply: ${supply.cells.length} cells, all ≥ ${supply.k}.`,
+  };
+}
+
 export async function runAll(): Promise<void> {
   const checks = [
     await assertNoCohortBelowFloor(),
     await assertUnconsentedNeverAppears(),
     await assertSeekerReportedExcluded(),
     await assertWorkAvailabilityPubliclySafe(),
+    await assertNoNationalityCellBelowFloor(),
   ];
 
   let failed = 0;
@@ -154,6 +195,6 @@ export async function runAll(): Promise<void> {
     if (!c.ok) failed++;
   }
   if (failed > 0) {
-    throw new Error(`${failed} Phase 7.5 compliance assertion(s) failed.`);
+    throw new Error(`${failed} Sebenza compliance assertion(s) failed.`);
   }
 }

@@ -41,6 +41,16 @@ export default async function GovExportsPage({
           href="/api/admin/audit-log/export"
           desc="Per-kind + per-actor filter. Capped at 10 000 rows; bigger windows are a Phase 10 email-it job."
         />
+        <ExportCard
+          title="Nationality mix  status (national)"
+          href="/api/gov/nationality-mix/export?dim=status"
+          desc="Employment status × SA-citizen / foreign-national. 2-class only (no country-level data). Suppressed cells (count below floor) excluded."
+        />
+        <ExportCard
+          title="Nationality mix  supply (national)"
+          href="/api/gov/nationality-mix/export?dim=supply"
+          desc="Province × profession × SA-citizen / foreign-national supply. 2-class only. Suppressed at k = floor. Add ?province=Gauteng for a single-province slice."
+        />
       </ul>
     </DashboardShell>
   );

@@ -6,29 +6,41 @@ import { verifyGov } from "@/lib/auth/dal";
 import { lmiWithTrend } from "@/lib/analytics/lmi";
 import { skillsGapQuery, freshnessBreakdownQuery } from "@/db/queries/analytics";
 import { outcomesQuery } from "@/lib/analytics/outcomes";
+import { statusMixByNationalityQuery } from "@/db/queries/nationality";
 import { getSetting } from "@/lib/admin/settings";
-import { ArrowDown, ArrowUp, Minus, MapPin, Download } from "lucide-react";
+import { ArrowDown, ArrowUp, Minus, MapPin, Download, Users } from "lucide-react";
+import { NationalityStatusMixCard } from "@/components/feature/gov/NationalityStatusMixCard";
 
 export const revalidate = 300;
 
 export default async function GovOverviewPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<{ split?: string }>;
 }) {
   const { locale } = await params;
+  const { split } = await searchParams;
   setRequestLocale(locale);
   const me = await verifyGov();
+
+  const showNationalitySplit = split === "nationality";
 
   const [freshDays, ageingDays] = await Promise.all([
     getSetting<number>("freshness_band_days_fresh"),
     getSetting<number>("freshness_band_days_ageing"),
   ]);
-  const [lmi, gap, freshness, outcomes] = await Promise.all([
+  const [lmi, gap, freshness, outcomes, statusMix] = await Promise.all([
     lmiWithTrend(),
     skillsGapQuery({ top: 10 }),
     freshnessBreakdownQuery({ freshDays, ageingDays }),
     outcomesQuery(),
+    // Fetched only when the toggle is on; cheap query, fine to fetch
+    // both sides and let the conditional render gate it.
+    showNationalitySplit
+      ? statusMixByNationalityQuery()
+      : Promise.resolve(null),
   ]);
 
   const nfmt = new Intl.NumberFormat(locale);
@@ -156,6 +168,41 @@ export default async function GovOverviewPage({
           value={nfmt.format(freshness.stale)}
           hint={`${ageingDays}+ days · down-ranked`}
         />
+      </section>
+
+      {/* Nationality-split status mix (Phase 9.7.2). Off by default;
+          flip on via ?split=nationality. Aggregate-only, k-floored
+          (default k=10), freshness-weighted, audit-logged on export. */}
+      <section className="mt-12">
+        <header className="mb-3 flex items-baseline justify-between gap-3 border-b-2 border-[color:var(--color-ink)] pb-2">
+          <h2 className="font-display text-2xl">
+            <Users className="mr-2 inline size-5" aria-hidden="true" />
+            Status mix
+          </h2>
+          <Link
+            href={
+              showNationalitySplit
+                ? "/gov"
+                : "/gov?split=nationality"
+            }
+            className="text-xs uppercase tracking-[0.18em] text-[color:var(--color-brand-strong)] hover:underline"
+          >
+            {showNationalitySplit
+              ? "Hide nationality split ←"
+              : "Split by SA-citizen / foreign-national →"}
+          </Link>
+        </header>
+        {showNationalitySplit && statusMix ? (
+          <NationalityStatusMixCard data={statusMix} />
+        ) : (
+          <p className="rounded-[var(--radius-md)] border border-dashed border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-5 text-sm text-[color:var(--color-ink-soft)]">
+            The split toggle reveals an SA-citizen / foreign-national
+            breakdown per employment status. 2-class only (no country-
+            level data). Every cell suppressed at k = floor; cells below
+            the floor are shown as &ldquo;too few to break down.&rdquo;
+            Use the toggle above to view.
+          </p>
+        )}
       </section>
 
       {/* Longitudinal outcomes signpost */}
