@@ -10,6 +10,10 @@ import {
 } from "@/components/ui/FormField";
 import { Button } from "@/components/ui/Button";
 import {
+  PasswordStrengthMeter,
+  scorePassword,
+} from "@/components/ui/PasswordStrength";
+import {
   PROVINCES,
   PROFESSIONS as MOCK_PROFESSIONS,
   INSTITUTIONS,
@@ -51,6 +55,7 @@ interface FormState {
   phone: string;
   nationalId: string;
   password: string;
+  passwordConfirm: string;
   // Step 2
   consents: Record<ConsentPurpose, boolean>;
   // Step 3
@@ -69,6 +74,7 @@ const initialState: FormState = {
   phone: "",
   nationalId: "",
   password: "",
+  passwordConfirm: "",
   consents: Object.fromEntries(
     CONSENT_PURPOSES.map((p) => [p, REQUIRED_FOR_SEARCHABILITY.includes(p)]),
   ) as Record<ConsentPurpose, boolean>,
@@ -116,7 +122,9 @@ export function SeekerSignUpForm({ professions }: Props = {}) {
       state.fullName.trim().length >= 2 &&
       /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(state.email) &&
       state.nationalId.length >= 6 &&
-      state.password.length >= 10
+      state.password.length >= 10 &&
+      state.password === state.passwordConfirm &&
+      scorePassword(state.password).score >= 2
     );
   }
 
@@ -236,15 +244,36 @@ export function SeekerSignUpForm({ professions }: Props = {}) {
             hint={t("stepHints.id")}
             disabled={pending}
           />
+          <div className="flex flex-col gap-1">
+            <TextField
+              id="password"
+              label={tCommon("password")}
+              value={state.password}
+              onChange={(e) => setState({ ...state, password: e.target.value })}
+              type="password"
+              autoComplete="new-password"
+              required
+              hint="At least 10 characters. Mix letters, digits and symbols."
+              disabled={pending}
+            />
+            <PasswordStrengthMeter password={state.password} />
+          </div>
           <TextField
-            id="password"
-            label={tCommon("password")}
-            value={state.password}
-            onChange={(e) => setState({ ...state, password: e.target.value })}
+            id="passwordConfirm"
+            label="Confirm password"
+            value={state.passwordConfirm}
+            onChange={(e) =>
+              setState({ ...state, passwordConfirm: e.target.value })
+            }
             type="password"
             autoComplete="new-password"
             required
-            hint="At least 10 characters."
+            error={
+              state.passwordConfirm.length > 0 &&
+              state.password !== state.passwordConfirm
+                ? "Passwords don't match."
+                : undefined
+            }
             disabled={pending}
           />
           <Button

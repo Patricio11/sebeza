@@ -222,9 +222,21 @@ function extractOptions(children: React.ReactNode): {
       children?: React.ReactNode;
       disabled?: boolean;
     };
-    const value = String(props.value ?? "");
     const label = nodeToString(props.children);
-    if (value === "" && out.length === 0 && placeholder === undefined) {
+    // Native <select> behaviour: if <option> has no explicit value attribute,
+    // the option's text content IS the value. Without this fallback every
+    // option with just `<option>X</option>` (no value=) submitted as empty,
+    // which made every CustomSelect look like "click doesn't do anything".
+    const hasExplicitValue = props.value !== undefined;
+    const value = hasExplicitValue ? String(props.value) : label;
+    // The very first option whose value is explicitly empty is the
+    // placeholder ("Select…") rather than a real option.
+    if (
+      hasExplicitValue &&
+      value === "" &&
+      out.length === 0 &&
+      placeholder === undefined
+    ) {
       placeholder = label;
       return;
     }
