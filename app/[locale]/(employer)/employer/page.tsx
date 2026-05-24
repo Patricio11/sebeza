@@ -10,6 +10,9 @@ import { verifyEmployer } from "@/lib/auth/dal";
 import { getDb } from "@/db/client";
 import * as schema from "@/db/schema";
 import { CheckCircle2 } from "lucide-react";
+import { employerOwnMixQuery } from "@/db/queries/employerMix";
+import { EmployerHiringMixCard } from "@/components/feature/employer/EmployerHiringMixCard";
+import { logAccess } from "@/lib/audit";
 
 export default async function EmployerOverviewPage({
   params,
@@ -72,6 +75,19 @@ export default async function EmployerOverviewPage({
     province: "gauteng",
   });
   const recent = search.profiles.slice(0, 3);
+
+  // ── Phase 9.7.5  own placement nationality mix ─────────────────────────
+  // Self-data; no k-floor (the employer knows who they hired). Audit-log
+  // the read for symmetry with the future regulated lookup (9.7.6).
+  const ownMix = orgId ? await employerOwnMixQuery(orgId) : null;
+  if (orgId && ownMix && ownMix.total > 0) {
+    await logAccess({
+      kind: "employer.own_mix.view",
+      actor: session.id,
+      subject: orgId,
+      meta: { total: ownMix.total },
+    });
+  }
 
   // ── Recent placements (this org) ─────────────────────────────────────────
   const recentPlacements = orgId
@@ -150,6 +166,15 @@ export default async function EmployerOverviewPage({
           })}
         />
       </section>
+
+      {/* Phase 9.7.5  "Your hiring on Sebenza" self-view. Own data
+          only, EEA §1 + ESA §8 framing (draft pending DPIA R9 counsel
+          review). */}
+      {ownMix && (
+        <section className="mt-10">
+          <EmployerHiringMixCard data={ownMix} />
+        </section>
+      )}
 
       {/* Recent matches  live search */}
       <section className="mt-12" aria-labelledby="recent-h">

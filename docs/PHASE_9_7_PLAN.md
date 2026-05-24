@@ -283,18 +283,38 @@ carry no per-employer surface and no public-facing legal-claim copy.
 - [x] Verified: `npm test` 22/22 green · `npm run typecheck` clean · `npm run build` clean.
       Commit `<TBD>`.
 
-### Task 9.7.5: Employer self-view — "Your hiring on Sebenza" (low-risk, genuinely useful)
-- [ ] On the employer dashboard: a card showing **the employer's own** `employer_confirmed` placement mix
-      (e.g. "14 placements: 11 SA citizens · 3 foreign nationals"), plus role/location breakdown.
-- [ ] **Their own data only** — scoped to `organizationId = session.org`. No cross-employer comparison,
-      no ranking, no benchmark-against-others.
-- [ ] Framing copy per **D2**: "EEA §1 designated-group qualification + ESA §8 record-keeping. Not a
-      substitute for your EEA-1 filing or your Department of Home Affairs documentation."
-- [ ] One-liner under the card: "Sebenza-confirmed placements only; not a substitute for your EEA-1
-      filing." (Same shape as the existing self-reported-placement disclaimer.)
-- [ ] Audit-logged read (`employer.own_mix.view`) for symmetry, though it's self-data.
-- [ ] **Hold copy ship** until counsel-review of D2 closes (DPIA R9). Engine + UI can build; the wording
-      is the only blocker.
+### Task 9.7.5: Employer self-view — "Your hiring on Sebenza" ✅ 2026-05-24 (engine + UI; final copy gated on DPIA R9)
+- [x] Card on `/employer` overview slotted between the KPI grid and "Recent matches". Shows total
+      employer-confirmed placements, SA-citizen + foreign-national splits with % + single-bar
+      stacked split, per-role breakdown (top 10) and per-city breakdown (top 10). Date range
+      footer (first hire  last hire).
+- [x] **Their own data only**: `employerOwnMixQuery(orgId)` filters strictly on
+      `placements.organization_id = orgId AND source = 'employer_confirmed'`. No cross-employer
+      comparison, no ranking, no benchmark surface in the query layer. The query function physically
+      cannot return another org's data.
+- [x] No k-floor on self-data  the employer knows who they hired; a floor here would be theatre.
+      The disclosure-control concern only applies when third parties view the data (which is what
+      9.7.6 + 9.7.7 are for).
+- [x] EEA §1 + ESA §8 framing copy per D2 is **live in the component** so the engineering work
+      is testable end-to-end. A visible **DRAFT banner at the top of the card** flags the wording
+      as engineering-team reading pending counsel review (DPIA R9). The banner comes off in a
+      follow-up commit once sign-off lands.
+- [x] Disclaimer one-liner: "Sebenza-confirmed placements only  not a substitute for your EEA-1
+      filing or your Department of Home Affairs documentation" sits at the bottom of the framing
+      section, same shape as the existing self-reported-placement disclaimer.
+- [x] New audit kind `employer.own_mix.view` in the catalog. Logged on every render with
+      `actor = session.id`, `subject = orgId`, `meta = { total }`  feeds the 9.7.7 oversight
+      log so a regulator can later correlate self-views with their own `gov.employer_mix.lookup`
+      records.
+- [x] Files: `db/queries/employerMix.ts`, `components/feature/employer/EmployerHiringMixCard.tsx`,
+      `app/[locale]/(employer)/employer/page.tsx` (wire-up), `lib/audit/index.ts` (kind added).
+- [x] Verified: `npm test` 22/22 green · `npm run typecheck` clean · `npm run build` clean.
+      Commit `<TBD>`.
+
+**What's blocking the DRAFT banner removal:** DPIA R9 counsel review on the EEA §1 / ESA §8
+framing. Until then, the card renders the framing for engineering testing but the banner makes
+the legal-claim caveat explicit. Once counsel signs off, remove the `<DraftBanner />` call in
+`EmployerHiringMixCard.tsx` and tighten any wording counsel changes.
 
 ### Task 9.7.6: Governed per-employer compliance lookup (`gov` only — highest sensitivity, ships dormant)
 The legitimate version of "how many nationals/non-nationals has *this* company hired" — built so it can't

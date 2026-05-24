@@ -88,7 +88,14 @@ export type AuditKind =
   // Phase 8  SAQA worker lifecycle.
   | "verification.approve.saqa"
   | "verification.reject.saqa"
-  | "verification.approve.manual_override";
+  | "verification.approve.manual_override"
+  // Phase 9.7.5  employer self-view (Your hiring on Sebenza).
+  // Self-data read, logged for symmetry  the employer sees their own
+  // org's placement nationality mix; logging it means every analytics
+  // surface, even self-views, leaves a trail. Pairs with the eventual
+  // gov.employer_mix.lookup audit kind (9.7.6) so the 9.7.7 oversight
+  // log can correlate self-views with regulator inquiries.
+  | "employer.own_mix.view";
 
 export interface AuditEvent {
   kind: AuditKind;
