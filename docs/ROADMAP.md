@@ -516,6 +516,42 @@ that registry  we win on **data quality, usability, and analytics.** The system 
 
 ---
 
+## 🧷 PHASE 9.8: VACANCIES & DEMAND-DRIVEN MATCHING (in flight  plan approved 2026-05-24)
+*Side-phase between Phase 9.7 and Phase 10. Mirrors the 6.5 / 7.5 / 9.7 pattern (capability enrichment on shipped infra; must not muddy the public-launch phase). Companion docs: `docs/PHASE_9_8_PLAN.md` (open questions Q1Q4 + senior-review push-back items D1D8 all closed same-day) + `docs/popia/DPIA.md`.*
+
+**Strategic frame:** turn Sebenza from ad-hoc search-and-contact into a structured demand-driven matching system. **Not a job board** (the comparison table at the top of the plan doc is the whole product call): vacancies are *org-private*; employers reverse-match against the talent base and *invite specific people*; seekers accept / decline / decline-with-reason. The decline-reason data is the labour-market intelligence no job board has  it tells government *why* roles go unfilled (salary-driven gap vs supply-driven gap are different policy signals), and it's the data that unblocks 9.7.3's "Local shortage" classifications on real (not seeded) data.
+
+**§CRITICAL design correction recorded in plan:** the originating voice-chat proposed a per-vacancy "South African only" invite gate. **Not building it**  direct contradiction of Rule 2 (Location-Not-Nationality) + Rule 3 (Citizen-Visibility) + the DPIA R9 mitigation shipped six days earlier in 9.7. Honest version: highlight + rank SA citizens via existing `citizen_boost`, show an honest supply line ("N SA citizens · M candidates match this vacancy"), but **no endpoint blocks invite by `nationality_class`**. Compliance assertion (c) catches regressions.
+
+### Task 9.8.1: Vacancy schema + lifecycle
+- [ ] `vacancies` table (id, org, created_by, title, profession, province/city, skills, seniority, salary_band PRIVATE, description, documents_required, status enum, invite_expiry_days, timestamps); `vacancy_status` enum [draft/open/closed/filled]; privacy invariant (no field on any non-org-member surface); `/employer/vacancies` list/create/edit/close respecting `orgMemberRole` (Owner+Recruiter create+invite, Viewer read-only). Mobile-first (360px wide forms).
+
+### Task 9.8.2: Reverse-matching ("Find matches")
+- [ ] "Find matches" reuses the Phase 4 ranking SQL  one ranking source of truth, no parallel matcher. Match view reuses `<TalentRosterItem>` with `citizen_boost` highlighting. Honest supply line: "N SA citizens · M candidates match this vacancy" (per D6  "candidates" not "eligible"). All Phase 5 redaction preserved.
+
+### Task 9.8.3: Consent purpose `vacancy_matching`
+- [ ] `consentPurpose` += `vacancy_matching` (default off, non-degrading: a seeker who doesn't grant it is still searchable/contactable exactly as today; they just don't receive vacancy invites). UI on `/dashboard/privacy` uses the D8 source text. Invites blocked at the action boundary when consent is not granted. Human-translated for Tier-1.
+
+### Task 9.8.4: Invite flow (employer  seeker)
+- [ ] `vacancy_invitations` table with state enum [invited/accepted/accepted_with_notice/declined/reconsidering/withdrawn/expired], `expires_at` computed from `vacancy.invite_expiry_days` per D2, decline_reason enum + 200-char note. Bulk invite skips non-consented per D5 (soft UX message "17 sent · 3 not eligible right now"; per-seeker reason in audit log only). Withdraw + notify.
+- [ ] New `/api/cron/vacancy-invite-expiry` reuses Phase 8 cron + CRON_SECRET. Transitions stale invites to `expired`, fires `vacancy.invite.expired` (seeker) + `vacancy.invite.unanswered` (employer); both honour in-app + email channel pipeline. Audit-logged as `vacancy.invite.expire`.
+
+### Task 9.8.5: Accept / decline-with-reason
+- [ ] Accept; accept_with_notice (per D1, `notice_period_months`  a yes, never a decline); decline picker (mobile bottom-sheet) with six reasons + 200-char optional note with POPIA reminder per D3 (treated as PII in exports/audit). Reconsidering path  "Express interest again"  fires `vacancy.reconsider` notification. Every response audit-logged.
+
+### Task 9.8.6: Vacancy outcome  placement linkage
+- [ ] When vacancy marked `filled`, prompt to log placement with `vacancy_id` set (nullable FK; cardinality 1 vacancy : 0..N placements, 1 placement : 0..1 vacancy). Inherits Placement-Truth rule.
+
+### Task 9.8.7: "Why roles go unfilled" analytics
+- [ ] Decline-reason distribution by profession × province on `/insights` (employer-private) + `/gov` (cross-market, suppressed via `lib/analytics/suppress.ts` k=10 + complementary). Freshness-weighted; CSV via `lib/analytics/csv.ts`. Cross-references 9.7.3's classifier  a salary-driven gap reads differently from a supply-driven one.
+
+### Task 9.8.8: Wiring, verification, doc convention
+- [ ] Six compliance assertions extended: (a) no vacancy field on public/seeker/cross-org surface · (b) invite impossible without current consent · (c) **no nationality-based invite gate** · (d) decline-reason cells suppressed · (e) `accepted_with_notice` excluded from "unfilled" stats · (f) decline-note flagged as PII in exports. Seed: 12 vacancies + invites across SA + foreign-national profiles + one of each response state. On ship: `PHASE_9_8_COMPLETE.md`, tick this header ✅ + date, refresh Current State, commit `Phase 9.8 complete + Phase 10 opens`.
+
+**Out of scope (explicit guardrails):** no public vacancy listing / "apply" button / seeker-side browsing (that's a job board) · no nationality-as-gate on invites · no `legal_eligibility_note` field (not even scaffolded, per D4) · salary-band stays private · no in-app interview scheduling / messaging build-out (reuses Phase 5 dossier flow) · public/employer search unchanged.
+
+---
+
 ## ♿ PHASE 10: ACCESSIBILITY, PERFORMANCE & LOW-BANDWIDTH
 *Goal: Genuinely usable for the people the platform exists to serve.*
 
