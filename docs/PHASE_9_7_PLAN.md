@@ -352,13 +352,38 @@ the legal-claim caveat explicit. Once counsel signs off, remove the `<DraftBanne
 - [x] Verified: `npm test` 22/22 green · `npm run typecheck` clean · `npm run build` clean · migration
       0013 applied to Neon. Commit `<TBD>`.
 
-### Task 9.7.7: Sensitive-query oversight log (watch the watchers)
-- [ ] An `/admin` view surfacing all `gov.employer_mix.lookup` + nationality-split export events from the
-      audit log — who ran a sensitive nationality query, when, against whom, with what stated reason.
-- [ ] Filterable (actor, date, employer) + reuses the Phase 7 audit-log-filter + CSV pattern.
-- [ ] **Trust rationale:** giving `gov` a powerful lens is safe *because* its use is itself observable.
-      This is the governance signal that makes DEL comfortable adopting it — and the honest answer to
-      "couldn't this be abused?" is "every use is logged and reviewable."
+### Task 9.7.7: Sensitive-query oversight log (watch the watchers) ✅ 2026-05-24
+- [x] New `/admin/oversight` page. Surfaces every `gov.employer_mix.lookup` row + every
+      `analytics.export` row whose `meta.surface` is in `NATIONALITY_EXPORT_SURFACES`
+      (`/gov/nationality-mix`, `/gov/shortage-justification`). Two-surface OR clause built inside the
+      query, so adding a future nationality surface = one entry in the constant catalogue.
+- [x] Filters: actor (substring on actor OR subject), employer (exact name → resolves to org id →
+      filters subject), since / until dates (date range). All four URL-param-driven so a particular
+      view shares cleanly. Employer name with no match surfaces a "no organisation found" notice
+      rather than just an empty table  the user shouldn't have to guess.
+- [x] Summary tiles row at the top: total events · lookups · above-floor · below-floor + not-found
+      (the anomaly-watch tile, accent-toned) · exports. Lets an admin spot fishing patterns (lots of
+      below-floor or not-found in a window) without scrolling.
+- [x] Table renders one row per event: timestamp · kind chip + outcome tag (above-floor /
+      below-floor / not-found / surface name) · actor · target (resolved org name when subject =
+      orgId) · per-event details (reason + note + placement count + floor for lookups; row count + k
+      for exports) · `<details>` drill-down with the full meta JSON for forensics.
+- [x] CSV export at `GET /api/admin/oversight/export` with the same four URL params. Explodes lookup
+      meta into discrete columns (reason, reason_note, input_method, org_found, placement_count,
+      above_floor, floor, row_count, k) so analysts pivot in spreadsheets without parsing JSON.
+      Self-references: the export itself logs `analytics.export` with `surface=/admin/oversight`.
+- [x] Reuses Phase 7 audit-log-filter idiom (URL-param GET form, exact-match employer chip pattern
+      mirrors the actor filter on the existing audit page). Same `lib/analytics/csv.ts` helpers.
+- [x] New `ADMIN_NAV` entry "Oversight log" (ShieldAlert icon) sits right after the existing "Audit
+      log" entry.
+- [x] Migration `0014_phase9_7_audit_log_indices.sql` adds `(at DESC)` + `(kind, at DESC)` indices
+      on `audit_log`. The table had no indices since Phase 7  fine at dev scale, seq-scan at
+      production scale. Both indices are `IF NOT EXISTS`, no data change. Applied to Neon.
+- [x] Files: `lib/gov/oversight-query.ts`, `app/[locale]/(admin)/admin/oversight/page.tsx`,
+      `app/api/admin/oversight/export/route.ts`, `components/layout/adminNav.ts`,
+      `db/migrations/0014_phase9_7_audit_log_indices.sql`.
+- [x] Verified: `npm test` 22/22 green · `npm run typecheck` clean · `npm run build` clean ·
+      migration `0014` applied to Neon. Commit `<TBD>`.
 
 ### Task 9.7.8: Scheduled LMI / nationality brief for `gov` (kept in scope)
 - [ ] Reuse `/insights/print` print-CSS + the LMI cron infra. Minimum viable: a `/gov/brief` print-CSS
