@@ -160,11 +160,17 @@ export const NOTIFICATION_CATALOG = {
     dedupeWindowSeconds: 24 * 60 * 60,
   },
   // ──────────────────────────────────────────────────────────────────────
-  // Phase 9.8.4  vacancy invitations
+  // Phase 9.8.4 + 9.8.5  vacancy invitations + responses.
+  // Email defaults ON: these are transactional lifecycle events (a
+  // specific action affecting a specific person) and read identically
+  // to a verification email in intent. Recipients can still opt out
+  // per kind in /dashboard/notifications/preferences. Sending is
+  // additionally gated by the platform-wide
+  // `feature_flag_email_notifications` killswitch.
   // ──────────────────────────────────────────────────────────────────────
   "vacancy.invite": {
     defaultInApp: true,
-    defaultEmail: false, // email channel dormant until Resend flips on
+    defaultEmail: true,
     audience: "seeker",
     label: "A verified employer flagged you for a specific role",
     description:
@@ -173,7 +179,7 @@ export const NOTIFICATION_CATALOG = {
   },
   "vacancy.invite.expired": {
     defaultInApp: true,
-    defaultEmail: false,
+    defaultEmail: true,
     audience: "seeker",
     label: "A vacancy invite expired without a response",
     description:
@@ -182,19 +188,16 @@ export const NOTIFICATION_CATALOG = {
   },
   "vacancy.invite.unanswered": {
     defaultInApp: true,
-    defaultEmail: false,
+    defaultEmail: true,
     audience: "org_members",
     label: "An invited seeker didn't respond in time",
     description:
       "Fires nightly when a vacancy invitation passes its expiry window without an accept or decline. Helps you keep your pipeline honest.",
     dedupeWindowSeconds: 0,
   },
-  // ──────────────────────────────────────────────────────────────────────
-  // Phase 9.8.5  seeker responses
-  // ──────────────────────────────────────────────────────────────────────
   "vacancy.response": {
     defaultInApp: true,
-    defaultEmail: false,
+    defaultEmail: true,
     audience: "org_members",
     label: "A seeker responded to a vacancy invitation",
     description:
@@ -203,7 +206,7 @@ export const NOTIFICATION_CATALOG = {
   },
   "vacancy.reconsider": {
     defaultInApp: true,
-    defaultEmail: false,
+    defaultEmail: true,
     audience: "org_members",
     label: "A seeker who previously declined wants to reconsider",
     description:

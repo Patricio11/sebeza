@@ -104,6 +104,21 @@ const TEMPLATES: Partial<
     genericTemplate(ctx, "Re-confirm your status", "Keep your profile fresh"),
   "saved_search.new_matches": (ctx) =>
     genericTemplate(ctx, "Open the saved search", "New matches"),
+  // ── Phase 9.8  vacancy invitations + responses ────────────────────────
+  // All five go through `genericTemplate`  the in-app title + body already
+  // carry the attribution (employer name + role) so the email reads
+  // identically to the bell. The CTA labels differ per audience so the
+  // recipient lands on the right surface.
+  "vacancy.invite": (ctx) =>
+    genericTemplate(ctx, "Open the invitation", "New vacancy invitation"),
+  "vacancy.invite.expired": (ctx) =>
+    genericTemplate(ctx, "Open your inbox", "Invitation closed"),
+  "vacancy.invite.unanswered": (ctx) =>
+    genericTemplate(ctx, "Open the vacancy", "Invitation expired"),
+  "vacancy.response": (ctx) =>
+    genericTemplate(ctx, "Open the vacancy", "Candidate response"),
+  "vacancy.reconsider": (ctx) =>
+    genericTemplate(ctx, "Open the vacancy", "Change of mind"),
 };
 
 export function emailContentFor(
