@@ -552,6 +552,14 @@ that registry  we win on **data quality, usability, and analytics.** The system 
 
 ---
 
+## 🧷 PHASE 9.9: EXPERIENCE-IN-YEARS ON PROFILE & SKILLS ✅ (shipped 2026-05-24)
+
+Pre-launch hygiene side-phase between Phase 9.8 and Phase 10. Two missing CV-header fields the system review surfaced: total years of professional experience on the profile, and per-skill years of experience. Both shipped as additive-nullable columns with self-declared values (no derivation from `experiences` history per D1  lossy). Read-side: profile header reads *"Senior · Chef · 8 yrs"*, skill chips read *"TypeScript · 5 yrs"*, NULL renders unchanged, 0 displays as *"<1 yr"*. UI clamps 0..60; UI Server Action also clamps. Public per D4 (CV-header data, not sensitive PII). Phase 4 ranking integration + `minYearsExperience` search filter deferred to optional Task 9.9.3 (post-launch backlog). **DOB + gender explicitly out of scope**  governance-reviewed phase if/when added.
+
+Migration `0018_phase9_9_years_experience.sql` applied to Neon. Companion docs: `docs/completed/PHASE_9_9_PLAN.md` + `docs/completed/PHASE_9_9_COMPLETE.md`.
+
+---
+
 ## ♿ PHASE 10: ACCESSIBILITY, PERFORMANCE & LOW-BANDWIDTH
 *Goal: Genuinely usable for the people the platform exists to serve.*
 

@@ -50,7 +50,12 @@ export default async function ProfileEditorPage({
     .map((s) => {
       const slug = slugByLabel.get(s.name);
       if (!slug) return null;
-      return { slug, label: s.name, proficiency: s.proficiency };
+      return {
+        slug,
+        label: s.name,
+        proficiency: s.proficiency,
+        yearsOfExperience: s.yearsOfExperience ?? null,
+      };
     })
     .filter((s): s is NonNullable<typeof s> => s !== null);
 
@@ -158,6 +163,7 @@ export default async function ProfileEditorPage({
               isCitizen: me.isCitizen,
               bio: me.bio ?? "",
               completeness: me.completeness,
+              yearsExperience: me.yearsExperience ?? null,
             }}
             professions={PROFESSIONS}
             identityHeading={

@@ -62,12 +62,23 @@ export function TalentRosterItem({
           <VerificationBadge state={profile.verification} />
         </header>
 
-        {/* Profession + city */}
+        {/* Profession + city  Phase 9.9 appends years experience after
+            profession when declared. NULL renders unchanged. */}
         <p className="mt-0.5 text-[color:var(--color-ink-soft)]">
           {profile.seniority && (
             <span className="capitalize">{profile.seniority} </span>
           )}
           <span className="text-[color:var(--color-ink)]">{profile.profession}</span>
+          {profile.yearsExperience != null && (
+            <>
+              <span aria-hidden="true"> · </span>
+              <span>
+                {profile.yearsExperience === 0
+                  ? "<1 yr"
+                  : `${profile.yearsExperience} yr${profile.yearsExperience === 1 ? "" : "s"}`}
+              </span>
+            </>
+          )}
           <span aria-hidden="true"> · </span>
           <span>{profile.city}</span>
           {profile.nationality && (
@@ -78,10 +89,17 @@ export function TalentRosterItem({
           )}
         </p>
 
-        {/* Top skills */}
+        {/* Top skills  Phase 9.9 appends years per skill when declared
+            (e.g. "TypeScript (5 yrs) · React (3 yrs) · Python"). */}
         <p className="mt-2 text-sm text-[color:var(--color-ink-soft)]">
           <span className="sr-only">{t("topSkills")}: </span>
-          {profile.topSkills.map((s) => s.name).join(" · ")}
+          {profile.topSkills
+            .map((s) =>
+              s.yearsOfExperience != null
+                ? `${s.name} (${s.yearsOfExperience === 0 ? "<1 yr" : `${s.yearsOfExperience} yr${s.yearsOfExperience === 1 ? "" : "s"}`})`
+                : s.name,
+            )
+            .join(" · ")}
         </p>
 
         {/* Status + completeness + availability + CTA */}

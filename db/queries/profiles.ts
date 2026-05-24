@@ -173,6 +173,7 @@ export async function searchProfilesQuery(
       p.work_availability,
       p.verification,
       p.completeness,
+      p.years_experience,
       p.member_since,
       (
         ${rankExpr}
@@ -208,6 +209,7 @@ export async function searchProfilesQuery(
     work_availability: string[] | string | null;
     verification: string;
     completeness: number;
+    years_experience: number | null;
     member_since: string | Date;
     score: string;
   }> }).rows;
@@ -234,6 +236,7 @@ export async function searchProfilesQuery(
     workAvailability: parsePgEnumArray(r.work_availability) as WorkAvailabilityKind[],
     verification: r.verification as VerificationStatus,
     completeness: r.completeness,
+    yearsExperience: r.years_experience,
     memberSince: new Date(r.member_since).toISOString(),
     topSkills: skillsByProfile.get(r.id) ?? [],
     score: Number(r.score),
@@ -377,6 +380,7 @@ export async function findProfileByHandleQuery(
       workAvailability: schema.profiles.workAvailability,
       verification: schema.profiles.verification,
       completeness: schema.profiles.completeness,
+      yearsExperience: schema.profiles.yearsExperience,
       memberSince: schema.profiles.memberSince,
     })
     .from(schema.profiles)
@@ -415,6 +419,7 @@ export async function findProfileByHandleQuery(
     workAvailability: (p.workAvailability ?? []) as WorkAvailabilityKind[],
     verification: p.verification as VerificationStatus,
     completeness: p.completeness,
+    yearsExperience: p.yearsExperience,
     memberSince: p.memberSince.toISOString(),
     topSkills,
     experience,
@@ -443,6 +448,7 @@ async function loadTopSkills(profileId: string): Promise<SkillRef[]> {
     .select({
       label: schema.skills.label,
       proficiency: schema.profileSkills.proficiency,
+      yearsOfExperience: schema.profileSkills.yearsOfExperience,
     })
     .from(schema.profileSkills)
     .innerJoin(schema.skills, eq(schema.profileSkills.skillSlug, schema.skills.slug))
@@ -451,6 +457,7 @@ async function loadTopSkills(profileId: string): Promise<SkillRef[]> {
   return rows.map((r) => ({
     name: r.label,
     proficiency: clampProficiency(r.proficiency),
+    yearsOfExperience: r.yearsOfExperience,
   }));
 }
 
@@ -469,6 +476,7 @@ async function topSkillsByProfile(
       profileId: schema.profileSkills.profileId,
       label: schema.skills.label,
       proficiency: schema.profileSkills.proficiency,
+      yearsOfExperience: schema.profileSkills.yearsOfExperience,
     })
     .from(schema.profileSkills)
     .innerJoin(schema.skills, eq(schema.profileSkills.skillSlug, schema.skills.slug))
@@ -485,6 +493,7 @@ async function topSkillsByProfile(
       list.push({
         name: r.label,
         proficiency: clampProficiency(r.proficiency),
+        yearsOfExperience: r.yearsOfExperience,
       });
       map.set(r.profileId, list);
     }

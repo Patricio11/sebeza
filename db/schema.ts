@@ -312,6 +312,14 @@ export const profiles = pgTable("profiles", {
     .default(sql`'{}'::work_availability_kind[]`),
   verification: verificationStatus("verification").notNull().default("unverified"),
   completeness: integer("completeness").notNull().default(0),
+  /**
+   * Phase 9.9  Total years of professional experience. Nullable;
+   * self-declared by the seeker on the profile editor. UI clamps
+   * 0..60. NULL = "rather not say." Public  shipped in the
+   * PublicProfile shape, visible on /search, /p/[handle], employer
+   * dossier. Differs from DOB (out of scope per PHASE_9_9_PLAN.md).
+   */
+  yearsExperience: integer("years_experience"),
   /** Encrypted (AES-GCM). NEVER selected on any public read path. */
   nationalIdEnc: text("national_id_enc"),
   /** Materialised tsvector. Populated by the trigger in
@@ -367,6 +375,16 @@ export const profileSkills = pgTable("profile_skills", {
     .notNull()
     .references(() => skills.slug),
   proficiency: integer("proficiency").notNull(),
+  /**
+   * Phase 9.9  Per-skill years of experience. Nullable; self-
+   * declared by the seeker on the SkillsEditor. UI clamps 0..60.
+   * NULL = "rather not say." Public  shipped in the SkillRef
+   * shape, visible on /search top-skills + /p/[handle] + employer
+   * dossier. Phase 9.9.3 (OPTIONAL per D6) wires the value into
+   * the Phase 4 ranking blend as a bounded multiplier; 9.9.1
+   * just stores it.
+   */
+  yearsOfExperience: integer("years_of_experience"),
 });
 
 export const experiences = pgTable("experiences", {

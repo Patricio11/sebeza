@@ -18,6 +18,9 @@ interface SkillState {
   slug: string;
   label: string;
   proficiency: number;
+  /** Phase 9.9  per-skill years of experience. NULL = "rather not say."
+   *  UI accepts blank or 0..60; the action layer clamps. */
+  yearsOfExperience: number | null;
 }
 
 interface Props {
@@ -48,9 +51,26 @@ export function SkillsEditor({ initial }: Props) {
     if (!candidate) return;
     setItems((prev) => [
       ...prev,
-      { slug: candidate.slug, label: candidate.label, proficiency: 3 },
+      {
+        slug: candidate.slug,
+        label: candidate.label,
+        proficiency: 3,
+        yearsOfExperience: null,
+      },
     ]);
     setPickerSlug("");
+  }
+
+  function setYears(slug: string, raw: string) {
+    setItems((prev) =>
+      prev.map((i) => {
+        if (i.slug !== slug) return i;
+        if (raw === "") return { ...i, yearsOfExperience: null };
+        const n = Math.max(0, Math.min(60, Math.floor(Number(raw))));
+        if (!Number.isFinite(n)) return i;
+        return { ...i, yearsOfExperience: n };
+      }),
+    );
   }
 
   function removeSkill(slug: string) {
@@ -67,7 +87,11 @@ export function SkillsEditor({ initial }: Props) {
     setMessage(null);
     startTransition(async () => {
       const r = await updateSkills({
-        skills: items.map((i) => ({ slug: i.slug, proficiency: i.proficiency })),
+        skills: items.map((i) => ({
+          slug: i.slug,
+          proficiency: i.proficiency,
+          yearsOfExperience: i.yearsOfExperience,
+        })),
       });
       if (r.ok) setMessage({ kind: "ok", text: "Skills saved." });
       else setMessage({ kind: "error", text: r.message });
@@ -91,9 +115,12 @@ export function SkillsEditor({ initial }: Props) {
                 <div className="truncate font-medium">{s.label}</div>
                 <div className="text-xs text-[color:var(--color-ink-soft)]">
                   Proficiency: {s.proficiency}/5
+                  {s.yearsOfExperience !== null && (
+                    <>  {s.yearsOfExperience === 0 ? "<1 yr" : `${s.yearsOfExperience} yr${s.yearsOfExperience === 1 ? "" : "s"}`}</>
+                  )}
                 </div>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <div className="flex items-center gap-0.5" role="group" aria-label="Proficiency">
                   {[1, 2, 3, 4, 5].map((level) => (
                     <button
@@ -111,6 +138,19 @@ export function SkillsEditor({ initial }: Props) {
                     />
                   ))}
                 </div>
+                {/* Phase 9.9  per-skill years input. 5ch wide so the
+                    row stays single-line at 360px. NULL when blank. */}
+                <input
+                  type="number"
+                  min={0}
+                  max={60}
+                  inputMode="numeric"
+                  placeholder="yrs"
+                  aria-label={`Years of ${s.label}`}
+                  value={s.yearsOfExperience ?? ""}
+                  onChange={(e) => setYears(s.slug, e.target.value)}
+                  className="h-7 w-14 rounded-[var(--radius-sm)] border border-[color:var(--color-hairline)] bg-[color:var(--color-paper)] px-1.5 text-xs"
+                />
                 <button
                   type="button"
                   aria-label={`Remove ${s.label}`}

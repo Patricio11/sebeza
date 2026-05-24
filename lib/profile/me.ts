@@ -81,6 +81,7 @@ export async function loadProfileForUser(userId: string): Promise<MyProfile | nu
       .select({
         skillSlug: schema.profileSkills.skillSlug,
         proficiency: schema.profileSkills.proficiency,
+        yearsOfExperience: schema.profileSkills.yearsOfExperience,
         label: schema.skills.label,
       })
       .from(schema.profileSkills)
@@ -106,6 +107,7 @@ export async function loadProfileForUser(userId: string): Promise<MyProfile | nu
   const topSkills: SkillRef[] = skillRows.map((s) => ({
     name: s.label,
     proficiency: clampProficiency(s.proficiency),
+    yearsOfExperience: s.yearsOfExperience,
   }));
 
   const experience: ExperienceItem[] = expRows.map((e) => ({
@@ -164,6 +166,7 @@ export async function loadProfileForUser(userId: string): Promise<MyProfile | nu
     workAvailability: (p.workAvailability ?? []) as WorkAvailabilityKind[],
     verification: p.verification as VerificationStatus,
     completeness: p.completeness,
+    yearsExperience: p.yearsExperience,
     memberSince: p.memberSince.toISOString(),
     topSkills,
     experience,

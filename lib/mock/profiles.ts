@@ -17,9 +17,9 @@ export const mockProfiles: PublicProfile[] = [
     nationality: "South African",
     isCitizen: true,
     topSkills: [
-      { name: "Pastry", proficiency: 5 },
-      { name: "Menu design", proficiency: 4 },
-      { name: "Kitchen management", proficiency: 4 },
+      { name: "Pastry", proficiency: 5, yearsOfExperience: 11 },
+      { name: "Menu design", proficiency: 4, yearsOfExperience: 7 },
+      { name: "Kitchen management", proficiency: 4, yearsOfExperience: 6 },
     ],
     bio: "Senior pastry chef with 11 years across fine dining and large-format catering. Comfortable owning a section, mentoring junior cooks, and writing seasonal menus.",
     status: "open_to_work",
@@ -27,6 +27,7 @@ export const mockProfiles: PublicProfile[] = [
     workAvailability: ["full_time", "contract"],
     verification: "verified",
     completeness: 82,
+    yearsExperience: 11,
     memberSince: "2024-08-02",
     experience: [
       {
@@ -226,9 +227,9 @@ export const mockProfiles: PublicProfile[] = [
     nationality: "South African",
     isCitizen: true,
     topSkills: [
-      { name: "TypeScript", proficiency: 3 },
-      { name: "React", proficiency: 3 },
-      { name: "Python", proficiency: 4 },
+      { name: "TypeScript", proficiency: 3, yearsOfExperience: 2 },
+      { name: "React", proficiency: 3, yearsOfExperience: 2 },
+      { name: "Python", proficiency: 4, yearsOfExperience: 4 },
     ],
     bio: "Final-year BSc Computer Science at Wits. Looking for graduate engineering programmes and final-year internships for the second semester. Quietly opinionated about accessibility.",
     status: "studying",
@@ -236,6 +237,7 @@ export const mockProfiles: PublicProfile[] = [
     workAvailability: ["casual", "part_time"],
     verification: "pending",
     completeness: 58,
+    yearsExperience: 2,
     memberSince: "2026-04-02",
     experience: [
       {

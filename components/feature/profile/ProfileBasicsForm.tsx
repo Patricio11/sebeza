@@ -24,6 +24,9 @@ interface InitialValues {
   isCitizen: boolean;
   bio: string;
   completeness: number;
+  /** Phase 9.9  total years of professional experience. NULL = "rather
+   *  not say." UI accepts blank or 0..60. */
+  yearsExperience: number | null;
 }
 
 interface Props {
@@ -73,6 +76,12 @@ export function ProfileBasicsForm({
   const [nationality, setNationality] = useState(initial.nationality ?? "South African");
   const [isCitizen, setIsCitizen] = useState(initial.isCitizen);
   const [bio, setBio] = useState(initial.bio ?? "");
+  // Phase 9.9  total years of experience. Stored as a string in form
+  // state so blank means NULL (vs 0 which means "<1 yr"). Clamped to
+  // 0..60 at submit time AND server-side in updateProfileBasics.
+  const [yearsExperience, setYearsExperience] = useState<string>(
+    initial.yearsExperience != null ? String(initial.yearsExperience) : "",
+  );
 
   const cities = PROVINCES.find((p) => p.slug === province)?.cities ?? [];
 
@@ -80,6 +89,11 @@ export function ProfileBasicsForm({
     e.preventDefault();
     setMessage(null);
     startTransition(async () => {
+      const yearsRaw = yearsExperience.trim();
+      const yearsNum =
+        yearsRaw === ""
+          ? null
+          : Math.max(0, Math.min(60, Math.floor(Number(yearsRaw))));
       const r = await updateProfileBasics({
         displayName,
         profession,
@@ -89,6 +103,8 @@ export function ProfileBasicsForm({
         nationality: nationality || null,
         isCitizen,
         bio: bio || null,
+        yearsExperience:
+          yearsNum !== null && Number.isFinite(yearsNum) ? yearsNum : null,
       });
       if (r.ok) {
         setMessage({ kind: "ok", text: "Saved." });
@@ -207,6 +223,22 @@ export function ProfileBasicsForm({
             <option value="intermediate">Intermediate</option>
             <option value="senior">Senior</option>
           </SelectField>
+          {/* Phase 9.9  total years of experience. Optional; UI clamps
+              0..60; blank = NULL ("rather not say"). 0 displays as "<1 yr"
+              everywhere it renders. */}
+          <TextField
+            id="yearsExperience"
+            name="yearsExperience"
+            type="number"
+            inputMode="numeric"
+            min={0}
+            max={60}
+            label="Total years of experience"
+            placeholder="e.g. 8"
+            value={yearsExperience}
+            onChange={(e) => setYearsExperience(e.target.value)}
+            hint="How long you've been working in your field. Leave blank if you'd rather not say."
+          />
           <TextareaField
             id="bio"
             label={labels.bio}

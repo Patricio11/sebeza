@@ -53,6 +53,9 @@ const basicsSchema = z.object({
   nationality: z.string().max(80).nullable().optional(),
   isCitizen: z.boolean().optional().default(false),
   bio: z.string().max(2000).optional().nullable(),
+  /** Phase 9.9  total years of experience. NULL = "rather not say."
+   *  Clamped 0..60 server-side; UI also clamps. */
+  yearsExperience: z.number().int().min(0).max(60).nullable().optional(),
 });
 
 export async function updateProfileBasics(
@@ -97,6 +100,7 @@ export async function updateProfileBasics(
       nationality: v.nationality ?? null,
       isCitizen: v.isCitizen ?? false,
       bio: v.bio ?? null,
+      yearsExperience: v.yearsExperience ?? null,
       completeness: liveCompleteness ?? newCompleteness,
     })
     .where(eq(schema.profiles.id, profile.id));
@@ -123,6 +127,9 @@ const skillsSchema = z.object({
       z.object({
         slug: z.string().min(1),
         proficiency: z.number().int().min(1).max(5),
+        /** Phase 9.9  per-skill years of experience. NULL = "rather not say."
+         *  Clamped 0..60 server-side; UI also clamps. */
+        yearsOfExperience: z.number().int().min(0).max(60).nullable().optional(),
       }),
     )
     .max(20),
@@ -157,6 +164,7 @@ export async function updateSkills(
           profileId: profile.id,
           skillSlug: s.slug,
           proficiency: s.proficiency,
+          yearsOfExperience: s.yearsOfExperience ?? null,
         })),
       );
     }

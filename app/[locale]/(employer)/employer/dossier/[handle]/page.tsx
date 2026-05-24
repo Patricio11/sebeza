@@ -233,6 +233,14 @@ export default async function EmployerDossierPage({
               <div className="flex flex-wrap items-center gap-2 text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--color-ink-soft)]">
                 <span>{profile.profession}</span>
                 {profile.seniority && <span>· {profile.seniority}</span>}
+                {profile.yearsExperience != null && (
+                  <span>
+                    ·{" "}
+                    {profile.yearsExperience === 0
+                      ? "<1 yr"
+                      : `${profile.yearsExperience} yr${profile.yearsExperience === 1 ? "" : "s"}`}
+                  </span>
+                )}
               </div>
               <h1 className="mt-1 font-display text-4xl">
                 {profile.displayName}
@@ -283,7 +291,17 @@ export default async function EmployerDossierPage({
                     key={s.name}
                     className="flex items-center justify-between gap-3 rounded-[var(--radius-sm)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] px-4 py-3"
                   >
-                    <span className="text-sm">{s.name}</span>
+                    <span className="text-sm">
+                      {s.name}
+                      {s.yearsOfExperience != null && (
+                        <span className="ml-1 text-xs text-[color:var(--color-ink-soft)]">
+                          ·{" "}
+                          {s.yearsOfExperience === 0
+                            ? "<1 yr"
+                            : `${s.yearsOfExperience} yr${s.yearsOfExperience === 1 ? "" : "s"}`}
+                        </span>
+                      )}
+                    </span>
                     <span className="flex gap-0.5">
                       {Array.from({ length: 5 }).map((_, i) => (
                         <span

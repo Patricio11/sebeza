@@ -127,6 +127,13 @@
       "when": 1779890000000,
       "tag": "0017_phase9_8_4_vacancy_invitations",
       "breakpoints": false
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1779900000000,
+      "tag": "0018_phase9_9_years_experience",
+      "breakpoints": false
     }
   ]
 }

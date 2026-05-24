@@ -264,10 +264,14 @@ async function ProfileHero({
             />
 
             <div className="flex-1">
-              {/* Profession eyebrow */}
+              {/* Profession eyebrow  Phase 9.9 appends years experience
+                  when declared (NULL renders the eyebrow unchanged; 0
+                  renders as "<1 yr"). */}
               <div className="text-[0.72rem] uppercase tracking-[0.28em] text-[color:var(--color-brand-strong)]">
                 {profile.seniority ? `${profile.seniority} · ` : ""}
                 {profile.profession}
+                {profile.yearsExperience != null &&
+                  ` · ${profile.yearsExperience === 0 ? "<1 yr" : `${profile.yearsExperience} yr${profile.yearsExperience === 1 ? "" : "s"}`}`}
               </div>
 
               {/* Name */}
@@ -577,6 +581,14 @@ async function ProfileBody({
                 >
                   <span className="text-[color:var(--color-ink)]">
                     {s.name}
+                    {s.yearsOfExperience != null && (
+                      <span className="ml-1 text-xs text-[color:var(--color-ink-soft)]">
+                        ·{" "}
+                        {s.yearsOfExperience === 0
+                          ? "<1 yr"
+                          : `${s.yearsOfExperience} yr${s.yearsOfExperience === 1 ? "" : "s"}`}
+                      </span>
+                    )}
                   </span>
                   <span className="flex gap-0.5">
                     {Array.from({ length: 5 }).map((_, i) => (
@@ -776,6 +788,16 @@ function SkillsSection({
               <div className="flex items-baseline justify-between gap-2">
                 <span className="font-medium text-[color:var(--color-ink)]">
                   {s.name}
+                  {/* Phase 9.9  years rendered after the skill name. NULL =
+                      omit entirely; 0 = "<1 yr". */}
+                  {s.yearsOfExperience != null && (
+                    <span className="ml-1 text-xs font-normal text-[color:var(--color-ink-soft)]">
+                      ·{" "}
+                      {s.yearsOfExperience === 0
+                        ? "<1 yr"
+                        : `${s.yearsOfExperience} yr${s.yearsOfExperience === 1 ? "" : "s"}`}
+                    </span>
+                  )}
                 </span>
                 <span className="font-display tabular text-sm text-[color:var(--color-ink-soft)]">
                   {s.proficiency}/5

@@ -199,6 +199,12 @@ async function seedUsersAndProfiles() {
       workAvailability: p.workAvailability,
       verification: p.verification,
       completeness: p.completeness,
+      // Phase 9.9  total years of experience. Per D1, leave NULL
+      // for any mock profile that doesn't declare it (the value
+      // lands when the seeker first edits their profile). The
+      // mock catalog populates `yearsExperience` on a handful of
+      // seekers so the dev demo isn't all empty.
+      yearsExperience: p.yearsExperience ?? null,
       memberSince: new Date(p.memberSince),
     })),
   );
@@ -223,6 +229,11 @@ async function seedProfileChildren() {
           profileId: id("prof", p.handle),
           skillSlug: slug,
           proficiency: s.proficiency,
+          // Phase 9.9  per-skill years of experience. NULL for
+          // mock profiles that don't declare it (per D1, no
+          // back-fill); the value lands when the seeker first
+          // edits their skill row.
+          yearsOfExperience: s.yearsOfExperience ?? null,
         };
       })
       .filter((r): r is NonNullable<typeof r> => r !== null),

@@ -42,6 +42,13 @@ export const WORK_AVAILABILITY_KINDS: WorkAvailabilityKind[] = [
 export interface SkillRef {
   name: string;
   proficiency: 1 | 2 | 3 | 4 | 5;
+  /**
+   * Phase 9.9  Years of experience with this skill. Nullable
+   * self-declared by the seeker; UI clamps 0..60. NULL renders as
+   * the skill name + proficiency only; non-NULL renders as
+   * "TypeScript · 5 yrs". 0 displays as "<1 yr".
+   */
+  yearsOfExperience?: number | null;
 }
 
 /**
@@ -84,6 +91,13 @@ export interface PublicProfile {
   verification: VerificationStatus;
   /** 0–100. Drives ProfileCompleteness component + ranking. */
   completeness: number;
+  /**
+   * Phase 9.9  Total years of professional experience. Nullable
+   * self-declared by the seeker; UI clamps 0..60. NULL renders as
+   * the seniority chip unchanged; non-NULL composes
+   * "Senior · 8 yrs". 0 displays as "<1 yr".
+   */
+  yearsExperience?: number | null;
   /** When the profile joined Sebenza (for "member since"). */
   memberSince: string;
   experience?: ExperienceItem[];
