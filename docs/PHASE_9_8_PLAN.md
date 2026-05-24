@@ -357,26 +357,60 @@ Server Action.
 - [x] Verified: `npm test` 22/22 green · `npm run typecheck` clean · `npm run build` clean (route
       `/api/cron/vacancy-invite-expiry` registered) · migration `0017` applied to Neon.
 
-### Task 9.8.5: Accept / decline-with-reason (the market-signal engine)
-- [ ] Seeker responds: **Accept** → `state = "accepted"`, employer notified (`vacancy.response`), moves to
-      the existing dossier/contact flow for next steps (interview/comms happen there, audited as today).
-- [ ] **Accept with notice** (per D1) → `state = "accepted_with_notice"` + `notice_period_months` int. A
-      *yes*, never a decline. Excluded from every "declined / unfilled" stat by query construction
-      (asserted in 9.8.8 compliance check (e)).
-- [ ] **Decline** → reason picker (fast modal, radio + optional note — *not a quiz*, mobile-first):
-  - `already_employed` · `salary_not_competitive` · `location_not_feasible` · `skills_mismatch` ·
-    `role_not_what_im_looking_for` · `other` (requires note).
-  - **Decline-note** (per D3): text input capped at 200 chars. Visible reminder under the input:
-    *"Work-related reasons only — don't include personal info like health, family status, or religion."*
-    Treated as PII in exports + audit-log meta.
-- [ ] **Change-of-mind path:** a declined seeker can later "Express interest again" → state
-      `reconsidering` → `vacancy.reconsider` notification to the employer. Human workflow, not a dead end.
-- [ ] **Every response audit-logged** (`vacancy.response`, reason + timestamp). This is what makes the
-      "why roles go unfilled" analytics trustworthy.
-- [ ] **Mobile-first:** the decline-reason modal is a bottom-sheet on mobile (thumb-reachable),
-      radio-group with large tap targets, note input only renders when a reason is selected. Submit button
-      sticks to the bottom edge so it doesn't get hidden by the keyboard. Esc closes; tapping the backdrop
-      closes; one save action, no quiz.
+### Task 9.8.5: Accept / decline-with-reason (the market-signal engine) ✅ 2026-05-24
+- [x] **Accept** Server Action `acceptInvitation({ invitationId })` in `lib/seeker/invitations.ts` flips
+      the row to `state='accepted'` + sets `respondedAt`, notifies the employer org via
+      `notifyOrgMembers` with kind `vacancy.response` (attributed: *"Sipho K. accepted your invitation
+      to 'Senior Pastry Chef'"*), audited as `vacancy.response` with `meta.responseKind='accept'`. The
+      employer follows up through the existing dossier/contact flow  no new comms surface built here.
+- [x] **Accept with notice** (D1) Server Action `acceptInvitationWithNotice({ invitationId,
+      noticePeriodMonths })` flips to `state='accepted_with_notice'` + writes `noticePeriodMonths`
+      (Zod-validated 112). Same `vacancy.response` notification with the months in the body
+      (*"Notice period: 3 months. Plan interviews accordingly."*) so the employer knows the available-
+      from date matters. **It's a yes, never a decline**  9.8.8 check (e) will assert it's excluded
+      from every "declined / unfilled" stat.
+- [x] **Decline** Server Action `declineInvitation({ invitationId, reason, note? })` flips to
+      `state='declined'` + stores `declineReason` (enum) + `declineNote` (string, 200-char cap enforced
+      Zod-side + UI-side + character counter shown live). Reason picker uses the six values from the
+      plan (`already_employed` / `salary_not_competitive` / `location_not_feasible` /
+      `skills_mismatch` / `role_not_what_im_looking_for` / `other`). Picking *"Other"* requires a note
+      (custom check  friendlier error than a Zod refinement). Notification body to the employer
+      includes the structured reason label (so the bell shows the market signal at a glance).
+- [x] **Decline-note PII handling per D3**: the visible POPIA reminder *"Work-related reasons only 
+      please don't include personal info like health, family status, or religion."* renders under the
+      textarea, with a live remaining-char counter. The audit-log meta carries
+      `seekerAuthoredFreeText: true` alongside the note so any CSV export from `lib/analytics/csv.ts`
+      sees it flagged as PII (compliance assertion (f) in 9.8.8 will lock this in).
+- [x] **Change-of-mind path** Server Action `reconsiderInvitation({ invitationId })` flips
+      `declined``reconsidering` (and only from `declined`  state-machine guard at both the
+      application AND the DB-conditional-update level so concurrent flips can't slip past). Fires
+      `vacancy.reconsider` (distinct notification kind so the employer's bell shows it apart from a
+      normal `vacancy.response`)  *"Sipho K. would like to reconsider 'Senior Pastry Chef'"* with a
+      body that nudges the employer to re-open the conversation if the role is still open.
+- [x] **Every response audit-logged** as `vacancy.response` with `meta.responseKind` =
+      `accept` / `accept_with_notice` / `decline` / `reconsider`. Reusing the single audit kind keeps
+      the log shape consistent  the variant lives in meta. Decline rows additionally carry the
+      structured reason + the (optional) note in meta, flagged as PII per above.
+- [x] **State-machine integrity**: the shared `respond()` engine guards every action with
+      (a) ownership check (`invitation.profile.userId === session.id`  cross-seeker attempts return
+      "Invitation not found", same as a genuine miss, so an attacker can't enumerate);
+      (b) expected-state check (defaults to `invited`, reconsider overrides to `declined`);
+      (c) DB-level conditional update (only updates if `state` is still the expected value) so a
+      concurrent expire-cron or duplicate submit can't race past us. On race-loss, the action returns
+      a clear "state changed in the meantime" error so the UI surfaces a refresh hint.
+- [x] **Mobile-first decline modal**: bottom-sheet on phones (anchored to screen bottom, full-width,
+      generous tap targets), centred modal on `md+`. Radio group with large 44px+ tap rows; note
+      `<textarea>` only renders once a reason is picked (compact by default); submit button is in a
+      sticky bottom bar inside the sheet so the on-screen keyboard never hides it. Esc closes; tapping
+      the backdrop closes; one save action. **Not a quiz**  six radios, optional note, done.
+- [x] **Seeker inbox surfaces**: `/dashboard/invitations` (list, mobile-first cards, terminal-state
+      rows separated into a dimmer "Closed" section so active invites have visual priority) and
+      `/dashboard/invitations/[id]` (detail + the state-aware `InvitationResponseIsland`). New
+      `Vacancy invites` entry in `SEEKER_NAV` between Qualifications and Career compass (Inbox icon).
+      The 9.8.4 invite notification's `/dashboard/invitations/${invitationId}` link now lands on a
+      real, action-ready page.
+- [x] Verified: `npm test` 22/22 green · `npm run typecheck` clean · `npm run build` clean (routes
+      `/[locale]/dashboard/invitations` + `/[locale]/dashboard/invitations/[id]` registered).
 
 ### Task 9.8.6: Vacancy outcome → placement linkage
 - [ ] When an employer marks a vacancy `filled`, prompt to log the `placement` (reuse Phase 5/7.5.5 flow)

@@ -189,6 +189,27 @@ export const NOTIFICATION_CATALOG = {
       "Fires nightly when a vacancy invitation passes its expiry window without an accept or decline. Helps you keep your pipeline honest.",
     dedupeWindowSeconds: 0,
   },
+  // ──────────────────────────────────────────────────────────────────────
+  // Phase 9.8.5  seeker responses
+  // ──────────────────────────────────────────────────────────────────────
+  "vacancy.response": {
+    defaultInApp: true,
+    defaultEmail: false,
+    audience: "org_members",
+    label: "A seeker responded to a vacancy invitation",
+    description:
+      "Fires when an invited seeker accepts, accepts with notice, or declines. The decline-reason  if one was given  is included so you can read the market signal.",
+    dedupeWindowSeconds: 0,
+  },
+  "vacancy.reconsider": {
+    defaultInApp: true,
+    defaultEmail: false,
+    audience: "org_members",
+    label: "A seeker who previously declined wants to reconsider",
+    description:
+      "The change-of-mind path: a declined seeker tapped \"Express interest again.\" Human workflow, not a dead end  re-open the conversation if the role is still open.",
+    dedupeWindowSeconds: 0,
+  },
 } as const satisfies Record<string, NotificationKindMeta>;
 
 export type NotificationKind = keyof typeof NOTIFICATION_CATALOG;
