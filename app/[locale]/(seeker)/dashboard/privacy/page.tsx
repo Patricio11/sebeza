@@ -29,6 +29,10 @@ const FALLBACK_CONSENT: Record<
   document_sharing: { state: "none", grantedAt: null, version: "v2.1" },
   analytics_aggregate: { state: "none", grantedAt: null, version: "v2.1" },
   outcomes_research: { state: "none", grantedAt: null, version: "v2.1" },
+  // Phase 9.8.3  default-off; the user must affirmatively opt in to
+  // receive vacancy invitations. Withholding does not degrade any
+  // other surface.
+  vacancy_matching: { state: "none", grantedAt: null, version: "v2.1" },
 };
 
 const PURPOSE_LABEL: Record<(typeof CONSENT_PURPOSES)[number], string> = {
@@ -37,6 +41,7 @@ const PURPOSE_LABEL: Record<(typeof CONSENT_PURPOSES)[number], string> = {
   document_sharing: "Document sharing",
   analytics_aggregate: "Aggregate analytics",
   outcomes_research: "Outcomes research (optional)",
+  vacancy_matching: "Vacancy invites (optional)",
 };
 
 const PURPOSE_BODY: Record<(typeof CONSENT_PURPOSES)[number], string> = {
@@ -53,6 +58,25 @@ const PURPOSE_BODY: Record<(typeof CONSENT_PURPOSES)[number], string> = {
     "What's shared: cohort-level numbers (programme × institution × province × graduation year, never under 10 people per cell). " +
     "What's never shared: any individual record, my name, my profile. " +
     "Withholding this consent does not weaken job-search in any way  it's a separate, optional contribution to the public-good dataset.",
+  // Short summary; the full D8 source text lives in PURPOSE_EXPLAINER
+  // (tap-to-expand on mobile, expanded by default on md+).
+  vacancy_matching:
+    "Let verified employers flag me for a specific role they're trying to fill (e.g. a chef position at a particular restaurant). I'll be notified by name and can accept, decline, or decline with a reason.",
+};
+
+/**
+ * Long-form explainers, rendered as `<details>` blocks under the body
+ * text. Use for purposes where the short summary alone is not enough
+ * to make an informed decision  the user needs the full lawful-basis
+ * + revocation picture before opting in. D8 source text for
+ * `vacancy_matching`; kept verbatim so the human-translated Tier-1
+ * versions have a stable English source.
+ */
+const PURPOSE_EXPLAINER: Partial<
+  Record<(typeof CONSENT_PURPOSES)[number], string>
+> = {
+  vacancy_matching:
+    "When you grant this, verified employers can flag you for a specific role they're trying to fill  a chef position at a particular restaurant, a developer role at a particular bank. You'll get a notification with the role + employer named, and you can accept, decline, or decline with a reason. Declining is free. You can revoke this consent any time from your privacy centre, and declining a single invite doesn't hurt your visibility in search.",
 };
 
 export default async function PrivacyPage({
@@ -97,6 +121,7 @@ export default async function PrivacyPage({
                 purpose={purpose}
                 label={PURPOSE_LABEL[purpose]}
                 body={PURPOSE_BODY[purpose]}
+                explainer={PURPOSE_EXPLAINER[purpose]}
                 initialState={c.state}
                 grantedAt={c.grantedAt}
                 version={c.version}

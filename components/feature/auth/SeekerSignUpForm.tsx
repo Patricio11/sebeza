@@ -34,6 +34,21 @@ import { GraduationCap } from "lucide-react";
 
 type Step = 1 | 2 | 3;
 
+/**
+ * Phase 9.8.3  per-purpose onboarding explainer (D8 source text for
+ * `vacancy_matching`). Whitelist  not every purpose gets a sub-
+ * paragraph; the short tPurposes() label is enough for familiar ones.
+ * Kept here (not in en.json) because next-intl's namespaced `t()` would
+ * throw on missing keys for the entries we deliberately don't fill in;
+ * a sparse Partial<Record> keyed by purpose is cleaner. The text
+ * itself stays a verbatim copy of D8 in PHASE_9_8_PLAN.md so the
+ * onboarding + privacy-centre + plan doc never drift.
+ */
+const PURPOSE_ONBOARDING_EXPLAINER: Partial<Record<ConsentPurpose, string>> = {
+  vacancy_matching:
+    "When you grant this, verified employers can flag you for a specific role they're trying to fill  a chef position at a particular restaurant, a developer role at a particular bank. You'll get a notification with the role + employer named, and you can accept, decline, or decline with a reason. Declining is free. You can revoke this consent any time from your privacy centre, and declining a single invite doesn't hurt your visibility in search.",
+};
+
 interface AcademicState {
   isStudent: boolean;
   institutionSlug: string;
@@ -295,6 +310,16 @@ export function SeekerSignUpForm({ professions }: Props = {}) {
           <ul className="space-y-3">
             {CONSENT_PURPOSES.map((purpose) => {
               const required = REQUIRED_FOR_SEARCHABILITY.includes(purpose);
+              // Per-purpose onboarding explainer (D8 source text for
+              // vacancy_matching). Whitelist  not every purpose gets a
+              // sub-paragraph; the short label is enough for the
+              // already-familiar ones. Added at 9.8.3 because Sebenza
+              // had not previously asked seekers for invite-channel
+              // consent and a one-line label can't carry the lawful
+              // basis. Renders as a tap-to-expand `<details>` on
+              // mobile, always visible on md+ — same pattern as the
+              // /dashboard/privacy explainer.
+              const explainer = PURPOSE_ONBOARDING_EXPLAINER[purpose];
               return (
                 <li
                   key={purpose}
@@ -329,6 +354,19 @@ export function SeekerSignUpForm({ professions }: Props = {}) {
                         <span className="mt-1 block text-xs text-[color:var(--color-ink-soft)]">
                           {t("step2.required")}
                         </span>
+                      )}
+                      {explainer && (
+                        <>
+                          <details className="mt-2 text-xs text-[color:var(--color-ink-soft)] md:hidden">
+                            <summary className="cursor-pointer select-none rounded-[var(--radius-pill)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface-sunk)] px-2.5 py-1 text-[0.7rem] uppercase tracking-[0.18em] text-[color:var(--color-ink)]">
+                              Read the full explainer
+                            </summary>
+                            <p className="mt-2">{explainer}</p>
+                          </details>
+                          <span className="mt-2 hidden text-xs text-[color:var(--color-ink-soft)] md:block">
+                            {explainer}
+                          </span>
+                        </>
                       )}
                     </span>
                   </label>

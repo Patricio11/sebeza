@@ -1,0 +1,26 @@
+-- Phase 9.8.3  `vacancy_matching` consent purpose.
+--
+-- A seeker consenting to "be searchable" has NOT consented to "be
+-- flagged by an employer for a specific role and pinged about it."
+-- POPIA treats these as different purposes (specific, primary purpose
+-- of receiving named-role invitations vs general findability), so we
+-- add a separate, optional, default-off, non-degrading consent purpose.
+--
+-- Non-degrading: a seeker who has NOT granted `vacancy_matching` is
+-- still searchable + contactable exactly as today. They simply don't
+-- receive vacancy invites. Withholding this consent must not weaken
+-- search visibility, contact reveals, or any other surface  it is a
+-- lawfulness condition for one specific channel (invitations), not a
+-- UX preference.
+--
+-- The invite action (Phase 9.8.4) gates on this being currently
+-- granted. Bulk-invite skips non-consented seekers cleanly with a soft
+-- user-facing message ("3 not eligible right now"); the per-seeker
+-- reason lives in the audit log only, never in the UI, to avoid
+-- leaking consent state (D5 in PHASE_9_8_PLAN.md).
+--
+-- Isolated migration, same pattern as 0008 (outcomes_research) and
+-- the rest of the enum-extension family. PG 16 (Neon) handles enum
+-- extension in-transaction. `IF NOT EXISTS` keeps it re-runnable.
+
+ALTER TYPE "consent_purpose" ADD VALUE IF NOT EXISTS 'vacancy_matching';

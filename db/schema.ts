@@ -66,6 +66,15 @@ export const consentPurpose = pgEnum("consent_purpose", [
   // employment outcomes dataset. Optional, default-off, non-degrading:
   // withholding it must NOT weaken job-search in any way.
   "outcomes_research",
+  // Phase 9.8.3  opt-in to receive vacancy invitations from verified
+  // employers (an employer flags a seeker for a SPECIFIC named role,
+  // not generic outreach). Optional, default-off, non-degrading: a
+  // seeker who has NOT granted this is still searchable + contactable
+  // exactly as today; they simply don't receive vacancy invites. The
+  // 9.8.4 invite action checks this consent at the boundary and the
+  // bulk-invite skip path records the actual reason in the audit log
+  // (per D5  the per-seeker reason is never surfaced in UI).
+  "vacancy_matching",
 ]);
 
 export const consentState = pgEnum("consent_state", [

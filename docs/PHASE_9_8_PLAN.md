@@ -262,18 +262,42 @@ Server Action.
 - [x] Verified: `npm test` 22/22 green · `npm run typecheck` clean · `npm run build` clean (route
       `/[locale]/employer/vacancies/[id]/match` listed in the build output).
 
-### Task 9.8.3: Consent purpose for vacancy invites
-- [ ] `consentPurpose` += `vacancy_matching` (existing migration pattern, per
-      `0008_phase7_5_outcomes_consent.sql`).
-- [ ] **Optional, default-off, non-degrading:** a seeker who doesn't grant it is still searchable/contactable
-      exactly as today; they simply aren't sent vacancy invites. No feature degradation, no nagging.
-- [ ] Consent UI on `/dashboard/privacy` + a plain-language explainer at onboarding using the **D8 source
-      text** (drafted above). **Human-translated** for Tier-1 locales (consent copy rule).
-- [ ] A seeker can be **invited only if `vacancy_matching` is currently granted** (enforced in the invite
-      action, asserted in tests). This is the gate the originating chat correctly insisted on.
-- [ ] **Mobile-first:** the consent toggle on `/dashboard/privacy` matches the existing per-purpose toggle
-      row pattern; the explainer text is a tap-to-expand `<details>` block on mobile, expanded by default
-      on `md+`.
+### Task 9.8.3: Consent purpose for vacancy invites ✅ 2026-05-24
+- [x] `consentPurpose` += `vacancy_matching` shipped via the additive enum-extension pattern
+      (`0016_phase9_8_3_vacancy_matching_consent.sql`  same shape as `0008` for `outcomes_research`).
+      `CONSENT_PURPOSES` array in `lib/consent/index.ts` extended. Both seed blocks + sign-up tx already
+      iterate the array, so the new purpose flows through with default-off behaviour unchanged. Migration
+      applied to Neon.
+- [x] **Optional, default-off, non-degrading:** the seed sets `vacancy_matching` to `state='none'` for
+      every seeded profile; the sign-up form leaves it unchecked by default; the privacy-centre fallback
+      consent state is `none`. A seeker who has NOT granted it is still searchable + contactable exactly
+      as today  no feature degradation, no nagging banner. Documented in the migration header + the
+      enum + array comments so the contract is explicit at every layer.
+- [x] Consent UI on `/dashboard/privacy` is wired automatically (the page iterates `CONSENT_PURPOSES`).
+      Added `PURPOSE_LABEL["vacancy_matching"] = "Vacancy invites (optional)"`,
+      `PURPOSE_BODY["vacancy_matching"]` = a short summary, and a new
+      `PURPOSE_EXPLAINER["vacancy_matching"]` = the full D8 source text. Threaded through `<ConsentRow>`
+      via a new optional `explainer` prop. Onboarding (seeker sign-up step 2) shows the same D8 text via
+      a sibling `PURPOSE_ONBOARDING_EXPLAINER` map in `SeekerSignUpForm`. **D8 text is verbatim** across
+      onboarding + privacy + plan doc  single English source for the Tier-1 human translation. Tier-1
+      catalogs (`zu` / `xh` / `af`) remain stub-marked `__notice`  the deepMerge fallback in
+      `i18n/request.ts` returns English until professional translation lands (per the no-machine-
+      translation rule for POPIA / consent / legal copy).
+- [x] **`hasVacancyMatchingConsent(userId)` helper** shipped in `lib/consent/check.ts` (with the more
+      general `hasConsent(userId, purpose)` it delegates to). Server-only module (`import "server-only"`).
+      Treats missing rows + `state='none'` + `state='revoked'` as not-granted  POPIA's affirmative-
+      consent rule, only an explicit current `granted` counts. **The 9.8.4 invite action will call this
+      at its boundary**; the structural ban on invites without current consent is asserted by compliance
+      check (b) in 9.8.8. (The action + its tests land in 9.8.4 because the action doesn't exist yet 
+      9.8.3 ships the gate primitive; 9.8.4 turns the key.)
+- [x] **Mobile-first:** on `/dashboard/privacy` and at sign-up step 2, the explainer renders as a tap-to-
+      expand `<details>` block on phones (collapsed by default, summary chip is a generous tap target)
+      and as a plain always-visible paragraph on `md+`. Pure-CSS, no JS for viewport detection 
+      duplicated in the DOM with `md:hidden` / `hidden md:block` so the server renders both states and
+      Tailwind hides the wrong one. Cheap (text-only). Existing per-purpose toggle row pattern preserved
+      for the other four purposes.
+- [x] Verified: `npm test` 22/22 green · `npm run typecheck` clean · `npm run build` clean · migration
+      `0016` applied to Neon.
 
 ### Task 9.8.4: Invite flow (employer → seeker)
 - [ ] `vacancy_invitations` table: `vacancy_id`, `profile_id`, `invited_by`, `invited_at`,

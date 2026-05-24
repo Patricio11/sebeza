@@ -134,7 +134,9 @@
           "searchability": "Searchability  let employers find me by skill + location",
           "contact_reveal": "Contact reveal  allow verified employers to request my contact details, audit-logged",
           "document_sharing": "Document sharing  allow verified employers to request my qualifications",
-          "analytics_aggregate": "Aggregate analytics  count me in national employment statistics (no personal data shared)"
+          "analytics_aggregate": "Aggregate analytics  count me in national employment statistics (no personal data shared)",
+          "outcomes_research": "Outcomes research (optional)  include me in cohort-level education-to-employment statistics. Never identifies any individual.",
+          "vacancy_matching": "Vacancy invites (optional)  verified employers can flag me for a specific named role"
         },
         "required": "Required for your profile to appear in search results."
       },
