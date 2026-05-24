@@ -299,34 +299,63 @@ Server Action.
 - [x] Verified: `npm test` 22/22 green · `npm run typecheck` clean · `npm run build` clean · migration
       `0016` applied to Neon.
 
-### Task 9.8.4: Invite flow (employer → seeker)
-- [ ] `vacancy_invitations` table: `vacancy_id`, `profile_id`, `invited_by`, `invited_at`,
-      **`expires_at`** (timestamp, nullable; computed at send time from `vacancy.invite_expiry_days`),
-      `state` enum, `responded_at`, `decline_reason` enum (nullable), `decline_note` (text, **capped 200
-      chars** per D3), `notice_period_months` (int, nullable — see D1), unique on
-      (`vacancy_id`,`profile_id`).
-- [ ] `pgEnum invitation_state` = `["invited","accepted","accepted_with_notice","declined","reconsidering",
-      "withdrawn","expired"]` (per D1 + D2).
-- [ ] Employer multi-selects matched seekers → "Invite to opportunity" (bulk). The action splits selections
-      into **eligible** (consent granted, not already invited) and **skipped** (per D5). For eligible:
-      writes invitation row → fires `vacancy.invite` notification → audit-logged (`vacancy.invite`, with
-      `vacancy_id` + actor). For skipped: audit-logged with the actual per-seeker reason
-      (`consent_not_granted` / `already_invited` / `profile_deleted`); UI shows the soft summary
-      ***"17 invites sent · 3 not eligible to receive an invite right now"*** — the per-seeker reason is
-      never exposed (it would leak consent state).
-- [ ] Seeker sees the invite **attributed**: *"Discovery Bank flagged you for: Chef · Cape Town."* Honest,
-      human, never anonymous.
-- [ ] Employer can withdraw an invite (state `withdrawn`, seeker notified, audited).
-- [ ] **Invite expiry cron** (new `/api/cron/vacancy-invite-expiry`, reuses Phase 8 cron infra +
-      `CRON_SECRET` guard): nightly, finds `state='invited' AND expires_at < now()`, transitions to
-      `state='expired'`, fires two notifications: `vacancy.invite.expired` (seeker, polite — *"Your
-      invitation from Discovery Bank has expired without a response"*) + `vacancy.invite.unanswered`
-      (employer, useful — *"Sipho K. didn't respond within your N-day window"*). Both honour the in-app
-      + email channel pipeline (Resend stays dormant per Phase 8; in-app always fires). Audit-logged as
-      `vacancy.invite.expire`.
-- [ ] **Mobile-first:** the bulk-invite confirmation modal is a bottom-sheet on mobile, centred modal on
-      `md+`. The "N sent · M skipped" summary uses the same `<Pill>` idiom as elsewhere in the employer
-      workspace.
+### Task 9.8.4: Invite flow (employer → seeker) ✅ 2026-05-24
+- [x] `vacancy_invitations` table shipped at `db/schema.ts` with every field specified (`vacancy_id`,
+      `profile_id`, `invited_by_user_id`, `invited_at`, `expires_at` nullable, `state` enum,
+      `responded_at`, `decline_reason` enum nullable, `decline_note` text, `notice_period_months` int
+      nullable). UNIQUE index on (`vacancy_id`,`profile_id`)  re-inviting is a no-op surfaced as
+      `already_invited` in the audit log. Two additional indexes for the common query shapes
+      (`(vacancy_id,state)` for the employer pipeline panel; `(profile_id,state)` for the future seeker
+      inbox) + an `expires_at` index for the cron range scan. ON DELETE CASCADE on both FKs (a deleted
+      vacancy or POPIA-erased profile takes its invitations with it).
+- [x] `pgEnum invitation_state` = `["invited","accepted","accepted_with_notice","declined",
+      "reconsidering","withdrawn","expired"]` shipped per D1 + D2. `pgEnum decline_reason` =
+      `["already_employed","salary_not_competitive","location_not_feasible","skills_mismatch",
+      "role_not_what_im_looking_for","other"]` shipped here (with the table) so 9.8.5's seeker-facing
+      action UI can store responses immediately without a follow-up migration  the action surface is
+      9.8.5, the column is 9.8.4. Migration `0017_phase9_8_4_vacancy_invitations.sql` applied to Neon.
+- [x] `bulkInviteToVacancy({ vacancyId, profileIds })` Server Action in `lib/employer/invitations.ts`
+      splits selections via four gates (in order): profile-not-found  profile-deleted (POPIA tombstone)
+       already-invited (UNIQUE index dedupe) **consent gate** via
+      `hasVacancyMatchingConsent(profile.userId)`. Each eligible seeker gets an invitation row, a
+      `vacancy.invite` notification (attributed: *"Discovery Bank flagged you for: Chef · Cape Town."*),
+      and a `vacancy.invite` audit-log row. Each skipped seeker gets a `vacancy.invite.skip` audit row
+      with the actual reason (`consent_not_granted` / `already_invited` / `profile_deleted` /
+      `profile_not_found`). **Per D5 the action response carries counts only**  per-seeker reason is
+      never in the response payload (it would leak consent state to the employer).
+- [x] Soft summary banner on the match page UI: ***"N invites sent · M not eligible to receive an
+      invite right now"*** with a sub-line explaining the audit-log lives elsewhere for admin oversight.
+      Matches the D5 wording verbatim. Per-seeker reason genuinely never reaches the client.
+- [x] Employer can **withdraw an invitation** via `withdrawInvitation({ invitationId })` from the
+      pipeline panel on the vacancy detail page. Only `state='invited'` rows are withdrawable; once a
+      seeker has responded, the lifecycle plays out. Withdraw transitions to `state='withdrawn'`,
+      notifies the seeker (re-uses `vacancy.invite.expired` kind with a "no longer open" body), audits as
+      `vacancy.invite.withdraw`.
+- [x] **Invite-expiry cron** shipped at `/api/cron/vacancy-invite-expiry`, guarded by
+      `isAuthorizedCron(request)` (Bearer `CRON_SECRET`). Pulls every `state='invited' AND expires_at <
+      now()` row with the vacancy + org + seeker context in one round trip; for each, calls
+      `expireInvitationFromCron()` (a non-`"use server"` sibling so it can never accidentally become a
+      Server Action invokable by a client). The helper does a conditional state flip (only if still
+      `invited`  idempotent against concurrent seeker responses), fires both notifications
+      (`vacancy.invite.expired` seeker polite / `vacancy.invite.unanswered` employer org-wide via
+      `notifyOrgMembers`), and writes one `vacancy.invite.expire` audit-log row. Both notification
+      kinds added to `NOTIFICATION_CATALOG` with `defaultInApp: true, defaultEmail: false` (email
+      dormant until Resend flips on per Phase 8). Cron route registered in the build map at
+      `/api/cron/vacancy-invite-expiry`.
+- [x] **Mobile-first**: `BulkInviteIsland` ships the multi-select + sticky bottom action bar + bottom-
+      sheet confirmation modal on phones (anchored to screen bottom, full-width, generous tap targets),
+      centred modal on `md+`. The "Already invited" rows render with a soft Invited pill instead of a
+      checkbox (deduped from selection). Server-rendered `<TalentRosterItem>` rows pass through as React
+      nodes so the existing Phase 5 redaction stays 100% server-rendered  only the selection shell is
+      client code. Select-all + Clear chips at the top of the list keep keyboard + thumb access easy.
+      Viewer role hides every interactive affordance (no checkboxes, no bulk bar, no modal trigger).
+- [x] **Vacancy-detail pipeline panel** (`VacancyInvitationsPanel`) renders the per-vacancy invitation
+      list grouped by state with tone-coded pills (`brand` for invited / `accent` for accepted / `danger`
+      for declined / `muted` for terminal states). Withdraw button visible only on `invited` rows for
+      Owners + Recruiters. The panel is visible to **all roles** including Viewers (read-only) so the
+      whole team has the same pipeline picture.
+- [x] Verified: `npm test` 22/22 green · `npm run typecheck` clean · `npm run build` clean (route
+      `/api/cron/vacancy-invite-expiry` registered) · migration `0017` applied to Neon.
 
 ### Task 9.8.5: Accept / decline-with-reason (the market-signal engine)
 - [ ] Seeker responds: **Accept** → `state = "accepted"`, employer notified (`vacancy.response`), moves to

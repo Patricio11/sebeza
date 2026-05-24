@@ -19,6 +19,7 @@ import {
   primaryKey,
   text,
   timestamp,
+  uniqueIndex,
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 
@@ -474,6 +475,60 @@ export const vacancyStatus = pgEnum("vacancy_status", [
 ]);
 
 /**
+ * Phase 9.8.4  invitation lifecycle.
+ *
+ * `invited`               employer sent the invite; awaiting seeker.
+ * `accepted`              seeker said yes; available now (D1).
+ * `accepted_with_notice`  seeker said yes but needs to serve out a notice
+ *                          period (D1)  counts as a yes everywhere
+ *                          except the "available now" filter; NEVER as a
+ *                          decline. Asserted by 9.8.8 check (e).
+ * `declined`              seeker said no (with optional reason in
+ *                          `decline_reason` + 200-char note per D3).
+ * `reconsidering`         a declined seeker changed their mind (the
+ *                          change-of-mind path in 9.8.5; fires
+ *                          `vacancy.reconsider` notification to employer).
+ * `withdrawn`             employer pulled the invite (seeker notified,
+ *                          audited as `vacancy.invite.withdraw`).
+ * `expired`               nightly cron flipped past `expires_at` without
+ *                          a seeker response. Audited as
+ *                          `vacancy.invite.expire`; two notifications
+ *                          fire (`vacancy.invite.expired` seeker;
+ *                          `vacancy.invite.unanswered` employer).
+ */
+export const invitationState = pgEnum("invitation_state", [
+  "invited",
+  "accepted",
+  "accepted_with_notice",
+  "declined",
+  "reconsidering",
+  "withdrawn",
+  "expired",
+]);
+
+/**
+ * Phase 9.8.5  decline reason taxonomy.
+ *
+ * Six work-related reasons from the plan + `other` (which requires a
+ * note per D3). The 200-char free-text note lives in
+ * `vacancy_invitations.decline_note`. Enum stays additive: a seventh
+ * ("commute / transport") or eighth ("hours don't suit") may surface
+ * from real-traffic `other` notes and would land via migration.
+ *
+ * Schema-shipped in 9.8.4 (with the table) so 9.8.5's seeker-facing
+ * action UI can store responses immediately without a follow-up
+ * migration. The action surface is 9.8.5; the column is 9.8.4.
+ */
+export const declineReason = pgEnum("decline_reason", [
+  "already_employed",
+  "salary_not_competitive",
+  "location_not_feasible",
+  "skills_mismatch",
+  "role_not_what_im_looking_for",
+  "other",
+]);
+
+/**
  * Vacancies are STRICTLY ORG-PRIVATE. No vacancy field is exposed on any
  * public route, /p/[handle], /search, sitemap, or to a non-member of
  * `organizationId`. Salary band, like Phase 5 placements, never leaves the
@@ -538,6 +593,99 @@ export const vacancies = pgTable(
       t.organizationId,
       t.status,
     ),
+  }),
+);
+
+/**
+ * Phase 9.8.4  vacancy invitations.
+ *
+ * Persistent (vacancy × seeker) pipeline rows. Opposite of saved
+ * searches' `searchSnapshot ≠ result-set` rule: here the membership
+ * IS the artefact  the employer's pipeline of who they've reached
+ * out to about a specific role and how those people responded.
+ *
+ * Privacy invariant: like `vacancies`, every read filters via the
+ * parent vacancy's organisation (no read function in
+ * `lib/employer/invitations.ts` returns rows from another org). The
+ * seeker's view is filtered through `profileId` matching the caller's
+ * own profile, so cross-seeker leakage is structurally impossible.
+ *
+ * Consent gate: a row is only ever written when the seeker had
+ * `vacancy_matching` consent in `state='granted'` at write time. The
+ * bulk-invite Server Action splits selections into eligible + skipped
+ * via `hasVacancyMatchingConsent()`; skipped seekers get an
+ * `vacancy.invite.skip` audit-log row each (with the actual reason
+ * never exposed to the employer UI to avoid leaking consent state, per
+ * D5). The compliance assertion (b) in 9.8.8 walks this contract.
+ *
+ * Audit: every state transition fires a `vacancy.invite[.subkind]`
+ * audit-log row through `lib/audit/index.ts` (reserved in 9.8.1).
+ */
+export const vacancyInvitations = pgTable(
+  "vacancy_invitations",
+  {
+    id: text("id").primaryKey(),
+    vacancyId: text("vacancy_id")
+      .notNull()
+      .references(() => vacancies.id, { onDelete: "cascade" }),
+    profileId: text("profile_id")
+      .notNull()
+      .references(() => profiles.id, { onDelete: "cascade" }),
+    /** Org member who sent the invite. References app_user so the
+        attribution survives the member later leaving the org. */
+    invitedByUserId: text("invited_by_user_id")
+      .notNull()
+      .references(() => appUser.id),
+    invitedAt: timestamp("invited_at").notNull().defaultNow(),
+    /**
+     * D2  computed at send time from `vacancy.invite_expiry_days`:
+     * `expires_at = invited_at + N days` (NULL when the vacancy has no
+     * expiry policy). The cron uses `WHERE state='invited' AND
+     * expires_at IS NOT NULL AND expires_at < now()` to flip stale
+     * rows to `expired`.
+     */
+    expiresAt: timestamp("expires_at"),
+    state: invitationState("state").notNull().default("invited"),
+    respondedAt: timestamp("responded_at"),
+    /** D1  populated only when state is `accepted_with_notice`. NULL
+        otherwise. Months because that's the dominant unit in SA notice
+        cultures (1-month / 3-month). */
+    noticePeriodMonths: integer("notice_period_months"),
+    /** 9.8.5  set when state=`declined`. The structured enum keeps
+        the "why roles go unfilled" aggregate honest; the free-text
+        note lives in `decline_note` below. */
+    declineReason: declineReason("decline_reason"),
+    /** D3  200-char cap enforced at the action boundary too. Treated
+        as PII in exports + audit-log meta (the seeker may inadvertently
+        include identifying detail despite the on-screen reminder). */
+    declineNote: text("decline_note"),
+  },
+  (t) => ({
+    /**
+     * One invitation per (vacancy, profile). Re-inviting the same
+     * person on the same vacancy is a no-op; the bulk-invite action
+     * surfaces this as the `already_invited` skip reason in the audit
+     * log (UI shows the soft summary only).
+     */
+    uniqueInvite: uniqueIndex("vacancy_invitations_vacancy_profile_uq").on(
+      t.vacancyId,
+      t.profileId,
+    ),
+    /** Employer detail page: list this vacancy's pipeline grouped by state. */
+    vacancyStateIdx: index("vacancy_invitations_vacancy_state_idx").on(
+      t.vacancyId,
+      t.state,
+    ),
+    /** Seeker inbox: list this seeker's invitations grouped by state. */
+    profileStateIdx: index("vacancy_invitations_profile_state_idx").on(
+      t.profileId,
+      t.state,
+    ),
+    /** Cron sweep: find `invited` rows past their `expires_at`. Partial-
+        index-like discipline via WHERE in the query (Drizzle's basic
+        index() doesn't accept a WHERE clause; the index still helps
+        the cron's range scan). */
+    expiryIdx: index("vacancy_invitations_expires_at_idx").on(t.expiresAt),
   }),
 );
 

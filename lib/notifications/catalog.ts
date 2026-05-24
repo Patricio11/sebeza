@@ -159,6 +159,36 @@ export const NOTIFICATION_CATALOG = {
     description: "Phase 8 cron rolls these up daily.",
     dedupeWindowSeconds: 24 * 60 * 60,
   },
+  // ──────────────────────────────────────────────────────────────────────
+  // Phase 9.8.4  vacancy invitations
+  // ──────────────────────────────────────────────────────────────────────
+  "vacancy.invite": {
+    defaultInApp: true,
+    defaultEmail: false, // email channel dormant until Resend flips on
+    audience: "seeker",
+    label: "A verified employer flagged you for a specific role",
+    description:
+      "Sent when an employer invites you to a vacancy they're trying to fill. You can accept, decline, or decline with a reason. Declining is free  it never affects your visibility in search.",
+    dedupeWindowSeconds: 0, // every distinct invite is its own notification
+  },
+  "vacancy.invite.expired": {
+    defaultInApp: true,
+    defaultEmail: false,
+    audience: "seeker",
+    label: "A vacancy invite expired without a response",
+    description:
+      "Polite reminder when an invitation's response window passed. The role may have been filled in the meantime  no action required.",
+    dedupeWindowSeconds: 0,
+  },
+  "vacancy.invite.unanswered": {
+    defaultInApp: true,
+    defaultEmail: false,
+    audience: "org_members",
+    label: "An invited seeker didn't respond in time",
+    description:
+      "Fires nightly when a vacancy invitation passes its expiry window without an accept or decline. Helps you keep your pipeline honest.",
+    dedupeWindowSeconds: 0,
+  },
 } as const satisfies Record<string, NotificationKindMeta>;
 
 export type NotificationKind = keyof typeof NOTIFICATION_CATALOG;

@@ -120,6 +120,13 @@
       "when": 1779880000000,
       "tag": "0016_phase9_8_3_vacancy_matching_consent",
       "breakpoints": false
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1779890000000,
+      "tag": "0017_phase9_8_4_vacancy_invitations",
+      "breakpoints": false
     }
   ]
 }

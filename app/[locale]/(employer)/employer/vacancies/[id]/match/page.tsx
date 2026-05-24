@@ -24,16 +24,23 @@
 import { setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { Link } from "@/i18n/navigation";
+import { inArray } from "drizzle-orm";
 import { DashboardShell } from "@/components/layout/DashboardShell";
 import { EMPLOYER_NAV, MOCK_EMPLOYER } from "@/components/layout/employerNav";
 import { verifyEmployer } from "@/lib/auth/dal";
 import {
+  getMyOrgRole,
   getMyVacancy,
   matchVacancyCandidates,
 } from "@/lib/employer/vacancies";
+import { canEditVacancies } from "@/lib/employer/vacancies-types";
+import { getInvitedProfileIdsForVacancy } from "@/lib/employer/invitations";
 import { TalentRosterItem } from "@/components/ui/TalentRosterItem";
 import { VacancyStatusChip } from "@/components/feature/employer/vacancies/VacancyStatusChip";
+import { BulkInviteIsland } from "@/components/feature/employer/vacancies/BulkInviteIsland";
 import { PROVINCES, PROFESSIONS } from "@/lib/mock/taxonomy";
+import { getDb } from "@/db/client";
+import * as schema from "@/db/schema";
 import { ChevronLeft, MapPin, Search, Users } from "lucide-react";
 
 export const revalidate = 0;
@@ -50,8 +57,35 @@ export default async function VacancyMatchPage({
   const vacancy = await getMyVacancy(id);
   if (!vacancy) notFound();
 
-  const match = await matchVacancyCandidates(vacancy);
+  const [match, role, alreadyInvitedProfileIds] = await Promise.all([
+    matchVacancyCandidates(vacancy),
+    getMyOrgRole(),
+    getInvitedProfileIdsForVacancy(vacancy.id),
+  ]);
   const { candidates, counts, filters } = match;
+  const canInvite =
+    canEditVacancies(role) &&
+    (vacancy.status === "open" || vacancy.status === "draft");
+
+  // Resolve handle  profileId for the candidates on this page so the
+  // bulk-invite client island can submit profile IDs (the Server Action
+  // accepts profile IDs; the public profile shape only carries the
+  // handle to keep /search payloads minimal). One round trip; the list
+  // is SEARCH_LIMIT-capped at 50 rows.
+  const handleToProfileId = new Map<string, string>();
+  if (candidates.length > 0) {
+    const db = getDb();
+    const rows = await db
+      .select({ id: schema.profiles.id, handle: schema.profiles.handle })
+      .from(schema.profiles)
+      .where(
+        inArray(
+          schema.profiles.handle,
+          candidates.map((c) => c.handle),
+        ),
+      );
+    for (const r of rows) handleToProfileId.set(r.handle, r.id);
+  }
 
   const professionLabel =
     PROFESSIONS.find((p) => p.slug === vacancy.professionSlug)?.label ??
@@ -150,28 +184,47 @@ export default async function VacancyMatchPage({
         />
       ) : (
         <>
-          <ol className="border-t border-[color:var(--color-hairline)]">
-            {candidates.map((p) => (
-              <li key={p.handle}>
-                <TalentRosterItem
-                  profile={p}
-                  locale={locale}
-                  highlightCitizen
-                />
-                {/* Phase 9.8.4 will add the bulk-invite affordance on
-                    top of these rows. For 9.8.2 the existing dossier
-                    flow is the next step. */}
-                <div className="-mt-2 mb-4 ml-16 flex flex-wrap items-center justify-end gap-3 text-xs">
-                  <Link
-                    href={`/employer/dossier/${p.handle}` as never}
-                    className="inline-flex h-9 items-center gap-2 rounded-[var(--radius-pill)] border border-[color:var(--color-ink)] px-3 font-medium text-[color:var(--color-ink)] hover:bg-[color:var(--color-ink)] hover:text-[color:var(--color-paper)]"
-                  >
-                    Open dossier
-                  </Link>
-                </div>
-              </li>
-            ))}
-          </ol>
+          {!canInvite && (vacancy.status === "closed" || vacancy.status === "filled") && (
+            <p className="mb-4 rounded-[var(--radius-sm)] border border-dashed border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] px-4 py-3 text-xs text-[color:var(--color-ink-soft)]">
+              This vacancy is <strong>{vacancy.status}</strong>  invites
+              are disabled. Re-open the vacancy if you want to reach out
+              to new candidates.
+            </p>
+          )}
+          <BulkInviteIsland
+            vacancyId={vacancy.id}
+            vacancyTitle={vacancy.title}
+            canInvite={canInvite}
+            items={candidates
+              .map((p) => {
+                const profileId = handleToProfileId.get(p.handle);
+                if (!profileId) return null; // shouldn't happen; guard anyway
+                return {
+                  profileId,
+                  handle: p.handle,
+                  displayName: p.displayName,
+                  alreadyInvited: alreadyInvitedProfileIds.has(profileId),
+                  row: (
+                    <>
+                      <TalentRosterItem
+                        profile={p}
+                        locale={locale}
+                        highlightCitizen
+                      />
+                      <div className="-mt-2 mb-4 ml-16 flex flex-wrap items-center justify-end gap-3 text-xs">
+                        <Link
+                          href={`/employer/dossier/${p.handle}` as never}
+                          className="inline-flex h-9 items-center gap-2 rounded-[var(--radius-pill)] border border-[color:var(--color-ink)] px-3 font-medium text-[color:var(--color-ink)] hover:bg-[color:var(--color-ink)] hover:text-[color:var(--color-paper)]"
+                        >
+                          Open dossier
+                        </Link>
+                      </div>
+                    </>
+                  ),
+                };
+              })
+              .filter((x): x is NonNullable<typeof x> => x !== null)}
+          />
 
           {candidates.length >= 50 && (
             <p className="mt-6 rounded-[var(--radius-sm)] border border-dashed border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] px-4 py-3 text-xs text-[color:var(--color-ink-soft)]">
@@ -184,12 +237,10 @@ export default async function VacancyMatchPage({
         </>
       )}
 
-      {/* Phase 9.8.4 nudge  remind the build what's coming next. */}
+      {/* Phase 9.8.5 nudge  what's coming next on this same flow. */}
       <p className="mt-8 text-xs italic text-[color:var(--color-ink-soft)]">
-        Phase 9.8.2 surfaces the matches. The <strong>bulk-invite</strong>
-        action (multi-select  &ldquo;Invite to opportunity&rdquo;) +
-        accept / decline-with-reason / reconsider lifecycle lands in
-        9.8.4  9.8.5.
+        Phase 9.8.4 ships the bulk-invite. The seeker accept /
+        decline-with-reason / reconsider lifecycle lands in 9.8.5.
       </p>
 
       {/* Hidden session ref to silence the unused-var lint when this

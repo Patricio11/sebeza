@@ -36,6 +36,11 @@ import {
 } from "@/lib/employer/vacancies-types";
 import { VacancyForm } from "@/components/feature/employer/vacancies/VacancyForm";
 import { VacancyStatusChip } from "@/components/feature/employer/vacancies/VacancyStatusChip";
+import { VacancyInvitationsPanel } from "@/components/feature/employer/vacancies/VacancyInvitationsPanel";
+import {
+  listInvitationsForVacancy,
+  withdrawInvitation,
+} from "@/lib/employer/invitations";
 import { getProfessions } from "@/lib/taxonomy/query";
 import { PROVINCES, PROFESSIONS, SKILLS } from "@/lib/mock/taxonomy";
 import { ChevronLeft, Lock, MapPin, Users } from "lucide-react";
@@ -58,6 +63,7 @@ export default async function VacancyDetailPage({
   if (!vacancy) notFound();
   const canEdit = canEditVacancies(role);
   const showSalary = canSeeSalary(role);
+  const invitations = await listInvitationsForVacancy(vacancy.id);
 
   const professions = await getProfessions();
 
@@ -142,6 +148,23 @@ export default async function VacancyDetailPage({
       </div>
 
       {!canEdit && <ViewerNotice />}
+
+      {/* Phase 9.8.4  Pipeline of invitations sent on this vacancy.
+          Visible to all roles (Viewers can see who's in the pipeline);
+          withdraw action is Owner/Recruiter-only and only available
+          while an invite is still in the `invited` state. */}
+      {invitations.length > 0 && (
+        <VacancyInvitationsPanel
+          invitations={invitations}
+          canEdit={canEdit}
+          locale={locale}
+          withdrawAction={async (invitationId: string) => {
+            "use server";
+            const res = await withdrawInvitation({ invitationId });
+            return res.ok ? { ok: true } : { ok: false, message: res.message };
+          }}
+        />
+      )}
 
       {/* Status transition actions  Owner/Recruiter only */}
       {canEdit && NEXT_STATES[vacancy.status].length > 0 && (
