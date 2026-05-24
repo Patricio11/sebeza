@@ -54,7 +54,7 @@ export default async function GovExportsPage({
         <ExportCard
           title="Skills-Shortage Justification Index"
           href="/api/gov/justification-index/export"
-          desc="Per (profession × province) cell: classification + demand_score + local_supply_ratio + foreign_fill_share + placement counts. Same suppression + threshold rules as /gov/shortage. Add ?province=Gauteng for a province slice."
+          desc="Per (profession × province) cell: classification + demand_score + local_supply_ratio + foreign_fill_share + placement counts. Same suppression + threshold rules as /gov/shortage AND /gov/opportunity. Filter to opportunities in your spreadsheet by classification = supply_available. Add ?province=Gauteng for a province slice."
         />
       </ul>
     </DashboardShell>

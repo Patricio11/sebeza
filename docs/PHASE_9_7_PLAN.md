@@ -260,15 +260,28 @@ carry no per-employer surface and no public-facing legal-claim copy.
       to Neon · `npm run build` clean (`/api/gov/justification-index/export` in the route
       manifest). Commit `<TBD>`.
 
-### Task 9.7.4: Local-Hiring Opportunity Map (the actionable flip side)
-- [ ] A `/gov` view highlighting `profession × province` cells classified *Local supply available* —
-      i.e. where government can push local-hiring incentives **without** harming employers who genuinely
-      can't find local talent.
-- [ ] Reuse the existing supply-heatmap component pattern (no new map libs — No-Flash Rule).
-- [ ] Drill-down links to `/search?q=<profession>&province=<slug>` (reuse 6.5 heatmap drill pattern), so a
-      policy user can see the actual available local talent behind the number.
-- [ ] Suppressed + freshness-weighted.
-- [ ] Legend uses the **ESA §8** framing from D2: "where §8 has practical force."
+### Task 9.7.4: Local-Hiring Opportunity Map (the actionable flip side) ✅ 2026-05-24
+- [x] New `/gov/opportunity` page. Reuses `justificationIndexQuery()` (no new query) and filters
+      to cells classified `supply_available`. Grouped by province; cells sorted by sa_supply
+      descending; bars normalised across provinces so cross-province comparison reads honestly.
+- [x] New `<OpportunityHeatmap>` component  CSS Grid + brand colour, no new map libraries
+      (No-Flash Rule). The "heatmap" idea is a grid of bars, not a choropleth.
+- [x] Drill-down per cell to `/search?q=<profession>&province=<province>` so policy users see
+      the actual talent behind the number. Same convention as the 6.5 heatmap and the 9.7.3 table.
+- [x] Inherits k=10 + complementary suppression from `justificationIndexQuery` (no separate
+      suppression pass needed; the query has already dropped sub-k SA-supply cells).
+- [x] ESA §8 framing in the legend per D2: dedicated framing strip on the page heads "Where §8
+      has practical force," names the Act explicitly (Employment Services Act 4 of 2014 §8),
+      and cross-references `/gov/shortage` so the reader sees the *complement* of where §8
+      enforcement is harder. Counsel-review caveat (DPIA R9) printed beneath.
+- [x] Headline tiles: opportunity-cell count · freshness-weighted SA supply available · shortage-
+      cell count (cross-reference). Province filter chips like 9.7.3.
+- [x] New nav entry "Local-hiring opportunity" (Sprout icon) in `GOV_NAV`, paired alongside
+      "Shortage justification".
+- [x] No new CSV export  the 9.7.3 export already carries the `classification` column. The
+      `/gov/exports` description now mentions filtering to `supply_available` in a spreadsheet.
+- [x] Verified: `npm test` 22/22 green · `npm run typecheck` clean · `npm run build` clean.
+      Commit `<TBD>`.
 
 ### Task 9.7.5: Employer self-view — "Your hiring on Sebenza" (low-risk, genuinely useful)
 - [ ] On the employer dashboard: a card showing **the employer's own** `employer_confirmed` placement mix

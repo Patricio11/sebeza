@@ -5,6 +5,7 @@ import {
   Download,
   UserCog,
   Scale,
+  Sprout,
 } from "lucide-react";
 import type { DashboardNavItem } from "./DashboardShell";
 
@@ -21,6 +22,12 @@ export const GOV_NAV: DashboardNavItem[] = [
     label: "Shortage justification",
     href: "/gov/shortage",
     icon: Scale,
+  },
+  {
+    key: "opportunity",
+    label: "Local-hiring opportunity",
+    href: "/gov/opportunity",
+    icon: Sprout,
   },
   {
     key: "municipalities",
