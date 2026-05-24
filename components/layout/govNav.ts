@@ -7,6 +7,7 @@ import {
   Scale,
   Sprout,
   FileSearch,
+  FileText,
 } from "lucide-react";
 import type { DashboardNavItem } from "./DashboardShell";
 
@@ -50,6 +51,12 @@ export const GOV_NAV: DashboardNavItem[] = [
     label: "Exports",
     href: "/gov/exports",
     icon: Download,
+  },
+  {
+    key: "brief",
+    label: "Policy brief",
+    href: "/gov/brief",
+    icon: FileText,
   },
   { key: "account", label: "My account", href: "/gov/account", icon: UserCog },
 ];

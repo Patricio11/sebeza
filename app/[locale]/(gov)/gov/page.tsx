@@ -8,7 +8,7 @@ import { skillsGapQuery, freshnessBreakdownQuery } from "@/db/queries/analytics"
 import { outcomesQuery } from "@/lib/analytics/outcomes";
 import { statusMixByNationalityQuery } from "@/db/queries/nationality";
 import { getSetting } from "@/lib/admin/settings";
-import { ArrowDown, ArrowUp, Minus, MapPin, Download, Users } from "lucide-react";
+import { ArrowDown, ArrowUp, Minus, MapPin, Download, Users, FileText } from "lucide-react";
 import { NationalityStatusMixCard } from "@/components/feature/gov/NationalityStatusMixCard";
 
 export const revalidate = 300;
@@ -59,14 +59,24 @@ export default async function GovOverviewPage({
       pageTitle="Sebenza Labour Market Index"
       pageSubtitle="One number, three components. Updated nightly. Not an official Stats SA statistic  opinionated index, formula published."
       pageActions={
-        <Link
-          href="/api/lmi"
-          prefetch={false}
-          className="inline-flex h-10 items-center gap-2 rounded-[var(--radius-pill)] border border-[color:var(--color-hairline)] px-4 text-sm font-medium hover:border-[color:var(--color-ink)]"
-        >
-          <Download className="size-4" aria-hidden="true" />
-          JSON
-        </Link>
+        <div className="flex flex-wrap items-center gap-2">
+          <Link
+            href="/gov/brief"
+            prefetch={false}
+            className="inline-flex h-10 items-center gap-2 rounded-[var(--radius-pill)] bg-[color:var(--color-ink)] px-4 text-sm font-medium text-[color:var(--color-paper)] shadow-press hover:-translate-y-0.5"
+          >
+            <FileText className="size-4" aria-hidden="true" />
+            Policy brief (print)
+          </Link>
+          <Link
+            href="/api/lmi"
+            prefetch={false}
+            className="inline-flex h-10 items-center gap-2 rounded-[var(--radius-pill)] border border-[color:var(--color-hairline)] px-4 text-sm font-medium hover:border-[color:var(--color-ink)]"
+          >
+            <Download className="size-4" aria-hidden="true" />
+            JSON
+          </Link>
+        </div>
       }
     >
       {/* LMI hero */}

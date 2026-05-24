@@ -385,12 +385,33 @@ the legal-claim caveat explicit. Once counsel signs off, remove the `<DraftBanne
 - [x] Verified: `npm test` 22/22 green · `npm run typecheck` clean · `npm run build` clean ·
       migration `0014` applied to Neon. Commit `<TBD>`.
 
-### Task 9.7.8: Scheduled LMI / nationality brief for `gov` (kept in scope)
-- [ ] Reuse `/insights/print` print-CSS + the LMI cron infra. Minimum viable: a `/gov/brief` print-CSS
-      page (the cron-to-PDF + email distribution is the optional extension). The recurring artifact
-      is the *point* — the data without it is invisible to policy users.
-- [ ] Compose: LMI headline + shortage / opportunity highlights + suppressed nationality dimension.
-- [ ] No new infra; assembly of existing pieces.
+### Task 9.7.8: Government policy brief ✅ 2026-05-24 (page-only; cron + email distribution deferred)
+- [x] New `/gov/brief` page using the `/insights/print` print-CSS pattern (`@media print { @page A4 }`,
+      `page-break-inside-avoid` sections, `<PrintActions />` window-print button for one-tap PDF via the
+      browser's File  Save as PDF). No server-side PDF library.
+- [x] Composes existing pieces  no new query layer:
+      1. LMI headline + three weighted components + week-over-week delta (`lmiWithTrend()` from 9.4).
+      2. Top 10 genuine local shortage cells (`justificationIndexQuery()` filtered to
+         `label === 'shortage'`, sorted by `demand_score` descending).
+      3. Top 10 local supply available cells (same query, `label === 'supply_available'`, sorted by
+         `sa_supply` descending).
+      4. National status × nationality_class table, k-suppressed (from 9.7.2's
+         `statusMixByNationalityQuery()`).
+- [x] Honest framing throughout: shortage section frames as "training-investment signal,"
+      opportunity section frames as "where ESA §8 has practical force." Footer carries the LMI
+      formula pointer + DPIA R9 counsel-review caveat for the legal copy.
+- [x] `gov`/`admin`-gated via `verifyGov()`. `robots: { index: false, follow: false }` so crawlers
+      don't index a policy-sensitive print artefact.
+- [x] Discovery: new `GOV_NAV` entry "Policy brief" (FileText icon) after Exports + a prominent
+      "Policy brief (print)" CTA on the `/gov` overview pageActions (ink-tone primary, next to the
+      existing JSON download).
+- [x] Cron + email distribution intentionally deferred (per plan: "the cron-to-PDF + email
+      distribution is the optional extension"). The LMI nightly cron is the template when this
+      lands  out of scope here.
+- [x] Files: `app/[locale]/(gov)/gov/brief/page.tsx`, `components/layout/govNav.ts` (nav entry +
+      FileText import), `app/[locale]/(gov)/gov/page.tsx` (pageActions CTA + FileText import).
+- [x] Verified: `npm test` 22/22 green · `npm run typecheck` clean · `npm run build` clean.
+      Commit `<TBD>`.
 
 ### Task 9.7.9: Wiring, verification, doc convention
 - [ ] All new strings in `messages/en.json`; `zu/xh/af` deepMerge fallback (full translation Phase 10).
