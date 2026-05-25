@@ -134,6 +134,13 @@
       "when": 1779900000000,
       "tag": "0018_phase9_9_years_experience",
       "breakpoints": false
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1779910000000,
+      "tag": "0019_phase9_10_org_vetting",
+      "breakpoints": false
     }
   ]
 }

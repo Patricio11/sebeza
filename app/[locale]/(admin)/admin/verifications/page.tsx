@@ -2,15 +2,13 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { DashboardShell } from "@/components/layout/DashboardShell";
 import { ADMIN_NAV, MOCK_ADMIN } from "@/components/layout/adminNav";
-import { VerificationBadge } from "@/components/ui/VerificationBadge";
 import { verifyAdmin } from "@/lib/auth/dal";
-import {
-  listPendingQualifications,
-  listPendingOrganisations,
-} from "@/lib/admin/verifications-query";
+import { listPendingQualifications } from "@/lib/admin/verifications-query";
+import { listOrgsForReview } from "@/lib/admin/org-vetting";
 import { VerificationActions } from "@/components/feature/admin/VerificationActions";
+import { OrgReviewLauncher } from "@/components/feature/admin/OrgReviewLauncher";
 import { getSetting } from "@/lib/admin/settings";
-import { FileText } from "lucide-react";
+import { CheckCircle2, Clock, FileText, ShieldOff, XCircle } from "lucide-react";
 
 export default async function VerificationsPage({
   params,
@@ -26,11 +24,14 @@ export default async function VerificationsPage({
   const active = tab === "organisations" ? "organisations" : "qualifications";
 
   const t = await getTranslations("adminDash.verifications");
-  const [quals, orgs, saqaWorkerEnabled] = await Promise.all([
+  const [quals, orgGroups, saqaWorkerEnabled] = await Promise.all([
     listPendingQualifications(),
-    listPendingOrganisations(),
+    listOrgsForReview(),
     getSetting<boolean>("feature_flag_saqa_worker"),
   ]);
+  // Default org sub-view = pending (the actionable queue); drafts are
+  // pre-submission, rejected + verified are history.
+  const orgsActionable = orgGroups.pending.length + orgGroups.unverified.length;
 
   const relTime = new Intl.RelativeTimeFormat(locale, { numeric: "auto" });
   function relative(d: Date | string | null | undefined): string {
@@ -65,7 +66,7 @@ export default async function VerificationsPage({
         <TabLink
           active={active === "organisations"}
           href={{ pathname: "/admin/verifications", query: { tab: "organisations" } }}
-          label={`${t("tabs.organisations")} · ${orgs.length}`}
+          label={`${t("tabs.organisations")} · ${orgsActionable}`}
         />
       </nav>
 
@@ -133,40 +134,53 @@ export default async function VerificationsPage({
             ))}
           </ul>
         )
-      ) : orgs.length === 0 ? (
-        <EmptyQueue
-          title="No organisations awaiting verification."
-          note="New employers will appear here after sign-up."
-        />
       ) : (
-        <ul className="space-y-3">
-          {orgs.map((o) => (
-            <li
-              key={o.id}
-              className="grid grid-cols-1 gap-4 rounded-[var(--radius-md)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-5 md:grid-cols-[1fr_auto] md:items-center"
-            >
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="font-display text-lg">{o.name}</span>
-                  <VerificationBadge state="pending" />
-                </div>
-                <div className="text-sm text-[color:var(--color-ink-soft)]">
-                  {o.registrationNumber ? `CIPC ${o.registrationNumber}` : "No CIPC on file"}
-                  {o.industry ? ` · ${o.industry}` : ""}
-                </div>
-                <div className="mt-1 text-xs text-[color:var(--color-ink-soft)]">
-                  Submitted {relative(o.createdAt)}
-                </div>
-              </div>
-              <VerificationActions
-                id={o.id}
-                kind="organisation"
-                approveLabel={t("approve")}
-                rejectLabel={t("reject")}
-              />
-            </li>
-          ))}
-        </ul>
+        <div className="space-y-8">
+          {/* Pending review  the actionable queue */}
+          <OrgGroup
+            title={`Pending review · ${orgGroups.pending.length}`}
+            tone="brand"
+            icon={Clock}
+            emptyTitle="Nothing pending."
+            emptyNote="Submitted onboarding applications will appear here. Drafts (not yet submitted) live in the section below."
+            orgs={orgGroups.pending}
+            relative={relative}
+          />
+          {/* Drafts  Owner hasn't submitted yet */}
+          <OrgGroup
+            title={`Drafts · ${orgGroups.unverified.length}`}
+            tone="muted"
+            icon={ShieldOff}
+            emptyTitle="No drafts."
+            emptyNote="New employers go here after signup, before they submit documents."
+            orgs={orgGroups.unverified}
+            relative={relative}
+          />
+          {/* Rejected  history */}
+          {orgGroups.rejected.length > 0 && (
+            <OrgGroup
+              title={`Rejected · ${orgGroups.rejected.length}`}
+              tone="danger"
+              icon={XCircle}
+              emptyTitle=""
+              emptyNote=""
+              orgs={orgGroups.rejected}
+              relative={relative}
+            />
+          )}
+          {/* Verified  history */}
+          {orgGroups.verified.length > 0 && (
+            <OrgGroup
+              title={`Verified · ${orgGroups.verified.length}`}
+              tone="accent"
+              icon={CheckCircle2}
+              emptyTitle=""
+              emptyNote=""
+              orgs={orgGroups.verified}
+              relative={relative}
+            />
+          )}
+        </div>
       )}
     </DashboardShell>
   );
@@ -202,5 +216,88 @@ function EmptyQueue({ title, note }: { title: string; note: string }) {
       <p className="font-display text-lg text-[color:var(--color-ink)]">{title}</p>
       <p className="mt-1">{note}</p>
     </div>
+  );
+}
+
+// Phase 9.10  per-state group on the admin organisations tab.
+function OrgGroup({
+  title,
+  tone,
+  icon: Icon,
+  emptyTitle,
+  emptyNote,
+  orgs,
+  relative,
+}: {
+  title: string;
+  tone: "brand" | "muted" | "danger" | "accent";
+  icon: typeof CheckCircle2;
+  emptyTitle: string;
+  emptyNote: string;
+  orgs: Awaited<ReturnType<typeof listOrgsForReview>>["pending"];
+  relative: (d: Date | string | null | undefined) => string;
+}) {
+  const toneClass: Record<typeof tone, string> = {
+    brand: "text-[color:var(--color-brand-strong)]",
+    muted: "text-[color:var(--color-ink-soft)]",
+    danger: "text-[color:var(--color-danger)]",
+    accent: "text-[color:var(--color-accent)]",
+  };
+  return (
+    <section>
+      <header className="mb-3 flex items-center gap-2 border-b border-[color:var(--color-hairline)] pb-2">
+        <Icon className={`size-4 ${toneClass[tone]}`} aria-hidden="true" />
+        <h2 className="font-display text-base text-[color:var(--color-ink)]">
+          {title}
+        </h2>
+      </header>
+      {orgs.length === 0 ? (
+        emptyTitle ? (
+          <EmptyQueue title={emptyTitle} note={emptyNote} />
+        ) : null
+      ) : (
+        <ul className="space-y-3">
+          {orgs.map((o) => (
+            <li
+              key={o.id}
+              className="grid grid-cols-1 gap-4 rounded-[var(--radius-md)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-5 md:grid-cols-[1fr_auto] md:items-center"
+            >
+              <div className="min-w-0">
+                <div className="flex flex-wrap items-baseline gap-2">
+                  <span className="font-display text-lg">{o.name}</span>
+                  <span className="font-mono text-[0.6rem] uppercase tracking-[0.18em] text-[color:var(--color-ink-soft)]">
+                    {o.id}
+                  </span>
+                </div>
+                <div className="text-sm text-[color:var(--color-ink-soft)]">
+                  {o.registrationNumber
+                    ? `CIPC ${o.registrationNumber}`
+                    : "No CIPC on file"}
+                  {o.industry ? `  ${o.industry}` : ""}
+                  {o.country ? `  ${o.country}` : ""}
+                </div>
+                <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-[color:var(--color-ink-soft)]">
+                  <span>Created {relative(o.createdAt)}</span>
+                  <span aria-hidden="true">·</span>
+                  <span>
+                    {o.documentCount} doc{o.documentCount === 1 ? "" : "s"}
+                  </span>
+                  {o.ownerEmail && (
+                    <>
+                      <span aria-hidden="true">·</span>
+                      <span>
+                        Owner: {o.ownerName ?? "?"} ({o.ownerEmail}
+                        {o.ownerEmailVerified ? "" : "  unverified email"})
+                      </span>
+                    </>
+                  )}
+                </div>
+              </div>
+              <OrgReviewLauncher orgId={o.id} />
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
   );
 }

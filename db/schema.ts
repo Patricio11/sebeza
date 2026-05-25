@@ -423,7 +423,60 @@ export const organizations = pgTable("organizations", {
   city: text("city"),
   country: text("country").notNull().default("South Africa"),
   verification: verificationStatus("verification").notNull().default("unverified"),
+  /**
+   * Phase 9.10  the org vetting lifecycle columns. NULL until the
+   * admin reviews the submission:
+   *   - verifiedAt        : timestamp of admin approval
+   *   - verifiedByUserId  : the admin who approved (audit trail)
+   *   - rejectionReason   : free text shown to the org owner when
+   *                         verification = 'rejected'
+   *   - adminNote         : free text shown as a yellow banner on
+   *                         the onboarding form when admin clicked
+   *                         "Request Changes". Cleared on resubmit.
+   *   - companyAddress    : physical address (captured at onboarding,
+   *                         not at signup  signup stays low-friction)
+   *   - vatNumber         : optional, captured at onboarding
+   */
+  verifiedAt: timestamp("verified_at"),
+  verifiedByUserId: text("verified_by_user_id").references((): AnyPgColumn => appUser.id),
+  rejectionReason: text("rejection_reason"),
+  adminNote: text("admin_note"),
+  companyAddress: text("company_address"),
+  vatNumber: text("vat_number"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+/**
+ * Phase 9.10  org document enum + table.
+ *
+ * The four required SA-standard KYC documents are baked into the
+ * enum (D1 in PHASE_9_10_PLAN.md): admin-managed-requirements CRUD
+ * is deferred post-launch. `other` allows a single optional
+ * supporting doc (e.g. SARB licence for a financial-services org).
+ */
+export const orgDocumentKind = pgEnum("org_document_kind", [
+  "company_reg_cert",   // CIPC / CK1 / CK2 document
+  "tax_clearance",      // SARS pin or letter
+  "proof_of_address",   //  3 months old
+  "bank_confirmation",  // bank letter
+  "other",              // optional supporting doc
+]);
+
+export const organizationDocuments = pgTable("organization_documents", {
+  id: text("id").primaryKey(),
+  organizationId: text("organization_id")
+    .notNull()
+    .references((): AnyPgColumn => organizations.id, { onDelete: "cascade" }),
+  kind: orgDocumentKind("kind").notNull(),
+  originalName: text("original_name").notNull(),
+  /** Supabase Storage object key: `{userId}/org-documents/{id}.{ext}` */
+  storageKey: text("storage_key").notNull(),
+  mimeType: text("mime_type").notNull(),
+  sizeBytes: integer("size_bytes").notNull(),
+  uploadedByUserId: text("uploaded_by_user_id")
+    .notNull()
+    .references((): AnyPgColumn => appUser.id),
+  uploadedAt: timestamp("uploaded_at").notNull().defaultNow(),
 });
 
 /** Per-employer team membership. Each member's PII access is audit-logged

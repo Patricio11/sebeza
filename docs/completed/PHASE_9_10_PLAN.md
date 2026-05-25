@@ -102,83 +102,59 @@ All 5 KYC emails (verification reminder, submitted, approved, rejected, request-
 
 ## 📋 TASKS
 
-### Task 9.10.1: Schema + signup wiring
-- [ ] Migration `0019_phase9_10_org_vetting.sql` (additive):
-      - `organizations` += `verified_at` timestamp, `verified_by_user_id` text FK to `app_user.id`, `rejection_reason` text, `admin_note` text. All nullable.
-      - New table `organization_documents`: `id`, `organization_id` (FK CASCADE), `kind` (enum: `company_reg_cert` / `tax_clearance` / `proof_of_address` / `bank_confirmation` / `other`), `original_name`, `storage_key`, `mime_type`, `size_bytes`, `uploaded_by_user_id` FK, `uploaded_at` timestamp default now. Unique on (organization_id, kind) for the 4 required slots; `other` allows multiple.
-- [ ] Drizzle schema + types extended.
-- [ ] **`signUpEmployer`** Server Action: confirm it creates the `organizations` row at signup (if not already); if not, add the insert with `verification: 'unverified'` + the user as Owner.
-- [ ] AuditKind union extended with `org.review.approve`, `org.review.reject`, `org.review.request-changes`, `verification.manual-grant`, `org.documents.upload`.
-- [ ] Migration applied to Neon.
+### Task 9.10.1: Schema + signup wiring ✅ 2026-05-25
+- [x] Migration `0019_phase9_10_org_vetting.sql` shipped: 6 new columns on `organizations` (`verified_at`, `verified_by_user_id` FK, `rejection_reason`, `admin_note`, `company_address`, `vat_number`); new `organization_documents` table with `org_document_kind` enum (5 values incl. `other`); UNIQUE partial index on (`organization_id`, `kind`) WHERE kind <> 'other' (one row per required kind; `other` is append-only); secondary index on `organization_id` for the admin review query. Applied to Neon.
+- [x] Drizzle schema mirrors the migration; types extended; `AnyPgColumn` already imported from 9.9 work.
+- [x] Pre-flight confirmed: `signUpEmployer` (`lib/auth/actions.ts:259`) already creates the org row with `verification: "unverified"` + the user as `owner`. No signup change needed.
+- [x] AuditKind union extended with 7 new kinds (`org.submit`, `org.review.approve`, `org.review.reject`, `org.review.request-changes`, `org.documents.upload`, `org.verification.resend`, `verification.manual-grant`).
+- [x] `lib/storage/upload.ts` extended with `uploadOrgDocument()`  same magic-byte sniff + rate limit + size cap as `uploadDocument()`, different folder (`{ownerUserId}/org-documents/...`).
 
-### Task 9.10.2: Onboarding form + status screens
-- [ ] New surface `/employer/onboarding` (route NOT under the new `(verified)` group)  server-rendered, status-driven, five sub-views:
-      - **emailVerified=false**  *"Verify your email to continue"* + resend button (re-uses existing `/api/auth/resend-verification`)
-      - **`unverified` + `emailVerified`**  the onboarding form (4 required document slots + 1 optional, physical address textarea, VAT number optional)
-      - **`pending`**  *"Thanks  your application is under review. We typically respond within one business day."* No actions.
-      - **`verified`**  auto-redirect to `/employer` after 2s, with green confirmation.
-      - **`rejected`**  red callout with `rejection_reason` verbatim + *"Contact support if you'd like to discuss."*
-- [ ] **`<OrgOnboardingForm>`** (client island):
-      - 4 required file inputs + 1 optional + address + VAT.
-      - Sequential uploads on submit with progress (*"Uploading 3 of 5…"*).
-      - Pre-fill from the org row so a request-changes resubmission starts with previous values (except docs  see D5).
-      - Yellow banner at the top when `adminNote` is set; cleared on submit.
-      - Mobile-first: single column on phones; file inputs are tap-friendly; the submit button stays sticky at the bottom of the form on mobile.
-- [ ] **`submitOrgOnboarding`** Server Action:
-      - Validates required fields + required docs.
-      - Replaces the `organization_documents` set (delete-then-insert in a transaction).
-      - Flips `organizations.verification` to `'pending'`, clears `admin_note`.
-      - Fires `verification.queued` notification to all admins (in-app + email).
-      - Fires submission-confirmation email to the org Owner.
-      - Audit-logged as `org.documents.upload` (per doc) and `org.review.request-changes`  no, just one `org.submit` audit row with doc count. **Reserve `org.submit` audit kind in 9.10.1.**
+### Task 9.10.2: Onboarding form + status screens ✅ 2026-05-25
+- [x] `/employer/onboarding` page shipped with all 5 status-aware sub-views (emailVerified=false  unverified + draft/resubmit  pending  verified  rejected). Verified state server-redirects immediately to `/employer` (no flashy 2s wait). Resubmit case shows a yellow banner pinned at the top with the admin's note + clears on submit (server-side state transition).
+- [x] `<OrgOnboardingForm>` client island shipped. **Architectural deviation from the plan**: per-file upload as the user picks them (not "sequential on submit") via the new `uploadOrgDocumentFile` Server Action. Simpler  one upload = one request via FormData; the server replaces the previous file of the same required kind on each pick. `other` is append-only up to 3 (OTHER_DOC_CAP). Renders progress per-file via the upload button state. Mobile-first: form sticky submit bar on phones; document slots stack full-width at 360 px wide.
+- [x] `lib/employer/vetting.ts` (Server Actions, Owner-only):
+      `uploadOrgDocumentFile(formData)`  validates + uploads + replaces previous row of the same kind; audits `org.documents.upload`.
+      `deleteOrgDocument(documentId)`  removes a row + best-effort storage cleanup.
+      `submitOrgOnboarding({companyAddress, vatNumber, city})`  validates required docs all present, flips verification 'unverified'  'pending', clears `admin_note` + stale `rejection_reason`, fires `verification.queued` to all admins + `org.documents.submitted` to the Owner, audits as `org.submit`.
+      `getMyOrgVettingState()` permissive read for the page itself.
+- [x] `vetting-types.ts` sibling for the label catalogue + types (so client islands can import without dragging a `"use server"` boundary  same pattern as Phase 9.8.5's `invitations-types.ts`).
 
-### Task 9.10.3: `/employer/*` layout gate
-- [ ] Create new route group `app/[locale]/(employer)/employer/(verified)/`. Move existing protected pages into it:
-      `search` / `vacancies` / `placements` / `shortlists` / `saved-searches` / `team` / `dossier` / `notifications` (the operational surfaces).
-- [ ] Keep at the root (no `(verified)` gate): `onboarding`, `organisation` (read-only when not verified), `account`, the top-level `/employer` page (lands on a dashboard that nudges toward onboarding when not verified).
-- [ ] `(verified)/layout.tsx` calls `verifyOrgVerified()`  redirects to `/employer/onboarding` on miss.
-- [ ] Top-level `/employer` page: when `verification !== 'verified'`, render a callout *"Complete your verification to unlock candidate search + invites"* with a CTA to `/employer/onboarding`. When verified, render the normal employer dashboard.
+### Task 9.10.3: `/employer/*` gate ✅ 2026-05-25 (D6 deviation)
+**Deviated from D6**: the planned `(verified)` route-group file shuffle was rejected as belts-and-braces  the per-page guard convention from Phase 5 (PII-touching surfaces call `verifyOrgVerified()`; permissive surfaces call `verifyEmployer()`) already covers every load-bearing path. The earlier audit (pre-Phase 9.10) confirmed clean coverage across all 13 employer pages. The file shuffle would have moved ~9 directories without preventing any concrete bug.
+- [x] **`verifyOrgVerified()` redirect target changed**: was `/employer/organisation` (a static settings page), now `/employer/onboarding` (the actionable KYC surface). The unverified employer can actually act there.
+- [x] **`OrgVerificationBanner` link target changed** same redirect target update.
+- [x] Existing `/employer` landing page already renders the banner via `<OrgVerificationBanner>` when `session.verification !== "verified"`  no further changes required.
+- [x] **Bug fix swept in**: 9.8.6's `getPlacementsForVacancy()` was using the hard `verifyOrgVerified()` gate (wrong for a read; redirected unverified employers away from the vacancy detail page). Fixed in commit `bdb12ae` before 9.10 build: read is now permissive (`verifyEmployer()` + org-scoped query); writes (`markAsHired`, `deletePlacement`) keep the hard gate.
 
-### Task 9.10.4: Admin review queue
-- [ ] New route `/admin/moderation/organisations` (tab-style addition to the existing moderation surface). Or, if cleaner, top-level `/admin/organisations`  decide during build based on the existing layout.
-- [ ] **`<OrganisationVettingTable>`**: tabs (Pending review · Onboarding · Approved · Rejected · All) with counts. Search across company name / contact name / email / registration number. Manual refresh button.
-- [ ] **`<OrganisationReviewModal>`**: large dialog (~680px wide, max 90vh, scrollable on phones).
-      - Header: company name + org id (mono, small) + state pill.
-      - Status-specific context cards: yellow "user hasn't verified yet" / blue "email verified, waiting on form" / red "previous rejection" / amber "admin note still visible".
-      - Company info grid: legal name, reg, country, VAT, address.
-      - Documents list: one row per doc with the requirement name + filename, click  opens signed-URL in new tab.
-      - Action prompts: yellow textarea when collecting a reject reason or admin note.
-      - Footer actions, state-dependent:
-        - **emailVerified=false**: *Mark as verified* (break-glass amber) · *Resend verification email* (blue)
-        - **unverified + verified email**: (nothing actionable  waiting on user)
-        - **pending**: *Request Changes* (amber) · *Reject* (red outline) · *Approve* (emerald)
-        - **verified**: read-only
-        - **rejected**: read-only, shows previous reason
-- [ ] Five admin Server Actions (all guarded by `verifyAdmin()`):
-      - `approveOrganisation(orgId)`  flips to `verified` + stamps `verified_at` / `verified_by_user_id`, clears `rejection_reason` + `admin_note`, fires `org.verified` notification to org members (with the org id as account reference), audits as `org.review.approve`.
-      - `rejectOrganisation({ orgId, reason })`  flips to `rejected` + stamps `rejection_reason`, fires `org.rejected` notification, audits as `org.review.reject`. **Doesn't delete the org or user**  they can be re-vetted later.
-      - `requestChangesOnOrganisation({ orgId, note })`  flips back to `unverified` + stamps `admin_note`, fires request-changes notification (new kind `org.review.changes`), audits as `org.review.request-changes`.
-      - `resendOrgVerificationEmail(orgId)`  re-fires `auth.api.sendVerificationEmail()` for the Owner. No state change.
-      - `markOrgEmailVerified(orgId)`  break-glass per D9. Constraints: caller must be admin, target must be the org Owner, target must currently be unverified. Audits as `verification.manual-grant`. **Does NOT auto-sign-in the user.**
+### Task 9.10.4: Admin review queue ✅ 2026-05-25
+- [x] **Route reuse, not new route**: extended the existing `/admin/verifications` page (which already had a qualifications + organisations tab pair from Phase 7) instead of creating `/admin/organisations`. The Phase 7 simple list is replaced with a richer 4-group view (Pending review · Drafts · Rejected · Verified) using the new query.
+- [x] `lib/admin/org-vetting.ts` (new) ships:
+      `listOrgsForReview()` returning 4 grouped buckets (`pending` / `unverified` / `rejected` / `verified`) with Owner email + emailVerified flag + doc count per row. One round-trip, capped 500.
+      `getOrgReviewDetail(orgId)`  full review payload incl. signed-URL per document (minted on demand at click time so the queue page doesn't waste tokens).
+      5 admin Server Actions matching the plan: `approveOrg`, `rejectOrg`, `requestChangesOnOrg`, `resendOrgVerificationEmail`, `markOrgEmailVerified`. All guarded by `verifyAdmin()`. All audit-logged with the new 9.10 audit kinds.
+- [x] `<OrgReviewLauncher>` button per row  fetches the detail on click, opens the modal.
+- [x] `<OrgReviewModal>` client island  bottom-sheet on phones / centred on `md+`, status-specific context cards (yellow "owner hasn't verified", muted "waiting on user", amber "your note still visible", red "previously rejected", accent "already verified"), company-info grid, signed-URL document list with per-doc Open button, conditional reason / note textareas (10-500 chars), state-dependent footer actions. Esc + backdrop tap close; one save action per branch.
+- [x] **Existing Phase 7 `approveOrganisation` + `rejectOrganisation` in `lib/admin/verifications.ts` left intact** for backwards compat with any old code paths; new code uses the richer Phase 9.10 actions in `lib/admin/org-vetting.ts`.
 
-### Task 9.10.5: Email templates
-- [ ] New `NOTIFICATION_CATALOG` entry `org.review.changes` (audience: `org_members`, `defaultInApp: true`, `defaultEmail: true`).
-- [ ] Five new templates in `lib/email/templates/notifications.ts` using the existing `genericTemplate()` shell:
-      - `org.verification.reminder` (seeker pattern? no  this is the existing Better Auth verification path; might already work). Confirm during build  may not be a new template.
-      - **`org.documents.submitted`**  to the Owner: *"We received your application — typically reviewed within one business day."* (Tied to a new catalog kind or reused via direct `sendEmail()` call.)
-      - **`org.verified`**  to org members: *"You're verified  welcome. Your account reference is {orgId}."*
-      - **`org.rejected`**  to org members: *"Your verification was not approved. Reason: {reason}. Reply to discuss."*
-      - **`org.review.changes`**  to org members: *"We need some updates: {note}. Open your application to revise + resubmit."*
-      - **`verification.queued`**  to admins: *"{orgName} submitted KYC for review. Open the admin queue."*
-- [ ] Templates default ON per D10. Email channel still gated by `feature_flag_email_notifications` (already ON).
+### Task 9.10.5: Email templates ✅ 2026-05-25
+- [x] **2 new** `NOTIFICATION_CATALOG` entries: `org.documents.submitted` (audience `org_members`) + `org.review.changes` (audience `org_members`). Both default-ON for email per D10.
+- [x] **4 new** templates wired into `lib/email/templates/notifications.ts`:
+      - `org.documents.submitted`  *"Application received"*
+      - `org.review.changes`  *"Updates needed"*
+      - `verification.queued`  *"New submission"* (catalog entry was there since Phase 7 but had no template; now wired)
+      - `org.rejected`  *"Verification not approved"* (catalog entry was there since Phase 7 but had no template; now wired)
+- [x] `org.verified` already had a template from Phase 7  no change.
+- [x] All templates use the existing `genericTemplate()` shell  same plumbing the Phase 9.8 vacancy emails use. Sending stays gated by `feature_flag_email_notifications` (admin-controlled).
 
-### Task 9.10.6: Seed + verify + doc convention
-- [ ] **Seed updates** (`db/seed.ts`):
-      - Existing Discovery Bank stays `verification: 'verified'` so dev flows aren't broken.
-      - Add 3 new fixture orgs: one `unverified` (email pending), one `unverified` + emailVerified (onboarding pending), one `pending` (admin queue has something to review), one `rejected` (with a reason). Each gets its own seeded org + owner user + the matching `organization_documents` rows where applicable.
-- [ ] Compliance assertions  consider extending `lib/analytics/outcomes-compliance.ts` with: (g) *every seeker-PII-touching action requires the actor's org to be `verified`*  belt-and-braces over the layout gate. Worth a runtime walk.
-- [ ] Verified: `npm test` green · `npm run typecheck` clean · `npm run build` clean · `npm run db:migrate` + `npm run db:seed` runs end-to-end. Mobile smoke at 360 px for the onboarding form + the admin review modal.
-- [ ] On ship: `docs/completed/PHASE_9_10_COMPLETE.md`; move this plan to `docs/completed/`; tick 9.10 in `ROADMAP.md` ✅; refresh **Current State** in `TO_START_EVERY_SESSION.md`; commit `Phase 9.10 complete + Phase 10 still next`.
+### Task 9.10.6: Seed + verify + doc convention ✅ 2026-05-25
+- [x] **Seed extended** (`db/seed.ts`): new `seedPhase9_10OrgVetting()` lands 3 fixture orgs alongside the existing Discovery Bank seed (which keeps its `MOCK_EMPLOYER.orgVerified`-driven state for backwards compat):
+      - **Acme Logistics**  `pending` (submitted, 4 required docs uploaded; the admin queue's primary actionable row).
+      - **Globex Industries**  `rejected` (admin rejected with a reason; demos the seeker-side RejectedScreen).
+      - **Initech**  `unverified` + `emailVerified` (Draft state; demos the empty onboarding form).
+      Each has its own Owner user + Better Auth account + organisation_members row. Document storage keys are placeholders (the admin modal shows "URL signing failed" gracefully); real uploads on actual flows will work normally. Truncate order extended to drop `organization_documents` before `placements`.
+- [x] **Compliance assertion deferred**: the proposed assertion (g) *"every seeker-PII-touching action requires the actor's org to be verified"* is already enforced by `verifyOrgVerified()` at the action boundaries (`markAsHired`, `deletePlacement`, `revealContact`, `downloadQualification`). A runtime walk would add belts-and-braces but no concrete bug it prevents  the per-action guards are the structural defence. Documented as a post-launch backlog item if the layout-gate ever gets revisited.
+- [x] Verified: `npm test` 22/22 green · `npm run typecheck` clean · `npm run build` clean (new routes `/[locale]/employer/onboarding` + `/[locale]/admin/verifications` registered) · migration `0019` applied to Neon · `npm run db:seed` runs end-to-end.
+- [x] On ship: this plan moved into `docs/completed/`; `docs/completed/PHASE_9_10_COMPLETE.md` written; `docs/ROADMAP.md` ticked ✅; Current State in `docs/TO_START_EVERY_SESSION.md` refreshed. Final commit: *Phase 9.10 complete  manual employer KYC ships*.
 
 ---
 

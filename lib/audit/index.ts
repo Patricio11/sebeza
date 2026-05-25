@@ -117,7 +117,21 @@ export type AuditKind =
   | "vacancy.invite.skip"
   | "vacancy.invite.withdraw"
   | "vacancy.invite.expire"
-  | "vacancy.response";
+  | "vacancy.response"
+  // Phase 9.10  employer KYC / org-vetting lifecycle. Replaces the
+  // dormant `feature_flag_kyc_provider` partnership path with admin-
+  // mediated vetting. `subject` is the organisation id; meta carries
+  // the doc count on submit, the reviewer's user id on review actions,
+  // and the rejection reason or admin note when applicable. The
+  // break-glass `verification.manual-grant` flips `emailVerified`
+  // server-side without auto-signing-in the user.
+  | "org.submit"
+  | "org.review.approve"
+  | "org.review.reject"
+  | "org.review.request-changes"
+  | "org.documents.upload"
+  | "org.verification.resend"
+  | "verification.manual-grant";
 
 export interface AuditEvent {
   kind: AuditKind;

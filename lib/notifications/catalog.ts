@@ -213,6 +213,31 @@ export const NOTIFICATION_CATALOG = {
       "The change-of-mind path: a declined seeker tapped \"Express interest again.\" Human workflow, not a dead end  re-open the conversation if the role is still open.",
     dedupeWindowSeconds: 0,
   },
+  // ──────────────────────────────────────────────────────────────────────
+  // Phase 9.10  employer KYC / org-vetting lifecycle. Transactional
+  // events; default ON like the vacancy + verification kinds.
+  // Recipients can opt out per kind in /employer/notifications/
+  // preferences. Sending is still gated by the platform-wide
+  // `feature_flag_email_notifications` killswitch.
+  // ──────────────────────────────────────────────────────────────────────
+  "org.documents.submitted": {
+    defaultInApp: true,
+    defaultEmail: true,
+    audience: "org_members",
+    label: "We received your verification application",
+    description:
+      "Confirmation that your onboarding documents were submitted. Our team typically reviews within one business day.",
+    dedupeWindowSeconds: 0,
+  },
+  "org.review.changes": {
+    defaultInApp: true,
+    defaultEmail: true,
+    audience: "org_members",
+    label: "Our team asked you to revise your application",
+    description:
+      "An admin requested specific changes to your onboarding submission. Your application form is open again with the admin's note pinned at the top  edit and resubmit.",
+    dedupeWindowSeconds: 0,
+  },
 } as const satisfies Record<string, NotificationKindMeta>;
 
 export type NotificationKind = keyof typeof NOTIFICATION_CATALOG;

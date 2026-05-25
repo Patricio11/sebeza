@@ -552,6 +552,14 @@ that registry  we win on **data quality, usability, and analytics.** The system 
 
 ---
 
+## 🧷 PHASE 9.10: EMPLOYER KYC / ORG VETTING FLOW ✅ (shipped 2026-05-25)
+
+Last pre-launch side-phase. Replaces the dormant `feature_flag_kyc_provider` path with admin-mediated vetting: employer signs up + verifies email  uploads 4 SA-standard KYC docs on `/employer/onboarding` (CIPC reg cert, SARS tax clearance, proof of address  3 months, bank confirmation; + optional supporting docs)  admin reviews on `/admin/verifications` with signed-URL inline document access + 5 actions (Approve / Reject-with-reason / Request-changes-with-note / Resend verification / Mark-verified break-glass). 5 new email templates wired through Resend; 7 new audit kinds; new `org_document_kind` enum + `organization_documents` table via migration `0019`. Hardcoded SA-standard doc set per D1 (admin-managed CRUD deferred post-launch). `(verified)` route-group file shuffle skipped per D6 deviation  per-page guards from Phase 5 already cover every load-bearing path. 3 lifecycle fixture orgs added to the seed (Acme/pending · Globex/rejected · Initech/unverified) alongside the existing Discovery Bank seed.
+
+Migration `0019_phase9_10_org_vetting.sql` applied to Neon. Companion docs: `docs/completed/PHASE_9_10_PLAN.md` + `docs/completed/PHASE_9_10_COMPLETE.md`.
+
+---
+
 ## 🧷 PHASE 9.9: EXPERIENCE-IN-YEARS ON PROFILE & SKILLS ✅ (shipped 2026-05-24)
 
 Pre-launch hygiene side-phase between Phase 9.8 and Phase 10. Two missing CV-header fields the system review surfaced: total years of professional experience on the profile, and per-skill years of experience. Both shipped as additive-nullable columns with self-declared values (no derivation from `experiences` history per D1  lossy). Read-side: profile header reads *"Senior · Chef · 8 yrs"*, skill chips read *"TypeScript · 5 yrs"*, NULL renders unchanged, 0 displays as *"<1 yr"*. UI clamps 0..60; UI Server Action also clamps. Public per D4 (CV-header data, not sensitive PII). Phase 4 ranking integration + `minYearsExperience` search filter deferred to optional Task 9.9.3 (post-launch backlog). **DOB + gender explicitly out of scope**  governance-reviewed phase if/when added.

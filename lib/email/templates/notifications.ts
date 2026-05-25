@@ -100,6 +100,8 @@ const TEMPLATES: Partial<
     genericTemplate(ctx, "Open your dashboard", "Account suspended"),
   "org.verified": (ctx) =>
     genericTemplate(ctx, "Open your workspace", "Organisation verified"),
+  "org.rejected": (ctx) =>
+    genericTemplate(ctx, "Contact support", "Verification not approved"),
   "status.stale.warning": (ctx) =>
     genericTemplate(ctx, "Re-confirm your status", "Keep your profile fresh"),
   "saved_search.new_matches": (ctx) =>
@@ -119,6 +121,18 @@ const TEMPLATES: Partial<
     genericTemplate(ctx, "Open the vacancy", "Candidate response"),
   "vacancy.reconsider": (ctx) =>
     genericTemplate(ctx, "Open the vacancy", "Change of mind"),
+  // ── Phase 9.10  employer KYC / org vetting lifecycle ──────────────────
+  // All five use the shared genericTemplate shell. Eyebrow + CTA label
+  // differ so the recipient lands on the right surface. The
+  // notification body itself (composed at the action site) carries
+  // the org name, the rejection reason, or the admin note  the
+  // template just wraps it.
+  "org.documents.submitted": (ctx) =>
+    genericTemplate(ctx, "Open your application", "Application received"),
+  "org.review.changes": (ctx) =>
+    genericTemplate(ctx, "Open your application", "Updates needed"),
+  "verification.queued": (ctx) =>
+    genericTemplate(ctx, "Open the admin queue", "New submission"),
 };
 
 export function emailContentFor(

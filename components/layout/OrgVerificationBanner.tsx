@@ -16,8 +16,11 @@ export function OrgVerificationBanner({
           <span className="font-medium">Organisation not verified.</span>{" "}
           {message}
         </p>
+        {/* Phase 9.10  link now points to the dedicated onboarding
+            surface (KYC document upload + admin review), not the
+            generic /employer/organisation settings page. */}
         <Link
-          href="/employer/organisation"
+          href="/employer/onboarding"
           className="rounded-[var(--radius-pill)] bg-[color:var(--color-ink)] px-4 py-1.5 text-xs font-medium uppercase tracking-[0.18em] text-[color:var(--color-paper)]"
         >
           {cta}

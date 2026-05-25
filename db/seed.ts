@@ -81,6 +81,7 @@ async function truncate() {
       consents,
       vacancy_invitations,
       vacancies,
+      organization_documents,
       placements,
       organization_members,
       organizations,
@@ -1061,6 +1062,193 @@ async function seedPhase9_8Vacancies() {
   ]);
 }
 
+/**
+ * Phase 9.10  three lifecycle org fixtures so the admin
+ * organisations queue has something to demo + the compliance
+ * assertions have rows to walk:
+ *
+ *   - Acme Logistics  PENDING REVIEW (submitted; 4 required docs
+ *     uploaded; admin queue's primary actionable row)
+ *   - Globex Industries  REJECTED (admin rejected with reason;
+ *     shows the rejected-screen branch on the seeker side)
+ *   - Initech  UNVERIFIED + emailVerified (draft state; admin
+ *     queue's secondary "Drafts" group; Owner can resubmit)
+ *
+ * Discovery Bank (the original MOCK_EMPLOYER) stays seeded with
+ * verification driven by `MOCK_EMPLOYER.orgVerified` (currently
+ * false  i.e. unverified). Don't break the existing demo flow.
+ *
+ * Document storage keys are placeholders. The admin OrgReviewModal
+ * fetches signed URLs at click time; for these seed rows the
+ * Supabase storage object doesn't actually exist  the modal
+ * shows "URL signing failed" gracefully instead of crashing.
+ * Real uploads on actual onboarding flows will work normally.
+ */
+async function seedPhase9_10OrgVetting() {
+  console.log("🛡  Phase 9.10  org vetting lifecycle fixtures…");
+  const pwHash = await hashPassword(SEED_PASSWORD);
+  const now = Date.now();
+  const day = 24 * 60 * 60 * 1000;
+
+  interface Fixture {
+    orgId: string;
+    ownerHandle: string;
+    ownerName: string;
+    ownerEmail: string;
+    orgName: string;
+    registration: string;
+    industry: string;
+    country: string;
+    city: string | null;
+    companyAddress: string | null;
+    vatNumber: string | null;
+    verification: "unverified" | "pending" | "verified" | "rejected";
+    rejectionReason: string | null;
+    adminNote: string | null;
+    createdAt: Date;
+    docs: { kind: string; originalName: string }[];
+  }
+
+  const fixtures: Fixture[] = [
+    {
+      orgId: "org_acme-logistics",
+      ownerHandle: "acme-owner",
+      ownerName: "Themba Khumalo",
+      ownerEmail: "owner@acme-logistics.example",
+      orgName: "Acme Logistics",
+      registration: "2019/123456/07",
+      industry: "Logistics",
+      country: "South Africa",
+      city: "Johannesburg",
+      companyAddress:
+        "12 Industrial Avenue, Aeroton, Johannesburg, Gauteng, 2013",
+      vatNumber: "4123456789",
+      verification: "pending",
+      rejectionReason: null,
+      adminNote: null,
+      createdAt: new Date(now - 2 * day),
+      docs: [
+        { kind: "company_reg_cert", originalName: "CK1-Acme.pdf" },
+        { kind: "tax_clearance", originalName: "SARS-pin-Acme.pdf" },
+        { kind: "proof_of_address", originalName: "Eskom-bill-2026-04.pdf" },
+        { kind: "bank_confirmation", originalName: "FNB-confirmation.pdf" },
+      ],
+    },
+    {
+      orgId: "org_globex-industries",
+      ownerHandle: "globex-owner",
+      ownerName: "Sarah van der Merwe",
+      ownerEmail: "owner@globex-industries.example",
+      orgName: "Globex Industries",
+      registration: "2018/987654/07",
+      industry: "Manufacturing",
+      country: "South Africa",
+      city: "Cape Town",
+      companyAddress: "Building 4, Black River Park, Observatory, Cape Town, 7925",
+      vatNumber: null,
+      verification: "rejected",
+      rejectionReason:
+        "CIPC certificate is for a different legal entity than the registration number on file. Please upload the certificate matching reg 2018/987654/07 and resubmit.",
+      adminNote: null,
+      createdAt: new Date(now - 10 * day),
+      docs: [
+        { kind: "company_reg_cert", originalName: "CK1-Globex-wrong.pdf" },
+        { kind: "tax_clearance", originalName: "Tax-clearance.pdf" },
+        { kind: "proof_of_address", originalName: "Lease.pdf" },
+        { kind: "bank_confirmation", originalName: "Standard-Bank.pdf" },
+      ],
+    },
+    {
+      orgId: "org_initech",
+      ownerHandle: "initech-owner",
+      ownerName: "Peter Gibbons",
+      ownerEmail: "owner@initech.example",
+      orgName: "Initech",
+      registration: "2024/555111/07",
+      industry: "Information technology",
+      country: "South Africa",
+      city: null,
+      companyAddress: null,
+      vatNumber: null,
+      verification: "unverified",
+      rejectionReason: null,
+      adminNote: null,
+      createdAt: new Date(now - day),
+      docs: [],
+    },
+  ];
+
+  // Users + better-auth accounts for each Owner.
+  await db.insert(schema.appUser).values(
+    fixtures.map((f) => ({
+      id: id("user", f.ownerHandle),
+      name: f.ownerName,
+      email: f.ownerEmail,
+      emailVerified: true,
+      role: "employer" as const,
+    })),
+  );
+  await db.insert(schema.account).values(
+    fixtures.map((f) => ({
+      id: `acc_${id("user", f.ownerHandle)}`,
+      accountId: id("user", f.ownerHandle),
+      providerId: "credential",
+      userId: id("user", f.ownerHandle),
+      password: pwHash,
+    })),
+  );
+
+  // Orgs + memberships.
+  await db.insert(schema.organizations).values(
+    fixtures.map((f) => ({
+      id: f.orgId,
+      name: f.orgName,
+      registrationNumber: f.registration,
+      industry: f.industry,
+      sizeBand: "11  50",
+      city: f.city,
+      country: f.country,
+      verification: f.verification,
+      rejectionReason: f.rejectionReason,
+      adminNote: f.adminNote,
+      companyAddress: f.companyAddress,
+      vatNumber: f.vatNumber,
+      verifiedAt: null,
+      verifiedByUserId: null,
+      createdAt: f.createdAt,
+    })),
+  );
+  await db.insert(schema.organizationMembers).values(
+    fixtures.map((f) => ({
+      id: id("orgmem", f.ownerHandle),
+      organizationId: f.orgId,
+      userId: id("user", f.ownerHandle),
+      role: "owner" as const,
+      twoFactorActive: false,
+    })),
+  );
+
+  // Documents (placeholder storage keys  signed-URL fetch will
+  // fail gracefully in the admin modal). Only fixtures that have
+  // submitted will have docs here.
+  const docRows = fixtures.flatMap((f) =>
+    f.docs.map((d, idx) => ({
+      id: id("orgdoc", `${f.ownerHandle}-${d.kind}-${idx}`),
+      organizationId: f.orgId,
+      kind: d.kind as "company_reg_cert" | "tax_clearance" | "proof_of_address" | "bank_confirmation" | "other",
+      originalName: d.originalName,
+      storageKey: `${id("user", f.ownerHandle)}/org-documents/${id("orgdoc", `${f.ownerHandle}-${d.kind}-${idx}`)}.pdf`,
+      mimeType: "application/pdf",
+      sizeBytes: 1_234_567,
+      uploadedByUserId: id("user", f.ownerHandle),
+      uploadedAt: f.createdAt,
+    })),
+  );
+  if (docRows.length > 0) {
+    await db.insert(schema.organizationDocuments).values(docRows);
+  }
+}
+
 async function seedPhase7Reports() {
   console.log("🚩 Phase 7 sample reports (open + closed  for /admin/moderation)…");
   await db.insert(schema.reports).values([
@@ -1115,6 +1303,12 @@ async function main() {
   // / seedPhase7_5OutcomesCohort / seedPhase9_7NationalityDemo (the
   // vacancy_matching consent gate the invite action enforces).
   await seedPhase9_8Vacancies();
+  // Phase 9.10  lifecycle org fixtures so the admin organisations
+  // queue + the OrgReviewModal have realistic rows to demo. Runs
+  // after the Phase 9.8 vacancies seed so the org-id namespace is
+  // settled. Adds three new (org, owner-user) pairs alongside the
+  // existing Discovery Bank seed.
+  await seedPhase9_10OrgVetting();
 
   const ms = Date.now() - started;
   console.log(

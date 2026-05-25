@@ -141,11 +141,29 @@ export async function uploadPhoto(opts: UploadOpts): Promise<{ key: string; mime
   });
 }
 
+/**
+ * Phase 9.10  KYC document uploads on the org-onboarding form.
+ * Same magic-byte sniff + rate limit + size cap as `uploadDocument()`;
+ * different folder (`{userId}/org-documents/...`) so admin oversight
+ * + future cleanup can scope by prefix. Caller passes the Owner's
+ * userId  one Owner per org by Phase 9.10 convention.
+ */
+export async function uploadOrgDocument(
+  opts: UploadOpts,
+): Promise<{ key: string; mime: string }> {
+  return upload({
+    ...opts,
+    kind: "org-documents",
+    maxBytes: DOC_MAX_BYTES,
+    allowed: DOC_ALLOWED,
+  });
+}
+
 async function upload(opts: {
   userId: string;
   id: string;
   file: File;
-  kind: "documents" | "photos";
+  kind: "documents" | "photos" | "org-documents";
   maxBytes: number;
   allowed: Set<string>;
 }): Promise<{ key: string; mime: string }> {

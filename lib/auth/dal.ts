@@ -251,9 +251,13 @@ export async function verifyOrgVerified(): Promise<
     .limit(1);
 
   const row = rows[0];
-  if (!row) redirect("/employer/organisation");
+  // Phase 9.10  redirect to the actionable onboarding surface
+  // (KYC docs + admin review) instead of the static /organisation
+  // settings page. The unverified employer can actually do
+  // something there.
+  if (!row) redirect("/employer/onboarding");
   if (row.verification !== "verified") {
-    redirect("/employer/organisation");
+    redirect("/employer/onboarding");
   }
   return {
     ...user,
