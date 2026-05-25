@@ -140,7 +140,18 @@ export type AuditKind =
   | "org.vacancy.filled.batch"
   | "org.vacancy.filled.no-placement"
   | "search.outside-hire-lookup"
-  | "vacancy.outcome.other-hired";
+  | "vacancy.outcome.other-hired"
+  // Phase 9.12  the learning loop. Seeker-private events that capture
+  // the accept / start / complete / abandon transitions on a
+  // `learning_items` row. Abandon meta carries the reason + (when
+  // present) the optional 200-char note  PII-flagged for any future
+  // export. Per D5 the related cross-kind notification cap (see
+  // `learning.nudge` vs `vacancy.outcome.other-hired`) is enforced
+  // cron-side; the audit row itself is always written.
+  | "learning.accept"
+  | "learning.start"
+  | "learning.complete"
+  | "learning.abandon";
 
 export interface AuditEvent {
   kind: AuditKind;

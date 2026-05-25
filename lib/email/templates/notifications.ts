@@ -139,6 +139,12 @@ const TEMPLATES: Partial<
   // land on the actionable surface, not a generic dashboard.
   "vacancy.outcome.other-hired": (ctx) =>
     genericTemplate(ctx, "Open Career Compass", "Vacancy outcome"),
+  // ── Phase 9.12  learning-loop celebration ─────────────────────────────
+  // `learning.completed` is the positive payoff. CTA points at the
+  // profile so the seeker can see the freshly-added (self-attested)
+  // skill in context.
+  "learning.completed": (ctx) =>
+    genericTemplate(ctx, "Open your profile", "Skill added"),
 };
 
 export function emailContentFor(

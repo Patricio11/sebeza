@@ -29,6 +29,10 @@ import {
   assertNoDeclineReasonCellBelowFloor,
   assertAcceptWithNoticeNotInUnfilled,
   assertDeclineNoteFlaggedPII,
+  // Phase 9.12  learning-loop compliance
+  assertSelfAttestedNeverVerified,
+  assertLearningItemsSeekerPrivate,
+  assertLearningNudgeCapHonoured,
 } from "@/lib/analytics/outcomes-compliance";
 
 export async function GET() {
@@ -47,6 +51,10 @@ export async function GET() {
     await assertNoDeclineReasonCellBelowFloor(),
     await assertAcceptWithNoticeNotInUnfilled(),
     await assertDeclineNoteFlaggedPII(),
+    // Phase 9.12
+    await assertSelfAttestedNeverVerified(),
+    await assertLearningItemsSeekerPrivate(),
+    await assertLearningNudgeCapHonoured(),
   ];
   const ok = checks.every((c) => c.ok);
   return NextResponse.json(

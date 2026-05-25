@@ -9,6 +9,13 @@ import { getCompassForProfile } from "@/db/queries/career-compass";
 import { rankInPoolQuery } from "@/db/queries/analytics";
 import { SKILLS } from "@/lib/mock/taxonomy";
 import {
+  listMyLearningItems,
+  listRecentAbandonReasonsBySkill,
+} from "@/lib/seeker/learning";
+import { COST_ACCESS_ABANDON_REASONS } from "@/lib/seeker/learning-types";
+import { MyLearningSection } from "@/components/feature/seeker/learning/MyLearningSection";
+import { AcceptRecommendationButton } from "@/components/feature/seeker/learning/AcceptRecommendationButton";
+import {
   PROVIDER_LABEL,
   COST_LABEL,
   type GrowthReason,
@@ -83,7 +90,7 @@ export default async function CareerCompassPage({
   // hardcoded `currentRank: 0` the mock compass returned. We splice the
   // live numbers into the compass headline so the existing UI
   // re-renders without a template change.
-  const [rawCompass, rank] = await Promise.all([
+  const [rawCompass, rank, myLearning, recentAbandons] = await Promise.all([
     getCompassForProfile(me),
     rankInPoolQuery({
       handle: me.handle,
@@ -91,7 +98,24 @@ export default async function CareerCompassPage({
       province: me.province,
       projectedSkillBoost: 2,
     }),
+    listMyLearningItems(),
+    listRecentAbandonReasonsBySkill(),
   ]);
+  // Phase 9.12  D3 + Accept-button awareness. The compass needs to know:
+  //  - which recommendations are already on the seeker's active learning
+  //    list (so the Accept button renders as a quiet "On your list" pill)
+  //  - which were recently abandoned for cost/access reasons (so D3 can
+  //    surface a free alternative; for now we just tag the chip).
+  const activeLearningSkills = new Set(
+    myLearning
+      .filter((i) => i.state === "accepted" || i.state === "in_progress")
+      .map((i) => i.skillSlug),
+  );
+  const costAccessAbandonedSkills = new Set(
+    Array.from(recentAbandons.entries())
+      .filter(([, reason]) => COST_ACCESS_ABANDON_REASONS.has(reason))
+      .map(([slug]) => slug),
+  );
   const compass = rank
     ? {
         ...rawCompass,
@@ -197,6 +221,9 @@ export default async function CareerCompassPage({
         />
       )}
 
+      {/* ───────────── My Learning (Phase 9.12) ───────────── */}
+      <MyLearningSection items={myLearning} />
+
       {/* ───────────── Recommendations ───────────── */}
       <section aria-labelledby="rec-h" className="mt-12">
         <header className="mb-5 flex items-baseline justify-between border-b-2 border-[color:var(--color-ink)] pb-2">
@@ -219,6 +246,8 @@ export default async function CareerCompassPage({
               nfmt={nfmt}
               t={t}
               highlight={missingSet.has(rec.skill.slug)}
+              alreadyOnLearningList={activeLearningSkills.has(rec.skill.slug)}
+              costAccessAbandoned={costAccessAbandonedSkills.has(rec.skill.slug)}
             />
           ))}
         </ol>
@@ -408,12 +437,16 @@ function RecommendationItem({
   nfmt,
   t,
   highlight,
+  alreadyOnLearningList,
+  costAccessAbandoned,
 }: {
   rec: SkillRecommendation;
   ordinal: number;
   nfmt: Intl.NumberFormat;
   t: (k: string, v?: Record<string, string | number>) => string;
   highlight?: boolean;
+  alreadyOnLearningList?: boolean;
+  costAccessAbandoned?: boolean;
 }) {
   return (
     <li
@@ -441,6 +474,14 @@ function RecommendationItem({
                 Vacancy gap
               </span>
             )}
+            {costAccessAbandoned && (
+              <span
+                className="inline-flex items-center gap-1 rounded-[var(--radius-pill)] border border-dashed border-[color:var(--color-brand)] bg-[color:var(--color-brand-tint)] px-2 py-0.5 text-[0.62rem] uppercase tracking-[0.18em] text-[color:var(--color-brand-strong)]"
+                title="You previously gave up on this skill for cost or access reasons  free alternative shown."
+              >
+                Free alt
+              </span>
+            )}
           </div>
           <p className="mt-2 max-w-2xl text-sm text-[color:var(--color-ink-soft)]">
             {rec.detail}
@@ -457,6 +498,16 @@ function RecommendationItem({
               }).replace(/^[\d, ]+/, "")}
             </p>
           )}
+
+          {/* Phase 9.12  Accept-to-learning button. Renders as a quiet
+              "On your list" pill when the seeker has an active row. */}
+          <div className="mt-4">
+            <AcceptRecommendationButton
+              skillSlug={rec.skill.slug}
+              skillLabel={rec.skill.label}
+              alreadyOnList={!!alreadyOnLearningList}
+            />
+          </div>
         </div>
 
         {rec.rankIfLearned && (

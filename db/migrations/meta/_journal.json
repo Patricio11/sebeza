@@ -141,6 +141,13 @@
       "when": 1779910000000,
       "tag": "0019_phase9_10_org_vetting",
       "breakpoints": false
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1779920000000,
+      "tag": "0020_phase9_12_learning_loop",
+      "breakpoints": false
     }
   ]
 }

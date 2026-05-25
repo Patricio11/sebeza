@@ -89,6 +89,7 @@ async function truncate() {
       academic_profiles,
       qualifications,
       experiences,
+      learning_items,
       profile_skills,
       profiles,
       verification,
@@ -1249,6 +1250,159 @@ async function seedPhase9_10OrgVetting() {
   }
 }
 
+/**
+ * Phase 9.12  Three learning items on one Wits BSc CS cohort member
+ * (wits-bsc-cs-2026-08, unused by the 9.8 vacancy seed) so the My
+ * Learning section on /dashboard/grow renders a real Active +
+ * Recent split out of the box, AND 9.13's "why learners stall"
+ * aggregate has a real (suppressed) row to work against:
+ *
+ *   - react       → in_progress     (started 10d ago)
+ *   - typescript  → completed       (started 30d, completed 5d ago)
+ *                                    + profile_skills row with
+ *                                    provenance='self_attested_learning'
+ *                                    (the 9.12.4 honesty contract in seed form)
+ *   - postgres    → abandoned       (reason=too_expensive, 3d ago)
+ *                                    → D3 free-alt chip lights up on
+ *                                    the compass on next render
+ *
+ * Audit rows mirror what the action handlers + abandon modal write.
+ */
+async function seedPhase9_12LearningLoop() {
+  console.log("📚 Phase 9.12  learning-loop fixtures (Wits cohort 08)…");
+  const profileId = id("prof", "wits-bsc-cs-2026-08");
+  const userId = id("user", "wits-bsc-cs-2026-08");
+  const day = 24 * 60 * 60 * 1000;
+  const now = Date.now();
+
+  const lrnReact = id("lrn", "wits08-react");
+  const lrnTs = id("lrn", "wits08-typescript");
+  const lrnPg = id("lrn", "wits08-postgres");
+
+  await db.insert(schema.learningItems).values([
+    {
+      id: lrnReact,
+      profileId,
+      skillSlug: "react",
+      title: "Build a React app from scratch  freeCodeCamp",
+      provider: "freeCodeCamp",
+      resourceUrl: "https://www.freecodecamp.org/learn/front-end-development-libraries/",
+      resourceKind: "free",
+      isFree: true,
+      state: "in_progress",
+      startedAt: new Date(now - 10 * day),
+    },
+    {
+      id: lrnTs,
+      profileId,
+      skillSlug: "typescript",
+      title: "TypeScript fundamentals  TVET short course",
+      provider: "Tshwane North TVET",
+      resourceUrl: null,
+      resourceKind: "tvet",
+      isFree: false,
+      state: "completed",
+      startedAt: new Date(now - 30 * day),
+      completedAt: new Date(now - 5 * day),
+    },
+    {
+      id: lrnPg,
+      profileId,
+      skillSlug: "postgres",
+      title: "PostgreSQL for backend  paid bootcamp",
+      provider: "Codespace SA",
+      resourceUrl: null,
+      resourceKind: "other",
+      isFree: false,
+      state: "abandoned",
+      startedAt: new Date(now - 14 * day),
+      abandonedAt: new Date(now - 3 * day),
+      abandonReason: "too_expensive",
+      abandonNote:
+        "Bursary application timed out and the upfront fee is more than I can cover this semester.",
+    },
+  ]);
+
+  // Profile-skill upsert for the completed item  the 9.12.4 honesty
+  // contract baked into seed: provenance='self_attested_learning',
+  // verifiedAt=NULL, yearsOfExperience=NULL ("<1 yr" honest).
+  await db
+    .insert(schema.profileSkills)
+    .values({
+      profileId,
+      skillSlug: "typescript",
+      proficiency: 3,
+      yearsOfExperience: null,
+      provenance: "self_attested_learning",
+      verifiedAt: null,
+    })
+    .onConflictDoNothing();
+
+  await db.insert(schema.auditLog).values([
+    {
+      id: id("aud", lrnReact + "-accept"),
+      kind: "learning.accept",
+      actor: userId,
+      subject: lrnReact,
+      meta: { skillSlug: "react" },
+      at: new Date(now - 11 * day),
+    },
+    {
+      id: id("aud", lrnReact + "-start"),
+      kind: "learning.start",
+      actor: userId,
+      subject: lrnReact,
+      meta: { skillSlug: "react", from: "accepted" },
+      at: new Date(now - 10 * day),
+    },
+    {
+      id: id("aud", lrnTs + "-accept"),
+      kind: "learning.accept",
+      actor: userId,
+      subject: lrnTs,
+      meta: { skillSlug: "typescript" },
+      at: new Date(now - 31 * day),
+    },
+    {
+      id: id("aud", lrnTs + "-start"),
+      kind: "learning.start",
+      actor: userId,
+      subject: lrnTs,
+      meta: { skillSlug: "typescript", from: "accepted" },
+      at: new Date(now - 30 * day),
+    },
+    {
+      id: id("aud", lrnTs + "-complete"),
+      kind: "learning.complete",
+      actor: userId,
+      subject: lrnTs,
+      meta: { skillSlug: "typescript", attachedToProfile: true },
+      at: new Date(now - 5 * day),
+    },
+    {
+      id: id("aud", lrnPg + "-accept"),
+      kind: "learning.accept",
+      actor: userId,
+      subject: lrnPg,
+      meta: { skillSlug: "postgres" },
+      at: new Date(now - 15 * day),
+    },
+    {
+      id: id("aud", lrnPg + "-abandon"),
+      kind: "learning.abandon",
+      actor: userId,
+      subject: lrnPg,
+      meta: {
+        skillSlug: "postgres",
+        from: "in_progress",
+        reason: "too_expensive",
+        seekerAuthoredFreeText: true,
+      },
+      at: new Date(now - 3 * day),
+    },
+  ]);
+}
+
 async function seedPhase7Reports() {
   console.log("🚩 Phase 7 sample reports (open + closed  for /admin/moderation)…");
   await db.insert(schema.reports).values([
@@ -1309,6 +1463,13 @@ async function main() {
   // settled. Adds three new (org, owner-user) pairs alongside the
   // existing Discovery Bank seed.
   await seedPhase9_10OrgVetting();
+  // Phase 9.12  learning-loop fixtures on Wits cohort 08 (3 items
+  // across in_progress / completed / abandoned). Runs after the
+  // cohort + Phase 9.8 vacancy seeds since it borrows a profile id +
+  // the new schema columns from migration 0020. Gives 9.13's stall
+  // analytics one real (suppressed) row to aggregate against from
+  // day 1.
+  await seedPhase9_12LearningLoop();
 
   const ms = Date.now() - started;
   console.log(

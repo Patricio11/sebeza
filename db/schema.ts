@@ -367,6 +367,23 @@ export const skills = pgTable("skills", {
   label: text("label").notNull(),
 });
 
+/**
+ * Phase 9.12  Provenance honesty contract (D1 in PHASE_9_12_PLAN.md).
+ * Together with `profile_skills.verified_at`, the UI rule is:
+ *
+ *   render "Verified"  ⇔  provenance = 'verified_provider' AND verified_at IS NOT NULL
+ *
+ * Anything else  including `self_attested_learning` rows that arrived
+ * via 9.12.4's completion path  reads as "Self-attested" with a
+ * provenance-specific qualifier ("via learning" / "imported" / etc.).
+ */
+export const skillProvenance = pgEnum("skill_provenance", [
+  "self_attested",
+  "self_attested_learning",
+  "imported",
+  "verified_provider",
+]);
+
 export const profileSkills = pgTable("profile_skills", {
   profileId: text("profile_id")
     .notNull()
@@ -385,6 +402,10 @@ export const profileSkills = pgTable("profile_skills", {
    * just stores it.
    */
   yearsOfExperience: integer("years_of_experience"),
+  /** Phase 9.12  honesty contract; see `skillProvenance` doc above. */
+  provenance: skillProvenance("provenance").notNull().default("self_attested"),
+  /** Phase 9.12  set by the dormant Phase 8 SAQA/provider adapter. */
+  verifiedAt: timestamp("verified_at"),
 });
 
 export const experiences = pgTable("experiences", {
@@ -399,6 +420,72 @@ export const experiences = pgTable("experiences", {
   endedAt: text("ended_at"),
   description: text("description"),
 });
+
+// ---------- Phase 9.12  the learning loop ----------
+/**
+ * One row per (seeker, accepted-recommendation) instance. The seeker's
+ * own audit trail of "I tried to learn X." Aggregated by 9.13 into the
+ * "why learners stall" + curriculum-vs-demand intelligence; never shown
+ * on any public / employer surface (seeker-private).
+ */
+export const learningState = pgEnum("learning_state", [
+  "accepted",
+  "in_progress",
+  "completed",
+  "abandoned",
+]);
+
+export const abandonReason = pgEnum("abandon_reason", [
+  "too_expensive",
+  "no_time",
+  "course_quality",
+  "access_transport",
+  "changed_direction",
+  "too_difficult",
+  "other",
+]);
+
+export const learningItems = pgTable(
+  "learning_items",
+  {
+    id: text("id").primaryKey(),
+    profileId: text("profile_id")
+      .notNull()
+      .references(() => profiles.id, { onDelete: "cascade" }),
+    skillSlug: text("skill_slug")
+      .notNull()
+      .references(() => skills.slug),
+    title: text("title").notNull(),
+    provider: text("provider").notNull(),
+    resourceUrl: text("resource_url"),
+    /** "seta" | "tvet" | "indlela" | "free" | "other"  free text by
+     *  design so 9.13's stall analytics can aggregate without an enum
+     *  rev when a new provider category appears. Never aggregated by
+     *  provider per D5; resource_kind is the dimension used. */
+    resourceKind: text("resource_kind").notNull(),
+    isFree: boolean("is_free").notNull().default(false),
+    state: learningState("state").notNull().default("accepted"),
+    startedAt: timestamp("started_at"),
+    completedAt: timestamp("completed_at"),
+    abandonedAt: timestamp("abandoned_at"),
+    abandonReason: abandonReason("abandon_reason"),
+    /** Optional 200-char note. PII-flagged in audit + future exports. */
+    abandonNote: text("abandon_note"),
+    /** 9.12.6 cron idempotency anchor (mirrors statusStaleLastSentAt). */
+    nudgeLastSentAt: timestamp("nudge_last_sent_at"),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+  },
+  (t) => ({
+    profileStateIdx: index("learning_items_profile_state_idx").on(
+      t.profileId,
+      t.state,
+    ),
+    skillStateIdx: index("learning_items_skill_state_idx").on(
+      t.skillSlug,
+      t.state,
+    ),
+  }),
+);
 
 export const qualifications = pgTable("qualifications", {
   id: text("id").primaryKey(),

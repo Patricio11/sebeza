@@ -254,6 +254,36 @@ export const NOTIFICATION_CATALOG = {
       "Honest closure when an employer hires someone else from a vacancy you accepted. Includes a comparison to the role's requirements (not the hired person's profile) and a Career Compass path for any skills the role wanted that your profile didn't show.",
     dedupeWindowSeconds: 0,
   },
+  // ──────────────────────────────────────────────────────────────────────
+  // Phase 9.12  the learning loop. Two kinds with deliberately
+  // asymmetric defaults:
+  //  - `learning.completed` is positive payoff (a skill landed on the
+  //    profile + rank shifted). Email default ON, exempt from the D5
+  //    cross-kind cap  celebration is never throttled.
+  //  - `learning.nudge` is a gentle "still working on it?" check on
+  //    stalled items. In-app default ON, email default OFF (lower
+  //    intrusion), AND subject to the D5 cross-kind weekly cap
+  //    (combined with `vacancy.outcome.other-hired`) enforced
+  //    cron-side in 9.12.6 to avoid demoralizing recipients.
+  // ──────────────────────────────────────────────────────────────────────
+  "learning.completed": {
+    defaultInApp: true,
+    defaultEmail: true,
+    audience: "seeker",
+    label: "You completed a learning item",
+    description:
+      "Celebrates honestly when you mark a learning item complete  the skill lands on your profile as self-attested (via learning) and your projected rank in your local pool shifts. Email channel default-on; opt out per kind if you'd rather only see it in the bell.",
+    dedupeWindowSeconds: 0,
+  },
+  "learning.nudge": {
+    defaultInApp: true,
+    defaultEmail: false,
+    audience: "seeker",
+    label: "A learning item has gone quiet",
+    description:
+      "Gentle once-only check-in when a learning item sits without progress for a while. Conservative by design: in-app only by default, frequency-capped across the week alongside other lifecycle nudges so we never stack two demoralising pings.",
+    dedupeWindowSeconds: 0,
+  },
 } as const satisfies Record<string, NotificationKindMeta>;
 
 export type NotificationKind = keyof typeof NOTIFICATION_CATALOG;

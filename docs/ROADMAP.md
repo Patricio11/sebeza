@@ -552,6 +552,30 @@ that registry  we win on **data quality, usability, and analytics.** The system 
 
 ---
 
+## 🧷 PHASE 9.12: THE LEARNING LOOP ✅ (shipped 2026-05-25)
+
+Side-phase between 9.11 and 9.13. Turns the Career Compass from advice-you-read into a loop the learner lives in. The 9.13 sister-phase ships the gov-facing analytics that aggregate the data this loop generates.
+
+**What ships:**
+
+1. **Provenance honesty contract on `profile_skills`** — additive migration `0020` adds `provenance` (`skill_provenance` enum: `self_attested | self_attested_learning | imported | verified_provider`) + `verified_at`. The UI rule (D1): *render "Verified" ⇔ `provenance='verified_provider'` AND `verified_at IS NOT NULL`*. Closes the only path through which a learning-driven skill could leak onto a "Verified" surface. Helpers `provenanceLabel()` + `isVerifiedSkill()` are the canonical readers.
+
+2. **`learning_items` table + state machine + 4 Server Actions** — same migration adds `learning_state` + `abandon_reason` enums + the `learning_items` table (one row per seeker × accepted recommendation). `acceptRecommendation` dedupes against active rows + matches a `LearningPath` from the existing SA-grounded catalog. `startLearningItem` flips to `in_progress`. `completeLearningItem` upserts the matching `profile_skills` row with **upgrade-only** semantics (`ON CONFLICT … SET … WHERE provenance='self_attested'` — never downgrades a verified row), fires `learning.completed` (exempt from D5 cap), recomputes `rankInPoolQuery` for the celebration copy. `abandonLearningItem` writes the reason + clamped 200-char note (PII-flagged in audit per the 9.8.5 pattern).
+
+3. **"My Learning" section + Accept button on `/dashboard/grow`** — server component splits items into Active + Recent (last 5 finished). `<AcceptRecommendationButton>` on every recommendation card renders as a primary CTA or a quiet "On your learning list" pill, depending on state. Compass page does ONE round trip to load both via `Promise.all`.
+
+4. **Abandon modal + D3 free-alt surfacing** — bottom-sheet on phones / centred on `md+`. Mirrors 9.8.5 decline-with-reason UX. When reason ∈ `{too_expensive, access_transport}`, an inline preview confirms *"We'll surface a free alternative for this skill next time you open the compass."* On the next Compass render, recommendations whose skill matches a recent cost/access-driven abandon get a dashed "Free alt" chip alongside any 9.11 "Vacancy gap" chip.
+
+5. **Gentle nudges + D5 cross-kind weekly cap** — new cron `/api/cron/learning-nudge` (Phase 8 pattern, `CRON_SECRET`-guarded, idempotent via per-row anchor). For each `accepted`/`in_progress` item silent ≥ 14 days, fires one `learning.nudge` (in-app default-on, email default-off). **D5 enforcement**: before queuing each candidate, the cron checks the `notifications` table for any `vacancy.outcome.other-hired` OR `learning.nudge` row in the last 7 days for that user — if either exists, skip. Two demoralising nudges in the same week is the opposite of the loop's intent. `learning.completed` is exempt (positive payoff never throttled).
+
+6. **Three compliance assertions wired into `/api/admin/outcomes-compliance`** — `self-attested-never-verified` (D1 structural pin), `learning-items-seeker-private` (FK + audience invariant), `learning-nudge-cap-honoured` (inverse of the D5 cron-side check).
+
+Four new audit kinds (`learning.{accept,start,complete,abandon}`), 2 new notification kinds, 1 new email template (`genericTemplate` shell with eyebrow "Skill added" + CTA "Open your profile"). Seed extended with 3 learning fixtures on `wits-bsc-cs-2026-08` (react in-progress, typescript completed → `profile_skills` upgraded to `self_attested_learning`, postgres abandoned with reason `too_expensive`). Typecheck clean.
+
+Companion docs: `docs/completed/PHASE_9_12_PLAN.md` + `docs/completed/PHASE_9_12_COMPLETE.md`. Sister phase opening next: `docs/PHASE_9_13_PLAN.md`.
+
+---
+
 ## 🧷 PHASE 9.11: VACANCY-OUTCOME LOOP + GROWTH NOTIFICATIONS ✅ (shipped 2026-05-25)
 
 Side-phase between 9.10 and Phase 10. Closes two pre-launch hygiene gaps surfaced in the 9.10 readiness review:
