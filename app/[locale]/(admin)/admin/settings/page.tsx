@@ -1,6 +1,6 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { DashboardShell } from "@/components/layout/DashboardShell";
-import { ADMIN_NAV, MOCK_ADMIN } from "@/components/layout/adminNav";
+import { ADMIN_NAV } from "@/components/layout/adminNav";
 import { verifyAdmin } from "@/lib/auth/dal";
 import { getAllSettings } from "@/lib/admin/settings";
 import { SettingsForm } from "@/components/feature/admin/SettingsForm";
@@ -12,14 +12,14 @@ export default async function SettingsPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  await verifyAdmin();
+  const session = await verifyAdmin();
   const t = await getTranslations("adminDash.settings");
   const values = await getAllSettings();
 
   return (
     <DashboardShell
       role="admin"
-      workspaceLabel={MOCK_ADMIN.fullName}
+      workspaceLabel={session.name ?? "Admin"}
       workspaceEyebrow="Administrator · 2FA required"
       nav={ADMIN_NAV}
       activeKey="settings"

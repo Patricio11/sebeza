@@ -1,7 +1,7 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { DashboardShell } from "@/components/layout/DashboardShell";
-import { ADMIN_NAV, MOCK_ADMIN } from "@/components/layout/adminNav";
+import { ADMIN_NAV } from "@/components/layout/adminNav";
 import { verifyAdmin } from "@/lib/auth/dal";
 import { listOpenReports } from "@/lib/admin/moderation-query";
 import { ReportActions } from "@/components/feature/admin/ReportActions";
@@ -25,7 +25,7 @@ export default async function ModerationPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  await verifyAdmin();
+  const session = await verifyAdmin();
   const t = await getTranslations("adminDash.moderation");
   const reports = await listOpenReports();
 
@@ -42,7 +42,7 @@ export default async function ModerationPage({
   return (
     <DashboardShell
       role="admin"
-      workspaceLabel={MOCK_ADMIN.fullName}
+      workspaceLabel={session.name ?? "Admin"}
       workspaceEyebrow="Administrator · 2FA required"
       nav={ADMIN_NAV}
       activeKey="moderation"

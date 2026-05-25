@@ -1,12 +1,29 @@
+/**
+ * Employer  Organisation summary surface.
+ *
+ * Phase 9.10 made `/employer/onboarding` the canonical edit + KYC
+ * surface. This page is the read-only "trust" summary  it reads
+ * live org state via `getMyOrgVettingState()` (the same Phase 9.10
+ * query) and renders organisation details + the live verification
+ * badge. The "Save" form on this page used to be cosmetic + hard-
+ * coded against MOCK_EMPLOYER  removed in the 9.13 audit sweep
+ * (no mock data in production paths). Every edit goes through
+ * `/employer/onboarding`, which has the proper Server Action +
+ * audit trail.
+ */
+
 import { setRequestLocale, getTranslations } from "next-intl/server";
+import { Link } from "@/i18n/navigation";
 import { DashboardShell } from "@/components/layout/DashboardShell";
-import { EMPLOYER_NAV, MOCK_EMPLOYER } from "@/components/layout/employerNav";
+import { EMPLOYER_NAV } from "@/components/layout/employerNav";
 import { OrgVerificationBanner } from "@/components/layout/OrgVerificationBanner";
-import { TextField, SelectField } from "@/components/ui/FormField";
 import { Button } from "@/components/ui/Button";
 import { VerificationBadge } from "@/components/ui/VerificationBadge";
-import { ShieldCheck } from "lucide-react";
-import { verifyRole } from "@/lib/auth/dal";
+import { Pencil, ShieldCheck } from "lucide-react";
+import { verifyEmployer } from "@/lib/auth/dal";
+import { getMyOrgVettingState } from "@/lib/employer/vetting";
+
+export const revalidate = 0;
 
 export default async function OrganisationPage({
   params,
@@ -15,15 +32,19 @@ export default async function OrganisationPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  await verifyRole("employer");
+  const session = await verifyEmployer();
   const t = await getTranslations("employerDash.organisation");
   const tOuter = await getTranslations("employerDash");
-  const org = MOCK_EMPLOYER;
+
+  const state = await getMyOrgVettingState();
+  const orgName = state?.orgName ?? session.orgName ?? "Your organisation";
+  const verification = state?.verification ?? "unverified";
+  const isVerified = verification === "verified";
 
   return (
     <DashboardShell
       role="employer"
-      workspaceLabel={org.orgName}
+      workspaceLabel={orgName}
       workspaceEyebrow="Employer · workspace"
       nav={EMPLOYER_NAV}
       activeKey="organisation"
@@ -31,75 +52,83 @@ export default async function OrganisationPage({
       pageTitle={t("title")}
       pageSubtitle={t("subtitle")}
       banner={
-        <OrgVerificationBanner
-          message={tOuter("orgUnverifiedBanner")}
-          cta={tOuter("orgUnverifiedCta")}
-        />
+        !isVerified ? (
+          <OrgVerificationBanner
+            message={tOuter("orgUnverifiedBanner")}
+            cta={tOuter("orgUnverifiedCta")}
+          />
+        ) : null
       }
     >
       <div className="grid gap-10 md:grid-cols-[1fr_320px]">
+        {/* ── Read-only summary; edits go via /employer/onboarding ─── */}
         <section>
-          <h2 className="mb-4 border-b-2 border-[color:var(--color-ink)] pb-2 font-display text-2xl">
-            {t("details")}
-          </h2>
-          <form className="grid gap-5 md:grid-cols-2">
-            <TextField id="orgName" label={t("company")} defaultValue={org.orgName} />
-            <TextField
-              id="registration"
-              label={t("registration")}
-              defaultValue={org.registration}
-            />
-            <SelectField id="industry" label={t("industry")} defaultValue={org.industry}>
-              <option>{org.industry}</option>
-              <option>Hospitality</option>
-              <option>Construction</option>
-              <option>Healthcare</option>
-              <option>Information technology</option>
-              <option>Manufacturing</option>
-              <option>Retail</option>
-              <option>Mining</option>
-              <option>Public sector</option>
-              <option>Other</option>
-            </SelectField>
-            <SelectField id="size" label={t("size")} defaultValue={org.size}>
-              <option>1 – 10</option>
-              <option>11 – 50</option>
-              <option>51 – 200</option>
-              <option>201 – 1 000</option>
-              <option>{org.size}</option>
-            </SelectField>
-            <SelectField id="country" label={t("country")} defaultValue={org.country}>
-              <option>{org.country}</option>
-              <option>Other (operates in SA)</option>
-            </SelectField>
-            <TextField id="city" label="Head office city" defaultValue={org.city} />
-          </form>
+          <header className="mb-4 flex items-baseline justify-between border-b-2 border-[color:var(--color-ink)] pb-2">
+            <h2 className="font-display text-2xl">{t("details")}</h2>
+            <Link
+              href="/employer/onboarding"
+              className="inline-flex items-center gap-1 text-[0.7rem] uppercase tracking-[0.18em] text-[color:var(--color-ink-soft)] hover:text-[color:var(--color-ink)]"
+            >
+              <Pencil className="size-3" aria-hidden="true" />
+              Edit details
+            </Link>
+          </header>
 
-          <div className="mt-6">
-            <Button type="submit" variant="ghost" size="md">
-              Save organisation details
-            </Button>
-          </div>
+          <dl className="grid gap-5 md:grid-cols-2">
+            <Field label={t("company")} value={orgName} />
+            <Field
+              label={t("registration")}
+              value={state?.registrationNumber}
+            />
+            <Field label={t("industry")} value={state?.industry} />
+            <Field label={t("country")} value={state?.country} />
+            <Field label="Head office city" value={state?.city} />
+            <Field label="Company address" value={state?.companyAddress} />
+            <Field label="VAT number" value={state?.vatNumber} />
+          </dl>
+
+          <p className="mt-6 text-xs italic text-[color:var(--color-ink-soft)]">
+            All organisation details + verification documents are managed on{" "}
+            <Link
+              href="/employer/onboarding"
+              className="underline hover:text-[color:var(--color-ink)]"
+            >
+              /employer/onboarding
+            </Link>
+            . This page is a read-only summary.
+          </p>
         </section>
 
+        {/* ── Verification card  reads live `verification` ─── */}
         <aside className="md:pt-12">
           <div className="rounded-[var(--radius-md)] border-2 border-[color:var(--color-ink)] bg-[color:var(--color-surface)] p-5">
             <div className="text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--color-ink-soft)]">
               {t("verification")}
             </div>
             <div className="mt-2 flex items-center gap-2">
-              <VerificationBadge state={org.orgVerified ? "verified" : "pending"} />
+              <VerificationBadge state={verification} />
             </div>
             <p className="mt-3 text-sm text-[color:var(--color-ink-soft)]">
-              {org.orgVerified
+              {isVerified
                 ? "Your organisation is verified. You can reveal candidate contact details and request documents  every access is audit-logged."
-                : "You haven't submitted for verification yet. Until then, contact reveal and document requests stay locked."}
+                : verification === "pending"
+                  ? "Your application is under review by our team. We typically respond within one business day."
+                  : verification === "rejected"
+                    ? "Your verification application was not approved. Open onboarding to read the reviewer's note and resubmit."
+                    : "You haven't submitted for verification yet. Until then, contact reveal and document requests stay locked."}
             </p>
-            {!org.orgVerified && (
-              <Button variant="primary" size="md" className="mt-4 w-full">
+            {!isVerified && (
+              <Link
+                href="/employer/onboarding"
+                className="mt-4 inline-flex h-10 w-full items-center justify-center gap-2 rounded-[var(--radius-pill)] border-2 border-[color:var(--color-ink)] bg-[color:var(--color-ink)] px-4 text-sm font-medium text-[color:var(--color-paper)] hover:bg-[color:var(--color-brand-strong)] hover:border-[color:var(--color-brand-strong)]"
+              >
                 <ShieldCheck className="size-4" aria-hidden="true" />
-                {t("submitForVerification")}
-              </Button>
+                {verification === "rejected"
+                  ? "Resubmit application"
+                  : verification === "pending"
+                    ? "View application status"
+                    : t("submitForVerification")}
+              </Link>
             )}
             <p className="mt-3 text-xs italic text-[color:var(--color-ink-soft)]">
               {t("kycSlot")}
@@ -108,5 +137,31 @@ export default async function OrganisationPage({
         </aside>
       </div>
     </DashboardShell>
+  );
+}
+
+function Field({
+  label,
+  value,
+}: {
+  label: string;
+  value: string | null | undefined;
+}) {
+  return (
+    <div>
+      <dt className="text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--color-ink-soft)]">
+        {label}
+      </dt>
+      <dd
+        className={
+          "mt-1 text-sm " +
+          (value
+            ? "text-[color:var(--color-ink)]"
+            : "italic text-[color:var(--color-ink-soft)]")
+        }
+      >
+        {value ?? "Not set"}
+      </dd>
+    </div>
   );
 }

@@ -1,7 +1,7 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { DashboardShell } from "@/components/layout/DashboardShell";
-import { ADMIN_NAV, MOCK_ADMIN } from "@/components/layout/adminNav";
+import { ADMIN_NAV } from "@/components/layout/adminNav";
 import { recentAuditEventsFromDb } from "@/lib/audit";
 import { verifyAdmin } from "@/lib/auth/dal";
 import { adminOverviewCounts } from "@/lib/admin/users";
@@ -14,7 +14,7 @@ export default async function AdminOverviewPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  await verifyAdmin();
+  const session = await verifyAdmin();
 
   const t = await getTranslations("adminDash");
   const [counts, events] = await Promise.all([
@@ -36,7 +36,7 @@ export default async function AdminOverviewPage({
   return (
     <DashboardShell
       role="admin"
-      workspaceLabel={MOCK_ADMIN.fullName}
+      workspaceLabel={session.name ?? "Admin"}
       workspaceEyebrow="Administrator · 2FA required"
       nav={ADMIN_NAV}
       activeKey="overview"

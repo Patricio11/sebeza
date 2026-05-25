@@ -1,6 +1,6 @@
 import { setRequestLocale } from "next-intl/server";
 import { DashboardShell } from "@/components/layout/DashboardShell";
-import { ADMIN_NAV, MOCK_ADMIN } from "@/components/layout/adminNav";
+import { ADMIN_NAV } from "@/components/layout/adminNav";
 import { verifyAdmin } from "@/lib/auth/dal";
 import { listForUser } from "@/lib/notifications/query";
 import { NotificationsList } from "@/components/feature/notifications/NotificationsList";
@@ -12,7 +12,7 @@ export default async function AdminNotificationsPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  await verifyAdmin();
+  const session = await verifyAdmin();
   const PAGE = 20;
   const probe = await listForUser({ limit: PAGE + 1 });
   const hasMore = probe.length > PAGE;
@@ -21,7 +21,7 @@ export default async function AdminNotificationsPage({
   return (
     <DashboardShell
       role="admin"
-      workspaceLabel={MOCK_ADMIN.fullName}
+      workspaceLabel={session.name ?? "Admin"}
       workspaceEyebrow="Administrator · 2FA required"
       nav={ADMIN_NAV}
       activeKey="notifications"

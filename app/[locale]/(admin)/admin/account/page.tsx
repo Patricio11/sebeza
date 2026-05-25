@@ -1,6 +1,6 @@
 import { setRequestLocale } from "next-intl/server";
 import { DashboardShell } from "@/components/layout/DashboardShell";
-import { ADMIN_NAV, MOCK_ADMIN } from "@/components/layout/adminNav";
+import { ADMIN_NAV } from "@/components/layout/adminNav";
 import { SignOutButton } from "@/components/feature/auth/SignOutButton";
 import { TwoFactorAccountPanel } from "@/components/feature/auth/TwoFactorAccountPanel";
 import { NotificationPrefsPanel } from "@/components/feature/notifications/NotificationPrefsPanel";
@@ -29,7 +29,7 @@ export default async function AdminAccountPage({
   return (
     <DashboardShell
       role="admin"
-      workspaceLabel={MOCK_ADMIN.fullName}
+      workspaceLabel={me.name ?? "Admin"}
       workspaceEyebrow="Administrator · 2FA required"
       nav={ADMIN_NAV}
       activeKey="account"

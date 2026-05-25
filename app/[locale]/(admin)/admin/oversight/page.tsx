@@ -17,7 +17,7 @@
 
 import { setRequestLocale } from "next-intl/server";
 import { DashboardShell } from "@/components/layout/DashboardShell";
-import { ADMIN_NAV, MOCK_ADMIN } from "@/components/layout/adminNav";
+import { ADMIN_NAV } from "@/components/layout/adminNav";
 import { Button } from "@/components/ui/Button";
 import { verifyAdmin } from "@/lib/auth/dal";
 import { oversightLogQuery } from "@/lib/gov/oversight-query";
@@ -41,7 +41,7 @@ export default async function OversightPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  await verifyAdmin();
+  const session = await verifyAdmin();
 
   const sp = await searchParams;
   const actor = (sp.actor ?? "").slice(0, 200);
@@ -71,7 +71,7 @@ export default async function OversightPage({
   return (
     <DashboardShell
       role="admin"
-      workspaceLabel={MOCK_ADMIN.fullName}
+      workspaceLabel={session.name ?? "Admin"}
       workspaceEyebrow="Administrator · 2FA required"
       nav={ADMIN_NAV}
       activeKey="oversight"

@@ -1,7 +1,7 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { DashboardShell } from "@/components/layout/DashboardShell";
-import { ADMIN_NAV, MOCK_ADMIN } from "@/components/layout/adminNav";
+import { ADMIN_NAV } from "@/components/layout/adminNav";
 import { verifyAdmin } from "@/lib/auth/dal";
 import { listPendingQualifications } from "@/lib/admin/verifications-query";
 import { listOrgsForReview } from "@/lib/admin/org-vetting";
@@ -19,7 +19,7 @@ export default async function VerificationsPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  await verifyAdmin();
+  const session = await verifyAdmin();
   const { tab } = await searchParams;
   const active = tab === "organisations" ? "organisations" : "qualifications";
 
@@ -48,7 +48,7 @@ export default async function VerificationsPage({
   return (
     <DashboardShell
       role="admin"
-      workspaceLabel={MOCK_ADMIN.fullName}
+      workspaceLabel={session.name ?? "Admin"}
       workspaceEyebrow="Administrator · 2FA required"
       nav={ADMIN_NAV}
       activeKey="verifications"
