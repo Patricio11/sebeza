@@ -8,6 +8,7 @@ import {
   Sprout,
   FileSearch,
   FileText,
+  GraduationCap,
 } from "lucide-react";
 import type { DashboardNavItem } from "./DashboardShell";
 
@@ -30,6 +31,13 @@ export const GOV_NAV: DashboardNavItem[] = [
     label: "Local-hiring opportunity",
     href: "/gov/opportunity",
     icon: Sprout,
+  },
+  // Phase 9.13  curriculum-vs-demand cross-market analytics.
+  {
+    key: "curriculum",
+    label: "Curriculum vs demand",
+    href: "/gov/curriculum",
+    icon: GraduationCap,
   },
   // Phase 9.7.6  ships dormant; the page itself renders an informative
   // notice when the feature flag is off, so the nav entry is honest about

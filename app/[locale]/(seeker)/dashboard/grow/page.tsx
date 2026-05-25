@@ -15,6 +15,8 @@ import {
 import { COST_ACCESS_ABANDON_REASONS } from "@/lib/seeker/learning-types";
 import { MyLearningSection } from "@/components/feature/seeker/learning/MyLearningSection";
 import { AcceptRecommendationButton } from "@/components/feature/seeker/learning/AcceptRecommendationButton";
+import { demandVsCurriculumQuery } from "@/db/queries/curriculum";
+import { ProgrammeVsMarketCard } from "@/components/feature/analytics/ProgrammeVsMarketCard";
 import {
   PROVIDER_LABEL,
   COST_LABEL,
@@ -90,17 +92,30 @@ export default async function CareerCompassPage({
   // hardcoded `currentRank: 0` the mock compass returned. We splice the
   // live numbers into the compass headline so the existing UI
   // re-renders without a template change.
-  const [rawCompass, rank, myLearning, recentAbandons] = await Promise.all([
-    getCompassForProfile(me),
-    rankInPoolQuery({
-      handle: me.handle,
-      profession: me.profession,
-      province: me.province,
-      projectedSkillBoost: 2,
-    }),
-    listMyLearningItems(),
-    listRecentAbandonReasonsBySkill(),
-  ]);
+  // Phase 9.13  curriculum-vs-market card for student-lane viewers only.
+  // We resolve the query input from `me.academic` (set when the seeker
+  // captured an academic profile at signup or in the editor). For
+  // non-students this stays null + the card isn't rendered.
+  const curriculumPromise = me.academic
+    ? demandVsCurriculumQuery({
+        institutionSlug: me.academic.institutionSlug,
+        programme: me.academic.programme,
+      })
+    : Promise.resolve(null);
+
+  const [rawCompass, rank, myLearning, recentAbandons, curriculum] =
+    await Promise.all([
+      getCompassForProfile(me),
+      rankInPoolQuery({
+        handle: me.handle,
+        profession: me.profession,
+        province: me.province,
+        projectedSkillBoost: 2,
+      }),
+      listMyLearningItems(),
+      listRecentAbandonReasonsBySkill(),
+      curriculumPromise,
+    ]);
   // Phase 9.12  D3 + Accept-button awareness. The compass needs to know:
   //  - which recommendations are already on the seeker's active learning
   //    list (so the Accept button renders as a quiet "On your list" pill)
@@ -219,6 +234,13 @@ export default async function CareerCompassPage({
           nfmt={nfmt}
           t={tStudent}
         />
+      )}
+
+      {/* ───────────── Phase 9.13  Curriculum vs market (student-side) ───────────── */}
+      {me.academic && curriculum && (
+        <section className="mt-10">
+          <ProgrammeVsMarketCard data={curriculum} locale={locale} />
+        </section>
       )}
 
       {/* ───────────── My Learning (Phase 9.12) ───────────── */}

@@ -33,6 +33,10 @@ import {
   assertSelfAttestedNeverVerified,
   assertLearningItemsSeekerPrivate,
   assertLearningNudgeCapHonoured,
+  // Phase 9.13  learning-loop intelligence compliance
+  assertCurriculumCellsAboveFloor,
+  assertStallCellsAboveFloor,
+  assertStallConsentGateEnforced,
 } from "@/lib/analytics/outcomes-compliance";
 
 export async function GET() {
@@ -55,6 +59,10 @@ export async function GET() {
     await assertSelfAttestedNeverVerified(),
     await assertLearningItemsSeekerPrivate(),
     await assertLearningNudgeCapHonoured(),
+    // Phase 9.13
+    await assertCurriculumCellsAboveFloor(),
+    await assertStallCellsAboveFloor(),
+    await assertStallConsentGateEnforced(),
   ];
   const ok = checks.every((c) => c.ok);
   return NextResponse.json(

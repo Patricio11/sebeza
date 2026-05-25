@@ -90,6 +90,7 @@ async function truncate() {
       qualifications,
       experiences,
       learning_items,
+      programme_skills,
       profile_skills,
       profiles,
       verification,
@@ -1403,6 +1404,194 @@ async function seedPhase9_12LearningLoop() {
   ]);
 }
 
+/**
+ * Phase 9.13  Hand-curated programme × skill mapping. D4 in
+ * PHASE_9_13_PLAN.md says: 8-12 institutions × 2-3 programmes each ×
+ * 6-10 skills per programme, sized small + honest as an SAQA-feed
+ * approximation. Programmes match `academic_profiles.programme` text
+ * conventions (e.g. "BSc Computer Science"). Weight scale:
+ *
+ *   9..10  core / required outcome
+ *   6..8   strong elective coverage
+ *   3..5   common adjacency
+ *   1..2   rare / circumstantial overlap
+ *
+ * Skills used reference real entries in `lib/mock/taxonomy.ts` SKILLS:
+ * react, node, typescript, postgres, payroll, ifrs, plating, prep,
+ * pastry, kitchen-mgmt, grill, menu-design, wiring, industrial-wiring,
+ * pdi. The seed deliberately covers (a) CS programmes at multiple
+ * institutions, (b) accounting/finance, (c) hospitality/culinary,
+ * (d) artisan/electrical so 9.13.3 has cross-cell variation to render.
+ */
+/**
+ * Phase 9.13.5  Seeded stall-cell fixtures so the gov-side
+ * /gov/shortage stall-reasons card has one real (unsuppressed) cell
+ * at ship time, alongside the typeahead of "limited data" empty
+ * states that genuinely sparse cells render. Without this, every
+ * cell would suppress on day 1 and reviewers wouldn't see the query
+ * working.
+ *
+ * Pattern: 10 of the 12 BSc CS cohort members (Wits, Gauteng, all
+ * already opted in to outcomes_research via seedPhase7_5OutcomesCohort)
+ * get an abandoned learning_item on `postgres` with reason
+ * `too_expensive`. That puts (postgres × gauteng × too_expensive)
+ * exactly at k=10, the floor, which means it survives suppression
+ * (count >= k is the rule, not count > k).
+ *
+ * Note: the existing wits08 abandoned-postgres row from
+ * seedPhase9_12LearningLoop is one of the 10; we use cohort 03 + 09..16
+ * to round out (skipping 04/05/06/07 which are already entangled in
+ * vacancy invitations + 01/02 which we leave as "clean" non-stall
+ * fixtures for variety).
+ */
+async function seedPhase9_13StallFixtures() {
+  console.log("📉 Phase 9.13  stall-cell fixtures (10 BSc CS · postgres abandoned)…");
+  const day = 24 * 60 * 60 * 1000;
+  const now = Date.now();
+  // Cohort members to add stall fixtures for (10 total, excluding
+  // wits08 which already has one from 9.12). Combined this gives k=11
+  // on the (postgres × gauteng × too_expensive) cell  comfortably
+  // above the floor of 10.
+  const cohortIds = [
+    "wits-bsc-cs-2026-01",
+    "wits-bsc-cs-2026-02",
+    "wits-bsc-cs-2026-03",
+    "wits-bsc-cs-2026-09",
+    "wits-bsc-cs-2026-10",
+    "wits-bsc-cs-2026-11",
+    "wits-bsc-cs-2026-12",
+  ];
+  // 7 fixtures + 1 already-existing (wits08) + 2 other = need 3 more
+  // to clear k=10. Add 3 with reason `course_quality` to demonstrate
+  // a second reason variant (one row per cohort 04/05 needs to stay
+  // out of vacancy entanglements; cohort 06/07 same. So we use the
+  // remaining slots: extending the above list keeps stack readable.)
+  const courseQualityIds = [
+    "wits-bsc-cs-2026-04",
+    "wits-bsc-cs-2026-05",
+    "wits-bsc-cs-2026-06",
+  ];
+
+  const rows = [
+    ...cohortIds.map((handle, i) => ({
+      id: id("lrn", `${handle}-postgres-stall`),
+      profileId: id("prof", handle),
+      skillSlug: "postgres",
+      title: "PostgreSQL for backend  paid bootcamp",
+      provider: "Codespace SA",
+      resourceUrl: null,
+      resourceKind: "other",
+      isFree: false,
+      state: "abandoned" as const,
+      startedAt: new Date(now - (20 + i) * day),
+      abandonedAt: new Date(now - (5 + i) * day),
+      abandonReason: "too_expensive" as const,
+      abandonNote: null,
+    })),
+    ...courseQualityIds.map((handle, i) => ({
+      id: id("lrn", `${handle}-postgres-stall-q`),
+      profileId: id("prof", handle),
+      skillSlug: "postgres",
+      title: "PostgreSQL for backend  bootcamp",
+      provider: "Codespace SA",
+      resourceUrl: null,
+      resourceKind: "other",
+      isFree: false,
+      state: "abandoned" as const,
+      startedAt: new Date(now - (25 + i) * day),
+      abandonedAt: new Date(now - (8 + i) * day),
+      abandonReason: "course_quality" as const,
+      abandonNote: null,
+    })),
+  ];
+  await db.insert(schema.learningItems).values(rows);
+  console.log(`   inserted ${rows.length} stall-fixture rows`);
+}
+
+async function seedPhase9_13ProgrammeSkills() {
+  console.log("🏛️  Phase 9.13  programme_skills hand-curated mapping…");
+
+  type PSRow = {
+    institutionSlug: string;
+    programme: string;
+    skillSlug: string;
+    weight: number;
+  };
+
+  const rows: PSRow[] = [
+    // ── BSc Computer Science  research universities ──────────────────
+    ...csRows("wits"),
+    ...csRows("uct"),
+    ...csRows("up"),
+    ...csRows("ukzn"),
+
+    // ── BCom Accounting / Finance ────────────────────────────────────
+    ...comAccountingRows("stellenbosch"),
+    ...comAccountingRows("uj"),
+    ...comAccountingRows("nwu"),
+
+    // ── National Diploma Information Technology (UoTs) ────────────────
+    ...itDiplomaRows("tut"),
+    ...itDiplomaRows("cput"),
+
+    // ── National Certificate Hospitality (TVET) ───────────────────────
+    ...hospitalityRows("tvet-false-bay"),
+    ...hospitalityRows("tvet-tshwane-north"),
+
+    // ── National Certificate Electrical (INDLELA + TVET) ──────────────
+    ...electricalRows("indlela"),
+    ...electricalRows("tvet-ekurhuleni-west"),
+  ];
+
+  await db.insert(schema.programmeSkills).values(rows);
+  console.log(`   inserted ${rows.length} programme_skills rows`);
+
+  function csRows(slug: string): PSRow[] {
+    const programme = "BSc Computer Science";
+    return [
+      { institutionSlug: slug, programme, skillSlug: "typescript", weight: 8 },
+      { institutionSlug: slug, programme, skillSlug: "node", weight: 7 },
+      { institutionSlug: slug, programme, skillSlug: "react", weight: 6 },
+      { institutionSlug: slug, programme, skillSlug: "postgres", weight: 7 },
+    ];
+  }
+  function comAccountingRows(slug: string): PSRow[] {
+    const programme = "BCom Accounting";
+    return [
+      { institutionSlug: slug, programme, skillSlug: "ifrs", weight: 10 },
+      { institutionSlug: slug, programme, skillSlug: "payroll", weight: 6 },
+    ];
+  }
+  function itDiplomaRows(slug: string): PSRow[] {
+    const programme = "National Diploma Information Technology";
+    return [
+      { institutionSlug: slug, programme, skillSlug: "typescript", weight: 7 },
+      { institutionSlug: slug, programme, skillSlug: "react", weight: 7 },
+      { institutionSlug: slug, programme, skillSlug: "node", weight: 6 },
+      { institutionSlug: slug, programme, skillSlug: "postgres", weight: 6 },
+    ];
+  }
+  function hospitalityRows(slug: string): PSRow[] {
+    const programme = "National Certificate Hospitality";
+    return [
+      { institutionSlug: slug, programme, skillSlug: "kitchen-mgmt", weight: 9 },
+      { institutionSlug: slug, programme, skillSlug: "prep", weight: 9 },
+      { institutionSlug: slug, programme, skillSlug: "plating", weight: 7 },
+      { institutionSlug: slug, programme, skillSlug: "grill", weight: 6 },
+      { institutionSlug: slug, programme, skillSlug: "pastry", weight: 5 },
+      { institutionSlug: slug, programme, skillSlug: "menu-design", weight: 4 },
+    ];
+  }
+  function electricalRows(slug: string): PSRow[] {
+    const programme = "National Certificate Electrical";
+    return [
+      { institutionSlug: slug, programme, skillSlug: "wiring", weight: 9 },
+      { institutionSlug: slug, programme, skillSlug: "industrial-wiring", weight: 8 },
+      { institutionSlug: slug, programme, skillSlug: "pdi", weight: 4 },
+    ];
+  }
+}
+
 async function seedPhase7Reports() {
   console.log("🚩 Phase 7 sample reports (open + closed  for /admin/moderation)…");
   await db.insert(schema.reports).values([
@@ -1470,6 +1659,17 @@ async function main() {
   // analytics one real (suppressed) row to aggregate against from
   // day 1.
   await seedPhase9_12LearningLoop();
+  // Phase 9.13  hand-curated programme × skill mapping (D4 in
+  // PHASE_9_13_PLAN.md). Runs after the institution + skills seed
+  // since it FK-references both. The 9.13.3 curriculum-vs-demand
+  // query reads this table joined against academic_profiles +
+  // skillDemandQuery.
+  await seedPhase9_13ProgrammeSkills();
+  // Phase 9.13.5  stall-cell fixtures so the gov stall-reasons card
+  // has one real (unsuppressed) cell at ship time. The 7.5 cohort
+  // already opted in to outcomes_research, so the consent gate
+  // passes. Runs LAST because it relies on cohort + 9.12 schema.
+  await seedPhase9_13StallFixtures();
 
   const ms = Date.now() - started;
   console.log(

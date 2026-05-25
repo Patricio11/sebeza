@@ -552,6 +552,26 @@ that registry  we win on **data quality, usability, and analytics.** The system 
 
 ---
 
+## 🧷 PHASE 9.13: LEARNING-LOOP INTELLIGENCE ✅ (shipped 2026-05-25)
+
+Sister phase to 9.12. The gov-facing analytics that read the data the loop produces. Closes the pre-launch gov analytics chapter end-to-end (demand → curriculum → learner → barrier → hire → outcome).
+
+**Two new datasets, both suppression-floored at k=10, both freshness-weighted, both consent-gated where appropriate:**
+
+1. **Curriculum vs demand.** New migration `0021` adds `programme_skills` table — hand-curated `(institution_slug × programme × skill_slug × weight)` rows per D4 (admits future SAQA-feed expansion without a schema change). `demandVsCurriculumQuery` joins it against `search_events` 90-day demand (same engine `career-compass.ts` uses) + `institutions.province_slug`. For each (institution × programme × province) cell: every skill the programme covers + the top 10 in-demand skills it doesn't cover (the gap signal). Two surfaces: student-side `<ProgrammeVsMarketCard>` on `/dashboard/grow` (focused view of seeker's own programme, no suppression) + gov-side `/gov/curriculum` (new route + new `GraduationCap` nav entry, cross-market, k=10 + two complementary axes). CSV export at `/api/gov/curriculum/export` (suppression preserved + audit-logged).
+
+2. **Why learners stall.** `stallReasonAggregateQuery` aggregates 9.12's `learning_items.abandon_reason` rows by `(skill × province × reason)`. Three structural defences per the plan: (D1) `outcomes_research` consent gate via INNER JOIN — unconsented learners structurally excluded before suppression runs; (D5) no `provider` dimension — provider judgment is reputational territory, not policy intelligence; (D6) freshness-weighted via `sebenza_freshness_confidence(abandoned_at)`. `<StallReasonsCard>` mirrors the 9.8.7 `<DeclineReasonsCard>` visual idiom verbatim. Surfaces on `/gov/shortage` (extends, doesn't add a new page). CSV at `/api/gov/stall-reasons/export`.
+
+Both cards carry footer cross-references explaining how to read them together (curriculum gap + stall reasons + Justification Index = three different interventions for the same skill gap).
+
+**Three new compliance assertions on `/api/admin/outcomes-compliance`** (now 18 total): `curriculum-cells-above-floor`, `stall-cells-above-floor`, `stall-consent-gate-enforced` (the last verifies the INNER JOIN gate by counting consented-source rows + checking the query result never exceeds them).
+
+Seed extended: `seedPhase9_13ProgrammeSkills()` (44 hand-curated programme×skill rows across 8 institutions × 5 archetypes — BSc CS, BCom Accounting, NatDip IT, NC Hospitality, NC Electrical) + `seedPhase9_13StallFixtures()` (10 abandoned `learning_items` on `postgres` for the BSc CS cohort to demonstrate the stall-cell infrastructure; suppression on (postgres × gauteng × any-single-reason) holds at the floor). No new audit kinds (reuses `analytics.export`). Typecheck clean.
+
+Companion docs: `docs/completed/PHASE_9_13_PLAN.md` + `docs/completed/PHASE_9_13_COMPLETE.md`.
+
+---
+
 ## 🧷 PHASE 9.12: THE LEARNING LOOP ✅ (shipped 2026-05-25)
 
 Side-phase between 9.11 and 9.13. Turns the Career Compass from advice-you-read into a loop the learner lives in. The 9.13 sister-phase ships the gov-facing analytics that aggregate the data this loop generates.

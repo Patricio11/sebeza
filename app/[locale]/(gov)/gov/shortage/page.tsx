@@ -38,6 +38,8 @@ import { PROVINCES } from "@/lib/mock/taxonomy";
 import { JustificationTable } from "@/components/feature/gov/JustificationTable";
 import { DeclineReasonsCard } from "@/components/feature/analytics/DeclineReasonsCard";
 import { declineReasonAggregateQuery } from "@/db/queries/decline-reasons";
+import { StallReasonsCard } from "@/components/feature/analytics/StallReasonsCard";
+import { stallReasonAggregateQuery } from "@/db/queries/stall-reasons";
 import { Download } from "lucide-react";
 
 export const revalidate = 300;
@@ -59,7 +61,7 @@ export default async function GovShortagePage({
     (p) => p.label === provinceFilterParam || p.slug === provinceFilterParam,
   );
 
-  const [result, declineData] = await Promise.all([
+  const [result, declineData, stallData] = await Promise.all([
     justificationIndexQuery({
       province: provinceFilter?.label,
     }),
@@ -67,6 +69,9 @@ export default async function GovShortagePage({
     // Reuses the existing k-floor from outcomes_min_cohort_size (one
     // knob across the system).
     declineReasonAggregateQuery(),
+    // Phase 9.13.4  cross-market stall-reason breakdown. Same k +
+    // freshness engine + outcomes_research consent gate.
+    stallReasonAggregateQuery(),
   ]);
 
   return (
@@ -212,6 +217,26 @@ export default async function GovShortagePage({
           data={declineData}
           locale={locale}
           exportHref="/api/gov/decline-reasons/export"
+        />
+      </section>
+
+      {/* Phase 9.13.4  "Why learners stall" cross-market breakdown.
+          Sister surface to "Why roles go unfilled" above. Cost-driven
+          stalls + salary-driven employer declines together map both
+          ends of the same skills-gap leak. */}
+      <section className="mt-8">
+        <header className="mb-3 flex items-baseline justify-between gap-3 border-b-2 border-[color:var(--color-ink)] pb-2">
+          <h2 className="font-display text-2xl">Why learners stall</h2>
+          <span className="text-xs text-[color:var(--color-ink-soft)]">
+            {stallData.cells.length > 0
+              ? `${stallData.cells.length} reason-cells · ${stallData.suppressed} suppressed (k = ${stallData.k})`
+              : `0 reason-cells · ${stallData.suppressed} suppressed (k = ${stallData.k})`}
+          </span>
+        </header>
+        <StallReasonsCard
+          data={stallData}
+          locale={locale}
+          exportHref="/api/gov/stall-reasons/export"
         />
       </section>
     </DashboardShell>

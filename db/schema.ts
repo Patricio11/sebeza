@@ -1145,3 +1145,41 @@ export const institutions = pgTable("institutions", {
     .notNull()
     .references(() => provinces.slug),
 });
+
+/**
+ * Phase 9.13  Curriculum-vs-demand mapping. Hand-curated at ship time
+ * per D4 in PHASE_9_13_PLAN.md; admits future SAQA-feed expansion
+ * without a schema change. `weight` (1..10) carries how strongly the
+ * programme's curriculum maps to this skill so 9.13.3's gap analysis
+ * weights core outcomes over tangential touches.
+ *
+ * `programme` is free text matching the shape of
+ * `academic_profiles.programme`  9.13.3 does ILIKE matching to bridge
+ * programme-name variants ("BSc Computer Science" vs
+ * "Bachelor of Science in Computer Science"). Known compromise; see
+ * PHASE_9_13_PLAN.md risk #2.
+ */
+export const programmeSkills = pgTable(
+  "programme_skills",
+  {
+    institutionSlug: text("institution_slug")
+      .notNull()
+      .references(() => institutions.slug),
+    programme: text("programme").notNull(),
+    skillSlug: text("skill_slug")
+      .notNull()
+      .references(() => skills.slug),
+    weight: integer("weight").notNull().default(5),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+  },
+  (t) => ({
+    pk: primaryKey({
+      columns: [t.institutionSlug, t.programme, t.skillSlug],
+    }),
+    skillIdx: index("programme_skills_skill_idx").on(t.skillSlug),
+    instProgIdx: index("programme_skills_inst_prog_idx").on(
+      t.institutionSlug,
+      t.programme,
+    ),
+  }),
+);
