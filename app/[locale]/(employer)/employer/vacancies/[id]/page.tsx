@@ -38,6 +38,7 @@ import { VacancyForm } from "@/components/feature/employer/vacancies/VacancyForm
 import { VacancyStatusChip } from "@/components/feature/employer/vacancies/VacancyStatusChip";
 import { VacancyInvitationsPanel } from "@/components/feature/employer/vacancies/VacancyInvitationsPanel";
 import { VacancyPlacementsPanel } from "@/components/feature/employer/vacancies/VacancyPlacementsPanel";
+import { MarkAsFilledModal } from "@/components/feature/employer/vacancies/MarkAsFilledModal";
 import {
   listInvitationsForVacancy,
   withdrawInvitation,
@@ -193,26 +194,40 @@ export default async function VacancyDetailPage({
           <span className="text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--color-ink-soft)]">
             Lifecycle
           </span>
-          {NEXT_STATES[vacancy.status].map((next) => (
-            <form
-              key={next}
-              action={async () => {
-                "use server";
-                await transitionVacancyStatus({
-                  vacancyId: vacancy.id,
-                  next,
-                });
-              }}
-            >
-              <Button
-                type="submit"
-                variant={next === "filled" ? "primary" : "secondary"}
-                size="sm"
+          {NEXT_STATES[vacancy.status].map((next) =>
+            next === "filled" ? (
+              <MarkAsFilledModal
+                key={next}
+                vacancyId={vacancy.id}
+                vacancyTitle={vacancy.title}
+                acceptedInvitees={invitations.filter(
+                  (i) =>
+                    i.state === "accepted" ||
+                    i.state === "accepted_with_notice",
+                )}
+                triggerLabel={TRANSITION_LABEL[next]}
+              />
+            ) : (
+              <form
+                key={next}
+                action={async () => {
+                  "use server";
+                  await transitionVacancyStatus({
+                    vacancyId: vacancy.id,
+                    next,
+                  });
+                }}
               >
-                {TRANSITION_LABEL[next]}
-              </Button>
-            </form>
-          ))}
+                <Button
+                  type="submit"
+                  variant="secondary"
+                  size="sm"
+                >
+                  {TRANSITION_LABEL[next]}
+                </Button>
+              </form>
+            ),
+          )}
         </section>
       )}
 

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/Button";
 import { getMyProfile } from "@/lib/profile/me";
 import { getCompassForProfile } from "@/db/queries/career-compass";
 import { rankInPoolQuery } from "@/db/queries/analytics";
+import { SKILLS } from "@/lib/mock/taxonomy";
 import {
   PROVIDER_LABEL,
   COST_LABEL,
@@ -38,15 +39,35 @@ import {
   MapPin,
   Building2,
   Landmark,
+  Target,
 } from "lucide-react";
 
 export default async function CareerCompassPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<{ missing?: string }>;
 }) {
   const { locale } = await params;
+  const { missing: missingParam } = await searchParams;
   setRequestLocale(locale);
+
+  // Phase 9.11 ─ deep-link awareness. The vacancy-outcome notification
+  // for not-selected candidates lands here with `?missing=slug,slug`.
+  // We render a small banner that names the role's missing skills, and
+  // recommendation rows whose skill matches one of the slugs get a
+  // "Vacancy gap" highlight so the seeker's eye lands on the actionable
+  // ones first.
+  const missingSlugs = (missingParam ?? "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean)
+    .slice(0, 5);
+  const missingSet = new Set(missingSlugs);
+  const missingLabels = missingSlugs.map(
+    (slug) => SKILLS.find((s) => s.slug === slug)?.label ?? slug,
+  );
 
   const me = await getMyProfile();
   if (!me) redirect("/sign-in?next=/dashboard/grow");
@@ -96,6 +117,33 @@ export default async function CareerCompassPage({
       pageTitle={t("title")}
       pageSubtitle={t("subtitle")}
     >
+      {/* ───────────── Vacancy-outcome deep-link banner (Phase 9.11) ─────────────
+          Lands here when a seeker opens the in-app / email notification
+          about a vacancy that was filled with another candidate. The
+          banner restates the role's published gaps (never names or
+          attributes the hired person  D4 privacy invariant) and the
+          highlighted recommendations below give an actionable next step. */}
+      {missingLabels.length > 0 && (
+        <section
+          aria-label="Vacancy outcome  growth focus"
+          className="mb-6 rounded-[var(--radius-md)] border-2 border-[color:var(--color-accent)] bg-[color:var(--color-accent-tint)] p-5 md:p-6"
+        >
+          <div className="flex items-center gap-2 text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--color-accent)]">
+            <Target className="size-3.5" aria-hidden="true" />
+            From your recent vacancy outcome
+          </div>
+          <h2 className="mt-2 font-display text-xl text-[color:var(--color-ink)] md:text-2xl">
+            The role asked for{" "}
+            <span className="italic">{missingLabels.join(", ")}</span>.
+          </h2>
+          <p className="mt-2 max-w-2xl text-sm text-[color:var(--color-ink-soft)]">
+            We&rsquo;ve highlighted these below in your recommendations and
+            learning paths. Closing one or two of them measurably moves
+            your rank in this pool.
+          </p>
+        </section>
+      )}
+
       {/* ───────────── Headline anchor ───────────── */}
       <section
         aria-labelledby="anchor-h"
@@ -164,7 +212,14 @@ export default async function CareerCompassPage({
         </p>
         <ol className="grid gap-4">
           {compass.recommendations.map((rec, i) => (
-            <RecommendationItem key={rec.skill.slug} rec={rec} ordinal={i + 1} nfmt={nfmt} t={t} />
+            <RecommendationItem
+              key={rec.skill.slug}
+              rec={rec}
+              ordinal={i + 1}
+              nfmt={nfmt}
+              t={t}
+              highlight={missingSet.has(rec.skill.slug)}
+            />
           ))}
         </ol>
       </section>
@@ -352,14 +407,23 @@ function RecommendationItem({
   ordinal,
   nfmt,
   t,
+  highlight,
 }: {
   rec: SkillRecommendation;
   ordinal: number;
   nfmt: Intl.NumberFormat;
   t: (k: string, v?: Record<string, string | number>) => string;
+  highlight?: boolean;
 }) {
   return (
-    <li className="rounded-[var(--radius-md)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-6">
+    <li
+      className={
+        "rounded-[var(--radius-md)] border bg-[color:var(--color-surface)] p-6 " +
+        (highlight
+          ? "border-2 border-[color:var(--color-accent)] ring-1 ring-[color:var(--color-accent)]"
+          : "border-[color:var(--color-hairline)]")
+      }
+    >
       <div className="grid gap-4 md:grid-cols-[2.5rem_1fr_auto] md:items-start">
         <span className="font-display text-[1.75rem] italic leading-none text-[color:var(--color-accent)]">
           {ordinal.toString().padStart(2, "0")}
@@ -371,6 +435,12 @@ function RecommendationItem({
               {rec.skill.label}
             </h3>
             <ReasonChip reason={rec.reason} t={t} />
+            {highlight && (
+              <span className="inline-flex items-center gap-1 rounded-[var(--radius-pill)] border border-[color:var(--color-accent)] bg-[color:var(--color-accent-tint)] px-2 py-0.5 text-[0.62rem] uppercase tracking-[0.18em] text-[color:var(--color-accent)]">
+                <Target className="size-3" aria-hidden="true" />
+                Vacancy gap
+              </span>
+            )}
           </div>
           <p className="mt-2 max-w-2xl text-sm text-[color:var(--color-ink-soft)]">
             {rec.detail}

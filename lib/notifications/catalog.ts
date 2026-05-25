@@ -238,6 +238,22 @@ export const NOTIFICATION_CATALOG = {
       "An admin requested specific changes to your onboarding submission. Your application form is open again with the admin's note pinned at the top  edit and resubmit.",
     dedupeWindowSeconds: 0,
   },
+  // ──────────────────────────────────────────────────────────────────────
+  // Phase 9.11  vacancy-outcome loop. Honest closure for accepted
+  // invitees who weren't selected when the vacancy got filled. Body
+  // composes vacancy requirements vs. the recipient's profile (NEVER
+  // the hired person's data, per D4) and links to Career Compass for
+  // any missing skills.
+  // ──────────────────────────────────────────────────────────────────────
+  "vacancy.outcome.other-hired": {
+    defaultInApp: true,
+    defaultEmail: true,
+    audience: "seeker",
+    label: "A vacancy you accepted was filled with someone else",
+    description:
+      "Honest closure when an employer hires someone else from a vacancy you accepted. Includes a comparison to the role's requirements (not the hired person's profile) and a Career Compass path for any skills the role wanted that your profile didn't show.",
+    dedupeWindowSeconds: 0,
+  },
 } as const satisfies Record<string, NotificationKindMeta>;
 
 export type NotificationKind = keyof typeof NOTIFICATION_CATALOG;

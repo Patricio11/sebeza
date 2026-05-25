@@ -133,6 +133,12 @@ const TEMPLATES: Partial<
     genericTemplate(ctx, "Open your application", "Updates needed"),
   "verification.queued": (ctx) =>
     genericTemplate(ctx, "Open the admin queue", "New submission"),
+  // ── Phase 9.11  vacancy-outcome growth notification ──────────────────
+  // Eyebrow + CTA send the recipient to Career Compass with the
+  // missing-skills hint already in the URL (?missing=...) so they
+  // land on the actionable surface, not a generic dashboard.
+  "vacancy.outcome.other-hired": (ctx) =>
+    genericTemplate(ctx, "Open Career Compass", "Vacancy outcome"),
 };
 
 export function emailContentFor(

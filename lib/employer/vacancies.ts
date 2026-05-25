@@ -22,12 +22,21 @@
 
 import { getDb } from "@/db/client";
 import * as schema from "@/db/schema";
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, inArray, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
-import { verifyEmployer } from "@/lib/auth/dal";
+import { verifyEmployer, verifyOrgVerified } from "@/lib/auth/dal";
 import { logAccess } from "@/lib/audit";
+import { createNotification } from "@/lib/notifications/server";
+import {
+  composeOutcomeNotification,
+  type OutcomeComposerInput,
+} from "@/lib/seeker/vacancy-outcome";
+import {
+  declineReasonAggregateQuery,
+  type DeclineReasonValue,
+} from "@/db/queries/decline-reasons";
 import {
   countMatchesByCitizenship,
   searchProfilesQuery,
@@ -459,6 +468,480 @@ export async function transitionVacancyStatus(
     actor: guard.userId,
     subject: vacancyId,
     meta: { orgId: guard.orgId, prior, next },
+  });
+
+  revalidatePath("/employer/vacancies");
+  revalidatePath(`/employer/vacancies/${vacancyId}`);
+  return ok();
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Phase 9.11  Mark-as-Filled with batch hire capture + outcome fan-out
+//
+// The combined action replaces today's "flip to filled, hope they
+// remember to log the placement later" two-step. The Mark-as-Filled
+// button now opens a modal that requires picking ≥ 1 hire (or an
+// explicit skip). On submit, this action runs everything in one
+// transaction: insert N placements + flip vacancy state + fire N
+// placement.confirmed notifications. AFTER the transaction commits,
+// we enumerate the not-selected accepted-invitee audience and fan
+// out the vacancy.outcome.other-hired growth notification (best-
+// effort  failure here doesn't roll back the hire).
+//
+// Reveal-gate accommodation: the existing markAsHired requires a
+// prior `profile.contact.reveal` audit row within 30 days. That
+// gate is correct for the dossier-driven flow but wrong for the
+// invitation flow  the invitation itself IS two-way engagement.
+// This action bypasses the gate when the hire is an accepted
+// invitee on THIS vacancy; otherwise it enforces the gate (the
+// outside-pipeline hire still needs a prior reveal so we don't
+// allow "log a hire for someone you never engaged with").
+// ─────────────────────────────────────────────────────────────────────────────
+
+const REVEAL_GATE_DAYS = 30;
+const OUTCOME_FANOUT_CAP = 100;
+
+const hireInputSchema = z.object({
+  profileId: z.string().min(1),
+  hiredAt: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Use YYYY-MM-DD").optional(),
+  salaryBand: z.string().trim().max(80).optional(),
+});
+
+const markFilledSchema = z.object({
+  vacancyId: z.string().min(1),
+  hires: z.array(hireInputSchema).min(1).max(20),
+  /** Shared salary band applied to any hire that didn't override.
+   *  Empty string treated as "no override"  per-hire stays null. */
+  sharedSalaryBand: z.string().trim().max(80).optional(),
+});
+
+export async function markVacancyFilledAndLogHires(
+  input: z.infer<typeof markFilledSchema>,
+): Promise<ActionResult<{ placementIds: string[]; notSelectedCount: number }>> {
+  // Verified-org gate  hiring is a PII-touching action.
+  const session = await verifyOrgVerified();
+  const parsed = markFilledSchema.safeParse(input);
+  if (!parsed.success) {
+    return fail(parsed.error.issues[0]?.message ?? "Invalid hire input.");
+  }
+  const v = parsed.data;
+
+  const role = await getMyOrgRole();
+  if (!canEditVacancies(role)) {
+    return fail(
+      "Your role is read-only for vacancies. Ask an Owner or Recruiter to log hires.",
+    );
+  }
+
+  // Vacancy must belong to caller's org + be in open/draft.
+  const vacancy = await getMyVacancy(v.vacancyId);
+  if (!vacancy) return fail("Vacancy not found in your organisation.");
+  if (vacancy.status !== "open" && vacancy.status !== "draft") {
+    return fail(
+      `This vacancy is already ${vacancy.status}  use the placements panel to log additional hires.`,
+    );
+  }
+
+  const db = getDb();
+
+  // Dedup profileIds in the batch  same person can't be hired twice
+  // for the same vacancy.
+  const uniqueHires = Array.from(
+    new Map(v.hires.map((h) => [h.profileId, h])).values(),
+  );
+  const hireProfileIds = uniqueHires.map((h) => h.profileId);
+
+  // Resolve profile rows for the hire batch.
+  const profileRows = await db
+    .select({
+      id: schema.profiles.id,
+      handle: schema.profiles.handle,
+      displayName: schema.profiles.displayName,
+      userId: schema.profiles.userId,
+      city: schema.profiles.city,
+      profession: schema.profiles.profession,
+    })
+    .from(schema.profiles)
+    .where(inArray(schema.profiles.id, hireProfileIds));
+  if (profileRows.length !== uniqueHires.length) {
+    return fail("One or more hired profiles couldn't be resolved.");
+  }
+  const profileById = new Map(profileRows.map((p) => [p.id, p]));
+
+  // Accepted-invitee set on this vacancy  these bypass the reveal
+  // gate because the invitation IS two-way engagement.
+  const acceptedRows = await db
+    .select({
+      profileId: schema.vacancyInvitations.profileId,
+      state: schema.vacancyInvitations.state,
+    })
+    .from(schema.vacancyInvitations)
+    .where(eq(schema.vacancyInvitations.vacancyId, v.vacancyId));
+  const acceptedProfileIds = new Set(
+    acceptedRows
+      .filter(
+        (r) => r.state === "accepted" || r.state === "accepted_with_notice",
+      )
+      .map((r) => r.profileId),
+  );
+
+  // For hires NOT on the accepted-invitee list, enforce the existing
+  // 30-day reveal gate. Single bulk query for all such profiles.
+  const outsidePipelineIds = hireProfileIds.filter(
+    (id) => !acceptedProfileIds.has(id),
+  );
+  if (outsidePipelineIds.length > 0) {
+    const since = new Date(
+      Date.now() - REVEAL_GATE_DAYS * 24 * 60 * 60 * 1000,
+    );
+    const reveals = await db
+      .select({
+        subject: schema.auditLog.subject,
+      })
+      .from(schema.auditLog)
+      .where(
+        and(
+          eq(schema.auditLog.kind, "profile.contact.reveal"),
+          inArray(schema.auditLog.subject, outsidePipelineIds),
+          sql`${schema.auditLog.at} >= ${since}`,
+          sql`${schema.auditLog.meta}->>'orgId' = ${session.orgId}`,
+        ),
+      );
+    const revealedSet = new Set(reveals.map((r) => r.subject));
+    const missing = outsidePipelineIds.filter((id) => !revealedSet.has(id));
+    if (missing.length > 0) {
+      const missingHandles = missing
+        .map((id) => profileById.get(id)?.handle ?? id)
+        .join(", ");
+      return fail(
+        `These hires need a prior contact reveal within the last 30 days: ${missingHandles}. Open each dossier first, then retry.`,
+      );
+    }
+  }
+
+  // ── Transactional write ────────────────────────────────────────────────
+  // All-or-nothing: vacancy state flip + N placements + N audit rows.
+  // Notifications fire outside the transaction (best-effort) per the
+  // existing pattern in createNotification.
+  const placementIds: string[] = [];
+  const sharedSalary = v.sharedSalaryBand?.trim() || null;
+
+  await db.transaction(async (tx) => {
+    for (const hire of uniqueHires) {
+      const profile = profileById.get(hire.profileId)!;
+      const placementId = `plc_${randomUUID()}`;
+      placementIds.push(placementId);
+      await tx.insert(schema.placements).values({
+        id: placementId,
+        profileId: profile.id,
+        organizationId: session.orgId,
+        actorUserId: session.id,
+        role: vacancy.title,
+        city: profile.city,
+        hiredAt: hire.hiredAt ? new Date(hire.hiredAt) : new Date(),
+        salaryBand: hire.salaryBand?.trim() || sharedSalary,
+        source: "employer_confirmed" as const,
+        vacancyId: v.vacancyId,
+      });
+    }
+
+    await tx
+      .update(schema.vacancies)
+      .set({
+        status: "filled" as const,
+        closedAt: new Date(),
+      })
+      .where(
+        and(
+          eq(schema.vacancies.id, v.vacancyId),
+          eq(schema.vacancies.organizationId, session.orgId),
+        ),
+      );
+  });
+
+  // ── Audit log: one batch row + one per-placement row ──────────────────
+  await logAccess({
+    kind: "org.vacancy.filled.batch",
+    actor: session.id,
+    subject: v.vacancyId,
+    meta: {
+      orgId: session.orgId,
+      placementIds,
+      hireProfileIds,
+      outsidePipelineCount: outsidePipelineIds.length,
+    },
+  });
+  for (let i = 0; i < uniqueHires.length; i++) {
+    const hire = uniqueHires[i]!;
+    const profile = profileById.get(hire.profileId)!;
+    await logAccess({
+      kind: "placement.confirm",
+      actor: session.id,
+      subject: profile.id,
+      meta: {
+        orgId: session.orgId,
+        handle: profile.handle,
+        role: vacancy.title,
+        city: profile.city,
+        vacancyId: v.vacancyId,
+        placementId: placementIds[i],
+      },
+    });
+  }
+
+  // ── Notifications: hired seekers (existing kind) ──────────────────────
+  // Same notification body shape as markAsHired() so the seeker's
+  // status-confirmation flow on /dashboard works unchanged.
+  const orgNameRow = await db
+    .select({ name: schema.organizations.name })
+    .from(schema.organizations)
+    .where(eq(schema.organizations.id, session.orgId))
+    .limit(1);
+  const orgName = orgNameRow[0]?.name ?? "An employer";
+
+  for (let i = 0; i < uniqueHires.length; i++) {
+    const profile = profileById.get(uniqueHires[i]!.profileId)!;
+    await createNotification({
+      userId: profile.userId,
+      kind: "placement.confirmed",
+      title: `${orgName} logged you as hired`,
+      body: `${vacancy.title} in ${profile.city}. Your status will switch to "employed" once you confirm.`,
+      link: "/dashboard",
+      meta: {
+        orgId: session.orgId,
+        orgName,
+        role: vacancy.title,
+        city: profile.city,
+        placementId: placementIds[i],
+        vacancyId: v.vacancyId,
+      },
+    });
+  }
+
+  // ── Outcome fan-out: not-selected accepted invitees ───────────────────
+  // Per D5: accepted / accepted_with_notice MINUS the hired set.
+  // Capped at OUTCOME_FANOUT_CAP per call to bound the email burst.
+  const notSelectedProfileIds = Array.from(acceptedProfileIds).filter(
+    (id) => !hireProfileIds.includes(id),
+  );
+  let notSelectedCount = 0;
+
+  if (notSelectedProfileIds.length > 0) {
+    const recipients = notSelectedProfileIds.slice(0, OUTCOME_FANOUT_CAP);
+
+    // Pull recipient profiles + skill slugs in two bulk queries.
+    const recipientRows = await db
+      .select({
+        id: schema.profiles.id,
+        userId: schema.profiles.userId,
+        yearsExperience: schema.profiles.yearsExperience,
+      })
+      .from(schema.profiles)
+      .where(inArray(schema.profiles.id, recipients));
+
+    const skillRows = await db
+      .select({
+        profileId: schema.profileSkills.profileId,
+        skillSlug: schema.profileSkills.skillSlug,
+      })
+      .from(schema.profileSkills)
+      .where(inArray(schema.profileSkills.profileId, recipients));
+    const skillsByProfile = new Map<string, string[]>();
+    for (const row of skillRows) {
+      const list = skillsByProfile.get(row.profileId) ?? [];
+      list.push(row.skillSlug);
+      skillsByProfile.set(row.profileId, list);
+    }
+
+    // Pull dominant decline reason for this (profession × province)
+    // cell from the cross-market 9.8.7 aggregate. NULL when below k.
+    const declineAgg = await declineReasonAggregateQuery();
+    const cellRows = declineAgg.cells.filter(
+      (c) =>
+        c.profession_slug === vacancy.professionSlug &&
+        c.province_slug === vacancy.provinceSlug,
+    );
+    const dominantDeclineReason: DeclineReasonValue | null = cellRows.length
+      ? cellRows.reduce((top, r) => (r.count > top.count ? r : top))
+          .reason as DeclineReasonValue
+      : null;
+
+    const professionLabel =
+      MOCK_PROFESSIONS.find((p) => p.slug === vacancy.professionSlug)?.label ??
+      vacancy.professionSlug;
+
+    for (const r of recipientRows) {
+      const composerInput: OutcomeComposerInput = {
+        orgName,
+        vacancyTitle: vacancy.title,
+        professionLabel,
+        requiredSkillSlugs: vacancy.skillSlugs,
+        seniorityLabel: vacancy.seniority,
+        recipientSkillSlugs: skillsByProfile.get(r.id) ?? [],
+        recipientYearsExperience: r.yearsExperience,
+        dominantDeclineReason,
+      };
+      const composed = composeOutcomeNotification(composerInput);
+      await createNotification({
+        userId: r.userId,
+        kind: "vacancy.outcome.other-hired",
+        title: composed.title,
+        body: composed.body,
+        link: composed.link,
+        meta: {
+          vacancyId: v.vacancyId,
+          orgId: session.orgId,
+          missingSkillSlugs: composed.missingSkillSlugs,
+        },
+      });
+      notSelectedCount++;
+    }
+
+    // Single batch audit row for the fan-out (per-recipient body is
+    // visible in the notifications table; auditing N rows here would
+    // double-log without adding traceability).
+    await logAccess({
+      kind: "vacancy.outcome.other-hired",
+      actor: session.id,
+      subject: v.vacancyId,
+      meta: {
+        orgId: session.orgId,
+        recipientCount: notSelectedCount,
+        capped: notSelectedProfileIds.length > OUTCOME_FANOUT_CAP,
+      },
+    });
+  }
+
+  revalidatePath("/employer/vacancies");
+  revalidatePath(`/employer/vacancies/${v.vacancyId}`);
+  revalidatePath("/employer/placements");
+  revalidatePath("/insights");
+
+  return ok({ placementIds, notSelectedCount });
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Phase 9.11  Outside-pipeline hire typeahead
+//
+// Used by the MarkAsFilledModal's "I hired someone not in this list"
+// expander. Returns a tight (max 5) `SearchResultRow[]` for a typed
+// query, scoped to the org's province so the recruiter sees regional
+// candidates first. Audit-logged so misuse (scraping) is visible.
+// ─────────────────────────────────────────────────────────────────────────────
+
+const typeaheadSchema = z.object({
+  vacancyId: z.string().min(1),
+  query: z.string().trim().min(2).max(80),
+});
+
+export async function searchOutsideHireCandidates(
+  input: z.infer<typeof typeaheadSchema>,
+): Promise<ActionResult<{ results: SearchResultRow[] }>> {
+  const session = await verifyOrgVerified();
+  const parsed = typeaheadSchema.safeParse(input);
+  if (!parsed.success) return fail("Invalid search input.");
+  const { vacancyId, query } = parsed.data;
+
+  // Vacancy must belong to caller's org  prevents probing of another
+  // org's candidate pool via this surface.
+  const vacancy = await getMyVacancy(vacancyId);
+  if (!vacancy) return fail("Vacancy not found in your organisation.");
+
+  // Exclude profiles already on the invitation pipeline for this
+  // vacancy  the modal handles those in its primary list.
+  const db = getDb();
+  const existing = await db
+    .select({ profileId: schema.vacancyInvitations.profileId })
+    .from(schema.vacancyInvitations)
+    .where(eq(schema.vacancyInvitations.vacancyId, vacancyId));
+  const excludeHandles = existing.length
+    ? (
+        await db
+          .select({ handle: schema.profiles.handle })
+          .from(schema.profiles)
+          .where(
+            inArray(
+              schema.profiles.id,
+              existing.map((e) => e.profileId),
+            ),
+          )
+      ).map((r) => r.handle)
+    : [];
+
+  // Reuse Phase 4 ranking SQL. Scope to the vacancy's province so
+  // typeahead surfaces local candidates first.
+  const filters: SearchFilters = {
+    query,
+    province: vacancy.provinceSlug,
+    highlightCitizens: true,
+  };
+  const { profiles } = await searchProfilesQuery(filters);
+
+  // Cap at 5 + filter out anyone on the invitation pipeline.
+  const results = profiles
+    .filter((p) => !excludeHandles.includes(p.handle))
+    .slice(0, 5);
+
+  await logAccess({
+    kind: "search.outside-hire-lookup",
+    actor: session.id,
+    subject: vacancyId,
+    meta: {
+      orgId: session.orgId,
+      query,
+      province: vacancy.provinceSlug,
+      resultCount: results.length,
+    },
+  });
+
+  return ok({ results });
+}
+
+const skipSchema = z.object({ vacancyId: z.string().min(1) });
+
+/**
+ * Explicit skip path  flip the vacancy state to `filled` without
+ * logging any placements. Writes a distinct audit row so admin
+ * analytics can spot orgs that habitually skip Placement-Truth.
+ *
+ * D1 trade-off: keeps the escape hatch open for edge cases (e.g.
+ * employer hired someone before joining Sebenza, can't pretend
+ * otherwise) without normalising it.
+ */
+export async function markVacancyFilledNoPlacement(
+  input: z.infer<typeof skipSchema>,
+): Promise<ActionResult> {
+  const guard = await requireEditRole();
+  if (!guard.ok) return guard;
+  const parsed = skipSchema.safeParse(input);
+  if (!parsed.success) return fail("Invalid vacancy id.");
+  const { vacancyId } = parsed.data;
+
+  const existing = await getMyVacancy(vacancyId);
+  if (!existing) return fail("Vacancy not found in your organisation.");
+  if (existing.status !== "open" && existing.status !== "draft") {
+    return fail(`Vacancy is already ${existing.status}.`);
+  }
+
+  const db = getDb();
+  await db
+    .update(schema.vacancies)
+    .set({
+      status: "filled" as const,
+      closedAt: new Date(),
+    })
+    .where(
+      and(
+        eq(schema.vacancies.id, vacancyId),
+        eq(schema.vacancies.organizationId, guard.orgId),
+      ),
+    );
+
+  await logAccess({
+    kind: "org.vacancy.filled.no-placement",
+    actor: guard.userId,
+    subject: vacancyId,
+    meta: { orgId: guard.orgId, prior: existing.status },
   });
 
   revalidatePath("/employer/vacancies");

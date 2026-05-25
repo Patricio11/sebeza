@@ -131,7 +131,16 @@ export type AuditKind =
   | "org.review.request-changes"
   | "org.documents.upload"
   | "org.verification.resend"
-  | "verification.manual-grant";
+  | "verification.manual-grant"
+  // Phase 9.11  vacancy-outcome loop. Mark-as-filled now captures
+  // who was hired (batch of 1..N placements in one transaction) +
+  // fans out the not-selected growth notification. `subject` is the
+  // vacancy id; meta carries the placement ids + the not-selected
+  // recipient count.
+  | "org.vacancy.filled.batch"
+  | "org.vacancy.filled.no-placement"
+  | "search.outside-hire-lookup"
+  | "vacancy.outcome.other-hired";
 
 export interface AuditEvent {
   kind: AuditKind;

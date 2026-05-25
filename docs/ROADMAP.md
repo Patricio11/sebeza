@@ -552,6 +552,20 @@ that registry  we win on **data quality, usability, and analytics.** The system 
 
 ---
 
+## 🧷 PHASE 9.11: VACANCY-OUTCOME LOOP + GROWTH NOTIFICATIONS ✅ (shipped 2026-05-25)
+
+Side-phase between 9.10 and Phase 10. Closes two pre-launch hygiene gaps surfaced in the 9.10 readiness review:
+
+1. **Mark-as-Filled now captures who was hired in the same atomic action.** The lifecycle button on `/employer/vacancies/[id]` opens `<MarkAsFilledModal>` (bottom-sheet on phones, centred on `md+`) which forces the employer to either pick ≥1 hire (from accepted invitees + outside-pipeline typeahead) or take the explicit *"Skip — log later"* escape hatch (audit-logged so admin can spot habitual skippers). `markVacancyFilledAndLogHires` wraps placement inserts + state flip + outcome fan-out in `db.transaction()`. Race protection: second attempt on a `filled` vacancy is refused. Multi-hire batches share a hire-date + optional salary; each placement row gets its own `placement.confirmed` notification + audit row, preserving the existing seeker self-confirmation flow (Placement-Truth).
+
+2. **Candidates who weren't selected get honest closure.** Every accepted invitee (excluding hires, declined, expired, withdrawn, reconsidering, still-pending — D5 audience scope) gets a `vacancy.outcome.other-hired` notification + email. The body is composed against the **vacancy requirements** — *never* the hired person's profile (D4 privacy invariant). Cites role's published skills, names the recipient's overlap + gaps, optionally cites the dominant decline-reason from the 9.8.7 cross-market aggregate (k-floor suppressed), deep-links to `/dashboard/grow?missing=<slugs>`. Career Compass page now reads the param: top banner restates the role's gaps + matching recommendation rows get a "Vacancy gap" highlight chip.
+
+Four new audit kinds (`org.vacancy.filled.batch`, `org.vacancy.filled.no-placement`, `search.outside-hire-lookup`, `vacancy.outcome.other-hired`); one new notification kind (`vacancy.outcome.other-hired`, audience seeker, in-app + email default-ON); one new email template (`genericTemplate` with eyebrow *"Vacancy outcome"* + CTA *"Open Career Compass"*); two new files (`lib/seeker/vacancy-outcome.ts` pure helper + `MarkAsFilledModal` client island); three Server Actions on `lib/employer/vacancies.ts`. Fan-out capped at 100 per batch to protect the email rate limit. No new migration. Typecheck clean.
+
+Companion docs: `docs/completed/PHASE_9_11_PLAN.md` + `docs/completed/PHASE_9_11_COMPLETE.md`.
+
+---
+
 ## 🧷 PHASE 9.10: EMPLOYER KYC / ORG VETTING FLOW ✅ (shipped 2026-05-25)
 
 Last pre-launch side-phase. Replaces the dormant `feature_flag_kyc_provider` path with admin-mediated vetting: employer signs up + verifies email  uploads 4 SA-standard KYC docs on `/employer/onboarding` (CIPC reg cert, SARS tax clearance, proof of address  3 months, bank confirmation; + optional supporting docs)  admin reviews on `/admin/verifications` with signed-URL inline document access + 5 actions (Approve / Reject-with-reason / Request-changes-with-note / Resend verification / Mark-verified break-glass). 5 new email templates wired through Resend; 7 new audit kinds; new `org_document_kind` enum + `organization_documents` table via migration `0019`. Hardcoded SA-standard doc set per D1 (admin-managed CRUD deferred post-launch). `(verified)` route-group file shuffle skipped per D6 deviation  per-page guards from Phase 5 already cover every load-bearing path. 3 lifecycle fixture orgs added to the seed (Acme/pending · Globex/rejected · Initech/unverified) alongside the existing Discovery Bank seed.
