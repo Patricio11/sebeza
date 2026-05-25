@@ -26,9 +26,16 @@ import { config as loadEnv } from "dotenv";
 // `dotenv/config` would only auto-load .env  we need .env.local too.
 loadEnv({ path: ".env.local" });
 loadEnv();
-import { neon } from "@neondatabase/serverless";
-import { drizzle } from "drizzle-orm/neon-http";
+import { Pool, neonConfig } from "@neondatabase/serverless";
+import { drizzle } from "drizzle-orm/neon-serverless";
 import { sql } from "drizzle-orm";
+import ws from "ws";
+
+// Match the runtime client (`db/client.ts`) so the seed runs against the
+// same Pool-backed driver  the transactional inserts here (cohort
+// fixtures, vacancy lifecycle) would otherwise hit the same "no
+// transactions" error users saw on /sign-up/seeker.
+neonConfig.webSocketConstructor = ws;
 import { hashPassword } from "better-auth/crypto";
 
 import * as schema from "./schema";
@@ -59,7 +66,7 @@ if (!url) {
   process.exit(1);
 }
 
-const db = drizzle(neon(url), { schema });
+const db = drizzle(new Pool({ connectionString: url }), { schema });
 
 // Tiny helper for human-readable, deterministic IDs.
 const id = (prefix: string, slug: string) => `${prefix}_${slug}`;

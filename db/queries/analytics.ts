@@ -36,9 +36,10 @@ const EMPLOYMENT_STATUSES: EmploymentStatus[] = [
   "open_to_work",
 ];
 
-/** db.execute() with the neon-http driver returns a wrapper object whose
- *  `.rows` property carries the actual array. Tiny helper extracts it with
- *  the right shape, so the call-sites below stay readable. */
+/** db.execute() with the Neon WebSocket Pool driver (pg-style) returns a
+ *  result object whose `.rows` property carries the actual array. Same
+ *  shape the previous neon-http driver returned, so this helper has not
+ *  changed across the 2026-05-25 driver swap. */
 function unwrap<T>(result: unknown): T[] {
   return (result as { rows: T[] }).rows;
 }
