@@ -9,9 +9,15 @@
  * exact columns we want. `nationalIdEnc`, `fullSurname`, `searchVector`,
  * and `email` are NEVER selected on a public read.
  *
- * Search SQL mirrors `lib/mock/helpers.rankProfiles` so the ranking
- * "feels" identical before and after the swap:
- *   relevance × freshness_confidence × completeness × citizen_boost
+ * Search SQL composes a per-row score as:
+ *   relevance × freshness_confidence × completeness
+ *
+ * When the "highlight SA citizens" filter is ON, the result list is
+ * additionally hard-grouped: every SA citizen ranks above every
+ * non-citizen (regardless of score) and within each group the score
+ * above orders rows. This is a deliberate UX choice  the toggle
+ * promises "South Africans first," not "South Africans slightly
+ * boosted." See `citizenGroupKey` below.
  */
 
 import "server-only";
@@ -90,9 +96,21 @@ export async function searchProfilesQuery(
     ? sql`ts_rank_cd(p.search_vector, websearch_to_tsquery('simple', ${q}))`
     : sql`1.0::numeric`;
 
-  const citizenBoost = filters.highlightCitizens
-    ? sql`CASE WHEN p.is_citizen THEN 1.08 ELSE 1.0 END`
-    : sql`1.0::numeric`;
+  // When the "highlight SA citizens" filter is ON, hard-group SA citizens
+  // ABOVE non-citizens in the result list rather than just nudging them up
+  // by a multiplier. This is the explicit user expectation (2026-05-25):
+  // the toggle should produce a visible "all SA first, then everyone else"
+  // ordering, not a soft boost where a stronger non-citizen match can still
+  // outrank a weaker SA citizen. Inside each group we still sort by the
+  // composed score below, so the best SA citizen is on top, then the rest
+  // of the SA citizens by score, then the best non-citizen, etc.
+  //
+  // We DON'T also apply a score multiplier  the hard grouping is the
+  // canonical signal now, and stacking both would distort the within-group
+  // ordering without changing the user-visible result.
+  const citizenGroupKey = filters.highlightCitizens
+    ? sql`CASE WHEN p.is_citizen THEN 0 ELSE 1 END`
+    : sql`0`;
 
   // WHERE clauses  assembled conditionally so a missing filter doesn't
   // narrow the result set.
@@ -179,11 +197,11 @@ export async function searchProfilesQuery(
         ${rankExpr}
         * sebenza_freshness_confidence(p.status_confirmed_at)
         * (0.5 + 0.5 * (p.completeness::numeric / 100))
-        * ${citizenBoost}
-      ) AS score
+      ) AS score,
+      ${citizenGroupKey} AS citizen_group
     FROM profiles p
     WHERE ${whereClause}
-    ORDER BY score DESC NULLS LAST, p.completeness DESC
+    ORDER BY citizen_group ASC, score DESC NULLS LAST, p.completeness DESC
     LIMIT ${SEARCH_LIMIT}
   `);
   // Neon's raw `execute()` returns timestamp columns as ISO strings, not
