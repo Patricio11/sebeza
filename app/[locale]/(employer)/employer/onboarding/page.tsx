@@ -29,10 +29,7 @@ import { setRequestLocale } from "next-intl/server";
 import { redirect } from "next/navigation";
 import { Link } from "@/i18n/navigation";
 import { DashboardShell } from "@/components/layout/DashboardShell";
-import {
-  EMPLOYER_NAV,
-  MOCK_EMPLOYER,
-} from "@/components/layout/employerNav";
+import { EMPLOYER_NAV } from "@/components/layout/employerNav";
 import { verifyRole } from "@/lib/auth/dal";
 import { getMyOrgVettingState } from "@/lib/employer/vetting";
 import { OrgOnboardingForm } from "@/components/feature/employer/OrgOnboardingForm";
@@ -66,7 +63,7 @@ export default async function EmployerOnboardingPage({
   // can see what's going on.
   if (!state) {
     return (
-      <Shell title="Verification">
+      <Shell title="Verification" orgName={null}>
         <div className="rounded-[var(--radius-md)] border-2 border-[color:var(--color-danger)] bg-[color:var(--color-surface)] p-6">
           <h2 className="font-display text-xl text-[color:var(--color-ink)]">
             Your account isn&rsquo;t linked to an organisation
@@ -83,7 +80,7 @@ export default async function EmployerOnboardingPage({
   // ── Branch (1)  email not verified yet ──────────────────────────────
   if (!state.emailVerified) {
     return (
-      <Shell title="Verify your email">
+      <Shell title="Verify your email" orgName={state.orgName}>
         <section
           aria-labelledby="email-verify-h"
           className="rounded-[var(--radius-md)] border-2 border-[color:var(--color-ink)] bg-[color:var(--color-brand-tint)] p-6"
@@ -133,7 +130,7 @@ export default async function EmployerOnboardingPage({
   // ── Branch (3)  pending review ─────────────────────────────────────
   if (state.verification === "pending") {
     return (
-      <Shell title="Under review">
+      <Shell title="Under review" orgName={state.orgName}>
         <section
           aria-labelledby="pending-h"
           className="rounded-[var(--radius-md)] border-2 border-[color:var(--color-brand)] bg-[color:var(--color-brand-tint)] p-6 md:p-8"
@@ -178,7 +175,7 @@ export default async function EmployerOnboardingPage({
   // ── Branch (5)  rejected ───────────────────────────────────────────
   if (state.verification === "rejected") {
     return (
-      <Shell title="Application not approved">
+      <Shell title="Application not approved" orgName={state.orgName}>
         <section
           aria-labelledby="rejected-h"
           className="rounded-[var(--radius-md)] border-2 border-[color:var(--color-danger)] bg-[color:var(--color-surface)] p-6 md:p-8"
@@ -224,7 +221,7 @@ export default async function EmployerOnboardingPage({
   // Owner-only edit path; non-Owners see a read-only nudge.
   if (!state.isOwner) {
     return (
-      <Shell title="Verification">
+      <Shell title="Verification" orgName={state?.orgName}>
         <section className="rounded-[var(--radius-md)] border-2 border-[color:var(--color-ink)] bg-[color:var(--color-surface)] p-6">
           <div className="flex items-start gap-3">
             <Lock
@@ -248,7 +245,7 @@ export default async function EmployerOnboardingPage({
   }
 
   return (
-    <Shell title={state.adminNote ? "Update your application" : "Complete your verification"}>
+    <Shell title={state.adminNote ? "Update your application" : "Complete your verification"} orgName={state.orgName}>
       {state.adminNote && (
         <div
           role="alert"
@@ -320,15 +317,19 @@ export default async function EmployerOnboardingPage({
 
 function Shell({
   title,
+  orgName,
   children,
 }: {
   title: string;
+  /** Live org name from getMyOrgVettingState; falls back when the
+   *  caller has no org context (edge case  defensive). */
+  orgName: string | null | undefined;
   children: React.ReactNode;
 }) {
   return (
     <DashboardShell
       role="employer"
-      workspaceLabel={MOCK_EMPLOYER.orgName}
+      workspaceLabel={orgName ?? "Your organisation"}
       workspaceEyebrow="Employer · workspace"
       nav={EMPLOYER_NAV}
       activeKey="organisation"

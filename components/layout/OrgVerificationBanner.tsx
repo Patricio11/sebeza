@@ -1,6 +1,13 @@
 import { Link } from "@/i18n/navigation";
-import { MOCK_EMPLOYER } from "./employerNav";
 
+/**
+ * Phase 9.10 cleanup  the banner used to short-circuit on the static
+ * `MOCK_EMPLOYER.orgVerified` flag, which made it lie when the live
+ * DB state diverged. The page-level conditional (e.g.
+ * `session.verification !== "verified"` on /employer) is the canonical
+ * filter; this component just renders whatever the caller decided to
+ * show. No more static-data branches.
+ */
 export function OrgVerificationBanner({
   message,
   cta,
@@ -8,7 +15,6 @@ export function OrgVerificationBanner({
   message: string;
   cta: string;
 }) {
-  if (MOCK_EMPLOYER.orgVerified) return null;
   return (
     <div className="border-y border-[color:var(--color-accent)] bg-[color:var(--color-accent-tint)] px-5 py-3 md:px-12">
       <div className="flex flex-wrap items-center justify-between gap-3">

@@ -1,9 +1,9 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { DashboardShell } from "@/components/layout/DashboardShell";
-import { EMPLOYER_NAV, MOCK_EMPLOYER } from "@/components/layout/employerNav";
+import { EMPLOYER_NAV } from "@/components/layout/employerNav";
 import { OrgVerificationBanner } from "@/components/layout/OrgVerificationBanner";
 import { Button } from "@/components/ui/Button";
-import { verifyRole } from "@/lib/auth/dal";
+import { verifyEmployer } from "@/lib/auth/dal";
 import { Plus, MoreVertical } from "lucide-react";
 
 interface Member {
@@ -28,14 +28,18 @@ export default async function TeamPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  await verifyRole("employer");
+  // Phase 9.10  use verifyEmployer (permissive) for the live
+  // org context (orgName etc). NB: the MEMBERS list below is still
+  // hardcoded mock data  that's a separate post-launch backlog
+  // item (the team page should read organization_members + app_user).
+  const session = await verifyEmployer();
   const t = await getTranslations("employerDash.team");
   const tOuter = await getTranslations("employerDash");
 
   return (
     <DashboardShell
       role="employer"
-      workspaceLabel={MOCK_EMPLOYER.orgName}
+      workspaceLabel={session.orgName ?? "Your organisation"}
       workspaceEyebrow="Employer · workspace"
       nav={EMPLOYER_NAV}
       activeKey="team"

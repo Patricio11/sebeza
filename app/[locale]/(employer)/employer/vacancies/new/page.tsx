@@ -38,11 +38,11 @@ export default async function NewVacancyPage({
   return (
     <DashboardShell
       role="employer"
-      workspaceLabel={MOCK_EMPLOYER.orgName}
+      workspaceLabel={session.orgName ?? "Your organisation"}
       workspaceEyebrow="Employer · workspace"
       nav={EMPLOYER_NAV}
       activeKey="vacancies"
-      pageEyebrow={session.name ?? MOCK_EMPLOYER.user.fullName}
+      pageEyebrow={session.name ?? "Employer workspace"}
       pageTitle="New vacancy"
       pageSubtitle="Private to your organisation. Vacancies start as drafts  open them when ready to invite candidates."
     >

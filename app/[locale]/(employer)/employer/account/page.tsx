@@ -1,6 +1,7 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
+import { eq, and } from "drizzle-orm";
 import { DashboardShell } from "@/components/layout/DashboardShell";
-import { EMPLOYER_NAV, MOCK_EMPLOYER } from "@/components/layout/employerNav";
+import { EMPLOYER_NAV } from "@/components/layout/employerNav";
 import { OrgVerificationBanner } from "@/components/layout/OrgVerificationBanner";
 import { TextField } from "@/components/ui/FormField";
 import { Button } from "@/components/ui/Button";
@@ -9,8 +10,10 @@ import { TwoFactorAccountPanel } from "@/components/feature/auth/TwoFactorAccoun
 import { NotificationPrefsPanel } from "@/components/feature/notifications/NotificationPrefsPanel";
 import { getMyNotificationPrefs } from "@/lib/notifications/query";
 import type { NotificationKind } from "@/lib/notifications/catalog";
-import { verifyRole, getSessionUser } from "@/lib/auth/dal";
+import { verifyEmployer, getSessionUser } from "@/lib/auth/dal";
 import { getSetting } from "@/lib/admin/settings";
+import { getDb } from "@/db/client";
+import * as schema from "@/db/schema";
 
 export default async function EmployerAccountPage({
   params,
@@ -19,13 +22,34 @@ export default async function EmployerAccountPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  await verifyRole("employer");
+  // Phase 9.10  switched from verifyRole to verifyEmployer so the
+  // dashboard shell gets the live org name (no more MOCK_EMPLOYER
+  // fallback). Also fetch the org-member role for the "Your role at
+  // the organisation" field so it reflects DB state.
+  const session = await verifyEmployer();
   const me = await getSessionUser();
   const enforced = await getSetting<boolean>("feature_flag_2fa_enforced");
   const prefs = await getMyNotificationPrefs();
   const emailChannelEnabled = await getSetting<boolean>("feature_flag_email_notifications");
   const t = await getTranslations("employerDash.account");
   const tOuter = await getTranslations("employerDash");
+
+  // Live org-member role (owner / recruiter / viewer) for this user.
+  const db = getDb();
+  const memberRole = session.orgId
+    ? (
+        await db
+          .select({ role: schema.organizationMembers.role })
+          .from(schema.organizationMembers)
+          .where(
+            and(
+              eq(schema.organizationMembers.organizationId, session.orgId),
+              eq(schema.organizationMembers.userId, session.id),
+            ),
+          )
+          .limit(1)
+      )[0]?.role ?? null
+    : null;
 
   const EMPLOYER_NOTIFICATION_KINDS: NotificationKind[] = [
     "org.verified",
@@ -36,7 +60,7 @@ export default async function EmployerAccountPage({
   return (
     <DashboardShell
       role="employer"
-      workspaceLabel={MOCK_EMPLOYER.orgName}
+      workspaceLabel={session.orgName ?? "Your organisation"}
       workspaceEyebrow="Employer · workspace"
       nav={EMPLOYER_NAV}
       activeKey="account"
@@ -60,18 +84,18 @@ export default async function EmployerAccountPage({
             <TextField
               id="fullName"
               label="Full name"
-              defaultValue={MOCK_EMPLOYER.user.fullName}
+              defaultValue={me?.name ?? ""}
             />
             <TextField
               id="email"
               label="Email"
               type="email"
-              defaultValue={MOCK_EMPLOYER.user.email}
+              defaultValue={me?.email ?? ""}
             />
             <TextField
               id="role"
               label="Your role at the organisation"
-              defaultValue={MOCK_EMPLOYER.user.role}
+              defaultValue={memberRole ?? ""}
             />
           </div>
         </section>

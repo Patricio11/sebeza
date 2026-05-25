@@ -59,11 +59,11 @@ export default async function VacanciesListPage({
   return (
     <DashboardShell
       role="employer"
-      workspaceLabel={MOCK_EMPLOYER.orgName}
+      workspaceLabel={session.orgName ?? "Your organisation"}
       workspaceEyebrow="Employer · workspace"
       nav={EMPLOYER_NAV}
       activeKey="vacancies"
-      pageEyebrow={session.name ?? MOCK_EMPLOYER.user.fullName}
+      pageEyebrow={session.name ?? "Employer workspace"}
       pageTitle="Vacancies"
       pageSubtitle="Private to your organisation. Vacancies are reverse-matching specifications  invite specific people, capture their accept / decline-with-reason, log the placement when filled. Never a public posting."
       pageActions={

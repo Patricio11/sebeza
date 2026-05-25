@@ -113,13 +113,19 @@ export default async function EmployerOverviewPage({
   return (
     <DashboardShell
       role="employer"
-      workspaceLabel={MOCK_EMPLOYER.orgName}
+      workspaceLabel={session.orgName ?? "Your organisation"}
       workspaceEyebrow="Employer · workspace"
       nav={EMPLOYER_NAV}
       activeKey="overview"
-      pageEyebrow={`${session.name || MOCK_EMPLOYER.user.fullName}`}
+      pageEyebrow={session.name ?? "Employer workspace"}
       pageTitle={t("title")}
-      pageSubtitle={`${MOCK_EMPLOYER.industry} · ${MOCK_EMPLOYER.city}, ${MOCK_EMPLOYER.country}`}
+      pageSubtitle={[
+        session.orgIndustry,
+        session.orgCity,
+        session.orgCountry,
+      ]
+        .filter(Boolean)
+        .join(" · ")}
       pageActions={
         <Link
           href="/search"

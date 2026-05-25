@@ -61,6 +61,13 @@ export interface OrgContext {
   orgId: string;
   /** organizations.verification  `"verified"` lets PII flows through */
   verification: "unverified" | "pending" | "verified" | "rejected";
+  /** Phase 9.10  display fields read from the live org row so pages
+   *  don't fall back to the static MOCK_EMPLOYER. NULLable because
+   *  some legacy columns are optional. */
+  orgName: string;
+  orgIndustry: string | null;
+  orgCountry: string | null;
+  orgCity: string | null;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -236,6 +243,10 @@ export async function verifyOrgVerified(): Promise<
     .select({
       orgId: organizationMembers.organizationId,
       verification: organizations.verification,
+      orgName: organizations.name,
+      orgIndustry: organizations.industry,
+      orgCountry: organizations.country,
+      orgCity: organizations.city,
     })
     .from(organizationMembers)
     .innerJoin(
@@ -263,6 +274,10 @@ export async function verifyOrgVerified(): Promise<
     ...user,
     orgId: row.orgId,
     verification: row.verification as OrgContext["verification"],
+    orgName: row.orgName,
+    orgIndustry: row.orgIndustry,
+    orgCountry: row.orgCountry,
+    orgCity: row.orgCity,
   };
 }
 
@@ -279,6 +294,10 @@ export async function verifyEmployer(): Promise<SessionUser & Partial<OrgContext
     .select({
       orgId: organizationMembers.organizationId,
       verification: organizations.verification,
+      orgName: organizations.name,
+      orgIndustry: organizations.industry,
+      orgCountry: organizations.country,
+      orgCity: organizations.city,
     })
     .from(organizationMembers)
     .innerJoin(
@@ -298,6 +317,10 @@ export async function verifyEmployer(): Promise<SessionUser & Partial<OrgContext
     ...user,
     orgId: row.orgId,
     verification: row.verification as OrgContext["verification"],
+    orgName: row.orgName,
+    orgIndustry: row.orgIndustry,
+    orgCountry: row.orgCountry,
+    orgCity: row.orgCity,
   };
 }
 
