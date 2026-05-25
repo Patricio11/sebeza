@@ -60,6 +60,7 @@ export default async function SearchPage({ params, searchParams }: SearchPagePro
   const query = asString(sp.q) ?? "";
   const filters: F = {
     query,
+    profession: asString(sp.profession) ?? null,
     province: asString(sp.province) ?? null,
     city: asString(sp.city) ?? null,
     status: (asString(sp.status) as EmploymentStatus) ?? null,

@@ -130,6 +130,13 @@ export async function searchProfilesQuery(
     const label = filters.province.replace(/-/g, " ");
     conditions.push(sql`lower(p.province) = lower(${label})`);
   }
+  if (filters.profession) {
+    // Exact profession-label filter (case-insensitive). Used by the
+    // /insights heatmap deep-link; complementary to the FTS `query`
+    // path. Both can be active simultaneously  the heatmap link
+    // passes profession only, leaving free-text empty.
+    conditions.push(sql`lower(p.profession) = lower(${filters.profession})`);
+  }
   if (filters.city) {
     const label = filters.city.replace(/-/g, " ");
     conditions.push(sql`lower(p.city) = lower(${label})`);

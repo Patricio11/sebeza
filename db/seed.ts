@@ -451,7 +451,7 @@ async function seedPhase7_5OutcomesCohort() {
       userId: id("user", handle),
       handle,
       displayName: `BSc CS Cohort ${handle.slice(-2)}`,
-      profession: "Software developer",
+      profession: "Software Developer",
       seniority: null,
       city: "Johannesburg",
       province: "Gauteng",
@@ -596,7 +596,7 @@ async function seedPhase9_7NationalityDemo() {
     {
       handle: "chiamaka-o",
       displayName: "Chiamaka O.",
-      profession: "Software developer",
+      profession: "Software Developer",
       city: "Johannesburg",
       province: "Gauteng",
       nationality: "Nigerian",
@@ -605,7 +605,7 @@ async function seedPhase9_7NationalityDemo() {
     {
       handle: "kemi-a",
       displayName: "Kemi A.",
-      profession: "Software developer",
+      profession: "Software Developer",
       city: "Johannesburg",
       province: "Gauteng",
       nationality: "Nigerian",

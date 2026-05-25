@@ -512,7 +512,7 @@ export default async function InsightsPage({
                               title={`${cell.supply} profile${cell.supply === 1 ? "" : "s"} · ${Math.round(cell.freshness * 100)}% fresh · click to open in search`}
                             >
                               <a
-                                href={`/search?q=${encodeURIComponent(prof)}&province=${encodeURIComponent(provSlug)}`}
+                                href={`/search?profession=${encodeURIComponent(prof)}&province=${encodeURIComponent(provSlug)}`}
                                 className="block px-2 py-2 hover:underline"
                                 aria-label={`${cell.supply} ${prof} in ${prov}  open in search`}
                               >

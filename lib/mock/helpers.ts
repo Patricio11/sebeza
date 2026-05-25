@@ -61,6 +61,11 @@ function scoreRelevance(p: PublicProfile, q: string): number {
 function matchesFilters(p: PublicProfile, f: SearchFilters): boolean {
   if (f.province && slug(p.province) !== f.province) return false;
   if (f.city && slug(p.city) !== f.city) return false;
+  if (
+    f.profession &&
+    p.profession.toLowerCase() !== f.profession.toLowerCase()
+  )
+    return false;
   if (f.status && p.status !== f.status) return false;
   if (f.seniority && p.seniority !== f.seniority) return false;
   if (f.verification && p.verification !== f.verification) return false;

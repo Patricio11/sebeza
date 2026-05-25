@@ -172,6 +172,11 @@ export interface AcademicProfile {
 
 export interface SearchFilters {
   query?: string;
+  /** Exact profession-label filter. Used by the /insights heatmap deep-link
+   *  so cell clicks are robust against FTS-tokenization quirks + casing
+   *  drift in stored profession strings. Pass the canonical label
+   *  ("Software Developer"), NOT the slug. Case-insensitive at query time. */
+  profession?: string | null;
   province?: string | null;
   city?: string | null;
   status?: EmploymentStatus | null;
