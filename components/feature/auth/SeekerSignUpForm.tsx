@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/FormField";
 import { Button } from "@/components/ui/Button";
 import { MonthYearPicker } from "@/components/ui/MonthYearPicker";
+import { DatePicker } from "@/components/ui/DatePicker";
 import { Checkbox } from "@/components/ui/Checkbox";
 import { ComboboxField } from "@/components/ui/ComboboxField";
 import {
@@ -22,6 +23,12 @@ import {
   INSTITUTIONS,
   NQF_LEVELS,
 } from "@/lib/mock/taxonomy";
+import { COUNTRIES } from "@/lib/taxonomy/countries";
+import {
+  validateDob,
+  validateSaId,
+  validatePassport,
+} from "@/lib/auth/id-validation";
 
 interface ProfessionOption {
   slug: string;
@@ -65,13 +72,27 @@ interface AcademicState {
   openToGraduateProgrammes: boolean;
 }
 
+type IdDocumentKind = "sa_id" | "passport";
+
 interface FormState {
   step: Step;
   // Step 1
   fullName: string;
   email: string;
   phone: string;
+  /** ISO yyyy-mm-dd; captured separately from ID number so we can
+   *  cross-check the SA ID prefix + run the 14100 age gate independently
+   *  for passport holders. Phase 9.16. */
+  dateOfBirth: string;
+  /** Which government ID the seeker is providing. Default "sa_id" since
+   *  ~99% of Sebenza signups are SA citizens or permanent residents. */
+  idDocumentKind: IdDocumentKind;
+  /** SA ID  13 digits. Only meaningful when idDocumentKind === "sa_id". */
   nationalId: string;
+  /** Passport number  alphanumeric. Only when idDocumentKind === "passport". */
+  passportNumber: string;
+  /** ISO 3166-1 alpha-2 code  passport issuer. Required for passports. */
+  passportCountry: string;
   password: string;
   passwordConfirm: string;
   // Step 2
@@ -90,7 +111,11 @@ const initialState: FormState = {
   fullName: "",
   email: "",
   phone: "",
+  dateOfBirth: "",
+  idDocumentKind: "sa_id",
   nationalId: "",
+  passportNumber: "",
+  passportCountry: "",
   password: "",
   passwordConfirm: "",
   consents: Object.fromEntries(
@@ -136,15 +161,51 @@ export function SeekerSignUpForm({ professions }: Props = {}) {
   }
 
   function step1Valid() {
-    return (
-      state.fullName.trim().length >= 2 &&
-      /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(state.email) &&
-      state.nationalId.length >= 6 &&
-      state.password.length >= 10 &&
-      state.password === state.passwordConfirm &&
-      scorePassword(state.password).score >= 2
-    );
+    if (state.fullName.trim().length < 2) return false;
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(state.email)) return false;
+    if (!validateDob(state.dateOfBirth).ok) return false;
+    if (state.idDocumentKind === "sa_id") {
+      if (!validateSaId(state.nationalId, state.dateOfBirth).ok) return false;
+    } else {
+      if (!validatePassport(state.passportNumber, state.passportCountry).ok)
+        return false;
+    }
+    if (state.password.length < 10) return false;
+    if (state.password !== state.passwordConfirm) return false;
+    if (scorePassword(state.password).score < 2) return false;
+    return true;
   }
+
+  // Inline validation messages  shown only after the user has typed
+  // something, so the form doesn't shout "invalid" the instant it opens.
+  const dobError = state.dateOfBirth
+    ? !validateDob(state.dateOfBirth).ok
+      ? (validateDob(state.dateOfBirth) as { ok: false; message: string })
+          .message
+      : undefined
+    : undefined;
+  const saIdError =
+    state.idDocumentKind === "sa_id" && state.nationalId.length >= 13
+      ? !validateSaId(state.nationalId, state.dateOfBirth).ok
+        ? (
+            validateSaId(state.nationalId, state.dateOfBirth) as {
+              ok: false;
+              message: string;
+            }
+          ).message
+        : undefined
+      : undefined;
+  const passportError =
+    state.idDocumentKind === "passport" && state.passportNumber.length >= 6
+      ? !validatePassport(state.passportNumber, state.passportCountry).ok
+        ? (
+            validatePassport(state.passportNumber, state.passportCountry) as {
+              ok: false;
+              message: string;
+            }
+          ).message
+        : undefined
+      : undefined;
 
   function step3Valid() {
     return Boolean(state.profession && state.province && state.status);
@@ -185,7 +246,16 @@ export function SeekerSignUpForm({ professions }: Props = {}) {
         fullName: state.fullName,
         email: state.email,
         phone: state.phone || undefined,
-        nationalId: state.nationalId,
+        dateOfBirth: state.dateOfBirth,
+        idDocumentKind: state.idDocumentKind,
+        nationalId:
+          state.idDocumentKind === "sa_id"
+            ? state.nationalId
+            : state.passportNumber,
+        passportCountry:
+          state.idDocumentKind === "passport"
+            ? state.passportCountry
+            : undefined,
         password: state.password,
         grantedConsents,
         profession: state.profession,
@@ -252,18 +322,124 @@ export function SeekerSignUpForm({ professions }: Props = {}) {
               disabled={pending}
             />
           </div>
-          <TextField
-            id="nationalId"
-            label="South African ID number (or passport)"
-            value={state.nationalId}
-            onChange={(e) =>
-              setState({ ...state, nationalId: e.target.value })
-            }
-            required
-            badge={<EncryptedBadge />}
-            hint={t("stepHints.id")}
+          {/* Phase 9.16  Date of birth captured separately so we can run
+              the 14100 age gate independently of the ID kind, and so
+              the SA ID prefix can be cross-checked against it. */}
+          <DatePicker
+            id="dateOfBirth"
+            label="Date of birth"
+            value={state.dateOfBirth}
+            onChange={(v) => setState({ ...state, dateOfBirth: v })}
+            minDate={`${new Date().getUTCFullYear() - 100}-01-01`}
+            maxDate={(() => {
+              // Latest allowed = today minus 14 years (SA Basic Conditions
+              // of Employment minimum). Computed once per render.
+              const d = new Date();
+              const yyyy = d.getUTCFullYear() - 14;
+              const mm = String(d.getUTCMonth() + 1).padStart(2, "0");
+              const dd = String(d.getUTCDate()).padStart(2, "0");
+              return `${yyyy}-${mm}-${dd}`;
+            })()}
+            helpText="Used to confirm your age and (for SA IDs) to verify your number."
+            error={dobError}
             disabled={pending}
           />
+
+          {/* ID-document kind chip pair */}
+          <div>
+            <span className="block text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--color-ink-soft)]">
+              Identity document
+            </span>
+            <div
+              role="radiogroup"
+              aria-label="Identity document type"
+              className="mt-1 inline-flex rounded-[var(--radius-pill)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface-sunk)] p-1"
+            >
+              {(
+                [
+                  ["sa_id", "South African ID"],
+                  ["passport", "Passport"],
+                ] as const
+              ).map(([kind, label]) => {
+                const active = state.idDocumentKind === kind;
+                return (
+                  <button
+                    key={kind}
+                    type="button"
+                    role="radio"
+                    aria-checked={active}
+                    disabled={pending}
+                    onClick={() =>
+                      setState({ ...state, idDocumentKind: kind })
+                    }
+                    className={
+                      "cursor-pointer rounded-[var(--radius-pill)] px-4 py-1.5 text-xs font-medium transition-colors " +
+                      (active
+                        ? "bg-[color:var(--color-ink)] text-[color:var(--color-paper)]"
+                        : "text-[color:var(--color-ink-soft)] hover:text-[color:var(--color-ink)]")
+                    }
+                  >
+                    {label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {state.idDocumentKind === "sa_id" ? (
+            <TextField
+              id="nationalId"
+              label="South African ID number"
+              value={state.nationalId}
+              onChange={(e) =>
+                setState({
+                  ...state,
+                  nationalId: e.target.value.replace(/\D/g, "").slice(0, 13),
+                })
+              }
+              inputMode="numeric"
+              required
+              badge={<EncryptedBadge />}
+              hint={t("stepHints.id")}
+              error={saIdError}
+              disabled={pending}
+            />
+          ) : (
+            <div className="grid gap-5 md:grid-cols-2">
+              <TextField
+                id="passportNumber"
+                label="Passport number"
+                value={state.passportNumber}
+                onChange={(e) =>
+                  setState({
+                    ...state,
+                    passportNumber: e.target.value.toUpperCase().slice(0, 20),
+                  })
+                }
+                required
+                badge={<EncryptedBadge />}
+                hint="As printed on the photo page."
+                error={passportError}
+                disabled={pending}
+              />
+              <SelectField
+                id="passportCountry"
+                label="Issuing country"
+                value={state.passportCountry}
+                onChange={(e) =>
+                  setState({ ...state, passportCountry: e.target.value })
+                }
+                required
+              >
+                <option value="">Select…</option>
+                {COUNTRIES.map((c) => (
+                  <option key={c.code} value={c.code}>
+                    {c.label}
+                  </option>
+                ))}
+              </SelectField>
+            </div>
+          )}
           <div className="flex flex-col gap-1">
             <TextField
               id="password"

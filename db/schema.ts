@@ -12,6 +12,7 @@ import {
   type AnyPgColumn,
   boolean,
   customType,
+  date,
   index,
   integer,
   jsonb,
@@ -48,6 +49,18 @@ export const verificationStatus = pgEnum("verification_status", [
   "pending",
   "verified",
   "rejected",
+]);
+
+/**
+ * Phase 9.16  Identity document kind discriminator on `profiles`. SA
+ * ID is the common case; passport supports non-SA residents per the
+ * Citizen-Visibility Rule. The encrypted ID text in `national_id_enc`
+ * is kind-agnostic; this enum tells the application which validation
+ * + UI flow applies.
+ */
+export const idDocumentKind = pgEnum("id_document_kind", [
+  "sa_id",
+  "passport",
 ]);
 
 // Phase 9  added `gov` for the government / policy / SETA-partner
@@ -345,8 +358,49 @@ export const profiles = pgTable("profiles", {
    * dossier. Differs from DOB (out of scope per PHASE_9_9_PLAN.md).
    */
   yearsExperience: integer("years_experience"),
-  /** Encrypted (AES-GCM). NEVER selected on any public read path. */
+  /**
+   * Phase 9.16  Date of birth. Typed `date` (no time component).
+   * NULLABLE so existing rows pre-9.16 back-fill cleanly. Self-
+   * declared at sign-up; editable on the profile editor. Powers
+   * youth-unemployment analytics + YEI / ECD / internship
+   * programme-eligibility checks. NEVER returned on PublicProfile
+   * (the compliance assertion `dob-never-in-public-payload` pins
+   * this structurally).
+   */
+  dateOfBirth: date("date_of_birth"),
+  /**
+   * Phase 9.16  identity document kind. SA ID is the common case;
+   * passport supports non-SA residents (Citizen-Visibility Rule).
+   * Defaults to 'sa_id' so pre-9.16 rows back-fill correctly.
+   */
+  idDocumentKind: idDocumentKind("id_document_kind").notNull().default("sa_id"),
+  /**
+   * Phase 9.16  passport-issuing country (ISO 3166-1 alpha-2).
+   * Required when `idDocumentKind = 'passport'`, enforced
+   * application-side (D3 in PHASE_9_16_PLAN.md). NULL when SA ID.
+   */
+  passportCountry: text("passport_country"),
+  /** Encrypted (AES-GCM). NEVER selected on any public read path.
+   *  Phase 9.16 broadens the semantics: carries either SA ID or
+   *  passport text; the encryption is kind-agnostic. Column kept
+   *  as-is (not renamed to `id_document_enc`) to avoid rippling to
+   *  too many sites. The `idDocumentKind` column above is the
+   *  discriminator. */
   nationalIdEnc: text("national_id_enc"),
+  /**
+   * Phase 9.16  ID document upload slot for admin-mediated review.
+   * Mirrors the qualifications.documentStorageKey pattern. Storage
+   * path: `{userId}/id-document/{id}.{ext}` via Supabase Storage.
+   * NEVER returned on PublicProfile; only signed URLs minted server-
+   * side for the seeker themselves or admin reviewers can yield the
+   * document. Cleared on admin reject; the seeker re-uploads.
+   */
+  idDocumentStorageKey: text("id_document_storage_key"),
+  idDocumentUploadedAt: timestamp("id_document_uploaded_at"),
+  /** Phase 9.16  admin's rejection note shown to the seeker on the
+   *  KycPanel after a reject. Populated alongside clearing
+   *  `idDocumentStorageKey` so the seeker sees why + can re-upload. */
+  idDocumentRejectionReason: text("id_document_rejection_reason"),
   /** Materialised tsvector. Populated by the trigger in
       `db/migrations/0001_phase4_search.sql` from
       profession + seniority + bio + city + province + skills_aggregated.

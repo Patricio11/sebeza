@@ -37,6 +37,11 @@ import {
   type ConsentPurpose,
   REQUIRED_FOR_SEARCHABILITY,
 } from "@/lib/consent";
+import {
+  validateDob,
+  validateSaId,
+  validatePassport,
+} from "@/lib/auth/id-validation";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Shared helpers
@@ -87,7 +92,20 @@ const seekerSignUpSchema = z.object({
   fullName: z.string().min(2).max(120),
   email: z.string().email(),
   phone: z.string().optional(),
+  // Phase 9.16  ISO yyyy-mm-dd. Re-validated below against the 14100
+  // age window. Storing this lets us run the LMI youth-cohort split
+  // (15-24) and confirm SA ID prefix.
+  dateOfBirth: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  // Which government ID the seeker is presenting at sign-up. Defaults
+  // to "sa_id" because almost all SA seekers have one. Foreign nationals
+  // working in SA carry passports.
+  idDocumentKind: z.enum(["sa_id", "passport"]).default("sa_id"),
+  // For sa_id: 13-digit national ID. For passport: alphanumeric passport
+  // number 620 chars. Both are encrypted at-rest in `national_id_enc`
+  // (column name kept kind-agnostic, see PHASE_9_16_PLAN decision D1).
   nationalId: z.string().min(6).max(40),
+  // ISO 3166-1 alpha-2 issuer  only meaningful for passports.
+  passportCountry: z.string().length(2).optional(),
   password: z.string().min(10).max(128),
   // Consent purposes the user granted in step 2.
   grantedConsents: z.array(z.enum(CONSENT_PURPOSES)).min(1),
@@ -129,6 +147,21 @@ export async function signUpSeeker(
   const parsed = seekerSignUpSchema.safeParse(input);
   if (!parsed.success) return fail("Please check the form and try again.");
   const v = parsed.data;
+
+  // Phase 9.16  defence in depth: re-run the same validators the client
+  // ran, so a tampered request can't bypass the 14100 age gate or
+  // submit a passport with a bogus country code. Trust the field, not
+  // the form.
+  const dobCheck = validateDob(v.dateOfBirth);
+  if (!dobCheck.ok) return fail(dobCheck.message);
+  if (v.idDocumentKind === "sa_id") {
+    const idCheck = validateSaId(v.nationalId, v.dateOfBirth);
+    if (!idCheck.ok) return fail(idCheck.message);
+  } else {
+    if (!v.passportCountry) return fail("Issuing country is required for passports.");
+    const passCheck = validatePassport(v.nationalId, v.passportCountry);
+    if (!passCheck.ok) return fail(passCheck.message);
+  }
 
   // Searchability must be granted before the profile becomes searchable
   // (Phase 2 acceptance criterion). We require it on the form too.
@@ -215,6 +248,14 @@ export async function signUpSeeker(
         city: "",
         province: v.province,
         nationalIdEnc: idEnc,
+        // Phase 9.16  three new fields. `dateOfBirth` is a `date`
+        // column (no time component); passport_country is only set when
+        // kind === "passport" so an empty string never leaks into the
+        // ISO check on the compliance assertion.
+        dateOfBirth: v.dateOfBirth,
+        idDocumentKind: v.idDocumentKind,
+        passportCountry:
+          v.idDocumentKind === "passport" ? (v.passportCountry ?? null) : null,
         status: v.status,
         statusConfirmedAt: new Date(),
         workAvailability: v.workAvailability ?? [],
