@@ -666,49 +666,53 @@ export function SeekerSignUpForm({ professions }: Props = {}) {
                     }
                     label={t("step3.academic.openToGraduateProgrammes")}
                   />
-
-                  {/* Phase 7.5  work-availability while studying. The casual /
-                      part-time path: students taking shifts (waitressing,
-                      retail, etc.) for income now, not deferred to graduation. */}
-                  <fieldset className="mt-2 rounded-[var(--radius-sm)] border border-[color:var(--color-hairline)] p-3">
-                    <legend className="px-1 text-xs font-medium">
-                      Available for work while I study (optional)
-                    </legend>
-                    <ul className="mt-1 grid gap-2 sm:grid-cols-2">
-                      {(
-                        [
-                          ["casual", "Casual / shift work"],
-                          ["part_time", "Part-time"],
-                          ["contract", "Contract"],
-                          ["full_time", "Full-time"],
-                        ] as const
-                      ).map(([kind, label]) => {
-                        const checked = state.workAvailability.includes(kind);
-                        return (
-                          <li key={kind}>
-                            <Checkbox
-                              size="sm"
-                              checked={checked}
-                              onChange={(v) => {
-                                const next = v
-                                  ? Array.from(new Set([...state.workAvailability, kind]))
-                                  : state.workAvailability.filter((x) => x !== kind);
-                                setState({ ...state, workAvailability: next });
-                              }}
-                              label={label}
-                            />
-                          </li>
-                        );
-                      })}
-                    </ul>
-                    <p className="mt-2 text-[0.65rem] italic text-[color:var(--color-ink-soft)]">
-                      You can change this any time from your dashboard.
-                    </p>
-                  </fieldset>
                 </div>
               </div>
             )}
           </div>
+
+          {/* Work-availability  visible to every seeker (not just students).
+              Originally inside the student panel as the "while I study"
+              path; lifted out 2026-05-26 so non-students can declare
+              their availability at sign-up too. The data layer + server
+              action already support this for any seeker. */}
+          <fieldset className="rounded-[var(--radius-md)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-4">
+            <legend className="px-1 text-xs font-medium text-[color:var(--color-ink)]">
+              Available for (optional)
+            </legend>
+            <p className="mt-1 mb-3 text-xs text-[color:var(--color-ink-soft)]">
+              What kinds of work you&rsquo;re open to. Independent of your
+              current status  e.g. an employed person can also be open to
+              contract work. You can change this any time from your dashboard.
+            </p>
+            <ul className="grid gap-2 sm:grid-cols-2">
+              {(
+                [
+                  ["casual", "Casual / shift work"],
+                  ["part_time", "Part-time"],
+                  ["contract", "Contract"],
+                  ["full_time", "Full-time"],
+                ] as const
+              ).map(([kind, label]) => {
+                const checked = state.workAvailability.includes(kind);
+                return (
+                  <li key={kind}>
+                    <Checkbox
+                      size="sm"
+                      checked={checked}
+                      onChange={(v) => {
+                        const next = v
+                          ? Array.from(new Set([...state.workAvailability, kind]))
+                          : state.workAvailability.filter((x) => x !== kind);
+                        setState({ ...state, workAvailability: next });
+                      }}
+                      label={label}
+                    />
+                  </li>
+                );
+              })}
+            </ul>
+          </fieldset>
 
           <div className="flex gap-3">
             <Button
