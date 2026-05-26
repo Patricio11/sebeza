@@ -23,13 +23,15 @@ import { auth } from "./server";
 import { roleHome } from "./guard";
 import { getDb } from "@/db/client";
 import * as schema from "@/db/schema";
-import { eq, and } from "drizzle-orm";
+import { eq, and, sql, isNull } from "drizzle-orm";
 import { headers as nextHeaders } from "next/headers";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { randomUUID } from "node:crypto";
 import { encryptField } from "@/lib/crypto";
 import { logAccess } from "@/lib/audit";
+import { notifyAllAdmins } from "@/lib/notifications/server";
+import { slug as slugify } from "@/lib/mock/helpers";
 import {
   CONSENT_PURPOSES,
   type ConsentPurpose,
@@ -154,6 +156,54 @@ export async function signUpSeeker(
     const displayName = redactSurname(v.fullName);
     const idEnc = encryptField(v.nationalId);
 
+    // Phase 9.15  resolve free-text "Other" entries BEFORE the transaction.
+    // For institutions: the FK constraint on academic_profiles requires the
+    // slug to exist. So if the user typed free-text, create the pending
+    // institutions row here + remember the slug for the academic insert.
+    // For professions: profiles.profession is plain text  no resolution
+    // needed at insert time. The suggestion fires post-transaction.
+    let resolvedInstitutionSlug: string | null = null;
+    let institutionWasCustom = false;
+    if (v.academic) {
+      const slug = v.academic.institutionSlug.trim();
+      const existing = await db
+        .select({ slug: schema.institutions.slug })
+        .from(schema.institutions)
+        .where(eq(schema.institutions.slug, slug))
+        .limit(1);
+      if (existing[0]) {
+        resolvedInstitutionSlug = slug;
+      } else {
+        // Free-text label  create a pending institutions row.
+        const provinceSlugRows = await db
+          .select({ slug: schema.provinces.slug })
+          .from(schema.provinces)
+          .where(sql`lower(${schema.provinces.label}) = lower(${v.province})`)
+          .limit(1);
+        const provinceSlug = provinceSlugRows[0]?.slug ?? "gauteng";
+        const pendingSlug = `other--${slugify(slug)}-${randomUUID().slice(0, 6)}`;
+        await db.insert(schema.institutions).values({
+          slug: pendingSlug,
+          label: slug,
+          kind: "private",
+          city: "Pending",
+          provinceSlug,
+          isPending: true,
+        });
+        resolvedInstitutionSlug = pendingSlug;
+        institutionWasCustom = true;
+      }
+    }
+
+    // Phase 9.15  determine if the profession was free-text (not in
+    // canonical list).
+    const canonicalProf = await db
+      .select({ slug: schema.professions.slug })
+      .from(schema.professions)
+      .where(sql`lower(${schema.professions.label}) = lower(${v.profession})`)
+      .limit(1);
+    const professionWasCustom = !canonicalProf[0];
+
     await db.transaction(async (tx) => {
       await tx.insert(schema.profiles).values({
         id: profileId,
@@ -189,11 +239,11 @@ export async function signUpSeeker(
       );
 
       // Optional academic
-      if (v.academic) {
+      if (v.academic && resolvedInstitutionSlug) {
         await tx.insert(schema.academicProfiles).values({
           id: `acad_${user.id}`,
           profileId,
-          institutionSlug: v.academic.institutionSlug,
+          institutionSlug: resolvedInstitutionSlug,
           programme: v.academic.programme,
           fieldOfStudy: v.academic.fieldOfStudy,
           nqfLevel: v.academic.nqfLevel,
@@ -206,6 +256,77 @@ export async function signUpSeeker(
         });
       }
     });
+
+    // Phase 9.15  post-transaction suggestion submissions. These are
+    // auxiliary  if they fail (DB blip, notification system down), the
+    // user account + profile + academic remain intact. Admin loses
+    // visibility into one suggestion but the user is signed up cleanly.
+    if (professionWasCustom) {
+      try {
+        const suggestionId = `tx_${randomUUID()}`;
+        await db.insert(schema.taxonomySuggestions).values({
+          id: suggestionId,
+          kind: "profession",
+          customText: v.profession,
+          submittedByUserId: user.id,
+        });
+        await logAccess({
+          kind: "taxonomy.suggestion.submit",
+          actor: user.id,
+          subject: suggestionId,
+          meta: { kind: "profession", customText: v.profession, via: "signup" },
+        });
+        await notifyAllAdmins({
+          kind: "taxonomy.suggestion.received",
+          title: `New profession suggestion: ${v.profession}`,
+          body: `A new user picked "Other" + entered "${v.profession}". Review on /admin/taxonomy.`,
+          link: "/admin/taxonomy",
+          dedupeKey: `profession::${v.profession.toLowerCase()}`,
+          meta: { suggestionId, kind: "profession", customText: v.profession },
+        });
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.error("[signup] profession suggestion submit failed:", e);
+      }
+    }
+    if (institutionWasCustom && v.academic && resolvedInstitutionSlug) {
+      try {
+        const suggestionId = `tx_${randomUUID()}`;
+        await db.insert(schema.taxonomySuggestions).values({
+          id: suggestionId,
+          kind: "institution",
+          customText: v.academic.institutionSlug,
+          submittedByUserId: user.id,
+          pendingInstitutionSlug: resolvedInstitutionSlug,
+        });
+        await logAccess({
+          kind: "taxonomy.suggestion.submit",
+          actor: user.id,
+          subject: suggestionId,
+          meta: {
+            kind: "institution",
+            customText: v.academic.institutionSlug,
+            pendingInstitutionSlug: resolvedInstitutionSlug,
+            via: "signup",
+          },
+        });
+        await notifyAllAdmins({
+          kind: "taxonomy.suggestion.received",
+          title: `New institution suggestion: ${v.academic.institutionSlug}`,
+          body: `A new student picked "Other" + entered "${v.academic.institutionSlug}". Review on /admin/taxonomy.`,
+          link: "/admin/taxonomy",
+          dedupeKey: `institution::${v.academic.institutionSlug.toLowerCase()}`,
+          meta: {
+            suggestionId,
+            kind: "institution",
+            customText: v.academic.institutionSlug,
+          },
+        });
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.error("[signup] institution suggestion submit failed:", e);
+      }
+    }
 
     await logAccess({
       kind: "auth.signup",

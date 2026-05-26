@@ -39,6 +39,10 @@ import {
   assertStallConsentGateEnforced,
   // Phase 9.14  seeker profile verification roll-up
   assertProfileVerificationMatchesRollup,
+  // Phase 9.15  taxonomy suggestion queue
+  assertTaxonomySuggestionsValid,
+  assertRejectedSuggestionsPreserveData,
+  assertTaxonomyBackfillsComplete,
 } from "@/lib/analytics/outcomes-compliance";
 
 export async function GET() {
@@ -67,6 +71,10 @@ export async function GET() {
     await assertStallConsentGateEnforced(),
     // Phase 9.14
     await assertProfileVerificationMatchesRollup(),
+    // Phase 9.15
+    await assertTaxonomySuggestionsValid(),
+    await assertRejectedSuggestionsPreserveData(),
+    await assertTaxonomyBackfillsComplete(),
   ];
   const ok = checks.every((c) => c.ok);
   return NextResponse.json(

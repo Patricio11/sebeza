@@ -284,6 +284,23 @@ export const NOTIFICATION_CATALOG = {
       "Gentle once-only check-in when a learning item sits without progress for a while. Conservative by design: in-app only by default, frequency-capped across the week alongside other lifecycle nudges so we never stack two demoralising pings.",
     dedupeWindowSeconds: 0,
   },
+  // ──────────────────────────────────────────────────────────────────────
+  // Phase 9.15  taxonomy suggestion queue. Admins are notified when a
+  // user picks "Other" + enters a free-text profession or institution
+  // value. Dedupe per (kind, lower(customText))  24h window keeps the
+  // bell calm when the same text gets re-submitted across many users.
+  // Admin queue page at /admin/taxonomy/suggestions is the canonical
+  // surface; email channel stays off to avoid noise.
+  // ──────────────────────────────────────────────────────────────────────
+  "taxonomy.suggestion.received": {
+    defaultInApp: true,
+    defaultEmail: false,
+    audience: "all_admins",
+    label: "A new taxonomy suggestion landed",
+    description:
+      "A user picked \"Other\" and entered a free-text profession or institution that isn't in the canonical list. Review on /admin/taxonomy/suggestions  promote it, merge it into an existing entry (fixes misspellings), or reject it. Rejection never erases the user's data.",
+    dedupeWindowSeconds: 24 * 60 * 60,
+  },
 } as const satisfies Record<string, NotificationKindMeta>;
 
 export type NotificationKind = keyof typeof NOTIFICATION_CATALOG;

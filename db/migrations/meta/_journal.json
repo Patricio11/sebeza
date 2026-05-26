@@ -169,6 +169,13 @@
       "when": 1779950000000,
       "tag": "0023_expand_professions_taxonomy",
       "breakpoints": false
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1779960000000,
+      "tag": "0024_phase9_15_taxonomy_suggestions",
+      "breakpoints": false
     }
   ]
 }

@@ -151,7 +151,15 @@ export type AuditKind =
   | "learning.accept"
   | "learning.start"
   | "learning.complete"
-  | "learning.abandon";
+  | "learning.abandon"
+  // Phase 9.15  taxonomy suggestion queue. `subject` is the suggestion id;
+  // `meta` carries kind + customText + (for resolve actions) targetSlug +
+  // backfilledRows. Submit fires on user submission; promote/merge/reject
+  // fire on admin resolution from /admin/taxonomy/suggestions.
+  | "taxonomy.suggestion.submit"
+  | "taxonomy.suggestion.promote"
+  | "taxonomy.suggestion.merge"
+  | "taxonomy.suggestion.reject";
 
 export interface AuditEvent {
   kind: AuditKind;

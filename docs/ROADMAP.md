@@ -552,6 +552,32 @@ that registry  we win on **data quality, usability, and analytics.** The system 
 
 ---
 
+## 🧷 PHASE 9.15: "OTHER" + ADMIN TAXONOMY SUGGESTION QUEUE ✅ (shipped 2026-05-26)
+
+User-facing gap closed: real users with unusual professions or non-canonical institutions can now onboard via an "Other (specify)" path on the sign-up combobox + admins get a structured queue at `/admin/taxonomy/suggestions` to canonicalise the entries (promote / merge into existing / reject).
+
+**One mechanism covers both professions + institutions**, discriminated by a `kind` enum. Splitting them into separate phases would have doubled the engineering for zero design benefit. Locked in D0 of the plan.
+
+Migration `0024_phase9_15_taxonomy_suggestions.sql` (additive) ships: new `taxonomy_suggestions` table with `kind` + `state` enums + CHECK constraint enforcing 2-80 char trimmed text + two indexes (state/kind ordering + dedupe lookup); new `institutions.is_pending` boolean + `institutions.deleted_at` timestamp.
+
+`<ComboboxField>` extended with `allowOther` + `onOtherSubmit` + `otherLabel` props. Picking the footer option transforms the field into a free-text input with a "Pick from list" revert link.
+
+Five Server Actions in `lib/taxonomy/suggestions.ts`: `submitTaxonomySuggestion` (validates + rate-limits 5/user/day + creates suggestion + for institution kind creates pending `institutions` row + notifies admins with `(kind, lower(custom_text))` dedupe), `listPendingSuggestions` (dedupes by customText with submitter-count aggregation), `promoteTaxonomySuggestion` (canonicalises + backfills profiles/academic_profiles + cleans up duplicate pending rows), `mergeTaxonomySuggestion` (links to existing canonical + backfills + deletes pending row), `rejectTaxonomySuggestion` (state='rejected', user data NEVER mutated — Verification-Honesty Rule).
+
+Sign-up flow wired end-to-end: `signUpSeeker` server action resolves institution_slug pre-transaction (creates pending row if free-text), fires post-transaction suggestion submissions for both profession + institution custom values. Auxiliary — never blocks the user's signup if a suggestion write fails.
+
+New admin queue page at `/admin/taxonomy/suggestions` (+ banner on the existing `/admin/taxonomy` showing pending count). Three actions per card: Promote (with optional spelling correction), Merge (combobox over existing canonical entries), Reject (with reason). Inline forms, no modals.
+
+Four new audit kinds (`taxonomy.suggestion.{submit,promote,merge,reject}`). One new notification kind (`taxonomy.suggestion.received`, audience all_admins, in-app default-on / email default-off, 24h dedupe). Three new compliance assertions (suggestions-valid / rejected-preserve-data / backfill-complete) on `/api/admin/outcomes-compliance` — now **22 assertions** total.
+
+Seed extended with three demo suggestions (pending "Game Ranger" + pending "Damelin College" + already-rejected "asdfasdf") so the admin queue renders real content out of the box.
+
+Companion docs: `docs/completed/PHASE_9_15_PLAN.md` + `docs/completed/PHASE_9_15_COMPLETE.md`.
+
+**Deferred to follow-ups** (documented in COMPLETE doc): `allowOther` on profile editor + vacancy form (slug-vs-label state divergence; needs focused refactor); full institution admin CRUD UI (add/edit/soft-delete form on the existing `/admin/taxonomy` tabs — schema in place, queue covers the immediate path).
+
+---
+
 ## 🧷 PHASE 9.14: SEEKER PROFILE VERIFICATION ROLL-UP ✅ (shipped 2026-05-26)
 
 Closed a structural gap discovered during system review: `profiles.verification` was scaffolded but never wired to any code path, so every seeker rendered as "Unverified" regardless of their qualification state. Honest by accident (never lying) but uninformative (never reflecting reality either).

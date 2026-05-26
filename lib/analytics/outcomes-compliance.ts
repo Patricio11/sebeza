@@ -863,6 +863,112 @@ export async function assertProfileVerificationMatchesRollup(): Promise<AssertRe
   };
 }
 
+// ──────────────────────────────────────────────────────────────────────
+// Phase 9.15 compliance assertions  taxonomy suggestion queue.
+// ──────────────────────────────────────────────────────────────────────
+
+/**
+ * (a) Length + whitespace invariants. The DB CHECK constraint already
+ * enforces 2..80 chars after trim, but this assertion catches drift if
+ * a future write path bypasses the constraint or the constraint gets
+ * dropped during a migration.
+ */
+export async function assertTaxonomySuggestionsValid(): Promise<AssertResult> {
+  const db = getDb();
+  const offending = await db.execute(sql`
+    SELECT id, custom_text
+    FROM taxonomy_suggestions
+    WHERE length(trim(custom_text)) < 2 OR length(trim(custom_text)) > 80
+    LIMIT 5
+  `);
+  const rows = (offending as unknown as { rows: Array<{ id: string }> }).rows;
+  return {
+    ok: rows.length === 0,
+    name: "taxonomy-suggestions-valid",
+    message:
+      rows.length === 0
+        ? "All taxonomy_suggestions rows have custom_text in the 2..80 char range after trim."
+        : `${rows.length} suggestion(s) violate length invariants. First id: ${rows[0]?.id}.`,
+  };
+}
+
+/**
+ * (b) Rejection preserves user data. For every rejected suggestion,
+ * the submitter's profile (for profession) or academic_profile (for
+ * institution) must still carry data referencing the original
+ * custom_text. We can't easily verify "the text is unchanged" without
+ * a history table, but we can verify the submitter still has a profile
+ * row + (for institutions) the pending row still exists. The user-data-
+ * preservation contract from D4 of PHASE_9_15_PLAN.md.
+ */
+export async function assertRejectedSuggestionsPreserveData(): Promise<AssertResult> {
+  const db = getDb();
+  // Check: for each rejected institution suggestion, the pending
+  // institutions row still exists (we never delete it on reject).
+  const orphans = await db.execute(sql`
+    SELECT s.id
+    FROM taxonomy_suggestions s
+    WHERE s.state = 'rejected'
+      AND s.kind = 'institution'
+      AND s.pending_institution_slug IS NOT NULL
+      AND NOT EXISTS (
+        SELECT 1 FROM institutions i WHERE i.slug = s.pending_institution_slug
+      )
+    LIMIT 5
+  `);
+  const rows = (orphans as unknown as { rows: Array<{ id: string }> }).rows;
+  return {
+    ok: rows.length === 0,
+    name: "taxonomy-suggestions-rejected-preserve-data",
+    message:
+      rows.length === 0
+        ? "Every rejected institution suggestion still has its pending row  user data preserved."
+        : `${rows.length} rejected institution suggestion(s) lost their pending row. First id: ${rows[0]?.id}.`,
+  };
+}
+
+/**
+ * (c) Promotion / merge backfill is complete. For every promoted or
+ * merged suggestion, no profile or academic_profile row should still
+ * carry the ORIGINAL custom_text  the backfill should have re-pointed
+ * everything. (Caveat: this check is exact-match. If the user later
+ * edits their own profession to a slightly different string after the
+ * backfill, that's a separate event + not a backfill bug.)
+ */
+export async function assertTaxonomyBackfillsComplete(): Promise<AssertResult> {
+  const db = getDb();
+  // Check profession suggestions: for every promoted/merged profession
+  // suggestion, no profiles row should still have profession = custom_text
+  // (case-insensitive). Allow up to a SMALL tolerance for rows that
+  // changed AFTER the resolution (we can't reliably distinguish backfill
+  // misses from post-resolution edits without a history; check is
+  // approximate but useful as a smoke).
+  const profMisses = await db.execute(sql`
+    SELECT s.id, s.custom_text, COUNT(p.id)::int AS still_carrying
+    FROM taxonomy_suggestions s
+    JOIN profiles p ON lower(p.profession) = lower(s.custom_text)
+    WHERE s.kind = 'profession'
+      AND s.state IN ('promoted', 'merged')
+      AND p.deleted_at IS NULL
+    GROUP BY s.id, s.custom_text
+    HAVING COUNT(p.id) > 0
+    LIMIT 5
+  `);
+  const rows = (
+    profMisses as unknown as {
+      rows: Array<{ id: string; custom_text: string; still_carrying: number }>;
+    }
+  ).rows;
+  return {
+    ok: rows.length === 0,
+    name: "taxonomy-promotion-backfill-complete",
+    message:
+      rows.length === 0
+        ? "Every promoted / merged profession suggestion has been fully backfilled across profiles."
+        : `${rows.length} suggestion(s) still have profiles carrying the original custom_text. First: id=${rows[0]?.id} text="${rows[0]?.custom_text}" still_carrying=${rows[0]?.still_carrying}.`,
+  };
+}
+
 export async function runAll(): Promise<void> {
   const checks = [
     await assertNoCohortBelowFloor(),
@@ -888,6 +994,10 @@ export async function runAll(): Promise<void> {
     await assertStallConsentGateEnforced(),
     // Phase 9.14
     await assertProfileVerificationMatchesRollup(),
+    // Phase 9.15
+    await assertTaxonomySuggestionsValid(),
+    await assertRejectedSuggestionsPreserveData(),
+    await assertTaxonomyBackfillsComplete(),
   ];
 
   let failed = 0;

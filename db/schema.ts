@@ -1169,7 +1169,72 @@ export const institutions = pgTable("institutions", {
   provinceSlug: text("province_slug")
     .notNull()
     .references(() => provinces.slug),
+  /** Phase 9.15  free-text "Other" entries land here with is_pending=true
+   *  until an admin promotes or merges them via /admin/taxonomy/suggestions.
+   *  Pickers filter `WHERE NOT is_pending AND deleted_at IS NULL`. */
+  isPending: boolean("is_pending").notNull().default(false),
+  /** Phase 9.15  admin soft-delete; preserves FK integrity for
+   *  academic_profiles already linked to the row. */
+  deletedAt: timestamp("deleted_at"),
 });
+
+// ──────────────────────────────────────────────────────────────────────
+// Phase 9.15  taxonomy suggestion queue
+// ──────────────────────────────────────────────────────────────────────
+
+export const taxonomySuggestionKind = pgEnum("taxonomy_suggestion_kind", [
+  "profession",
+  "institution",
+]);
+
+export const taxonomySuggestionState = pgEnum("taxonomy_suggestion_state", [
+  "pending",
+  "promoted",
+  "merged",
+  "rejected",
+]);
+
+/**
+ * One row per user submission of a free-text "Other" value. Admin queue
+ * at `/admin/taxonomy/suggestions` groups by `(kind, lower(custom_text))`
+ * so duplicates cluster + frequency is visible. Lifecycle:
+ *
+ *   pending  ──► promoted   (admin adds to canonical taxonomy + backfills)
+ *            ├─► merged     (admin links to existing canonical entry + backfills)
+ *            └─► rejected   (spam / joke  user data is NEVER mutated)
+ *
+ * For institution suggestions, `pendingInstitutionSlug` carries the FK
+ * to the institutions row created at submit time with is_pending=true.
+ * That's the row the admin merge / promote / reject actions need to
+ * clean up.
+ */
+export const taxonomySuggestions = pgTable(
+  "taxonomy_suggestions",
+  {
+    id: text("id").primaryKey(),
+    kind: taxonomySuggestionKind("kind").notNull(),
+    customText: text("custom_text").notNull(),
+    submittedByUserId: text("submitted_by_user_id")
+      .notNull()
+      .references(() => appUser.id, { onDelete: "cascade" }),
+    submittedAt: timestamp("submitted_at").notNull().defaultNow(),
+    state: taxonomySuggestionState("state").notNull().default("pending"),
+    targetSlug: text("target_slug"),
+    resolvedByUserId: text("resolved_by_user_id").references(() => appUser.id),
+    resolvedAt: timestamp("resolved_at"),
+    adminNote: text("admin_note"),
+    pendingInstitutionSlug: text("pending_institution_slug").references(
+      () => institutions.slug,
+      { onDelete: "set null" },
+    ),
+  },
+  (t) => ({
+    stateKindIdx: index("taxonomy_suggestions_state_kind_idx").on(
+      t.state,
+      t.kind,
+    ),
+  }),
+);
 
 /**
  * Phase 9.13  Curriculum-vs-demand mapping. Hand-curated at ship time

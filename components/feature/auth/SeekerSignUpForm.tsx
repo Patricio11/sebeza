@@ -413,6 +413,8 @@ export function SeekerSignUpForm({ professions }: Props = {}) {
             options={PROFESSIONS.map((p) => ({ value: p.label }))}
             placeholder="Search professions…"
             required
+            allowOther
+            otherLabel="My profession isn't listed"
           />
           <SelectField
             id="province"
@@ -524,27 +526,24 @@ export function SeekerSignUpForm({ professions }: Props = {}) {
             {state.academic.isStudent && (
               <div className="border-t border-[color:var(--color-hairline)] p-5">
                 <div className="grid gap-4 md:grid-cols-2">
-                  <SelectField
+                  <ComboboxField
                     id="academic-institution"
                     label={t("step3.academic.institutionLabel")}
                     value={state.academic.institutionSlug}
-                    onChange={(e) =>
+                    onChange={(v) =>
                       setState({
                         ...state,
-                        academic: {
-                          ...state.academic,
-                          institutionSlug: e.target.value,
-                        },
+                        academic: { ...state.academic, institutionSlug: v },
                       })
                     }
-                  >
-                    <option value="">Select…</option>
-                    {INSTITUTIONS.map((i) => (
-                      <option key={i.slug} value={i.slug}>
-                        {i.label}
-                      </option>
-                    ))}
-                  </SelectField>
+                    options={INSTITUTIONS.map((i) => ({
+                      value: i.slug,
+                      label: i.label,
+                    }))}
+                    placeholder="Search institutions…"
+                    allowOther
+                    otherLabel="My institution isn't listed"
+                  />
                   <TextField
                     id="academic-programme"
                     label={t("step3.academic.programmeLabel")}

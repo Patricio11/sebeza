@@ -85,6 +85,7 @@ async function truncate() {
     TRUNCATE TABLE
       reports,
       audit_log,
+      taxonomy_suggestions,
       consents,
       vacancy_invitations,
       vacancies,
@@ -1599,6 +1600,117 @@ async function seedPhase9_13ProgrammeSkills() {
   }
 }
 
+/**
+ * Phase 9.15  Three demo taxonomy suggestions so /admin/taxonomy/suggestions
+ * renders real content immediately. Demonstrates the full lifecycle:
+ *
+ *   1. PENDING profession  "Game Ranger" submitted by a cohort student.
+ *      Admin can promote / merge / reject. Shows the simplest path.
+ *
+ *   2. PENDING institution  "Damelin College" with the matching
+ *      `institutions` pending row already inserted (is_pending=true,
+ *      slug = other--damelin-college-<rand>). Admin can promote (flip
+ *      is_pending to false) or merge (link to existing canonical).
+ *      Shows the institution flow with the pending FK row in place.
+ *
+ *   3. REJECTED  "asdfasdf" spam submission. Demonstrates the
+ *      rejection lifecycle  the suggestion is in state='rejected'
+ *      but the submitter's profile (if any) is untouched.
+ */
+async function seedPhase9_15TaxonomySuggestions() {
+  console.log("📥 Phase 9.15  taxonomy suggestion fixtures…");
+  const day = 24 * 60 * 60 * 1000;
+  const now = Date.now();
+
+  // (1) Pending profession  Game Ranger
+  await db.insert(schema.taxonomySuggestions).values({
+    id: id("tx", "game-ranger"),
+    kind: "profession",
+    customText: "Game Ranger",
+    submittedByUserId: id("user", "wits-bsc-cs-2026-09"),
+    submittedAt: new Date(now - 2 * day),
+    state: "pending",
+  });
+
+  // (2) Pending institution  Damelin College
+  // First insert the pending institutions row that the suggestion FKs to.
+  const damelinSlug = "other--damelin-college-seed01";
+  await db.insert(schema.institutions).values({
+    slug: damelinSlug,
+    label: "Damelin College",
+    kind: "private",
+    city: "Pending",
+    provinceSlug: "gauteng",
+    isPending: true,
+  });
+  await db.insert(schema.taxonomySuggestions).values({
+    id: id("tx", "damelin"),
+    kind: "institution",
+    customText: "Damelin College",
+    submittedByUserId: id("user", "wits-bsc-cs-2026-10"),
+    submittedAt: new Date(now - 3 * day),
+    state: "pending",
+    pendingInstitutionSlug: damelinSlug,
+  });
+
+  // (3) Rejected  "asdfasdf" spam demonstration
+  await db.insert(schema.taxonomySuggestions).values({
+    id: id("tx", "spam-rejected"),
+    kind: "profession",
+    customText: "asdfasdf",
+    submittedByUserId: id("user", "wits-bsc-cs-2026-11"),
+    submittedAt: new Date(now - 10 * day),
+    state: "rejected",
+    resolvedByUserId: id("user", "sebenza-admin"),
+    resolvedAt: new Date(now - 9 * day),
+    adminNote: "Not a real profession  spam submission.",
+  });
+
+  // Audit log entries mirroring what the production write paths produce.
+  await db.insert(schema.auditLog).values([
+    {
+      id: id("aud", "tx-game-ranger-submit"),
+      kind: "taxonomy.suggestion.submit",
+      actor: id("user", "wits-bsc-cs-2026-09"),
+      subject: id("tx", "game-ranger"),
+      meta: { kind: "profession", customText: "Game Ranger" },
+      at: new Date(now - 2 * day),
+    },
+    {
+      id: id("aud", "tx-damelin-submit"),
+      kind: "taxonomy.suggestion.submit",
+      actor: id("user", "wits-bsc-cs-2026-10"),
+      subject: id("tx", "damelin"),
+      meta: {
+        kind: "institution",
+        customText: "Damelin College",
+        pendingInstitutionSlug: damelinSlug,
+      },
+      at: new Date(now - 3 * day),
+    },
+    {
+      id: id("aud", "tx-spam-submit"),
+      kind: "taxonomy.suggestion.submit",
+      actor: id("user", "wits-bsc-cs-2026-11"),
+      subject: id("tx", "spam-rejected"),
+      meta: { kind: "profession", customText: "asdfasdf" },
+      at: new Date(now - 10 * day),
+    },
+    {
+      id: id("aud", "tx-spam-reject"),
+      kind: "taxonomy.suggestion.reject",
+      actor: id("user", "sebenza-admin"),
+      subject: id("tx", "spam-rejected"),
+      meta: {
+        kind: "profession",
+        customText: "asdfasdf",
+        reason: "Not a real profession  spam submission.",
+      },
+      at: new Date(now - 9 * day),
+    },
+  ]);
+}
+
 async function seedPhase7Reports() {
   console.log("🚩 Phase 7 sample reports (open + closed  for /admin/moderation)…");
   await db.insert(schema.reports).values([
@@ -1677,6 +1789,12 @@ async function main() {
   // already opted in to outcomes_research, so the consent gate
   // passes. Runs LAST because it relies on cohort + 9.12 schema.
   await seedPhase9_13StallFixtures();
+  // Phase 9.15  taxonomy suggestion queue fixtures: three demo rows so
+  // /admin/taxonomy/suggestions renders real content out of the box.
+  // One pending profession ("Game Ranger"), one pending institution
+  // ("Damelin College" with the matching pending institutions row),
+  // one already-rejected suggestion to demonstrate the lifecycle.
+  await seedPhase9_15TaxonomySuggestions();
 
   const ms = Date.now() - started;
   console.log(

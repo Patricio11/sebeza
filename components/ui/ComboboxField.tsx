@@ -37,7 +37,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { Check, ChevronDown, Search, X } from "lucide-react";
+import { ArrowLeft, Check, ChevronDown, PencilLine, Search, X } from "lucide-react";
 
 export interface ComboboxOption {
   /** The value posted to the backend / used in state. */
@@ -65,6 +65,23 @@ interface Props {
   /** Empty-results footer  string OR ReactNode. */
   emptyText?: string;
   className?: string;
+  /**
+   * Phase 9.15  show an "Other (specify)" footer option that switches the
+   * field to free-text mode. The parent receives the typed value via the
+   * regular `onChange` and is responsible for firing the suggestion
+   * submission Server Action when the value isn't in `options`.
+   */
+  allowOther?: boolean;
+  /**
+   * Phase 9.15  optional callback for when the user explicitly confirms a
+   * free-text "Other" entry (Enter or blur). Fires AFTER onChange. Use
+   * this to fire the suggestion submission if you want immediate review.
+   * Parent can alternatively detect Other-ness on form-submit by checking
+   * if `value` isn't in `options`.
+   */
+  onOtherSubmit?: (text: string) => void;
+  /** Label for the Other footer option. Default: "Other (specify)". */
+  otherLabel?: string;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -93,6 +110,9 @@ export function ComboboxField({
   name,
   emptyText = "No matches  refine your search or contact support if your option isn't listed.",
   className,
+  allowOther,
+  onOtherSubmit,
+  otherLabel = "Other (specify)",
 }: Props) {
   const reactId = useId();
   const buttonId = id ?? `combo-${reactId}`;
@@ -102,10 +122,14 @@ export function ComboboxField({
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [activeIdx, setActiveIdx] = useState(0);
+  // Phase 9.15  free-text "Other" mode. Set when the user clicks the
+  // Other footer option. Cleared by the "Pick from list" revert link.
+  const [otherMode, setOtherMode] = useState(false);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);
+  const otherRef = useRef<HTMLInputElement>(null);
 
   // Selected option (matches value field, case-insensitive on label fallback).
   const selected = useMemo(
@@ -117,6 +141,12 @@ export function ComboboxField({
       ),
     [options, value],
   );
+
+  // If value is set but doesn't match any option, infer Other mode on mount.
+  const valueIsOther = !!value && !selected;
+  useEffect(() => {
+    if (allowOther && valueIsOther) setOtherMode(true);
+  }, [allowOther, valueIsOther]);
 
   // Filtered + sorted list.
   const filtered = useMemo(() => {
@@ -208,6 +238,72 @@ export function ComboboxField({
 
   const displayLabel = selected?.label ?? selected?.value ?? value;
   const hasValue = !!value;
+
+  // Phase 9.15  free-text "Other" mode: render a text input instead of
+  // the picker trigger. The "Pick from list" link reverts to the picker.
+  if (allowOther && otherMode) {
+    return (
+      <div className={className ?? ""}>
+        <div className="flex items-baseline justify-between">
+          <label
+            htmlFor={buttonId}
+            className="block text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--color-ink-soft)]"
+          >
+            {label}
+            {required && (
+              <span aria-hidden="true" className="ml-1 text-[color:var(--color-accent)]">
+                *
+              </span>
+            )}
+          </label>
+          <button
+            type="button"
+            onClick={() => {
+              setOtherMode(false);
+              onChange("");
+              triggerRef.current?.focus();
+            }}
+            className="inline-flex cursor-pointer items-center gap-1 text-[0.65rem] uppercase tracking-[0.18em] text-[color:var(--color-ink-soft)] hover:text-[color:var(--color-ink)]"
+          >
+            <ArrowLeft className="size-3" aria-hidden="true" /> Pick from list
+          </button>
+        </div>
+        <div className="mt-1 flex w-full items-center gap-2 rounded-[var(--radius-sm)] border border-[color:var(--color-accent)] bg-[color:var(--color-accent-tint)] px-3 py-2.5">
+          <PencilLine
+            className="size-4 shrink-0 text-[color:var(--color-accent)]"
+            aria-hidden="true"
+          />
+          <input
+            ref={otherRef}
+            id={buttonId}
+            name={name}
+            type="text"
+            disabled={disabled}
+            required={required}
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            onBlur={(e) => {
+              const trimmed = e.target.value.trim();
+              if (trimmed && onOtherSubmit) onOtherSubmit(trimmed);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                e.currentTarget.blur();
+              }
+            }}
+            placeholder={`Type your ${label.toLowerCase()}`}
+            maxLength={80}
+            className="w-full bg-transparent text-sm text-[color:var(--color-ink)] outline-none placeholder:text-[color:var(--color-ink-soft)]"
+          />
+        </div>
+        <p className="mt-1 text-[0.7rem] text-[color:var(--color-ink-soft)]">
+          We&rsquo;ll review your entry so it can become part of the canonical
+          list. Up to 80 characters.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className={className ?? ""} ref={containerRef}>
@@ -401,6 +497,26 @@ export function ComboboxField({
                     </li>
                   );
                 })
+              )}
+              {/* Phase 9.15  Other (specify) footer option. */}
+              {allowOther && (
+                <li
+                  role="option"
+                  aria-selected={false}
+                  onClick={() => {
+                    onChange("");
+                    setOtherMode(true);
+                    setOpen(false);
+                    requestAnimationFrame(() => otherRef.current?.focus());
+                  }}
+                  className="mt-1 flex cursor-pointer items-center gap-2 border-t border-[color:var(--color-hairline)] bg-[color:var(--color-surface-sunk)] px-3 py-2.5 text-sm text-[color:var(--color-accent)] hover:bg-[color:var(--color-accent-tint)]"
+                >
+                  <PencilLine className="size-3.5" aria-hidden="true" />
+                  <span className="font-medium">{otherLabel}</span>
+                  <span className="ml-auto text-[0.65rem] uppercase tracking-[0.18em] text-[color:var(--color-ink-soft)]">
+                    type your own
+                  </span>
+                </li>
               )}
             </ul>
           </div>
