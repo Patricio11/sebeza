@@ -803,6 +803,66 @@ export async function assertStallConsentGateEnforced(): Promise<AssertResult> {
   };
 }
 
+// ──────────────────────────────────────────────────────────────────────
+// Phase 9.14 compliance assertion  the seeker profile verification
+// roll-up. profiles.verification MUST equal the derived state from
+// qualifications:
+//   verified   ⇔ ≥1 qualification.verification = 'verified'
+//   pending    ⇔ no verified, but ≥1 pending
+//   unverified ⇔ otherwise
+// `rejected` is never auto-applied at the profile level.
+// ──────────────────────────────────────────────────────────────────────
+
+export async function assertProfileVerificationMatchesRollup(): Promise<AssertResult> {
+  const db = getDb();
+  const mismatches = (
+    (await db.execute(sql`
+      SELECT
+        p.id,
+        p.verification AS profile_verification,
+        CASE
+          WHEN EXISTS (
+            SELECT 1 FROM qualifications q
+            WHERE q.profile_id = p.id AND q.verification = 'verified'
+          ) THEN 'verified'
+          WHEN EXISTS (
+            SELECT 1 FROM qualifications q
+            WHERE q.profile_id = p.id AND q.verification = 'pending'
+          ) THEN 'pending'
+          ELSE 'unverified'
+        END AS expected_verification
+      FROM profiles p
+      WHERE p.deleted_at IS NULL
+        AND p.verification <> CASE
+          WHEN EXISTS (
+            SELECT 1 FROM qualifications q
+            WHERE q.profile_id = p.id AND q.verification = 'verified'
+          ) THEN 'verified'::verification_status
+          WHEN EXISTS (
+            SELECT 1 FROM qualifications q
+            WHERE q.profile_id = p.id AND q.verification = 'pending'
+          ) THEN 'pending'::verification_status
+          ELSE 'unverified'::verification_status
+        END
+      LIMIT 5
+    `)) as unknown as {
+      rows: Array<{
+        id: string;
+        profile_verification: string;
+        expected_verification: string;
+      }>;
+    }
+  ).rows;
+  return {
+    ok: mismatches.length === 0,
+    name: "profile-verification-matches-rollup",
+    message:
+      mismatches.length === 0
+        ? "Every non-deleted profile's verification matches the qualification roll-up."
+        : `${mismatches.length} profile(s) drift from the roll-up. First: ${mismatches[0]!.id} has ${mismatches[0]!.profile_verification}, expected ${mismatches[0]!.expected_verification}.`,
+  };
+}
+
 export async function runAll(): Promise<void> {
   const checks = [
     await assertNoCohortBelowFloor(),
@@ -826,6 +886,8 @@ export async function runAll(): Promise<void> {
     await assertCurriculumCellsAboveFloor(),
     await assertStallCellsAboveFloor(),
     await assertStallConsentGateEnforced(),
+    // Phase 9.14
+    await assertProfileVerificationMatchesRollup(),
   ];
 
   let failed = 0;

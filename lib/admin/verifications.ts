@@ -25,6 +25,7 @@ import { verifyAdmin } from "@/lib/auth/dal";
 import { logAccess } from "@/lib/audit";
 import { createNotification, notifyOrgMembers } from "@/lib/notifications/server";
 import { getSetting } from "@/lib/admin/settings";
+import { recomputeProfileVerification } from "@/lib/profile/verification-rollup";
 
 export type ActionResult<T extends object = object> =
   | ({ ok: true } & T)
@@ -106,6 +107,11 @@ export async function approveQualification(
     .set({ verification: "verified" })
     .where(eq(schema.qualifications.id, row.id));
 
+  // Phase 9.14  recompute the profile-level verification roll-up.
+  // A newly-verified qualification flips an `unverified`/`pending`
+  // profile to `verified`. Idempotent + no-op when nothing changed.
+  const rollup = await recomputeProfileVerification(row.profileId);
+
   await logAccess({
     kind: parsed.data.forceApprove
       ? "verification.approve.manual_override"
@@ -117,6 +123,9 @@ export async function approveQualification(
       title: row.title,
       note: parsed.data.note ?? null,
       forceApprove: parsed.data.forceApprove ?? false,
+      profileVerificationChanged: rollup?.changed ?? false,
+      profileVerificationFrom: rollup?.from ?? null,
+      profileVerificationTo: rollup?.to ?? null,
     },
   });
 
@@ -174,6 +183,13 @@ export async function rejectQualification(
     .set({ verification: "rejected" })
     .where(eq(schema.qualifications.id, row.id));
 
+  // Phase 9.14  recompute the profile-level verification roll-up.
+  // A rejected qualification can DEMOTE the profile if it was the
+  // only verified/pending one. `rejected` is never auto-applied at
+  // the profile level (Verification-Honesty Rule  rejection is
+  // per-document, not per-seeker).
+  const rollup = await recomputeProfileVerification(row.profileId);
+
   await logAccess({
     kind: "verification.reject",
     actor: session.id,
@@ -182,6 +198,9 @@ export async function rejectQualification(
       qualificationId: row.id,
       title: row.title,
       reason: parsed.data.reason,
+      profileVerificationChanged: rollup?.changed ?? false,
+      profileVerificationFrom: rollup?.from ?? null,
+      profileVerificationTo: rollup?.to ?? null,
     },
   });
 

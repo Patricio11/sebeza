@@ -552,6 +552,27 @@ that registry  we win on **data quality, usability, and analytics.** The system 
 
 ---
 
+## 🧷 PHASE 9.14: SEEKER PROFILE VERIFICATION ROLL-UP ✅ (shipped 2026-05-26)
+
+Closed a structural gap discovered during system review: `profiles.verification` was scaffolded but never wired to any code path, so every seeker rendered as "Unverified" regardless of their qualification state. Honest by accident (never lying) but uninformative (never reflecting reality either).
+
+**Fix**: derive `profiles.verification` from `qualifications.verification` via a roll-up:
+
+- `verified` ⇔ at least one qualification has `verification = 'verified'`
+- `pending` ⇔ no verified, but at least one qualification is `pending`
+- `unverified` ⇔ otherwise (no quals, or every qual is unverified/rejected)
+- `rejected` is **never auto-applied** at the profile level — per-document rejection isn't a per-seeker judgement (Verification-Honesty Rule).
+
+New helper `recomputeProfileVerification()` in `lib/profile/verification-rollup.ts` is the only writer of `profiles.verification`. Wired into four mutation sites: `approveQualification` + `rejectQualification` (admin) + `uploadQualificationDocument` + `deleteQualification` (seeker). The audit meta on the admin approve/reject rows now carries `profileVerificationChanged/From/To` so the audit trail captures the roll-up transition alongside the per-document one.
+
+Migration `0022_phase9_14_profile_verification_backfill.sql` (additive, data-only) runs the same roll-up against every non-deleted profile so existing rows converge to honest state without a re-seed. Idempotent.
+
+New compliance assertion `profile-verification-matches-rollup` on `/api/admin/outcomes-compliance` (now **19 assertions** total) walks every non-deleted profile and confirms the column matches the roll-up. Structural pin against regressions.
+
+Companion docs: `docs/completed/PHASE_9_14_COMPLETE.md`.
+
+---
+
 ## 🧷 PHASE 9.13: LEARNING-LOOP INTELLIGENCE ✅ (shipped 2026-05-25)
 
 Sister phase to 9.12. The gov-facing analytics that read the data the loop produces. Closes the pre-launch gov analytics chapter end-to-end (demand → curriculum → learner → barrier → hire → outcome).

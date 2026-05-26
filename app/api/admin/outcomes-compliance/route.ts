@@ -37,6 +37,8 @@ import {
   assertCurriculumCellsAboveFloor,
   assertStallCellsAboveFloor,
   assertStallConsentGateEnforced,
+  // Phase 9.14  seeker profile verification roll-up
+  assertProfileVerificationMatchesRollup,
 } from "@/lib/analytics/outcomes-compliance";
 
 export async function GET() {
@@ -63,6 +65,8 @@ export async function GET() {
     await assertCurriculumCellsAboveFloor(),
     await assertStallCellsAboveFloor(),
     await assertStallConsentGateEnforced(),
+    // Phase 9.14
+    await assertProfileVerificationMatchesRollup(),
   ];
   const ok = checks.every((c) => c.ok);
   return NextResponse.json(

@@ -27,6 +27,7 @@ import {
   deleteStorageObject,
 } from "@/lib/storage/upload";
 import { StorageError } from "@/lib/storage/supabase";
+import { recomputeProfileVerification } from "./verification-rollup";
 
 export type ActionResult<T extends object = object> =
   | ({ ok: true } & T)
@@ -134,6 +135,12 @@ export async function uploadQualificationDocument(
       }
     }
 
+    // Phase 9.14  the qualification just flipped to `pending`. If the
+    // profile was `unverified`, this elevates it to `pending` (admin
+    // queue). No-op if the profile was already `verified` from another
+    // qualification.
+    await recomputeProfileVerification(profile);
+
     await logAccess({
       kind: "profile.qualification.document.upload",
       actor: session.id,
@@ -185,6 +192,11 @@ export async function deleteQualification(id: string): Promise<ActionResult> {
       // Not fatal  Phase 8 cron sweeps orphans.
     }
   }
+
+  // Phase 9.14  deleting a qualification can DEMOTE the profile-level
+  // badge if this was the only verified / pending row. Always runs;
+  // idempotent if nothing changed.
+  await recomputeProfileVerification(profile);
 
   await logAccess({
     kind: "profile.qualification.delete",
