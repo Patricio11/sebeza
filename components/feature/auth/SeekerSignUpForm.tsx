@@ -9,6 +9,7 @@ import {
   EncryptedBadge,
 } from "@/components/ui/FormField";
 import { Button } from "@/components/ui/Button";
+import { MonthYearPicker } from "@/components/ui/MonthYearPicker";
 import {
   PasswordStrengthMeter,
   scorePassword,
@@ -463,40 +464,69 @@ export function SeekerSignUpForm({ professions }: Props = {}) {
             ))}
           </SelectField>
 
-          {/* Student toggle */}
-          <details
-            open={state.academic.isStudent}
-            className="group rounded-[var(--radius-md)] border-2 border-dashed border-[color:var(--color-ink)] bg-[color:var(--color-surface-sunk)] open:border-solid open:bg-[color:var(--color-surface)]"
+          {/* Student toggle  the whole card-header is one button so
+              clicking anywhere (icon, label, hint, the checkbox visual
+              itself) toggles `isStudent` AND opens/closes the panel
+              in one go. Previously this was a <details>/<summary>
+              pair that let the panel open without flipping the
+              checkbox state  desync bug. */}
+          <div
+            className={
+              "rounded-[var(--radius-md)] border-2 " +
+              (state.academic.isStudent
+                ? "border-solid border-[color:var(--color-ink)] bg-[color:var(--color-surface)]"
+                : "border-dashed border-[color:var(--color-ink)] bg-[color:var(--color-surface-sunk)]")
+            }
           >
-            <summary className="flex cursor-pointer items-start gap-3 p-5 text-sm marker:hidden [&::-webkit-details-marker]:hidden">
-              <input
-                type="checkbox"
-                checked={state.academic.isStudent}
-                onChange={(e) =>
-                  setState({
-                    ...state,
-                    academic: {
-                      ...state.academic,
-                      isStudent: e.target.checked,
-                    },
-                  })
-                }
-                className="mt-0.5 size-4"
+            <button
+              type="button"
+              aria-expanded={state.academic.isStudent}
+              onClick={() =>
+                setState({
+                  ...state,
+                  academic: {
+                    ...state.academic,
+                    isStudent: !state.academic.isStudent,
+                  },
+                })
+              }
+              className="flex w-full cursor-pointer items-start gap-3 rounded-[var(--radius-md)] p-5 text-left text-sm hover:bg-[color:var(--color-paper)]/50"
+            >
+              <span
                 aria-hidden="true"
-              />
-              <div className="flex-1">
-                <div className="flex items-center gap-2 font-medium">
+                className={
+                  "mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-[3px] border-2 transition-colors " +
+                  (state.academic.isStudent
+                    ? "border-[color:var(--color-ink)] bg-[color:var(--color-ink)] text-[color:var(--color-paper)]"
+                    : "border-[color:var(--color-ink-soft)] bg-[color:var(--color-paper)]")
+                }
+              >
+                {state.academic.isStudent && (
+                  <svg viewBox="0 0 12 12" className="size-3" aria-hidden="true">
+                    <path
+                      d="M2 6.5 5 9.5 10 3.5"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                )}
+              </span>
+              <span className="flex-1">
+                <span className="flex items-center gap-2 font-medium">
                   <GraduationCap
                     className="size-4 text-[color:var(--color-accent)]"
                     aria-hidden="true"
                   />
                   {t("step3.studentToggle")}
-                </div>
-                <p className="mt-1 text-xs text-[color:var(--color-ink-soft)]">
+                </span>
+                <span className="mt-1 block text-xs text-[color:var(--color-ink-soft)]">
                   {t("step3.studentToggleHint")}
-                </p>
-              </div>
-            </summary>
+                </span>
+              </span>
+            </button>
 
             {state.academic.isStudent && (
               <div className="border-t border-[color:var(--color-hairline)] p-5">
@@ -593,22 +623,21 @@ export function SeekerSignUpForm({ professions }: Props = {}) {
                       </option>
                     ))}
                   </SelectField>
-                  <TextField
+                  <MonthYearPicker
                     id="academic-graduation"
                     label={t("step3.academic.graduationLabel")}
-                    type="month"
                     value={state.academic.expectedGraduation}
-                    onChange={(e) =>
+                    onChange={(value) =>
                       setState({
                         ...state,
                         academic: {
                           ...state.academic,
-                          expectedGraduation: e.target.value,
+                          expectedGraduation: value,
                         },
                       })
                     }
                   />
-                  <label className="inline-flex items-center gap-2 text-sm md:col-span-2">
+                  <label className="inline-flex cursor-pointer items-center gap-2 text-sm md:col-span-2">
                     <input
                       type="checkbox"
                       checked={state.academic.nsfas}
@@ -621,11 +650,11 @@ export function SeekerSignUpForm({ professions }: Props = {}) {
                           },
                         })
                       }
-                      className="size-4"
+                      className="size-4 cursor-pointer"
                     />
                     {t("step3.academic.nsfasLabel")}
                   </label>
-                  <label className="inline-flex items-start gap-2 text-sm md:col-span-2">
+                  <label className="inline-flex cursor-pointer items-start gap-2 text-sm md:col-span-2">
                     <input
                       type="checkbox"
                       checked={state.academic.openToInternships}
@@ -638,11 +667,11 @@ export function SeekerSignUpForm({ professions }: Props = {}) {
                           },
                         })
                       }
-                      className="mt-1 size-4"
+                      className="mt-1 size-4 cursor-pointer"
                     />
                     <span>{t("step3.academic.openToInternships")}</span>
                   </label>
-                  <label className="inline-flex items-start gap-2 text-sm md:col-span-2">
+                  <label className="inline-flex cursor-pointer items-start gap-2 text-sm md:col-span-2">
                     <input
                       type="checkbox"
                       checked={state.academic.openToGraduateProgrammes}
@@ -655,7 +684,7 @@ export function SeekerSignUpForm({ professions }: Props = {}) {
                           },
                         })
                       }
-                      className="mt-1 size-4"
+                      className="mt-1 size-4 cursor-pointer"
                     />
                     <span>
                       {t("step3.academic.openToGraduateProgrammes")}
@@ -681,7 +710,7 @@ export function SeekerSignUpForm({ professions }: Props = {}) {
                         const checked = state.workAvailability.includes(kind);
                         return (
                           <li key={kind}>
-                            <label className="flex items-start gap-2 text-xs">
+                            <label className="flex cursor-pointer items-start gap-2 text-xs">
                               <input
                                 type="checkbox"
                                 checked={checked}
@@ -691,7 +720,7 @@ export function SeekerSignUpForm({ professions }: Props = {}) {
                                     : state.workAvailability.filter((v) => v !== kind);
                                   setState({ ...state, workAvailability: next });
                                 }}
-                                className="mt-0.5 size-4"
+                                className="mt-0.5 size-4 cursor-pointer"
                               />
                               <span>{label}</span>
                             </label>
@@ -706,7 +735,7 @@ export function SeekerSignUpForm({ professions }: Props = {}) {
                 </div>
               </div>
             )}
-          </details>
+          </div>
 
           <div className="flex gap-3">
             <Button
