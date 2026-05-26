@@ -32,6 +32,7 @@ import {
 } from "@/lib/employer/vacancies";
 import type { InvitationRow } from "@/lib/employer/invitations";
 import type { SearchResultRow } from "@/db/queries/profiles";
+import { Checkbox } from "@/components/ui/Checkbox";
 import {
   AlertTriangle,
   CheckCircle2,
@@ -350,42 +351,42 @@ function Sheet({
                   const isSelected = selected.has(inv.profileId);
                   return (
                     <li key={inv.profileId}>
-                      <label
+                      <div
                         className={
-                          "flex cursor-pointer items-start gap-3 rounded-[var(--radius-sm)] border bg-[color:var(--color-surface)] p-3 hover:border-[color:var(--color-ink)] " +
+                          "rounded-[var(--radius-sm)] border bg-[color:var(--color-surface)] p-3 hover:border-[color:var(--color-ink)] " +
                           (isSelected
                             ? "border-[color:var(--color-brand)] bg-[color:var(--color-brand-tint)]"
                             : "border-[color:var(--color-hairline)]")
                         }
                       >
-                        <input
-                          type="checkbox"
+                        <Checkbox
                           checked={isSelected}
                           onChange={() => toggleInvitee(inv)}
                           disabled={pending}
-                          className="mt-1 size-4 accent-[color:var(--color-ink)]"
+                          label={
+                            <span className="font-display text-sm text-[color:var(--color-ink)]">
+                              {inv.displayName}
+                            </span>
+                          }
+                          description={
+                            <>
+                              @{inv.handle}
+                              {inv.state === "accepted_with_notice" &&
+                                inv.noticePeriodMonths != null && (
+                                  <>
+                                    {"  "}
+                                    <Clock
+                                      className="ml-1 inline size-3 align-text-bottom"
+                                      aria-hidden="true"
+                                    />{" "}
+                                    Notice: {inv.noticePeriodMonths} month
+                                    {inv.noticePeriodMonths === 1 ? "" : "s"}
+                                  </>
+                                )}
+                            </>
+                          }
                         />
-                        <div className="min-w-0 flex-1">
-                          <p className="font-display text-sm text-[color:var(--color-ink)]">
-                            {inv.displayName}
-                          </p>
-                          <p className="mt-0.5 text-[0.7rem] text-[color:var(--color-ink-soft)]">
-                            @{inv.handle}
-                            {inv.state === "accepted_with_notice" &&
-                              inv.noticePeriodMonths != null && (
-                                <>
-                                  {"  "}
-                                  <Clock
-                                    className="ml-1 inline size-3 align-text-bottom"
-                                    aria-hidden="true"
-                                  />{" "}
-                                  Notice: {inv.noticePeriodMonths} month
-                                  {inv.noticePeriodMonths === 1 ? "" : "s"}
-                                </>
-                              )}
-                          </p>
-                        </div>
-                      </label>
+                      </div>
                     </li>
                   );
                 })}

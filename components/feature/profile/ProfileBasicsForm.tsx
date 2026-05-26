@@ -9,6 +9,7 @@
 import { useState, useTransition } from "react";
 import { TextField, TextareaField, SelectField } from "@/components/ui/FormField";
 import { Button } from "@/components/ui/Button";
+import { Checkbox } from "@/components/ui/Checkbox";
 import { ProfileCompleteness } from "@/components/ui/ProfileCompleteness";
 import { updateProfileBasics } from "@/lib/profile/actions";
 import { PROVINCES } from "@/lib/mock/taxonomy";
@@ -138,15 +139,13 @@ export function ProfileBasicsForm({
             placeholder="e.g. South African"
             hint="Free text  Sebenza matches by location + skill, never by nationality."
           />
-          <label className="mt-2 inline-flex items-center gap-2 text-sm md:mt-auto md:pb-3">
-            <input
-              type="checkbox"
-              checked={isCitizen}
-              onChange={(e) => setIsCitizen(e.target.checked)}
-              className="size-4"
-            />
-            {labels.citizen}
-          </label>
+          <Checkbox
+            className="mt-2 md:mt-auto md:pb-3"
+            align="center"
+            checked={isCitizen}
+            onChange={setIsCitizen}
+            label={labels.citizen}
+          />
         </div>
       </section>
 

@@ -9,6 +9,7 @@ import { WORK_AVAILABILITY_LABEL } from "@/components/feature/profile/WorkAvaila
 import { useState, useTransition } from "react";
 import { cn } from "@/lib/utils";
 import { CustomSelect } from "@/components/ui/CustomSelect";
+import { Checkbox } from "@/components/ui/Checkbox";
 
 interface Props {
   defaultFilters: F;
@@ -121,20 +122,12 @@ export function SearchFilters({ defaultFilters, query }: Props) {
       </FilterGroup>
 
       <FilterGroup label={t("nationality")}>
-        <label className="flex cursor-pointer items-start gap-2 text-sm">
-          <input
-            type="checkbox"
-            checked={defaultFilters.highlightCitizens ?? false}
-            onChange={(e) => update({ highlightCitizens: e.target.checked })}
-            className="mt-1 cursor-pointer"
-          />
-          <span>
-            {t("highlightCitizens")}
-            <span className="mt-1 block text-xs text-[color:var(--color-ink-soft)]">
-              {t("nationalityHelp")}
-            </span>
-          </span>
-        </label>
+        <Checkbox
+          checked={defaultFilters.highlightCitizens ?? false}
+          onChange={(v) => update({ highlightCitizens: v })}
+          label={t("highlightCitizens")}
+          description={t("nationalityHelp")}
+        />
       </FilterGroup>
 
       <FilterGroup label={t("verification")}>
@@ -149,64 +142,40 @@ export function SearchFilters({ defaultFilters, query }: Props) {
           internship or graduate-programme intake. Strictly opt-in by the
           seeker; never default; never inferred. */}
       <FilterGroup label="Early-career opt-ins">
-        <label className="flex cursor-pointer items-start gap-2 text-sm">
-          <input
-            type="checkbox"
-            checked={defaultFilters.openToInternships ?? false}
-            onChange={(e) =>
-              update({ openToInternships: e.target.checked || undefined })
-            }
-            className="mt-1 cursor-pointer"
-          />
-          <span>
-            Open to internships
-            <span className="mt-1 block text-xs text-[color:var(--color-ink-soft)]">
-              Currently-enrolled students who've explicitly opted in.
-            </span>
-          </span>
-        </label>
-        <label className="mt-3 flex cursor-pointer items-start gap-2 text-sm">
-          <input
-            type="checkbox"
-            checked={defaultFilters.openToGraduateProgrammes ?? false}
-            onChange={(e) =>
-              update({
-                openToGraduateProgrammes: e.target.checked || undefined,
-              })
-            }
-            className="mt-1 cursor-pointer"
-          />
-          <span>
-            Open to graduate programmes
-            <span className="mt-1 block text-xs text-[color:var(--color-ink-soft)]">
-              Final-year + recent graduates open to formal grad-track roles.
-            </span>
-          </span>
-        </label>
+        <Checkbox
+          checked={defaultFilters.openToInternships ?? false}
+          onChange={(v) => update({ openToInternships: v || undefined })}
+          label="Open to internships"
+          description="Currently-enrolled students who've explicitly opted in."
+        />
+        <Checkbox
+          className="mt-3"
+          checked={defaultFilters.openToGraduateProgrammes ?? false}
+          onChange={(v) =>
+            update({ openToGraduateProgrammes: v || undefined })
+          }
+          label="Open to graduate programmes"
+          description="Final-year + recent graduates open to formal grad-track roles."
+        />
       </FilterGroup>
 
       <FilterGroup label="Available for">
         {WORK_AVAILABILITY_KINDS.map((kind) => {
           const checked = (defaultFilters.availableFor ?? []).includes(kind);
           return (
-            <label
+            <Checkbox
               key={kind}
-              className="mt-2 flex cursor-pointer items-start gap-2 text-sm first:mt-0"
-            >
-              <input
-                type="checkbox"
-                checked={checked}
-                onChange={(e) => {
-                  const cur = defaultFilters.availableFor ?? [];
-                  const next = e.target.checked
-                    ? Array.from(new Set([...cur, kind]))
-                    : cur.filter((v) => v !== kind);
-                  update({ availableFor: next.length > 0 ? next : undefined });
-                }}
-                className="mt-1 cursor-pointer"
-              />
-              <span>{WORK_AVAILABILITY_LABEL[kind]}</span>
-            </label>
+              className="mt-2 first:mt-0"
+              checked={checked}
+              onChange={(v) => {
+                const cur = defaultFilters.availableFor ?? [];
+                const next = v
+                  ? Array.from(new Set([...cur, kind]))
+                  : cur.filter((x) => x !== kind);
+                update({ availableFor: next.length > 0 ? next : undefined });
+              }}
+              label={WORK_AVAILABILITY_LABEL[kind]}
+            />
           );
         })}
         <p className="mt-2 text-xs italic text-[color:var(--color-ink-soft)]">

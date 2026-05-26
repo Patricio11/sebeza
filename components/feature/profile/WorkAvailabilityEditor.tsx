@@ -13,6 +13,7 @@ import { useState, useTransition } from "react";
 import { updateWorkAvailability } from "@/lib/profile/actions";
 import type { WorkAvailabilityKind } from "@/lib/mock/types";
 import { WORK_AVAILABILITY_KINDS } from "@/lib/mock/types";
+import { Checkbox } from "@/components/ui/Checkbox";
 
 const LABEL: Record<WorkAvailabilityKind, string> = {
   casual: "Casual / shift work",
@@ -73,28 +74,24 @@ export function WorkAvailabilityEditor({ initialValues }: Props) {
           const checked = values.includes(kind);
           return (
             <li key={kind}>
-              <label
+              <div
                 className={
-                  "flex cursor-pointer items-start gap-3 rounded-[var(--radius-sm)] border p-3 transition-colors " +
+                  "rounded-[var(--radius-sm)] border p-3 transition-colors " +
                   (checked
                     ? "border-[color:var(--color-brand)] bg-[color:var(--color-brand-tint)]"
                     : "border-[color:var(--color-hairline)] hover:border-[color:var(--color-ink)]")
                 }
               >
-                <input
-                  type="checkbox"
+                <Checkbox
                   checked={checked}
                   disabled={pending}
                   onChange={() => toggle(kind)}
-                  className="mt-0.5 size-4 accent-[color:var(--color-brand)]"
+                  label={
+                    <span className="font-display text-sm">{LABEL[kind]}</span>
+                  }
+                  description={HINT[kind]}
                 />
-                <span className="min-w-0">
-                  <span className="block font-display text-sm">{LABEL[kind]}</span>
-                  <span className="block text-xs text-[color:var(--color-ink-soft)]">
-                    {HINT[kind]}
-                  </span>
-                </span>
-              </label>
+              </div>
             </li>
           );
         })}

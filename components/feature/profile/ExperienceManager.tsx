@@ -8,6 +8,7 @@
 import { useState, useTransition } from "react";
 import { TextField, TextareaField } from "@/components/ui/FormField";
 import { Button } from "@/components/ui/Button";
+import { Checkbox } from "@/components/ui/Checkbox";
 import {
   Plus,
   Pencil,
@@ -204,21 +205,19 @@ export function ExperienceManager({ initial, labels }: Props) {
               onChange={(e) => setForm({ ...form, endedAt: e.target.value })}
               disabled={form.isCurrent}
             />
-            <label className="mt-2 inline-flex items-center gap-2 text-sm md:mt-auto md:pb-3">
-              <input
-                type="checkbox"
-                checked={form.isCurrent}
-                onChange={(e) =>
-                  setForm({
-                    ...form,
-                    isCurrent: e.target.checked,
-                    endedAt: e.target.checked ? "" : form.endedAt,
-                  })
-                }
-                className="size-4"
-              />
-              {labels.current}
-            </label>
+            <Checkbox
+              className="mt-2 md:mt-auto md:pb-3"
+              align="center"
+              checked={form.isCurrent}
+              onChange={(v) =>
+                setForm({
+                  ...form,
+                  isCurrent: v,
+                  endedAt: v ? "" : form.endedAt,
+                })
+              }
+              label={labels.current}
+            />
             <TextareaField
               id="exp-desc"
               label="Description"

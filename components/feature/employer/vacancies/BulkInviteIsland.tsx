@@ -192,6 +192,12 @@ export function BulkInviteIsland({
                       Invited
                     </span>
                   ) : (
+                    // Row-select pattern  no visible label (the row text
+                    // beside this is the implicit label). Deliberately uses
+                    // a bare <input> instead of <Checkbox> because the
+                    // outer 44px tap-target wrapper IS the click surface,
+                    // and a visible label would duplicate the row name.
+                    // aria-label provides screen-reader text.
                     <label className="flex size-11 cursor-pointer items-center justify-center rounded-[var(--radius-sm)] hover:bg-[color:var(--color-surface)]">
                       <input
                         type="checkbox"
@@ -199,7 +205,7 @@ export function BulkInviteIsland({
                         onChange={() => toggle(it.profileId)}
                         disabled={pending}
                         aria-label={`Select ${it.displayName} for bulk invite`}
-                        className="size-5 accent-[color:var(--color-ink)]"
+                        className="size-5 cursor-pointer accent-[color:var(--color-ink)]"
                       />
                     </label>
                   )}

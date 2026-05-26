@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/FormField";
 import { Button } from "@/components/ui/Button";
 import { MonthYearPicker } from "@/components/ui/MonthYearPicker";
+import { Checkbox } from "@/components/ui/Checkbox";
 import {
   PasswordStrengthMeter,
   scorePassword,
@@ -326,51 +327,49 @@ export function SeekerSignUpForm({ professions }: Props = {}) {
                   key={purpose}
                   className="rounded-[var(--radius-sm)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-4"
                 >
-                  <label className="flex items-start gap-3 text-sm">
-                    <input
-                      type="checkbox"
-                      checked={state.consents[purpose]}
-                      disabled={required || pending}
-                      onChange={(e) =>
-                        setState({
-                          ...state,
-                          consents: {
-                            ...state.consents,
-                            [purpose]: e.target.checked,
-                          },
-                        })
-                      }
-                      className="mt-1 size-4"
-                    />
-                    <span>
-                      <span className="font-medium text-[color:var(--color-ink)]">
-                        {tPurposes(purpose)}
-                      </span>
-                      {required && (
-                        <span className="ml-2 inline-block rounded-[var(--radius-pill)] border border-[color:var(--color-brand)] bg-[color:var(--color-brand-tint)] px-2 py-0.5 text-[0.6rem] uppercase tracking-[0.18em] text-[color:var(--color-brand-strong)]">
-                          Required
+                  <Checkbox
+                    checked={state.consents[purpose]}
+                    disabled={required || pending}
+                    onChange={(v) =>
+                      setState({
+                        ...state,
+                        consents: {
+                          ...state.consents,
+                          [purpose]: v,
+                        },
+                      })
+                    }
+                    label={
+                      <>
+                        <span className="font-medium text-[color:var(--color-ink)]">
+                          {tPurposes(purpose)}
                         </span>
-                      )}
-                      {required && (
-                        <span className="mt-1 block text-xs text-[color:var(--color-ink-soft)]">
-                          {t("step2.required")}
-                        </span>
-                      )}
-                      {explainer && (
-                        <>
-                          <details className="mt-2 text-xs text-[color:var(--color-ink-soft)] md:hidden">
-                            <summary className="cursor-pointer select-none rounded-[var(--radius-pill)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface-sunk)] px-2.5 py-1 text-[0.7rem] uppercase tracking-[0.18em] text-[color:var(--color-ink)]">
-                              Read the full explainer
-                            </summary>
-                            <p className="mt-2">{explainer}</p>
-                          </details>
-                          <span className="mt-2 hidden text-xs text-[color:var(--color-ink-soft)] md:block">
-                            {explainer}
+                        {required && (
+                          <span className="ml-2 inline-block rounded-[var(--radius-pill)] border border-[color:var(--color-brand)] bg-[color:var(--color-brand-tint)] px-2 py-0.5 text-[0.6rem] uppercase tracking-[0.18em] text-[color:var(--color-brand-strong)]">
+                            Required
                           </span>
-                        </>
-                      )}
-                    </span>
-                  </label>
+                        )}
+                        {required && (
+                          <span className="mt-1 block text-xs text-[color:var(--color-ink-soft)]">
+                            {t("step2.required")}
+                          </span>
+                        )}
+                        {explainer && (
+                          <>
+                            <details className="mt-2 text-xs text-[color:var(--color-ink-soft)] md:hidden">
+                              <summary className="cursor-pointer select-none rounded-[var(--radius-pill)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface-sunk)] px-2.5 py-1 text-[0.7rem] uppercase tracking-[0.18em] text-[color:var(--color-ink)]">
+                                Read the full explainer
+                              </summary>
+                              <p className="mt-2">{explainer}</p>
+                            </details>
+                            <span className="mt-2 hidden text-xs text-[color:var(--color-ink-soft)] md:block">
+                              {explainer}
+                            </span>
+                          </>
+                        )}
+                      </>
+                    }
+                  />
                 </li>
               );
             })}
@@ -637,59 +636,43 @@ export function SeekerSignUpForm({ professions }: Props = {}) {
                       })
                     }
                   />
-                  <label className="inline-flex cursor-pointer items-center gap-2 text-sm md:col-span-2">
-                    <input
-                      type="checkbox"
-                      checked={state.academic.nsfas}
-                      onChange={(e) =>
-                        setState({
-                          ...state,
-                          academic: {
-                            ...state.academic,
-                            nsfas: e.target.checked,
-                          },
-                        })
-                      }
-                      className="size-4 cursor-pointer"
-                    />
-                    {t("step3.academic.nsfasLabel")}
-                  </label>
-                  <label className="inline-flex cursor-pointer items-start gap-2 text-sm md:col-span-2">
-                    <input
-                      type="checkbox"
-                      checked={state.academic.openToInternships}
-                      onChange={(e) =>
-                        setState({
-                          ...state,
-                          academic: {
-                            ...state.academic,
-                            openToInternships: e.target.checked,
-                          },
-                        })
-                      }
-                      className="mt-1 size-4 cursor-pointer"
-                    />
-                    <span>{t("step3.academic.openToInternships")}</span>
-                  </label>
-                  <label className="inline-flex cursor-pointer items-start gap-2 text-sm md:col-span-2">
-                    <input
-                      type="checkbox"
-                      checked={state.academic.openToGraduateProgrammes}
-                      onChange={(e) =>
-                        setState({
-                          ...state,
-                          academic: {
-                            ...state.academic,
-                            openToGraduateProgrammes: e.target.checked,
-                          },
-                        })
-                      }
-                      className="mt-1 size-4 cursor-pointer"
-                    />
-                    <span>
-                      {t("step3.academic.openToGraduateProgrammes")}
-                    </span>
-                  </label>
+                  <Checkbox
+                    className="md:col-span-2"
+                    align="center"
+                    checked={state.academic.nsfas}
+                    onChange={(v) =>
+                      setState({
+                        ...state,
+                        academic: { ...state.academic, nsfas: v },
+                      })
+                    }
+                    label={t("step3.academic.nsfasLabel")}
+                  />
+                  <Checkbox
+                    className="md:col-span-2"
+                    checked={state.academic.openToInternships}
+                    onChange={(v) =>
+                      setState({
+                        ...state,
+                        academic: { ...state.academic, openToInternships: v },
+                      })
+                    }
+                    label={t("step3.academic.openToInternships")}
+                  />
+                  <Checkbox
+                    className="md:col-span-2"
+                    checked={state.academic.openToGraduateProgrammes}
+                    onChange={(v) =>
+                      setState({
+                        ...state,
+                        academic: {
+                          ...state.academic,
+                          openToGraduateProgrammes: v,
+                        },
+                      })
+                    }
+                    label={t("step3.academic.openToGraduateProgrammes")}
+                  />
 
                   {/* Phase 7.5  work-availability while studying. The casual /
                       part-time path: students taking shifts (waitressing,
@@ -710,20 +693,17 @@ export function SeekerSignUpForm({ professions }: Props = {}) {
                         const checked = state.workAvailability.includes(kind);
                         return (
                           <li key={kind}>
-                            <label className="flex cursor-pointer items-start gap-2 text-xs">
-                              <input
-                                type="checkbox"
-                                checked={checked}
-                                onChange={(e) => {
-                                  const next = e.target.checked
-                                    ? Array.from(new Set([...state.workAvailability, kind]))
-                                    : state.workAvailability.filter((v) => v !== kind);
-                                  setState({ ...state, workAvailability: next });
-                                }}
-                                className="mt-0.5 size-4 cursor-pointer"
-                              />
-                              <span>{label}</span>
-                            </label>
+                            <Checkbox
+                              size="sm"
+                              checked={checked}
+                              onChange={(v) => {
+                                const next = v
+                                  ? Array.from(new Set([...state.workAvailability, kind]))
+                                  : state.workAvailability.filter((x) => x !== kind);
+                                setState({ ...state, workAvailability: next });
+                              }}
+                              label={label}
+                            />
                           </li>
                         );
                       })}

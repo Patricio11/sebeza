@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
 import { TextField } from "@/components/ui/FormField";
 import { Button } from "@/components/ui/Button";
+import { Checkbox } from "@/components/ui/Checkbox";
 import { signIn } from "@/lib/auth/actions";
 
 interface Props {
@@ -22,6 +23,7 @@ export function SignInForm({ next }: Props) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const [remember, setRemember] = useState(false);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -74,15 +76,15 @@ export function SignInForm({ next }: Props) {
       />
 
       <div className="flex flex-wrap items-center justify-between gap-3 text-sm">
-        <label className="inline-flex items-center gap-2 text-[color:var(--color-ink-soft)]">
-          <input
-            type="checkbox"
-            name="remember"
-            className="size-4 rounded border-[color:var(--color-hairline)]"
-            disabled={pending}
-          />
-          {t("common.rememberMe")}
-        </label>
+        <Checkbox
+          align="center"
+          size="sm"
+          name="remember"
+          checked={remember}
+          onChange={setRemember}
+          disabled={pending}
+          label={t("common.rememberMe")}
+        />
         <Link
           href="/forgot-password"
           className="text-[color:var(--color-brand)] hover:underline"
