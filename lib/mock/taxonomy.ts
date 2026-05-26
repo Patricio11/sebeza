@@ -103,6 +103,7 @@ export const PROFESSIONS: TaxonomyEntry[] = [
   // ── Tech + IT ────────────────────────────────────────────────────────
   { slug: "software-developer", label: "Software Developer" },
   { slug: "help-desk", label: "Help Desk / IT Support" },
+  { slug: "ux-ui-designer", label: "UX/UI Designer" },
   // ── Admin + office ───────────────────────────────────────────────────
   { slug: "call-centre-agent", label: "Call-Centre Agent" },
   { slug: "hr-practitioner", label: "HR Practitioner" },
@@ -189,6 +190,38 @@ export const PROFESSIONS: TaxonomyEntry[] = [
   { slug: "rental-agent", label: "Rental Agent" },
   { slug: "property-manager", label: "Property Manager" },
   { slug: "property-valuer", label: "Property Valuer" },
+  // ── Legal ────────────────────────────────────────────────────────────
+  // SA-specific note: "Attorney" (works through a law firm) is distinct
+  // from "Advocate" (bar member, takes briefs from attorneys). Both
+  // canonical. "Candidate Attorney" is the SA articled-clerk equivalent.
+  { slug: "attorney", label: "Attorney" },
+  { slug: "advocate", label: "Advocate" },
+  { slug: "candidate-attorney", label: "Candidate Attorney" },
+  { slug: "paralegal", label: "Paralegal" },
+  { slug: "legal-secretary", label: "Legal Secretary" },
+  // ── Insurance ────────────────────────────────────────────────────────
+  // SA: "Claims Assessor" is the standard term (USA: "Claims Adjuster").
+  { slug: "insurance-broker", label: "Insurance Broker" },
+  { slug: "claims-assessor", label: "Claims Assessor" },
+  { slug: "underwriter", label: "Underwriter" },
+  // ── Logistics + warehouse ────────────────────────────────────────────
+  { slug: "warehouse-picker", label: "Warehouse Picker / Packer" },
+  { slug: "stock-controller", label: "Stock Controller" },
+  { slug: "dispatch-clerk", label: "Dispatch Clerk" },
+  { slug: "logistics-coordinator", label: "Logistics Coordinator" },
+  { slug: "supply-chain-officer", label: "Supply Chain Officer" },
+  // ── Creative + media ─────────────────────────────────────────────────
+  { slug: "graphic-designer", label: "Graphic Designer" },
+  { slug: "photographer", label: "Photographer" },
+  { slug: "videographer", label: "Videographer" },
+  { slug: "copywriter", label: "Copywriter" },
+  { slug: "content-creator", label: "Content Creator" },
+  // ── Sales + marketing ────────────────────────────────────────────────
+  { slug: "sales-representative", label: "Sales Representative" },
+  { slug: "marketing-coordinator", label: "Marketing Coordinator" },
+  { slug: "social-media-manager", label: "Social Media Manager" },
+  { slug: "digital-marketer", label: "Digital Marketer" },
+  { slug: "brand-manager", label: "Brand Manager" },
 ];
 
 export const SKILLS: TaxonomyEntry[] = [
