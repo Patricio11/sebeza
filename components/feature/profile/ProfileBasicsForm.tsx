@@ -10,6 +10,7 @@ import { useState, useTransition } from "react";
 import { TextField, TextareaField, SelectField } from "@/components/ui/FormField";
 import { Button } from "@/components/ui/Button";
 import { Checkbox } from "@/components/ui/Checkbox";
+import { ComboboxField } from "@/components/ui/ComboboxField";
 import { ProfileCompleteness } from "@/components/ui/ProfileCompleteness";
 import { updateProfileBasics } from "@/lib/profile/actions";
 import { PROVINCES } from "@/lib/mock/taxonomy";
@@ -192,21 +193,18 @@ export function ProfileBasicsForm({
       <section id="professional">
         {professionalHeading}
         <div className="grid gap-5 md:grid-cols-2">
-          <SelectField
+          <ComboboxField
             id="profession"
             label={labels.profession}
             value={profession}
             name="profession"
-            onChange={(e) =>
-              setProfession((e.target as HTMLSelectElement).value)
-            }
-          >
-            {professions.map((p) => (
-              <option key={p.slug} value={p.slug}>
-                {p.label}
-              </option>
-            ))}
-          </SelectField>
+            onChange={setProfession}
+            options={professions.map((p) => ({
+              value: p.slug,
+              label: p.label,
+            }))}
+            placeholder="Search professions…"
+          />
           <SelectField
             id="seniority"
             label={labels.seniority}

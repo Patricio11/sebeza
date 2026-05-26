@@ -11,6 +11,7 @@ import {
 import { Button } from "@/components/ui/Button";
 import { MonthYearPicker } from "@/components/ui/MonthYearPicker";
 import { Checkbox } from "@/components/ui/Checkbox";
+import { ComboboxField } from "@/components/ui/ComboboxField";
 import {
   PasswordStrengthMeter,
   scorePassword,
@@ -404,22 +405,15 @@ export function SeekerSignUpForm({ professions }: Props = {}) {
 
       {state.step === 3 && (
         <div className="flex flex-col gap-6">
-          <SelectField
+          <ComboboxField
             id="profession"
             label={t("step3.professionLabel")}
             value={state.profession}
-            onChange={(e) =>
-              setState({ ...state, profession: e.target.value })
-            }
+            onChange={(v) => setState({ ...state, profession: v })}
+            options={PROFESSIONS.map((p) => ({ value: p.label }))}
+            placeholder="Search professions…"
             required
-          >
-            <option value="">Select…</option>
-            {PROFESSIONS.map((p) => (
-              <option key={p.slug} value={p.label}>
-                {p.label}
-              </option>
-            ))}
-          </SelectField>
+          />
           <SelectField
             id="province"
             label={t("step3.locationLabel")}

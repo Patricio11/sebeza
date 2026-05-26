@@ -162,6 +162,13 @@
       "when": 1779940000000,
       "tag": "0022_phase9_14_profile_verification_backfill",
       "breakpoints": false
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1779950000000,
+      "tag": "0023_expand_professions_taxonomy",
+      "breakpoints": false
     }
   ]
 }

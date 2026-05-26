@@ -84,20 +84,92 @@ export const PROVINCES: Province[] = [
 ];
 
 // Seed only  extended in Phase 7 by admin taxonomy management.
+// Sebenza profession catalogue. SA-grounded, organised by sector below for
+// readability  the dropdown sorts/filters at render time so the file order
+// only matters for grep + diffs. Admins can extend this at runtime via
+// `/admin/taxonomy`  any addition there is persisted in the `professions`
+// table independently of this file.
 export const PROFESSIONS: TaxonomyEntry[] = [
+  // ── Hospitality ──────────────────────────────────────────────────────
   { slug: "chef", label: "Chef" },
+  { slug: "cook", label: "Cook" },
+  { slug: "kitchen-porter", label: "Kitchen Porter" },
+  { slug: "waitstaff", label: "Waitstaff" },
+  { slug: "barista", label: "Barista" },
+  { slug: "bartender", label: "Bartender" },
+  { slug: "restaurant-manager", label: "Restaurant Manager" },
+  { slug: "hotel-receptionist", label: "Hotel Receptionist" },
+  { slug: "housekeeping", label: "Housekeeping Attendant" },
+  // ── Tech + IT ────────────────────────────────────────────────────────
   { slug: "software-developer", label: "Software Developer" },
   { slug: "help-desk", label: "Help Desk / IT Support" },
+  // ── Admin + office ───────────────────────────────────────────────────
   { slug: "call-centre-agent", label: "Call-Centre Agent" },
   { slug: "hr-practitioner", label: "HR Practitioner" },
+  { slug: "receptionist", label: "Receptionist" },
+  { slug: "admin-clerk", label: "Administrative Clerk" },
+  { slug: "personal-assistant", label: "Personal Assistant" },
+  // ── Finance ──────────────────────────────────────────────────────────
+  { slug: "accountant", label: "Accountant" },
+  { slug: "bookkeeper", label: "Bookkeeper" },
+  // ── Trades + construction ────────────────────────────────────────────
   { slug: "electrician", label: "Electrician" },
   { slug: "plumber", label: "Plumber" },
-  { slug: "accountant", label: "Accountant" },
-  { slug: "nurse", label: "Nurse" },
-  { slug: "driver", label: "Driver" },
+  { slug: "bricklayer", label: "Bricklayer" },
+  { slug: "carpenter", label: "Carpenter" },
+  { slug: "painter", label: "Painter" },
+  { slug: "tiler", label: "Tiler" },
+  { slug: "roofer", label: "Roofer" },
+  { slug: "plasterer", label: "Plasterer" },
   { slug: "boilermaker", label: "Boilermaker" },
   { slug: "welder", label: "Welder" },
+  // ── Automotive + technical ───────────────────────────────────────────
+  { slug: "mechanic", label: "Mechanic" },
+  { slug: "panel-beater", label: "Panel Beater" },
+  { slug: "aircon-technician", label: "Aircon Technician" },
+  { slug: "fridge-technician", label: "Fridge Technician" },
+  // ── Healthcare ───────────────────────────────────────────────────────
+  { slug: "nurse", label: "Nurse" },
+  { slug: "caregiver", label: "Caregiver" },
+  { slug: "paramedic", label: "Paramedic" },
+  { slug: "pharmacy-assistant", label: "Pharmacy Assistant" },
+  { slug: "dental-assistant", label: "Dental Assistant" },
+  // ── Education ────────────────────────────────────────────────────────
   { slug: "teacher", label: "Teacher" },
+  { slug: "tutor", label: "Tutor" },
+  { slug: "ecd-practitioner", label: "ECD Practitioner" },
+  { slug: "lecturer", label: "Lecturer" },
+  { slug: "sports-coach", label: "Sports Coach" },
+  // ── Transport ────────────────────────────────────────────────────────
+  { slug: "driver", label: "Driver" },
+  { slug: "truck-driver", label: "Truck Driver (long-haul)" },
+  { slug: "delivery-driver", label: "Delivery Driver" },
+  { slug: "taxi-driver", label: "Taxi Driver" },
+  { slug: "forklift-operator", label: "Forklift Operator" },
+  { slug: "crane-operator", label: "Crane Operator" },
+  // ── Retail + service ─────────────────────────────────────────────────
+  { slug: "retail-assistant", label: "Retail Assistant" },
+  { slug: "cashier", label: "Cashier" },
+  { slug: "store-manager", label: "Store Manager" },
+  { slug: "visual-merchandiser", label: "Visual Merchandiser" },
+  // ── Security ─────────────────────────────────────────────────────────
+  { slug: "security-officer", label: "Security Officer" },
+  { slug: "armed-response", label: "Armed Response Officer" },
+  { slug: "cctv-operator", label: "CCTV Operator" },
+  // ── Cleaning + facilities ────────────────────────────────────────────
+  { slug: "domestic-worker", label: "Domestic Worker" },
+  { slug: "cleaner", label: "Cleaner" },
+  { slug: "caretaker", label: "Caretaker" },
+  { slug: "gardener", label: "Gardener" },
+  // ── Beauty + wellness ────────────────────────────────────────────────
+  { slug: "hairstylist", label: "Hairstylist" },
+  { slug: "barber", label: "Barber" },
+  { slug: "beauty-therapist", label: "Beauty Therapist" },
+  { slug: "nail-technician", label: "Nail Technician" },
+  // ── Agriculture + mining ─────────────────────────────────────────────
+  { slug: "farm-worker", label: "Farm Worker" },
+  { slug: "miner", label: "Miner" },
+  { slug: "mine-safety-officer", label: "Mine Safety Officer" },
 ];
 
 export const SKILLS: TaxonomyEntry[] = [

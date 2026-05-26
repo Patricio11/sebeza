@@ -20,6 +20,7 @@ import {
   SelectField,
 } from "@/components/ui/FormField";
 import { Button } from "@/components/ui/Button";
+import { ComboboxField } from "@/components/ui/ComboboxField";
 import { Lock } from "lucide-react";
 import type { TaxonomyEntry, Province } from "@/lib/mock/types";
 
@@ -166,22 +167,20 @@ export function VacancyForm({
           hint="The label your team sees on the vacancy list."
         />
         <div className="grid gap-5 md:grid-cols-2">
-          <SelectField
+          <ComboboxField
             id="profession"
             name="profession"
             label="Profession"
             required
             value={profession}
-            onChange={(e) => setProfession(e.target.value)}
+            onChange={setProfession}
             disabled={pending}
-          >
-            <option value="">Select…</option>
-            {professions.map((p) => (
-              <option key={p.slug} value={p.slug}>
-                {p.label}
-              </option>
-            ))}
-          </SelectField>
+            options={professions.map((p) => ({
+              value: p.slug,
+              label: p.label,
+            }))}
+            placeholder="Search professions…"
+          />
           <SelectField
             id="province"
             name="province"
