@@ -120,14 +120,6 @@ export function SearchFilters({ defaultFilters, query }: Props) {
         />
       </FilterGroup>
 
-      <FilterGroup label={t("verification")}>
-        <ChipRow
-          options={VERIFICATIONS.map((v) => ({ value: v, label: tVer(v) }))}
-          value={defaultFilters.verification ?? null}
-          onChange={(v) => update({ verification: (v as VerificationStatus) || null })}
-        />
-      </FilterGroup>
-
       <FilterGroup label={t("nationality")}>
         <label className="flex items-start gap-2 text-sm">
           <input
@@ -143,6 +135,14 @@ export function SearchFilters({ defaultFilters, query }: Props) {
             </span>
           </span>
         </label>
+      </FilterGroup>
+
+      <FilterGroup label={t("verification")}>
+        <ChipRow
+          options={VERIFICATIONS.map((v) => ({ value: v, label: tVer(v) }))}
+          value={defaultFilters.verification ?? null}
+          onChange={(v) => update({ verification: (v as VerificationStatus) || null })}
+        />
       </FilterGroup>
 
       {/* Phase 6: scope to seekers in Student mode who opted in to the
