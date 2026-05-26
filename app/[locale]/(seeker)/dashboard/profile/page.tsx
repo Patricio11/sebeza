@@ -20,6 +20,7 @@ import { NationalIdControls } from "@/components/feature/profile/NationalIdContr
 import { KycPanel } from "@/components/feature/profile/KycPanel";
 import { getSetting } from "@/lib/admin/settings";
 import { AvatarEditor } from "@/components/feature/profile/AvatarEditor";
+import { ShareProfileLink } from "@/components/feature/profile/ShareProfileLink";
 import { signedPhotoUrl } from "@/lib/storage/signed";
 import { isStorageConfigured } from "@/lib/storage/supabase";
 import {
@@ -112,6 +113,10 @@ export default async function ProfileEditorPage({
         </aside>
 
         <div className="space-y-12">
+          {/* Share-your-profile  sits above the editorial sections so
+              the seeker can grab their public URL without scrolling. */}
+          <ShareProfileLink handle={me.handle} />
+
           {/* Avatar  sits above the editorial numbered sections */}
           <section id="avatar" aria-labelledby="avatar-h">
             <header className="mb-5 border-b-2 border-[color:var(--color-ink)] pb-3">
