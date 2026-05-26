@@ -37,7 +37,7 @@ import type {
   AcademicProfile,
   WorkAvailabilityKind,
 } from "@/lib/mock/types";
-import { INSTITUTIONS } from "@/lib/mock/taxonomy";
+import { INSTITUTIONS, PROVINCES } from "@/lib/mock/taxonomy";
 import { randomUUID } from "node:crypto";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -124,11 +124,24 @@ export async function searchProfilesQuery(
     );
   }
   if (filters.province) {
-    // Filters arrive as slugs (e.g. "western-cape") but the column stores
-    // the human label ("Western Cape"). Use ILIKE for case-insensitive
-    // hyphen-tolerant match.
-    const label = filters.province.replace(/-/g, " ");
-    conditions.push(sql`lower(p.province) = lower(${label})`);
+    // Filters arrive as slugs (e.g. "western-cape", "kwazulu-natal") but
+    // the column stores the human label ("Western Cape", "KwaZulu-Natal").
+    // Use the PROVINCES taxonomy as the canonical map  the naive
+    // `.replace(/-/g, " ")` transform broke for KwaZulu-Natal whose name
+    // legitimately contains a hyphen ("kwazulu natal" matched nothing).
+    const canonical = PROVINCES.find(
+      (p) =>
+        p.slug === filters.province ||
+        p.label.toLowerCase() === filters.province?.toLowerCase(),
+    );
+    if (canonical) {
+      conditions.push(sql`lower(p.province) = lower(${canonical.label})`);
+    } else {
+      // Unknown slug  fall back to the old behaviour so we don't
+      // silently widen the result set.
+      const fallback = filters.province.replace(/-/g, " ");
+      conditions.push(sql`lower(p.province) = lower(${fallback})`);
+    }
   }
   if (filters.profession) {
     // Exact profession-label filter (case-insensitive). Used by the

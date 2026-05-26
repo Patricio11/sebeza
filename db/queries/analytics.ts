@@ -319,6 +319,15 @@ export interface HeatmapCell {
  */
 export async function supplyHeatmapQuery(): Promise<HeatmapCell[]> {
   const db = getDb();
+  // JOIN to the `professions` taxonomy on a case-insensitive label
+  // match so casing/whitespace drift in `profiles.profession` doesn't
+  // produce duplicate columns (e.g. "Software Developer" + "Software
+  // developer" being grouped separately). When the profile's profession
+  // matches a known taxonomy entry, COALESCE returns the canonical
+  // label; when there's no match (orphan strings), we fall through to
+  // the raw value so the data isn't hidden. The COUNT is now
+  // case-insensitive at the profession dimension, so the heatmap cell
+  // matches what /search returns when the cell is clicked.
   const rows = unwrap<{
     province: string;
     profession: string;
@@ -327,14 +336,15 @@ export async function supplyHeatmapQuery(): Promise<HeatmapCell[]> {
   }>(
     await db.execute(sql`
       SELECT
-        province,
-        profession,
+        p.province,
+        COALESCE(prof.label, p.profession) AS profession,
         COUNT(*)::int AS supply,
-        COALESCE(AVG(sebenza_freshness_confidence(status_confirmed_at)), 0)::numeric AS freshness
-      FROM profiles
-      WHERE deleted_at IS NULL
-      GROUP BY province, profession
-      ORDER BY province ASC, supply DESC
+        COALESCE(AVG(sebenza_freshness_confidence(p.status_confirmed_at)), 0)::numeric AS freshness
+      FROM profiles p
+      LEFT JOIN professions prof ON lower(prof.label) = lower(p.profession)
+      WHERE p.deleted_at IS NULL
+      GROUP BY p.province, COALESCE(prof.label, p.profession)
+      ORDER BY p.province ASC, supply DESC
     `),
   );
 
