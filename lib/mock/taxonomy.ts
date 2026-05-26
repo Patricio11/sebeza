@@ -170,6 +170,16 @@ export const PROFESSIONS: TaxonomyEntry[] = [
   { slug: "farm-worker", label: "Farm Worker" },
   { slug: "miner", label: "Miner" },
   { slug: "mine-safety-officer", label: "Mine Safety Officer" },
+  // ── Property + real estate ───────────────────────────────────────────
+  // "Estate Agent" is the colloquial SA term. The Property Practitioners
+  // Act 2019 retitles the legal designation to "Property Practitioner"
+  // but everyday usage stays "Estate Agent"  match user intent. If a
+  // user needs the legal title, admin can add it via /admin/taxonomy
+  // or the 9.15 suggestion flow.
+  { slug: "estate-agent", label: "Estate Agent" },
+  { slug: "rental-agent", label: "Rental Agent" },
+  { slug: "property-manager", label: "Property Manager" },
+  { slug: "property-valuer", label: "Property Valuer" },
 ];
 
 export const SKILLS: TaxonomyEntry[] = [
