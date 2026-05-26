@@ -1,3 +1,4 @@
+import { Fragment } from "react";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
@@ -80,6 +81,21 @@ export default async function SearchPage({ params, searchParams }: SearchPagePro
   const locationLabel = city?.label ?? province?.label ?? "South Africa";
   const nfmt = new Intl.NumberFormat(locale);
 
+  // Phase 9.14.x  citizen split breakdown on the displayed slice.
+  // Only meaningful when the "Highlight SA citizens" toggle is ON AND
+  // both groups are present  otherwise the split is either vacuous
+  // (all citizens) or a non-grouping (no citizens to highlight).
+  // Wording follows the Citizen-Visibility Rule: "from other
+  // nationalities" instead of clinical "non-citizens" / "foreign
+  // nationals". Counts are over the displayed window (result.profiles),
+  // not the full match  hence "shown first" framing.
+  const citizenCount = result.profiles.filter((p) => p.isCitizen).length;
+  const otherCount = result.profiles.length - citizenCount;
+  const showCitizenSplit =
+    (filters.highlightCitizens ?? false) &&
+    citizenCount > 0 &&
+    otherCount > 0;
+
   const inferredRole =
     PROFESSIONS.find(
       (p) =>
@@ -135,6 +151,22 @@ export default async function SearchPage({ params, searchParams }: SearchPagePro
                 Ranked by skill match, status freshness and completeness. Stale
                 statuses fall to the bottom  honestly.
               </p>
+
+              {/* Phase 9.14.x  citizen split when the highlight toggle is on. */}
+              {showCitizenSplit && (
+                <p
+                  className="mt-3 inline-flex flex-wrap items-baseline gap-2 rounded-[var(--radius-pill)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] px-3 py-1.5 text-xs text-[color:var(--color-ink-soft)]"
+                  aria-label="South African citizen split"
+                >
+                  <span className="font-medium text-[color:var(--color-ink)]">
+                    {nfmt.format(citizenCount)} SA citizens shown first
+                  </span>
+                  <span aria-hidden="true">·</span>
+                  <span>
+                    then {nfmt.format(otherCount)} from other nationalities
+                  </span>
+                </p>
+              )}
             </div>
           </header>
 
@@ -151,15 +183,40 @@ export default async function SearchPage({ params, searchParams }: SearchPagePro
               ) : (
                 <>
                   <ol className="border-t border-[color:var(--color-hairline)]">
-                    {result.profiles.map((p) => (
-                      <li key={p.handle}>
-                        <TalentRosterItem
-                          profile={p}
-                          locale={locale}
-                          highlightCitizen={filters.highlightCitizens}
-                        />
-                      </li>
-                    ))}
+                    {result.profiles.map((p, i) => {
+                      const prev = result.profiles[i - 1];
+                      const isTransition =
+                        showCitizenSplit && !!prev?.isCitizen && !p.isCitizen;
+                      return (
+                        <Fragment key={p.handle}>
+                          {isTransition && (
+                            <li
+                              role="presentation"
+                              className="my-2 flex items-center gap-3 px-1"
+                            >
+                              <span
+                                aria-hidden="true"
+                                className="h-px flex-1 bg-[color:var(--color-hairline)]"
+                              />
+                              <span className="rounded-[var(--radius-pill)] border border-[color:var(--color-hairline)] bg-[color:var(--color-paper)] px-3 py-1 text-[0.7rem] uppercase tracking-[0.18em] text-[color:var(--color-ink-soft)]">
+                                {nfmt.format(otherCount)} from other nationalities below
+                              </span>
+                              <span
+                                aria-hidden="true"
+                                className="h-px flex-1 bg-[color:var(--color-hairline)]"
+                              />
+                            </li>
+                          )}
+                          <li>
+                            <TalentRosterItem
+                              profile={p}
+                              locale={locale}
+                              highlightCitizen={filters.highlightCitizens}
+                            />
+                          </li>
+                        </Fragment>
+                      );
+                    })}
                   </ol>
 
                   {/* Honest end-state. Real pagination is queued for Phase 8
