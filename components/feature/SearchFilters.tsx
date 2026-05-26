@@ -121,12 +121,12 @@ export function SearchFilters({ defaultFilters, query }: Props) {
       </FilterGroup>
 
       <FilterGroup label={t("nationality")}>
-        <label className="flex items-start gap-2 text-sm">
+        <label className="flex cursor-pointer items-start gap-2 text-sm">
           <input
             type="checkbox"
             checked={defaultFilters.highlightCitizens ?? false}
             onChange={(e) => update({ highlightCitizens: e.target.checked })}
-            className="mt-1"
+            className="mt-1 cursor-pointer"
           />
           <span>
             {t("highlightCitizens")}
@@ -149,14 +149,14 @@ export function SearchFilters({ defaultFilters, query }: Props) {
           internship or graduate-programme intake. Strictly opt-in by the
           seeker; never default; never inferred. */}
       <FilterGroup label="Early-career opt-ins">
-        <label className="flex items-start gap-2 text-sm">
+        <label className="flex cursor-pointer items-start gap-2 text-sm">
           <input
             type="checkbox"
             checked={defaultFilters.openToInternships ?? false}
             onChange={(e) =>
               update({ openToInternships: e.target.checked || undefined })
             }
-            className="mt-1"
+            className="mt-1 cursor-pointer"
           />
           <span>
             Open to internships
@@ -165,7 +165,7 @@ export function SearchFilters({ defaultFilters, query }: Props) {
             </span>
           </span>
         </label>
-        <label className="mt-3 flex items-start gap-2 text-sm">
+        <label className="mt-3 flex cursor-pointer items-start gap-2 text-sm">
           <input
             type="checkbox"
             checked={defaultFilters.openToGraduateProgrammes ?? false}
@@ -174,7 +174,7 @@ export function SearchFilters({ defaultFilters, query }: Props) {
                 openToGraduateProgrammes: e.target.checked || undefined,
               })
             }
-            className="mt-1"
+            className="mt-1 cursor-pointer"
           />
           <span>
             Open to graduate programmes
@@ -191,7 +191,7 @@ export function SearchFilters({ defaultFilters, query }: Props) {
           return (
             <label
               key={kind}
-              className="mt-2 flex items-start gap-2 text-sm first:mt-0"
+              className="mt-2 flex cursor-pointer items-start gap-2 text-sm first:mt-0"
             >
               <input
                 type="checkbox"
@@ -203,7 +203,7 @@ export function SearchFilters({ defaultFilters, query }: Props) {
                     : cur.filter((v) => v !== kind);
                   update({ availableFor: next.length > 0 ? next : undefined });
                 }}
-                className="mt-1"
+                className="mt-1 cursor-pointer"
               />
               <span>{WORK_AVAILABILITY_LABEL[kind]}</span>
             </label>
@@ -316,7 +316,7 @@ function ChipRow({
             type="button"
             onClick={() => onChange(active ? null : o.value)}
             className={cn(
-              "rounded-[var(--radius-pill)] border px-3 py-1 text-xs capitalize transition-colors",
+              "cursor-pointer rounded-[var(--radius-pill)] border px-3 py-1 text-xs capitalize transition-colors",
               active
                 ? "border-[color:var(--color-ink)] bg-[color:var(--color-ink)] text-[color:var(--color-paper)]"
                 : "border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] text-[color:var(--color-ink-soft)] hover:border-[color:var(--color-ink)]",
