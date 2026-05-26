@@ -310,6 +310,31 @@ export const profiles = pgTable("profiles", {
     .array()
     .notNull()
     .default(sql`'{}'::work_availability_kind[]`),
+  /**
+   * DISPLAY ONLY  never gate access on this column.
+   *
+   * Derived from `qualifications.verification` via the Phase 9.14
+   * roll-up (`lib/profile/verification-rollup.ts`)  the SOLE writer.
+   * The roll-up runs after every qualification approve / reject /
+   * upload / delete, and on the one-time backfill migration `0022`.
+   *
+   * UX contract:
+   *   verified   ⇔ ≥1 qualification.verification = 'verified'
+   *   pending    ⇔ no verified, but ≥1 pending
+   *   unverified ⇔ otherwise
+   *   rejected   ⇔ NEVER auto-applied (per-doc rejection isn't a
+   *                per-seeker judgement; Verification-Honesty Rule)
+   *
+   * If a future Server Action needs to gate on "this seeker has
+   * documented evidence of X", DO NOT read `profiles.verification`
+   * here  query `qualifications.verification` directly so the gate
+   * names exactly what it's checking. Re-coupling display to access
+   * via this column makes the system harder to reason about.
+   *
+   * Compliance assertion `profile-verification-matches-rollup` on
+   * `/api/admin/outcomes-compliance` is the structural pin against
+   * the roll-up drifting from this column.
+   */
   verification: verificationStatus("verification").notNull().default("unverified"),
   completeness: integer("completeness").notNull().default(0),
   /**
