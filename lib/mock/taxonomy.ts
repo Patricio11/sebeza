@@ -166,6 +166,15 @@ export const PROFESSIONS: TaxonomyEntry[] = [
   { slug: "barber", label: "Barber" },
   { slug: "beauty-therapist", label: "Beauty Therapist" },
   { slug: "nail-technician", label: "Nail Technician" },
+  { slug: "massage-therapist", label: "Massage Therapist" },
+  { slug: "spa-therapist", label: "Spa Therapist" },
+  { slug: "aesthetician", label: "Aesthetician" },
+  { slug: "makeup-artist", label: "Makeup Artist" },
+  // ── Fitness + sport ──────────────────────────────────────────────────
+  { slug: "personal-trainer", label: "Personal Trainer" },
+  { slug: "fitness-instructor", label: "Fitness Instructor" },
+  { slug: "yoga-instructor", label: "Yoga Instructor" },
+  { slug: "pilates-instructor", label: "Pilates Instructor" },
   // ── Agriculture + mining ─────────────────────────────────────────────
   { slug: "farm-worker", label: "Farm Worker" },
   { slug: "miner", label: "Miner" },

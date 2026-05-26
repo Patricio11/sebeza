@@ -183,6 +183,13 @@
       "when": 1779970000000,
       "tag": "0025_expand_professions_property",
       "breakpoints": false
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1779980000000,
+      "tag": "0026_expand_professions_spa_fitness",
+      "breakpoints": false
     }
   ]
 }
