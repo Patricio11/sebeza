@@ -56,8 +56,8 @@ export function ReportInviteForm({ token, orgName }: Props) {
           Thanks for telling us. A Sebenza administrator will review
           {" "}
           {orgName}
-          's invitation activity. If it looks like email harvesting or
-          unsolicited outreach, we'll suspend their account and notify
+          &rsquo;s invitation activity. If it looks like email harvesting or
+          unsolicited outreach, we&rsquo;ll suspend their account and notify
           you at the email this invitation was sent to.
         </p>
       </div>
@@ -72,14 +72,14 @@ export function ReportInviteForm({ token, orgName }: Props) {
           aria-hidden="true"
         />
         <div className="text-sm text-[color:var(--color-ink-soft)]">
-          You're about to report an invitation from{" "}
+          You&rsquo;re about to report an invitation from{" "}
           <strong className="text-[color:var(--color-ink)]">{orgName}</strong>.
         </div>
       </div>
 
       <label className="block">
         <span className="block text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--color-ink-soft)]">
-          What's wrong? (optional)
+          What&rsquo;s wrong? (optional)
         </span>
         <textarea
           value={reason}
@@ -91,7 +91,7 @@ export function ReportInviteForm({ token, orgName }: Props) {
           disabled={pending}
         />
         <p className="mt-1 text-[0.7rem] text-[color:var(--color-ink-soft)]">
-          {reason.length}/500. You don't have to give a reason.
+          {reason.length}/500. You don&rsquo;t have to give a reason.
         </p>
       </label>
 

@@ -52,8 +52,8 @@ export function DeclineInvitationForm({ token, orgName }: Props) {
           Decline recorded
         </div>
         <p className="mt-2 text-sm text-[color:var(--color-ink-soft)]">
-          Thanks for telling us. We'll let {orgName} know, and we'll block
-          any new invitations from them to this email for at least 90 days.
+          Thanks for telling us. We&rsquo;ll let {orgName} know, and we&rsquo;ll
+          block any new invitations from them to this email for at least 90 days.
         </p>
       </div>
     );

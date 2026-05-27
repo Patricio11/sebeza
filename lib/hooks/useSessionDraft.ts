@@ -79,19 +79,19 @@ export function useSessionDraft<TPersistable>(
 ): UseSessionDraftReturn {
   const { state, onRestore, enabled = true } = options;
   const [hydrated, setHydrated] = useState(false);
-  // Capture the callback in a ref so the restore-effect doesn't
-  // re-run when the caller passes an inline arrow function each
-  // render. The effect cares about `key + hydrated`, not the
-  // callback identity.
+  // Capture the initial onRestore + enabled values via useRef. We
+  // never re-assign during render  the restore effect fires once
+  // and only cares about the values at mount time. This satisfies
+  // the react-hooks/refs lint rule (no ref-writes outside of effects /
+  // event handlers) while preserving the correct semantics: a stable
+  // restore callback + a mount-time restoration decision.
   const onRestoreRef = useRef(onRestore);
-  onRestoreRef.current = onRestore;
-  const enabledRef = useRef(enabled);
-  enabledRef.current = enabled;
+  const enabledAtMountRef = useRef(enabled);
 
   // Restore once on mount.
   useEffect(() => {
     if (hydrated) return;
-    if (!enabledRef.current) {
+    if (!enabledAtMountRef.current) {
       setHydrated(true);
       return;
     }
@@ -110,16 +110,18 @@ export function useSessionDraft<TPersistable>(
     setHydrated(true);
   }, [hydrated, key]);
 
-  // Persist on every state change once hydrated.
+  // Persist on every state change once hydrated. `enabled` is in the
+  // dep array so a runtime toggle (e.g. caller flips to false to
+  // stop persisting mid-flow) takes effect immediately.
   useEffect(() => {
     if (!hydrated) return;
-    if (!enabledRef.current) return;
+    if (!enabled) return;
     try {
       window.sessionStorage.setItem(key, JSON.stringify(state));
     } catch {
       // ignore: quota / disabled storage
     }
-  }, [hydrated, key, state]);
+  }, [hydrated, key, state, enabled]);
 
   function clear() {
     try {

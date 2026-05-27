@@ -93,7 +93,7 @@ export function InviteSeekerForm({ professions }: Props) {
         </h2>
         <p className="mt-1 text-sm text-[color:var(--color-ink-soft)]">
           Send a single Civic-Editorial-styled email. The recipient lands
-          on a tailored sign-up page; once they finish, you'll see them on
+          on a tailored sign-up page; once they finish, you&rsquo;ll see them on
           your Joined list and can extend a vacancy invitation from there.
         </p>
       </header>
@@ -150,7 +150,7 @@ export function InviteSeekerForm({ professions }: Props) {
           />
           <p className="mt-1 text-[0.7rem] text-[color:var(--color-ink-soft)]">
             {note.length}/200. Rendered verbatim in the email + flagged
-            as personal information in your org's audit log.
+            as personal information in your org&rsquo;s audit log.
           </p>
         </label>
       </div>

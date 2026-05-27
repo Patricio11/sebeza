@@ -10,7 +10,7 @@
  */
 
 import { useState, useTransition } from "react";
-import { RotateCw, Send, X } from "lucide-react";
+import { Send, X } from "lucide-react";
 import {
   resendSeekerInvitation,
   withdrawSeekerInvitation,

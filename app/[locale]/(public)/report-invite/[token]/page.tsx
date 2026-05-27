@@ -41,11 +41,11 @@ export default async function ReportInvitePage({
           Report an invitation
         </p>
         <h1 className="mt-2 font-display text-4xl text-[color:var(--color-ink)] md:text-5xl">
-          Tell us what's wrong
+          Tell us what&rsquo;s wrong
         </h1>
         <p className="mt-4 text-base text-[color:var(--color-ink-soft)]">
           A Sebenza administrator will review the report. We may suspend
-          the inviting organisation's account if it looks like email
+          the inviting organisation&rsquo;s account if it looks like email
           harvesting or other abuse.
         </p>
 
@@ -55,9 +55,9 @@ export default async function ReportInvitePage({
           ) : (
             <div className="rounded-[var(--radius-md)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-5 text-sm text-[color:var(--color-ink-soft)]">
               <p>
-                We couldn't verify the invitation link  it may have
+                We couldn&rsquo;t verify the invitation link  it may have
                 expired or already been handled. If you keep receiving
-                invitations from someone you don't know, email
+                invitations from someone you don&rsquo;t know, email
                 support@sebenza.co.za directly.
               </p>
               <p className="mt-3">

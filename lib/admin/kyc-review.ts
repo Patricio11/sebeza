@@ -33,7 +33,7 @@
 
 import { getDb } from "@/db/client";
 import * as schema from "@/db/schema";
-import { and, desc, eq, isNull, isNotNull, sql } from "drizzle-orm";
+import { and, desc, eq, isNull, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
