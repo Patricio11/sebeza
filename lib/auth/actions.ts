@@ -820,8 +820,58 @@ export async function regrantConsent(
 // Helpers
 // ─────────────────────────────────────────────────────────────────────────────
 
+/**
+ * Convert an arbitrary caught error into a user-facing string.
+ *
+ * IMPORTANT: never return the raw SQL or stack trace to the
+ * caller  it leaks schema details + scares users with text they
+ * can't act on. Instead, log the full error (including
+ * `.cause` which Drizzle uses to attach the underlying Postgres
+ * error) server-side, and surface a generic message.
+ *
+ * Patterns we surface specifically:
+ *   - Drizzle `DrizzleQueryError`s where `.message` starts with
+ *     "Failed query"  the SQL itself is the message, which is
+ *     useless on the client. We collapse to a generic phrase +
+ *     server-log the cause so an operator can debug.
+ *   - Known Postgres error codes (unique violation, FK violation)
+ *     get slightly more actionable text.
+ */
 function toMessage(e: unknown): string {
-  if (e instanceof Error) return e.message || "Sign-up failed. Please try again.";
+  // Log the full error tree for operator diagnostics. `cause` is
+  // where Drizzle stashes the underlying Postgres error  pg-protocol
+  // sets `code`, `detail`, `constraint` on it.
+  // eslint-disable-next-line no-console
+  console.error("[signUpSeeker / acceptSeekerInvitation] error:", e);
+  if (e instanceof Error && e.cause) {
+    // eslint-disable-next-line no-console
+    console.error("[signUpSeeker / acceptSeekerInvitation] cause:", e.cause);
+  }
+
+  const cause = e instanceof Error ? e.cause : undefined;
+  const causeCode =
+    cause && typeof cause === "object" && "code" in cause
+      ? String((cause as { code?: unknown }).code ?? "")
+      : "";
+
+  // 23505 = unique_violation, 23503 = foreign_key_violation,
+  // 23502 = not_null_violation, 42703 = undefined_column
+  if (causeCode === "23505") {
+    return "An account with this email already exists. Try signing in instead.";
+  }
+  if (causeCode === "42703") {
+    return "The database is missing a column the app expects. An administrator needs to run `npm run db:migrate`.";
+  }
+  if (causeCode === "23502" || causeCode === "23503") {
+    return "Sign-up couldn't complete because a required field was missing or pointed at something we don't know about. Please refresh and try again.";
+  }
+
+  // Generic Drizzle "Failed query: ..." messages leak SQL  collapse.
+  if (e instanceof Error && e.message.startsWith("Failed query")) {
+    return "Sign-up failed. Please refresh and try again, or contact support if the problem persists.";
+  }
+
+  if (e instanceof Error && e.message) return e.message;
   return "Sign-up failed. Please try again.";
 }
 
