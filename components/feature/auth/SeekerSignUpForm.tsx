@@ -20,7 +20,7 @@ import {
   NQF_LEVELS,
 } from "@/lib/mock/taxonomy";
 import { validateDob } from "@/lib/auth/id-validation";
-import { COUNTRIES } from "@/lib/taxonomy/countries";
+import { COUNTRIES, flagEmoji } from "@/lib/taxonomy/countries";
 
 interface ProfessionOption {
   slug: string;
@@ -302,24 +302,29 @@ export function SeekerSignUpForm({ professions }: Props = {}) {
               so analytics + the Citizen-Visibility Rule have a real
               signal from day one. ID / passport NUMBERS are NOT asked
               for here  the user adds them later from /dashboard/profile
-              when they're ready to be KYC-verified. */}
-          <SelectField
+              when they're ready to be KYC-verified.
+
+              Searchable ComboboxField (191 countries is too many for a
+              native <select>); flag emoji renders in a `leading` slot
+              that's excluded from the type-to-filter rank, so "south"
+              still ranks "South Africa" at idx 0. SA + SADC are pinned
+              at the head of the COUNTRIES array so they appear first
+              when the search box is empty. */}
+          <ComboboxField
             id="nationality"
             label="Nationality"
             value={state.nationality}
-            onChange={(e) =>
-              setState({ ...state, nationality: e.target.value })
-            }
+            onChange={(v) => setState({ ...state, nationality: v })}
+            options={COUNTRIES.map((c) => ({
+              value: c.code,
+              label: c.label,
+              leading: flagEmoji(c.code),
+            }))}
+            placeholder="Search countries…"
+            helpText="Used for analytics + to highlight South African candidates in employer searches. You can change this any time."
             required
-            hint="Used for analytics + to highlight South African candidates in employer searches. You can change this any time."
             disabled={pending}
-          >
-            {COUNTRIES.map((c) => (
-              <option key={c.code} value={c.code}>
-                {c.label}
-              </option>
-            ))}
-          </SelectField>
+          />
           <div className="flex flex-col gap-1">
             <TextField
               id="password"

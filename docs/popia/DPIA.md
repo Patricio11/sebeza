@@ -161,20 +161,37 @@ covered by this DPIA:
 
 ### R10  Identity document at-rest exposure & DOB linkability (Phase 9.16)
 
-- **Risk**: Phase 9.16 captures **date of birth** at sign-up and
-  introduces an **admin-mediated ID-document upload** path (SA ID book
-  or passport bio page) because the planned KYC-SaaS partnership did
-  not land. Two new exposure surfaces:
+- **Risk**: Phase 9.16 captures **date of birth + nationality** at
+  sign-up and introduces an **admin-mediated ID-document upload** path
+  (SA ID book or passport bio page) for the verification flow because
+  the planned KYC-SaaS partnership did not land. Three new exposure
+  surfaces:
     1. **DOB**. Now stored on `profiles.date_of_birth`. With DOB +
        province + handle, an attacker who scraped the public profile
        can attempt linkage attacks against electoral roll or social
        graph data sources.
-    2. **ID document scan**. A new private object lives at
-       `{userId}/id-documents/{profileId}.{ext}` in the Supabase
+    2. **Nationality**. Captured via a country-picker at sign-up;
+       persisted as country label on `profiles.nationality` + derived
+       boolean `profiles.is_citizen = (code === "ZA")`. Already a
+       displayable field on the existing schema; sign-up just makes
+       sure it's set rather than NULL for fresh accounts. Low new
+       linkage risk on its own  category-level data, not a unique
+       identifier.
+    3. **ID document scan**. When the seeker opts into KYC
+       verification from `/dashboard/profile`, a private object lives
+       at `{userId}/id-documents/{profileId}.{ext}` in the Supabase
        private bucket. A scan typically reveals: full names, SA ID
-       number (already in `national_id_enc`), photograph, date of
-       birth, place of birth. A bucket-level compromise would expose
-       the document directly.
+       number (in `national_id_enc` only if the seeker also typed it
+       in), photograph, date of birth, place of birth. A bucket-level
+       compromise would expose the document directly.
+
+  Note (post-trim, 2026-05-27): SA ID and passport NUMBERS are NOT
+  collected at sign-up  the field moved off the form during operator
+  review on the day of ship. They are captured later from
+  `/dashboard/profile` only if and when the seeker chooses to be
+  KYC-verified. This reduces the data we hold for accounts that never
+  reach KYC review and is consistent with POPIA's data-minimisation
+  principle (§19): collect only what's needed for the active purpose.
 - **Decision (operator review, 2026-05-26)**: **PROCEED with the
   controls listed below.** Identity-confirmation is a precondition for
   the platform's verification posture (Verification-Honesty Rule). The

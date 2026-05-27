@@ -236,6 +236,29 @@ export function isValidCountryCode(code: string): boolean {
   return CODE_TO_LABEL.has(code);
 }
 
+/**
+ * Render an ISO 3166-1 alpha-2 country code as a Unicode flag emoji.
+ *
+ * Each letter A-Z maps to the matching regional-indicator codepoint
+ * (U+1F1E6 .. U+1F1FF). Pairing two regional indicators produces the
+ * country's flag emoji on every modern platform. Returns "" for any
+ * code that isn't two uppercase ASCII letters.
+ *
+ * No image assets + no font dependency  the runtime renders whatever
+ * the OS provides (typical: 🇿🇦 🇧🇼 🇳🇬 …). On the small set of
+ * platforms that don't ship flag glyphs (older Windows builds), the
+ * fallback is the two regional-indicator letters, which is still
+ * legible.
+ */
+export function flagEmoji(code: string): string {
+  if (!/^[A-Z]{2}$/.test(code)) return "";
+  const base = 0x1f1e6 - "A".charCodeAt(0);
+  return String.fromCodePoint(
+    base + code.charCodeAt(0),
+    base + code.charCodeAt(1),
+  );
+}
+
 /** Resolve display label from an alpha-2 code; falls back to the code
  *  itself when the code is unknown (so we don't render an empty string). */
 export function countryLabel(code: string | null | undefined): string {

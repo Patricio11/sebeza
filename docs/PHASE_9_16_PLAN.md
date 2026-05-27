@@ -260,3 +260,52 @@ Phase 9.9's "DOB out of scope" decision was correct at the time. Six months late
 ---
 
 *Plan opened 2026-05-26. Target: complete before Phase 10 (public launch) opens. Bounded scope (~1 focused session given the existing infrastructure: encryption pipeline + audit + compliance machinery + Supabase Storage helpers + `<ComboboxField>` + `<MonthYearPicker>` pattern + Phase 9.10's admin-mediated KYC blueprint).*
+
+---
+
+## 📝 FOLLOW-UP NOTES (2026-05-27)
+
+Same-day operator review after shipping the initial 14-task scope produced four trim / extension decisions that adjusted the sign-up form and added an admin knob. All compatible with the original plan; none invalidate the locked decisions above.
+
+### F1  Admin toggle to hide verification badges platform-wide
+
+**Decision**: ship a `feature_flag_verification_badges_visible` boolean setting (default ON) on `/admin/settings`. When OFF, both `<VerificationBadge>` and the Avatar verification ring render nothing on every seeker-facing surface (public profile, search, employer dossier, vacancy match, seeker dashboard + profile + qualifications). Threaded via a `visible` prop on `<VerificationBadge>` and a `verificationVisible` prop on the two client components (`<TalentRosterItem>`, `<QualificationsManager>`) — parent server pages read the setting once via `getSetting()` and pass it down.
+
+**Why**: pre-launch, SAQA + KYC verification volume is too thin to make the badge a meaningful signal — an admin needs a way to suppress it during the transition without violating the Verification-Honesty Rule. The rule still holds (the column exists, the roll-up still runs, badges still reflect reality when shown); the toggle is a *display* opt-out, not a *truth* opt-out.
+
+**What's preserved**: every compliance assertion, every audit kind, every notification kind. The org-verification badge on `/employer/organisation` is deliberately NOT gated — it's a different lifecycle (org KYC, not seeker KYC).
+
+### F2  Trim sign-up: remove SA ID + passport NUMBERS from the form
+
+**Decision**: remove the ID-kind chip + SA ID number field + passport number + issuing country fields from `SeekerSignUpForm` step 1. Those captures move entirely to `/dashboard/profile` (already had `<NationalIdControls>`) + the KYC panel (where they belong for the verify-when-ready flow).
+
+**Why**: asking new users for identification before they have seen the product is the wrong posture for an inviting national platform. The original D9 ("DOB + passport-country editable on sign-up step 2 or 3 — capture once on step 1, edit thereafter") is reaffirmed for DOB, but for ID/passport numbers the capture moves out of sign-up entirely. The KYC panel already had a 5-state lifecycle that handles the "add ID later, upload doc, await review" flow — duplicating the capture on sign-up was friction without payoff.
+
+**What's preserved**:
+- The schema (kind + passport_country + national_id_enc).
+- The Server Action's defence-in-depth validators (now only triggered when the user adds an ID later).
+- The compliance assertions — `id-encryption-mandatory`, `passport-country-when-passport`, `kyc-document-private` all stay; they just become no-ops for fresh sign-ups until the seeker adds an ID.
+
+**Cost**: we lose immediate duplicate-detection at account creation (one SA ID = one account). Email verification + the KYC review step catch this later, so it's a deferred check rather than a missing one.
+
+### F3  Capture nationality at sign-up instead
+
+**Decision**: add a single nationality dropdown to `SeekerSignUpForm` step 1, replacing the removed ID block. Backed by a searchable `<ComboboxField>` populated from `lib/taxonomy/countries.ts` (~191 ISO 3166-1 alpha-2 codes, SA + SADC pinned at the head). Each option renders a flag emoji in a new `leading` slot on `ComboboxOption` (Unicode regional-indicator pair via `flagEmoji()` helper — no image assets, no font dependency, OS-rendered). The `leading` glyph is **excluded from the type-to-filter rank** so typing "south" still ranks "South Africa" at idx 0.
+
+Server action persists:
+- `profiles.nationality` = country label (e.g. "South Africa", "Nigeria")
+- `profiles.is_citizen` = `(code === "ZA")` — the 2-class signal Phase 9.7's `nationality_class` analytics + the Citizen-Visibility Rule's employer-search highlight already consume
+
+**Why**: with the ID number gone from sign-up, we still want to know whether a new seeker is SA citizen / PR or a foreign national from day one — otherwise the LMI analytics + the Citizen-Visibility Rule both lose their signal until the user happens to visit the profile editor. A nationality dropdown is lower-friction than an ID number (it's category-level data, not a unique identifier), and gives us exactly the same 2-class signal the platform actually consumes.
+
+**Refinable later**: `/dashboard/profile` already exposes `isCitizen` + `nationality` as editable fields, so a user who picked the wrong country at sign-up can correct it without contacting support.
+
+### F4  Component extension: `leading` slot on `<ComboboxField>`
+
+**Decision**: extend `ComboboxOption` with an optional `leading: string` field. Renders before the label in both the trigger display + dropdown rows. Excluded from `rank()`. Generic — usable anywhere a long picker wants a leading glyph (skills with icons, professions with sector badges, institutions with logos-as-letters).
+
+**Why**: emoji or icon as part of the label string would corrupt the type-to-filter rank because the rank function uses string `indexOf`. A dedicated slot separates *display* from *search input*.
+
+---
+
+*Follow-up section recorded 2026-05-27 after same-day operator review of the initial Phase 9.16 ship. Documents the trim from "ID at sign-up" to "nationality at sign-up", plus the admin verification-badge toggle. Together with the original plan above this is the complete Phase 9.16 record.*

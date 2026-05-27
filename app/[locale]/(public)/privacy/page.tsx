@@ -81,18 +81,24 @@ export default async function PrivacyPolicyPage({
             <ul className="my-4 list-disc pl-6 space-y-2">
               <li>
                 <strong>Identity</strong> (name, email, date of birth,
-                encrypted national ID or passport number + issuing country,
-                and  when you submit one for verification  a copy of your
-                SA ID book/card or passport bio page)  to create an
-                account, confirm you meet the minimum age (14) under the
-                Basic Conditions of Employment Act, and link your profile
-                to a real person. Documents you upload for identity
-                verification are stored in a private bucket scoped to your
-                user id and are read only via short-lived signed URLs by
-                Sebenza administrators when they review your submission.
-                Your date of birth is visible only to you and Sebenza
-                administrators  it is never shown on your public profile
-                or returned by employer searches.
+                nationality, and  only when you choose to be KYC-verified
+                later from your dashboard  your encrypted SA ID or
+                passport number plus a copy of your SA ID book/card or
+                passport bio page)  to create an account, confirm you
+                meet the minimum age (14) under the Basic Conditions of
+                Employment Act, and link your profile to a real person.
+                ID number and document upload are never asked for at
+                sign-up; they live on the KYC panel and are entirely
+                optional until you decide to be verified. Documents
+                you upload for identity verification are stored in a
+                private bucket scoped to your user id and are read only
+                via short-lived signed URLs by Sebenza administrators
+                when they review your submission. Your date of birth
+                is visible only to you and Sebenza administrators
+                it is never shown on your public profile or returned by
+                employer searches. Your nationality may be displayed on
+                your public profile (e.g. &ldquo;South African&rdquo;)
+                as a passive label; it is never used as a gate.
               </li>
               <li>
                 <strong>Professional</strong> (profession, skills, experience,

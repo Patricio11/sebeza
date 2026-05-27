@@ -48,6 +48,15 @@ export interface ComboboxOption {
   description?: string;
   /** Disable this option in the dropdown. */
   disabled?: boolean;
+  /**
+   * Optional leading slot rendered before the label  e.g. a flag
+   * emoji on a country picker, an icon character, a 2-letter code.
+   * Deliberately a string (not ReactNode) so it stays serialisable +
+   * trivially passable from server components. Excluded from the
+   * type-to-filter rank so typing "south" still ranks "South Africa"
+   * at idx 0 rather than after the flag glyph.
+   */
+  leading?: string;
 }
 
 interface Props {
@@ -337,7 +346,21 @@ export function ComboboxField({
               : "text-[color:var(--color-ink-soft)]")
           }
         >
-          {hasValue ? displayLabel : placeholder}
+          {hasValue ? (
+            <>
+              {selected?.leading && (
+                <span
+                  aria-hidden="true"
+                  className="mr-2 inline-block leading-none"
+                >
+                  {selected.leading}
+                </span>
+              )}
+              {displayLabel}
+            </>
+          ) : (
+            placeholder
+          )}
         </span>
         <span className="flex shrink-0 items-center gap-1">
           {hasValue && !disabled && (
@@ -486,6 +509,14 @@ export function ComboboxField({
                       </span>
                       <span className="min-w-0 flex-1">
                         <span className="block text-[color:var(--color-ink)]">
+                          {opt.leading && (
+                            <span
+                              aria-hidden="true"
+                              className="mr-2 inline-block leading-none"
+                            >
+                              {opt.leading}
+                            </span>
+                          )}
                           {opt.label ?? opt.value}
                         </span>
                         {opt.description && (

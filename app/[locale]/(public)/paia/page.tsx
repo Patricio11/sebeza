@@ -108,11 +108,13 @@ export default async function PaiaManualPage({
               <li>
                 <strong>Profile records</strong>  handle, profession,
                 skills, experience, qualifications, employment status,
-                work availability, date of birth, encrypted national ID
-                or passport number + issuing country (where supplied),
-                and  when uploaded for KYC review  a private copy of
-                your SA ID book/card or passport bio page held in a
-                user-scoped folder of the private object store.
+                work availability, date of birth, nationality, and
+                only when the user opts into KYC verification later from
+                their dashboard  the encrypted SA ID or passport number
+                plus issuing country, and a private copy of the SA ID
+                book/card or passport bio page held in a user-scoped
+                folder of the private object store. ID number and
+                document are not collected at sign-up.
               </li>
               <li>
                 <strong>Organisation records</strong>  registered employer
