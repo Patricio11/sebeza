@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { TextField, SelectField } from "@/components/ui/FormField";
@@ -10,6 +10,7 @@ import {
   scorePassword,
 } from "@/components/ui/PasswordStrength";
 import { signUpEmployer } from "@/lib/auth/actions";
+import { useSessionDraft } from "@/lib/hooks/useSessionDraft";
 
 const INDUSTRY_OPTIONS = [
   "Financial services",
@@ -24,16 +25,43 @@ const INDUSTRY_OPTIONS = [
 ] as const;
 const INDUSTRY_OTHER = "Other";
 
+/** sessionStorage key for the in-flight employer sign-up draft. */
+const DRAFT_KEY = "sebenza:employer-signup-draft";
+
+interface FormFields {
+  orgName: string;
+  registrationNumber: string;
+  industry: string;
+  industryOther: string;
+  size: string;
+  country: string;
+  fullName: string;
+  yourRole: string;
+  email: string;
+  phone: string;
+}
+
+const INITIAL: FormFields = {
+  orgName: "",
+  registrationNumber: "",
+  industry: "",
+  industryOther: "",
+  size: "",
+  country: "South Africa",
+  fullName: "",
+  yourRole: "",
+  email: "",
+  phone: "",
+};
+
 export function EmployerSignUpForm() {
   const router = useRouter();
   const t = useTranslations("auth.employerSignUp");
   const tCommon = useTranslations("auth.common");
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
-
-  // Controlled fields needed for conditional / cross-field UI.
-  const [industry, setIndustry] = useState<string>("");
-  const [industryOther, setIndustryOther] = useState<string>("");
+  const [fields, setFields] = useState<FormFields>(INITIAL);
+  // Password fields stay separate  they are NEVER persisted.
   const [password, setPassword] = useState<string>("");
   const [passwordConfirm, setPasswordConfirm] = useState<string>("");
 
@@ -45,25 +73,40 @@ export function EmployerSignUpForm() {
     passwordMismatch ||
     !passwordStrong ||
     password.length < 10 ||
-    (industry === INDUSTRY_OTHER && industryOther.trim().length < 2);
+    (fields.industry === INDUSTRY_OTHER && fields.industryOther.trim().length < 2);
+
+  // Persist + restore the non-sensitive fields. Passwords are
+  // deliberately omitted from the draft slice  see the hook doc.
+  const persistable = useMemo(() => fields, [fields]);
+  const { clear: clearDraft } = useSessionDraft<FormFields>(DRAFT_KEY, {
+    state: persistable,
+    onRestore: (draft) => {
+      setFields((f) => ({ ...f, ...draft }));
+    },
+  });
+
+  function setField<K extends keyof FormFields>(k: K, v: FormFields[K]) {
+    setFields((f) => ({ ...f, [k]: v }));
+  }
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
-    const fd = new FormData(e.currentTarget);
     // When the user picked "Other", the real industry is the free-text input.
     const resolvedIndustry =
-      industry === INDUSTRY_OTHER ? industryOther.trim() : industry;
+      fields.industry === INDUSTRY_OTHER
+        ? fields.industryOther.trim()
+        : fields.industry;
     const data = {
-      orgName: String(fd.get("orgName") ?? ""),
-      registrationNumber: String(fd.get("registrationNumber") ?? ""),
+      orgName: fields.orgName,
+      registrationNumber: fields.registrationNumber,
       industry: resolvedIndustry,
-      size: String(fd.get("size") ?? ""),
-      country: String(fd.get("country") ?? "South Africa"),
-      fullName: String(fd.get("fullName") ?? ""),
-      yourRole: String(fd.get("yourRole") ?? ""),
-      email: String(fd.get("email") ?? ""),
-      phone: String(fd.get("phone") ?? ""),
+      size: fields.size,
+      country: fields.country || "South Africa",
+      fullName: fields.fullName,
+      yourRole: fields.yourRole,
+      email: fields.email,
+      phone: fields.phone,
       password,
     };
 
@@ -82,6 +125,7 @@ export function EmployerSignUpForm() {
         setError(result.message);
         return;
       }
+      clearDraft();
       router.push(
         `/verify-email?email=${encodeURIComponent(data.email)}` as never,
       );
@@ -109,6 +153,8 @@ export function EmployerSignUpForm() {
           label={t("orgName")}
           required
           autoComplete="organization"
+          value={fields.orgName}
+          onChange={(e) => setField("orgName", e.target.value)}
           disabled={pending}
         />
         <div className="grid gap-5 md:grid-cols-2">
@@ -118,6 +164,8 @@ export function EmployerSignUpForm() {
             label={t("registrationNumber")}
             placeholder="2020/123456/07"
             required
+            value={fields.registrationNumber}
+            onChange={(e) => setField("registrationNumber", e.target.value)}
             disabled={pending}
           />
           <SelectField
@@ -126,8 +174,8 @@ export function EmployerSignUpForm() {
             label={t("industry")}
             required
             disabled={pending}
-            value={industry}
-            onChange={(e) => setIndustry(e.target.value)}
+            value={fields.industry}
+            onChange={(e) => setField("industry", e.target.value)}
           >
             <option value="">Select…</option>
             {INDUSTRY_OPTIONS.map((opt) => (
@@ -138,14 +186,14 @@ export function EmployerSignUpForm() {
             <option value={INDUSTRY_OTHER}>{INDUSTRY_OTHER}</option>
           </SelectField>
         </div>
-        {industry === INDUSTRY_OTHER && (
+        {fields.industry === INDUSTRY_OTHER && (
           <TextField
             id="industryOther"
             name="industryOther"
             label="Industry  please specify"
             placeholder="e.g. Renewable energy"
-            value={industryOther}
-            onChange={(e) => setIndustryOther(e.target.value)}
+            value={fields.industryOther}
+            onChange={(e) => setField("industryOther", e.target.value)}
             required
             disabled={pending}
             hint="Two or more characters."
@@ -157,6 +205,8 @@ export function EmployerSignUpForm() {
             name="size"
             label={t("size")}
             required
+            value={fields.size}
+            onChange={(e) => setField("size", e.target.value)}
             disabled={pending}
           >
             <option value="">Select…</option>
@@ -171,7 +221,8 @@ export function EmployerSignUpForm() {
             name="country"
             label={t("country")}
             required
-            defaultValue="South Africa"
+            value={fields.country}
+            onChange={(e) => setField("country", e.target.value)}
             disabled={pending}
           >
             <option value="South Africa">South Africa</option>
@@ -195,6 +246,8 @@ export function EmployerSignUpForm() {
             label={tCommon("fullName")}
             required
             autoComplete="name"
+            value={fields.fullName}
+            onChange={(e) => setField("fullName", e.target.value)}
             disabled={pending}
           />
           <TextField
@@ -203,6 +256,8 @@ export function EmployerSignUpForm() {
             label={t("yourRole")}
             placeholder="Head of People"
             required
+            value={fields.yourRole}
+            onChange={(e) => setField("yourRole", e.target.value)}
             disabled={pending}
           />
         </div>
@@ -214,6 +269,8 @@ export function EmployerSignUpForm() {
             type="email"
             required
             autoComplete="email"
+            value={fields.email}
+            onChange={(e) => setField("email", e.target.value)}
             disabled={pending}
           />
           <TextField
@@ -222,6 +279,8 @@ export function EmployerSignUpForm() {
             label={tCommon("phone")}
             type="tel"
             autoComplete="tel"
+            value={fields.phone}
+            onChange={(e) => setField("phone", e.target.value)}
             disabled={pending}
           />
         </div>

@@ -6,7 +6,7 @@
  * and academic record have their own islands so saves can be partial.
  */
 
-import { useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
 import { TextField, TextareaField, SelectField } from "@/components/ui/FormField";
 import { Button } from "@/components/ui/Button";
 import { Checkbox } from "@/components/ui/Checkbox";
@@ -15,6 +15,7 @@ import { ProfileCompleteness } from "@/components/ui/ProfileCompleteness";
 import { updateProfileBasics } from "@/lib/profile/actions";
 import { PROVINCES } from "@/lib/mock/taxonomy";
 import type { Seniority } from "@/lib/mock/types";
+import { useSessionDraft } from "@/lib/hooks/useSessionDraft";
 
 interface InitialValues {
   displayName: string;
@@ -87,6 +88,52 @@ export function ProfileBasicsForm({
 
   const cities = PROVINCES.find((p) => p.slug === province)?.cities ?? [];
 
+  // Persist the in-flight edits so the locale switcher doesn't
+  // discard them. Scoped to the signed-in user's own profile editor
+  // (single instance per browser tab  no per-id scoping needed).
+  const persistable = useMemo(
+    () => ({
+      displayName,
+      profession,
+      seniority,
+      province,
+      city,
+      nationality,
+      isCitizen,
+      bio,
+      yearsExperience,
+    }),
+    [
+      displayName,
+      profession,
+      seniority,
+      province,
+      city,
+      nationality,
+      isCitizen,
+      bio,
+      yearsExperience,
+    ],
+  );
+  const { clear: clearDraft } = useSessionDraft<typeof persistable>(
+    "sebenza:profile-basics-draft",
+    {
+      state: persistable,
+      onRestore: (draft) => {
+        if (draft.displayName !== undefined) setDisplayName(draft.displayName);
+        if (draft.profession !== undefined) setProfession(draft.profession);
+        if (draft.seniority !== undefined) setSeniority(draft.seniority);
+        if (draft.province !== undefined) setProvince(draft.province);
+        if (draft.city !== undefined) setCity(draft.city);
+        if (draft.nationality !== undefined) setNationality(draft.nationality);
+        if (draft.isCitizen !== undefined) setIsCitizen(draft.isCitizen);
+        if (draft.bio !== undefined) setBio(draft.bio);
+        if (draft.yearsExperience !== undefined)
+          setYearsExperience(draft.yearsExperience);
+      },
+    },
+  );
+
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setMessage(null);
@@ -110,6 +157,7 @@ export function ProfileBasicsForm({
       });
       if (r.ok) {
         setMessage({ kind: "ok", text: "Saved." });
+        clearDraft();
       } else {
         setMessage({ kind: "error", text: r.message });
       }

@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/Button";
 import { X, Plus } from "lucide-react";
 import { updateSkills } from "@/lib/profile/actions";
 import { SKILLS } from "@/lib/mock/taxonomy";
+import { useSessionDraft } from "@/lib/hooks/useSessionDraft";
 
 interface SkillState {
   slug: string;
@@ -43,6 +44,27 @@ export function SkillsEditor({ initial }: Props) {
         label: s.label,
       })),
     [usedSlugs],
+  );
+
+  // Persist the skills list so locale-switching mid-edit doesn't
+  // wipe a freshly-curated set of skills + proficiencies. Items
+  // include the resolved `label` from the SKILLS catalogue  cheap
+  // to round-trip; the action layer ignores it.
+  const { clear: clearDraft } = useSessionDraft<{ items: SkillState[] }>(
+    "sebenza:profile-skills-draft",
+    {
+      state: { items },
+      onRestore: (draft) => {
+        if (Array.isArray(draft.items)) {
+          // Validate each slug against the live taxonomy; drop unknowns
+          // (catalogue items may have been removed between sessions).
+          const valid = draft.items.filter((d) =>
+            SKILLS.some((s) => s.slug === d.slug),
+          );
+          if (valid.length > 0) setItems(valid);
+        }
+      },
+    },
   );
 
   function addSkill() {
@@ -93,8 +115,12 @@ export function SkillsEditor({ initial }: Props) {
           yearsOfExperience: i.yearsOfExperience,
         })),
       });
-      if (r.ok) setMessage({ kind: "ok", text: "Skills saved." });
-      else setMessage({ kind: "error", text: r.message });
+      if (r.ok) {
+        setMessage({ kind: "ok", text: "Skills saved." });
+        clearDraft();
+      } else {
+        setMessage({ kind: "error", text: r.message });
+      }
     });
   }
 

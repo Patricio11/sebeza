@@ -255,6 +255,7 @@ export default async function VacancyDetailPage({
             professions={professions}
             provinces={PROVINCES}
             skills={SKILLS}
+            draftId={vacancy.id}
             onSubmit={async (value) => {
               "use server";
               const res = await updateVacancy(vacancy.id, value);

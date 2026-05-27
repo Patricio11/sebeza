@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
+import { useSessionDraft } from "@/lib/hooks/useSessionDraft";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { TextField, SelectField } from "@/components/ui/FormField";
@@ -149,25 +150,7 @@ interface Props {
   };
 }
 
-/**
- * sessionStorage key for the in-flight sign-up draft.
- *
- * The draft survives in-app navigations  notably switching the
- * locale, which next-intl handles by replacing the URL and remounting
- * the page tree. Without persistence, every locale switch wipes
- * whatever the user had typed.
- *
- * Scope:
- *   - sessionStorage (not localStorage): tab-scoped, cleared when the
- *     tab/window closes. No long-lived storage of half-completed
- *     sign-ups on shared computers.
- *   - Excludes `password` + `passwordConfirm`: those fields are never
- *     written to storage at all, not even briefly. The user re-types
- *     them after a locale switch  small UX cost for a meaningful
- *     security improvement.
- *   - Cleared after a successful sign-up so the next visitor on the
- *     same tab doesn't see the previous user's data.
- */
+/** sessionStorage key for the public seeker sign-up draft. */
 const DRAFT_KEY = "sebenza:seeker-signup-draft";
 
 type PersistableFormState = Omit<FormState, "password" | "passwordConfirm">;
@@ -189,39 +172,50 @@ export function SeekerSignUpForm({
       profession: invitationContext.prefilledProfession ?? "",
     };
   });
-  const [hydrated, setHydrated] = useState(false);
   const t = useTranslations("auth.seekerSignUp");
   const tCommon = useTranslations("auth.common");
   const tStatus = useTranslations("status");
   const tPurposes = useTranslations("auth.seekerSignUp.step2.purposes");
 
-  // Restore any in-flight draft once on mount. Runs in a useEffect
-  // (not the initial useState) so the SSR markup stays in sync with
-  // the first client render  no hydration mismatch.
-  useEffect(() => {
-    if (hydrated) return;
-    try {
-      const raw =
-        typeof window !== "undefined"
-          ? window.sessionStorage.getItem(DRAFT_KEY)
-          : null;
-      if (raw) {
-        const saved = JSON.parse(raw) as Partial<PersistableFormState>;
+  // Build the persistable slice fresh each render. Passwords are
+  // NEVER included  even though sessionStorage is tab-scoped, the
+  // smaller surface area for credentials is a real win.
+  const persistable: PersistableFormState = useMemo(
+    () => ({
+      step: state.step,
+      fullName: state.fullName,
+      email: state.email,
+      phone: state.phone,
+      dateOfBirth: state.dateOfBirth,
+      nationality: state.nationality,
+      consents: state.consents,
+      profession: state.profession,
+      province: state.province,
+      status: state.status,
+      workAvailability: state.workAvailability,
+      academic: state.academic,
+    }),
+    [state],
+  );
+
+  const { clear: clearDraft } = useSessionDraft<PersistableFormState>(
+    DRAFT_KEY,
+    {
+      state: persistable,
+      onRestore: (draft) => {
         setState((s) => {
           const merged: FormState = {
             ...s,
-            ...saved,
-            // Passwords are NEVER persisted  always start blank on
-            // restore. Even though sessionStorage is tab-scoped, the
-            // smaller storage surface for credentials is a real win.
+            ...draft,
             password: "",
             passwordConfirm: "",
           };
-          // Re-overlay invitation-locked fields if present so a draft
-          // from a different context can't override the invite's
-          // email/name pre-fills.
+          // Re-overlay invitation-locked fields if present so a stale
+          // public draft can't override the invite's authoritative
+          // email/name/profession pre-fills.
           if (invitationContext) {
-            merged.fullName = invitationContext.prefilledName ?? merged.fullName;
+            merged.fullName =
+              invitationContext.prefilledName ?? merged.fullName;
             merged.email = invitationContext.prefilledEmail;
             if (invitationContext.prefilledProfession) {
               merged.profession = invitationContext.prefilledProfession;
@@ -229,48 +223,9 @@ export function SeekerSignUpForm({
           }
           return merged;
         });
-      }
-    } catch {
-      // sessionStorage may throw in private-browsing modes or when
-      // disabled by policy  silently skip restoration.
-    }
-    setHydrated(true);
-  }, [hydrated, invitationContext]);
-
-  // Persist on every state change once hydrated. Sync write is fine
-  // sessionStorage is fast enough for form-typing rhythm.
-  useEffect(() => {
-    if (!hydrated) return;
-    try {
-      const persistable: PersistableFormState = {
-        step: state.step,
-        fullName: state.fullName,
-        email: state.email,
-        phone: state.phone,
-        dateOfBirth: state.dateOfBirth,
-        nationality: state.nationality,
-        consents: state.consents,
-        profession: state.profession,
-        province: state.province,
-        status: state.status,
-        workAvailability: state.workAvailability,
-        academic: state.academic,
-      };
-      window.sessionStorage.setItem(DRAFT_KEY, JSON.stringify(persistable));
-    } catch {
-      // ignore quota / disabled storage
-    }
-  }, [hydrated, state]);
-
-  function clearDraft() {
-    try {
-      if (typeof window !== "undefined") {
-        window.sessionStorage.removeItem(DRAFT_KEY);
-      }
-    } catch {
-      // ignore
-    }
-  }
+      },
+    },
+  );
 
   function goto(step: Step) {
     setState((s) => ({ ...s, step }));

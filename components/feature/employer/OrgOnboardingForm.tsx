@@ -22,11 +22,12 @@
  * flagged. On submit the banner clears (handled server-side).
  */
 
-import { useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "@/i18n/navigation";
 
 import { Button } from "@/components/ui/Button";
 import { TextField, TextareaField } from "@/components/ui/FormField";
+import { useSessionDraft } from "@/lib/hooks/useSessionDraft";
 import {
   deleteOrgDocument,
   submitOrgOnboarding,
@@ -84,6 +85,28 @@ export function OrgOnboardingForm({ initial }: Props) {
   );
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+
+  // Persist the address / VAT / city draft. Uploaded documents are
+  // already server-side after each pick (the upload completes
+  // synchronously to Supabase), so they survive any locale switch
+  // automatically  the persistence layer only covers the text
+  // fields here.
+  const persistable = useMemo(
+    () => ({ companyAddress, vatNumber, city }),
+    [companyAddress, vatNumber, city],
+  );
+  const { clear: clearDraft } = useSessionDraft<typeof persistable>(
+    "sebenza:org-onboarding-draft",
+    {
+      state: persistable,
+      onRestore: (draft) => {
+        if (draft.companyAddress !== undefined)
+          setCompanyAddress(draft.companyAddress);
+        if (draft.vatNumber !== undefined) setVatNumber(draft.vatNumber);
+        if (draft.city !== undefined) setCity(draft.city);
+      },
+    },
+  );
 
   const docsByKind = new Map<OrgDocumentKind, OrgDocumentRow[]>();
   for (const d of docs) {
@@ -149,6 +172,7 @@ export function OrgOnboardingForm({ initial }: Props) {
         setError(res.message);
         return;
       }
+      clearDraft();
       // Server-side revalidate of the page itself will flip the view.
       router.refresh();
     });

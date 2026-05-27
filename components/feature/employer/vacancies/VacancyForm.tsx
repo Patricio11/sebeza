@@ -12,7 +12,7 @@
  * updateVacancy). The component knows nothing about routing.
  */
 
-import { useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "@/i18n/navigation";
 import {
   TextField,
@@ -23,6 +23,7 @@ import { Button } from "@/components/ui/Button";
 import { ComboboxField } from "@/components/ui/ComboboxField";
 import { Lock } from "lucide-react";
 import type { TaxonomyEntry, Province } from "@/lib/mock/types";
+import { useSessionDraft } from "@/lib/hooks/useSessionDraft";
 
 export interface VacancyFormValue {
   title: string;
@@ -52,6 +53,24 @@ export interface VacancyFormProps {
   submitLabel?: string;
   /** Cancel button href. Defaults to /employer/vacancies. */
   cancelHref?: string;
+  /**
+   * Scopes the sessionStorage draft key so drafts don't bleed between
+   * vacancies. Pass the vacancy id when editing; defaults to "new" for
+   * the create flow. Without this, opening Edit-A then Edit-B would
+   * make B inherit A's unsaved draft.
+   */
+  draftId?: string;
+}
+
+interface VacancyDraft {
+  title: string;
+  profession: string;
+  province: string;
+  seniority: string;
+  salaryBand: string;
+  description: string;
+  inviteExpiryDays: string;
+  skillSlugs: string[];
 }
 
 const SENIORITY_OPTIONS = [
@@ -70,6 +89,7 @@ export function VacancyForm({
   redirectTo,
   submitLabel = "Save vacancy",
   cancelHref = "/employer/vacancies",
+  draftId = "new",
 }: VacancyFormProps) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -94,6 +114,51 @@ export function VacancyForm({
   );
   const [skillSet, setSkillSet] = useState<Set<string>>(
     new Set(initial?.skillSlugs ?? []),
+  );
+
+  // Persist the draft so locale-switching mid-edit doesn't wipe it.
+  // Scoped per (create vs edit-vacancy-id) so drafts don't bleed
+  // between vacancies. `Set<string>` isn't JSON-serialisable  the
+  // persistable shape uses a `string[]` instead.
+  const persistable: VacancyDraft = useMemo(
+    () => ({
+      title,
+      profession,
+      province,
+      seniority: seniority ?? "",
+      salaryBand,
+      description,
+      inviteExpiryDays,
+      skillSlugs: Array.from(skillSet),
+    }),
+    [
+      title,
+      profession,
+      province,
+      seniority,
+      salaryBand,
+      description,
+      inviteExpiryDays,
+      skillSet,
+    ],
+  );
+  const { clear: clearDraft } = useSessionDraft<VacancyDraft>(
+    `sebenza:vacancy-form-draft:${draftId}`,
+    {
+      state: persistable,
+      onRestore: (draft) => {
+        if (draft.title !== undefined) setTitle(draft.title);
+        if (draft.profession !== undefined) setProfession(draft.profession);
+        if (draft.province !== undefined) setProvince(draft.province);
+        if (draft.seniority !== undefined) setSeniority(draft.seniority);
+        if (draft.salaryBand !== undefined) setSalaryBand(draft.salaryBand);
+        if (draft.description !== undefined) setDescription(draft.description);
+        if (draft.inviteExpiryDays !== undefined)
+          setInviteExpiryDays(draft.inviteExpiryDays);
+        if (Array.isArray(draft.skillSlugs))
+          setSkillSet(new Set(draft.skillSlugs));
+      },
+    },
   );
 
   function toggleSkill(slug: string) {
@@ -136,6 +201,7 @@ export function VacancyForm({
         setError(res.message);
         return;
       }
+      clearDraft();
       router.push(redirectTo as never);
     });
   }
