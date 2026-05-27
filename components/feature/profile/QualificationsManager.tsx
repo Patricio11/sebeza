@@ -46,9 +46,19 @@ export interface QualificationRow {
 interface Props {
   initial: QualificationRow[];
   labels: { add: string; empty: string };
+  /**
+   * Phase 9.16.1  threaded from the parent server page (reads the
+   * `feature_flag_verification_badges_visible` platform setting).
+   * Default true so existing callers stay unchanged.
+   */
+  verificationVisible?: boolean;
 }
 
-export function QualificationsManager({ initial, labels }: Props) {
+export function QualificationsManager({
+  initial,
+  labels,
+  verificationVisible = true,
+}: Props) {
   const [items, setItems] = useState<QualificationRow[]>(initial);
   const [adding, setAdding] = useState(false);
   const [draft, setDraft] = useState({ title: "", institution: "", awardedYear: "" });
@@ -196,7 +206,7 @@ export function QualificationsManager({ initial, labels }: Props) {
                 </div>
               </div>
               <div className="flex flex-col items-end gap-2">
-                <VerificationBadge state={q.verification} />
+                <VerificationBadge state={q.verification} visible={verificationVisible} />
                 <div className="flex gap-1">
                   <UploadButton
                     qualificationId={q.id}

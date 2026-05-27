@@ -13,6 +13,13 @@ interface Props {
   locale?: string;
   /** When true, draw a subtle "citizen highlight" treatment (per Citizen-Visibility Rule). */
   highlightCitizen?: boolean;
+  /**
+   * Phase 9.16.1  threaded through from the parent server page which
+   * reads the platform-level `feature_flag_verification_badges_visible`
+   * setting. When false, both the badge pill and the avatar ring are
+   * hidden. Defaults true so existing callers stay unchanged.
+   */
+  verificationVisible?: boolean;
   className?: string;
 }
 
@@ -27,6 +34,7 @@ export function TalentRosterItem({
   profile,
   locale = "en",
   highlightCitizen = false,
+  verificationVisible = true,
   className,
 }: Props) {
   const t = useTranslations("search.rosterItem");
@@ -46,6 +54,7 @@ export function TalentRosterItem({
         photoUrl={profile.profilePhotoUrl}
         verification={profile.verification}
         size="md"
+        showRing={verificationVisible}
       />
 
       <div className="min-w-0">
@@ -59,7 +68,7 @@ export function TalentRosterItem({
               {profile.displayName}
             </Link>
           </h3>
-          <VerificationBadge state={profile.verification} />
+          <VerificationBadge state={profile.verification} visible={verificationVisible} />
         </header>
 
         {/* Profession + city  Phase 9.9 appends years experience after

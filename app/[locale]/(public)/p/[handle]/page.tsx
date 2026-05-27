@@ -32,6 +32,7 @@ import { ReportProfileButton } from "@/components/feature/profile/ReportProfileB
 import { WorkAvailabilityChips } from "@/components/feature/profile/WorkAvailabilityChips";
 import { getSessionUser } from "@/lib/auth/dal";
 import { getMyProfile } from "@/lib/profile/me";
+import { getSetting } from "@/lib/admin/settings";
 
 interface Props {
   params: Promise<{ locale: string; handle: string }>;
@@ -93,6 +94,9 @@ export default async function ProfilePage({ params }: Props) {
   // Only seekers can own a handle; cheap query, only fired when there's a session.
   const me = viewer?.role === "seeker" ? await getMyProfile() : null;
   const isOwner = !!me && me.handle === handle;
+  const verificationVisible = await getSetting<boolean>(
+    "feature_flag_verification_badges_visible",
+  );
 
   const dossierHref = `/employer/dossier/${profile.handle}`;
   const ctaHref =
@@ -143,6 +147,7 @@ export default async function ProfilePage({ params }: Props) {
           ctaEnabled={ctaEnabled}
           viewerSignedIn={Boolean(viewer)}
           isOwner={isOwner}
+          verificationVisible={verificationVisible}
         />
 
         <ProfileBody
@@ -156,6 +161,7 @@ export default async function ProfilePage({ params }: Props) {
             viewer.role !== "admin" &&
             !isOwner
           }
+          verificationVisible={verificationVisible}
         />
       </main>
       <SiteFooter />
@@ -218,6 +224,7 @@ async function ProfileHero({
   ctaEnabled,
   viewerSignedIn,
   isOwner,
+  verificationVisible,
 }: {
   profile: NonNullable<Awaited<ReturnType<typeof dataProvider.getProfile>>>;
   memberSinceFmt: string;
@@ -232,6 +239,8 @@ async function ProfileHero({
   viewerSignedIn: boolean;
   /** True when the signed-in viewer owns this handle  swaps the right rail. */
   isOwner: boolean;
+  /** Phase 9.16.1  threaded from ProfilePage's getSetting() read. */
+  verificationVisible: boolean;
 }) {
   return (
     <section
@@ -253,6 +262,7 @@ async function ProfileHero({
               photoUrl={profile.profilePhotoUrl}
               verification={profile.verification}
               size="xl"
+              showRing={verificationVisible}
               className="anim-rise-soft md:hidden"
             />
             <Avatar
@@ -260,6 +270,7 @@ async function ProfileHero({
               photoUrl={profile.profilePhotoUrl}
               verification={profile.verification}
               size="2xl"
+              showRing={verificationVisible}
               className="anim-rise-soft hidden md:inline-flex"
             />
 
@@ -313,7 +324,7 @@ async function ProfileHero({
                   confirmedAt={profile.statusConfirmedAt}
                   locale={locale}
                 />
-                <VerificationBadge state={profile.verification} />
+                <VerificationBadge state={profile.verification} visible={verificationVisible} />
                 <ProfileCompleteness value={profile.completeness} />
               </div>
             </div>
@@ -488,6 +499,7 @@ async function ProfileBody({
   locale,
   isOwner,
   viewerSignedInAsNonEmployer,
+  verificationVisible,
 }: {
   profile: NonNullable<Awaited<ReturnType<typeof dataProvider.getProfile>>>;
   t: Awaited<ReturnType<typeof getTranslations<"profile">>>;
@@ -497,6 +509,8 @@ async function ProfileBody({
    *  and they're not the owner. Drives the calm "employer-only feature"
    *  variant of the gated panel  no "sign in as employer" CTAs. */
   viewerSignedInAsNonEmployer: boolean;
+  /** Phase 9.16.1  threaded from ProfilePage's getSetting() read. */
+  verificationVisible: boolean;
 }) {
   return (
     <div className="mx-auto max-w-[1320px] px-5 py-16 md:px-10 md:py-24">
@@ -514,7 +528,7 @@ async function ProfileBody({
           )}
 
           {profile.academic && (
-            <StudiesSection profile={profile} t={t} />
+            <StudiesSection profile={profile} t={t} verificationVisible={verificationVisible} />
           )}
 
           <SkillsSection skills={profile.topSkills} />
@@ -527,6 +541,7 @@ async function ProfileBody({
             <QualificationsSection
               items={profile.qualifications}
               t={t}
+              verificationVisible={verificationVisible}
             />
           )}
 
@@ -672,9 +687,11 @@ function RailRow({
 function StudiesSection({
   profile,
   t,
+  verificationVisible,
 }: {
   profile: NonNullable<Awaited<ReturnType<typeof dataProvider.getProfile>>>;
   t: Awaited<ReturnType<typeof getTranslations<"profile">>>;
+  verificationVisible: boolean;
 }) {
   const academic = profile.academic!;
   const months = monthsUntil(academic.expectedGraduation);
@@ -693,7 +710,7 @@ function StudiesSection({
             <h3 className="font-display text-2xl text-[color:var(--color-ink)]">
               {academic.programme}
             </h3>
-            <VerificationBadge state={academic.verification} />
+            <VerificationBadge state={academic.verification} visible={verificationVisible} />
           </div>
           <p className="mt-1 text-[color:var(--color-ink-soft)]">
             <span className="text-[color:var(--color-ink)]">
@@ -908,6 +925,7 @@ function ExperienceTimeline({
 function QualificationsSection({
   items,
   t,
+  verificationVisible,
 }: {
   items: NonNullable<
     NonNullable<
@@ -915,6 +933,7 @@ function QualificationsSection({
     >["qualifications"]
   >;
   t: Awaited<ReturnType<typeof getTranslations<"profile">>>;
+  verificationVisible: boolean;
 }) {
   return (
     <Section eyebrow="Qualifications" title={t("qualifications")}>
@@ -932,7 +951,7 @@ function QualificationsSection({
                 <div className="font-display text-lg text-[color:var(--color-ink)]">
                   {q.title}
                 </div>
-                <VerificationBadge state={q.verification} />
+                <VerificationBadge state={q.verification} visible={verificationVisible} />
               </div>
               <div className="text-sm text-[color:var(--color-ink-soft)]">
                 {q.institution}

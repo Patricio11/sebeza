@@ -25,6 +25,7 @@ import { StatusCard } from "@/components/feature/profile/StatusCard";
 import { SelfReportPlacementCard } from "@/components/feature/profile/SelfReportPlacementCard";
 import { StatusNudgeBanner } from "@/components/feature/profile/StatusNudgeBanner";
 import { listMyInvitations } from "@/lib/seeker/invitations";
+import { getSetting } from "@/lib/admin/settings";
 import { Inbox } from "lucide-react";
 
 export default async function SeekerOverviewPage({
@@ -39,6 +40,9 @@ export default async function SeekerOverviewPage({
   if (!me) redirect("/sign-in?next=/dashboard");
 
   const t = await getTranslations("seekerDash");
+  const verificationVisible = await getSetting<boolean>(
+    "feature_flag_verification_badges_visible",
+  );
   const lastConfirmed = formatRelativeTime(me.statusConfirmedAt, locale);
   const freshness = freshnessSummary(me.statusConfirmedAt);
   // Phase 6: real compass  recommendations come from live search-event
@@ -177,7 +181,7 @@ export default async function SeekerOverviewPage({
             <h2 id="vis-h" className="font-display text-2xl">
               {t("overview.completeness")}
             </h2>
-            <VerificationBadge state={me.verification} />
+            <VerificationBadge state={me.verification} visible={verificationVisible} />
           </header>
           <div className="flex flex-col items-start gap-6 md:flex-row md:items-center">
             <ProfileCompleteness value={me.completeness} variant="arc" />

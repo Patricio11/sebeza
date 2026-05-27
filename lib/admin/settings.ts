@@ -66,7 +66,16 @@ export type SettingKey =
   // ships dormant. Activation pairs with a concrete operational need
   // (purpose-limitation, retention, named operators become concrete
   // at that point). Same dormant-by-default posture as KYC + SAQA.
-  | "feature_flag_employer_mix_lookup";
+  | "feature_flag_employer_mix_lookup"
+  // Phase 9.16.1  global show/hide for VerificationBadge.
+  // Default ON  matches current behaviour, no surprise on deploy.
+  // Flipping OFF hides every state (verified / pending / unverified /
+  // rejected) across every surface, public + employer + seeker. Useful
+  // as a transitional knob while SAQA + KYC verification volume is
+  // still thin and the badge would be more noise than signal. Honest
+  // either way: the column still exists, the rule still holds
+  // we just don't paint anything.
+  | "feature_flag_verification_badges_visible";
 
 const DEFAULTS: Record<SettingKey, unknown> = {
   freshness_band_days_fresh: 30,
@@ -86,6 +95,7 @@ const DEFAULTS: Record<SettingKey, unknown> = {
   lmi_foreign_fill_floor: 0.5,
   employer_mix_min_placements: 5,
   feature_flag_employer_mix_lookup: false,
+  feature_flag_verification_badges_visible: true,
 };
 
 /**

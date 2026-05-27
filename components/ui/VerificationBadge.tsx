@@ -7,6 +7,14 @@ interface Props {
   state: VerificationStatus;
   /** Show the textual label next to the glyph. Default true. */
   showLabel?: boolean;
+  /**
+   * Phase 9.16.1  global opt-out. When `false`, the component renders
+   * nothing  every state hidden, no chrome, no aria-label. Drives the
+   * platform-level `feature_flag_verification_badges_visible` toggle.
+   * Defaults to `true` (visible) so existing call sites that don't pass
+   * the prop keep working unchanged.
+   */
+  visible?: boolean;
   className?: string;
 }
 
@@ -14,9 +22,20 @@ interface Props {
  * Verification-Honesty Rule (TO_START_EVERY_SESSION.md §6): never display
  * "Verified" for self-reported data. Default is `unverified`. Badges must
  * reflect reality  this component refuses to lie.
+ *
+ * Phase 9.16.1: also refuses to render at all when the admin has flipped
+ * `feature_flag_verification_badges_visible` to false. Still honest
+ * the column exists, the rule still holds, we just don't paint anything.
  */
-export function VerificationBadge({ state, showLabel = true, className }: Props) {
+export function VerificationBadge({
+  state,
+  showLabel = true,
+  visible = true,
+  className,
+}: Props) {
+  // Hooks must run before the early-return to keep the call order stable.
   const t = useTranslations("verification");
+  if (!visible) return null;
   const cfg = STATE[state];
   const Icon = cfg.icon;
   const label = t(state);

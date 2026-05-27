@@ -13,6 +13,7 @@ import { CheckCircle2 } from "lucide-react";
 import { employerOwnMixQuery } from "@/db/queries/employerMix";
 import { EmployerHiringMixCard } from "@/components/feature/employer/EmployerHiringMixCard";
 import { logAccess } from "@/lib/audit";
+import { getSetting } from "@/lib/admin/settings";
 
 export default async function EmployerOverviewPage({
   params,
@@ -24,6 +25,9 @@ export default async function EmployerOverviewPage({
   const session = await verifyEmployer();
 
   const t = await getTranslations("employerDash");
+  const verificationVisible = await getSetting<boolean>(
+    "feature_flag_verification_badges_visible",
+  );
 
   // ── Real KPIs ────────────────────────────────────────────────────────────
   const db = getDb();
@@ -201,7 +205,7 @@ export default async function EmployerOverviewPage({
         <ol className="border-t border-[color:var(--color-hairline)]">
           {recent.map((p) => (
             <li key={p.handle}>
-              <TalentRosterItem profile={p} locale={locale} />
+              <TalentRosterItem profile={p} locale={locale} verificationVisible={verificationVisible} />
               <div className="-mt-2 mb-4 ml-16 flex items-center justify-between gap-3 rounded-[var(--radius-sm)] border border-dashed border-[color:var(--color-brand)] bg-[color:var(--color-brand-tint)] px-3 py-2 text-sm">
                 <span className="text-[color:var(--color-brand-strong)]">
                   <CheckCircle2

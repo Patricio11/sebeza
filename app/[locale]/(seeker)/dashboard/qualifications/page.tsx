@@ -12,6 +12,7 @@ import {
   type QualificationRow,
 } from "@/components/feature/profile/QualificationsManager";
 import type { VerificationStatus } from "@/lib/mock/types";
+import { getSetting } from "@/lib/admin/settings";
 
 export default async function QualificationsPage({
   params,
@@ -25,6 +26,9 @@ export default async function QualificationsPage({
   if (!me) redirect("/sign-in?next=/dashboard/qualifications");
 
   const t = await getTranslations("seekerDash.qualifications");
+  const verificationVisible = await getSetting<boolean>(
+    "feature_flag_verification_badges_visible",
+  );
 
   const db = getDb();
   const rows = await db
@@ -99,6 +103,7 @@ export default async function QualificationsPage({
               add: t("add"),
               empty: t("empty"),
             }}
+            verificationVisible={verificationVisible}
           />
         </div>
       </div>

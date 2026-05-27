@@ -39,6 +39,7 @@ import { TalentRosterItem } from "@/components/ui/TalentRosterItem";
 import { VacancyStatusChip } from "@/components/feature/employer/vacancies/VacancyStatusChip";
 import { BulkInviteIsland } from "@/components/feature/employer/vacancies/BulkInviteIsland";
 import { PROVINCES, PROFESSIONS } from "@/lib/mock/taxonomy";
+import { getSetting } from "@/lib/admin/settings";
 import { getDb } from "@/db/client";
 import * as schema from "@/db/schema";
 import { ChevronLeft, MapPin, Search, Users } from "lucide-react";
@@ -57,10 +58,11 @@ export default async function VacancyMatchPage({
   const vacancy = await getMyVacancy(id);
   if (!vacancy) notFound();
 
-  const [match, role, alreadyInvitedProfileIds] = await Promise.all([
+  const [match, role, alreadyInvitedProfileIds, verificationVisible] = await Promise.all([
     matchVacancyCandidates(vacancy),
     getMyOrgRole(),
     getInvitedProfileIdsForVacancy(vacancy.id),
+    getSetting<boolean>("feature_flag_verification_badges_visible"),
   ]);
   const { candidates, counts, filters } = match;
   const canInvite =
@@ -210,6 +212,7 @@ export default async function VacancyMatchPage({
                         profile={p}
                         locale={locale}
                         highlightCitizen
+                        verificationVisible={verificationVisible}
                       />
                       <div className="-mt-2 mb-4 ml-16 flex flex-wrap items-center justify-end gap-3 text-xs">
                         <Link

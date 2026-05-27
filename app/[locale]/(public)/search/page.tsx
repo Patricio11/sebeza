@@ -16,6 +16,7 @@ import type {
   WorkAvailabilityKind,
 } from "@/lib/mock/types";
 import { findProvinceBySlug, findCityBySlug, PROFESSIONS } from "@/lib/mock/taxonomy";
+import { getSetting } from "@/lib/admin/settings";
 import { SearchX } from "lucide-react";
 
 interface SearchPageProps {
@@ -58,6 +59,9 @@ export default async function SearchPage({ params, searchParams }: SearchPagePro
   setRequestLocale(locale);
 
   const sp = await searchParams;
+  const verificationVisible = await getSetting<boolean>(
+    "feature_flag_verification_badges_visible",
+  );
   const query = asString(sp.q) ?? "";
   const filters: F = {
     query,
@@ -212,6 +216,7 @@ export default async function SearchPage({ params, searchParams }: SearchPagePro
                               profile={p}
                               locale={locale}
                               highlightCitizen={filters.highlightCitizens}
+                              verificationVisible={verificationVisible}
                             />
                           </li>
                         </Fragment>

@@ -79,6 +79,12 @@ const ROWS: SettingRow[] = [
     type: "boolean",
   },
   {
+    key: "feature_flag_verification_badges_visible",
+    label:
+      "Show verification badges on profiles (9.16.1  turn off while verification volume is still thin)",
+    type: "boolean",
+  },
+  {
     key: "outcomes_min_cohort_size",
     label: "Outcomes minimum cohort size (k-anonymity floor)",
     type: "number",

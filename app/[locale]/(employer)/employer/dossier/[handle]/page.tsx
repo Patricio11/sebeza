@@ -18,6 +18,7 @@ import { getDb } from "@/db/client";
 import * as schema from "@/db/schema";
 import type { ConsentPurpose, ConsentState } from "@/lib/consent";
 import { logAccess } from "@/lib/audit";
+import { getSetting } from "@/lib/admin/settings";
 import { createNotification } from "@/lib/notifications/server";
 import { ContactRevealCard } from "@/components/feature/employer/ContactRevealCard";
 import { QualificationDownloadButton } from "@/components/feature/employer/QualificationDownloadButton";
@@ -56,6 +57,10 @@ export default async function EmployerDossierPage({
 
   const profile = await dataProvider.getProfile(handle);
   if (!profile) notFound();
+
+  const verificationVisible = await getSetting<boolean>(
+    "feature_flag_verification_badges_visible",
+  );
 
   const db = getDb();
 
@@ -228,6 +233,7 @@ export default async function EmployerDossierPage({
               photoUrl={profile.profilePhotoUrl}
               verification={profile.verification}
               size="2xl"
+              showRing={verificationVisible}
             />
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-2 text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--color-ink-soft)]">
@@ -246,7 +252,7 @@ export default async function EmployerDossierPage({
                 {profile.displayName}
               </h1>
               <div className="mt-2 flex flex-wrap items-center gap-3">
-                <VerificationBadge state={profile.verification} />
+                <VerificationBadge state={profile.verification} visible={verificationVisible} />
                 <StatusChip
                   status={profile.status}
                   confirmedAt={profile.statusConfirmedAt}
@@ -380,7 +386,7 @@ export default async function EmployerDossierPage({
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
-                      <VerificationBadge state={q.verification} />
+                      <VerificationBadge state={q.verification} visible={verificationVisible} />
                       <QualificationDownloadButton
                         qualificationId={q.id}
                         hasDocument={!!q.hasDocument}

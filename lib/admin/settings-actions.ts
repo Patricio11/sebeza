@@ -68,6 +68,8 @@ const KEY_SCHEMAS = {
   // Phase 9.7.6  dormant-by-default gate on the per-employer
   // governed lookup. Engine + UI ship; flag enables the form.
   feature_flag_employer_mix_lookup: z.boolean(),
+  // Phase 9.16.1  global show/hide for VerificationBadge.
+  feature_flag_verification_badges_visible: z.boolean(),
 } as const satisfies Record<SettingKey, z.ZodTypeAny>;
 
 const updateSchema = z.object({
@@ -88,6 +90,7 @@ const updateSchema = z.object({
     "lmi_foreign_fill_floor",
     "employer_mix_min_placements",
     "feature_flag_employer_mix_lookup",
+    "feature_flag_verification_badges_visible",
   ] as const),
   value: z.unknown(),
 });

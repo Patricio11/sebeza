@@ -40,6 +40,9 @@ export default async function ProfileEditorPage({
   const me = await getMyProfile();
   if (!me) redirect("/sign-in?next=/dashboard/profile");
   const kycProviderEnabled = await getSetting<boolean>("feature_flag_kyc_provider");
+  const verificationVisible = await getSetting<boolean>(
+    "feature_flag_verification_badges_visible",
+  );
 
   const t = await getTranslations("seekerDash.profileEditor");
   const tAcademic = await getTranslations("seekerDash.profileEditor.academic");
@@ -265,7 +268,7 @@ export default async function ProfileEditorPage({
               />
 
               <div className="mb-5 flex flex-wrap items-center gap-2">
-                <VerificationBadge state={academic.verification} />
+                <VerificationBadge state={academic.verification} visible={verificationVisible} />
                 <span className="text-xs text-[color:var(--color-ink-soft)]">
                   {tAcademic("verificationNote")}
                 </span>
