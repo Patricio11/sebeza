@@ -192,10 +192,13 @@ const WORK_AVAILABILITY_VALUES = [
   "part_time",
   "contract",
   "full_time",
+  // Phase 9.18  work-mode values share the enum with employment-type.
+  "remote",
+  "hybrid",
 ] as const;
 
 const workAvailabilitySchema = z.object({
-  values: z.array(z.enum(WORK_AVAILABILITY_VALUES)).max(4),
+  values: z.array(z.enum(WORK_AVAILABILITY_VALUES)).max(6),
 });
 
 export async function updateWorkAvailability(
@@ -204,7 +207,7 @@ export async function updateWorkAvailability(
   const session = await getSessionUser();
   if (!session) return fail("Not signed in.");
   const parsed = workAvailabilitySchema.safeParse(input);
-  if (!parsed.success) return fail("Pick from the four kinds.");
+  if (!parsed.success) return fail("Pick from the listed work kinds.");
   const db = getDb();
   const profile = await loadOwnedProfile(db, session.id);
   if (!profile) return fail("Profile not found.");

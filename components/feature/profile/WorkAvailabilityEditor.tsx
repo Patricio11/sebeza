@@ -20,6 +20,8 @@ const LABEL: Record<WorkAvailabilityKind, string> = {
   part_time: "Part-time",
   contract: "Contract",
   full_time: "Full-time",
+  remote: "Remote",
+  hybrid: "Hybrid",
 };
 
 const HINT: Record<WorkAvailabilityKind, string> = {
@@ -27,6 +29,8 @@ const HINT: Record<WorkAvailabilityKind, string> = {
   part_time: "Regular but < 35 hours a week. Compatible with study.",
   contract: "Fixed-term or project work.",
   full_time: "Permanent, full-time roles.",
+  remote: "Work from anywhere  no daily commute required.",
+  hybrid: "Mix of office + remote days. Usually 23 days on-site.",
 };
 
 interface Props {

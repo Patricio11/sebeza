@@ -93,7 +93,14 @@ interface FormState {
   province: string;
   status: "open_to_work" | "employed" | "self_employed" | "studying" | "unemployed";
   /** Phase 7.5  optional work-availability set captured at sign-up. */
-  workAvailability: ("casual" | "part_time" | "contract" | "full_time")[];
+  workAvailability: (
+    | "casual"
+    | "part_time"
+    | "contract"
+    | "full_time"
+    | "remote"
+    | "hybrid"
+  )[];
   academic: AcademicState;
 }
 
@@ -861,6 +868,8 @@ export function SeekerSignUpForm({
                   ["part_time", "Part-time"],
                   ["contract", "Contract"],
                   ["full_time", "Full-time"],
+                  ["remote", "Remote"],
+                  ["hybrid", "Hybrid"],
                 ] as const
               ).map(([kind, label]) => {
                 const checked = state.workAvailability.includes(kind);

@@ -114,8 +114,17 @@ const seekerSignUpSchema = z.object({
   // Phase 7.5  optional at sign-up (also editable later from
   // /dashboard/profile). Empty = no signal.
   workAvailability: z
-    .array(z.enum(["casual", "part_time", "contract", "full_time"]))
-    .max(4)
+    .array(
+      z.enum([
+        "casual",
+        "part_time",
+        "contract",
+        "full_time",
+        "remote",
+        "hybrid",
+      ]),
+    )
+    .max(6)
     .optional(),
   // Optional academic block when "I'm a student" is on
   academic: z

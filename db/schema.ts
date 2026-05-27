@@ -140,6 +140,12 @@ export const workAvailabilityKind = pgEnum("work_availability_kind", [
   "part_time",
   "contract",
   "full_time",
+  // Phase 9.18  work-mode values added to the same enum as
+  // employment-type values. The two axes are orthogonal in theory
+  // (you can be "full-time remote") but the picker treats them as a
+  // single "what work are you open to" set for UX simplicity.
+  "remote",
+  "hybrid",
 ]);
 
 /**

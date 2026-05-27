@@ -14,6 +14,8 @@ const LABEL: Record<WorkAvailabilityKind, string> = {
   part_time: "Part-time",
   contract: "Contract",
   full_time: "Full-time",
+  remote: "Remote",
+  hybrid: "Hybrid",
 };
 
 interface Props {

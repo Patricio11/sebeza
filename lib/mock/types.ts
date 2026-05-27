@@ -30,13 +30,20 @@ export type WorkAvailabilityKind =
   | "casual"
   | "part_time"
   | "contract"
-  | "full_time";
+  | "full_time"
+  // Phase 9.18  work-mode values share this enum with employment-type
+  // values. Two axes, one field, simpler UX. See migration 0030 + the
+  // operator-review note on the same phase.
+  | "remote"
+  | "hybrid";
 
 export const WORK_AVAILABILITY_KINDS: WorkAvailabilityKind[] = [
   "casual",
   "part_time",
   "contract",
   "full_time",
+  "remote",
+  "hybrid",
 ];
 
 export interface SkillRef {

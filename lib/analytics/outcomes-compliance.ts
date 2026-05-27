@@ -126,7 +126,17 @@ export async function assertWorkAvailabilityPubliclySafe(): Promise<AssertResult
   const seen = new Set(
     (result as unknown as { rows: Array<{ kind: string }> }).rows.map((r) => r.kind),
   );
-  const expected = new Set(["casual", "part_time", "contract", "full_time"]);
+  // Phase 9.18  added remote + hybrid to the same enum. If a future
+  // phase splits work-mode into its own column, drop them from this
+  // set + introduce a separate assertion.
+  const expected = new Set([
+    "casual",
+    "part_time",
+    "contract",
+    "full_time",
+    "remote",
+    "hybrid",
+  ]);
   const unexpected = Array.from(seen).filter((k) => !expected.has(k));
   return {
     ok: unexpected.length === 0,

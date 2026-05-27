@@ -33,6 +33,8 @@ const WORK_AVAILABILITY_VALUES = new Set<WorkAvailabilityKind>([
   "part_time",
   "contract",
   "full_time",
+  "remote",
+  "hybrid",
 ]);
 
 function parseAvailableFor(
