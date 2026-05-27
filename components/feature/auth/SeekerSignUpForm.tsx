@@ -3,11 +3,7 @@
 import { useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
-import {
-  TextField,
-  SelectField,
-  EncryptedBadge,
-} from "@/components/ui/FormField";
+import { TextField, SelectField } from "@/components/ui/FormField";
 import { Button } from "@/components/ui/Button";
 import { MonthYearPicker } from "@/components/ui/MonthYearPicker";
 import { DatePicker } from "@/components/ui/DatePicker";
@@ -23,12 +19,8 @@ import {
   INSTITUTIONS,
   NQF_LEVELS,
 } from "@/lib/mock/taxonomy";
+import { validateDob } from "@/lib/auth/id-validation";
 import { COUNTRIES } from "@/lib/taxonomy/countries";
-import {
-  validateDob,
-  validateSaId,
-  validatePassport,
-} from "@/lib/auth/id-validation";
 
 interface ProfessionOption {
   slug: string;
@@ -72,27 +64,25 @@ interface AcademicState {
   openToGraduateProgrammes: boolean;
 }
 
-type IdDocumentKind = "sa_id" | "passport";
-
 interface FormState {
   step: Step;
   // Step 1
   fullName: string;
   email: string;
   phone: string;
-  /** ISO yyyy-mm-dd; captured separately from ID number so we can
-   *  cross-check the SA ID prefix + run the 14100 age gate independently
-   *  for passport holders. Phase 9.16. */
+  /** ISO yyyy-mm-dd. Captured at sign-up for the 14100 age gate and
+   *  LMI youth-cohort analytics. ID / passport numbers are NOT
+   *  collected here  too much friction before the user has even
+   *  seen the product. They get added later from the profile editor
+   *  + uploaded for KYC review from the dashboard's KYC panel
+   *  (Phase 9.16, follow-up: 2026-05-27 trim). */
   dateOfBirth: string;
-  /** Which government ID the seeker is providing. Default "sa_id" since
-   *  ~99% of Sebenza signups are SA citizens or permanent residents. */
-  idDocumentKind: IdDocumentKind;
-  /** SA ID  13 digits. Only meaningful when idDocumentKind === "sa_id". */
-  nationalId: string;
-  /** Passport number  alphanumeric. Only when idDocumentKind === "passport". */
-  passportNumber: string;
-  /** ISO 3166-1 alpha-2 code  passport issuer. Required for passports. */
-  passportCountry: string;
+  /** Phase 9.16 follow-up  ISO 3166-1 alpha-2 country code of the
+   *  seeker's nationality. Drives the `isCitizen` derivation
+   *  (code === "ZA") + persists as the country label on
+   *  `profiles.nationality`. Defaults to ZA since ~99% of users are
+   *  South African. */
+  nationality: string;
   password: string;
   passwordConfirm: string;
   // Step 2
@@ -112,10 +102,7 @@ const initialState: FormState = {
   email: "",
   phone: "",
   dateOfBirth: "",
-  idDocumentKind: "sa_id",
-  nationalId: "",
-  passportNumber: "",
-  passportCountry: "",
+  nationality: "ZA",
   password: "",
   passwordConfirm: "",
   consents: Object.fromEntries(
@@ -164,48 +151,22 @@ export function SeekerSignUpForm({ professions }: Props = {}) {
     if (state.fullName.trim().length < 2) return false;
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(state.email)) return false;
     if (!validateDob(state.dateOfBirth).ok) return false;
-    if (state.idDocumentKind === "sa_id") {
-      if (!validateSaId(state.nationalId, state.dateOfBirth).ok) return false;
-    } else {
-      if (!validatePassport(state.passportNumber, state.passportCountry).ok)
-        return false;
-    }
+    if (state.nationality.length !== 2) return false;
     if (state.password.length < 10) return false;
     if (state.password !== state.passwordConfirm) return false;
     if (scorePassword(state.password).score < 2) return false;
     return true;
   }
 
-  // Inline validation messages  shown only after the user has typed
-  // something, so the form doesn't shout "invalid" the instant it opens.
+  // Inline DOB validation message  shown only after the user has
+  // typed something, so the form doesn't shout "invalid" the instant
+  // it opens.
   const dobError = state.dateOfBirth
     ? !validateDob(state.dateOfBirth).ok
       ? (validateDob(state.dateOfBirth) as { ok: false; message: string })
           .message
       : undefined
     : undefined;
-  const saIdError =
-    state.idDocumentKind === "sa_id" && state.nationalId.length >= 13
-      ? !validateSaId(state.nationalId, state.dateOfBirth).ok
-        ? (
-            validateSaId(state.nationalId, state.dateOfBirth) as {
-              ok: false;
-              message: string;
-            }
-          ).message
-        : undefined
-      : undefined;
-  const passportError =
-    state.idDocumentKind === "passport" && state.passportNumber.length >= 6
-      ? !validatePassport(state.passportNumber, state.passportCountry).ok
-        ? (
-            validatePassport(state.passportNumber, state.passportCountry) as {
-              ok: false;
-              message: string;
-            }
-          ).message
-        : undefined
-      : undefined;
 
   function step3Valid() {
     return Boolean(state.profession && state.province && state.status);
@@ -247,15 +208,7 @@ export function SeekerSignUpForm({ professions }: Props = {}) {
         email: state.email,
         phone: state.phone || undefined,
         dateOfBirth: state.dateOfBirth,
-        idDocumentKind: state.idDocumentKind,
-        nationalId:
-          state.idDocumentKind === "sa_id"
-            ? state.nationalId
-            : state.passportNumber,
-        passportCountry:
-          state.idDocumentKind === "passport"
-            ? state.passportCountry
-            : undefined,
+        nationality: state.nationality,
         password: state.password,
         grantedConsents,
         profession: state.profession,
@@ -345,101 +298,28 @@ export function SeekerSignUpForm({ professions }: Props = {}) {
             disabled={pending}
           />
 
-          {/* ID-document kind chip pair */}
-          <div>
-            <span className="block text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--color-ink-soft)]">
-              Identity document
-            </span>
-            <div
-              role="radiogroup"
-              aria-label="Identity document type"
-              className="mt-1 inline-flex rounded-[var(--radius-pill)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface-sunk)] p-1"
-            >
-              {(
-                [
-                  ["sa_id", "South African ID"],
-                  ["passport", "Passport"],
-                ] as const
-              ).map(([kind, label]) => {
-                const active = state.idDocumentKind === kind;
-                return (
-                  <button
-                    key={kind}
-                    type="button"
-                    role="radio"
-                    aria-checked={active}
-                    disabled={pending}
-                    onClick={() =>
-                      setState({ ...state, idDocumentKind: kind })
-                    }
-                    className={
-                      "cursor-pointer rounded-[var(--radius-pill)] px-4 py-1.5 text-xs font-medium transition-colors " +
-                      (active
-                        ? "bg-[color:var(--color-ink)] text-[color:var(--color-paper)]"
-                        : "text-[color:var(--color-ink-soft)] hover:text-[color:var(--color-ink)]")
-                    }
-                  >
-                    {label}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {state.idDocumentKind === "sa_id" ? (
-            <TextField
-              id="nationalId"
-              label="South African ID number"
-              value={state.nationalId}
-              onChange={(e) =>
-                setState({
-                  ...state,
-                  nationalId: e.target.value.replace(/\D/g, "").slice(0, 13),
-                })
-              }
-              inputMode="numeric"
-              required
-              badge={<EncryptedBadge />}
-              hint={t("stepHints.id")}
-              error={saIdError}
-              disabled={pending}
-            />
-          ) : (
-            <div className="grid gap-5 md:grid-cols-2">
-              <TextField
-                id="passportNumber"
-                label="Passport number"
-                value={state.passportNumber}
-                onChange={(e) =>
-                  setState({
-                    ...state,
-                    passportNumber: e.target.value.toUpperCase().slice(0, 20),
-                  })
-                }
-                required
-                badge={<EncryptedBadge />}
-                hint="As printed on the photo page."
-                error={passportError}
-                disabled={pending}
-              />
-              <SelectField
-                id="passportCountry"
-                label="Issuing country"
-                value={state.passportCountry}
-                onChange={(e) =>
-                  setState({ ...state, passportCountry: e.target.value })
-                }
-                required
-              >
-                <option value="">Select…</option>
-                {COUNTRIES.map((c) => (
-                  <option key={c.code} value={c.code}>
-                    {c.label}
-                  </option>
-                ))}
-              </SelectField>
-            </div>
-          )}
+          {/* Phase 9.16 follow-up (2026-05-27)  nationality at sign-up
+              so analytics + the Citizen-Visibility Rule have a real
+              signal from day one. ID / passport NUMBERS are NOT asked
+              for here  the user adds them later from /dashboard/profile
+              when they're ready to be KYC-verified. */}
+          <SelectField
+            id="nationality"
+            label="Nationality"
+            value={state.nationality}
+            onChange={(e) =>
+              setState({ ...state, nationality: e.target.value })
+            }
+            required
+            hint="Used for analytics + to highlight South African candidates in employer searches. You can change this any time."
+            disabled={pending}
+          >
+            {COUNTRIES.map((c) => (
+              <option key={c.code} value={c.code}>
+                {c.label}
+              </option>
+            ))}
+          </SelectField>
           <div className="flex flex-col gap-1">
             <TextField
               id="password"

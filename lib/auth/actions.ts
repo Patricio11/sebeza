@@ -28,7 +28,6 @@ import { headers as nextHeaders } from "next/headers";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { randomUUID } from "node:crypto";
-import { encryptField } from "@/lib/crypto";
 import { logAccess } from "@/lib/audit";
 import { notifyAllAdmins } from "@/lib/notifications/server";
 import { slug as slugify } from "@/lib/mock/helpers";
@@ -37,11 +36,8 @@ import {
   type ConsentPurpose,
   REQUIRED_FOR_SEARCHABILITY,
 } from "@/lib/consent";
-import {
-  validateDob,
-  validateSaId,
-  validatePassport,
-} from "@/lib/auth/id-validation";
+import { validateDob } from "@/lib/auth/id-validation";
+import { isValidCountryCode, countryLabel } from "@/lib/taxonomy/countries";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Shared helpers
@@ -94,18 +90,14 @@ const seekerSignUpSchema = z.object({
   phone: z.string().optional(),
   // Phase 9.16  ISO yyyy-mm-dd. Re-validated below against the 14100
   // age window. Storing this lets us run the LMI youth-cohort split
-  // (15-24) and confirm SA ID prefix.
+  // (15-24).
   dateOfBirth: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-  // Which government ID the seeker is presenting at sign-up. Defaults
-  // to "sa_id" because almost all SA seekers have one. Foreign nationals
-  // working in SA carry passports.
-  idDocumentKind: z.enum(["sa_id", "passport"]).default("sa_id"),
-  // For sa_id: 13-digit national ID. For passport: alphanumeric passport
-  // number 620 chars. Both are encrypted at-rest in `national_id_enc`
-  // (column name kept kind-agnostic, see PHASE_9_16_PLAN decision D1).
-  nationalId: z.string().min(6).max(40),
-  // ISO 3166-1 alpha-2 issuer  only meaningful for passports.
-  passportCountry: z.string().length(2).optional(),
+  // Phase 9.16 follow-up (2026-05-27)  ISO 3166-1 alpha-2 nationality
+  // code. Drives `is_citizen = (code === "ZA")` + the country label
+  // stored on `profiles.nationality`. ID / passport numbers are no
+  // longer collected at sign-up  the seeker adds them later from
+  // /dashboard/profile when ready to be KYC-verified.
+  nationality: z.string().length(2),
   password: z.string().min(10).max(128),
   // Consent purposes the user granted in step 2.
   grantedConsents: z.array(z.enum(CONSENT_PURPOSES)).min(1),
@@ -148,19 +140,14 @@ export async function signUpSeeker(
   if (!parsed.success) return fail("Please check the form and try again.");
   const v = parsed.data;
 
-  // Phase 9.16  defence in depth: re-run the same validators the client
-  // ran, so a tampered request can't bypass the 14100 age gate or
-  // submit a passport with a bogus country code. Trust the field, not
+  // Phase 9.16  defence in depth: re-run the same validators the
+  // client ran, so a tampered request can't bypass the 14100 age
+  // gate or smuggle in a bogus country code. Trust the field, not
   // the form.
   const dobCheck = validateDob(v.dateOfBirth);
   if (!dobCheck.ok) return fail(dobCheck.message);
-  if (v.idDocumentKind === "sa_id") {
-    const idCheck = validateSaId(v.nationalId, v.dateOfBirth);
-    if (!idCheck.ok) return fail(idCheck.message);
-  } else {
-    if (!v.passportCountry) return fail("Issuing country is required for passports.");
-    const passCheck = validatePassport(v.nationalId, v.passportCountry);
-    if (!passCheck.ok) return fail(passCheck.message);
+  if (!isValidCountryCode(v.nationality)) {
+    return fail("That nationality isn't recognised  pick from the list.");
   }
 
   // Searchability must be granted before the profile becomes searchable
@@ -187,7 +174,11 @@ export async function signUpSeeker(
     const handle = await uniqueHandle(db, v.fullName);
 
     const displayName = redactSurname(v.fullName);
-    const idEnc = encryptField(v.nationalId);
+    // Phase 9.16 follow-up  derive citizenship from the picked country.
+    // SA = citizen-or-PR class for the Phase 9.7 2-class analytics.
+    // Refinable later from /dashboard/profile.
+    const isCitizen = v.nationality === "ZA";
+    const nationalityLabel = countryLabel(v.nationality) ?? null;
 
     // Phase 9.15  resolve free-text "Other" entries BEFORE the transaction.
     // For institutions: the FK constraint on academic_profiles requires the
@@ -247,15 +238,17 @@ export async function signUpSeeker(
         profession: v.profession,
         city: "",
         province: v.province,
-        nationalIdEnc: idEnc,
-        // Phase 9.16  three new fields. `dateOfBirth` is a `date`
-        // column (no time component); passport_country is only set when
-        // kind === "passport" so an empty string never leaks into the
-        // ISO check on the compliance assertion.
+        // Phase 9.16  DOB captured at sign-up; ID number / passport
+        // NOT collected here (added later from /dashboard/profile).
+        // The id_document_kind column stays at its DB default ("sa_id")
+        // until the seeker actually adds a document.
         dateOfBirth: v.dateOfBirth,
-        idDocumentKind: v.idDocumentKind,
-        passportCountry:
-          v.idDocumentKind === "passport" ? (v.passportCountry ?? null) : null,
+        // Phase 9.16 follow-up  nationality + citizenship class.
+        // isCitizen drives the Phase 9.7 nationality_class analytics
+        // + the Citizen-Visibility Rule's "highlight SA candidates"
+        // affordance in employer search.
+        nationality: nationalityLabel,
+        isCitizen,
         status: v.status,
         statusConfirmedAt: new Date(),
         workAvailability: v.workAvailability ?? [],
