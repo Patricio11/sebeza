@@ -375,6 +375,141 @@ export async function signUpSeeker(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Phase 9.17  acceptSeekerInvitation
+//
+// Token-gated sibling of signUpSeeker. The recipient of an
+// employer-initiated invitation arrives on /sign-up/invited/[token]
+// with name + email pre-filled (email read-only since it's the
+// lookup key). Submitting the form calls this action; on success
+// the invite row flips to 'accepted', acceptedProfileId is stamped,
+// and every member of the inviting org receives the
+// `org.seeker_invite.accepted` notification.
+//
+// Why it lives here (not in lib/employer/seeker-invitations.ts):
+// keeps every sign-up path (public + invited) in one module so the
+// Better Auth + consent-insert + redactSurname sequence has a
+// single source of truth.
+// ─────────────────────────────────────────────────────────────────────────────
+
+const acceptInviteSchema = seekerSignUpSchema
+  .omit({ email: true })
+  .extend({ token: z.string().min(1) });
+
+export async function acceptSeekerInvitation(
+  input: z.infer<typeof acceptInviteSchema>,
+): Promise<ActionResult<{ next?: string }>> {
+  const { verifyInviteToken } = await import("@/lib/auth/invite-tokens");
+
+  const parsed = acceptInviteSchema.safeParse(input);
+  if (!parsed.success) return fail("Please check the form and try again.");
+  const { token, ...rest } = parsed.data;
+
+  const tokenCheck = verifyInviteToken(token);
+  if (!tokenCheck.ok) {
+    return fail(
+      tokenCheck.reason === "expired"
+        ? "This invitation link has expired. Ask your inviter to send a new one."
+        : "This invitation link is invalid.",
+    );
+  }
+
+  const db = getDb();
+  const inviteRows = await db
+    .select({
+      id: schema.seekerInvitations.id,
+      email: schema.seekerInvitations.email,
+      state: schema.seekerInvitations.state,
+      orgId: schema.seekerInvitations.organizationId,
+    })
+    .from(schema.seekerInvitations)
+    .where(eq(schema.seekerInvitations.id, tokenCheck.inviteId))
+    .limit(1);
+  const invite = inviteRows[0];
+  if (!invite) return fail("This invitation no longer exists.");
+  if (invite.state !== "pending") {
+    return fail(
+      invite.state === "accepted"
+        ? "This invitation has already been accepted. Try signing in instead."
+        : `This invitation has been ${invite.state}. Ask your inviter to send a new one.`,
+    );
+  }
+
+  // Delegate to signUpSeeker with the invite's email locked in.
+  const result = await signUpSeeker({ ...rest, email: invite.email });
+  if (!result.ok) return result;
+
+  // Look up the freshly-created user + profile so we can stamp the
+  // invite row + broadcast to the org. Use lower(email) to match the
+  // case-insensitive uniqueness convention.
+  const userRows = await db
+    .select({ id: schema.appUser.id })
+    .from(schema.appUser)
+    .where(sql`lower(${schema.appUser.email}) = ${invite.email.toLowerCase()}`)
+    .limit(1);
+  const newUser = userRows[0];
+  if (!newUser) {
+    // Shouldn't happen  signUpSeeker just created the row. Log + bail.
+    console.error("[acceptSeekerInvitation] user not found post-signup");
+    return ok({ next: "/verify-email" });
+  }
+
+  const profileRows = await db
+    .select({
+      id: schema.profiles.id,
+      handle: schema.profiles.handle,
+      displayName: schema.profiles.displayName,
+    })
+    .from(schema.profiles)
+    .where(eq(schema.profiles.userId, newUser.id))
+    .limit(1);
+  const newProfile = profileRows[0];
+
+  if (newProfile) {
+    await db
+      .update(schema.seekerInvitations)
+      .set({
+        state: "accepted",
+        acceptedProfileId: newProfile.id,
+        respondedAt: new Date(),
+      })
+      .where(eq(schema.seekerInvitations.id, invite.id));
+
+    await logAccess({
+      kind: "org.seeker_invite.accept",
+      actor: newUser.id,
+      subject: invite.id,
+      meta: {
+        profileId: newProfile.id,
+        signupCompletedAt: new Date().toISOString(),
+      },
+    });
+
+    // Resolve org name for the notification body.
+    const orgRows = await db
+      .select({ name: schema.organizations.name })
+      .from(schema.organizations)
+      .where(eq(schema.organizations.id, invite.orgId))
+      .limit(1);
+    const orgName = orgRows[0]?.name ?? "your organisation";
+
+    const { notifyOrgMembers } = await import("@/lib/notifications/server");
+    await notifyOrgMembers(invite.orgId, {
+      kind: "org.seeker_invite.accepted",
+      title: `${newProfile.displayName} joined Sebenza`,
+      body: `An invited seeker  ${newProfile.displayName}  completed sign-up via your invitation. Open the Invites tab to see them on the Joined list. Org: ${orgName}.`,
+      link: "/employer/invites",
+      meta: {
+        inviteId: invite.id,
+        profileId: newProfile.id,
+        profileHandle: newProfile.handle,
+      },
+    });
+  }
+
+  return result;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // signUpEmployer  wires the employer registration form
 // ─────────────────────────────────────────────────────────────────────────────
 

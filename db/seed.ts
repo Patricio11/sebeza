@@ -323,7 +323,14 @@ async function seedOrgsAndPlacements() {
     sizeBand: MOCK_EMPLOYER.size,
     city: MOCK_EMPLOYER.city,
     country: MOCK_EMPLOYER.country,
-    verification: MOCK_EMPLOYER.orgVerified ? "verified" : "unverified",
+    // Phase 9.17  Discovery Bank is the seed's "happy path" verified
+    // employer so the demo invite + vacancy + KYC flows all light up
+    // out of the box. To test the verifyOrgVerified gate against an
+    // unverified org, log in as Acme/Globex/Initech's owner instead
+    // (those stay in their respective pending/rejected/unverified
+    // states via seedPhase9_10OrgVetting).
+    verification: "verified",
+    verifiedAt: new Date(),
   });
   await db.insert(schema.organizationMembers).values({
     id: id("orgmem", "naledi-k"),
@@ -1795,6 +1802,12 @@ async function main() {
   // ("Damelin College" with the matching pending institutions row),
   // one already-rejected suggestion to demonstrate the lifecycle.
   await seedPhase9_15TaxonomySuggestions();
+  // Phase 9.17  three seeker-invitation rows on Discovery Bank so
+  // /employer/invites renders real content out of the box: one
+  // pending, one accepted (linked to a real cohort seeker with the
+  // invite backdated 7 days before sign-up), one declined with a
+  // reason. Requires Discovery to be `verified` (seeded above).
+  await seedPhase9_17SeekerInvitations();
 
   const ms = Date.now() - started;
   console.log(
@@ -1802,6 +1815,80 @@ async function main() {
       `${PROVINCES.length} provinces, ${PROFESSIONS.length} professions, ` +
       `${SKILLS.length} skills, ${INSTITUTIONS.length} institutions.`,
   );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Phase 9.17  seeker-invitation fixtures.
+//
+// Three rows on Discovery Bank so /employer/invites + the admin audit
+// surfaces render real content immediately:
+//
+//   pending     just-sent invite (3 days old, 11 days left to expire)
+//   accepted    invited 7 days BEFORE the cohort seeker signed up
+//                linked to wits-bsc-cs-2026-04's profile via
+//                accepted_profile_id, with `respondedAt` matching the
+//                seeker's memberSince
+//   declined    declined 30 days ago with a polite reason  inside the
+//                90-day cooldown window so the dashboard shows the
+//                "cooldown active" badge
+// ─────────────────────────────────────────────────────────────────────────────
+
+async function seedPhase9_17SeekerInvitations() {
+  console.log("📨 Phase 9.17  seeker invitation fixtures…");
+  const day = 24 * 60 * 60 * 1000;
+  const now = Date.now();
+  const orgId = id("org", "discovery-bank");
+  const invitedByUserId = id("user", "naledi-k");
+
+  // (1) Pending  sent 3 days ago, expires in 11.
+  await db.insert(schema.seekerInvitations).values({
+    id: id("inv", "thandi-mokoena-pending"),
+    organizationId: orgId,
+    invitedByUserId,
+    email: "thandi.mokoena@example.co.za",
+    name: "Thandi Mokoena",
+    profession: "Software Developer",
+    personalNote:
+      "We loved your portfolio at the WeThinkCode demo day. We're building out our payments team  please confirm so we can put you forward.",
+    state: "pending",
+    createdAt: new Date(now - 3 * day),
+    expiresAt: new Date(now + 11 * day),
+  });
+
+  // (2) Accepted  linked to wits-bsc-cs-2026-04 (one of the seeded
+  // cohort seekers). Invited 7 days before their member-since date.
+  await db.insert(schema.seekerInvitations).values({
+    id: id("inv", "wits-04-accepted"),
+    organizationId: orgId,
+    invitedByUserId,
+    email: "wits-bsc-cs-2026-04@example.com",
+    name: null,
+    profession: null,
+    personalNote: null,
+    state: "accepted",
+    acceptedProfileId: id("prof", "wits-bsc-cs-2026-04"),
+    createdAt: new Date(now - 14 * day),
+    expiresAt: new Date(now - 0 * day),
+    respondedAt: new Date(now - 7 * day),
+  });
+
+  // (3) Declined  30 days ago, with a polite reason. Within the
+  // 90-day cooldown window so the dashboard renders the badge.
+  await db.insert(schema.seekerInvitations).values({
+    id: id("inv", "sipho-declined"),
+    organizationId: orgId,
+    invitedByUserId,
+    email: "sipho.dlamini@example.co.za",
+    name: "Sipho Dlamini",
+    profession: "Project Manager",
+    personalNote: "We're growing our PMO  would love to chat.",
+    state: "declined",
+    declineReason:
+      "Thanks for thinking of me, but I'm not open to opportunities right now. Best of luck with the search!",
+    createdAt: new Date(now - 35 * day),
+    expiresAt: new Date(now - 21 * day),
+    respondedAt: new Date(now - 30 * day),
+  });
 }
 
 main().catch((err) => {

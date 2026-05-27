@@ -31,7 +31,7 @@ import {
   REQUIRED_FOR_SEARCHABILITY,
   type ConsentPurpose,
 } from "@/lib/consent";
-import { signUpSeeker } from "@/lib/auth/actions";
+import { signUpSeeker, acceptSeekerInvitation } from "@/lib/auth/actions";
 import { GraduationCap } from "lucide-react";
 
 type Step = 1 | 2 | 3;
@@ -129,14 +129,43 @@ const initialState: FormState = {
 interface Props {
   /** DB-backed list; falls back to MOCK_PROFESSIONS if absent. */
   professions?: ProfessionOption[];
+  /**
+   * Phase 9.17  pre-fill data + token from an employer-initiated
+   * invitation. When present:
+   *   - name + email are pre-filled in step 1; email is disabled
+   *     (the invite row is the source of truth for which address
+   *     becomes the new account's email)
+   *   - profession is pre-filled in step 3 if the inviter selected one
+   *   - submit calls `acceptSeekerInvitation` with the token instead
+   *     of the public `signUpSeeker`
+   * When absent the form behaves identically to the public sign-up.
+   */
+  invitationContext?: {
+    token: string;
+    orgName: string;
+    prefilledEmail: string;
+    prefilledName: string | null;
+    prefilledProfession: string | null;
+  };
 }
 
-export function SeekerSignUpForm({ professions }: Props = {}) {
+export function SeekerSignUpForm({
+  professions,
+  invitationContext,
+}: Props = {}) {
   const router = useRouter();
   const PROFESSIONS = professions && professions.length > 0 ? professions : MOCK_PROFESSIONS;
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
-  const [state, setState] = useState<FormState>(initialState);
+  const [state, setState] = useState<FormState>(() => {
+    if (!invitationContext) return initialState;
+    return {
+      ...initialState,
+      fullName: invitationContext.prefilledName ?? "",
+      email: invitationContext.prefilledEmail,
+      profession: invitationContext.prefilledProfession ?? "",
+    };
+  });
   const t = useTranslations("auth.seekerSignUp");
   const tCommon = useTranslations("auth.common");
   const tStatus = useTranslations("status");
@@ -203,20 +232,35 @@ export function SeekerSignUpForm({ professions }: Props = {}) {
           }
         : null;
 
-      const result = await signUpSeeker({
-        fullName: state.fullName,
-        email: state.email,
-        phone: state.phone || undefined,
-        dateOfBirth: state.dateOfBirth,
-        nationality: state.nationality,
-        password: state.password,
-        grantedConsents,
-        profession: state.profession,
-        province: state.province,
-        status: state.status,
-        workAvailability: state.workAvailability,
-        academic,
-      });
+      const result = invitationContext
+        ? await acceptSeekerInvitation({
+            token: invitationContext.token,
+            fullName: state.fullName,
+            phone: state.phone || undefined,
+            dateOfBirth: state.dateOfBirth,
+            nationality: state.nationality,
+            password: state.password,
+            grantedConsents,
+            profession: state.profession,
+            province: state.province,
+            status: state.status,
+            workAvailability: state.workAvailability,
+            academic,
+          })
+        : await signUpSeeker({
+            fullName: state.fullName,
+            email: state.email,
+            phone: state.phone || undefined,
+            dateOfBirth: state.dateOfBirth,
+            nationality: state.nationality,
+            password: state.password,
+            grantedConsents,
+            profession: state.profession,
+            province: state.province,
+            status: state.status,
+            workAvailability: state.workAvailability,
+            academic,
+          });
 
       if (!result.ok) {
         setError(result.message);
@@ -262,7 +306,12 @@ export function SeekerSignUpForm({ professions }: Props = {}) {
               type="email"
               autoComplete="email"
               required
-              disabled={pending}
+              disabled={pending || Boolean(invitationContext)}
+              hint={
+                invitationContext
+                  ? "Locked to the address your invitation was sent to."
+                  : undefined
+              }
             />
             <TextField
               id="phone"

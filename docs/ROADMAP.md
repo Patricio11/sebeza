@@ -552,6 +552,32 @@ that registry  we win on **data quality, usability, and analytics.** The system 
 
 ---
 
+## 🧷 PHASE 9.17: EMPLOYER-INITIATED SEEKER INVITES ✅ (shipped 2026-05-27)
+
+SA staffing-agency workflow gap: agents maintain candidate rosters on WhatsApp + Excel and bring people to platforms via "go sign up at sebenza.co.za" links. Phase 9.17 adds a path inside the system  a verified-org employer sends a single-invite-at-a-time onboarding nudge (email + optional name + optional profession + 200-char personal note), recipient lands on a tailored sign-up at `/sign-up/invited/[token]` with name + profession pre-filled and email locked, completes a customised `<SeekerSignUpForm>`, and the inviter sees them appear on the Joined list in `/employer/invites`. No vacancy coupling  the existing Phase 9.8 vacancy-invitation flow handles role-specific outreach once the seeker is on the platform.
+
+Three states the dashboard surfaces: Pending (Withdraw + Resend actions), Joined (linked to the same redacted public profile every verified employer sees  **no special PII access** on joined seekers per D9), Declined (with optional reason + 90-day cooldown badge per POPIA &sect;11).
+
+**POPIA posture, defendable end-to-end:**
+- **Verified-orgs-only gate** via `verifyOrgVerified()` (D1)  same gate as contact-reveal + document download
+- **Transparent dedupe** when the email already has a Sebenza account (D4): returns *"this email already has a Sebenza account. Search for them by name on Talent search to invite them to a vacancy."* The brute-enumeration defence is the 50/day per-org rate-limit (D7.1) that counts dedupe-hits and cooldown blocks alongside successful sends  attackers are throttled regardless of which path they trigger
+- **POPIA &sect;11 right-to-object** baked in: 90-day per-(org, email) cooldown after every decline (D7.2)
+- **POPIA &sect;16 transparency**: every invitation email carries a *"Why did I get this?"* footer + a token-gated `/report-invite/[token]` page that flags an `all_admins` notification + audit row  no Sebenza account required to report
+- **PII flag** on the audit log's `meta.note` for the 200-char personal note (D6)
+- **Signed HMAC-SHA256 tokens** with their own env var (`SEBENZA_INVITE_SIGNING_SECRET`)  a password-reset key leak doesn't compromise invitation tokens, and vice versa. 14-day expiry, single-use enforced at the DB layer (D8). 6 Vitest fixtures lock the contract.
+
+Additive migration `0029_phase9_17_seeker_invitations.sql` ships the `seeker_invitations` table + `seeker_invitation_state` enum + 3 indexes (org+state for dashboard reads, lower(email)+org for the D4 dedupe + D7.2 cooldown lookups, partial index on expires_at gated to `state='pending'` for the nightly cron).
+
+Six new audit kinds (`org.seeker_invite.{send,accept,decline,withdraw,expire,reported}`) + two new notification kinds (`org.seeker_invite.accepted` audience `org_members` so every seat on the inviting org sees the outcome, `org.seeker_invite.reported` audience `all_admins` for abuse oversight  both in-app default-on, email default-off per the Phase 8 email-flag posture).
+
+Three new compliance assertions on `/api/admin/outcomes-compliance` (now **29 assertions** total): `seeker-invite-verified-org-only` (regression check on the gate), `seeker-invite-cooldown-honoured` (no row created within 90 days of the same `(org, email)` declining), `seeker-invite-no-orphan-when-user-exists` (no row persists when an `app_user` already has the email).
+
+New `/employer/invites` dashboard route + `UserPlus` nav entry between Vacancies and Talent pools. New `/sign-up/invited/[token]` + `/sign-up/invited/[token]/decline` + `/report-invite/[token]` public routes (token-gated, no auth). New cron at `/api/cron/seeker-invite-expiry` (CRON_SECRET-guarded, same pattern as the Phase 9.8 vacancy-invite-expiry cron). `<SeekerSignUpForm>` extended with an `invitationContext` prop that pre-fills name + email + profession and locks the email field; submit branches to `acceptSeekerInvitation` instead of `signUpSeeker`. Recipient-facing email lives in `lib/email/templates/seeker-invite.ts`  reuses the shared `emailShell()` brand chrome.
+
+Seed extends with 3 demo invites on Discovery Bank (one pending / one accepted linked to a real cohort seeker / one declined with a polite reason inside the cooldown window) so `/employer/invites` renders real content immediately. **Discovery Bank flipped to `verified` in the seed** so the Phase 9.17 demo + the existing Phase 9.10 KYC fixtures (Acme `pending`, Globex `rejected`, Initech `unverified`) cover both happy-path + gate-testing dev workflows side-by-side. Companion docs: `docs/PHASE_9_17_PLAN.md` (13 locked decisions + 14 build tasks) + DPIA addendum R11 + Privacy Section 2 + PAIA Section 4 updates.
+
+---
+
 ## 🧷 PHASE 9.16: DOB + NATIONALITY AT SIGN-UP + ADMIN-MEDIATED ID VERIFICATION ✅ (shipped 2026-05-27)
 
 Originally three coupled changes around identity capture; a same-day operator review (2026-05-27) trimmed the most friction-heavy part of the sign-up form. **Final shape:** DOB + nationality captured at sign-up; ID number / passport / document upload live entirely on the profile editor + KYC panel. The infrastructure for SA ID + passport stays exactly as designed, just not in the user's face at first contact.

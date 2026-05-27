@@ -168,7 +168,23 @@ export type AuditKind =
   // identically.
   | "kyc.document.upload"
   | "kyc.review.approve"
-  | "kyc.review.reject";
+  | "kyc.review.reject"
+  // Phase 9.17  employer-initiated seeker invitations. `subject` is
+  // the seeker_invitations.id. Meta carries:
+  //   send       { email, name?, profession?, note? (pii), dedupe?,
+  //                resend?, blockedBy? }
+  //   accept     { profileId, signupCompletedAt }
+  //   decline    { reason? }
+  //   withdraw   {}
+  //   expire     {}  fired by the nightly cron, actor = "system"
+  //   reported   { reason?, reporterIp? }  no auth required, the
+  //                token IS the proof of identity for the report
+  | "org.seeker_invite.send"
+  | "org.seeker_invite.accept"
+  | "org.seeker_invite.decline"
+  | "org.seeker_invite.withdraw"
+  | "org.seeker_invite.expire"
+  | "org.seeker_invite.reported";
 
 export interface AuditEvent {
   kind: AuditKind;

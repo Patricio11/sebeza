@@ -7,6 +7,7 @@ import {
   CheckCircle2,
   Building2,
   UsersRound,
+  UserPlus,
   Bell,
   Settings,
 } from "lucide-react";
@@ -20,6 +21,10 @@ export const EMPLOYER_NAV: DashboardNavItem[] = [
   // monitoring) and talent pools (manual shortlisting) because they
   // are the active reverse-matching workflow that bridges the two.
   { key: "vacancies", label: "Vacancies", href: "/employer/vacancies", icon: Briefcase },
+  // Phase 9.17  invited seekers (roster-building flow). Sits next to
+  // Vacancies because both are outbound-from-employer workflows;
+  // Vacancies invites EXISTING seekers, Invites onboards NEW ones.
+  { key: "invites", label: "Invites", href: "/employer/invites", icon: UserPlus },
   { key: "shortlists", label: "Talent pools", href: "/employer/shortlists", icon: Users2 },
   { key: "placements", label: "Placements", href: "/employer/placements", icon: CheckCircle2 },
   { key: "organisation", label: "Organisation", href: "/employer/organisation", icon: Building2 },

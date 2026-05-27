@@ -115,6 +115,19 @@ export default async function PrivacyPolicyPage({
                 reveals, document downloads)  to maintain the audit ledger
                 you can see on <code>/dashboard/activity</code>.
               </li>
+              <li>
+                <strong>Invitations you receive</strong>  if a verified
+                Sebenza employer invites you to join the platform, we
+                store the invitation row (the inviting organisation,
+                your email address, the optional name + profession +
+                personal note your inviter included) until you accept,
+                decline, or the 14-day expiry runs out. If you decline,
+                we honour that decision by blocking that same
+                organisation from sending you another invitation for at
+                least 90 days under POPIA &sect;11. You can also report
+                an invitation as unsolicited from a link inside every
+                invitation email  no Sebenza account required.
+              </li>
             </ul>
             <p>
               We do not collect anything we do not need for one of these

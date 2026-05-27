@@ -323,6 +323,33 @@ export const NOTIFICATION_CATALOG = {
     description: "Includes the admin's reason so you can re-upload a clearer copy.",
     dedupeWindowSeconds: 0,
   },
+  // Phase 9.17  fires to every member of the inviting org when a
+  // seeker completes sign-up via the invitation link. Same broadcast
+  // pattern as Phase 9.10's org.documents.submitted: any seat on the
+  // org sees the outcome. In-app default-on so the inviter actually
+  // notices; email default-off (Phase 8 flag still gates the channel
+  // for all email kinds).
+  "org.seeker_invite.accepted": {
+    defaultInApp: true,
+    defaultEmail: false,
+    audience: "org_members",
+    label: "An invited seeker joined Sebenza",
+    description:
+      "Someone you invited completed sign-up. Open the Invites tab to see who.",
+    dedupeWindowSeconds: 0,
+  },
+  // Phase 9.17  fires to every admin when a recipient hits the
+  // report-this-invite path. High-urgency  no dedupe so repeated
+  // reports stay visible. In-app default-on, email default-off.
+  "org.seeker_invite.reported": {
+    defaultInApp: true,
+    defaultEmail: false,
+    audience: "all_admins",
+    label: "Seeker invitation reported",
+    description:
+      "An invitation recipient flagged an invite as abusive. Open the admin verifications page to review the inviting org.",
+    dedupeWindowSeconds: 0,
+  },
 } as const satisfies Record<string, NotificationKindMeta>;
 
 export type NotificationKind = keyof typeof NOTIFICATION_CATALOG;

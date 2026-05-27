@@ -145,6 +145,12 @@ const TEMPLATES: Partial<
   // skill in context.
   "learning.completed": (ctx) =>
     genericTemplate(ctx, "Open your profile", "Skill added"),
+  // ── Phase 9.17  invited-seeker outcome to the org ────────────────────
+  // Fires to every member of the inviting org when the seeker
+  // completes sign-up via the invitation link. CTA lands on the
+  // employer invites page where the new "Joined" row is waiting.
+  "org.seeker_invite.accepted": (ctx) =>
+    genericTemplate(ctx, "Open the Invites tab", "Invited seeker joined"),
 };
 
 export function emailContentFor(

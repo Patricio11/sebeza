@@ -245,6 +245,81 @@ covered by this DPIA:
   to provider verification and admin-mediated upload becomes the
   break-glass.
 
+### R11  Employer-initiated seeker invitations (Phase 9.17)
+
+- **Risk**: Phase 9.17 lets a verified-org employer (or staffing agent
+  acting through a verified org) send a Sebenza sign-up invitation to
+  an email address that has not yet consented to anything on the
+  platform. Three distinct exposure surfaces:
+    1. **Email harvesting**. A bad-actor org could submit emails as
+       a discovery probe ("does this person exist on Sebenza?") or as
+       an unsolicited outreach blast.
+    2. **The personal-note field**. Up to 200 characters of free text
+       written by the inviter and rendered verbatim in the recipient's
+       inbox. Anything that quotes the recipient by name or context
+       is POPIA personal information.
+    3. **The invitation token**. Bearer credential for the
+       /sign-up/invited/[token] flow. Possession of the token grants
+       the ability to create an account with the invite's email as
+       the lookup key.
+- **Decision (operator review, 2026-05-27)**: **PROCEED with the
+  controls listed below.** Phase 9.17 closes a real workflow gap for
+  SA staffing agencies (their existing process is WhatsApp + Excel
+  rosters outside the platform); leaving them outside the platform
+  loses the audit trail + the LMI signal entirely.
+- **Controls** (every one server-side enforced, audit-logged on every
+  block):
+  - **Verified-orgs-only gate** (D1) via the existing
+    `verifyOrgVerified()` helper. Unverified orgs cannot send a
+    single invitation. The org must have already passed Phase 9.10
+    admin KYC review  CIPC certificate, tax clearance, proof of
+    address, bank confirmation.
+  - **Per-org daily cap** (D7.1) of 50 invite attempts, counting
+    EVERY outcome  successful sends, D4 dedupe-hits, D7.2 cooldown
+    blocks, validation failures. An enumeration attacker has the
+    same ceiling whether they hit valid emails or not.
+  - **Platform-wide daily cap** (D7.3) of 500 attempts for the first
+    30 days post-launch, raised on observation.
+  - **Per-(org, email) 90-day decline cooldown** (D7.2). POPIA §11
+    right-to-object: once a recipient declines, the same org cannot
+    re-invite that address for 90 days. Server-side enforced via the
+    `seeker-invite-cooldown-honoured` compliance assertion.
+  - **Transparent dedupe with rate-limit defence** (D4). When the
+    email already has a Sebenza account, we return
+    `"this email already has a Sebenza account"` rather than the
+    silent "invitation sent" oracle defence. The product reason:
+    legitimate agents need actionable feedback ("search for them
+    instead"); they shouldn't be left re-sending invitations that
+    were silently swallowed. The structural defence is the 50/day
+    rate limit  including dedupe-hits, so brute-enumeration of who
+    exists on the platform is throttled. Assertion
+    `seeker-invite-no-orphan-when-user-exists` verifies the dedupe
+    never persists a row when the user already exists.
+  - **PII flag on the personal note** (D6). The audit row's
+    `meta.note` field is treated as PII for any future
+    data-export sweep. Limited to 200 chars to keep the surface
+    area bounded.
+  - **Signed HMAC-SHA256 tokens** (D8), 14-day expiry, single-use
+    enforced at the DB layer (the row's `state` flips on accept /
+    decline / withdraw / expire). Signing secret is its own env var
+    (`SEBENZA_INVITE_SIGNING_SECRET`)  a leak of the password-reset
+    signing key does not compromise invitation tokens, and vice versa.
+    Tokens are opaque: the email never appears in the URL.
+  - **POPIA §16 transparency** (D13). Every invitation email carries
+    a footer with (a) "Why did I get this?" plain-language paragraph
+    and (b) a token-gated "Report this invite" link that requires no
+    Sebenza account. Reports fire an `all_admins` notification + an
+    `org.seeker_invite.reported` audit row; admins can suspend the
+    inviting org if the pattern looks abusive.
+- **Residual risk**: low. A malicious verified org could theoretically
+  burn its rate limit each day for as long as it stays verified, but
+  (a) the verified-org gate already filtered most bad actors at the
+  KYC review stage, (b) the report-this-invite path surfaces abuse
+  to admins out-of-band, (c) the platform-wide cap caps the total
+  blast radius. When the KYC-SaaS partnership lands (Phase 8 flag
+  flip), the verifier upgrades from admin-mediated to provider-
+  mediated and the trust posture strengthens further.
+
 ## 4. Sign-off
 
 To be signed by the Information Officer once designated. Until then,

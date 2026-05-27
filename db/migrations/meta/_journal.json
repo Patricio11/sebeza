@@ -204,6 +204,13 @@
       "when": 1780000000000,
       "tag": "0028_phase9_16_dob_passport_kyc_upload",
       "breakpoints": false
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1780100000000,
+      "tag": "0029_phase9_17_seeker_invitations",
+      "breakpoints": false
     }
   ]
 }

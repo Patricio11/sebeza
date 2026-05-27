@@ -1077,6 +1077,117 @@ export async function assertPassportCountryWhenPassport(): Promise<AssertResult>
   };
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Phase 9.17  employer-initiated seeker invitation assertions.
+//
+//   1. seeker-invite-verified-org-only   every seeker_invitations row
+//      links to an org that is currently `verified`. Catches a
+//      regression where the verifyOrgVerified gate drops out + an
+//      unverified org slips through.
+//   2. seeker-invite-cooldown-honoured   for every declined row + the
+//      subsequent re-invite to the same email from the same org, the
+//      90-day cooldown was respected at create-time.
+//   3. seeker-invite-no-orphan-when-user-exists   no row exists where
+//      lower(email) matches an `app_user.email` that was created
+//      before the invite's created_at. Verifies D4's transparent
+//      dedupe never persisted a redundant row.
+// ─────────────────────────────────────────────────────────────────────────────
+
+export async function assertSeekerInviteVerifiedOrgOnly(): Promise<AssertResult> {
+  const db = getDb();
+  const rows = await db.execute(sql`
+    SELECT si.id AS invite_id, si.organization_id, o.verification
+    FROM seeker_invitations si
+    JOIN organizations o ON o.id = si.organization_id
+    WHERE o.verification != 'verified'
+    LIMIT 5
+  `);
+  const offenders = (
+    rows as unknown as {
+      rows: Array<{
+        invite_id: string;
+        organization_id: string;
+        verification: string;
+      }>;
+    }
+  ).rows;
+  return {
+    ok: offenders.length === 0,
+    name: "seeker-invite-verified-org-only",
+    message:
+      offenders.length === 0
+        ? "Every seeker invitation row links to a currently-verified org."
+        : `${offenders.length} invitation(s) link to non-verified orgs. First: invite=${offenders[0]?.invite_id} org=${offenders[0]?.organization_id} verification=${offenders[0]?.verification}.`,
+  };
+}
+
+export async function assertSeekerInviteCooldownHonoured(): Promise<AssertResult> {
+  const db = getDb();
+  // Find any row where a same-(org, lower(email)) row was declined
+  // within the 90 days BEFORE this row's created_at. That's the
+  // cooldown violation.
+  const rows = await db.execute(sql`
+    SELECT later.id AS invite_id, later.organization_id, lower(later.email) AS email,
+           earlier.id AS prior_decline_id, earlier.responded_at AS declined_at
+    FROM seeker_invitations later
+    JOIN seeker_invitations earlier
+      ON earlier.organization_id = later.organization_id
+      AND lower(earlier.email) = lower(later.email)
+      AND earlier.state = 'declined'
+      AND earlier.id != later.id
+      AND earlier.responded_at IS NOT NULL
+      AND earlier.responded_at > (later.created_at - INTERVAL '90 days')
+      AND earlier.responded_at < later.created_at
+    LIMIT 5
+  `);
+  const offenders = (
+    rows as unknown as {
+      rows: Array<{
+        invite_id: string;
+        organization_id: string;
+        email: string;
+        prior_decline_id: string;
+        declined_at: Date;
+      }>;
+    }
+  ).rows;
+  return {
+    ok: offenders.length === 0,
+    name: "seeker-invite-cooldown-honoured",
+    message:
+      offenders.length === 0
+        ? "No invitation row created within 90 days of the same (org, email) declining a previous invitation."
+        : `${offenders.length} cooldown violation(s). First: invite=${offenders[0]?.invite_id} re-invited despite prior decline=${offenders[0]?.prior_decline_id}.`,
+  };
+}
+
+export async function assertSeekerInviteNoOrphanWhenUserExists(): Promise<AssertResult> {
+  const db = getDb();
+  // Every seeker_invitations row whose email matches an app_user row
+  // created BEFORE the invite is a D4 violation  the action should
+  // have refused the insert.
+  const rows = await db.execute(sql`
+    SELECT si.id AS invite_id, lower(si.email) AS email, u.id AS user_id
+    FROM seeker_invitations si
+    JOIN app_user u ON lower(u.email) = lower(si.email)
+    WHERE u."createdAt" < si.created_at
+    LIMIT 5
+  `);
+  const offenders = (
+    rows as unknown as {
+      rows: Array<{ invite_id: string; email: string; user_id: string }>;
+    }
+  ).rows;
+  return {
+    ok: offenders.length === 0,
+    name: "seeker-invite-no-orphan-when-user-exists",
+    message:
+      offenders.length === 0
+        ? "No invitation row exists for an email that already had a Sebenza account at create-time."
+        : `${offenders.length} orphan invite(s). First: invite=${offenders[0]?.invite_id} email=${offenders[0]?.email} pre-existing-user=${offenders[0]?.user_id}.`,
+  };
+}
+
 export async function assertKycDocumentPrivate(): Promise<AssertResult> {
   const db = getDb();
   // Every storage key MUST follow `{userId}/id-documents/...`. Catches a
@@ -1143,6 +1254,10 @@ export async function runAll(): Promise<void> {
     await assertIdEncryptionMandatory(),
     await assertPassportCountryWhenPassport(),
     await assertKycDocumentPrivate(),
+    // Phase 9.17
+    await assertSeekerInviteVerifiedOrgOnly(),
+    await assertSeekerInviteCooldownHonoured(),
+    await assertSeekerInviteNoOrphanWhenUserExists(),
   ];
 
   let failed = 0;

@@ -126,6 +126,15 @@ export default async function PaiaManualPage({
                 consent grants/revocations, administrator actions.
               </li>
               <li>
+                <strong>Seeker invitation records</strong>  for each
+                invitation an employer sends, the inviting
+                organisation id, the inviter's user id, the recipient
+                email + optional name/profession/note, the lifecycle
+                state (pending / accepted / declined / withdrawn /
+                expired), the timestamps, and  when accepted  the
+                linked profile id.
+              </li>
+              <li>
                 <strong>File uploads</strong>  CVs, qualification documents,
                 profile photos (stored privately in Supabase Storage; access
                 via short-lived signed URLs only).

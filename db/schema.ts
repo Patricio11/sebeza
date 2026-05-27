@@ -1327,3 +1327,92 @@ export const programmeSkills = pgTable(
     ),
   }),
 );
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Phase 9.17  employer-initiated seeker invites.
+//
+// Single-invite-at-a-time roster-building flow for verified-org
+// employers. The invitation does NOT tie to a vacancy (D3); once the
+// seeker signs up via the token, the existing Phase 9.8 vacancy-
+// invitation flow handles role-specific outreach.
+//
+// Lifecycle:
+//   pending     row created, email queued
+//   accepted    seeker completed sign-up via the token
+//   declined    seeker explicitly clicked "Not interested" on the
+//                landing page (with optional reason)
+//   withdrawn   employer cancelled before any response
+//   expired     nightly cron flipped past expires_at
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const seekerInvitationState = pgEnum("seeker_invitation_state", [
+  "pending",
+  "accepted",
+  "declined",
+  "withdrawn",
+  "expired",
+]);
+
+export const seekerInvitations = pgTable(
+  "seeker_invitations",
+  {
+    id: text("id").primaryKey(),
+    /** The verified org doing the inviting. FK to organizations.id. */
+    organizationId: text("organization_id")
+      .notNull()
+      .references(() => organizations.id),
+    /** Which member of the org clicked Invite. Audit-trail anchor. */
+    invitedByUserId: text("invited_by_user_id")
+      .notNull()
+      .references(() => appUser.id),
+    /** Recipient email. Stored case-as-typed; lookups + uniqueness use
+     *  lower(email). Validation: must be a syntactically valid email. */
+    email: text("email").notNull(),
+    /** Optional pre-fill for the seeker's sign-up form. */
+    name: text("name"),
+    /** Optional pre-fill for the seeker's profession (Step 3 of sign-up). */
+    profession: text("profession"),
+    /** Optional 200-char personal note from the inviter. Verbatim in
+     *  the email body. PII territory: anything that quotes the
+     *  recipient's life is personal info under POPIA, so the audit
+     *  log meta.note is flagged for any future data-export sweep. */
+    personalNote: text("personal_note"),
+    state: seekerInvitationState("state").notNull().default("pending"),
+    /** When the seeker clicked Decline. Free-text reason  optional. */
+    declineReason: text("decline_reason"),
+    /** Linked profile id when state = accepted. Mirrors Phase 9.8's
+     *  invite-to-profile link pattern. */
+    acceptedProfileId: text("accepted_profile_id").references(
+      () => profiles.id,
+    ),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    expiresAt: timestamp("expires_at").notNull(),
+    /** When the seeker accepted / declined / when the cron expired
+     *  the row / when the employer withdrew it. */
+    respondedAt: timestamp("responded_at"),
+  },
+  (t) => ({
+    orgStateIdx: index("seeker_invites_org_state_idx").on(
+      t.organizationId,
+      t.state,
+    ),
+    /* Email lookup index for the D4 dedupe check + D7.2 cooldown
+       check. Uses lower(email) via the migration's explicit
+       CREATE INDEX  Drizzle's index() doesn't accept a SQL
+       expression, so the migration owns the lowercase index + this
+       schema-side `index()` is the plain version. The query layer
+       always wraps the column in lower() when comparing  see
+       lib/employer/seeker-invitations.ts. */
+    emailOrgIdx: index("seeker_invites_email_org_idx").on(
+      t.email,
+      t.organizationId,
+    ),
+    /* Partial index on expires_at for the cron sweep (state =
+       'pending' only). Drizzle's index() doesn't accept a WHERE
+       clause, so we duplicate the index name; the migration's
+       CREATE INDEX … WHERE is what actually lands on the database.
+       The plain index here keeps the introspection round-trip
+       quiet. */
+    expiryIdx: index("seeker_invites_expires_idx").on(t.expiresAt),
+  }),
+);
