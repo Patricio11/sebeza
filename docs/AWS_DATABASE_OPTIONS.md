@@ -559,6 +559,7 @@ For Sebenza specifically, the cost difference is ~$50-100/month vs Aurora Server
 ## The smartest move you can make right now
 
 1. **Apply for AWS Activate** today — <https://aws.amazon.com/activate/>. Sebenza's POPIA + gov story + Phase 9.13 compliance suite is a strong application. Expect $1K-$5K in credits for the Founders tier, up to $100K if you're accepted by a Portfolio partner.
+-Already registed just need to do the application when register the company: https://aws.amazon.com/startups/dashboard
 
 2. **Stay on Neon** until a partner confirms. Don't burn money on infrastructure waiting for users.
 
