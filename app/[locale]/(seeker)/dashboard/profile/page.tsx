@@ -18,6 +18,7 @@ import { SkillsEditor } from "@/components/feature/profile/SkillsEditor";
 import { WorkAvailabilityEditor } from "@/components/feature/profile/WorkAvailabilityEditor";
 import { NationalIdControls } from "@/components/feature/profile/NationalIdControls";
 import { KycPanel } from "@/components/feature/profile/KycPanel";
+import { DateOfBirthEditor } from "@/components/feature/profile/DateOfBirthEditor";
 import { getSetting } from "@/lib/admin/settings";
 import { AvatarEditor } from "@/components/feature/profile/AvatarEditor";
 import { ShareProfileLink } from "@/components/feature/profile/ShareProfileLink";
@@ -236,12 +237,19 @@ export default async function ProfileEditorPage({
               title="National ID"
               hint="Captured once, encrypted on save, never displayed back. POPIA special-category data."
             />
+            <div className="mb-3">
+              <DateOfBirthEditor initialValue={me.dateOfBirth} />
+            </div>
             <NationalIdControls hasNationalId={me.hasNationalId} />
             <div className="mt-4">
               <KycPanel
                 hasNationalId={me.hasNationalId}
                 kycVerifiedAt={me.kycVerifiedAt}
                 realProviderEnabled={kycProviderEnabled}
+                hasIdDocument={me.hasIdDocument}
+                idDocumentUploadedAt={me.idDocumentUploadedAt}
+                idDocumentRejectionReason={me.idDocumentRejectionReason}
+                idDocumentKind={me.idDocumentKind}
               />
             </div>
           </section>

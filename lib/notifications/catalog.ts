@@ -301,6 +301,28 @@ export const NOTIFICATION_CATALOG = {
       "A user picked \"Other\" and entered a free-text profession or institution that isn't in the canonical list. Review on /admin/taxonomy/suggestions  promote it, merge it into an existing entry (fixes misspellings), or reject it. Rejection never erases the user's data.",
     dedupeWindowSeconds: 24 * 60 * 60,
   },
+  // Phase 9.16  admin-mediated seeker ID verification. Mirrors the
+  // qualification.verified / .rejected pair: the document the seeker
+  // uploaded has been reviewed by an admin, with an outcome they need
+  // to know about. Email defaults stay off (Phase 8 will flip once
+  // Resend is wired); in-app on because the seeker is blocked from
+  // some surfaces until KYC is settled.
+  "kyc.approved": {
+    defaultInApp: true,
+    defaultEmail: false,
+    audience: "seeker",
+    label: "Your identity document was approved",
+    description: "Admins reviewed your ID and confirmed it. You're KYC-verified.",
+    dedupeWindowSeconds: 0,
+  },
+  "kyc.rejected": {
+    defaultInApp: true,
+    defaultEmail: false,
+    audience: "seeker",
+    label: "Your identity document was rejected",
+    description: "Includes the admin's reason so you can re-upload a clearer copy.",
+    dedupeWindowSeconds: 0,
+  },
 } as const satisfies Record<string, NotificationKindMeta>;
 
 export type NotificationKind = keyof typeof NOTIFICATION_CATALOG;

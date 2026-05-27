@@ -80,9 +80,19 @@ export default async function PrivacyPolicyPage({
             </p>
             <ul className="my-4 list-disc pl-6 space-y-2">
               <li>
-                <strong>Identity</strong> (name, email, encrypted national ID)
-                 to create an account, verify you, and link your profile to
-                a real person.
+                <strong>Identity</strong> (name, email, date of birth,
+                encrypted national ID or passport number + issuing country,
+                and  when you submit one for verification  a copy of your
+                SA ID book/card or passport bio page)  to create an
+                account, confirm you meet the minimum age (14) under the
+                Basic Conditions of Employment Act, and link your profile
+                to a real person. Documents you upload for identity
+                verification are stored in a private bucket scoped to your
+                user id and are read only via short-lived signed URLs by
+                Sebenza administrators when they review your submission.
+                Your date of birth is visible only to you and Sebenza
+                administrators  it is never shown on your public profile
+                or returned by employer searches.
               </li>
               <li>
                 <strong>Professional</strong> (profession, skills, experience,
@@ -305,7 +315,12 @@ export default async function PrivacyPolicyPage({
               <li>
                 <strong>KYC verification</strong>  TBC SA-registered
                 provider (Home Affairs eHANIS adapter). Currently inactive
-                pending partnership confirmation.
+                pending partnership confirmation. While the SaaS path is
+                dormant, identity is confirmed by an admin-mediated
+                document review: you upload a copy of your SA ID or
+                passport bio page; a Sebenza administrator reviews it
+                from <code>/admin/verifications</code>; the outcome is
+                logged in the audit trail and you are notified in-app.
               </li>
               <li>
                 <strong>SAQA qualification verification</strong>  SAQA NLRD

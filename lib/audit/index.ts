@@ -159,7 +159,16 @@ export type AuditKind =
   | "taxonomy.suggestion.submit"
   | "taxonomy.suggestion.promote"
   | "taxonomy.suggestion.merge"
-  | "taxonomy.suggestion.reject";
+  | "taxonomy.suggestion.reject"
+  // Phase 9.16  admin-mediated seeker ID verification. `subject` is the
+  // seeker's profile id; meta carries the document storage key on
+  // upload, the reviewer's user id on review actions, and the
+  // rejection reason when applicable. Mirrors the org.review.* shape
+  // from Phase 9.10 so admin oversight tooling can treat both queues
+  // identically.
+  | "kyc.document.upload"
+  | "kyc.review.approve"
+  | "kyc.review.reject";
 
 export interface AuditEvent {
   kind: AuditKind;

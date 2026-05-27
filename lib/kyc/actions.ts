@@ -17,7 +17,7 @@
  */
 
 import { z } from "zod";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { getDb } from "@/db/client";
 import * as schema from "@/db/schema";
@@ -25,6 +25,11 @@ import { getSessionUser } from "@/lib/auth/guard";
 import { verifyAdmin } from "@/lib/auth/dal";
 import { logAccess } from "@/lib/audit";
 import { decryptField } from "@/lib/crypto";
+import {
+  uploadIdDocument as uploadIdDocumentToStorage,
+  deleteStorageObject,
+} from "@/lib/storage/upload";
+import { StorageError } from "@/lib/storage/supabase";
 import { resolveIdentityVerifier } from "./provider";
 
 export type ActionResult<T extends object = object> =
@@ -143,6 +148,92 @@ export async function adminVerifyIdManually(
 
   revalidatePath("/admin/users");
   return ok();
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Phase 9.16  seeker ID document upload (admin-mediated review)
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Seeker-side: attach a copy of the seeker's ID book/card or passport
+ * bio page so an admin can verify it manually. Replaces the
+ * `submitMyIdForVerification` flow when the KYC-SaaS partnership is
+ * absent (today's reality  the SaaS flag is dormant).
+ *
+ * Writes:
+ *   - profiles.id_document_storage_key  the new object's path
+ *   - profiles.id_document_uploaded_at  now()
+ *   - profiles.id_document_rejection_reason  cleared (re-upload after
+ *     a rejection wipes the prior reason so it doesn't haunt the UI)
+ *
+ * Audit: `kyc.document.upload` (subject = profileId, meta = storageKey).
+ *
+ * Storage uses the `{userId}/id-documents/{profileId}.{ext}` path so
+ * the audit trail + future KYC-SaaS migration can sweep the prefix.
+ */
+export async function uploadIdDocument(
+  formData: FormData,
+): Promise<ActionResult<{ key: string }>> {
+  const session = await getSessionUser();
+  if (!session) return fail("Not signed in.");
+
+  const file = formData.get("file");
+  if (!(file instanceof File)) return fail("Missing file.");
+
+  const db = getDb();
+  const rows = await db
+    .select({
+      id: schema.profiles.id,
+      userId: schema.profiles.userId,
+      old: schema.profiles.idDocumentStorageKey,
+    })
+    .from(schema.profiles)
+    .where(eq(schema.profiles.userId, session.id))
+    .limit(1);
+  const me = rows[0];
+  if (!me) return fail("Profile not found.");
+
+  try {
+    const { key } = await uploadIdDocumentToStorage({
+      userId: session.id,
+      id: me.id,
+      file,
+    });
+
+    await db
+      .update(schema.profiles)
+      .set({
+        idDocumentStorageKey: key,
+        idDocumentUploadedAt: new Date(),
+        idDocumentRejectionReason: null,
+      })
+      .where(eq(schema.profiles.id, me.id));
+
+    // Best-effort cleanup of the previous object if the path changed
+    // (e.g. user replaced a JPEG with a PDF). Not fatal  Phase 8 cron
+    // sweeps orphans.
+    if (me.old && me.old !== key) {
+      try {
+        await deleteStorageObject(me.old);
+      } catch {
+        // ignore
+      }
+    }
+
+    await logAccess({
+      kind: "kyc.document.upload",
+      actor: session.id,
+      subject: me.id,
+      meta: { storageKey: key },
+    });
+
+    revalidatePath("/dashboard/profile");
+    revalidatePath("/admin/verifications");
+    return ok({ key });
+  } catch (e) {
+    if (e instanceof StorageError) return fail(e.message);
+    return fail("Upload failed. Please try again.");
+  }
 }
 
 export async function revokeMyKyc(): Promise<ActionResult> {

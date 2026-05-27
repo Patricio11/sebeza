@@ -969,6 +969,146 @@ export async function assertTaxonomyBackfillsComplete(): Promise<AssertResult> {
   };
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Phase 9.16  identity capture assertions.
+//
+// New surface: DOB + admin-mediated ID document upload + passport
+// support. Four invariants the platform must maintain end-to-end:
+//
+//   1. dob-never-in-public-payload  the `dataProvider.getProfile()`
+//      seam (the canonical public-facing projection) MUST NOT carry
+//      dateOfBirth. POPIA personal-info: visible only to the owner +
+//      admins.
+//   2. id-encryption-mandatory      every non-null profiles.national_id_enc
+//      MUST start with the encryption prefix (`v1.`). Catches a
+//      regression where plaintext leaks into the column.
+//   3. passport-country-when-passport  every profile with
+//      id_document_kind = 'passport' MUST have a non-null,
+//      ISO-3166-valid passport_country. We never want to render
+//      "passport from <empty>".
+//   4. kyc-document-private        every id_document_storage_key MUST
+//      follow `{userId}/id-documents/...` so admin tooling can scope
+//      audits by prefix + the path itself never leaks outside its
+//      owner. Cross-checks against the public profile payload too:
+//      the storage key MUST NOT appear in any public-facing projection.
+// ─────────────────────────────────────────────────────────────────────────────
+
+export async function assertDobNeverInPublicPayload(): Promise<AssertResult> {
+  const db = getDb();
+  const sample = await db
+    .select({ handle: schema.profiles.handle })
+    .from(schema.profiles)
+    .limit(50);
+  if (sample.length === 0) {
+    return {
+      ok: true,
+      name: "dob-never-in-public-payload",
+      message: "No profiles to sample; vacuously satisfied.",
+    };
+  }
+  const { dataProvider } = await import("@/lib/data/provider");
+  for (const s of sample) {
+    const pub = await dataProvider.getProfile(s.handle);
+    if (!pub) continue;
+    if (Object.prototype.hasOwnProperty.call(pub, "dateOfBirth")) {
+      return {
+        ok: false,
+        name: "dob-never-in-public-payload",
+        message: `Profile ${s.handle} carried dateOfBirth in the public projection.`,
+      };
+    }
+    if (Object.prototype.hasOwnProperty.call(pub, "idDocumentStorageKey")) {
+      return {
+        ok: false,
+        name: "dob-never-in-public-payload",
+        message: `Profile ${s.handle} carried idDocumentStorageKey in the public projection (private field leak).`,
+      };
+    }
+  }
+  return {
+    ok: true,
+    name: "dob-never-in-public-payload",
+    message: `Sampled ${sample.length} profiles via dataProvider.getProfile()  none carried DOB or storage-key.`,
+  };
+}
+
+export async function assertIdEncryptionMandatory(): Promise<AssertResult> {
+  const db = getDb();
+  const rows = await db
+    .select({
+      id: schema.profiles.id,
+      enc: schema.profiles.nationalIdEnc,
+    })
+    .from(schema.profiles)
+    .where(sql`${schema.profiles.nationalIdEnc} IS NOT NULL`)
+    .limit(500);
+  const offender = rows.find((r) => !r.enc || !r.enc.startsWith("v1."));
+  return {
+    ok: !offender,
+    name: "id-encryption-mandatory",
+    message: offender
+      ? `Profile ${offender.id} has a non-null national_id_enc that doesn't carry the v1. encryption prefix. Plaintext or corrupt payload.`
+      : `All ${rows.length} non-null national_id_enc values carry the v1. encryption prefix.`,
+  };
+}
+
+export async function assertPassportCountryWhenPassport(): Promise<AssertResult> {
+  const { isValidCountryCode } = await import("@/lib/taxonomy/countries");
+  const db = getDb();
+  const rows = await db
+    .select({
+      id: schema.profiles.id,
+      country: schema.profiles.passportCountry,
+    })
+    .from(schema.profiles)
+    .where(eq(schema.profiles.idDocumentKind, "passport"))
+    .limit(500);
+  const offender = rows.find(
+    (r) => !r.country || !isValidCountryCode(r.country),
+  );
+  return {
+    ok: !offender,
+    name: "passport-country-when-passport",
+    message: offender
+      ? `Profile ${offender.id} has id_document_kind=passport but passport_country=${
+          offender.country ?? "NULL"
+        }  not a valid ISO 3166-1 alpha-2.`
+      : `All ${rows.length} passport profiles carry a valid ISO 3166-1 alpha-2 issuer.`,
+  };
+}
+
+export async function assertKycDocumentPrivate(): Promise<AssertResult> {
+  const db = getDb();
+  // Every storage key MUST follow `{userId}/id-documents/...`. Catches a
+  // regression where the bucket layout drifts + admin oversight loses
+  // its prefix scoping.
+  const rows = await db
+    .select({
+      id: schema.profiles.id,
+      userId: schema.profiles.userId,
+      key: schema.profiles.idDocumentStorageKey,
+    })
+    .from(schema.profiles)
+    .where(sql`${schema.profiles.idDocumentStorageKey} IS NOT NULL`)
+    .limit(500);
+  for (const r of rows) {
+    if (!r.key) continue;
+    const expectedPrefix = `${r.userId}/id-documents/`;
+    if (!r.key.startsWith(expectedPrefix)) {
+      return {
+        ok: false,
+        name: "kyc-document-private",
+        message: `Profile ${r.id} has storage key "${r.key}" that does not start with "${expectedPrefix}". Admin audit-by-prefix is broken.`,
+      };
+    }
+  }
+  return {
+    ok: true,
+    name: "kyc-document-private",
+    message: `All ${rows.length} KYC document keys are owner-scoped under \`{userId}/id-documents/\`.`,
+  };
+}
+
 export async function runAll(): Promise<void> {
   const checks = [
     await assertNoCohortBelowFloor(),
@@ -998,6 +1138,11 @@ export async function runAll(): Promise<void> {
     await assertTaxonomySuggestionsValid(),
     await assertRejectedSuggestionsPreserveData(),
     await assertTaxonomyBackfillsComplete(),
+    // Phase 9.16
+    await assertDobNeverInPublicPayload(),
+    await assertIdEncryptionMandatory(),
+    await assertPassportCountryWhenPassport(),
+    await assertKycDocumentPrivate(),
   ];
 
   let failed = 0;

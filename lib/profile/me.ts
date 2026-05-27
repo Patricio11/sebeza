@@ -39,6 +39,23 @@ export type MyProfile = PublicProfile & {
   kycVerifiedAt: string | null;
   /** Phase 8  read-only email surfaced from the auth session. */
   email: string;
+  /** Phase 9.16  ISO yyyy-mm-dd. Captured at sign-up + editable from
+   *  /dashboard/profile. Null only for legacy accounts created before
+   *  the column existed. */
+  dateOfBirth: string | null;
+  /** Phase 9.16  "sa_id" or "passport". Drives the KYC panel copy. */
+  idDocumentKind: "sa_id" | "passport";
+  /** Phase 9.16  ISO 3166 alpha-2 issuer; only set for passport. */
+  passportCountry: string | null;
+  /** Phase 9.16  truthy iff the seeker has uploaded a document for
+   *  admin review. The KycPanel uses this to flip between
+   *  "needs upload" and "pending review" states. */
+  hasIdDocument: boolean;
+  /** Phase 9.16  ISO when the latest document was attached. */
+  idDocumentUploadedAt: string | null;
+  /** Phase 9.16  admin's rejection note (if any). When set, the
+   *  KycPanel shows the reason + a re-upload control. */
+  idDocumentRejectionReason: string | null;
 };
 
 export async function getMyProfile(): Promise<MyProfile | null> {
@@ -151,6 +168,12 @@ export async function loadProfileForUser(userId: string): Promise<MyProfile | nu
     hasNationalId: !!p.nationalIdEnc,
     email: u?.email ?? "",
     kycVerifiedAt: u?.kycVerifiedAt?.toISOString() ?? null,
+    dateOfBirth: p.dateOfBirth ?? null,
+    idDocumentKind: (p.idDocumentKind ?? "sa_id") as "sa_id" | "passport",
+    passportCountry: p.passportCountry ?? null,
+    hasIdDocument: !!p.idDocumentStorageKey,
+    idDocumentUploadedAt: p.idDocumentUploadedAt?.toISOString() ?? null,
+    idDocumentRejectionReason: p.idDocumentRejectionReason ?? null,
     handle: p.handle,
     displayName: p.displayName,
     profilePhotoUrl: p.profilePhotoUrl,

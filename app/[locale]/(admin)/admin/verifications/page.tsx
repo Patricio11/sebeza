@@ -5,10 +5,19 @@ import { ADMIN_NAV } from "@/components/layout/adminNav";
 import { verifyAdmin } from "@/lib/auth/dal";
 import { listPendingQualifications } from "@/lib/admin/verifications-query";
 import { listOrgsForReview } from "@/lib/admin/org-vetting";
+import { listKycSubmissions, type KycReviewRow } from "@/lib/admin/kyc-review";
 import { VerificationActions } from "@/components/feature/admin/VerificationActions";
 import { OrgReviewLauncher } from "@/components/feature/admin/OrgReviewLauncher";
+import { KycReviewActions } from "@/components/feature/admin/KycReviewActions";
 import { getSetting } from "@/lib/admin/settings";
-import { CheckCircle2, Clock, FileText, ShieldOff, XCircle } from "lucide-react";
+import {
+  CheckCircle2,
+  Clock,
+  ExternalLink,
+  FileText,
+  ShieldOff,
+  XCircle,
+} from "lucide-react";
 
 export default async function VerificationsPage({
   params,
@@ -21,12 +30,18 @@ export default async function VerificationsPage({
   setRequestLocale(locale);
   const session = await verifyAdmin();
   const { tab } = await searchParams;
-  const active = tab === "organisations" ? "organisations" : "qualifications";
+  const active =
+    tab === "organisations"
+      ? "organisations"
+      : tab === "seeker-ids"
+        ? "seeker-ids"
+        : "qualifications";
 
   const t = await getTranslations("adminDash.verifications");
-  const [quals, orgGroups, saqaWorkerEnabled] = await Promise.all([
+  const [quals, orgGroups, kycGroups, saqaWorkerEnabled] = await Promise.all([
     listPendingQualifications(),
     listOrgsForReview(),
+    listKycSubmissions(),
     getSetting<boolean>("feature_flag_saqa_worker"),
   ]);
   // Default org sub-view = pending (the actionable queue); drafts are
@@ -68,9 +83,50 @@ export default async function VerificationsPage({
           href={{ pathname: "/admin/verifications", query: { tab: "organisations" } }}
           label={`${t("tabs.organisations")} · ${orgsActionable}`}
         />
+        <TabLink
+          active={active === "seeker-ids"}
+          href={{ pathname: "/admin/verifications", query: { tab: "seeker-ids" } }}
+          label={`Seeker IDs · ${kycGroups.pending.length}`}
+        />
       </nav>
 
-      {active === "qualifications" ? (
+      {active === "seeker-ids" ? (
+        <div className="space-y-8">
+          <KycGroup
+            title={`Pending review · ${kycGroups.pending.length}`}
+            tone="brand"
+            icon={Clock}
+            emptyTitle="Nothing pending."
+            emptyNote="When a seeker uploads a copy of their SA ID or passport, submissions appear here for review."
+            rows={kycGroups.pending}
+            relative={relative}
+          />
+          {kycGroups.rejected.length > 0 && (
+            <KycGroup
+              title={`Recently rejected · ${kycGroups.rejected.length}`}
+              tone="danger"
+              icon={XCircle}
+              emptyTitle=""
+              emptyNote=""
+              rows={kycGroups.rejected}
+              relative={relative}
+              readOnly
+            />
+          )}
+          {kycGroups.verified.length > 0 && (
+            <KycGroup
+              title={`Recently verified · ${kycGroups.verified.length}`}
+              tone="accent"
+              icon={CheckCircle2}
+              emptyTitle=""
+              emptyNote=""
+              rows={kycGroups.verified}
+              relative={relative}
+              readOnly
+            />
+          )}
+        </div>
+      ) : active === "qualifications" ? (
         quals.length === 0 ? (
           <EmptyQueue
             title="Nothing pending."
@@ -294,6 +350,105 @@ function OrgGroup({
                 </div>
               </div>
               <OrgReviewLauncher orgId={o.id} />
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  );
+}
+
+// Phase 9.16  per-state group on the admin "Seeker IDs" tab. Mirrors
+// OrgGroup but the row is simpler  one document per seeker, signed
+// URL inline, three inline action buttons.
+function KycGroup({
+  title,
+  tone,
+  icon: Icon,
+  emptyTitle,
+  emptyNote,
+  rows,
+  relative,
+  readOnly,
+}: {
+  title: string;
+  tone: "brand" | "muted" | "danger" | "accent";
+  icon: typeof CheckCircle2;
+  emptyTitle: string;
+  emptyNote: string;
+  rows: KycReviewRow[];
+  relative: (d: Date | string | null | undefined) => string;
+  readOnly?: boolean;
+}) {
+  const toneClass: Record<typeof tone, string> = {
+    brand: "text-[color:var(--color-brand-strong)]",
+    muted: "text-[color:var(--color-ink-soft)]",
+    danger: "text-[color:var(--color-danger)]",
+    accent: "text-[color:var(--color-accent)]",
+  };
+  return (
+    <section>
+      <header className="mb-3 flex items-center gap-2 border-b border-[color:var(--color-hairline)] pb-2">
+        <Icon className={`size-4 ${toneClass[tone]}`} aria-hidden="true" />
+        <h2 className="font-display text-base text-[color:var(--color-ink)]">
+          {title}
+        </h2>
+      </header>
+      {rows.length === 0 ? (
+        emptyTitle ? (
+          <EmptyQueue title={emptyTitle} note={emptyNote} />
+        ) : null
+      ) : (
+        <ul className="space-y-3">
+          {rows.map((r) => (
+            <li
+              key={r.profileId}
+              className="grid grid-cols-1 gap-4 rounded-[var(--radius-md)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-5 md:grid-cols-[1fr_auto] md:items-center"
+            >
+              <div className="min-w-0">
+                <div className="flex flex-wrap items-baseline gap-2">
+                  <Link
+                    href={`/p/${r.handle}`}
+                    className="font-display text-lg text-[color:var(--color-brand)] hover:underline"
+                  >
+                    {r.displayName}
+                  </Link>
+                  <span className="rounded-[var(--radius-pill)] border border-[color:var(--color-hairline)] bg-[color:var(--color-paper)] px-2 py-0.5 text-[0.6rem] uppercase tracking-[0.18em] text-[color:var(--color-ink-soft)]">
+                    {r.idDocumentKind === "passport"
+                      ? `Passport · ${r.passportCountry ?? "?"}`
+                      : "SA ID"}
+                  </span>
+                </div>
+                <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-[color:var(--color-ink-soft)]">
+                  {r.uploadedAt && <span>Uploaded {relative(r.uploadedAt)}</span>}
+                  {r.kycVerifiedAt && (
+                    <>
+                      <span aria-hidden="true">·</span>
+                      <span>Verified {relative(r.kycVerifiedAt)}</span>
+                    </>
+                  )}
+                  {r.signedUrl && (
+                    <>
+                      <span aria-hidden="true">·</span>
+                      <a
+                        href={r.signedUrl}
+                        target="_blank"
+                        rel="noreferrer noopener"
+                        className="inline-flex items-center gap-1 text-[color:var(--color-brand)] hover:underline"
+                      >
+                        <ExternalLink className="size-3" aria-hidden="true" />
+                        Open document
+                      </a>
+                    </>
+                  )}
+                </div>
+                {r.rejectionReason && (
+                  <p className="mt-2 rounded-[var(--radius-sm)] border-l-2 border-[color:var(--color-danger)] bg-[color:var(--color-paper)] px-3 py-1.5 text-xs italic text-[color:var(--color-ink)]">
+                    Reviewer note: {r.rejectionReason}
+                  </p>
+                )}
+              </div>
+              <KycReviewActions profileId={r.profileId} readOnly={readOnly} />
             </li>
           ))}
         </ul>

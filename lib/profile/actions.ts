@@ -22,6 +22,7 @@ import { getSessionUser } from "@/lib/auth/guard";
 import { logAccess } from "@/lib/audit";
 import { encryptField } from "@/lib/crypto";
 import { validateSaIdNumber } from "@/lib/id-number";
+import { validateDob } from "@/lib/auth/id-validation";
 import { computeCompleteness } from "@/lib/mock/helpers";
 import { SKILLS } from "@/lib/mock/taxonomy";
 import type { EmploymentStatus } from "@/lib/mock/types";
@@ -338,6 +339,59 @@ export async function changeNationalId(
     kind: "profile.national_id.update",
     actor: session.id,
     subject: profile.id,
+  });
+
+  revalidatePath("/dashboard/profile");
+  return ok();
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Phase 9.16  Date of Birth (captured at sign-up; editable from profile)
+// ─────────────────────────────────────────────────────────────────────────────
+
+const dobSchema = z.object({
+  dateOfBirth: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Use YYYY-MM-DD."),
+});
+
+/**
+ * Update the seeker's date of birth from /dashboard/profile.
+ *
+ * Phase 9.16 captures DOB at sign-up; this surface lets a seeker fix
+ * a typo. The 14100 window is enforced server-side via
+ * `validateDob` so a tampered request can't backdoor through the
+ * Server Action.
+ *
+ * We deliberately do NOT cross-check the SA ID prefix here  the SA ID
+ * is encrypted at-rest and decrypting it on every DOB edit just to
+ * cross-check would create needless decrypt audit events. The next
+ * KYC review surfaces any mismatch from the document itself.
+ */
+export async function updateMyDateOfBirth(
+  input: z.infer<typeof dobSchema>,
+): Promise<ActionResult> {
+  const session = await getSessionUser();
+  if (!session) return fail("Not signed in.");
+  const parsed = dobSchema.safeParse(input);
+  if (!parsed.success) {
+    return fail(parsed.error.issues[0]?.message ?? "Invalid date.");
+  }
+  const dobCheck = validateDob(parsed.data.dateOfBirth);
+  if (!dobCheck.ok) return fail(dobCheck.message);
+
+  const db = getDb();
+  const profile = await loadOwnedProfile(db, session.id);
+  if (!profile) return fail("Profile not found.");
+
+  await db
+    .update(schema.profiles)
+    .set({ dateOfBirth: parsed.data.dateOfBirth })
+    .where(eq(schema.profiles.id, profile.id));
+
+  await logAccess({
+    kind: "profile.update",
+    actor: session.id,
+    subject: profile.id,
+    meta: { fields: ["dateOfBirth"] },
   });
 
   revalidatePath("/dashboard/profile");

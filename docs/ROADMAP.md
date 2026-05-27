@@ -552,6 +552,26 @@ that registry  we win on **data quality, usability, and analytics.** The system 
 
 ---
 
+## 🧷 PHASE 9.16: DOB + PASSPORT SUPPORT + ADMIN-MEDIATED ID VERIFICATION ✅ (shipped 2026-05-27)
+
+Three coupled changes shipped as one phase because they share the new identity-capture seam and would otherwise need three round-trips through the sign-up form, the schema, the privacy policy, and the compliance suite.
+
+1. **Date of birth at sign-up.** New `profiles.date_of_birth` (date) captured via a new reusable `<DatePicker>` component (three-view popover: day → month → year, mobile bottom-sheet, range-clamped). Server-side enforces a 14–100 age window via `validateDob` in `lib/auth/id-validation.ts` (the lower bound comes from the SA Basic Conditions of Employment Act minimum). DOB is editable from `/dashboard/profile` via a small `<DateOfBirthEditor>` panel. **Never** included in the public profile projection — guarded by the new `dob-never-in-public-payload` compliance assertion that samples 50 profiles through `dataProvider.getProfile()` on every run.
+
+2. **Passport support alongside SA ID.** New `id_document_kind` pgEnum (`sa_id` | `passport`, default `sa_id`) + `passport_country` text column. Sign-up form gains an ID-kind chip pair; SA ID flows through the existing 13-digit + Luhn + DOB-prefix cross-check; passport flows through a 6–20 alphanumeric + ISO-3166-issuer check (new static catalogue in `lib/taxonomy/countries.ts` with SA + SADC pinned first). The encryption column `national_id_enc` is retained kind-agnostic (D1 in the plan: renaming would touch too many sites with no functional benefit). The `passport-country-when-passport` compliance assertion enforces issuer presence + validity.
+
+3. **Admin-mediated ID document verification.** The dormant KYC-SaaS partnership never landed, so seekers now upload a copy of their SA ID book/card or passport bio page; an admin reviews it from the new "Seeker IDs" tab on `/admin/verifications` with three actions (Approve / Reject / Request changes). Mirrors the Phase 9.10 org-vetting shape 1:1. New `<KycPanel>` (rewritten as a 5-state lifecycle: verified / no-ID / rejected / pending review / needs upload), new `uploadIdDocument` Server Action with magic-byte sniff + 10 MB cap + 5-uploads-per-10-min rate limit (path convention `{userId}/id-documents/{profileId}.{ext}` — owner-prefixed so admin tooling can scope audits by prefix, enforced by the `kyc-document-private` compliance assertion). New `<KycReviewActions>` admin client component drives the three review actions in `lib/admin/kyc-review.ts`.
+
+Migration `0028_phase9_16_dob_passport_kyc_upload.sql` (additive) adds the six new `profiles` columns + the `id_document_kind` enum + a partial index on the pending-review queue.
+
+Audit + notifications: three new audit kinds (`kyc.document.upload`, `kyc.review.approve`, `kyc.review.reject`) + two new notification kinds (`kyc.approved`, `kyc.rejected`, audience `seeker`, in-app default-on / email default-off, no dedupe). Four new compliance assertions on `/api/admin/outcomes-compliance` (now **26 assertions** total): the three named above plus `id-encryption-mandatory` which verifies every non-null `national_id_enc` carries the `v1.` AES-256-GCM prefix.
+
+22 Vitest fixtures for the validation helpers (`validateDob` boundary cases + `validateSaId` Luhn + DOB cross-check + whitespace handling + `validatePassport` regex + country lookup). Full suite at 44 passing.
+
+Companion docs: `docs/PHASE_9_16_PLAN.md` (12 locked decisions + 14 tasks) + DPIA addendum R10 (DOB linkability + ID-document at-rest exposure controls) + Privacy Section 2 (data categories) + PAIA Section 4 (records held).
+
+---
+
 ## 🧷 PHASE 9.15: "OTHER" + ADMIN TAXONOMY SUGGESTION QUEUE ✅ (shipped 2026-05-26)
 
 User-facing gap closed: real users with unusual professions or non-canonical institutions can now onboard via an "Other (specify)" path on the sign-up combobox + admins get a structured queue at `/admin/taxonomy/suggestions` to canonicalise the entries (promote / merge into existing / reject).

@@ -159,11 +159,30 @@ export async function uploadOrgDocument(
   });
 }
 
+/**
+ * Phase 9.16  seeker ID document upload (SA ID book/card scan or
+ * passport bio page). Lives in its own `{userId}/id-documents/...`
+ * folder so admin reviewers can spot it at a glance + so a future
+ * KYC-SaaS migration can sweep the prefix when the partnership
+ * lands. Same magic-byte sniff + rate limit + size cap as
+ * `uploadDocument()`.
+ */
+export async function uploadIdDocument(
+  opts: UploadOpts,
+): Promise<{ key: string; mime: string }> {
+  return upload({
+    ...opts,
+    kind: "id-documents",
+    maxBytes: DOC_MAX_BYTES,
+    allowed: DOC_ALLOWED,
+  });
+}
+
 async function upload(opts: {
   userId: string;
   id: string;
   file: File;
-  kind: "documents" | "photos" | "org-documents";
+  kind: "documents" | "photos" | "org-documents" | "id-documents";
   maxBytes: number;
   allowed: Set<string>;
 }): Promise<{ key: string; mime: string }> {

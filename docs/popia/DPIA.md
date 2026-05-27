@@ -159,6 +159,75 @@ covered by this DPIA:
   with a concrete operational need rather than a hypothetical
   partnership.
 
+### R10  Identity document at-rest exposure & DOB linkability (Phase 9.16)
+
+- **Risk**: Phase 9.16 captures **date of birth** at sign-up and
+  introduces an **admin-mediated ID-document upload** path (SA ID book
+  or passport bio page) because the planned KYC-SaaS partnership did
+  not land. Two new exposure surfaces:
+    1. **DOB**. Now stored on `profiles.date_of_birth`. With DOB +
+       province + handle, an attacker who scraped the public profile
+       can attempt linkage attacks against electoral roll or social
+       graph data sources.
+    2. **ID document scan**. A new private object lives at
+       `{userId}/id-documents/{profileId}.{ext}` in the Supabase
+       private bucket. A scan typically reveals: full names, SA ID
+       number (already in `national_id_enc`), photograph, date of
+       birth, place of birth. A bucket-level compromise would expose
+       the document directly.
+- **Decision (operator review, 2026-05-26)**: **PROCEED with the
+  controls listed below.** Identity-confirmation is a precondition for
+  the platform's verification posture (Verification-Honesty Rule). The
+  admin-mediated path is the necessary fallback while the KYC-SaaS
+  partnership is dormant.
+- **Controls**:
+  - **DOB is never published.** The `PublicProfile` projection on the
+    `dataProvider` seam does not carry `dateOfBirth`. A compliance
+    assertion (`dob-never-in-public-payload`) samples 50 random
+    profiles via the public seam on every `runAll()` and fails the
+    suite if the field leaks. DOB is visible only to the owner
+    (`/dashboard/profile`) and to admins on `/admin/verifications`.
+  - **ID document objects are owner-prefixed.** The storage path
+    convention `{userId}/id-documents/...` is asserted by the
+    `kyc-document-private` compliance check so admin oversight can
+    scope audits by prefix and a regression in the path layout fails
+    loudly.
+  - **Signed-URL reads only.** Admin reviewers fetch the document via
+    a short-TTL signed URL minted by `signedDocumentUrl()`. No
+    permanent public URL exists. Every reviewer fetch is paired with a
+    `kyc.review.approve` / `kyc.review.reject` audit row (subject =
+    profile id; meta = reviewer user id + reason text on rejection).
+  - **Magic-byte sniff + 10 MB cap + 5-upload-per-10-min rate limit**
+    on the upload Server Action  identical posture to the qualification
+    + org KYC paths (Phase 3 / 9.10).
+  - **Encryption stays as-is.** SA IDs and passport numbers continue
+    to be encrypted at-rest in `profiles.national_id_enc` under
+    AES-256-GCM (`v1.` prefix). The `id-encryption-mandatory` compliance
+    assertion samples 500 rows on every `runAll()` and fails if any
+    non-null payload is missing the prefix.
+  - **Passport issuer is validated server-side.** The
+    `passport-country-when-passport` assertion confirms every passport
+    profile carries a valid ISO 3166-1 alpha-2 issuer code, so
+    rendering and audit trails never have to handle the empty-string
+    edge case.
+  - **Three new audit kinds**: `kyc.document.upload`,
+    `kyc.review.approve`, `kyc.review.reject`. The seeker receives an
+    in-app notification on every admin action (`kyc.approved` /
+    `kyc.rejected` catalog kinds) so trust runs both ways.
+  - **Defence in depth** on the sign-up Server Action: every
+    client-side validator (`validateDob`, `validateSaId` with Luhn +
+    DOB cross-check, `validatePassport` with ISO issuer check) is
+    re-run server-side before the row is written. A tampered request
+    cannot backdoor through the 14100 age gate.
+- **Residual risk**: low-to-moderate. A bucket-level compromise of
+  Supabase storage remains the main outstanding concern; this is
+  shared with the existing qualification + org KYC documents and is
+  addressed by Supabase's at-rest encryption + the Phase 9 migration
+  to the `af-south-1` Cape Town region for POPIA in-country residency.
+  When the KYC-SaaS partnership lands, the seeker-facing path swaps
+  to provider verification and admin-mediated upload becomes the
+  break-glass.
+
 ## 4. Sign-off
 
 To be signed by the Information Officer once designated. Until then,

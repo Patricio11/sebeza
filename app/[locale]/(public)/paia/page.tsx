@@ -108,7 +108,11 @@ export default async function PaiaManualPage({
               <li>
                 <strong>Profile records</strong>  handle, profession,
                 skills, experience, qualifications, employment status,
-                work availability, encrypted national ID (where supplied).
+                work availability, date of birth, encrypted national ID
+                or passport number + issuing country (where supplied),
+                and  when uploaded for KYC review  a private copy of
+                your SA ID book/card or passport bio page held in a
+                user-scoped folder of the private object store.
               </li>
               <li>
                 <strong>Organisation records</strong>  registered employer
