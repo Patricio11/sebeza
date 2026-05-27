@@ -58,7 +58,18 @@ export default async function LocaleLayout({
 
   return (
     <html lang={locale} className={`${fraunces.variable} ${hanken.variable}`}>
-      <body className="min-h-screen bg-[color:var(--color-paper)] text-[color:var(--color-ink)]">
+      {/* suppressHydrationWarning on <body> absorbs the attribute spam
+          some browser extensions (Bitdefender TrafficLight, Grammarly,
+          LastPass) inject on the body element before React can hydrate
+           e.g. bis_register, __processed_<uuid>__. Without this,
+          every page load in dev surfaces a noisy hydration warning that
+          isn't a code bug. The suppression only covers attribute
+          mismatches on this exact element; real content mismatches
+          (text nodes, child trees) still error normally. */}
+      <body
+        suppressHydrationWarning
+        className="min-h-screen bg-[color:var(--color-paper)] text-[color:var(--color-ink)]"
+      >
         <NextIntlClientProvider locale={locale} messages={messages}>
           {children}
           {/* Phase 9  cookie consent banner. Renders only when no
