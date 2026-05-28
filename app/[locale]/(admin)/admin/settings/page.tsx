@@ -4,6 +4,7 @@ import { ADMIN_NAV } from "@/components/layout/adminNav";
 import { verifyAdmin } from "@/lib/auth/dal";
 import { getAllSettings } from "@/lib/admin/settings";
 import { SettingsForm } from "@/components/feature/admin/SettingsForm";
+import { EmailTestPanel } from "@/components/feature/admin/EmailTestPanel";
 
 export default async function SettingsPage({
   params,
@@ -32,6 +33,9 @@ export default async function SettingsPage({
         records the prior and new value for every change.
       </p>
       <SettingsForm values={values} />
+      <div className="mt-10">
+        <EmailTestPanel defaultRecipient={session.email} />
+      </div>
     </DashboardShell>
   );
 }
