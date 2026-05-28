@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
 import { TextField } from "@/components/ui/FormField";
+import { PasswordField } from "@/components/ui/PasswordField";
 import { Button } from "@/components/ui/Button";
 import { Checkbox } from "@/components/ui/Checkbox";
 import { signIn } from "@/lib/auth/actions";
@@ -65,11 +66,10 @@ export function SignInForm({ next }: Props) {
         disabled={pending}
       />
 
-      <TextField
+      <PasswordField
         id="password"
         label={t("common.password")}
         name="password"
-        type="password"
         autoComplete="current-password"
         required
         disabled={pending}

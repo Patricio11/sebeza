@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "@/i18n/navigation";
-import { TextField } from "@/components/ui/FormField";
+import { PasswordField } from "@/components/ui/PasswordField";
 import { Button } from "@/components/ui/Button";
 import { completePasswordReset } from "@/lib/auth/actions";
 
@@ -45,21 +45,19 @@ export function ResetPasswordForm({ token }: { token: string }) {
           {error}
         </div>
       )}
-      <TextField
+      <PasswordField
         id="newPassword"
         name="newPassword"
         label="New password"
-        type="password"
         autoComplete="new-password"
         required
         hint="At least 10 characters."
         disabled={pending}
       />
-      <TextField
+      <PasswordField
         id="confirm"
         name="confirm"
         label="Confirm new password"
-        type="password"
         autoComplete="new-password"
         required
         disabled={pending}

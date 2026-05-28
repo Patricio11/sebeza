@@ -5,6 +5,7 @@ import { useSessionDraft } from "@/lib/hooks/useSessionDraft";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { TextField, SelectField } from "@/components/ui/FormField";
+import { PasswordField } from "@/components/ui/PasswordField";
 import { Button } from "@/components/ui/Button";
 import { MonthYearPicker } from "@/components/ui/MonthYearPicker";
 import { DatePicker } from "@/components/ui/DatePicker";
@@ -441,12 +442,11 @@ export function SeekerSignUpForm({
             disabled={pending}
           />
           <div className="flex flex-col gap-1">
-            <TextField
+            <PasswordField
               id="password"
               label={tCommon("password")}
               value={state.password}
               onChange={(e) => setState({ ...state, password: e.target.value })}
-              type="password"
               autoComplete="new-password"
               required
               hint="At least 10 characters. Mix letters, digits and symbols."
@@ -454,14 +454,13 @@ export function SeekerSignUpForm({
             />
             <PasswordStrengthMeter password={state.password} />
           </div>
-          <TextField
+          <PasswordField
             id="passwordConfirm"
             label="Confirm password"
             value={state.passwordConfirm}
             onChange={(e) =>
               setState({ ...state, passwordConfirm: e.target.value })
             }
-            type="password"
             autoComplete="new-password"
             required
             error={

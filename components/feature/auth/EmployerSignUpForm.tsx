@@ -4,6 +4,7 @@ import { useMemo, useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { TextField, SelectField } from "@/components/ui/FormField";
+import { PasswordField } from "@/components/ui/PasswordField";
 import { Button } from "@/components/ui/Button";
 import {
   PasswordStrengthMeter,
@@ -285,11 +286,10 @@ export function EmployerSignUpForm() {
           />
         </div>
         <div className="flex flex-col gap-1">
-          <TextField
+          <PasswordField
             id="password"
             name="password"
             label={tCommon("password")}
-            type="password"
             autoComplete="new-password"
             required
             value={password}
@@ -299,11 +299,10 @@ export function EmployerSignUpForm() {
           />
           <PasswordStrengthMeter password={password} />
         </div>
-        <TextField
+        <PasswordField
           id="passwordConfirm"
           name="passwordConfirm"
           label="Confirm password"
-          type="password"
           autoComplete="new-password"
           required
           value={passwordConfirm}
