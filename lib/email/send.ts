@@ -45,9 +45,46 @@ export interface SendEmailInput {
 
 export type EmailTransport = "smtp" | "console";
 
+/**
+ * Whether to fail loud when `EMAIL_TRANSPORT` is misconfigured.
+ * Defaults to "loud in production, silent in dev"  set explicitly
+ * via `EMAIL_TRANSPORT_STRICT=true` if you want loud-fail in dev too.
+ */
+function strict(): boolean {
+  const v = process.env.EMAIL_TRANSPORT_STRICT?.toLowerCase();
+  if (v === "true") return true;
+  if (v === "false") return false;
+  return process.env.NODE_ENV === "production";
+}
+
+let warnedAboutFallthrough = false;
+
 function transport(): EmailTransport {
   const v = process.env.EMAIL_TRANSPORT?.toLowerCase();
   if (v === "smtp" || v === "console") return v;
+  // No `EMAIL_TRANSPORT` set. The historical default is to fall
+  // through to `console` so dev flows don't break on missing creds.
+  // BUT in prod that's a silent trap: emails go to the server log,
+  // Better Auth thinks the send succeeded, the user gets nothing, the
+  // Resend dashboard stays empty. Loud-fail in prod; warn-once
+  // everywhere else.
+  const hasSomeSmtpConfig = Boolean(
+    process.env.SMTP_HOST ||
+      process.env.SMTP_USER ||
+      process.env.SMTP_PASS,
+  );
+  if (strict() && hasSomeSmtpConfig) {
+    throw new Error(
+      "EMAIL_TRANSPORT is not set, but SMTP_* env vars are present  this almost always means the deploy is missing `EMAIL_TRANSPORT=smtp`. Refusing to silently log to console. Set EMAIL_TRANSPORT_STRICT=false to opt out.",
+    );
+  }
+  if (!warnedAboutFallthrough && hasSomeSmtpConfig) {
+    warnedAboutFallthrough = true;
+    // eslint-disable-next-line no-console
+    console.warn(
+      "[email] EMAIL_TRANSPORT not set but SMTP_* env vars are present  falling back to console transport. Set EMAIL_TRANSPORT=smtp to actually send.",
+    );
+  }
   return "console";
 }
 
