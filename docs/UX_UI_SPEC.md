@@ -154,6 +154,22 @@ across the whole app; the explicit `--color-sa-*` tokens are also available for 
   secondary / ghost / accent × sm / md / lg).
 - **`<FormField>`** family  `TextField`, `SelectField`, `TextareaField`, `FieldShell`,
   `EncryptedBadge` (the chip rendered next to the ID-number input).
+- **`<PasswordField>`** (Phase 9.18)  same prop shape as `TextField` minus `type`, with a
+  built-in show/hide eye toggle inside the input's right edge. `Eye` / `EyeOff` icon swap
+  reflects state; aria-label updates accordingly. Toggle is `tabIndex={-1}` so a Tab from
+  the input goes to the next form field  keyboard users almost never need it, and
+  accidental password reveal on a shared screen is the bigger harm. Lives in its own file
+  (`components/ui/PasswordField.tsx`, `"use client"`) so `TextField` stays server-friendly.
+- **`<DatePicker>`** + **`<MonthYearPicker>`** (Phase 9.16)  Civic Editorial date pickers.
+  DatePicker is a 3-view popover (day → month → year) for the sign-up DOB capture, range-
+  clampable via `min` / `max`. MonthYearPicker is the lighter variant used on graduation
+  date + similar yyyy-mm captures. Both mobile-first: bottom-sheet on phones, dropdown on
+  `md+`. Both throw their year-step cleanly via arrow-key + keyboard nav.
+- **`<ComboboxField>`** (extended Phase 9.16)  picker over a flat list with type-to-filter
+  ranking. Adds an optional `leading: string` slot per option (e.g. flag emoji on the
+  nationality picker)  excluded from the type-to-filter rank so typing "south" still
+  ranks "South Africa" at idx 0 rather than after the flag glyph. `allowOther` footer
+  switches the field to free-text mode for the Phase 9.15 taxonomy-suggestion flow.
 - **`<CustomSelect>`**  replaces every native `<select>` on the platform. Portaled into
   `document.body` (so no ancestor `transform` / `overflow` ever displaces it). Desktop:
   anchored popover from measured trigger rect. Mobile: full-screen bottom sheet with backdrop
@@ -272,6 +288,29 @@ States: fonts-not-loaded fallback; JS-off the search still submits (progressive 
 For EVERY data surface specify: **loading** (skeleton, never spinner-only), **empty** (helpful + action),
 **error** (plain language + retry), **offline** (cached last results + banner), **redacted** (locked panel,
 never a broken layout). A national system is judged on its edge cases.
+
+### 2.9 Form-draft persistence (Phase 9.18)
+Any form that takes more than a few seconds to fill in MUST persist its in-flight state via the shared
+`useSessionDraft` hook (`lib/hooks/useSessionDraft.ts`). The locale switcher in next-intl swaps the URL
+(e.g. `/en/sign-up` → `/zu/sign-up`) which remounts the page tree  without persistence, the user
+loses everything they had typed when they switch language mid-form. Same applies to in-app
+navigations that happen to remount (rarer but real).
+
+**Storage shape:**
+- `sessionStorage` only  cleared when the tab/window closes. No long-lived half-completed forms on
+  shared computers.
+- Caller passes a pre-filtered slice into `state`  passwords / file blobs / secrets are **never**
+  included. The user re-types them after a locale switch; small UX cost for a real security win.
+- Restoration runs in `useEffect`, not initial `useState`, so SSR markup matches first client render
+  exactly (no React hydration mismatch warnings).
+- Cleared after a successful submit (return `clear()` from the hook).
+- Silent failure on disabled storage (private browsing, enterprise policy, quota errors)  the form
+  still works without restoration.
+
+**Applied to:** `SeekerSignUpForm`, `EmployerSignUpForm`, `VacancyForm` (per-vacancy `draftId` scoping
+so drafts don't bleed across edit-A → edit-B), `OrgOnboardingForm`, `ProfileBasicsForm`, `SkillsEditor`.
+Short forms (sign-in, decline-invite, password reset confirm code, 2FA verify, etc.) are deliberately
+**excluded**  the re-typing cost is lower than the storage-surface cost for sensitive fields.
 
 ---
 

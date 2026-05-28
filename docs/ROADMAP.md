@@ -552,6 +552,64 @@ that registry  we win on **data quality, usability, and analytics.** The system 
 
 ---
 
+## 🧷 PHASE 9.18: POST-LAUNCH HYGIENE — REMOTE/HYBRID, EMAIL OPS, FORM-DRAFT PERSISTENCE, AUTH UX ✅ (shipped 2026-05-28)
+
+A clustered post-9.17 sweep — one schema addition, three platform-ops fixes, and three UX polish items. Bundled into a single phase because they shipped on the same day and each was small enough that splitting them would have been noise. Migration `0030_phase9_18_remote_hybrid.sql` is the only DB change.
+
+### 1. Remote + Hybrid on work-availability
+
+Seeker can now mark their profile as open to **Remote** and/or **Hybrid** work alongside the existing Casual / Part-time / Contract / Full-time options. Both new values share the same `work_availability_kind` enum + the same chip picker on sign-up + `/dashboard/profile` + the `/search` "Available for" facet (data-driven from `WORK_AVAILABILITY_KINDS`, so the search filter picked them up automatically). The `<WorkAvailabilityChips>` LABEL map adds Remote + Hybrid entries; the `work-availability-publicly-safe` compliance assertion's expected-set adds them too so the enum-drift guard stays valid.
+
+**Conceptual trade-off documented in code:** Remote + Hybrid live in the same enum as the employment-type values (Casual / Part-time / Contract / Full-time) for UX simplicity — picker treats it as one "what work are you open to" set — even though work-mode and employment-type are technically orthogonal dimensions. If a future analytics phase wants to slice these independently ("% of SA software developers open to remote, by province"), splitting work-mode into its own column is a clean follow-up migration; the call-sites + assertion comments flag the path.
+
+### 2. Email transport collapsed to a single SMTP path
+
+The Phase 8 design carried two transport code paths — Mailtrap SMTP for dev + Resend SDK for prod — which meant dev and prod didn't behave identically and we shipped a vendor-specific `resend` npm dependency for one call site. Collapsed to one nodemailer SMTP transport for every environment: Mailtrap sandbox for dev, Resend / Sendgrid / Postmark / AWS SES SMTP relay for prod. Provider becomes an env-var choice rather than a code path.
+
+`EMAIL_TRANSPORT` shrinks from `mailtrap | resend | console` to `smtp | console`. Env vars renamed to a single `SMTP_HOST / PORT / SECURE / USER / PASS / FROM / FROM_NAME` set. The `resend` npm package is dropped.
+
+**Trade-off:** lose Resend's richer error responses (`validation_error` strings); SMTP returns numeric codes like 550. Acceptable at our transactional volume; the vendor-portability win is meaningful for a POPIA-compliant platform that might need to swap providers under compliance or pricing pressure (config change, not a code change).
+
+### 3. Loud-fail when `EMAIL_TRANSPORT` is misconfigured in production
+
+The previous silent fallback to console transport was a real trap: if a prod deploy forgot to set `EMAIL_TRANSPORT=smtp`, every send went to the server log, Better Auth thought it succeeded, the user got no email, and the Resend dashboard stayed empty — with no error anywhere. The fix throws a clear error in production when `EMAIL_TRANSPORT` is unset AND any `SMTP_*` var is set (signal: "you tried to configure SMTP but it's not active"). In dev / non-prod, warn-once via `console.warn`. Opt-out via `EMAIL_TRANSPORT_STRICT=false` for the rare case an operator genuinely wants silent fallback in prod.
+
+### 4. Admin test-email panel on `/admin/settings`
+
+One-click diagnostic to confirm the SMTP pipeline reaches the provider without faking a signup or password reset. Defaults the recipient to the signed-in admin's own email. Three outcomes shown inline:
+
+- **Green** — provider accepted the send, with the message ID for Resend dashboard cross-reference
+- **Yellow** — transport fell back to console (operator immediately sees the env-var problem)
+- **Red** — raw error text from the SMTP reject reason or the missing-credentials guard
+
+Every test send is audit-logged with the recipient + transport + message id (or error), so the trail captures who tested when. Surfaces via `<EmailTestPanel>` + the new `sendTestEmail` action in `lib/admin/email-debug.ts`. Same `verifyAdmin()` gate as the rest of `/admin/settings`.
+
+### 5. Form-draft persistence across locale switches
+
+Next-intl's locale switcher swaps the URL (`/en/sign-up` → `/zu/sign-up`) and remounts the page tree — which previously wiped every `useState` in any form the user was filling in. Real UX bug: a seeker halfway through signup who tried the language switcher lost everything.
+
+New shared `useSessionDraft` hook in `lib/hooks/useSessionDraft.ts` persists the draft to `sessionStorage` on every state change, restores on mount, clears after a successful submit. Tab-scoped storage (cleared when the tab/window closes — no long-lived half-completed signups on shared computers).
+
+Applied to six forms: `SeekerSignUpForm`, `EmployerSignUpForm`, `VacancyForm` (per-vacancy `draftId` scoping so drafts don't bleed across edit-A → edit-B), `OrgOnboardingForm` (text fields only — uploaded docs are already server-side), `ProfileBasicsForm`, `SkillsEditor` (with taxonomy revalidation on restore). EmployerSignUpForm required converting uncontrolled `FormData` inputs to controlled state to make the persistence work.
+
+**Three invariants the hook enforces:**
+
+1. Passwords / file blobs / secrets are never written — callers pass a pre-filtered slice into `state`.
+2. Restoration runs in `useEffect`, not initial `useState`, so SSR markup matches first client render — zero React hydration warnings.
+3. All sessionStorage errors swallow silently — private browsing, enterprise policy, quota — forms still work without restoration.
+
+### 6. Password show/hide toggle on every auth form
+
+New `<PasswordField>` client component (`components/ui/PasswordField.tsx`) wraps the existing `FieldShell` + input styling and adds an in-field eye toggle. Lives in its own file so `FormField` stays server-friendly (every page rendering a plain `TextField`, including server pages like `/privacy` + `/paia`, would have gained an unnecessary client boundary otherwise).
+
+Swapped into `SignInForm`, `SeekerSignUpForm` (password + confirm), `EmployerSignUpForm` (password + confirm), `ResetPasswordForm` (new + confirm). Eye icon swaps between `Eye` and `EyeOff`; aria-label updates accordingly. Toggle is `tabIndex={-1}` so a Tab from the input goes to the next form field — keyboard users almost never need the toggle, and the bigger harm is showing a password by accident on a shared screen.
+
+### 7. Domain rename: sebenza.co.za → sebenzasa.com
+
+Codebase had `sebenza.co.za` hardcoded throughout from initial scaffolding. The actual production domain is `sebenzasa.com` (sebenza.com wasn't available). Brand / product name **stays "Sebenza"** — only the URL host + email address domain changed. 20 files updated: live config defaults (send.ts fallback, .env.example), public-facing copy (`/paia`, `/privacy`, `/report-invite` support links, `/gov/brief` + `/insights/print` printable footers), admin display email, seed comment, README credentials table, forward-looking docs (ROADMAP, PHASE_9_17_PLAN, POPIA docs, AWS guides), the Phase 2 smoke-test creds. Historical `docs/completed/PHASE_2_PLAN.md` + `PHASE_9_PLAN.md` + the COMPLETE snapshots left alone — they're snapshots of past state.
+
+---
+
 ## 🧷 PHASE 9.17: EMPLOYER-INITIATED SEEKER INVITES ✅ (shipped 2026-05-27)
 
 SA staffing-agency workflow gap: agents maintain candidate rosters on WhatsApp + Excel and bring people to platforms via "go sign up at sebenzasa.com" links. Phase 9.17 adds a path inside the system  a verified-org employer sends a single-invite-at-a-time onboarding nudge (email + optional name + optional profession + 200-char personal note), recipient lands on a tailored sign-up at `/sign-up/invited/[token]` with name + profession pre-filled and email locked, completes a customised `<SeekerSignUpForm>`, and the inviter sees them appear on the Joined list in `/employer/invites`. No vacancy coupling  the existing Phase 9.8 vacancy-invitation flow handles role-specific outreach once the seeker is on the platform.
