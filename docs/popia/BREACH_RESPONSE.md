@@ -92,5 +92,5 @@ is documented in this folder all the same.
 > {{incident_id}}.
 >
 > If you have questions, reply to this email or write to
-> popia@sebenza.co.za. Our Information Officer responds within 5
+> popia@sebenzasa.com. Our Information Officer responds within 5
 > business days.

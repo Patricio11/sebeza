@@ -10,7 +10,7 @@
 
 import type { MetadataRoute } from "next";
 
-const appUrl = process.env.BETTER_AUTH_URL ?? "https://sebenza.co.za";
+const appUrl = process.env.BETTER_AUTH_URL ?? "https://sebenzasa.com";
 
 export default function robots(): MetadataRoute.Robots {
   return {

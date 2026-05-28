@@ -63,8 +63,8 @@ export default async function PrivacyPolicyPage({
             </p>
             <p>
               Our Information Officer is reachable at{" "}
-              <a href="mailto:popia@sebenza.co.za" className="underline">
-                popia@sebenza.co.za
+              <a href="mailto:popia@sebenzasa.com" className="underline">
+                popia@sebenzasa.com
               </a>
               . The Information Regulator (South Africa) is the supervisory
               authority for POPIA matters.
@@ -368,8 +368,8 @@ export default async function PrivacyPolicyPage({
 
           <p className="mt-12 rounded-md border border-dashed border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-4 text-sm text-[color:var(--color-ink-soft)]">
             Questions? Email{" "}
-            <a href="mailto:popia@sebenza.co.za" className="underline">
-              popia@sebenza.co.za
+            <a href="mailto:popia@sebenzasa.com" className="underline">
+              popia@sebenzasa.com
             </a>{" "}
              our Information Officer responds within 5 business days. For
             a copy of the records-management arrangement see our{" "}

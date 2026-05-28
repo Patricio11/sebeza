@@ -899,7 +899,7 @@ sudo chmod 600 certs/server.key
 sudo chmod 644 certs/server.crt
 ```
 
-For production: use Let's Encrypt with a DNS name pointed at the EIP (e.g. `db.sebenza.co.za`), not a self-signed cert.
+For production: use Let's Encrypt with a DNS name pointed at the EIP (e.g. `db.sebenzasa.com`), not a self-signed cert.
 
 ### 11.2 Update docker-compose.yml to mount the certs
 
@@ -1020,7 +1020,7 @@ Each alarm sends to an SNS topic — create one called `sebenza-ops` first and s
 
 From the Vercel production URL, walk through this list. Each must pass.
 
-1. **Sign in** as admin (`admin@sebenza.co.za`, password from seed).
+1. **Sign in** as admin (`admin@sebenzasa.com`, password from seed).
 2. **`/admin/outcomes-compliance`** — open the JSON endpoint directly, confirm `"ok": true` for all 18 assertions.
 3. **`/insights`** — verify LMI value, freshness band, supply heatmap (no duplicate columns now if you re-seeded).
 4. **`/search`** — try a query, confirm results appear. Try clicking a heatmap cell from `/insights` — should land here with rows.
@@ -1144,14 +1144,14 @@ This is genuinely more work than RDS Multi-AZ ($30/mo) does for you in one tickb
 
 Once the pilot is stable, replace `<EIP>` with a hostname. Two options:
 
-1. **Route 53 hosted zone** for `sebenza.co.za`:
-   - Create A record `db.sebenza.co.za` → your EIP.
-   - Update Vercel env to use `db.sebenza.co.za` instead of the raw IP.
+1. **Route 53 hosted zone** for `sebenzasa.com`:
+   - Create A record `db.sebenzasa.com` → your EIP.
+   - Update Vercel env to use `db.sebenzasa.com` instead of the raw IP.
    - Re-issue the SSL cert with Let's Encrypt for the proper CN:
      ```bash
      sudo apt install certbot
-     sudo certbot certonly --standalone -d db.sebenza.co.za
-     # Update docker-compose volume mounts to point at /etc/letsencrypt/live/db.sebenza.co.za/
+     sudo certbot certonly --standalone -d db.sebenzasa.com
+     # Update docker-compose volume mounts to point at /etc/letsencrypt/live/db.sebenzasa.com/
      ```
 
 2. **External DNS** (Cloudflare etc.) — same idea, A record pointing at the EIP.

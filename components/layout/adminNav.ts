@@ -36,5 +36,5 @@ export const ADMIN_NAV: DashboardNavItem[] = [
 export const MOCK_ADMIN = {
   fullName: "Sebenza · Admin",
   role: "Compliance & Trust",
-  email: "admin@sebenza.co.za",
+  email: "admin@sebenzasa.com",
 };

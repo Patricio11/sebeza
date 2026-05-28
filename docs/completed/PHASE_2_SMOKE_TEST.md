@@ -22,7 +22,7 @@ Visit `http://localhost:3000/sign-in` and try each account in turn:
 
 | # | Account | Email | Password | Should land on | ✅ |
 |---|---|---|---|---|---|
-| 1 | Admin | `admin@sebenza.co.za` | `sebenza-dev-2026` | `/admin` | ☐ |
+| 1 | Admin | `admin@sebenzasa.com` | `sebenza-dev-2026` | `/admin` | ☐ |
 | 2 | Employer · Discovery Bank owner | `naledi.khumalo@discovery.co.za` | `sebenza-dev-2026` | `/employer` | ☐ |
 | 3 | Seeker · Andile | `andile-z@example.co.za` | `sebenza-dev-2026` | `/dashboard` | ☐ |
 | 4 | Seeker · Thandeka | `thandeka-m@example.co.za` | `sebenza-dev-2026` | `/dashboard` | ☐ |
@@ -54,7 +54,7 @@ The proxy strips the locale prefix when deciding whether to guard, so locale-pre
 2. Visit `http://localhost:3000/dashboard/privacy`
 3. Toggle the `Contact reveal` consent **off** → should flip to *Revoked*
 4. Toggle it back **on** → should flip to *Granted* with today's timestamp
-5. Sign out, sign in as **Admin** (`admin@sebenza.co.za`)
+5. Sign out, sign in as **Admin** (`admin@sebenzasa.com`)
 6. Visit `http://localhost:3000/admin/audit-log`
 7. You should see two new rows at the top:
    - `consent.revoke` actor=Andile's user id

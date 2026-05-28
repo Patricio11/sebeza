@@ -14,7 +14,7 @@
  *
  * Seed credentials (dev only  NEVER deploy these):
  *   - Password for every seeded account: "sebenza-dev-2026"
- *   - Admin: admin@sebenza.co.za
+ *   - Admin: admin@sebenzasa.com
  *   - Employer (Discovery Bank owner): naledi.khumalo@discovery.co.za
  *   - Seekers: {handle}@example.co.za  (andile-z@example.co.za, etc.)
  *   - All seeded accounts have `email_verified = true` so sign-in works

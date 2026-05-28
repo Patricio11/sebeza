@@ -13,7 +13,7 @@ Last updated 2026-05-23.
 
 **Pre-launch  to be designated before commercial pilot.**
 
-A working email is published already at `popia@sebenza.co.za` and surfaced on
+A working email is published already at `popia@sebenzasa.com` and surfaced on
 `/privacy` and `/paia` so individuals can exercise their rights today. The
 named-individual designation gets filled in here once the founding team /
 investor structure is locked.

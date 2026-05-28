@@ -94,7 +94,7 @@ These are the surrounding tools you need to make the self-hosted setup productio
 | **AWS CloudWatch** | Custom metrics from your CWAgent on the EC2 | ~$5 |
 | **AWS CloudWatch Alarms** | CPU / disk / memory / status alarms | ~$1 |
 | **AWS S3** | Backup bucket | ~$1-5 |
-| **AWS Route 53** | Optional, for `db.sebenza.co.za` DNS | $0.50 + $0.40 per million queries |
+| **AWS Route 53** | Optional, for `db.sebenzasa.com` DNS | $0.50 + $0.40 per million queries |
 | **AWS GuardDuty** (recommended) | Anomaly detection across your AWS footprint | ~$10-30 |
 | **Let's Encrypt** (via Certbot on EC2) | Postgres SSL cert (free) | free |
 | **AWS Activate credits** | Up to $100K offsets all of the above for months | covers everything |

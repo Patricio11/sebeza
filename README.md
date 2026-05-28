@@ -154,7 +154,7 @@ Password for every seeded account: `sebenza-dev-2026`
 
 | Role | Email |
 |---|---|
-| admin | `admin@sebenza.co.za` |
+| admin | `admin@sebenzasa.com` |
 | employer | `naledi.khumalo@discovery.co.za` |
 | seeker | `{handle}@example.co.za` (any seeded handle, e.g. `lerato-mokoena`) |
 | gov | seeded via admin role-grant; flip a seeker to `gov` in `/admin` |
@@ -210,7 +210,7 @@ All authed routes localised at `/[locale]/...` for `en`, `zu`, `xh`, `af`.
 
 Sebenza is built POPIA-first. Compliance is documented end-to-end:
 
-- [docs/popia/INFORMATION_OFFICER.md](docs/popia/INFORMATION_OFFICER.md) — designation placeholder + working contact (`popia@sebenza.co.za`)
+- [docs/popia/INFORMATION_OFFICER.md](docs/popia/INFORMATION_OFFICER.md) — designation placeholder + working contact (`popia@sebenzasa.com`)
 - [docs/popia/DPIA.md](docs/popia/DPIA.md) — risks + mitigations (R8 = rate-limit decision; R9 = 9.7 reframing of nationality analytics as policy intelligence, not regulatory enforcement)
 - [docs/popia/BREACH_RESPONSE.md](docs/popia/BREACH_RESPONSE.md) — containment / assessment / notification stages, Section-22 template
 - [docs/popia/RETENTION_POLICY.md](docs/popia/RETENTION_POLICY.md) — per-category retention windows + enforcement mechanism

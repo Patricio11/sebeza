@@ -62,8 +62,8 @@ export default async function PaiaManualPage({
                 <Row k="Postal address" v="To be confirmed before commercial launch" />
                 <Row k="Physical address" v="To be confirmed before commercial launch" />
                 <Row k="Telephone" v="To be published with commercial launch" />
-                <Row k="Email (Information Officer)" v="popia@sebenza.co.za" />
-                <Row k="Website" v="https://sebenza.co.za" />
+                <Row k="Email (Information Officer)" v="popia@sebenzasa.com" />
+                <Row k="Website" v="https://sebenzasa.com" />
               </tbody>
             </table>
           </Section>
@@ -77,7 +77,7 @@ export default async function PaiaManualPage({
               <tbody>
                 <Row k="Information Officer" v="To be designated (named individual recorded in docs/popia/INFORMATION_OFFICER.md)" />
                 <Row k="Deputy Information Officer" v="To be designated alongside" />
-                <Row k="Email" v="popia@sebenza.co.za" />
+                <Row k="Email" v="popia@sebenzasa.com" />
               </tbody>
             </table>
           </Section>
@@ -202,8 +202,8 @@ export default async function PaiaManualPage({
             <p>
               Complete Form 2 of the PAIA Regulations and submit it to the
               Information Officer at{" "}
-              <a href="mailto:popia@sebenza.co.za" className="underline">
-                popia@sebenza.co.za
+              <a href="mailto:popia@sebenzasa.com" className="underline">
+                popia@sebenzasa.com
               </a>
               . We respond within{" "}
               <strong>30 calendar days</strong> as required by PAIA, and

@@ -16,7 +16,7 @@ import * as schema from "@/db/schema";
 import { and, eq, isNull } from "drizzle-orm";
 
 const APP_URL = (
-  process.env.BETTER_AUTH_URL ?? "https://sebenza.co.za"
+  process.env.BETTER_AUTH_URL ?? "https://sebenzasa.com"
 ).replace(/\/$/, "");
 
 const LOCALES = ["en", "zu", "xh", "af"] as const;

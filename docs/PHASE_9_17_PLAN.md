@@ -6,7 +6,7 @@
 
 ## 🎯 WHAT THIS PHASE IS
 
-Today an employer (or staffing agent) who wants to bring a known candidate onto Sebenza has no path inside the platform — they have to ask the seeker to "go sign up at sebenza.co.za" via WhatsApp or email. That's a real workflow gap for SA staffing agencies, who maintain rosters of candidates and bring them to platforms in batches.
+Today an employer (or staffing agent) who wants to bring a known candidate onto Sebenza has no path inside the platform — they have to ask the seeker to "go sign up at sebenzasa.com" via WhatsApp or email. That's a real workflow gap for SA staffing agencies, who maintain rosters of candidates and bring them to platforms in batches.
 
 **Phase 9.17 adds:** a single-invite-at-a-time path. A verified-org employer enters an email (and optionally a name + profession + personal note), Sebenza sends a Civic-Editorial-styled invitation email, the recipient clicks a signed link and lands on a tailored sign-up page that pre-fills the name + email and collects only the remaining captures (DOB, nationality, phone, password). The employer can see their pending / joined / declined invites on a new dashboard tab; they get **no** special PII access on the joined seekers (the platform's neutrality posture is intact).
 

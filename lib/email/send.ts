@@ -95,7 +95,7 @@ function fromAddress(override?: string): string {
   // Resend SMTP, Sendgrid SMTP) document. Falls back to legacy
   // EMAIL_FROM for any deploy that hasn't migrated env vars yet.
   const addr = process.env.SMTP_FROM ?? process.env.EMAIL_FROM;
-  if (!addr) return "Sebenza <noreply@sebenza.co.za>";
+  if (!addr) return "Sebenza <noreply@sebenzasa.com>";
   const name = process.env.SMTP_FROM_NAME;
   // If the address already includes a display name (`Name <addr@x>`),
   // pass through unchanged. Otherwise compose `Name <addr>`.

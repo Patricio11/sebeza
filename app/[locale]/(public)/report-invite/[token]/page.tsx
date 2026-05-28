@@ -58,7 +58,7 @@ export default async function ReportInvitePage({
                 We couldn&rsquo;t verify the invitation link  it may have
                 expired or already been handled. If you keep receiving
                 invitations from someone you don&rsquo;t know, email
-                support@sebenza.co.za directly.
+                support@sebenzasa.com directly.
               </p>
               <p className="mt-3">
                 <Link

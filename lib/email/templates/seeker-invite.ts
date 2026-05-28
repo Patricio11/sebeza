@@ -33,7 +33,7 @@ export interface SeekerInviteEmailInput {
    *  body so the recipient knows what role context they're stepping
    *  into. */
   profession: string | null;
-  /** Public-app origin (e.g. https://sebenza.co.za). The accept +
+  /** Public-app origin (e.g. https://sebenzasa.com). The accept +
    *  decline + report links are composed against this. */
   origin: string;
   /** The signed token  goes into the URL path. */
