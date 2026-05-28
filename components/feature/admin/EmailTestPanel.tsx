@@ -65,28 +65,33 @@ export function EmailTestPanel({ defaultRecipient }: Props) {
         audit-logged.
       </p>
 
-      <div className="flex flex-wrap items-end gap-3 rounded-[var(--radius-sm)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-4">
-        <div className="min-w-[260px] flex-1">
-          <TextField
-            id="test-email-recipient"
-            label="Recipient"
-            type="email"
-            value={recipient}
-            onChange={(e) => setRecipient(e.target.value)}
-            disabled={pending}
-            hint="Defaults to your own admin email. Override if you want to test deliverability to a specific inbox."
-          />
+      <div className="rounded-[var(--radius-sm)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-4">
+        <div className="flex flex-wrap items-end gap-3">
+          <div className="min-w-[260px] flex-1">
+            <TextField
+              id="test-email-recipient"
+              label="Recipient"
+              type="email"
+              value={recipient}
+              onChange={(e) => setRecipient(e.target.value)}
+              disabled={pending}
+            />
+          </div>
+          <Button
+            type="button"
+            variant="primary"
+            size="md"
+            onClick={onSend}
+            disabled={pending || recipient.trim().length === 0}
+          >
+            <Send className="size-4" aria-hidden="true" />
+            {pending ? "Sending…" : "Send test"}
+          </Button>
         </div>
-        <Button
-          type="button"
-          variant="primary"
-          size="md"
-          onClick={onSend}
-          disabled={pending || recipient.trim().length === 0}
-        >
-          <Send className="size-4" aria-hidden="true" />
-          {pending ? "Sending…" : "Send test"}
-        </Button>
+        <p className="mt-2 text-[0.7rem] text-[color:var(--color-ink-soft)]">
+          Defaults to your own admin email. Override if you want to test
+          deliverability to a specific inbox.
+        </p>
       </div>
 
       {result && (
