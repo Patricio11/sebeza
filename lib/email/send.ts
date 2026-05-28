@@ -1,10 +1,12 @@
 /**
- * Transactional email transport  env-driven.
+ * Transactional email transport  SMTP-only via nodemailer.
  *
  * Picks transport from `EMAIL_TRANSPORT`:
- *   - "mailtrap" → SMTP via nodemailer to the captured sandbox inbox (dev)
- *   - "resend"   → Resend SDK (production)
- *   - "console"  → log to terminal (fallback / first-boot)
+ *   - "smtp"     SMTP via nodemailer. Same code path for every
+ *                  provider (Mailtrap sandbox for dev, Resend / Sendgrid
+ *                  / Postmark / AWS SES SMTP relay for prod). Swapping
+ *                  providers is an env-var change, not a code change.
+ *   - "console"  log to terminal (fallback / first-boot, no creds)
  *
  * Every email-sending code path in Sebenza calls `sendEmail(...)`. Better
  * Auth's verification + password-reset callbacks wire through this module
@@ -14,6 +16,19 @@
  * to stdout. The console transport prints recipient + subject + the first
  * 80 chars of the body. Verification + reset links are visible in the URL
  * portion of the HTML for dev convenience.
+ *
+ * Why SMTP-only (decision, 2026-05-28): the previous design carried a
+ * separate Resend-SDK code path for production + a Mailtrap-SMTP path
+ * for dev. That meant two code paths to maintain + a vendor-specific
+ * dependency. Collapsing to one nodemailer transport gives us:
+ *   - **Vendor portability**: switching from Resend to Sendgrid to AWS
+ *     SES is an env-var swap; no code change.
+ *   - **Dev/prod parity**: the same code path runs in both, so SMTP-
+ *     specific quirks surface in dev rather than at launch.
+ *   - **One dependency** (`nodemailer`)  no `resend` SDK lock-in.
+ * Trade-off: we lose Resend's richer error responses (e.g.
+ * `validation_error` strings); SMTP returns numeric codes. Acceptable
+ * for our volume.
  */
 
 import "server-only";
@@ -24,24 +39,31 @@ export interface SendEmailInput {
   html: string;
   /** Optional plain-text fallback. If omitted, derived from `html`. */
   text?: string;
-  /** Optional from override. Defaults to `EMAIL_FROM`. */
+  /** Optional from override. Defaults to `SMTP_FROM` / `EMAIL_FROM`. */
   from?: string;
 }
 
-export type EmailTransport = "mailtrap" | "resend" | "console";
+export type EmailTransport = "smtp" | "console";
 
 function transport(): EmailTransport {
   const v = process.env.EMAIL_TRANSPORT?.toLowerCase();
-  if (v === "mailtrap" || v === "resend" || v === "console") return v;
+  if (v === "smtp" || v === "console") return v;
   return "console";
 }
 
 function fromAddress(override?: string): string {
-  return (
-    override ??
-    process.env.EMAIL_FROM ??
-    "Sebenza <noreply@sebenza.co.za>"
-  );
+  if (override) return override;
+  // SMTP_FROM_NAME + SMTP_FROM lets ops set the display name separately
+  // from the address; matches the convention most SMTP UIs (Mailtrap,
+  // Resend SMTP, Sendgrid SMTP) document. Falls back to legacy
+  // EMAIL_FROM for any deploy that hasn't migrated env vars yet.
+  const addr = process.env.SMTP_FROM ?? process.env.EMAIL_FROM;
+  if (!addr) return "Sebenza <noreply@sebenza.co.za>";
+  const name = process.env.SMTP_FROM_NAME;
+  // If the address already includes a display name (`Name <addr@x>`),
+  // pass through unchanged. Otherwise compose `Name <addr>`.
+  if (name && !addr.includes("<")) return `${name} <${addr}>`;
+  return addr;
 }
 
 function htmlToText(html: string): string {
@@ -68,42 +90,26 @@ export async function sendEmail(input: SendEmailInput): Promise<{
   const from = fromAddress(input.from);
   const text = input.text ?? htmlToText(input.html);
 
-  if (kind === "resend") {
-    const apiKey = process.env.RESEND_API_KEY;
-    if (!apiKey) {
+  if (kind === "smtp") {
+    const host = process.env.SMTP_HOST;
+    const portRaw = process.env.SMTP_PORT;
+    const user = process.env.SMTP_USER;
+    const pass = process.env.SMTP_PASS;
+    if (!host || !portRaw || !user || !pass) {
       throw new Error(
-        "EMAIL_TRANSPORT=resend but RESEND_API_KEY is not set.",
+        "EMAIL_TRANSPORT=smtp but one of SMTP_HOST / SMTP_PORT / SMTP_USER / SMTP_PASS is not set.",
       );
     }
-    const { Resend } = await import("resend");
-    const resend = new Resend(apiKey);
-    const result = await resend.emails.send({
-      from,
-      to: input.to,
-      subject: input.subject,
-      html: input.html,
-      text,
-    });
-    if (result.error) {
-      throw new Error(`Resend error: ${result.error.message}`);
-    }
-    return { transport: "resend", id: result.data?.id };
-  }
-
-  if (kind === "mailtrap") {
-    const host = process.env.MAILTRAP_HOST ?? "sandbox.smtp.mailtrap.io";
-    const port = Number(process.env.MAILTRAP_PORT ?? "2525");
-    const user = process.env.MAILTRAP_USER;
-    const pass = process.env.MAILTRAP_PASS;
-    if (!user || !pass) {
-      throw new Error(
-        "EMAIL_TRANSPORT=mailtrap but MAILTRAP_USER / MAILTRAP_PASS are not set.",
-      );
-    }
+    const port = Number(portRaw);
+    // `secure: true` => TLS-on-connect (port 465 convention).
+    // `secure: false` => STARTTLS on a non-TLS port (587 / 2525). Both
+    // are encrypted in flight  the flag only picks the handshake.
+    const secure = (process.env.SMTP_SECURE ?? "").toLowerCase() === "true";
     const nodemailer = await import("nodemailer");
     const transporter = nodemailer.default.createTransport({
       host,
       port,
+      secure,
       auth: { user, pass },
     });
     const info = await transporter.sendMail({
@@ -113,7 +119,7 @@ export async function sendEmail(input: SendEmailInput): Promise<{
       html: input.html,
       text,
     });
-    return { transport: "mailtrap", id: info.messageId };
+    return { transport: "smtp", id: info.messageId };
   }
 
   // console  fallback
