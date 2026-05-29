@@ -866,6 +866,17 @@ export const vacancies = pgTable(
       .default(sql`'{}'::work_availability_kind[]`),
     minYearsExperience: integer("min_years_experience"),
     minNqfLevel: integer("min_nqf_level"),
+    /**
+     * Phase 9.19 D8  follow-up nudges are opt-in per vacancy. When true,
+     * a nightly cron looks for `invited`-state invitations older than 7
+     * days and fires a single dedupe-keyed notification per invite per
+     * cron run. Capped at 1 nudge per invite ever (re-nudging is
+     * harassment). Default false; today no seeker expects a follow-up,
+     * so on-by-default would feel like spam.
+     */
+    followUpNudgesEnabled: boolean("follow_up_nudges_enabled")
+      .notNull()
+      .default(false),
     createdAt: timestamp("created_at").notNull().defaultNow(),
     closedAt: timestamp("closed_at"),
   },
@@ -973,6 +984,46 @@ export const vacancyInvitations = pgTable(
         index() doesn't accept a WHERE clause; the index still helps
         the cron's range scan). */
     expiryIdx: index("vacancy_invitations_expires_at_idx").on(t.expiresAt),
+  }),
+);
+
+/**
+ * Phase 9.19 Tier 2  per-(vacancy, profile) bookmark surface used on
+ * the match page. Scope is the **vacancy**, not the user (D5): two
+ * team-mates editing the same vacancy work off the same shortlist.
+ * Per-user cross-vacancy shortlists already live in `shortlistPools`
+ * below; this table is the lighter "save for later on THIS vacancy"
+ * affordance.
+ *
+ * Not a consent surface  removing is symmetric to adding, no audit
+ * kind required. Cascades on both parent rows (vacancy + profile)
+ * keep the table tidy without a separate sweeper.
+ */
+export const vacancyShortlists = pgTable(
+  "vacancy_shortlists",
+  {
+    id: text("id").primaryKey(),
+    vacancyId: text("vacancy_id")
+      .notNull()
+      .references(() => vacancies.id, { onDelete: "cascade" }),
+    profileId: text("profile_id")
+      .notNull()
+      .references(() => profiles.id, { onDelete: "cascade" }),
+    /** Member who added the row. References app_user so the
+        attribution survives the member later leaving the org. */
+    addedByUserId: text("added_by_user_id")
+      .notNull()
+      .references(() => appUser.id),
+    addedAt: timestamp("added_at").notNull().defaultNow(),
+  },
+  (t) => ({
+    /** One row per (vacancy, profile)  toggling is an upsert/delete. */
+    vacancyProfileUq: uniqueIndex("vacancy_shortlists_vacancy_profile_uniq").on(
+      t.vacancyId,
+      t.profileId,
+    ),
+    /** Hot path: match-page render loads the whole vacancy's shortlist. */
+    vacancyIdx: index("vacancy_shortlists_vacancy_idx").on(t.vacancyId),
   }),
 );
 

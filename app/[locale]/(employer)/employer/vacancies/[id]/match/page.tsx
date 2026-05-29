@@ -35,6 +35,11 @@ import {
 } from "@/lib/employer/vacancies";
 import { canEditVacancies } from "@/lib/employer/vacancies-types";
 import { getInvitedProfileIdsForVacancy } from "@/lib/employer/invitations";
+import {
+  addToVacancyShortlist,
+  getVacancyShortlistProfileIds,
+  removeFromVacancyShortlist,
+} from "@/lib/employer/vacancy-shortlists";
 import { TalentRosterItem } from "@/components/ui/TalentRosterItem";
 import { VacancyStatusChip } from "@/components/feature/employer/vacancies/VacancyStatusChip";
 import { BulkInviteIsland } from "@/components/feature/employer/vacancies/BulkInviteIsland";
@@ -58,12 +63,14 @@ export default async function VacancyMatchPage({
   const vacancy = await getMyVacancy(id);
   if (!vacancy) notFound();
 
-  const [match, role, alreadyInvitedProfileIds, verificationVisible] = await Promise.all([
-    matchVacancyCandidates(vacancy),
-    getMyOrgRole(),
-    getInvitedProfileIdsForVacancy(vacancy.id),
-    getSetting<boolean>("feature_flag_verification_badges_visible"),
-  ]);
+  const [match, role, alreadyInvitedProfileIds, verificationVisible, shortlistedProfileIds] =
+    await Promise.all([
+      matchVacancyCandidates(vacancy),
+      getMyOrgRole(),
+      getInvitedProfileIdsForVacancy(vacancy.id),
+      getSetting<boolean>("feature_flag_verification_badges_visible"),
+      getVacancyShortlistProfileIds(vacancy.id),
+    ]);
   const { candidates, counts, filters } = match;
   const canInvite =
     canEditVacancies(role) &&
@@ -197,6 +204,22 @@ export default async function VacancyMatchPage({
             vacancyId={vacancy.id}
             vacancyTitle={vacancy.title}
             canInvite={canInvite}
+            addToShortlistAction={async (profileId: string) => {
+              "use server";
+              const res = await addToVacancyShortlist({
+                vacancyId: vacancy.id,
+                profileId,
+              });
+              return res.ok ? { ok: true } : { ok: false, message: res.message };
+            }}
+            removeFromShortlistAction={async (profileId: string) => {
+              "use server";
+              const res = await removeFromVacancyShortlist({
+                vacancyId: vacancy.id,
+                profileId,
+              });
+              return res.ok ? { ok: true } : { ok: false, message: res.message };
+            }}
             items={candidates
               .map((p) => {
                 const profileId = handleToProfileId.get(p.handle);
@@ -206,6 +229,14 @@ export default async function VacancyMatchPage({
                   handle: p.handle,
                   displayName: p.displayName,
                   alreadyInvited: alreadyInvitedProfileIds.has(profileId),
+                  shortlisted: shortlistedProfileIds.has(profileId),
+                  meta: {
+                    workAvailability: p.workAvailability,
+                    yearsExperience: p.yearsExperience ?? null,
+                    isCitizen: p.isCitizen,
+                    statusConfirmedAt: p.statusConfirmedAt,
+                    completeness: p.completeness,
+                  },
                   row: (
                     <>
                       <TalentRosterItem
