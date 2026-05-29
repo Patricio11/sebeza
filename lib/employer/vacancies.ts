@@ -98,6 +98,9 @@ export interface VacancyRow {
    *  record. NULL = "no floor" (the role does not require a credential,
    *  e.g. trades / hospitality / casual labour / sales). */
   minNqfLevel: number | null;
+  /** Phase 9.19 D8  opt-in 7-day follow-up nudges. Default false; the
+   *  nightly cron only runs against vacancies that have it set. */
+  followUpNudgesEnabled: boolean;
   createdAt: string; // ISO
   closedAt: string | null;
 }
@@ -121,6 +124,7 @@ function rowToVacancy(r: typeof schema.vacancies.$inferSelect): VacancyRow {
     workAvailability: (r.workAvailability ?? []) as WorkAvailabilityKind[],
     minYearsExperience: r.minYearsExperience ?? null,
     minNqfLevel: r.minNqfLevel ?? null,
+    followUpNudgesEnabled: r.followUpNudgesEnabled ?? false,
     createdAt:
       r.createdAt instanceof Date
         ? r.createdAt.toISOString()
@@ -262,6 +266,10 @@ const vacancyInputSchema = z.object({
     .max(10)
     .nullable()
     .optional(),
+  /** Phase 9.19 D8  opt-in follow-up nudge cron. Omitted = leave the
+   *  current value alone (no surprise toggle on partial form payloads
+   *  from older clients). */
+  followUpNudgesEnabled: z.boolean().optional(),
 });
 
 const transitionSchema = z.object({
@@ -325,6 +333,7 @@ export async function createVacancy(
     workAvailability: v.workAvailability ?? [],
     minYearsExperience: v.minYearsExperience ?? null,
     minNqfLevel: v.minNqfLevel ?? null,
+    followUpNudgesEnabled: v.followUpNudgesEnabled ?? false,
   });
 
   await logAccess({
@@ -381,6 +390,11 @@ export async function updateVacancy(
       workAvailability: v.workAvailability ?? [],
       minYearsExperience: v.minYearsExperience ?? null,
       minNqfLevel: v.minNqfLevel ?? null,
+      // Phase 9.19  Zod `optional()` lets the patch omit this; we only
+      // overwrite the column when the form actually included a value.
+      ...(v.followUpNudgesEnabled !== undefined
+        ? { followUpNudgesEnabled: v.followUpNudgesEnabled }
+        : {}),
     })
     .where(
       and(

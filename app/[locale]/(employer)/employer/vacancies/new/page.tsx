@@ -11,9 +11,16 @@ import { redirect } from "next/navigation";
 import { DashboardShell } from "@/components/layout/DashboardShell";
 import { EMPLOYER_NAV, MOCK_EMPLOYER } from "@/components/layout/employerNav";
 import { verifyEmployer } from "@/lib/auth/dal";
-import { createVacancy, getMyOrgRole } from "@/lib/employer/vacancies";
+import {
+  createVacancy,
+  getMyOrgRole,
+  getMyVacancy,
+} from "@/lib/employer/vacancies";
 import { canEditVacancies } from "@/lib/employer/vacancies-types";
-import { VacancyForm } from "@/components/feature/employer/vacancies/VacancyForm";
+import {
+  VacancyForm,
+  type VacancyFormValue,
+} from "@/components/feature/employer/vacancies/VacancyForm";
 import { getProfessions } from "@/lib/taxonomy/query";
 import { PROVINCES, SKILLS } from "@/lib/mock/taxonomy";
 
@@ -21,8 +28,10 @@ export const revalidate = 0;
 
 export default async function NewVacancyPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<{ duplicateFrom?: string }>;
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
@@ -31,6 +40,37 @@ export default async function NewVacancyPage({
   const role = await getMyOrgRole();
   if (!canEditVacancies(role)) {
     redirect("/employer/vacancies");
+  }
+
+  // Phase 9.19 D7  Duplicate from existing. The button on the
+  // vacancy list passes ?duplicateFrom=<id>; we load that vacancy
+  // (org-scoped via getMyVacancy) and pre-fill the form. The new
+  // vacancy is its own draft  saving doesn't touch the source row.
+  // Title suffix " (copy)" so the editor knows which is which.
+  const { duplicateFrom } = await searchParams;
+  let initial: Partial<VacancyFormValue> | undefined;
+  let pageSubtitle =
+    "Private to your organisation. Vacancies start as drafts  open them when ready to invite candidates.";
+  if (duplicateFrom) {
+    const source = await getMyVacancy(duplicateFrom);
+    if (source) {
+      initial = {
+        title: `${source.title} (copy)`,
+        professionSlug: source.professionSlug,
+        provinceSlug: source.provinceSlug,
+        citySlug: source.citySlug,
+        skillSlugs: source.skillSlugs,
+        seniority: source.seniority,
+        salaryBand: source.salaryBand,
+        description: source.description,
+        documentsRequired: source.documentsRequired,
+        inviteExpiryDays: source.inviteExpiryDays,
+        workAvailability: source.workAvailability,
+        minYearsExperience: source.minYearsExperience,
+        minNqfLevel: source.minNqfLevel,
+      };
+      pageSubtitle = `Pre-filled from "${source.title}". Edit anything before saving  this creates a fresh draft, the original stays untouched.`;
+    }
   }
 
   const professions = await getProfessions();
@@ -43,14 +83,18 @@ export default async function NewVacancyPage({
       nav={EMPLOYER_NAV}
       activeKey="vacancies"
       pageEyebrow={session.name ?? "Employer workspace"}
-      pageTitle="New vacancy"
-      pageSubtitle="Private to your organisation. Vacancies start as drafts  open them when ready to invite candidates."
+      pageTitle={initial ? "Duplicate vacancy" : "New vacancy"}
+      pageSubtitle={pageSubtitle}
     >
       <div className="rounded-[var(--radius-md)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-5 md:p-8">
         <VacancyForm
+          initial={initial}
           professions={professions}
           provinces={PROVINCES}
           skills={SKILLS}
+          // Phase 9.19  scope the sessionStorage draft per source so
+          // duplicating two different vacancies doesn't bleed drafts.
+          draftId={duplicateFrom ? `duplicate-${duplicateFrom}` : "new"}
           onSubmit={async (value) => {
             "use server";
             const res = await createVacancy(value);

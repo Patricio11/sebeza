@@ -167,6 +167,13 @@ export function BulkInviteIsland({
     new Set(),
   );
 
+  /**
+   * Phase 9.19 Tier 3 D6  optional 200-char personal note attached
+   * to the next bulk-invite call. Lives in the modal's textarea; gets
+   * cleared (along with selection) after a successful send.
+   */
+  const [personalNote, setPersonalNote] = useState<string>("");
+
   function isShortlisted(item: BulkInviteItem): boolean {
     return shortlistOverrides.get(item.profileId) ?? item.shortlisted;
   }
@@ -314,14 +321,20 @@ export function BulkInviteIsland({
       setModalOpen(false);
       return;
     }
+    const note = personalNote.trim();
     startTransition(async () => {
-      const res = await bulkInviteToVacancy({ vacancyId, profileIds });
+      const res = await bulkInviteToVacancy({
+        vacancyId,
+        profileIds,
+        ...(note.length > 0 ? { personalNote: note } : {}),
+      });
       if (!res.ok) {
         setError(res.message);
         return;
       }
       setBanner({ invited: res.invited, skipped: res.skipped });
       setSelected(new Set());
+      setPersonalNote("");
       setModalOpen(false);
       router.refresh();
     });
@@ -670,6 +683,8 @@ export function BulkInviteIsland({
           selectedCount={selectedCount}
           error={error}
           pending={pending}
+          personalNote={personalNote}
+          onPersonalNoteChange={setPersonalNote}
           onCancel={() => setModalOpen(false)}
           onConfirm={onConfirm}
         />
@@ -683,15 +698,21 @@ interface ModalProps {
   selectedCount: number;
   error: string | null;
   pending: boolean;
+  personalNote: string;
+  onPersonalNoteChange: (value: string) => void;
   onCancel: () => void;
   onConfirm: () => void;
 }
+
+const PERSONAL_NOTE_MAX = 200;
 
 function BulkInviteModal({
   vacancyTitle,
   selectedCount,
   error,
   pending,
+  personalNote,
+  onPersonalNoteChange,
   onCancel,
   onConfirm,
 }: ModalProps) {
@@ -735,6 +756,51 @@ function BulkInviteModal({
           <li> Already-invited candidates are skipped (no duplicates).</li>
           <li> Audit-logged as <code>vacancy.invite</code> for each invite sent.</li>
         </ul>
+
+        {/* Phase 9.19 D6  optional personal note. Same 200-char cap +
+            PII-flag pattern as the Phase 9.17 seeker-invite note. The
+            note is the SAME across every invite in this batch (the modal
+            is the batch boundary); per-seeker personalisation belongs in
+            the dossier-DM flow that lands later. */}
+        <div className="mt-5">
+          <label
+            htmlFor="bulk-invite-note"
+            className="flex items-baseline justify-between text-[0.72rem] uppercase tracking-[0.22em] text-[color:var(--color-ink)]"
+          >
+            <span>
+              Add a note
+              <span className="ml-1 text-[color:var(--color-ink-soft)]">
+                (optional)
+              </span>
+            </span>
+            <span
+              className={
+                "text-[0.65rem] tracking-normal " +
+                (personalNote.length > PERSONAL_NOTE_MAX
+                  ? "text-[color:var(--color-danger)]"
+                  : "text-[color:var(--color-ink-soft)]")
+              }
+              aria-live="polite"
+            >
+              {personalNote.length} / {PERSONAL_NOTE_MAX}
+            </span>
+          </label>
+          <textarea
+            id="bulk-invite-note"
+            value={personalNote}
+            onChange={(e) => onPersonalNoteChange(e.target.value)}
+            disabled={pending}
+            maxLength={PERSONAL_NOTE_MAX}
+            rows={3}
+            placeholder="Why you're reaching out  what about their profile caught your eye."
+            className="mt-1.5 w-full rounded-[var(--radius-sm)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-3 text-sm text-[color:var(--color-ink)] outline-none transition-colors placeholder:text-[color:var(--color-ink-soft)] focus:border-[color:var(--color-ink)]"
+          />
+          <p className="mt-1.5 text-xs text-[color:var(--color-ink-soft)]">
+            The same note attaches to every invite in this batch. Logged
+            as PII alongside the audit row  if you'd rather not write
+            anything, leave it blank.
+          </p>
+        </div>
 
         {error && (
           <div

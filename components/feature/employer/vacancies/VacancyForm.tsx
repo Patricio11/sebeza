@@ -46,6 +46,8 @@ export interface VacancyFormValue {
   minYearsExperience?: number | null;
   /** Phase 9.19  NULL = no NQF check at all (every seeker passes). */
   minNqfLevel?: number | null;
+  /** Phase 9.19 D8  opt-in 7-day follow-up nudge cron (default off). */
+  followUpNudgesEnabled?: boolean;
 }
 
 export interface VacancyFormProps {
@@ -86,6 +88,7 @@ interface VacancyDraft {
   workAvailability: WorkAvailabilityKind[];
   minYearsExperience: string;
   minNqfLevel: string;
+  followUpNudgesEnabled: boolean;
 }
 
 const SENIORITY_OPTIONS = [
@@ -172,6 +175,9 @@ export function VacancyForm({
   const [minNqfLevel, setMinNqfLevel] = useState<string>(
     initial?.minNqfLevel != null ? String(initial.minNqfLevel) : "",
   );
+  const [followUpNudgesEnabled, setFollowUpNudgesEnabled] = useState<boolean>(
+    initial?.followUpNudgesEnabled ?? false,
+  );
 
   // Persist the draft so locale-switching mid-edit doesn't wipe it.
   // Scoped per (create vs edit-vacancy-id) so drafts don't bleed
@@ -190,6 +196,7 @@ export function VacancyForm({
       workAvailability: Array.from(workAvailabilitySet),
       minYearsExperience,
       minNqfLevel,
+      followUpNudgesEnabled,
     }),
     [
       title,
@@ -203,6 +210,7 @@ export function VacancyForm({
       workAvailabilitySet,
       minYearsExperience,
       minNqfLevel,
+      followUpNudgesEnabled,
     ],
   );
   const { clear: clearDraft } = useSessionDraft<VacancyDraft>(
@@ -225,6 +233,8 @@ export function VacancyForm({
         if (draft.minYearsExperience !== undefined)
           setMinYearsExperience(draft.minYearsExperience);
         if (draft.minNqfLevel !== undefined) setMinNqfLevel(draft.minNqfLevel);
+        if (typeof draft.followUpNudgesEnabled === "boolean")
+          setFollowUpNudgesEnabled(draft.followUpNudgesEnabled);
       },
     },
   );
@@ -297,6 +307,7 @@ export function VacancyForm({
       workAvailability: Array.from(workAvailabilitySet),
       minYearsExperience: yearsNum,
       minNqfLevel: nqfNum,
+      followUpNudgesEnabled,
     };
 
     startTransition(async () => {
@@ -571,6 +582,30 @@ export function VacancyForm({
           disabled={pending}
           hint="14 days is the typical default; 0 or empty = never expires."
         />
+
+        {/* Phase 9.19 D8  opt-in follow-up nudge. A single gentle
+            reminder fires 7 days after the invite if the seeker
+            hasn't responded; capped at one nudge per invite ever
+            (re-nudging is harassment). Default OFF  today no seeker
+            expects a follow-up. */}
+        <label className="flex items-start gap-3 rounded-[var(--radius-sm)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-3">
+          <input
+            type="checkbox"
+            checked={followUpNudgesEnabled}
+            onChange={(e) => setFollowUpNudgesEnabled(e.target.checked)}
+            disabled={pending}
+            className="mt-0.5 size-4 cursor-pointer accent-[color:var(--color-ink)]"
+          />
+          <span className="flex-1 text-sm">
+            <span className="font-display text-base text-[color:var(--color-ink)]">
+              Send a gentle nudge after 7 days
+            </span>
+            <span className="mt-0.5 block text-xs text-[color:var(--color-ink-soft)]">
+              One reminder, only to seekers who haven&rsquo;t responded yet.
+              Capped at one nudge per invite  re-nudging is harassment.
+            </span>
+          </span>
+        </label>
       </section>
 
       <div className="flex flex-wrap items-center justify-end gap-3 border-t border-[color:var(--color-hairline)] pt-5">

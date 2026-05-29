@@ -27,7 +27,7 @@ import {
 import { VacancyStatusChip } from "@/components/feature/employer/vacancies/VacancyStatusChip";
 import { DeclineReasonsCard } from "@/components/feature/analytics/DeclineReasonsCard";
 import { declineReasonAggregateQuery } from "@/db/queries/decline-reasons";
-import { Plus, MapPin, Briefcase, Calendar } from "lucide-react";
+import { Plus, MapPin, Briefcase, Calendar, Copy } from "lucide-react";
 import { PROVINCES, PROFESSIONS } from "@/lib/mock/taxonomy";
 
 export const revalidate = 0; // Always fresh  this is the employer's pipeline view.
@@ -92,7 +92,11 @@ export default async function VacanciesListPage({
         <ul className="grid gap-3 md:grid-cols-2">
           {vacancies.map((v) => (
             <li key={v.id}>
-              <VacancyCard vacancy={v} showSalary={showSalary} />
+              <VacancyCard
+                vacancy={v}
+                showSalary={showSalary}
+                canEdit={canEdit}
+              />
             </li>
           ))}
         </ul>
@@ -141,9 +145,11 @@ function EmptyState({ canEdit }: { canEdit: boolean }) {
 function VacancyCard({
   vacancy,
   showSalary,
+  canEdit,
 }: {
   vacancy: VacancyRow;
   showSalary: boolean;
+  canEdit: boolean;
 }) {
   const professionLabel =
     PROFESSIONS.find((p) => p.slug === vacancy.professionSlug)?.label ??
@@ -157,14 +163,21 @@ function VacancyCard({
     day: "numeric",
   });
 
+  // Phase 9.19 D7  the card now hosts two actions (Open + Duplicate)
+  // so it's a div, not a wrapping Link. The title carries the primary
+  // navigation; Duplicate is a sibling link to /new?duplicateFrom=...
+  // The create page reads that query param server-side and pre-fills
+  // the form (see /employer/vacancies/new).
   return (
-    <Link
-      href={`/employer/vacancies/${vacancy.id}` as never}
-      className="block h-full rounded-[var(--radius-md)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-5 transition-colors hover:border-[color:var(--color-ink)]"
-    >
+    <article className="flex h-full flex-col rounded-[var(--radius-md)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-5 transition-colors hover:border-[color:var(--color-ink)]">
       <header className="flex flex-wrap items-baseline justify-between gap-2">
         <h3 className="font-display text-lg leading-tight text-[color:var(--color-ink)]">
-          {vacancy.title}
+          <Link
+            href={`/employer/vacancies/${vacancy.id}` as never}
+            className="hover:underline focus:underline focus:outline-none"
+          >
+            {vacancy.title}
+          </Link>
         </h3>
         <VacancyStatusChip status={vacancy.status} />
       </header>
@@ -198,6 +211,26 @@ function VacancyCard({
           </div>
         )}
       </dl>
-    </Link>
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-2 pt-3">
+        <Link
+          href={`/employer/vacancies/${vacancy.id}` as never}
+          className="inline-flex h-8 items-center gap-1.5 rounded-[var(--radius-pill)] border border-[color:var(--color-ink)] px-3 text-xs font-medium text-[color:var(--color-ink)] hover:bg-[color:var(--color-ink)] hover:text-[color:var(--color-paper)]"
+        >
+          Open
+        </Link>
+        {canEdit && (
+          <Link
+            href={
+              `/employer/vacancies/new?duplicateFrom=${vacancy.id}` as never
+            }
+            className="inline-flex h-8 items-center gap-1.5 rounded-[var(--radius-pill)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] px-3 text-xs text-[color:var(--color-ink-soft)] hover:border-[color:var(--color-ink)] hover:text-[color:var(--color-ink)]"
+            title="Open the create form pre-filled with this vacancy's values"
+          >
+            <Copy className="size-3" aria-hidden="true" />
+            Duplicate
+          </Link>
+        )}
+      </div>
+    </article>
   );
 }

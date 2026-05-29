@@ -146,6 +146,16 @@ export default async function VacancyDetailPage({
           truth; blank = matcher ignores axis). */}
       <MatchRequirementsStrip vacancy={vacancy} />
 
+      {/* Phase 9.19 D9  per-vacancy accept-rate analytics. Vacancy-
+          private, never cross-vacancy comparison, never per-seeker
+          breakdown. Hidden when there's nothing to show. */}
+      {invitations.length > 0 && (
+        <AcceptRateStrip
+          invitations={invitations}
+          followUpNudgesEnabled={vacancy.followUpNudgesEnabled}
+        />
+      )}
+
       {/* Find-matches CTA  visible to all roles. Reverse-matching is a
           read of the public talent pool through the existing redaction
           layer, so Viewers can browse matches even though they cannot
@@ -310,6 +320,117 @@ function ViewerNotice() {
       Your workspace role is <strong>Viewer</strong>  vacancy detail is
       read-only. Ask an Owner or Recruiter to make changes.
     </p>
+  );
+}
+
+function AcceptRateStrip({
+  invitations,
+  followUpNudgesEnabled,
+}: {
+  invitations: import("@/lib/employer/invitations").InvitationRow[];
+  followUpNudgesEnabled: boolean;
+}) {
+  // Bucket every invitation into one of five lifecycle columns. We
+  // deliberately fold `accepted_with_notice` into accepted (it IS an
+  // acceptance), `reconsidering` into declined (it's a transient
+  // sub-state of declined), and `withdrawn` into expired (both are
+  // "no further action expected"). Sum across buckets equals total,
+  // so the figures don't lie even when transient states exist.
+  let accepted = 0;
+  let declined = 0;
+  let pending = 0;
+  let expired = 0;
+  for (const inv of invitations) {
+    switch (inv.state) {
+      case "accepted":
+      case "accepted_with_notice":
+        accepted++;
+        break;
+      case "declined":
+      case "reconsidering":
+        declined++;
+        break;
+      case "invited":
+        pending++;
+        break;
+      case "expired":
+      case "withdrawn":
+        expired++;
+        break;
+    }
+  }
+  const total = invitations.length;
+  // Acceptance rate as a fraction of CLOSED responses (acceptances
+  // over accepted + declined). Pending + expired are not counted in
+  // the denominator  including them would make the rate look worse
+  // every time someone slow-walks a response. Surface NULL when no
+  // closed responses exist yet.
+  const closed = accepted + declined;
+  const acceptRate = closed > 0 ? Math.round((accepted / closed) * 100) : null;
+  return (
+    <section
+      aria-label="Vacancy invitation outcomes"
+      className="mb-6 rounded-[var(--radius-md)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-4"
+    >
+      <div className="mb-2 flex flex-wrap items-baseline justify-between gap-2">
+        <span className="text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--color-ink-soft)]">
+          Invitation outcomes
+        </span>
+        <span className="text-xs text-[color:var(--color-ink-soft)]">
+          {acceptRate !== null ? (
+            <>
+              <strong className="text-[color:var(--color-ink)]">
+                {acceptRate}%
+              </strong>{" "}
+              acceptance on closed responses
+            </>
+          ) : (
+            "No responses yet"
+          )}
+        </span>
+      </div>
+      <dl className="grid grid-cols-2 gap-3 text-sm md:grid-cols-5">
+        <StatCell label="Sent" value={total} />
+        <StatCell label="Accepted" value={accepted} accent="brand" />
+        <StatCell label="Declined" value={declined} />
+        <StatCell label="Pending" value={pending} />
+        <StatCell label="Expired" value={expired} />
+      </dl>
+      {followUpNudgesEnabled && pending > 0 && (
+        <p className="mt-2 text-xs text-[color:var(--color-ink-soft)]">
+          Follow-up nudges are on for this vacancy. Pending invitations
+          past 7 days will receive one gentle reminder.
+        </p>
+      )}
+    </section>
+  );
+}
+
+function StatCell({
+  label,
+  value,
+  accent,
+}: {
+  label: string;
+  value: number;
+  accent?: "brand";
+}) {
+  return (
+    <div>
+      <dt className="text-[0.68rem] uppercase tracking-[0.18em] text-[color:var(--color-ink-soft)]">
+        {label}
+      </dt>
+      <dd
+        className={
+          "mt-0.5 font-display text-2xl leading-none " +
+          (accent === "brand"
+            ? "text-[color:var(--color-brand-strong)]"
+            : "text-[color:var(--color-ink)]")
+        }
+      >
+        {value}
+      </dd>
+    </div>
   );
 }
 

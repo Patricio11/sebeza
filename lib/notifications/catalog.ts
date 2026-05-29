@@ -195,6 +195,19 @@ export const NOTIFICATION_CATALOG = {
       "Fires nightly when a vacancy invitation passes its expiry window without an accept or decline. Helps you keep your pipeline honest.",
     dedupeWindowSeconds: 0,
   },
+  // Phase 9.19 D8  optional 7-days-after-invite gentle reminder.
+  // Off by default per vacancy (vacancies.follow_up_nudges_enabled);
+  // capped at one nudge per invite ever via the cron's dedupeKey
+  // (invitationId). Re-nudging is harassment.
+  "vacancy.invite.followup": {
+    defaultInApp: true,
+    defaultEmail: true,
+    audience: "seeker",
+    label: "Gentle reminder about a pending invitation",
+    description:
+      "A single follow-up fires one week after an invitation if you haven't responded yet. Capped at one per invite ever  the employer chose to enable nudges on this vacancy. You can still accept, decline, or decline with a reason.",
+    dedupeWindowSeconds: 0,
+  },
   "vacancy.response": {
     defaultInApp: true,
     defaultEmail: true,

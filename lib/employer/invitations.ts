@@ -165,6 +165,20 @@ const bulkInviteSchema = z.object({
   vacancyId: z.string().min(1),
   // Cap at 50 per call to match the SEARCH_LIMIT on the match view.
   profileIds: z.array(z.string().min(1)).min(1).max(50),
+  /**
+   * Phase 9.19 Tier 3  optional employer-authored note attached to
+   * every invite in this batch. Same 200-char cap as the Phase 9.17
+   * seeker-invite note, same PII-flagged audit treatment (D6). NULL
+   * / empty = no note. We deliberately do NOT persist the note on
+   * the invitation row  it's a moment-of-invitation gesture, not a
+   * durable field. Lives in the audit `meta.note` only, where the
+   * Phase 9.17 PII flag already handles export sweeps.
+   */
+  personalNote: z
+    .string()
+    .trim()
+    .max(200, "Note must be 200 characters or fewer.")
+    .optional(),
 });
 
 /**
@@ -196,7 +210,8 @@ export async function bulkInviteToVacancy(
 
   const parsed = bulkInviteSchema.safeParse(input);
   if (!parsed.success) return fail("Invalid invite request.");
-  const { vacancyId, profileIds } = parsed.data;
+  const { vacancyId, profileIds, personalNote } = parsed.data;
+  const noteForMeta = personalNote && personalNote.length > 0 ? personalNote : null;
 
   // Re-fetch the vacancy with org scoping (the privacy invariant).
   const vacancy = await getMyVacancy(vacancyId);
@@ -283,7 +298,13 @@ export async function bulkInviteToVacancy(
       });
 
       // Attributed notification per the plan: name the employer + the
-      // role. No anonymous invites.
+      // role. No anonymous invites. Phase 9.19 D6  the personal note,
+      // when present, is appended to the notification body (so the
+      // seeker actually reads it) AND captured in the audit meta as a
+      // PII-flagged field for the export sweep.
+      const noteSuffix = noteForMeta
+        ? `\n\nNote from ${orgName}: ${noteForMeta}`
+        : "";
       await createNotification({
         userId: profile.userId,
         kind: "vacancy.invite",
@@ -292,7 +313,8 @@ export async function bulkInviteToVacancy(
           `Open the invite to accept, decline, or decline with a reason. ` +
           (expiresAt
             ? `Responds-by: ${expiresAt.toISOString().slice(0, 10)}.`
-            : `No expiry on this invite.`),
+            : `No expiry on this invite.`) +
+          noteSuffix,
         link: `/dashboard/invitations/${invitationId}`,
         meta: {
           invitationId,
@@ -311,6 +333,10 @@ export async function bulkInviteToVacancy(
           vacancyId,
           profileId: pid,
           handle: profile.handle,
+          // Phase 9.19 D6  reuse the existing PII flag pattern from
+          // Phase 9.17 (seeker-invite notes). Stored in audit only; not
+          // mirrored on the invitation row.
+          ...(noteForMeta ? { note: noteForMeta, notePii: true } : {}),
         },
       });
 

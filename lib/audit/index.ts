@@ -117,6 +117,10 @@ export type AuditKind =
   | "vacancy.invite.skip"
   | "vacancy.invite.withdraw"
   | "vacancy.invite.expire"
+  // Phase 9.19 D8  the gentle reminder cron writes one row per
+  // nudge sent, keyed by `subject = invitationId` so re-runs can see
+  // an invite has already been nudged (cap: one per invite ever).
+  | "vacancy.invite.followup"
   | "vacancy.response"
   // Phase 9.10  employer KYC / org-vetting lifecycle. Replaces the
   // dormant `feature_flag_kyc_provider` partnership path with admin-
