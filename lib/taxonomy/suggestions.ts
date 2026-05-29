@@ -61,11 +61,18 @@ function fail(message: string): { ok: false; message: string } {
 // ─────────────────────────────────────────────────────────────────────
 
 const submitSchema = z.object({
-  kind: z.enum(["profession", "institution"]),
+  kind: z.enum(["profession", "institution", "organisation"]),
   customText: z
     .string()
     .min(2, "Too short  at least 2 characters.")
     .max(80, "Too long  cap at 80 characters."),
+  /**
+   * Phase 9.22  optional city for `kind='organisation'` submissions.
+   * Lives on the pending organizations row alongside the name so the
+   * admin reviewer has location context. Ignored for profession +
+   * institution kinds.
+   */
+  orgCity: z.string().trim().max(80).optional(),
 });
 
 /** Daily per-user submission cap (anti-spam). */
@@ -79,6 +86,12 @@ export async function submitTaxonomySuggestion(
     /** For institution submissions, the pending slug created so the
      *  caller can write it into academic_profiles.institution_slug. */
     pendingInstitutionSlug?: string;
+    /**
+     * Phase 9.22  for organisation submissions, the pending org id
+     * created so the caller can write it into
+     * profiles.current_employer_org_id.
+     */
+    pendingOrganisationId?: string;
   }>
 > {
   const session = await verifySession();
@@ -123,7 +136,7 @@ export async function submitTaxonomySuggestion(
         `"${customText}" already exists in the profession list  please pick it from the dropdown.`,
       );
     }
-  } else {
+  } else if (parsed.data.kind === "institution") {
     const existing = await db
       .select({ slug: schema.institutions.slug })
       .from(schema.institutions)
@@ -140,10 +153,31 @@ export async function submitTaxonomySuggestion(
         `"${customText}" already exists in the institution list  please pick it from the dropdown.`,
       );
     }
+  } else {
+    // organisation  reject only against orgs that would have been
+    // picker-visible (sebenza_registered, or seeker_named verified).
+    // Pending seeker_named orgs are excluded so multiple submissions
+    // of the same name don't collide; admin merges them at the queue.
+    const existing = await db
+      .select({ id: schema.organizations.id })
+      .from(schema.organizations)
+      .where(
+        and(
+          sql`lower(${schema.organizations.name}) = lower(${customText})`,
+          sql`(${schema.organizations.origin} = 'sebenza_registered' OR ${schema.organizations.verification} = 'verified')`,
+        ),
+      )
+      .limit(1);
+    if (existing[0]) {
+      return fail(
+        `"${customText}" already exists in the employer list  please pick it from the dropdown.`,
+      );
+    }
   }
 
   const suggestionId = `tx_${randomUUID()}`;
   let pendingInstitutionSlug: string | undefined;
+  let pendingOrganisationId: string | undefined;
 
   if (parsed.data.kind === "institution") {
     // Create the pending institutions row so academic_profiles can FK
@@ -175,6 +209,23 @@ export async function submitTaxonomySuggestion(
       provinceSlug,
       isPending: true,
     });
+  } else if (parsed.data.kind === "organisation") {
+    // Phase 9.22  insert a pending org row that the seeker's
+    // profile can FK into. `origin='seeker_named'` carries the lineage
+    // forever (audit + queue + badge). `verification='unverified'`
+    // hides the row from the picker until admin promotes; the seeker
+    // who submitted it sees the free-text-fallback on their own
+    // profile until the row is verified.
+    pendingOrganisationId = `org_${randomUUID()}`;
+    const orgCity = parsed.data.orgCity?.trim() ?? null;
+    await db.insert(schema.organizations).values({
+      id: pendingOrganisationId,
+      name: customText,
+      city: orgCity && orgCity.length > 0 ? orgCity : null,
+      origin: "seeker_named",
+      verification: "unverified",
+      listedBySeekerCount: 0,
+    });
   }
 
   await db.insert(schema.taxonomySuggestions).values({
@@ -183,6 +234,7 @@ export async function submitTaxonomySuggestion(
     customText,
     submittedByUserId: session.id,
     pendingInstitutionSlug: pendingInstitutionSlug ?? null,
+    pendingOrganisationId: pendingOrganisationId ?? null,
   });
 
   await logAccess({
@@ -200,27 +252,40 @@ export async function submitTaxonomySuggestion(
     body:
       parsed.data.kind === "profession"
         ? `A user picked "Other" on the profession picker and entered "${customText}". Review on /admin/taxonomy.`
-        : `A user picked "Other" on the institution picker and entered "${customText}". Review on /admin/taxonomy.`,
+        : parsed.data.kind === "institution"
+          ? `A user picked "Other" on the institution picker and entered "${customText}". Review on /admin/taxonomy.`
+          : `A seeker picked "Other" on the employer picker and entered "${customText}". Review on /admin/taxonomy.`,
     link: "/admin/taxonomy",
     dedupeKey: `${parsed.data.kind}::${customText.toLowerCase()}`,
     meta: { suggestionId, kind: parsed.data.kind, customText },
   });
 
-  return ok({ suggestionId, pendingInstitutionSlug });
+  return ok({ suggestionId, pendingInstitutionSlug, pendingOrganisationId });
 }
 
 // ─────────────────────────────────────────────────────────────────────
 // Admin reads
 // ─────────────────────────────────────────────────────────────────────
 
+export type SuggestionKind = "profession" | "institution" | "organisation";
+
 export interface SuggestionRow {
   id: string;
-  kind: "profession" | "institution";
+  kind: SuggestionKind;
   customText: string;
   submittedAt: string;
   state: "pending" | "promoted" | "merged" | "rejected";
   targetSlug: string | null;
   pendingInstitutionSlug: string | null;
+  /** Phase 9.22  for org-kind suggestions, the FK to the pending
+   *  organizations row. Carries the city the seeker submitted (so
+   *  the admin can edit it on promote). */
+  pendingOrganisationId: string | null;
+  /** Phase 9.22  for org-kind suggestions only. Snapshot of the
+   *  pending row's name + city at read time so the admin queue
+   *  can render them without a JOIN. NULL for other kinds. */
+  pendingOrganisationName: string | null;
+  pendingOrganisationCity: string | null;
   /** Number of rows in profiles/academic_profiles currently carrying
    *  this exact custom text (case-insensitive)  helps the admin gauge
    *  how popular the suggestion is. */
@@ -228,7 +293,7 @@ export interface SuggestionRow {
 }
 
 export async function listPendingSuggestions(
-  kind: "profession" | "institution",
+  kind: SuggestionKind,
 ): Promise<SuggestionRow[]> {
   await verifyAdmin();
   const db = getDb();
@@ -242,8 +307,20 @@ export async function listPendingSuggestions(
       state: schema.taxonomySuggestions.state,
       targetSlug: schema.taxonomySuggestions.targetSlug,
       pendingInstitutionSlug: schema.taxonomySuggestions.pendingInstitutionSlug,
+      pendingOrganisationId: schema.taxonomySuggestions.pendingOrganisationId,
+      // Phase 9.22  surface the pending org's editable fields so the
+      // admin queue card can render the current name + city.
+      pendingOrganisationName: schema.organizations.name,
+      pendingOrganisationCity: schema.organizations.city,
     })
     .from(schema.taxonomySuggestions)
+    .leftJoin(
+      schema.organizations,
+      eq(
+        schema.organizations.id,
+        schema.taxonomySuggestions.pendingOrganisationId,
+      ),
+    )
     .where(
       and(
         eq(schema.taxonomySuggestions.kind, kind),
@@ -269,12 +346,15 @@ export async function listPendingSuggestions(
     seen.add(key);
     out.push({
       id: r.id,
-      kind: r.kind,
+      kind: r.kind as SuggestionKind,
       customText: r.customText,
       submittedAt: r.submittedAt.toISOString(),
       state: r.state,
       targetSlug: r.targetSlug,
       pendingInstitutionSlug: r.pendingInstitutionSlug,
+      pendingOrganisationId: r.pendingOrganisationId,
+      pendingOrganisationName: r.pendingOrganisationName ?? null,
+      pendingOrganisationCity: r.pendingOrganisationCity ?? null,
       submitterCount: counts.get(key) ?? 1,
     });
   }
@@ -290,6 +370,10 @@ const promoteSchema = z.object({
   /** Optional admin-corrected label. When omitted, the customText is
    *  promoted as-is. Useful for fixing casing/spelling before adding. */
   correctedLabel: z.string().max(80).optional(),
+  /** Phase 9.22  for org-kind suggestions, admin can edit the city
+   *  alongside the name. Empty string clears the city to NULL; omitted
+   *  keeps the existing value. Ignored for profession + institution. */
+  correctedCity: z.string().trim().max(80).optional(),
   note: z.string().max(280).optional(),
 });
 
@@ -334,6 +418,97 @@ export async function promoteTaxonomySuggestion(
       .set({ profession: finalLabel })
       .where(sql`lower(${schema.profiles.profession}) = lower(${row.customText})`);
     backfilledRows = (result as unknown as { rowCount?: number }).rowCount ?? 0;
+  } else if (row.kind === "organisation") {
+    // Phase 9.22  promote the pending org: update name + city, flip
+    // verification='verified'. Then find any OTHER pending orgs with
+    // the same name and merge them in (re-point profile FKs, delete
+    // the dupes, sum the seeker counts).
+    if (!row.pendingOrganisationId) {
+      return fail(
+        "Suggestion is missing its pending organisation id  contact engineering.",
+      );
+    }
+    const correctedCity = parsed.data.correctedCity?.trim();
+    await db
+      .update(schema.organizations)
+      .set({
+        name: finalLabel,
+        ...(correctedCity !== undefined
+          ? { city: correctedCity.length > 0 ? correctedCity : null }
+          : {}),
+        verification: "verified",
+        verifiedAt: new Date(),
+        verifiedByUserId: session.id,
+      })
+      .where(eq(schema.organizations.id, row.pendingOrganisationId));
+
+    // De-duplicate: other pending org rows with the same name
+    // (case-insensitive). Re-point profile FKs, then delete them. The
+    // canonical row's listed_by_seeker_count gets the cumulative
+    // total via a recount at the end.
+    const dupes = await db
+      .select({ id: schema.organizations.id })
+      .from(schema.organizations)
+      .where(
+        and(
+          eq(schema.organizations.origin, "seeker_named"),
+          eq(schema.organizations.verification, "unverified"),
+          sql`lower(${schema.organizations.name}) = lower(${finalLabel})`,
+          ne(schema.organizations.id, row.pendingOrganisationId),
+        ),
+      );
+    if (dupes.length > 0) {
+      const dupeIds = dupes.map((d) => d.id);
+      const backfill = await db
+        .update(schema.profiles)
+        .set({ currentEmployerOrgId: row.pendingOrganisationId })
+        .where(sql`${schema.profiles.currentEmployerOrgId} = ANY(${dupeIds})`);
+      backfilledRows =
+        (backfill as unknown as { rowCount?: number }).rowCount ?? 0;
+      // Mark the dupe suggestions as merged into this one (so they
+      // disappear from the admin queue) BEFORE deleting the org rows
+      // (the suggestion's pending_organisation_id FK is ON DELETE SET NULL,
+      // so the order isn't critical, but doing it first keeps the audit
+      // trail crisper).
+      await db
+        .update(schema.taxonomySuggestions)
+        .set({
+          state: "merged",
+          targetSlug: row.pendingOrganisationId,
+          resolvedByUserId: session.id,
+          resolvedAt: new Date(),
+          adminNote: `Auto-merged into ${finalLabel} during promote of #${row.id}.`,
+        })
+        .where(
+          and(
+            eq(schema.taxonomySuggestions.kind, "organisation"),
+            eq(schema.taxonomySuggestions.state, "pending"),
+            sql`${schema.taxonomySuggestions.pendingOrganisationId} = ANY(${dupeIds})`,
+          ),
+        );
+      await db
+        .delete(schema.organizations)
+        .where(sql`${schema.organizations.id} = ANY(${dupeIds})`);
+    }
+    // Recompute the canonical org's seeker count. Done as a single
+    // COUNT(*) read so the denormalised column stays honest after the
+    // backfill above. Small table; cheap.
+    const recountRows = await db
+      .select({ count: sql<number>`COUNT(*)::int` })
+      .from(schema.profiles)
+      .where(
+        and(
+          eq(schema.profiles.currentEmployerOrgId, row.pendingOrganisationId),
+          isNull(schema.profiles.deletedAt),
+        ),
+      );
+    const seekerCount = recountRows[0]?.count ?? 0;
+    await db
+      .update(schema.organizations)
+      .set({ listedBySeekerCount: seekerCount })
+      .where(eq(schema.organizations.id, row.pendingOrganisationId));
+
+    targetSlug = row.pendingOrganisationId;
   } else {
     // Institution: flip is_pending=false on the existing pending row.
     // Also update label if the admin corrected it.
@@ -444,6 +619,57 @@ export async function mergeTaxonomySuggestion(
       .set({ profession: targetLabel })
       .where(sql`lower(${schema.profiles.profession}) = lower(${row.customText})`);
     backfilledRows = (result as unknown as { rowCount?: number }).rowCount ?? 0;
+  } else if (row.kind === "organisation") {
+    // Phase 9.22  merge into an existing canonical org. Target must
+    // be picker-visible (sebenza_registered, or verified seeker_named).
+    if (!row.pendingOrganisationId) {
+      return fail("Suggestion is missing its pending organisation id.");
+    }
+    const targetRows = await db
+      .select({
+        id: schema.organizations.id,
+        origin: schema.organizations.origin,
+        verification: schema.organizations.verification,
+      })
+      .from(schema.organizations)
+      .where(eq(schema.organizations.id, parsed.data.targetSlug))
+      .limit(1);
+    const target = targetRows[0];
+    if (!target) return fail("Target organisation not found.");
+    if (
+      !(
+        target.origin === "sebenza_registered" || target.verification === "verified"
+      )
+    ) {
+      return fail(
+        "Target organisation is not picker-visible (must be Sebenza-registered or verified seeker-named).",
+      );
+    }
+    // Re-point seeker profiles using the pending org id  target.
+    const result = await db
+      .update(schema.profiles)
+      .set({ currentEmployerOrgId: parsed.data.targetSlug })
+      .where(eq(schema.profiles.currentEmployerOrgId, row.pendingOrganisationId));
+    backfilledRows =
+      (result as unknown as { rowCount?: number }).rowCount ?? 0;
+    // Recount the target's seeker count + delete the pending row.
+    const recountRows = await db
+      .select({ count: sql<number>`COUNT(*)::int` })
+      .from(schema.profiles)
+      .where(
+        and(
+          eq(schema.profiles.currentEmployerOrgId, parsed.data.targetSlug),
+          isNull(schema.profiles.deletedAt),
+        ),
+      );
+    const seekerCount = recountRows[0]?.count ?? 0;
+    await db
+      .update(schema.organizations)
+      .set({ listedBySeekerCount: seekerCount })
+      .where(eq(schema.organizations.id, parsed.data.targetSlug));
+    await db
+      .delete(schema.organizations)
+      .where(eq(schema.organizations.id, row.pendingOrganisationId));
   } else {
     if (!row.pendingInstitutionSlug) {
       return fail("Suggestion is missing its pending institution slug.");
@@ -483,9 +709,11 @@ export async function mergeTaxonomySuggestion(
       resolvedByUserId: session.id,
       resolvedAt: new Date(),
       adminNote: parsed.data.note ?? null,
-      // Null out the pending slug since we deleted the row.
+      // Null out the pending slug/id since we deleted the dependent row.
       pendingInstitutionSlug:
         row.kind === "institution" ? null : row.pendingInstitutionSlug,
+      pendingOrganisationId:
+        row.kind === "organisation" ? null : row.pendingOrganisationId,
     })
     .where(eq(schema.taxonomySuggestions.id, row.id));
 

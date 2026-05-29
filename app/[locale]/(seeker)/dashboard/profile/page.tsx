@@ -16,6 +16,8 @@ import { GraduationCap } from "lucide-react";
 import { ProfileBasicsForm } from "@/components/feature/profile/ProfileBasicsForm";
 import { SkillsEditor } from "@/components/feature/profile/SkillsEditor";
 import { WorkAvailabilityEditor } from "@/components/feature/profile/WorkAvailabilityEditor";
+import { CurrentEmploymentEditor } from "@/components/feature/profile/CurrentEmploymentEditor";
+import { listEmployerOptions } from "@/lib/profile/employment";
 import { NationalIdControls } from "@/components/feature/profile/NationalIdControls";
 import { KycPanel } from "@/components/feature/profile/KycPanel";
 import { DateOfBirthEditor } from "@/components/feature/profile/DateOfBirthEditor";
@@ -43,6 +45,8 @@ export default async function ProfileEditorPage({
   const verificationVisible = await getSetting<boolean>(
     "feature_flag_verification_badges_visible",
   );
+  // Phase 9.22  picker-visible employers for the new editor.
+  const employerOptions = await listEmployerOptions("");
 
   const t = await getTranslations("seekerDash.profileEditor");
   const tAcademic = await getTranslations("seekerDash.profileEditor.academic");
@@ -231,6 +235,30 @@ export default async function ProfileEditorPage({
               hint="What kinds of work you're open to  independent of your current employment status."
             />
             <WorkAvailabilityEditor initialValues={me.workAvailability ?? []} />
+          </section>
+
+          {/* Phase 9.22  Current employment. Always shown (the seeker
+              might be employed without `status='employed'`; we keep
+              the editor available rather than gating on status to
+              avoid surprise hides on status changes). */}
+          <section id="current-employment">
+            <SectionHeading
+              eyebrow="05a"
+              title="Current employment"
+              hint="Where you work right now. Optional. Visible on your public profile when the employer is verified."
+            />
+            <CurrentEmploymentEditor
+              initial={{
+                currentEmployerOrgId: me.currentEmployerOrgId,
+                currentEmployerName: me.currentEmployerName,
+                currentRoleStartedAt: me.currentRoleStartedAt,
+                currentRoleCity: me.currentRoleCity,
+              }}
+              options={employerOptions}
+              pendingEmployerName={
+                me.currentEmployerIsPending ? me.currentEmployerName : null
+              }
+            />
           </section>
 
           {/* National ID */}

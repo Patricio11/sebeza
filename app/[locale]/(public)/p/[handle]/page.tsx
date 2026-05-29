@@ -450,6 +450,24 @@ async function ProfileHero({
                   />
                 </DossierRow>
               )}
+              {/* Phase 9.22  current employer. Only shown for picker-
+                  visible orgs (pending seeker_named never appears).
+                  Badge spells out the verification posture honestly. */}
+              {profile.currentEmployerName && profile.currentEmployerBadge && (
+                <DossierRow label="Currently at">
+                  <div className="text-sm text-[color:var(--color-ink)]">
+                    <strong>{profile.currentEmployerName}</strong>
+                    <div className="mt-0.5 text-[0.65rem] uppercase tracking-[0.18em] text-[color:var(--color-ink-soft)]">
+                      {profile.currentEmployerBadge === "sebenza_registered"
+                        ? "Sebenza employer"
+                        : "Verified employer"}
+                      {profile.currentRoleStartedAt
+                        ? ` · since ${formatRoleStartedAt(profile.currentRoleStartedAt)}`
+                        : ""}
+                    </div>
+                  </div>
+                </DossierRow>
+              )}
             </dl>
 
             <p className="mt-6 rounded-md bg-[color:var(--color-surface-sunk)] px-3 py-2 text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--color-ink-soft)]">
@@ -1221,4 +1239,15 @@ function ProfileFooter({
       </span>
     </footer>
   );
+}
+
+/**
+ * Phase 9.22  format a YYYY-MM-DD role start date as "MMM YYYY".
+ * Day precision is captured in the schema but we display month + year
+ * only  the day rarely matters at the public-profile glance.
+ */
+function formatRoleStartedAt(iso: string): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.valueOf())) return iso;
+  return d.toLocaleDateString("en-ZA", { month: "short", year: "numeric" });
 }

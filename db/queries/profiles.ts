@@ -235,6 +235,11 @@ export async function searchProfilesQuery(
       p.completeness,
       p.years_experience,
       p.member_since,
+      p.current_employer_org_id,
+      p.current_role_started_at,
+      orgs.name AS current_employer_name,
+      orgs.origin AS current_employer_origin,
+      orgs.verification AS current_employer_verification,
       (
         ${rankExpr}
         * sebenza_freshness_confidence(p.status_confirmed_at)
@@ -242,6 +247,7 @@ export async function searchProfilesQuery(
       ) AS score,
       ${citizenGroupKey} AS citizen_group
     FROM profiles p
+    LEFT JOIN organizations orgs ON orgs.id = p.current_employer_org_id
     WHERE ${whereClause}
     ORDER BY citizen_group ASC, score DESC NULLS LAST, p.completeness DESC
     LIMIT ${SEARCH_LIMIT}
@@ -271,6 +277,11 @@ export async function searchProfilesQuery(
     completeness: number;
     years_experience: number | null;
     member_since: string | Date;
+    current_employer_org_id: string | null;
+    current_role_started_at: string | Date | null;
+    current_employer_name: string | null;
+    current_employer_origin: string | null;
+    current_employer_verification: string | null;
     score: string;
   }> }).rows;
 
@@ -300,6 +311,18 @@ export async function searchProfilesQuery(
     memberSince: new Date(r.member_since).toISOString(),
     topSkills: skillsByProfile.get(r.id) ?? [],
     score: Number(r.score),
+    // Phase 9.22  current employer block. Same picker-visibility
+    // guard as findProfileByHandle (pending orgs hidden).
+    ...employerPayload({
+      orgId: r.current_employer_org_id,
+      name: r.current_employer_name,
+      origin: r.current_employer_origin,
+      verification: r.current_employer_verification,
+      roleStartedAt:
+        r.current_role_started_at instanceof Date
+          ? r.current_role_started_at.toISOString().slice(0, 10)
+          : r.current_role_started_at,
+    }),
   }));
 
   // Skills-gap signal  every search writes a row. Phase 6 builds on this.
@@ -457,8 +480,20 @@ export async function findProfileByHandleQuery(
       completeness: schema.profiles.completeness,
       yearsExperience: schema.profiles.yearsExperience,
       memberSince: schema.profiles.memberSince,
+      // Phase 9.22  surface current employment when the org is
+      // picker-visible. Pending seeker_named orgs (verification !=
+      // 'verified') never reach the public payload.
+      currentEmployerOrgId: schema.profiles.currentEmployerOrgId,
+      currentRoleStartedAt: schema.profiles.currentRoleStartedAt,
+      currentEmployerName: schema.organizations.name,
+      currentEmployerOrigin: schema.organizations.origin,
+      currentEmployerVerification: schema.organizations.verification,
     })
     .from(schema.profiles)
+    .leftJoin(
+      schema.organizations,
+      eq(schema.organizations.id, schema.profiles.currentEmployerOrgId),
+    )
     .where(and(eq(schema.profiles.handle, handle), isNull(schema.profiles.deletedAt)))
     .limit(1);
 
@@ -500,6 +535,47 @@ export async function findProfileByHandleQuery(
     experience,
     qualifications,
     academic,
+    // Phase 9.22  surface employer only when picker-visible. Pending
+    // seeker_named orgs (origin='seeker_named' AND verification !=
+    // 'verified') are hidden  honest about state.
+    ...employerPayload({
+      orgId: p.currentEmployerOrgId,
+      name: p.currentEmployerName,
+      origin: p.currentEmployerOrigin,
+      verification: p.currentEmployerVerification,
+      roleStartedAt: p.currentRoleStartedAt,
+    }),
+  };
+}
+
+/**
+ * Phase 9.22  shared shaper for the public-payload's current-employer
+ * fields. Returns an empty object (NULL all three) when the org is
+ * either NULL or not picker-visible. Used by both findProfileByHandle
+ * and searchProfilesQuery so the two surfaces stay in lockstep.
+ */
+function employerPayload(args: {
+  orgId: string | null;
+  name: string | null;
+  origin: string | null;
+  verification: string | null;
+  roleStartedAt: string | null;
+}): {
+  currentEmployerName?: string | null;
+  currentEmployerBadge?: "sebenza_registered" | "seeker_named_verified" | null;
+  currentRoleStartedAt?: string | null;
+} {
+  if (!args.orgId || !args.name) return {};
+  const visible =
+    args.origin === "sebenza_registered" || args.verification === "verified";
+  if (!visible) return {};
+  return {
+    currentEmployerName: args.name,
+    currentEmployerBadge:
+      args.origin === "sebenza_registered"
+        ? "sebenza_registered"
+        : "seeker_named_verified",
+    currentRoleStartedAt: args.roleStartedAt,
   };
 }
 

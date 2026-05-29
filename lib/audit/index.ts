@@ -42,6 +42,11 @@ export type AuditKind =
   | "profile.experience.add"
   | "profile.experience.update"
   | "profile.experience.delete"
+  // Phase 9.22  current-employment self-edit. Meta carries the
+  // before/after employerOrgId so the audit trail captures the
+  // change. The seeker's "Other" submission has its own audit kind
+  // (taxonomy.suggestion.submit) and shouldn't be double-logged here.
+  | "profile.employment.update"
   | "profile.qualification.add"
   | "profile.qualification.delete"
   | "profile.qualification.document.upload"

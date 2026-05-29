@@ -9,7 +9,7 @@
 
 import { setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
-import { asc, eq, isNull, and } from "drizzle-orm";
+import { asc, eq, isNull, and, sql } from "drizzle-orm";
 import { DashboardShell } from "@/components/layout/DashboardShell";
 import { ADMIN_NAV } from "@/components/layout/adminNav";
 import { verifyAdmin } from "@/lib/auth/dal";
@@ -31,28 +31,53 @@ export default async function TaxonomySuggestionsPage({
   const session = await verifyAdmin();
 
   const db = getDb();
-  const [professionSuggestions, institutionSuggestions, canonicalProfessions, canonicalInstitutions] =
-    await Promise.all([
-      listPendingSuggestions("profession"),
-      listPendingSuggestions("institution"),
-      db
-        .select({ slug: schema.professions.slug, label: schema.professions.label })
-        .from(schema.professions)
-        .orderBy(asc(schema.professions.label)),
-      db
-        .select({ slug: schema.institutions.slug, label: schema.institutions.label })
-        .from(schema.institutions)
-        .where(
-          and(
-            eq(schema.institutions.isPending, false),
-            isNull(schema.institutions.deletedAt),
-          ),
-        )
-        .orderBy(asc(schema.institutions.label)),
-    ]);
+  const [
+    professionSuggestions,
+    institutionSuggestions,
+    organisationSuggestions,
+    canonicalProfessions,
+    canonicalInstitutions,
+    canonicalOrganisations,
+  ] = await Promise.all([
+    listPendingSuggestions("profession"),
+    listPendingSuggestions("institution"),
+    // Phase 9.22  org-kind suggestions.
+    listPendingSuggestions("organisation"),
+    db
+      .select({ slug: schema.professions.slug, label: schema.professions.label })
+      .from(schema.professions)
+      .orderBy(asc(schema.professions.label)),
+    db
+      .select({ slug: schema.institutions.slug, label: schema.institutions.label })
+      .from(schema.institutions)
+      .where(
+        and(
+          eq(schema.institutions.isPending, false),
+          isNull(schema.institutions.deletedAt),
+        ),
+      )
+      .orderBy(asc(schema.institutions.label)),
+    // Phase 9.22  picker-visible orgs for the merge picker. Includes
+    // sebenza_registered + verified seeker_named. Capped at 500 for
+    // the picker; if the org list grows past that, the existing
+    // ComboboxField client-side filter handles the rest.
+    db
+      .select({
+        slug: schema.organizations.id,
+        label: schema.organizations.name,
+      })
+      .from(schema.organizations)
+      .where(
+        sql`(${schema.organizations.origin} = 'sebenza_registered' OR ${schema.organizations.verification} = 'verified')`,
+      )
+      .orderBy(asc(schema.organizations.name))
+      .limit(500),
+  ]);
 
   const totalPending =
-    professionSuggestions.length + institutionSuggestions.length;
+    professionSuggestions.length +
+    institutionSuggestions.length +
+    organisationSuggestions.length;
 
   return (
     <DashboardShell
@@ -82,6 +107,7 @@ export default async function TaxonomySuggestionsPage({
       <TaxonomySuggestionsManager
         professionSuggestions={professionSuggestions}
         institutionSuggestions={institutionSuggestions}
+        organisationSuggestions={organisationSuggestions}
         canonicalProfessions={canonicalProfessions.map((p) => ({
           value: p.slug,
           label: p.label,
@@ -89,6 +115,10 @@ export default async function TaxonomySuggestionsPage({
         canonicalInstitutions={canonicalInstitutions.map((i) => ({
           value: i.slug,
           label: i.label,
+        }))}
+        canonicalOrganisations={canonicalOrganisations.map((o) => ({
+          value: o.slug,
+          label: o.label,
         }))}
       />
 

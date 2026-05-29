@@ -141,6 +141,22 @@ export interface PublicProfile {
    * Surfaces Student mode in the dashboard + Career compass.
    */
   academic?: AcademicProfile;
+  /**
+   * Phase 9.22  current employer name. Only surfaced when the
+   * underlying org is picker-visible (sebenza_registered OR verified
+   * seeker_named); a pending seeker_named org never reaches the
+   * public payload. NULL otherwise.
+   */
+  currentEmployerName?: string | null;
+  /**
+   * Phase 9.22  the origin badge for the current employer. Drives the
+   * UI label on /p/[handle] + the search row: "Sebenza employer" vs
+   * "Listed by N seekers". NULL when no employer is shown.
+   */
+  currentEmployerBadge?: "sebenza_registered" | "seeker_named_verified" | null;
+  /** Phase 9.22  ISO yyyy-mm-dd start date of the current role.
+   *  Only meaningful when `currentEmployerName` is set. */
+  currentRoleStartedAt?: string | null;
 }
 
 export interface ExperienceItem {

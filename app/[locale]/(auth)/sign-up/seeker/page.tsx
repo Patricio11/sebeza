@@ -2,6 +2,7 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import { AuthShell } from "@/components/layout/AuthShell";
 import { SeekerSignUpForm } from "@/components/feature/auth/SeekerSignUpForm";
 import { getProfessions } from "@/lib/taxonomy/query";
+import { listEmployerOptions } from "@/lib/profile/employment";
 
 export const metadata = { title: "Create a seeker profile" };
 
@@ -13,7 +14,13 @@ export default async function SeekerSignUpPage({
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("auth.seekerSignUp");
-  const professions = await getProfessions();
+  // Phase 9.22  fetch picker-visible orgs server-side so the
+  // employer combobox in step 3 has a complete starting set without
+  // a client-side round-trip on mount. Returns the top 40 by name.
+  const [professions, employerOptions] = await Promise.all([
+    getProfessions(),
+    listEmployerOptions(""),
+  ]);
 
   return (
     <AuthShell
@@ -22,7 +29,10 @@ export default async function SeekerSignUpPage({
       subhead="Three steps: identity, consent, then your first profile fields. You can edit everything later from your dashboard."
       rightAside={<SeekerSignUpDossier />}
     >
-      <SeekerSignUpForm professions={professions} />
+      <SeekerSignUpForm
+        professions={professions}
+        employerOptions={employerOptions}
+      />
     </AuthShell>
   );
 }

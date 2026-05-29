@@ -414,6 +414,32 @@ export const profiles = pgTable("profiles", {
    *  KycPanel after a reject. Populated alongside clearing
    *  `idDocumentStorageKey` so the seeker sees why + can re-upload. */
   idDocumentRejectionReason: text("id_document_rejection_reason"),
+  /**
+   * Phase 9.22  current employer linkage. Surfaces on the public
+   * profile + employer dossier when the org is verified (either
+   * `sebenza_registered` or `seeker_named + verification='verified'`).
+   * NULL = the seeker hasn't declared where they work, or their
+   * declared org is still pending admin review (the pending org row
+   * is the only place the seeker's text lives in that case  see
+   * Phase 9.15's "user data is never lost" contract).
+   *
+   * ON DELETE SET NULL  if the org is removed (rare; usually merged
+   * by admin), the seeker's profile keeps surfacing as "employer not
+   * declared" until they re-pick.
+   */
+  currentEmployerOrgId: text("current_employer_org_id").references(
+    (): AnyPgColumn => organizations.id,
+    { onDelete: "set null" },
+  ),
+  /** Phase 9.22  day-precision start date for the current role.
+   *  Form captures year + month; day defaults to 01. NULL when
+   *  the seeker hasn't told us. */
+  currentRoleStartedAt: date("current_role_started_at"),
+  /** Phase 9.22  city for the current role. Can diverge from
+   *  `profiles.city` (the seeker's residence) for cross-province
+   *  commuters. NULL falls back to `profiles.city` in the public
+   *  renderer. */
+  currentRoleCity: text("current_role_city"),
   /** Materialised tsvector. Populated by the trigger in
       `db/migrations/0001_phase4_search.sql` from
       profession + seniority + bio + city + province + skills_aggregated.
@@ -593,6 +619,21 @@ export const qualifications = pgTable("qualifications", {
 
 // ---------- Organisations + placements (employer side) ----------
 
+/**
+ * Phase 9.22  origin axis on organisations.
+ *
+ *   sebenza_registered  the org signed up via the employer flow,
+ *                        carries the Phase 9.10 KYC lifecycle.
+ *   seeker_named        the org was created from a seeker's "Other"
+ *                        submission on the employer picker. Carries
+ *                        the Phase 9.22 admin review lifecycle on the
+ *                        existing `verification` column.
+ */
+export const organizationOrigin = pgEnum("organization_origin", [
+  "sebenza_registered",
+  "seeker_named",
+]);
+
 export const organizations = pgTable("organizations", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
@@ -601,6 +642,17 @@ export const organizations = pgTable("organizations", {
   sizeBand: text("size_band"),
   city: text("city"),
   country: text("country").notNull().default("South Africa"),
+  /**
+   * Phase 9.22  the lifecycle column. For sebenza_registered orgs
+   * the Phase 9.10 semantics hold (unverified -> pending -> verified
+   * / rejected). For seeker_named orgs the semantics are
+   * unverified (just submitted, awaiting admin review) -> verified
+   * (admin approved + edited) or rejected. The `origin` column
+   * disambiguates; the picker filter is
+   *   WHERE origin = 'sebenza_registered' OR verification = 'verified'
+   * which surfaces every recruiting employer + every verified
+   * seeker-named org.
+   */
   verification: verificationStatus("verification").notNull().default("unverified"),
   /**
    * Phase 9.10  the org vetting lifecycle columns. NULL until the
@@ -622,6 +674,21 @@ export const organizations = pgTable("organizations", {
   adminNote: text("admin_note"),
   companyAddress: text("company_address"),
   vatNumber: text("vat_number"),
+  /**
+   * Phase 9.22  origin axis. Existing rows default to
+   * `sebenza_registered` since every pre-9.22 org came through the
+   * employer signup path. Seeker-submitted "Other" orgs are inserted
+   * with `seeker_named`.
+   */
+  origin: organizationOrigin("origin").notNull().default("sebenza_registered"),
+  /**
+   * Phase 9.22  denormalised count of profiles with this org as
+   * their `current_employer_org_id`. Powers the "Listed by N seekers"
+   * badge on verified seeker-named orgs without a per-render JOIN.
+   * Maintained by the updateCurrentEmployment + suggestion-promote /
+   * merge / reject paths; a nightly cron is the backstop for drift.
+   */
+  listedBySeekerCount: integer("listed_by_seeker_count").notNull().default(0),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
@@ -1492,6 +1559,11 @@ export const institutions = pgTable("institutions", {
 export const taxonomySuggestionKind = pgEnum("taxonomy_suggestion_kind", [
   "profession",
   "institution",
+  // Phase 9.22  seeker-named organisation. Submitted when the seeker
+  // picks "Other" on the employer combobox at sign-up / dashboard
+  // edit. Admin queue at /admin/taxonomy/suggestions reviews + edits +
+  // promotes; the pending organizations row carries the user data.
+  "organisation",
 ]);
 
 export const taxonomySuggestionState = pgEnum("taxonomy_suggestion_state", [
@@ -1532,6 +1604,18 @@ export const taxonomySuggestions = pgTable(
     adminNote: text("admin_note"),
     pendingInstitutionSlug: text("pending_institution_slug").references(
       () => institutions.slug,
+      { onDelete: "set null" },
+    ),
+    /**
+     * Phase 9.22  for `kind='organisation'` suggestions, the FK to
+     * the pending `organizations` row created at submit time
+     * (`origin='seeker_named'`, `verification='unverified'`). NULL
+     * for profession + institution kinds. Admin promote flips the
+     * org's verification to 'verified'; merge re-points seeker
+     * profiles + deletes the pending row.
+     */
+    pendingOrganisationId: text("pending_organisation_id").references(
+      (): AnyPgColumn => organizations.id,
       { onDelete: "set null" },
     ),
   },

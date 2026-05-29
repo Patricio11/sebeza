@@ -56,6 +56,24 @@ export type MyProfile = PublicProfile & {
   /** Phase 9.16  admin's rejection note (if any). When set, the
    *  KycPanel shows the reason + a re-upload control. */
   idDocumentRejectionReason: string | null;
+  /**
+   * Phase 9.22  current employment block. Three nullable columns
+   * mirror the database. The dashboard editor surfaces the three
+   * (or shows blank inputs) so the seeker can declare / clear.
+   *
+   * `currentEmployerName` is the resolved org's name when the FK is
+   * set, OR the free-text name from the pending row when the seeker's
+   * employer is still awaiting admin review.
+   */
+  currentEmployerOrgId: string | null;
+  currentEmployerName: string | null;
+  /** True when the seeker's current employer is a pending seeker_named
+   *  row (verification != 'verified'); the public profile renderer
+   *  hides the badge in that case but the editor still shows the name
+   *  so the seeker knows their text landed. */
+  currentEmployerIsPending: boolean;
+  currentRoleStartedAt: string | null;
+  currentRoleCity: string | null;
 };
 
 export async function getMyProfile(): Promise<MyProfile | null> {
@@ -143,6 +161,31 @@ export async function loadProfileForUser(userId: string): Promise<MyProfile | nu
     verification: q.verification as VerificationStatus,
   }));
 
+  // Phase 9.22  resolve the current employer (name + pending flag).
+  // Single round trip; the FK may be null + the row could be either
+  // verified or pending. The dashboard editor needs the name even for
+  // pending rows so the seeker can see their submitted text.
+  let currentEmployerName: string | null = null;
+  let currentEmployerIsPending = false;
+  if (p.currentEmployerOrgId) {
+    const orgRows = await db
+      .select({
+        name: schema.organizations.name,
+        origin: schema.organizations.origin,
+        verification: schema.organizations.verification,
+      })
+      .from(schema.organizations)
+      .where(eq(schema.organizations.id, p.currentEmployerOrgId))
+      .limit(1);
+    const org = orgRows[0];
+    if (org) {
+      currentEmployerName = org.name;
+      currentEmployerIsPending = !(
+        org.origin === "sebenza_registered" || org.verification === "verified"
+      );
+    }
+  }
+
   let academic: AcademicProfile | undefined;
   const a = acadRows[0];
   if (a) {
@@ -195,6 +238,12 @@ export async function loadProfileForUser(userId: string): Promise<MyProfile | nu
     experience,
     qualifications,
     academic,
+    // Phase 9.22  current employment block.
+    currentEmployerOrgId: p.currentEmployerOrgId ?? null,
+    currentEmployerName,
+    currentEmployerIsPending,
+    currentRoleStartedAt: p.currentRoleStartedAt ?? null,
+    currentRoleCity: p.currentRoleCity ?? null,
   };
 }
 

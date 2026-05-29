@@ -42,17 +42,23 @@ interface CanonicalOption {
 interface Props {
   professionSuggestions: SuggestionRow[];
   institutionSuggestions: SuggestionRow[];
+  /** Phase 9.22  organisation suggestions (kind='organisation'). */
+  organisationSuggestions?: SuggestionRow[];
   /** Canonical professions for the merge-into picker. */
   canonicalProfessions: CanonicalOption[];
   /** Canonical institutions (non-pending, non-deleted) for the merge picker. */
   canonicalInstitutions: CanonicalOption[];
+  /** Phase 9.22  picker-visible orgs for the org-merge picker. */
+  canonicalOrganisations?: CanonicalOption[];
 }
 
 export function TaxonomySuggestionsManager({
   professionSuggestions,
   institutionSuggestions,
+  organisationSuggestions,
   canonicalProfessions,
   canonicalInstitutions,
+  canonicalOrganisations,
 }: Props) {
   return (
     <div className="space-y-10">
@@ -69,6 +75,16 @@ export function TaxonomySuggestionsManager({
         rows={institutionSuggestions}
         canonical={canonicalInstitutions}
         kindLabel="institution"
+      />
+      {/* Phase 9.22  organisation queue. Same Promote / Merge / Reject
+          lifecycle; the card shows the pending org's city + lets admin
+          edit the city alongside the name during Promote. */}
+      <Section
+        title="Employer (organisation) suggestions"
+        empty="No pending employer suggestions. When seekers pick 'Other' on the employer combobox, submissions land here."
+        rows={organisationSuggestions ?? []}
+        canonical={canonicalOrganisations ?? []}
+        kindLabel="organisation"
       />
     </div>
   );
@@ -131,9 +147,17 @@ function SuggestionRowCard({
   const [mode, setMode] = useState<
     "idle" | "promote" | "merge" | "reject"
   >("idle");
-  const [correctedLabel, setCorrectedLabel] = useState(row.customText);
+  // Phase 9.22  org rows store the canonical name on the pending org
+  // row (not on suggestion row), so seed correctedLabel from there
+  // when available.
+  const initialLabel = row.pendingOrganisationName ?? row.customText;
+  const [correctedLabel, setCorrectedLabel] = useState(initialLabel);
+  const [correctedCity, setCorrectedCity] = useState(
+    row.pendingOrganisationCity ?? "",
+  );
   const [mergeTarget, setMergeTarget] = useState("");
   const [reason, setReason] = useState("");
+  const isOrgKind = row.kind === "organisation";
 
   function onPromote() {
     setError(null);
@@ -141,9 +165,12 @@ function SuggestionRowCard({
       const res = await promoteTaxonomySuggestion({
         suggestionId: row.id,
         correctedLabel:
-          correctedLabel.trim() !== row.customText.trim()
+          correctedLabel.trim() !== initialLabel.trim()
             ? correctedLabel
             : undefined,
+        // Phase 9.22  city field only meaningful for org-kind; the
+        // action ignores it for other kinds.
+        ...(isOrgKind ? { correctedCity } : {}),
       });
       if (!res.ok) {
         setError(res.message);
@@ -203,6 +230,9 @@ function SuggestionRowCard({
             {row.submitterCount} submitter{row.submitterCount === 1 ? "" : "s"}
             {" · first "}
             {new Date(row.submittedAt).toLocaleDateString()}
+            {isOrgKind && row.pendingOrganisationCity && (
+              <> · seeker said city: <strong>{row.pendingOrganisationCity}</strong></>
+            )}
           </p>
         </div>
         {mode === "idle" && (
@@ -242,7 +272,9 @@ function SuggestionRowCard({
         <div className="mt-4 rounded-[var(--radius-sm)] border border-[color:var(--color-brand)] bg-[color:var(--color-brand-tint)] p-3">
           <label className="block text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--color-brand-strong)]">
             <PencilLine className="mr-1 inline size-3" aria-hidden="true" />
-            Promote with corrected label (leave as-is to keep original)
+            {isOrgKind
+              ? "Verified employer name (edit casing / spelling / abbreviations before promoting)"
+              : "Promote with corrected label (leave as-is to keep original)"}
           </label>
           <input
             type="text"
@@ -252,6 +284,27 @@ function SuggestionRowCard({
             disabled={pending}
             className="mt-1 w-full rounded-[var(--radius-sm)] border border-[color:var(--color-hairline)] bg-[color:var(--color-paper)] px-3 py-2 text-sm"
           />
+          {isOrgKind && (
+            <>
+              <label className="mt-3 block text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--color-brand-strong)]">
+                Verified city (empty = no city on file)
+              </label>
+              <input
+                type="text"
+                value={correctedCity}
+                onChange={(e) => setCorrectedCity(e.target.value)}
+                maxLength={80}
+                disabled={pending}
+                placeholder="e.g. Sandton"
+                className="mt-1 w-full rounded-[var(--radius-sm)] border border-[color:var(--color-hairline)] bg-[color:var(--color-paper)] px-3 py-2 text-sm"
+              />
+              <p className="mt-2 text-xs italic text-[color:var(--color-ink-soft)]">
+                Promoting marks this org as verified seeker-named. It
+                does NOT grant vacancy-posting rights  the employer
+                still needs to sign up + complete KYC for that.
+              </p>
+            </>
+          )}
           <div className="mt-3 flex justify-end gap-2">
             <Button
               type="button"
@@ -259,7 +312,8 @@ function SuggestionRowCard({
               size="sm"
               onClick={() => {
                 setMode("idle");
-                setCorrectedLabel(row.customText);
+                setCorrectedLabel(initialLabel);
+                setCorrectedCity(row.pendingOrganisationCity ?? "");
               }}
               disabled={pending}
             >

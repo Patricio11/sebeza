@@ -142,6 +142,28 @@ const seekerSignUpSchema = z.object({
       openToGraduateProgrammes: z.boolean(),
     })
     .nullable(),
+  /**
+   * Phase 9.22  optional current-employment block. Surfaces in the
+   * form when status='employed' or 'self_employed'. The picker passes
+   * either `currentEmployerOrgId` (the seeker picked from the
+   * verified list) or `customCurrentEmployerName` (the seeker typed
+   * "Other"; we create the pending org + suggestion inline). Mutually
+   * exclusive  the action ignores the custom name when the id is set.
+   */
+  currentEmployerOrgId: z.string().min(1).nullable().optional(),
+  customCurrentEmployerName: z
+    .string()
+    .trim()
+    .min(2)
+    .max(80)
+    .optional(),
+  customCurrentEmployerCity: z.string().trim().max(80).optional(),
+  currentRoleStartedAt: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, "Use YYYY-MM-DD")
+    .nullable()
+    .optional(),
+  currentRoleCity: z.string().trim().max(80).nullable().optional(),
 });
 
 export async function signUpSeeker(
@@ -239,6 +261,85 @@ export async function signUpSeeker(
       .limit(1);
     const professionWasCustom = !canonicalProf[0];
 
+    // Phase 9.22  resolve the current-employer FK. Three paths:
+    //   1) currentEmployerOrgId picked from the dropdown  verify
+    //      picker-visible (Sebenza-registered OR verified seeker-named)
+    //   2) customCurrentEmployerName  create a pending org now;
+    //      the suggestion row is written post-transaction below so the
+    //      same try/catch pattern as profession suggestions applies.
+    //   3) Neither (or status is not employed/self_employed)  NULL.
+    let resolvedEmployerOrgId: string | null = null;
+    let pendingEmployerOrgId: string | null = null;
+    let employerWasCustom = false;
+    let employerCustomName: string | null = null;
+    let employerCustomCity: string | null = null;
+    if (v.status === "employed" || v.status === "self_employed") {
+      if (v.currentEmployerOrgId) {
+        const orgRows = await db
+          .select({
+            id: schema.organizations.id,
+            origin: schema.organizations.origin,
+            verification: schema.organizations.verification,
+          })
+          .from(schema.organizations)
+          .where(eq(schema.organizations.id, v.currentEmployerOrgId))
+          .limit(1);
+        const org = orgRows[0];
+        // Silently null on unknown / not-picker-visible  same posture
+        // as Phase 9.8.6 used for cross-org vacancyId smuggling. Don't
+        // fail the sign-up; the seeker can re-pick from /dashboard.
+        if (
+          org &&
+          (org.origin === "sebenza_registered" ||
+            org.verification === "verified")
+        ) {
+          resolvedEmployerOrgId = org.id;
+        }
+      } else if (v.customCurrentEmployerName) {
+        const customName = v.customCurrentEmployerName.trim();
+        if (customName.length >= 2) {
+          // Dedupe against picker-visible orgs (same check that
+          // submitTaxonomySuggestion does inline). If a match exists,
+          // attach to it without creating a new pending row.
+          const existingRows = await db
+            .select({
+              id: schema.organizations.id,
+            })
+            .from(schema.organizations)
+            .where(
+              and(
+                sql`lower(${schema.organizations.name}) = lower(${customName})`,
+                sql`(${schema.organizations.origin} = 'sebenza_registered' OR ${schema.organizations.verification} = 'verified')`,
+              ),
+            )
+            .limit(1);
+          if (existingRows[0]) {
+            resolvedEmployerOrgId = existingRows[0].id;
+          } else {
+            // Create the pending org row. Suggestion + audit go
+            // post-transaction below.
+            pendingEmployerOrgId = `org_${randomUUID()}`;
+            employerCustomCity =
+              v.customCurrentEmployerCity?.trim() ?? null;
+            await db.insert(schema.organizations).values({
+              id: pendingEmployerOrgId,
+              name: customName,
+              city:
+                employerCustomCity && employerCustomCity.length > 0
+                  ? employerCustomCity
+                  : null,
+              origin: "seeker_named",
+              verification: "unverified",
+              listedBySeekerCount: 0,
+            });
+            resolvedEmployerOrgId = pendingEmployerOrgId;
+            employerWasCustom = true;
+            employerCustomName = customName;
+          }
+        }
+      }
+    }
+
     await db.transaction(async (tx) => {
       await tx.insert(schema.profiles).values({
         id: profileId,
@@ -266,6 +367,14 @@ export async function signUpSeeker(
         verification: "unverified",
         completeness: 20, // very basic profile at step 3
         memberSince: new Date(),
+        // Phase 9.22  current-employment columns. NULL for
+        // open_to_work / unemployed / studying.
+        currentEmployerOrgId: resolvedEmployerOrgId,
+        currentRoleStartedAt: v.currentRoleStartedAt ?? null,
+        currentRoleCity:
+          v.currentRoleCity && v.currentRoleCity.length > 0
+            ? v.currentRoleCity
+            : null,
       });
 
       // Consents  granted ones are 'granted', the rest are 'none'.
@@ -332,6 +441,71 @@ export async function signUpSeeker(
       } catch (e) {
         // eslint-disable-next-line no-console
         console.error("[signup] profession suggestion submit failed:", e);
+      }
+    }
+    // Phase 9.22  organisation suggestion submit (mirror of the
+    // institution path above). Auxiliary; failure doesn't tank the
+    // signup. Also increments the resolved org's listed_by_seeker_count
+    // (even when employer was picked from the dropdown  the count
+    // maintenance happens regardless of how the FK was resolved).
+    if (resolvedEmployerOrgId) {
+      try {
+        const cntRows = await db
+          .select({ count: sql<number>`COUNT(*)::int` })
+          .from(schema.profiles)
+          .where(
+            and(
+              eq(schema.profiles.currentEmployerOrgId, resolvedEmployerOrgId),
+              isNull(schema.profiles.deletedAt),
+            ),
+          );
+        await db
+          .update(schema.organizations)
+          .set({ listedBySeekerCount: cntRows[0]?.count ?? 0 })
+          .where(eq(schema.organizations.id, resolvedEmployerOrgId));
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.error("[signup] org seeker-count recount failed:", e);
+      }
+    }
+    if (employerWasCustom && pendingEmployerOrgId && employerCustomName) {
+      try {
+        const suggestionId = `tx_${randomUUID()}`;
+        await db.insert(schema.taxonomySuggestions).values({
+          id: suggestionId,
+          kind: "organisation",
+          customText: employerCustomName,
+          submittedByUserId: user.id,
+          pendingOrganisationId: pendingEmployerOrgId,
+        });
+        await logAccess({
+          kind: "taxonomy.suggestion.submit",
+          actor: user.id,
+          subject: suggestionId,
+          meta: {
+            kind: "organisation",
+            customText: employerCustomName,
+            orgCity: employerCustomCity,
+            pendingOrganisationId: pendingEmployerOrgId,
+            via: "signup",
+          },
+        });
+        await notifyAllAdmins({
+          kind: "taxonomy.suggestion.received",
+          title: `New employer suggestion: ${employerCustomName}`,
+          body: `A new seeker picked "Other" + entered "${employerCustomName}". Review on /admin/taxonomy.`,
+          link: "/admin/taxonomy",
+          dedupeKey: `organisation::${employerCustomName.toLowerCase()}`,
+          meta: {
+            suggestionId,
+            kind: "organisation",
+            customText: employerCustomName,
+            pendingOrganisationId: pendingEmployerOrgId,
+          },
+        });
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.error("[signup] organisation suggestion submit failed:", e);
       }
     }
     if (institutionWasCustom && v.academic && resolvedInstitutionSlug) {

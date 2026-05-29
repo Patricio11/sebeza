@@ -105,6 +105,18 @@ interface FormState {
     | "seasonal"
   )[];
   academic: AcademicState;
+  /**
+   * Phase 9.22  current employment block (optional, only renders
+   * when status is employed / self_employed). The combobox value is
+   * either an existing org id (picked from the dropdown) OR a free-
+   * text name (Other mode). On submit, we check `employerOptions` to
+   * disambiguate the two paths.
+   */
+  currentEmployerValue: string;
+  currentEmployerCity: string;
+  currentRoleStartedYear: string;
+  currentRoleStartedMonth: string;
+  currentRoleCity: string;
 }
 
 const initialState: FormState = {
@@ -135,11 +147,30 @@ const initialState: FormState = {
     openToInternships: true,
     openToGraduateProgrammes: true,
   },
+  // Phase 9.22  current-employment defaults (empty; the block only
+  // renders when status is employed / self_employed).
+  currentEmployerValue: "",
+  currentEmployerCity: "",
+  currentRoleStartedYear: "",
+  currentRoleStartedMonth: "",
+  currentRoleCity: "",
 };
 
 interface Props {
   /** DB-backed list; falls back to MOCK_PROFESSIONS if absent. */
   professions?: ProfessionOption[];
+  /**
+   * Phase 9.22  picker-visible orgs for the employer combobox in step
+   * 3. Server-fetched + passed in so the form doesn't need to do a
+   * round-trip on mount. Empty falls back to "Other only" mode.
+   */
+  employerOptions?: ReadonlyArray<{
+    id: string;
+    name: string;
+    city: string | null;
+    badge: "sebenza_registered" | "seeker_named_verified";
+    listedBySeekerCount: number;
+  }>;
   /**
    * Phase 9.17  pre-fill data + token from an employer-initiated
    * invitation. When present:
@@ -168,6 +199,7 @@ type PersistableFormState = Omit<FormState, "password" | "passwordConfirm">;
 export function SeekerSignUpForm({
   professions,
   invitationContext,
+  employerOptions,
 }: Props = {}) {
   const router = useRouter();
   const PROFESSIONS = professions && professions.length > 0 ? professions : MOCK_PROFESSIONS;
@@ -204,6 +236,13 @@ export function SeekerSignUpForm({
       status: state.status,
       workAvailability: state.workAvailability,
       academic: state.academic,
+      // Phase 9.22  draft-persist the employment block so a locale
+      // switch mid-form doesn't wipe it.
+      currentEmployerValue: state.currentEmployerValue,
+      currentEmployerCity: state.currentEmployerCity,
+      currentRoleStartedYear: state.currentRoleStartedYear,
+      currentRoleStartedMonth: state.currentRoleStartedMonth,
+      currentRoleCity: state.currentRoleCity,
     }),
     [state],
   );
@@ -282,6 +321,38 @@ export function SeekerSignUpForm({
     }
 
     startTransition(async () => {
+      // Phase 9.22  resolve the employer block. The combobox value is
+      // either an existing org id (matches an entry in employerOptions)
+      // OR a free-text Other name. Only relevant when status is
+      // employed / self_employed; otherwise everything is NULL.
+      const opts = employerOptions ?? [];
+      const employerIsPicked = opts.some(
+        (o) => o.id === state.currentEmployerValue,
+      );
+      const employerBlock =
+        state.status === "employed" || state.status === "self_employed"
+          ? {
+              currentEmployerOrgId: employerIsPicked
+                ? state.currentEmployerValue
+                : null,
+              customCurrentEmployerName:
+                !employerIsPicked && state.currentEmployerValue.trim()
+                  ? state.currentEmployerValue.trim()
+                  : undefined,
+              customCurrentEmployerCity:
+                !employerIsPicked &&
+                state.currentEmployerValue.trim() &&
+                state.currentEmployerCity.trim()
+                  ? state.currentEmployerCity.trim()
+                  : undefined,
+              currentRoleStartedAt:
+                state.currentRoleStartedYear && state.currentRoleStartedMonth
+                  ? `${state.currentRoleStartedYear}-${state.currentRoleStartedMonth.padStart(2, "0")}-01`
+                  : null,
+              currentRoleCity: state.currentRoleCity.trim() || null,
+            }
+          : {};
+
       const academic = state.academic.isStudent
         ? {
             institutionSlug: state.academic.institutionSlug,
@@ -326,6 +397,9 @@ export function SeekerSignUpForm({
             status: state.status,
             workAvailability: state.workAvailability,
             academic,
+            // Phase 9.22  current-employment block. NULL for non-
+            // employed / non-self-employed statuses.
+            ...employerBlock,
           });
 
       if (!result.ok) {
@@ -635,6 +709,127 @@ export function SeekerSignUpForm({
               </option>
             ))}
           </SelectField>
+
+          {/* Phase 9.22  current-employment block. Only renders when
+              status is employed or self_employed. All fields optional. */}
+          {(state.status === "employed" ||
+            state.status === "self_employed") && (
+            <fieldset className="rounded-[var(--radius-md)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-5">
+              <legend className="px-1 font-display text-base">
+                Where do you work?
+              </legend>
+              <p className="mb-4 text-xs text-[color:var(--color-ink-soft)]">
+                Optional. Tells employers searching the platform where
+                you&rsquo;re currently placed + grows the platform&rsquo;s
+                employer database honestly. Pick from the list, or use
+                Other to add a new employer (admin reviews these before
+                they appear in the picker for others).
+              </p>
+              <div className="grid gap-4 md:grid-cols-2">
+                <ComboboxField
+                  id="current-employer"
+                  label="Current employer"
+                  value={state.currentEmployerValue}
+                  onChange={(v) =>
+                    setState({ ...state, currentEmployerValue: v })
+                  }
+                  options={(employerOptions ?? []).map((o) => ({
+                    value: o.id,
+                    label: o.name,
+                    subLabel:
+                      o.badge === "sebenza_registered"
+                        ? "Sebenza employer"
+                        : o.listedBySeekerCount === 1
+                          ? "Listed by 1 seeker"
+                          : `Listed by ${o.listedBySeekerCount} seekers`,
+                  }))}
+                  placeholder="Search employers"
+                  allowOther
+                  otherLabel="My employer isn't listed"
+                />
+                {/* City input only when Other is in effect (free-text
+                    value that doesn't match any option). */}
+                {state.currentEmployerValue.trim().length > 0 &&
+                  !(employerOptions ?? []).some(
+                    (o) => o.id === state.currentEmployerValue,
+                  ) && (
+                    <TextField
+                      id="current-employer-city"
+                      label="Employer city"
+                      placeholder="e.g. Sandton"
+                      value={state.currentEmployerCity}
+                      onChange={(e) =>
+                        setState({
+                          ...state,
+                          currentEmployerCity: e.target.value,
+                        })
+                      }
+                    />
+                  )}
+                <SelectField
+                  id="role-started-month"
+                  label="Started (month)"
+                  value={state.currentRoleStartedMonth}
+                  onChange={(e) =>
+                    setState({
+                      ...state,
+                      currentRoleStartedMonth: e.target.value,
+                    })
+                  }
+                >
+                  <option value=""></option>
+                  {[
+                    [1, "January"],
+                    [2, "February"],
+                    [3, "March"],
+                    [4, "April"],
+                    [5, "May"],
+                    [6, "June"],
+                    [7, "July"],
+                    [8, "August"],
+                    [9, "September"],
+                    [10, "October"],
+                    [11, "November"],
+                    [12, "December"],
+                  ].map(([n, label]) => (
+                    <option key={n} value={String(n)}>
+                      {label}
+                    </option>
+                  ))}
+                </SelectField>
+                <SelectField
+                  id="role-started-year"
+                  label="Started (year)"
+                  value={state.currentRoleStartedYear}
+                  onChange={(e) =>
+                    setState({
+                      ...state,
+                      currentRoleStartedYear: e.target.value,
+                    })
+                  }
+                >
+                  <option value=""></option>
+                  {Array.from({ length: 40 }, (_, i) => {
+                    const y = new Date().getFullYear() - i;
+                    return (
+                      <option key={y} value={String(y)}>
+                        {y}
+                      </option>
+                    );
+                  })}
+                </SelectField>
+                <TextField
+                  id="role-city"
+                  label="City you work in"
+                  placeholder="e.g. Cape Town  leave blank to use your home city"
+                  value={state.currentRoleCity}
+                  onChange={(e) =>
+                    setState({ ...state, currentRoleCity: e.target.value })
+                  }
+                />
+              </div>
+            </fieldset>
+          )}
 
           {/* Student toggle  the whole card-header is one button so
               clicking anywhere (icon, label, hint, the checkbox visual
