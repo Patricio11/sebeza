@@ -20,6 +20,18 @@ Each tier is **independently shippable**. Stopping after any tier leaves the oth
 
 ## 🔒 LOCKED DECISIONS
 
+### D0 — The vacancy is the source of truth; every match axis is optional
+
+**Cross-cutting principle, applies to D1 / D2 / D3 + every future matcher field.** Every match dimension is **vacancy-optional**. If the vacancy leaves the field blank, the matcher does not constrain on that axis. Specifically:
+
+- **Work availability** — empty `work_availability` array → matcher ignores work-mode + employment-type; every seeker passes this axis.
+- **Min years of experience** — NULL `min_years_experience` → matcher ignores years; every seeker passes.
+- **Min NQF level** — NULL `min_nqf_level` → matcher ignores qualifications; every seeker passes, **including seekers with no academic record at all**. (Many SA roles  trades, hospitality, casual labour, sales  do not require any formal qualification and an employer recruiting for one of these should not be forced to declare otherwise just to use the platform.)
+
+This is the contract: **the employer declares what the role needs; the matcher honours that declaration and ignores the axes the employer left blank.** Future tiers that add new match fields must follow the same rule  no axis is ever "always on."
+
+The form UI must reinforce this. Every match-related field carries an inline hint: *"Leave blank if this isn't a requirement."* The vacancy detail page renders the unset axes as "No minimum" / "Any work mode / employment type" rather than hiding them silently  honesty about what the matcher is and isn't filtering on.
+
 ### D1 — One enum, two-axis matching (Tier 1)
 
 Vacancy's `work_availability` mirrors the seeker column 1:1 — same `work_availability_kind` enum (casual / part_time / contract / full_time / remote / hybrid). This conflates work-mode and employment-type just like Phase 9.18 did on the seeker side. **It is the right call** because the two columns must match on the same enum for the array-overlap (`&&`) filter to work without a translation layer.
@@ -34,9 +46,11 @@ NULL years on a seeker (Phase 9.9 "rather not say") is treated as **does not pas
 
 ### D3 — NQF level matches against the seeker's *highest* academic record (Tier 1)
 
-`min_nqf_level` checks `MAX(academic_profiles.nqf_level)` per profile. A seeker with two records (NQF 6 diploma + NQF 8 honours) passes a `min_nqf_level = 7` filter. NULL on the vacancy column = "no NQF floor" (current behaviour).
+`min_nqf_level` checks `MAX(academic_profiles.nqf_level)` per profile. A seeker with two records (NQF 6 diploma + NQF 8 honours) passes a `min_nqf_level = 7` filter.
 
-A seeker with no academic record at all = does not pass an NQF floor. Honest posture: the floor exists because the role needs a credential; if we don't know whether the seeker has one, the matcher should not pretend.
+**Only applies when the vacancy declares a floor.** NULL `min_nqf_level` = no NQF check at all; every seeker passes regardless of whether they have any academic record. Per D0, many SA roles (trades, hospitality, casual labour, sales) do not require any formal qualification  the platform must support recruiting for those without forcing the employer to set a fictitious floor. **The default is "NQF doesn't matter for this role"**; the field only constrains when the employer explicitly says it does.
+
+When the vacancy does declare a floor, a seeker with no academic record at all does not pass it  honest posture: the floor exists because the role needs a credential; if we don't know whether the seeker has one, the matcher should not pretend.
 
 ### D4 — Match-page filter chips are client-side only (Tier 2)
 
