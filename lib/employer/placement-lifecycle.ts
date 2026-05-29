@@ -31,7 +31,13 @@ import "server-only";
 import { getDb } from "@/db/client";
 import * as schema from "@/db/schema";
 import { and, asc, desc, eq, inArray, sql } from "drizzle-orm";
+import { revalidatePath } from "next/cache";
+import { randomUUID } from "node:crypto";
+import { z } from "zod";
 import { verifyEmployer } from "@/lib/auth/dal";
+import { logAccess } from "@/lib/audit";
+import { canEditVacancies } from "@/lib/employer/vacancies-types";
+import type { OrgMemberRole } from "@/lib/employer/vacancies-types";
 
 /**
  * Lifecycle bucket per D5. Mirrors the Postgres enum in
@@ -542,4 +548,235 @@ export async function listPlacementAuditExcerpt(
     at: r.at instanceof Date ? r.at.toISOString() : new Date(r.at).toISOString(),
     actor: r.actor,
   }));
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// Tier 2 writes  status check-ins + editable internal note
+// ─────────────────────────────────────────────────────────────────────
+
+export type ActionResult<T extends object = object> =
+  | ({ ok: true } & T)
+  | { ok: false; message: string };
+
+function ok<T extends object>(extra?: T): { ok: true } & T {
+  return { ok: true, ...(extra ?? ({} as T)) };
+}
+function fail(message: string): { ok: false; message: string } {
+  return { ok: false, message };
+}
+
+/**
+ * Resolve session + edit-role + placement ownership in one go. Same
+ * shape as the vacancy-shortlists guard (Phase 9.19 Tier 2). Viewer
+ * is rejected  lifecycle edits are an editor-only affordance, same
+ * gate the rest of the vacancy + placement surfaces use.
+ */
+async function requireEditableForPlacement(
+  placementId: string,
+): Promise<
+  | {
+      ok: true;
+      orgId: string;
+      userId: string;
+      placement: { id: string; profileId: string; currentStatus: PlacementLifecycleStatus };
+    }
+  | { ok: false; message: string }
+> {
+  const session = await verifyEmployer();
+  if (!session.orgId) {
+    return { ok: false, message: "No organisation context." };
+  }
+  const db = getDb();
+  const placementRows = await db
+    .select({
+      id: schema.placements.id,
+      profileId: schema.placements.profileId,
+      currentStatus: schema.placements.currentStatus,
+    })
+    .from(schema.placements)
+    .where(
+      and(
+        eq(schema.placements.id, placementId),
+        eq(schema.placements.organizationId, session.orgId),
+      ),
+    )
+    .limit(1);
+  const placement = placementRows[0];
+  if (!placement) {
+    return { ok: false, message: "Placement not found in your organisation." };
+  }
+  const memberRows = await db
+    .select({ role: schema.organizationMembers.role })
+    .from(schema.organizationMembers)
+    .where(
+      and(
+        eq(schema.organizationMembers.organizationId, session.orgId),
+        eq(schema.organizationMembers.userId, session.id),
+      ),
+    )
+    .limit(1);
+  const role = (memberRows[0]?.role ?? null) as OrgMemberRole | null;
+  if (!canEditVacancies(role)) {
+    return {
+      ok: false,
+      message:
+        "Your role is read-only. Ask an Owner or Recruiter to edit this employee.",
+    };
+  }
+  return {
+    ok: true,
+    orgId: session.orgId,
+    userId: session.id,
+    placement: {
+      id: placement.id,
+      profileId: placement.profileId,
+      currentStatus: placement.currentStatus as PlacementLifecycleStatus,
+    },
+  };
+}
+
+const confirmStillEmployedSchema = z.object({
+  placementId: z.string().min(1),
+  /** Optional 500-char check-time note. Distinct from the durable
+   *  org-private internalNote on the placement row  this is the
+   *  context for THIS check ("confirmed via Slack DM, all good"). */
+  note: z
+    .string()
+    .trim()
+    .max(500, "Check-in note must be 500 characters or fewer.")
+    .optional(),
+});
+
+/**
+ * Phase 9.20 T2  confirm a placement is still active. Writes one
+ * row to `placement_status_checks` and updates the denormalised
+ * `last_check_at` / `last_check_by_user_id` on `placements` in a
+ * single transaction so the list-view read can rely on them being
+ * in step. Audit-logged as `placement.status.check` with the note
+ * carried in meta (PII-flagged per D6).
+ *
+ * Rejected for placements whose current_status is 'departed'  the
+ * UI hides the action in that case, but the action enforces it too.
+ * 'unknown' is allowed (the check moves it back to 'active').
+ */
+export async function confirmPlacementStillEmployed(
+  input: z.infer<typeof confirmStillEmployedSchema>,
+): Promise<ActionResult> {
+  const parsed = confirmStillEmployedSchema.safeParse(input);
+  if (!parsed.success) {
+    return fail(parsed.error.issues[0]?.message ?? "Invalid check-in input.");
+  }
+  const { placementId, note } = parsed.data;
+
+  const guard = await requireEditableForPlacement(placementId);
+  if (!guard.ok) return guard;
+
+  if (guard.placement.currentStatus === "departed") {
+    return fail(
+      "This placement is already marked as departed  confirming is no longer available.",
+    );
+  }
+
+  const noteForMeta = note && note.length > 0 ? note : null;
+  const db = getDb();
+  const checkId = `chk_${randomUUID()}`;
+  const now = new Date();
+
+  await db.transaction(async (tx) => {
+    await tx.insert(schema.placementStatusChecks).values({
+      id: checkId,
+      placementId,
+      checkedByUserId: guard.userId,
+      checkedAt: now,
+      stillEmployed: true,
+      note: noteForMeta,
+    });
+    await tx
+      .update(schema.placements)
+      .set({
+        currentStatus: "active",
+        lastCheckAt: now,
+        lastCheckByUserId: guard.userId,
+      })
+      .where(
+        and(
+          eq(schema.placements.id, placementId),
+          eq(schema.placements.organizationId, guard.orgId),
+        ),
+      );
+  });
+
+  await logAccess({
+    kind: "placement.status.check",
+    actor: guard.userId,
+    subject: guard.placement.profileId,
+    meta: {
+      orgId: guard.orgId,
+      placementId,
+      checkId,
+      stillEmployed: true,
+      ...(noteForMeta ? { note: noteForMeta, notePii: true } : {}),
+    },
+  });
+
+  revalidatePath("/employer/placements");
+  revalidatePath(`/employer/placements/${placementId}`);
+  return ok();
+}
+
+const internalNoteSchema = z.object({
+  placementId: z.string().min(1),
+  note: z
+    .string()
+    .max(1000, "Internal note must be 1000 characters or fewer."),
+});
+
+/**
+ * Phase 9.20 T2  set/update/clear the org-private internal note
+ * (D6). Empty string clears the note (stored as NULL). Audit-logged
+ * with the note in meta (PII-flagged); the audit-log row carries
+ * both old and new lengths so the data-export sweep can find every
+ * note historically attached to this placement.
+ */
+export async function updatePlacementInternalNote(
+  input: z.infer<typeof internalNoteSchema>,
+): Promise<ActionResult> {
+  const parsed = internalNoteSchema.safeParse(input);
+  if (!parsed.success) {
+    return fail(parsed.error.issues[0]?.message ?? "Invalid note input.");
+  }
+  const { placementId, note } = parsed.data;
+
+  const guard = await requireEditableForPlacement(placementId);
+  if (!guard.ok) return guard;
+
+  const trimmed = note.trim();
+  const persisted = trimmed.length === 0 ? null : trimmed;
+  const db = getDb();
+
+  await db
+    .update(schema.placements)
+    .set({ internalNote: persisted })
+    .where(
+      and(
+        eq(schema.placements.id, placementId),
+        eq(schema.placements.organizationId, guard.orgId),
+      ),
+    );
+
+  await logAccess({
+    kind: "placement.note.update",
+    actor: guard.userId,
+    subject: guard.placement.profileId,
+    meta: {
+      orgId: guard.orgId,
+      placementId,
+      noteLength: trimmed.length,
+      ...(persisted ? { note: persisted, notePii: true } : { noteCleared: true }),
+    },
+  });
+
+  revalidatePath("/employer/placements");
+  revalidatePath(`/employer/placements/${placementId}`);
+  return ok();
 }

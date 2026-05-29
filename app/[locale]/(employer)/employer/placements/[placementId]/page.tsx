@@ -21,13 +21,19 @@ import { EMPLOYER_NAV, MOCK_EMPLOYER } from "@/components/layout/employerNav";
 import { Avatar } from "@/components/ui/Avatar";
 import { verifyEmployer } from "@/lib/auth/dal";
 import {
+  confirmPlacementStillEmployed,
   getEmployee,
   listStatusChecksForPlacement,
   listPlacementAuditExcerpt,
+  updatePlacementInternalNote,
   type EmployeeDetail,
   type PlacementStatusCheckRow,
   type PlacementAuditRow,
 } from "@/lib/employer/placement-lifecycle";
+import { getMyOrgRole } from "@/lib/employer/vacancies";
+import { canEditVacancies } from "@/lib/employer/vacancies-types";
+import { ConfirmStatusIsland } from "@/components/feature/employer/placements/ConfirmStatusIsland";
+import { InternalNoteEditorIsland } from "@/components/feature/employer/placements/InternalNoteEditorIsland";
 import {
   ChevronLeft,
   Calendar,
@@ -37,7 +43,6 @@ import {
   CheckCircle2,
   AlertCircle,
   History,
-  StickyNote,
   FileText,
 } from "lucide-react";
 
@@ -55,10 +60,12 @@ export default async function EmployeeDetailPage({
   const employee = await getEmployee(placementId);
   if (!employee) notFound();
 
-  const [checks, auditExcerpt] = await Promise.all([
+  const [checks, auditExcerpt, role] = await Promise.all([
     listStatusChecksForPlacement(employee.placementId),
     listPlacementAuditExcerpt(employee.placementId, employee.profileId),
+    getMyOrgRole(),
   ]);
+  const canEdit = canEditVacancies(role);
 
   return (
     <DashboardShell
@@ -96,9 +103,18 @@ export default async function EmployeeDetailPage({
 
       <PersonHeader employee={employee} />
 
-      <TenureTimeline employee={employee} />
+      <TenureTimeline employee={employee} canEdit={canEdit} />
 
-      <InternalNotePanel note={employee.internalNote} />
+      <InternalNoteEditorIsland
+        placementId={employee.placementId}
+        initialNote={employee.internalNote}
+        canEdit={canEdit}
+        action={async (input) => {
+          "use server";
+          const res = await updatePlacementInternalNote(input);
+          return res.ok ? { ok: true } : { ok: false, message: res.message };
+        }}
+      />
 
       <CheckHistoryPanel checks={checks} />
 
@@ -112,8 +128,8 @@ export default async function EmployeeDetailPage({
       <ActivityPanel rows={auditExcerpt} />
 
       <p className="mt-8 text-xs italic text-[color:var(--color-ink-soft)]">
-        Tier 1 of Phase 9.20  read surface only. The Confirm status,
-        Edit note, and Mark departed actions land in Tier 2 + Tier 3.
+        Mark-as-departed lands in Tier 3 of this phase  the re-engage
+        hook will reuse your existing open-vacancies pipeline.
       </p>
     </DashboardShell>
   );
@@ -187,7 +203,13 @@ function PersonHeader({ employee }: { employee: EmployeeDetail }) {
   );
 }
 
-function TenureTimeline({ employee }: { employee: EmployeeDetail }) {
+function TenureTimeline({
+  employee,
+  canEdit,
+}: {
+  employee: EmployeeDetail;
+  canEdit: boolean;
+}) {
   const hiredAt = new Date(employee.hiredAt);
   const nextCheck = new Date(employee.nextCheckDueAt);
   const lastCheck = employee.lastCheckAt
@@ -195,8 +217,24 @@ function TenureTimeline({ employee }: { employee: EmployeeDetail }) {
     : null;
   return (
     <section className="mb-6 rounded-[var(--radius-md)] border border-[color:var(--color-hairline)] bg-[color:var(--color-paper)] p-4 md:p-5">
-      <div className="mb-3 text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--color-ink-soft)]">
-        Lifecycle
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+        <span className="text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--color-ink-soft)]">
+          Lifecycle
+        </span>
+        {canEdit && employee.currentStatus !== "departed" && (
+          <ConfirmStatusIsland
+            placementId={employee.placementId}
+            employeeName={employee.displayName}
+            variant="button"
+            action={async (input) => {
+              "use server";
+              const res = await confirmPlacementStillEmployed(input);
+              return res.ok
+                ? { ok: true }
+                : { ok: false, message: res.message };
+            }}
+          />
+        )}
       </div>
       <ol className="space-y-2 text-sm">
         <li className="flex items-baseline gap-3">
@@ -281,33 +319,6 @@ function TenureTimeline({ employee }: { employee: EmployeeDetail }) {
           </li>
         )}
       </ol>
-    </section>
-  );
-}
-
-function InternalNotePanel({ note }: { note: string | null }) {
-  return (
-    <section className="mb-6 rounded-[var(--radius-md)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-4 md:p-5">
-      <div className="mb-2 flex flex-wrap items-baseline justify-between gap-2">
-        <span className="inline-flex items-center gap-1.5 text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--color-ink-soft)]">
-          <StickyNote className="size-3" aria-hidden="true" />
-          Internal note
-        </span>
-        <span className="text-[0.65rem] uppercase tracking-[0.18em] text-[color:var(--color-ink-soft)]">
-          Org-private
-        </span>
-      </div>
-      {note ? (
-        <p className="whitespace-pre-wrap text-sm text-[color:var(--color-ink)]">
-          {note}
-        </p>
-      ) : (
-        <p className="text-sm italic text-[color:var(--color-ink-soft)]">
-          No internal note yet  Tier 2 of Phase 9.20 adds the editor.
-          This space is for durable context only your team sees (never the
-          seeker).
-        </p>
-      )}
     </section>
   );
 }

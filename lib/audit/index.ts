@@ -51,6 +51,15 @@ export type AuditKind =
   | "profile.contact.request"
   | "placement.confirm"
   | "placement.delete"
+  // Phase 9.20 T2  lifecycle ledger events. `status.check` is a
+  // status confirmation (subject = profileId, meta carries the
+  // checkId + the boolean + the PII-flagged optional note). `note.
+  // update` writes when an org member edits the durable internal
+  // note; the meta carries both the new content (PII-flagged) and
+  // a `noteCleared` boolean for clear-to-NULL operations.
+  | "placement.status.check"
+  | "placement.status.check_due"
+  | "placement.note.update"
   // Phase 7.5  seeker self-reported placement (softer signal,
   // excluded from official analytics + outcomes dataset).
   | "placement.self_report"

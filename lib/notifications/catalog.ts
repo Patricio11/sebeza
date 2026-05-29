@@ -208,6 +208,22 @@ export const NOTIFICATION_CATALOG = {
       "A single follow-up fires one week after an invitation if you haven't responded yet. Capped at one per invite ever  the employer chose to enable nudges on this vacancy. You can still accept, decline, or decline with a reason.",
     dedupeWindowSeconds: 0,
   },
+  // Phase 9.20 D2  the lifecycle check-in-due cron. Fires when a
+  // placement's 3/6/12-month-then-annual milestone passes without a
+  // confirmation. Cap: one notification per (placement × milestone)
+  // via NOT EXISTS on the notifications table. Default email OFF;
+  // this is a periodic prompt, not a transactional event, and we
+  // don't want to push it to email until the cadence has been
+  // observed in practice.
+  "placement.status.check_due": {
+    defaultInApp: true,
+    defaultEmail: false,
+    audience: "org_members",
+    label: "An employee's status check is due",
+    description:
+      "Fires nightly when a placement passes one of its check-in milestones (3 / 6 / 12 months, then annual) without an Owner / Recruiter confirming the person is still in the role. One question, one tap  keeps the platform's retention figure honest.",
+    dedupeWindowSeconds: 0,
+  },
   "vacancy.response": {
     defaultInApp: true,
     defaultEmail: true,

@@ -27,11 +27,15 @@ import { Avatar } from "@/components/ui/Avatar";
 import { Link } from "@/i18n/navigation";
 import { verifyEmployer } from "@/lib/auth/dal";
 import {
+  confirmPlacementStillEmployed,
   listEmployees,
   type EmployeeListRow,
   type EmployeeListSort,
   type EmployeeListTab,
 } from "@/lib/employer/placement-lifecycle";
+import { getMyOrgRole } from "@/lib/employer/vacancies";
+import { canEditVacancies } from "@/lib/employer/vacancies-types";
+import { ConfirmStatusIsland } from "@/components/feature/employer/placements/ConfirmStatusIsland";
 import { Search, MapPin, Calendar, Clock, AlertCircle } from "lucide-react";
 
 export const revalidate = 0;
@@ -71,7 +75,11 @@ export default async function EmployeesListPage({
   const tab = parseTab(tabRaw);
   const sort = parseSort(sortRaw);
 
-  const rows = await listEmployees({ tab, sort });
+  const [rows, role] = await Promise.all([
+    listEmployees({ tab, sort }),
+    getMyOrgRole(),
+  ]);
+  const canEdit = canEditVacancies(role);
 
   // Counts across all buckets so the tabs can show totals even when
   // the user is filtered into one. Cheap second query  same org,
@@ -208,7 +216,7 @@ export default async function EmployeesListPage({
             <ul className="space-y-3">
               {rows.map((row) => (
                 <li key={row.placementId}>
-                  <EmployeeRow row={row} />
+                  <EmployeeRow row={row} canEdit={canEdit} />
                 </li>
               ))}
             </ul>
@@ -217,15 +225,22 @@ export default async function EmployeesListPage({
       )}
 
       <p className="mt-8 text-xs italic text-[color:var(--color-ink-soft)]">
-        Lifecycle data stays inside your organisation. Status check-ins
-        + departure categories ship in Tier 2 + Tier 3 of this same
-        phase; today the page is a richer read of what we already know.
+        Lifecycle data stays inside your organisation. Aggregate
+        retention figures land on <Link href="/insights" className="underline">/insights</Link>
+        {" "}once Tier 3 of this phase ships  the per-employee detail
+        never leaves your workspace.
       </p>
     </DashboardShell>
   );
 }
 
-function EmployeeRow({ row }: { row: EmployeeListRow }) {
+function EmployeeRow({
+  row,
+  canEdit,
+}: {
+  row: EmployeeListRow;
+  canEdit: boolean;
+}) {
   const tenureLabel = formatTenure(row.tenureMonths);
   const hiredAtDate = new Date(row.hiredAt).toLocaleDateString("en-ZA", {
     year: "numeric",
@@ -233,12 +248,12 @@ function EmployeeRow({ row }: { row: EmployeeListRow }) {
     day: "numeric",
   });
   return (
-    <Link
-      href={`/employer/placements/${row.placementId}`}
-      className="block rounded-[var(--radius-md)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-4 transition-colors hover:border-[color:var(--color-ink)] md:p-5"
-    >
+    <article className="rounded-[var(--radius-md)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-4 transition-colors hover:border-[color:var(--color-ink)] md:p-5">
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:gap-5">
-        <div className="flex items-center gap-3 md:flex-1">
+        <Link
+          href={`/employer/placements/${row.placementId}`}
+          className="flex items-center gap-3 md:flex-1"
+        >
           <Avatar
             name={row.displayName}
             photoUrl={row.profilePhotoUrl}
@@ -246,14 +261,14 @@ function EmployeeRow({ row }: { row: EmployeeListRow }) {
             showRing={false}
           />
           <div className="min-w-0 flex-1">
-            <h3 className="font-display text-base leading-tight text-[color:var(--color-ink)]">
+            <h3 className="font-display text-base leading-tight text-[color:var(--color-ink)] hover:underline">
               {row.displayName}
             </h3>
             <p className="mt-0.5 truncate text-xs text-[color:var(--color-ink-soft)]">
               {row.role}
             </p>
           </div>
-        </div>
+        </Link>
         <dl className="grid grid-cols-2 gap-3 border-t border-dashed border-[color:var(--color-hairline)] pt-3 text-xs md:flex-1 md:grid-cols-4 md:border-0 md:pt-0">
           <div className="md:col-span-1">
             <dt className="text-[0.62rem] uppercase tracking-[0.22em] text-[color:var(--color-ink-soft)]">
@@ -287,16 +302,22 @@ function EmployeeRow({ row }: { row: EmployeeListRow }) {
               Status
             </dt>
             <dd className="mt-0.5">
-              <StatusPill row={row} />
+              <StatusPill row={row} canEdit={canEdit} />
             </dd>
           </div>
         </dl>
       </div>
-    </Link>
+    </article>
   );
 }
 
-function StatusPill({ row }: { row: EmployeeListRow }) {
+function StatusPill({
+  row,
+  canEdit,
+}: {
+  row: EmployeeListRow;
+  canEdit: boolean;
+}) {
   if (row.currentStatus === "departed") {
     return (
       <span className="inline-flex items-center rounded-[var(--radius-pill)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface-sunk)] px-2 py-0.5 text-[0.6rem] uppercase tracking-[0.18em] text-[color:var(--color-ink-soft)]">
@@ -305,7 +326,24 @@ function StatusPill({ row }: { row: EmployeeListRow }) {
       </span>
     );
   }
+  // Phase 9.20 T2  swap the static "Check-in due" pill for the
+  // interactive ConfirmStatusIsland when the caller can edit. Viewers
+  // still see the badge but it stays a label, not an action.
   if (row.checkInDue) {
+    if (canEdit) {
+      return (
+        <ConfirmStatusIsland
+          placementId={row.placementId}
+          employeeName={row.displayName}
+          variant="due-badge"
+          action={async (input) => {
+            "use server";
+            const res = await confirmPlacementStillEmployed(input);
+            return res.ok ? { ok: true } : { ok: false, message: res.message };
+          }}
+        />
+      );
+    }
     return (
       <span className="inline-flex items-center gap-1 rounded-[var(--radius-pill)] border border-[color:var(--color-accent)] bg-[color:var(--color-accent)]/10 px-2 py-0.5 text-[0.6rem] uppercase tracking-[0.18em] text-[color:var(--color-accent)]">
         <AlertCircle className="size-2.5" aria-hidden="true" />
