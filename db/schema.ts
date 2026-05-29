@@ -840,6 +840,32 @@ export const vacancies = pgTable(
      * vacancy_invitations row at send time.
      */
     inviteExpiryDays: integer("invite_expiry_days"),
+    /**
+     * Phase 9.19  vacancy-side match enrichment. All three columns
+     * follow the D0 "vacancy is the source of truth" principle: empty
+     * array / NULL = the matcher does NOT constrain on that axis.
+     *
+     * workAvailability mirrors the seeker column's enum 1:1 (the same
+     * Phase 9.18 work_availability_kind values: casual / part_time /
+     * contract / full_time / remote / hybrid) so the array-overlap
+     * match operates against identical types. Empty = "any work mode
+     * / employment type" (matcher ignores the axis entirely).
+     *
+     * minYearsExperience is a hard floor on profiles.years_experience.
+     * NULL = no floor.
+     *
+     * minNqfLevel is a hard floor on MAX(academic_profiles.nqf_level)
+     * per profile. NULL = no floor. Many SA roles (trades, hospitality,
+     * casual labour, sales) genuinely don't require a credential  the
+     * field is optional precisely so those vacancies don't have to
+     * fabricate a number.
+     */
+    workAvailability: workAvailabilityKind("work_availability")
+      .array()
+      .notNull()
+      .default(sql`'{}'::work_availability_kind[]`),
+    minYearsExperience: integer("min_years_experience"),
+    minNqfLevel: integer("min_nqf_level"),
     createdAt: timestamp("created_at").notNull().defaultNow(),
     closedAt: timestamp("closed_at"),
   },
@@ -849,6 +875,11 @@ export const vacancies = pgTable(
       t.organizationId,
       t.status,
     ),
+    // Phase 9.19  partial index on the years floor. Drizzle's
+    // index() doesn't accept WHERE; the migration's CREATE INDEX … WHERE
+    // is what actually lands in the database. This plain index keeps
+    // the introspection round-trip quiet.
+    minYearsIdx: index("vacancies_min_years_idx").on(t.minYearsExperience),
   }),
 );
 

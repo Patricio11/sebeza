@@ -46,7 +46,11 @@ import {
   PROFESSIONS as MOCK_PROFESSIONS,
   SKILLS as MOCK_SKILLS,
 } from "@/lib/mock/taxonomy";
-import type { SearchFilters, Seniority } from "@/lib/mock/types";
+import type {
+  SearchFilters,
+  Seniority,
+  WorkAvailabilityKind,
+} from "@/lib/mock/types";
 import type {
   OrgMemberRole,
   VacancyStatus,
@@ -84,6 +88,16 @@ export interface VacancyRow {
   documentsRequired: string[];
   status: VacancyStatus;
   inviteExpiryDays: number | null;
+  /** Phase 9.19  what work modes / employment types the role offers.
+   *  Empty array = "no constraint" (matcher ignores this axis). */
+  workAvailability: WorkAvailabilityKind[];
+  /** Phase 9.19  minimum total years of experience. NULL = "no floor"
+   *  (matcher does NOT check this axis at all  not "0 years or more"). */
+  minYearsExperience: number | null;
+  /** Phase 9.19  minimum NQF level on the seeker's highest academic
+   *  record. NULL = "no floor" (the role does not require a credential,
+   *  e.g. trades / hospitality / casual labour / sales). */
+  minNqfLevel: number | null;
   createdAt: string; // ISO
   closedAt: string | null;
 }
@@ -104,6 +118,9 @@ function rowToVacancy(r: typeof schema.vacancies.$inferSelect): VacancyRow {
     documentsRequired: r.documentsRequired ?? [],
     status: r.status as VacancyStatus,
     inviteExpiryDays: r.inviteExpiryDays ?? null,
+    workAvailability: (r.workAvailability ?? []) as WorkAvailabilityKind[],
+    minYearsExperience: r.minYearsExperience ?? null,
+    minNqfLevel: r.minNqfLevel ?? null,
     createdAt:
       r.createdAt instanceof Date
         ? r.createdAt.toISOString()
@@ -191,6 +208,15 @@ export async function getMyOrgRole(): Promise<OrgMemberRole | null> {
 // Writes  Server Actions
 // ─────────────────────────────────────────────────────────────────────────────
 
+const WORK_AVAILABILITY_VALUES = [
+  "casual",
+  "part_time",
+  "contract",
+  "full_time",
+  "remote",
+  "hybrid",
+] as const satisfies readonly WorkAvailabilityKind[];
+
 const vacancyInputSchema = z.object({
   title: z.string().trim().min(3).max(120),
   professionSlug: z.string().min(1),
@@ -209,6 +235,31 @@ const vacancyInputSchema = z.object({
     .int()
     .min(1)
     .max(365)
+    .nullable()
+    .optional(),
+  /** Phase 9.19 D0/D1  work modes / employment types the role offers.
+   *  Empty array (the default) = no constraint; matcher ignores this axis. */
+  workAvailability: z
+    .array(z.enum(WORK_AVAILABILITY_VALUES))
+    .max(WORK_AVAILABILITY_VALUES.length)
+    .optional(),
+  /** Phase 9.19 D2  hard floor on total years of experience.
+   *  NULL / omitted = "no floor", matcher does not check this axis. */
+  minYearsExperience: z.coerce
+    .number()
+    .int()
+    .min(0)
+    .max(60)
+    .nullable()
+    .optional(),
+  /** Phase 9.19 D3  minimum NQF level (1-10) on the seeker's highest
+   *  academic record. NULL / omitted = no NQF check at all; every
+   *  seeker passes regardless of whether they hold a credential. */
+  minNqfLevel: z.coerce
+    .number()
+    .int()
+    .min(1)
+    .max(10)
     .nullable()
     .optional(),
 });
@@ -271,6 +322,9 @@ export async function createVacancy(
     documentsRequired: v.documentsRequired ?? [],
     status: "draft" as const,
     inviteExpiryDays: v.inviteExpiryDays ?? null,
+    workAvailability: v.workAvailability ?? [],
+    minYearsExperience: v.minYearsExperience ?? null,
+    minNqfLevel: v.minNqfLevel ?? null,
   });
 
   await logAccess({
@@ -324,6 +378,9 @@ export async function updateVacancy(
       description: v.description ?? null,
       documentsRequired: v.documentsRequired ?? [],
       inviteExpiryDays: v.inviteExpiryDays ?? null,
+      workAvailability: v.workAvailability ?? [],
+      minYearsExperience: v.minYearsExperience ?? null,
+      minNqfLevel: v.minNqfLevel ?? null,
     })
     .where(
       and(
@@ -389,6 +446,16 @@ function vacancyToSearchFilters(
     city: vacancy.citySlug ?? null,
     seniority: seniorityNormalised,
     highlightCitizens: true,
+    // Phase 9.19  D0/D1/D2/D3: vacancy is the source of truth.
+    // Empty array / NULL means the matcher does not constrain on that
+    // axis. The query layer (searchProfilesQuery) treats absent fields
+    // as "no filter," so we only forward what the vacancy actually asks.
+    availableFor:
+      vacancy.workAvailability.length > 0
+        ? vacancy.workAvailability
+        : undefined,
+    minYearsExperience: vacancy.minYearsExperience,
+    minNqfLevel: vacancy.minNqfLevel,
   };
 }
 

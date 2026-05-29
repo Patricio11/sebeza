@@ -187,6 +187,28 @@ export async function searchProfilesQuery(
     );
     conditions.push(sql`p.work_availability && ${kindsLiteral}`);
   }
+  // Phase 9.19 D2  years-experience hard floor. Vacancy is the source
+  // of truth: NULL on the vacancy = no constraint (skip entirely).
+  // When the floor is set, a NULL on the seeker (`yearsExperience`
+  // never declared) does NOT pass  "unknown is not a pass."
+  if (
+    filters.minYearsExperience !== null &&
+    filters.minYearsExperience !== undefined
+  ) {
+    conditions.push(
+      sql`p.years_experience IS NOT NULL AND p.years_experience >= ${filters.minYearsExperience}`,
+    );
+  }
+  // Phase 9.19 D3  NQF floor matches the seeker's HIGHEST academic
+  // record (EXISTS over academic_profiles  no record = no pass).
+  // NULL on the vacancy = no NQF check at all; trades / hospitality /
+  // casual labour / sales roles simply skip this axis and every seeker
+  // remains eligible regardless of whether they hold a credential.
+  if (filters.minNqfLevel !== null && filters.minNqfLevel !== undefined) {
+    conditions.push(
+      sql`EXISTS (SELECT 1 FROM academic_profiles ap WHERE ap.profile_id = p.id AND ap.nqf_level >= ${filters.minNqfLevel})`,
+    );
+  }
 
   const whereClause = sql.join(conditions, sql` AND `);
 
@@ -365,6 +387,21 @@ export async function countMatchesByCitizenship(
         .join(",")}]::work_availability_kind[]`,
     );
     conditions.push(sql`p.work_availability && ${kindsLiteral}`);
+  }
+  // Phase 9.19  mirror the years/NQF gates so the honest-supply
+  // counts agree with the ranked list (every WHERE clause must match).
+  if (
+    filters.minYearsExperience !== null &&
+    filters.minYearsExperience !== undefined
+  ) {
+    conditions.push(
+      sql`p.years_experience IS NOT NULL AND p.years_experience >= ${filters.minYearsExperience}`,
+    );
+  }
+  if (filters.minNqfLevel !== null && filters.minNqfLevel !== undefined) {
+    conditions.push(
+      sql`EXISTS (SELECT 1 FROM academic_profiles ap WHERE ap.profile_id = p.id AND ap.nqf_level >= ${filters.minNqfLevel})`,
+    );
   }
   const whereClause = sql.join(conditions, sql` AND `);
 

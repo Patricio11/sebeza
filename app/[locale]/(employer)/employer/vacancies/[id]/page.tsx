@@ -47,8 +47,21 @@ import { getPlacementsForVacancy } from "@/lib/employer/placements";
 import { getProfessions } from "@/lib/taxonomy/query";
 import { PROVINCES, PROFESSIONS, SKILLS } from "@/lib/mock/taxonomy";
 import { ChevronLeft, Lock, MapPin, Users } from "lucide-react";
+import type { WorkAvailabilityKind } from "@/lib/mock/types";
 
 export const revalidate = 0;
+
+// Phase 9.19  display labels for the work_availability_kind enum.
+// Single source of truth for read-only renderings on the vacancy
+// detail page (the editable form has its own list with values).
+const WORK_AVAILABILITY_LABELS: Record<WorkAvailabilityKind, string> = {
+  full_time: "Full-time",
+  part_time: "Part-time",
+  contract: "Contract",
+  casual: "Casual",
+  remote: "Remote",
+  hybrid: "Hybrid",
+};
 
 export default async function VacancyDetailPage({
   params,
@@ -124,6 +137,14 @@ export default async function VacancyDetailPage({
           {provinceLabel}
         </span>
       </div>
+
+      {/* Phase 9.19  Match-requirements strip. Surfaces the three new
+          vacancy-side axes (work availability, min years, min NQF) above
+          the "Find matches" CTA so the organiser sees, at a glance, what
+          the matcher will constrain on. Each field that's blank renders
+          as "No requirement"  consistent with D0 (vacancy is source of
+          truth; blank = matcher ignores axis). */}
+      <MatchRequirementsStrip vacancy={vacancy} />
 
       {/* Find-matches CTA  visible to all roles. Reverse-matching is a
           read of the public talent pool through the existing redaction
@@ -289,6 +310,56 @@ function ViewerNotice() {
       Your workspace role is <strong>Viewer</strong>  vacancy detail is
       read-only. Ask an Owner or Recruiter to make changes.
     </p>
+  );
+}
+
+function MatchRequirementsStrip({
+  vacancy,
+}: {
+  vacancy: import("@/lib/employer/vacancies").VacancyRow;
+}) {
+  const workModes = vacancy.workAvailability
+    .map((k) => WORK_AVAILABILITY_LABELS[k])
+    .join(" · ");
+  const yearsLabel =
+    vacancy.minYearsExperience != null
+      ? `${vacancy.minYearsExperience}+ yr${vacancy.minYearsExperience === 1 ? "" : "s"}`
+      : "No minimum";
+  const nqfLabel =
+    vacancy.minNqfLevel != null
+      ? `NQF ${vacancy.minNqfLevel}+`
+      : "Not required";
+  return (
+    <section
+      aria-label="Match requirements"
+      className="mb-6 rounded-[var(--radius-md)] border border-[color:var(--color-hairline)] bg-[color:var(--color-paper)] p-4"
+    >
+      <div className="mb-2 text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--color-ink-soft)]">
+        Match requirements
+      </div>
+      <dl className="grid gap-3 text-sm md:grid-cols-3">
+        <div>
+          <dt className="text-[0.68rem] uppercase tracking-[0.18em] text-[color:var(--color-ink-soft)]">
+            Work mode &amp; type
+          </dt>
+          <dd className="mt-0.5 text-[color:var(--color-ink)]">
+            {workModes || "Any work mode / employment type"}
+          </dd>
+        </div>
+        <div>
+          <dt className="text-[0.68rem] uppercase tracking-[0.18em] text-[color:var(--color-ink-soft)]">
+            Years of experience
+          </dt>
+          <dd className="mt-0.5 text-[color:var(--color-ink)]">{yearsLabel}</dd>
+        </div>
+        <div>
+          <dt className="text-[0.68rem] uppercase tracking-[0.18em] text-[color:var(--color-ink-soft)]">
+            NQF level
+          </dt>
+          <dd className="mt-0.5 text-[color:var(--color-ink)]">{nqfLabel}</dd>
+        </div>
+      </dl>
+    </section>
   );
 }
 

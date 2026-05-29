@@ -22,7 +22,11 @@ import {
 import { Button } from "@/components/ui/Button";
 import { ComboboxField } from "@/components/ui/ComboboxField";
 import { Lock } from "lucide-react";
-import type { TaxonomyEntry, Province } from "@/lib/mock/types";
+import type {
+  TaxonomyEntry,
+  Province,
+  WorkAvailabilityKind,
+} from "@/lib/mock/types";
 import { useSessionDraft } from "@/lib/hooks/useSessionDraft";
 
 export interface VacancyFormValue {
@@ -36,6 +40,12 @@ export interface VacancyFormValue {
   description?: string | null;
   documentsRequired: string[];
   inviteExpiryDays?: number | null;
+  /** Phase 9.19  empty array = no constraint (matcher ignores axis). */
+  workAvailability: WorkAvailabilityKind[];
+  /** Phase 9.19  NULL = no constraint (matcher does NOT check this axis). */
+  minYearsExperience?: number | null;
+  /** Phase 9.19  NULL = no NQF check at all (every seeker passes). */
+  minNqfLevel?: number | null;
 }
 
 export interface VacancyFormProps {
@@ -71,6 +81,11 @@ interface VacancyDraft {
   description: string;
   inviteExpiryDays: string;
   skillSlugs: string[];
+  // Phase 9.19  serialised as strings so the draft round-trips through JSON
+  // cleanly. Empty string for the two numeric inputs = "blank = no constraint."
+  workAvailability: WorkAvailabilityKind[];
+  minYearsExperience: string;
+  minNqfLevel: string;
 }
 
 const SENIORITY_OPTIONS = [
@@ -78,6 +93,35 @@ const SENIORITY_OPTIONS = [
   "Intermediate",
   "Senior",
   "Lead / Manager",
+];
+
+// Phase 9.19  the six work_availability_kind enum values, each with a
+// human-readable label for the chips. Order mirrors the seeker form
+// (Phase 9.18) so a vacancy editor coming from the seeker side sees a
+// consistent layout.
+const WORK_AVAILABILITY_CHOICES: ReadonlyArray<{
+  value: WorkAvailabilityKind;
+  label: string;
+}> = [
+  { value: "full_time", label: "Full-time" },
+  { value: "part_time", label: "Part-time" },
+  { value: "contract", label: "Contract" },
+  { value: "casual", label: "Casual" },
+  { value: "remote", label: "Remote" },
+  { value: "hybrid", label: "Hybrid" },
+];
+
+// Phase 9.19  NQF dropdown options. The seeker side (`NqfLevel`) only
+// captures 4-10 (post-Matric) so we offer the same range here  asking
+// a vacancy to require NQF 1-3 would never match any seeker.
+const NQF_OPTIONS: ReadonlyArray<{ value: number; label: string }> = [
+  { value: 4, label: "4  Matric / National Certificate" },
+  { value: 5, label: "5  Higher Certificate" },
+  { value: 6, label: "6  Diploma / Advanced Certificate" },
+  { value: 7, label: "7  Bachelor's degree" },
+  { value: 8, label: "8  Honours / Postgraduate Diploma" },
+  { value: 9, label: "9  Master's degree" },
+  { value: 10, label: "10  Doctorate" },
 ];
 
 export function VacancyForm({
@@ -115,6 +159,19 @@ export function VacancyForm({
   const [skillSet, setSkillSet] = useState<Set<string>>(
     new Set(initial?.skillSlugs ?? []),
   );
+  // Phase 9.19  match-requirement fields. Empty array / empty string =
+  // "leave blank if this isn't a requirement" (D0: vacancy is source of truth).
+  const [workAvailabilitySet, setWorkAvailabilitySet] = useState<
+    Set<WorkAvailabilityKind>
+  >(new Set(initial?.workAvailability ?? []));
+  const [minYearsExperience, setMinYearsExperience] = useState<string>(
+    initial?.minYearsExperience != null
+      ? String(initial.minYearsExperience)
+      : "",
+  );
+  const [minNqfLevel, setMinNqfLevel] = useState<string>(
+    initial?.minNqfLevel != null ? String(initial.minNqfLevel) : "",
+  );
 
   // Persist the draft so locale-switching mid-edit doesn't wipe it.
   // Scoped per (create vs edit-vacancy-id) so drafts don't bleed
@@ -130,6 +187,9 @@ export function VacancyForm({
       description,
       inviteExpiryDays,
       skillSlugs: Array.from(skillSet),
+      workAvailability: Array.from(workAvailabilitySet),
+      minYearsExperience,
+      minNqfLevel,
     }),
     [
       title,
@@ -140,6 +200,9 @@ export function VacancyForm({
       description,
       inviteExpiryDays,
       skillSet,
+      workAvailabilitySet,
+      minYearsExperience,
+      minNqfLevel,
     ],
   );
   const { clear: clearDraft } = useSessionDraft<VacancyDraft>(
@@ -157,6 +220,11 @@ export function VacancyForm({
           setInviteExpiryDays(draft.inviteExpiryDays);
         if (Array.isArray(draft.skillSlugs))
           setSkillSet(new Set(draft.skillSlugs));
+        if (Array.isArray(draft.workAvailability))
+          setWorkAvailabilitySet(new Set(draft.workAvailability));
+        if (draft.minYearsExperience !== undefined)
+          setMinYearsExperience(draft.minYearsExperience);
+        if (draft.minNqfLevel !== undefined) setMinNqfLevel(draft.minNqfLevel);
       },
     },
   );
@@ -166,6 +234,15 @@ export function VacancyForm({
       const next = new Set(prev);
       if (next.has(slug)) next.delete(slug);
       else next.add(slug);
+      return next;
+    });
+  }
+
+  function toggleWorkAvailability(value: WorkAvailabilityKind) {
+    setWorkAvailabilitySet((prev) => {
+      const next = new Set(prev);
+      if (next.has(value)) next.delete(value);
+      else next.add(value);
       return next;
     });
   }
@@ -182,6 +259,30 @@ export function VacancyForm({
       return;
     }
 
+    // Phase 9.19 D0  blank = no constraint. Empty string maps to NULL,
+    // matcher then skips the axis entirely. Validate the numeric inputs
+    // only when populated.
+    const yearsRaw = minYearsExperience.trim();
+    const yearsNum = yearsRaw === "" ? null : Number(yearsRaw);
+    if (
+      yearsNum !== null &&
+      (!Number.isFinite(yearsNum) || yearsNum < 0 || yearsNum > 60)
+    ) {
+      setError(
+        "Minimum years of experience must be empty, or a whole number between 0 and 60.",
+      );
+      return;
+    }
+    const nqfRaw = minNqfLevel.trim();
+    const nqfNum = nqfRaw === "" ? null : Number(nqfRaw);
+    if (
+      nqfNum !== null &&
+      (!Number.isFinite(nqfNum) || nqfNum < 1 || nqfNum > 10)
+    ) {
+      setError("Minimum NQF level must be empty, or between 1 and 10.");
+      return;
+    }
+
     const value: VacancyFormValue = {
       title: title.trim(),
       professionSlug: profession,
@@ -193,6 +294,9 @@ export function VacancyForm({
       description: description.trim() || null,
       documentsRequired: [], // vNext  for now the matching uses skills + profession
       inviteExpiryDays: expiryNum,
+      workAvailability: Array.from(workAvailabilitySet),
+      minYearsExperience: yearsNum,
+      minNqfLevel: nqfNum,
     };
 
     startTransition(async () => {
@@ -325,6 +429,91 @@ export function VacancyForm({
           placeholder="What the role does, who it reports to, what success looks like in the first 90 days. Internal-only  no seeker ever sees this."
           maxLength={4000}
         />
+      </section>
+
+      <hr className="hairline" />
+
+      {/* Phase 9.19  match requirements. Every axis is optional: leave
+          blank if the role doesn't ask for it, and the matcher won't
+          constrain on it. SA-context driver: trades / hospitality /
+          casual labour / sales rarely require formal NQF credentials,
+          so the form must never push organisers to pick one. */}
+      <section className="flex flex-col gap-5">
+        <div className="text-[0.72rem] uppercase tracking-[0.22em] text-[color:var(--color-ink)]">
+          Match requirements
+        </div>
+        <p className="text-xs text-[color:var(--color-ink-soft)]">
+          Used to narrow the candidate list on the &ldquo;Find matches&rdquo;
+          screen. Leave any field blank if it isn&rsquo;t a requirement &mdash;
+          the matcher then ignores that axis entirely.
+        </p>
+
+        <fieldset className="flex flex-col gap-2">
+          <legend className="text-[0.72rem] uppercase tracking-[0.22em] text-[color:var(--color-ink)]">
+            Work mode &amp; employment type
+          </legend>
+          <p className="text-xs text-[color:var(--color-ink-soft)]">
+            Pick all that apply. None selected = the role accepts any work
+            mode / employment type.
+          </p>
+          <ul className="-mb-2 flex flex-wrap gap-2 pt-1">
+            {WORK_AVAILABILITY_CHOICES.map((choice) => {
+              const on = workAvailabilitySet.has(choice.value);
+              return (
+                <li key={choice.value}>
+                  <button
+                    type="button"
+                    onClick={() => toggleWorkAvailability(choice.value)}
+                    disabled={pending}
+                    aria-pressed={on}
+                    className={
+                      "rounded-[var(--radius-pill)] border px-3 py-1.5 text-xs transition-colors " +
+                      (on
+                        ? "border-[color:var(--color-brand)] bg-[color:var(--color-brand-tint)] text-[color:var(--color-brand-strong)]"
+                        : "border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] text-[color:var(--color-ink)] hover:border-[color:var(--color-ink)]")
+                    }
+                  >
+                    {choice.label}
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </fieldset>
+
+        <div className="grid gap-5 md:grid-cols-2">
+          <TextField
+            id="minYearsExperience"
+            name="minYearsExperience"
+            label="Minimum years of experience"
+            type="number"
+            inputMode="numeric"
+            min={0}
+            max={60}
+            optional
+            value={minYearsExperience}
+            onChange={(e) => setMinYearsExperience(e.target.value)}
+            disabled={pending}
+            hint="Leave blank if this isn't a requirement. Seekers who haven't declared a number won't pass once a floor is set."
+          />
+          <SelectField
+            id="minNqfLevel"
+            name="minNqfLevel"
+            label="Minimum NQF level"
+            optional
+            value={minNqfLevel}
+            onChange={(e) => setMinNqfLevel(e.target.value)}
+            disabled={pending}
+            hint="Leave blank if this isn't a requirement (most trades, hospitality, casual labour and sales roles won't need one)."
+          >
+            <option value="">No NQF requirement</option>
+            {NQF_OPTIONS.map((opt) => (
+              <option key={opt.value} value={String(opt.value)}>
+                {opt.label}
+              </option>
+            ))}
+          </SelectField>
+        </div>
       </section>
 
       <hr className="hairline" />

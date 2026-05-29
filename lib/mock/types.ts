@@ -200,6 +200,21 @@ export interface SearchFilters {
    * no filter applied. Matches via `&&` array containment.
    */
   availableFor?: WorkAvailabilityKind[];
+  /**
+   * Phase 9.19  hard floor on the seeker's total years of experience.
+   * NULL / omitted = no constraint; the matcher does not check this
+   * axis at all. Seekers whose `yearsExperience` is NULL never pass
+   * a non-null floor (Phase 9.19 D2: "unknown is not a pass").
+   */
+  minYearsExperience?: number | null;
+  /**
+   * Phase 9.19  minimum NQF level on the seeker's HIGHEST academic
+   * record. NULL / omitted = no NQF check at all; every seeker
+   * passes regardless of whether they hold a credential (Phase 9.19
+   * D3: SA roles in trades / hospitality / casual labour / sales
+   * rarely require formal qualifications).
+   */
+  minNqfLevel?: number | null;
 }
 
 export interface SearchResult {
