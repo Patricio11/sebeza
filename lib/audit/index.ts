@@ -60,6 +60,11 @@ export type AuditKind =
   | "placement.status.check"
   | "placement.status.check_due"
   | "placement.note.update"
+  // Phase 9.20 Tier 3  the structured departure event. `subject` is
+  // the profileId; meta carries departureDate + category + the
+  // PII-flagged optional note. Per D4: the *category* is captured;
+  // the *reason* (performance, misconduct, etc.) is deliberately not.
+  | "placement.departed"
   // Phase 7.5  seeker self-reported placement (softer signal,
   // excluded from official analytics + outcomes dataset).
   | "placement.self_report"

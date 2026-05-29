@@ -13,6 +13,7 @@ import {
 } from "@/db/queries/analytics";
 import { getSetting } from "@/lib/admin/settings";
 import { outcomesQuery } from "@/lib/analytics/outcomes";
+import { getLatestRetentionSnapshot } from "@/lib/analytics/retention";
 import { InsightsCharts } from "@/components/feature/InsightsCharts";
 import { InsightsExportButton } from "@/components/feature/InsightsExportButton";
 import { TrendingUp, AlertCircle, ArrowUp, ArrowDown, Minus } from "lucide-react";
@@ -58,7 +59,7 @@ export default async function InsightsPage({
   // Parallel load  all six aggregates ship at once. `skillsGapTrendQuery`
   // is `skillsGapQuery` plus the week-over-week delta arrow column (falls
   // back to no-delta when there's no prior snapshot yet).
-  const [analytics, skillsGap, skillDemand, heatmap, freshness, outcomes] =
+  const [analytics, skillsGap, skillDemand, heatmap, freshness, outcomes, retention] =
     await Promise.all([
       dataProvider.getAnalyticsSnapshot(),
       skillsGapTrendQuery({ top: 20, lookbackDays: 7 }),
@@ -66,6 +67,7 @@ export default async function InsightsPage({
       supplyHeatmapQuery(),
       freshnessBreakdownQuery({ freshDays, ageingDays }),
       outcomesQuery(),
+      getLatestRetentionSnapshot(),
     ]);
 
   const conf = overallFreshnessConfidence(analytics);
@@ -687,6 +689,112 @@ export default async function InsightsPage({
             )}
           </section>
 
+          {/* Phase 9.20 D8  national placement-retention figure. The hard
+              number nobody else surfaces: of the hires that made it to N
+              months, how many were still active at that mark. Aggregate
+              only, k = 10 floor applied at the cron, never per-employer. */}
+          <section className="mt-16" aria-labelledby="retention-h">
+            <div className="mb-4 flex flex-wrap items-baseline justify-between gap-3">
+              <div>
+                <div className="text-[0.72rem] uppercase tracking-[0.24em] text-[color:var(--color-ink-soft)]">
+                  Placement-Truth, the tail
+                </div>
+                <h2 id="retention-h" className="font-display text-2xl">
+                  Did the hires stick?
+                </h2>
+                <p className="mt-1 max-w-2xl text-sm text-[color:var(--color-ink-soft)]">
+                  Of the Sebenza-confirmed placements that made it to each
+                  milestone, how many were still active at that mark. Per-
+                  cell suppression at k = 10  employer privacy is held;
+                  the national picture stays honest.
+                </p>
+              </div>
+              {retention.capturedAt && (
+                <div className="text-[0.72rem] uppercase tracking-[0.18em] text-[color:var(--color-ink-soft)]">
+                  Captured{" "}
+                  {new Date(retention.capturedAt).toLocaleDateString(locale, {
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric",
+                  })}
+                </div>
+              )}
+            </div>
+
+            {retention.nationalByMilestone.length === 0 ? (
+              <div className="rounded-[var(--radius-md)] border border-dashed border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-6 text-sm text-[color:var(--color-ink-soft)]">
+                Not enough confirmed placements have reached the first
+                milestone yet to publish a retention figure  the dataset
+                grows as employers log + check in on hires across the
+                platform. The k = 10 floor is intentional, not a bug.
+              </div>
+            ) : (
+              <>
+                <dl className="grid gap-3 md:grid-cols-3 lg:grid-cols-5">
+                  {retention.nationalByMilestone.map((m) => (
+                    <div
+                      key={m.milestoneMonths}
+                      className="rounded-[var(--radius-md)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-4"
+                    >
+                      <dt className="text-[0.68rem] uppercase tracking-[0.18em] text-[color:var(--color-ink-soft)]">
+                        {formatMilestoneLabel(m.milestoneMonths)}
+                      </dt>
+                      <dd className="mt-1 font-display text-3xl leading-none text-[color:var(--color-ink)]">
+                        {Math.round(m.retentionRate * 100)}%
+                      </dd>
+                      <dd className="mt-1 text-xs text-[color:var(--color-ink-soft)]">
+                        {nfmt.format(m.stillActiveAtMilestone)} of{" "}
+                        {nfmt.format(m.hiredInCohort)} hires
+                      </dd>
+                    </div>
+                  ))}
+                </dl>
+
+                {retention.topCells.length > 0 && (
+                  <div className="mt-8">
+                    <h3 className="font-display text-lg text-[color:var(--color-ink)]">
+                      Roles where hires stick
+                    </h3>
+                    <p className="mt-1 text-xs text-[color:var(--color-ink-soft)]">
+                      12-month retention by (profession × province), best
+                      first. Tie-breaker is cohort size  larger cohorts
+                      surface above smaller ones at the same rate.
+                    </p>
+                    <ul className="mt-4 grid gap-2 md:grid-cols-2">
+                      {retention.topCells.map((c) => (
+                        <li
+                          key={`${c.professionSlug}__${c.provinceSlug}`}
+                          className="flex items-baseline justify-between gap-3 rounded-[var(--radius-sm)] border border-[color:var(--color-hairline)] bg-[color:var(--color-paper)] p-3"
+                        >
+                          <div>
+                            <p className="font-display text-base text-[color:var(--color-ink)]">
+                              {c.professionLabel}
+                            </p>
+                            <p className="text-xs text-[color:var(--color-ink-soft)]">
+                              {c.provinceLabel}  cohort of{" "}
+                              {nfmt.format(c.hiredInCohort)}
+                            </p>
+                          </div>
+                          <span className="font-display text-xl tabular text-[color:var(--color-brand-strong)]">
+                            {Math.round(c.retentionRate * 100)}%
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                <p className="mt-4 text-xs italic text-[color:var(--color-ink-soft)]">
+                  Snapshot covers {nfmt.format(retention.cellsPublished)}{" "}
+                  published cell{retention.cellsPublished === 1 ? "" : "s"}
+                   cells below the k = 10 floor are suppressed at the
+                  cron so per-employer numbers never leak. Retention =
+                  active at the milestone, NOT active today.
+                </p>
+              </>
+            )}
+          </section>
+
           {/* Charts (client island  trend + demand) */}
           <section className="mt-16">
             <InsightsCharts
@@ -808,4 +916,18 @@ function FreshnessTile({
       <p className="mt-1 text-xs text-[color:var(--color-ink-soft)]">{hint}</p>
     </div>
   );
+}
+
+/**
+ * Phase 9.20 D8  human label for a retention milestone in months.
+ * 3 / 6 / 12 become "3-month" / "6-month" / "12-month"; integer-year
+ * marks compress to "2-year" / "3-year"; the rare non-year mark falls
+ * back to the months form.
+ */
+function formatMilestoneLabel(months: number): string {
+  if (months < 12) return `${months}-month`;
+  if (months === 12) return "12-month";
+  const years = months / 12;
+  if (Number.isInteger(years)) return `${years}-year`;
+  return `${months}-month`;
 }

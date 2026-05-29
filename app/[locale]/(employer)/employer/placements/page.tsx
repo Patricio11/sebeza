@@ -33,6 +33,10 @@ import {
   type EmployeeListSort,
   type EmployeeListTab,
 } from "@/lib/employer/placement-lifecycle";
+import {
+  PLACEMENT_DEPARTURE_CATEGORIES,
+  type PlacementDepartureCategory,
+} from "@/lib/employer/placement-lifecycle-types";
 import { getMyOrgRole } from "@/lib/employer/vacancies";
 import { canEditVacancies } from "@/lib/employer/vacancies-types";
 import { ConfirmStatusIsland } from "@/components/feature/employer/placements/ConfirmStatusIsland";
@@ -319,10 +323,19 @@ function StatusPill({
   canEdit: boolean;
 }) {
   if (row.currentStatus === "departed") {
+    const categoryLabel = row.departureCategory
+      ? departureCategoryLabel(row.departureCategory)
+      : null;
     return (
-      <span className="inline-flex items-center rounded-[var(--radius-pill)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface-sunk)] px-2 py-0.5 text-[0.6rem] uppercase tracking-[0.18em] text-[color:var(--color-ink-soft)]">
-        Departed
-        {row.departureDate ? ` · ${row.departureDate}` : ""}
+      <span
+        className="inline-flex items-center rounded-[var(--radius-pill)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface-sunk)] px-2 py-0.5 text-[0.6rem] uppercase tracking-[0.18em] text-[color:var(--color-ink-soft)]"
+        title={
+          row.departureDate
+            ? `${categoryLabel ?? "Departed"} · ${row.departureDate}`
+            : (categoryLabel ?? "Departed")
+        }
+      >
+        {categoryLabel ? `Departed · ${categoryLabel}` : "Departed"}
       </span>
     );
   }
@@ -372,4 +385,10 @@ function formatTenure(months: number): string {
   const rem = months % 12;
   if (rem === 0) return `${years} ${years === 1 ? "year" : "years"}`;
   return `${years}y ${rem}m`;
+}
+
+function departureCategoryLabel(c: PlacementDepartureCategory): string {
+  return (
+    PLACEMENT_DEPARTURE_CATEGORIES.find((opt) => opt.value === c)?.label ?? c
+  );
 }

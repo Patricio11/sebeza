@@ -38,14 +38,18 @@ import { verifyEmployer } from "@/lib/auth/dal";
 import { logAccess } from "@/lib/audit";
 import { canEditVacancies } from "@/lib/employer/vacancies-types";
 import type { OrgMemberRole } from "@/lib/employer/vacancies-types";
+// Phase 9.20  runtime label catalog + type unions live in a plain
+// (non-"use server") module so client islands can import them. Next.js
+// rejects non-async runtime exports from a "use server" file.
+import type {
+  PlacementDepartureCategory,
+  PlacementLifecycleStatus,
+} from "./placement-lifecycle-types";
 
-/**
- * Lifecycle bucket per D5. Mirrors the Postgres enum in
- * `db/schema.ts:placementLifecycleStatus`. We restate it as a TS
- * union here so consumers don't have to import from db/schema (where
- * Drizzle's `enumValues` type is awkward to reach).
- */
-export type PlacementLifecycleStatus = "active" | "departed" | "unknown";
+export type {
+  PlacementDepartureCategory,
+  PlacementLifecycleStatus,
+} from "./placement-lifecycle-types";
 
 /**
  * Per D2: status-check milestones are at 3, 6, 12 months, then
@@ -157,6 +161,9 @@ export interface EmployeeListRow {
   lastCheckAt: string | null;
   /** ISO date (YYYY-MM-DD) or null. Only populated when status='departed'. */
   departureDate: string | null;
+  /** Phase 9.20 Tier 3  the structured category of the departure.
+   *  NULL while status='active'. See `PlacementDepartureCategory`. */
+  departureCategory: PlacementDepartureCategory | null;
   /** Months elapsed since hiredAt, floored. */
   tenureMonths: number;
   /** ISO date of the next check-in milestone (may be in the past). */
@@ -239,6 +246,7 @@ export async function listEmployees({
       currentStatus: schema.placements.currentStatus,
       lastCheckAt: schema.placements.lastCheckAt,
       departureDate: schema.placements.departureDate,
+      departureCategory: schema.placements.departureCategory,
       vacancyId: schema.placements.vacancyId,
       vacancyTitle: schema.vacancies.title,
     })
@@ -279,6 +287,8 @@ export async function listEmployees({
       currentStatus: r.currentStatus as PlacementLifecycleStatus,
       lastCheckAt: lastCheckAt ? lastCheckAt.toISOString() : null,
       departureDate: r.departureDate ?? null,
+      departureCategory: (r.departureCategory ??
+        null) as PlacementDepartureCategory | null,
       tenureMonths: tenureMonths(hiredAt, now),
       nextCheckDueAt: cadence.nextDueAt.toISOString(),
       // A departed placement has no future check owed  freeze the flag.
@@ -336,6 +346,7 @@ export async function getEmployee(
       lastCheckAt: schema.placements.lastCheckAt,
       lastCheckByUserId: schema.placements.lastCheckByUserId,
       departureDate: schema.placements.departureDate,
+      departureCategory: schema.placements.departureCategory,
       internalNote: schema.placements.internalNote,
       vacancyId: schema.placements.vacancyId,
       vacancyTitle: schema.vacancies.title,
@@ -406,6 +417,8 @@ export async function getEmployee(
     currentStatus: r.currentStatus as PlacementLifecycleStatus,
     lastCheckAt: lastCheckAt ? lastCheckAt.toISOString() : null,
     departureDate: r.departureDate ?? null,
+    departureCategory: (r.departureCategory ??
+      null) as PlacementDepartureCategory | null,
     tenureMonths: tenureMonths(hiredAt, now),
     nextCheckDueAt: cadence.nextDueAt.toISOString(),
     checkInDue: r.currentStatus === "active" && cadence.isDue,
@@ -779,4 +792,178 @@ export async function updatePlacementInternalNote(
   revalidatePath("/employer/placements");
   revalidatePath(`/employer/placements/${placementId}`);
   return ok();
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// Tier 3 writes  departure capture
+// ─────────────────────────────────────────────────────────────────────
+
+const departureSchema = z.object({
+  placementId: z.string().min(1),
+  departureDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Use YYYY-MM-DD"),
+  category: z.enum([
+    "resigned",
+    "contract_ended",
+    "dismissed",
+    "retrenched",
+    "moved_internally",
+    "mutual_separation",
+    "other",
+  ]),
+  /** Optional 500-char context appended to the durable internal note.
+   *  Per D4 we never capture the *reason* as a structured field; this
+   *  is the employer's own free-text memory aid. */
+  note: z
+    .string()
+    .trim()
+    .max(500, "Departure note must be 500 characters or fewer.")
+    .optional(),
+});
+
+export type DepartureInput = z.infer<typeof departureSchema>;
+
+/**
+ * Phase 9.20 Tier 3 D4  flip a placement to `departed`. Idempotent
+ * for a placement that's already departed (returns the existing
+ * state); rejects any input where the date is in the future or
+ * before the hire date (the floor + ceiling sanity check).
+ *
+ * Appends the optional note to the durable internalNote with a
+ * `Departure (YYYY-MM-DD, <category>):` prefix so context never
+ * silently overwrites prior notes. Audit log carries category +
+ * date; internal_note text is PII-flagged.
+ */
+export async function markPlacementDeparted(
+  input: DepartureInput,
+): Promise<ActionResult> {
+  const parsed = departureSchema.safeParse(input);
+  if (!parsed.success) {
+    return fail(parsed.error.issues[0]?.message ?? "Invalid departure input.");
+  }
+  const { placementId, departureDate, category, note } = parsed.data;
+
+  const guard = await requireEditableForPlacement(placementId);
+  if (!guard.ok) return guard;
+
+  if (guard.placement.currentStatus === "departed") {
+    return fail(
+      "This placement is already marked as departed. Open the detail page to see when and why.",
+    );
+  }
+
+  // Sanity-check the date against the placement's hire date.
+  const db = getDb();
+  const hireRows = await db
+    .select({
+      hiredAt: schema.placements.hiredAt,
+      internalNote: schema.placements.internalNote,
+    })
+    .from(schema.placements)
+    .where(eq(schema.placements.id, placementId))
+    .limit(1);
+  const hireRow = hireRows[0];
+  if (!hireRow) return fail("Placement not found.");
+  const departureMs = new Date(departureDate).valueOf();
+  if (Number.isNaN(departureMs)) {
+    return fail("Departure date is not a valid date.");
+  }
+  if (departureMs < hireRow.hiredAt.valueOf()) {
+    return fail("Departure date cannot be before the hire date.");
+  }
+  if (departureMs > Date.now() + 24 * 60 * 60 * 1000) {
+    return fail("Departure date cannot be in the future.");
+  }
+
+  // Compose the durable note. Existing note (if any) is preserved; the
+  // new context is appended with a dated header so the trail is honest.
+  let nextInternalNote: string | null = hireRow.internalNote ?? null;
+  const trimmedNote = note?.trim() ?? "";
+  if (trimmedNote.length > 0) {
+    const header = `Departure (${departureDate}, ${category}):`;
+    const block = `${header} ${trimmedNote}`;
+    nextInternalNote = nextInternalNote
+      ? `${nextInternalNote}\n\n${block}`
+      : block;
+    // Cap the durable note at the same 1000-char ceiling
+    // updatePlacementInternalNote enforces. If we'd blow past it, fail
+    // explicitly rather than silently truncating.
+    if (nextInternalNote.length > 1000) {
+      return fail(
+        "Adding this departure note would push the internal note past the 1000-char cap. Trim the note (or edit the existing internal note) and try again.",
+      );
+    }
+  }
+
+  await db
+    .update(schema.placements)
+    .set({
+      currentStatus: "departed",
+      departureDate,
+      departureCategory: category,
+      internalNote: nextInternalNote,
+    })
+    .where(
+      and(
+        eq(schema.placements.id, placementId),
+        eq(schema.placements.organizationId, guard.orgId),
+      ),
+    );
+
+  await logAccess({
+    kind: "placement.departed",
+    actor: guard.userId,
+    subject: guard.placement.profileId,
+    meta: {
+      orgId: guard.orgId,
+      placementId,
+      departureDate,
+      category,
+      ...(trimmedNote.length > 0
+        ? { note: trimmedNote, notePii: true }
+        : {}),
+    },
+  });
+
+  revalidatePath("/employer/placements");
+  revalidatePath(`/employer/placements/${placementId}`);
+  return ok();
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// Tier 3 read  re-engage panel (D7)
+// ─────────────────────────────────────────────────────────────────────
+
+export interface OpenVacancyOption {
+  vacancyId: string;
+  title: string;
+}
+
+/**
+ * Phase 9.20 Tier 3 D7  list this org's currently-open vacancies for
+ * the post-departure re-engage panel. Returns title + id only; the
+ * subsequent invite goes through the existing `bulkInviteToVacancy`
+ * path (the panel calls it with `profileIds = [departed.profileId]`),
+ * so no new consent gate, no new audit kind, no new write here.
+ */
+export async function listOpenVacanciesForReengage(): Promise<
+  OpenVacancyOption[]
+> {
+  const session = await verifyEmployer();
+  if (!session.orgId) return [];
+  const db = getDb();
+  const rows = await db
+    .select({
+      vacancyId: schema.vacancies.id,
+      title: schema.vacancies.title,
+    })
+    .from(schema.vacancies)
+    .where(
+      and(
+        eq(schema.vacancies.organizationId, session.orgId),
+        eq(schema.vacancies.status, "open"),
+      ),
+    )
+    .orderBy(desc(schema.vacancies.createdAt))
+    .limit(20);
+  return rows.map((r) => ({ vacancyId: r.vacancyId, title: r.title }));
 }

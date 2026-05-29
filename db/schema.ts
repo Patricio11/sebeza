@@ -678,6 +678,26 @@ export const placementLifecycleStatus = pgEnum(
   ["active", "departed", "unknown"],
 );
 
+/**
+ * Phase 9.20 Tier 3 D4  SA labour-relations vocabulary for *why* a
+ * placement ended. Categorical fact only; the *reason* (performance,
+ * misconduct, etc.) is deliberately NOT captured. Recording the
+ * reason would make Sebenza a record-of-truth for LRA / CCMA
+ * disputes  D0 territory.
+ */
+export const placementDepartureCategory = pgEnum(
+  "placement_departure_category",
+  [
+    "resigned",
+    "contract_ended",
+    "dismissed",
+    "retrenched",
+    "moved_internally",
+    "mutual_separation",
+    "other",
+  ],
+);
+
 export const placements = pgTable(
   "placements",
   {
@@ -739,6 +759,10 @@ export const placements = pgTable(
     /** Phase 9.20 Tier 3  date the seeker left this placement. Set
      *  by markPlacementDeparted; NULL while currentStatus='active'. */
     departureDate: date("departure_date"),
+    /** Phase 9.20 Tier 3  categorical fact only. NULL while
+     *  currentStatus='active'. See `placementDepartureCategory` for
+     *  why the *reason* lives nowhere on this row. */
+    departureCategory: placementDepartureCategory("departure_category"),
     /** Phase 9.20  org-private free-text context. Capped at 1000
      *  chars in the action layer; never seeker-visible. PII-flagged
      *  in audit exports (Phase 9.17 pattern). */
@@ -1318,6 +1342,39 @@ export const outcomeSnapshots = pgTable("outcome_snapshots", {
   /** k value applied at capture  for honesty when the floor changes later. */
   minCohortSize: integer("min_cohort_size").notNull(),
 });
+
+/**
+ * Phase 9.20 Tier 3 D8  retention snapshot. Nightly aggregate of
+ * placements by (profession × province × milestone window),
+ * k-thresholded at the read site (existing Phase 9.7 LMI floor of
+ * k ≥ 10). Drives the /insights retention surface.
+ *
+ * The aggregate captures "how many made it to milestone N" against
+ * the cohort eligible at capture date  it's a historical retention
+ * figure, not a "still active today" snapshot. The cron writes one
+ * row per (profession, province, milestone, capture date) tuple; the
+ * UI reads the latest capture per cell.
+ */
+export const placementRetentionSnapshots = pgTable(
+  "placement_retention_snapshots",
+  {
+    id: text("id").primaryKey(),
+    capturedAt: timestamp("captured_at").notNull().defaultNow(),
+    professionSlug: text("profession_slug").notNull(),
+    provinceSlug: text("province_slug").notNull(),
+    milestoneMonths: integer("milestone_months").notNull(),
+    hiredInCohort: integer("hired_in_cohort").notNull(),
+    stillActiveAtMilestone: integer("still_active_at_milestone").notNull(),
+  },
+  (t) => ({
+    lookupIdx: index("placement_retention_snapshots_lookup_idx").on(
+      t.professionSlug,
+      t.provinceSlug,
+      t.milestoneMonths,
+      t.capturedAt,
+    ),
+  }),
+);
 
 /**
  * Phase 9  Sebenza Labour Market Index time-series.

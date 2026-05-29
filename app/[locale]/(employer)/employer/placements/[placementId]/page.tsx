@@ -23,17 +23,25 @@ import { verifyEmployer } from "@/lib/auth/dal";
 import {
   confirmPlacementStillEmployed,
   getEmployee,
+  listOpenVacanciesForReengage,
   listStatusChecksForPlacement,
   listPlacementAuditExcerpt,
+  markPlacementDeparted,
   updatePlacementInternalNote,
   type EmployeeDetail,
   type PlacementStatusCheckRow,
   type PlacementAuditRow,
 } from "@/lib/employer/placement-lifecycle";
+import {
+  PLACEMENT_DEPARTURE_CATEGORIES,
+  type PlacementDepartureCategory,
+} from "@/lib/employer/placement-lifecycle-types";
+import { bulkInviteToVacancy } from "@/lib/employer/invitations";
 import { getMyOrgRole } from "@/lib/employer/vacancies";
 import { canEditVacancies } from "@/lib/employer/vacancies-types";
 import { ConfirmStatusIsland } from "@/components/feature/employer/placements/ConfirmStatusIsland";
 import { InternalNoteEditorIsland } from "@/components/feature/employer/placements/InternalNoteEditorIsland";
+import { DepartureIsland } from "@/components/feature/employer/placements/DepartureIsland";
 import {
   ChevronLeft,
   Calendar,
@@ -60,10 +68,11 @@ export default async function EmployeeDetailPage({
   const employee = await getEmployee(placementId);
   if (!employee) notFound();
 
-  const [checks, auditExcerpt, role] = await Promise.all([
+  const [checks, auditExcerpt, role, openVacancies] = await Promise.all([
     listStatusChecksForPlacement(employee.placementId),
     listPlacementAuditExcerpt(employee.placementId, employee.profileId),
     getMyOrgRole(),
+    listOpenVacanciesForReengage(),
   ]);
   const canEdit = canEditVacancies(role);
 
@@ -103,7 +112,11 @@ export default async function EmployeeDetailPage({
 
       <PersonHeader employee={employee} />
 
-      <TenureTimeline employee={employee} canEdit={canEdit} />
+      <TenureTimeline
+        employee={employee}
+        canEdit={canEdit}
+        openVacancies={openVacancies}
+      />
 
       <InternalNoteEditorIsland
         placementId={employee.placementId}
@@ -128,8 +141,13 @@ export default async function EmployeeDetailPage({
       <ActivityPanel rows={auditExcerpt} />
 
       <p className="mt-8 text-xs italic text-[color:var(--color-ink-soft)]">
-        Mark-as-departed lands in Tier 3 of this phase  the re-engage
-        hook will reuse your existing open-vacancies pipeline.
+        Lifecycle data stays inside your organisation. Aggregate
+        retention figures land on{" "}
+        <Link href="/insights" className="underline">
+          /insights
+        </Link>{" "}
+        thresholded at k ≥ 10, the same disclosure floor every other
+        national surface respects.
       </p>
     </DashboardShell>
   );
@@ -206,9 +224,11 @@ function PersonHeader({ employee }: { employee: EmployeeDetail }) {
 function TenureTimeline({
   employee,
   canEdit,
+  openVacancies,
 }: {
   employee: EmployeeDetail;
   canEdit: boolean;
+  openVacancies: { vacancyId: string; title: string }[];
 }) {
   const hiredAt = new Date(employee.hiredAt);
   const nextCheck = new Date(employee.nextCheckDueAt);
@@ -222,18 +242,44 @@ function TenureTimeline({
           Lifecycle
         </span>
         {canEdit && employee.currentStatus !== "departed" && (
-          <ConfirmStatusIsland
-            placementId={employee.placementId}
-            employeeName={employee.displayName}
-            variant="button"
-            action={async (input) => {
-              "use server";
-              const res = await confirmPlacementStillEmployed(input);
-              return res.ok
-                ? { ok: true }
-                : { ok: false, message: res.message };
-            }}
-          />
+          <div className="flex flex-wrap gap-2">
+            <ConfirmStatusIsland
+              placementId={employee.placementId}
+              employeeName={employee.displayName}
+              variant="button"
+              action={async (input) => {
+                "use server";
+                const res = await confirmPlacementStillEmployed(input);
+                return res.ok
+                  ? { ok: true }
+                  : { ok: false, message: res.message };
+              }}
+            />
+            <DepartureIsland
+              placementId={employee.placementId}
+              profileId={employee.profileId}
+              employeeName={employee.displayName}
+              hireDateIso={employee.hiredAt}
+              openVacancies={openVacancies}
+              departureAction={async (input) => {
+                "use server";
+                const res = await markPlacementDeparted(input);
+                return res.ok
+                  ? { ok: true }
+                  : { ok: false, message: res.message };
+              }}
+              reengageAction={async (input) => {
+                "use server";
+                const res = await bulkInviteToVacancy({
+                  vacancyId: input.vacancyId,
+                  profileIds: [input.profileId],
+                });
+                return res.ok
+                  ? { ok: true }
+                  : { ok: false, message: res.message };
+              }}
+            />
+          </div>
         )}
       </div>
       <ol className="space-y-2 text-sm">
@@ -315,6 +361,9 @@ function TenureTimeline({
             <span className="text-[color:var(--color-ink-soft)]">
               <strong>Departed</strong> on{" "}
               <span className="tabular">{employee.departureDate}</span>
+              {employee.departureCategory
+                ? `  ${departureCategoryLabel(employee.departureCategory)}`
+                : ""}
             </span>
           </li>
         )}
@@ -470,4 +519,10 @@ function formatTenure(months: number): string {
   const rem = months % 12;
   if (rem === 0) return `${years} ${years === 1 ? "year" : "years"}`;
   return `${years}y ${rem}m`;
+}
+
+function departureCategoryLabel(c: PlacementDepartureCategory): string {
+  return (
+    PLACEMENT_DEPARTURE_CATEGORIES.find((opt) => opt.value === c)?.label ?? c
+  );
 }
