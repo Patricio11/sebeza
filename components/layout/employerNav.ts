@@ -26,7 +26,11 @@ export const EMPLOYER_NAV: DashboardNavItem[] = [
   // Vacancies invites EXISTING seekers, Invites onboards NEW ones.
   { key: "invites", label: "Invites", href: "/employer/invites", icon: UserPlus },
   { key: "shortlists", label: "Talent pools", href: "/employer/shortlists", icon: Users2 },
-  { key: "placements", label: "Placements", href: "/employer/placements", icon: CheckCircle2 },
+  // Phase 9.20 D11  the URL stays /employer/placements so every
+  // historic deep link (audit log meta, notification emails, ISR
+  // cache keys) keeps resolving. The label is the recruiter's
+  // mental model: "Employees", not the platform's internal noun.
+  { key: "placements", label: "Employees", href: "/employer/placements", icon: CheckCircle2 },
   { key: "organisation", label: "Organisation", href: "/employer/organisation", icon: Building2 },
   { key: "team", label: "Team", href: "/employer/team", icon: UsersRound },
   { key: "notifications", label: "Notifications", href: "/employer/notifications", icon: Bell },

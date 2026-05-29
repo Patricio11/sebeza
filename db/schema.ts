@@ -667,50 +667,133 @@ export const organizationMembers = pgTable("organization_members", {
   suspendedAt: timestamp("suspended_at"),
 });
 
-export const placements = pgTable("placements", {
-  id: text("id").primaryKey(),
-  profileId: text("profile_id")
-    .notNull()
-    .references(() => profiles.id),
-  organizationId: text("organization_id")
-    .notNull()
-    .references(() => organizations.id),
-  /** Who clicked "Mark as hired". Null for legacy seeded rows; required
-      going forward for accountability. */
-  actorUserId: text("actor_user_id").references(() => appUser.id),
-  role: text("role").notNull(),
-  city: text("city").notNull(),
-  hiredAt: timestamp("hired_at").notNull().defaultNow(),
-  /** Optional salary band (kept private  never in public reads). */
-  salaryBand: text("salary_band"),
-  /**
-   * Phase 7.5  Placement-Truth refinement. `employer_confirmed` (the
-   * Phase 5 default, gated by the 30-day reveal window) is the only
-   * source that counts in national/government analytics. `seeker_reported`
-   * is a softer self-declared signal, shown on the seeker's own profile
-   * flagged as such, and excluded from official aggregates.
-   */
-  source: placementSource("source").notNull().default("employer_confirmed"),
-  /**
-   * Phase 9.8  optional vacancy linkage. A placement may be logged
-   * directly (Phase 5 flow, vacancy_id NULL) or tied to a specific
-   * vacancy whose pipeline produced the hire. ON DELETE SET NULL so
-   * deleting a vacancy never breaks Placement-Truth history.
-   *
-   * Cardinality: 1 vacancy : 0..N placements (an employer might hire
-   * multiple chefs from one posting); 1 placement : 0..1 vacancy
-   * (the pre-9.8 placement flow continues unchanged). No UNIQUE
-   * constraint  asserted by FK shape.
-   *
-   * NB: the migration `0015_phase9_8_vacancies.sql` already created
-   * the actual FK in Postgres; this `.references(...)` keeps the
-   * Drizzle schema honest with the DB so future migration diffs
-   * don't try to re-add the constraint.
-   */
-  vacancyId: text("vacancy_id").references((): AnyPgColumn => vacancies.id, {
-    onDelete: "set null",
+/**
+ * Phase 9.20  placement lifecycle state. `active` is the default for
+ * any new hire; `departed` is set by the Tier 3 markPlacementDeparted
+ * action; `unknown` is reserved for legacy / imported rows where the
+ * employer never told us either way (and we don't want to assume).
+ */
+export const placementLifecycleStatus = pgEnum(
+  "placement_lifecycle_status",
+  ["active", "departed", "unknown"],
+);
+
+export const placements = pgTable(
+  "placements",
+  {
+    id: text("id").primaryKey(),
+    profileId: text("profile_id")
+      .notNull()
+      .references(() => profiles.id),
+    organizationId: text("organization_id")
+      .notNull()
+      .references(() => organizations.id),
+    /** Who clicked "Mark as hired". Null for legacy seeded rows; required
+        going forward for accountability. */
+    actorUserId: text("actor_user_id").references(() => appUser.id),
+    role: text("role").notNull(),
+    city: text("city").notNull(),
+    hiredAt: timestamp("hired_at").notNull().defaultNow(),
+    /** Optional salary band (kept private  never in public reads). */
+    salaryBand: text("salary_band"),
+    /**
+     * Phase 7.5  Placement-Truth refinement. `employer_confirmed` (the
+     * Phase 5 default, gated by the 30-day reveal window) is the only
+     * source that counts in national/government analytics. `seeker_reported`
+     * is a softer self-declared signal, shown on the seeker's own profile
+     * flagged as such, and excluded from official aggregates.
+     */
+    source: placementSource("source").notNull().default("employer_confirmed"),
+    /**
+     * Phase 9.8  optional vacancy linkage. A placement may be logged
+     * directly (Phase 5 flow, vacancy_id NULL) or tied to a specific
+     * vacancy whose pipeline produced the hire. ON DELETE SET NULL so
+     * deleting a vacancy never breaks Placement-Truth history.
+     *
+     * Cardinality: 1 vacancy : 0..N placements (an employer might hire
+     * multiple chefs from one posting); 1 placement : 0..1 vacancy
+     * (the pre-9.8 placement flow continues unchanged). No UNIQUE
+     * constraint  asserted by FK shape.
+     *
+     * NB: the migration `0015_phase9_8_vacancies.sql` already created
+     * the actual FK in Postgres; this `.references(...)` keeps the
+     * Drizzle schema honest with the DB so future migration diffs
+     * don't try to re-add the constraint.
+     */
+    vacancyId: text("vacancy_id").references((): AnyPgColumn => vacancies.id, {
+      onDelete: "set null",
+    }),
+    /**
+     * Phase 9.20  lifecycle denormalisation (D5). The latest check-in
+     * outcome lives on this row so the "Active employees" list reads
+     * are a single-table scan; the per-event ledger
+     * (`placement_status_checks`) carries the full history.
+     */
+    currentStatus: placementLifecycleStatus("current_status")
+      .notNull()
+      .default("active"),
+    lastCheckAt: timestamp("last_check_at"),
+    lastCheckByUserId: text("last_check_by_user_id").references(
+      () => appUser.id,
+    ),
+    /** Phase 9.20 Tier 3  date the seeker left this placement. Set
+     *  by markPlacementDeparted; NULL while currentStatus='active'. */
+    departureDate: date("departure_date"),
+    /** Phase 9.20  org-private free-text context. Capped at 1000
+     *  chars in the action layer; never seeker-visible. PII-flagged
+     *  in audit exports (Phase 9.17 pattern). */
+    internalNote: text("internal_note"),
+  },
+  (t) => ({
+    // Phase 9.20  hot path for the Active-employees list + the
+    // check-in-due cron. Drizzle's basic index() doesn't carry the
+    // WHERE current_status='active' clause; the migration's CREATE
+    // INDEX … WHERE is what actually lands. This plain index keeps
+    // the introspection round-trip quiet.
+    activeCheckDueIdx: index("placements_active_check_due_idx").on(
+      t.organizationId,
+      t.lastCheckAt,
+      t.hiredAt,
+    ),
   }),
-});
+);
+
+/**
+ * Phase 9.20  per-event check-in ledger. One row per "Is X still
+ * employed?" confirmation. Denormalised onto `placements` for the
+ * list-view read path; this table carries the durable trail.
+ *
+ * The Tier 2 action `confirmPlacementStillEmployed` writes here +
+ * updates the parent's `last_check_at` / `last_check_by_user_id`
+ * in the same transaction. The detail page lists rows in
+ * `checked_at DESC` order.
+ */
+export const placementStatusChecks = pgTable(
+  "placement_status_checks",
+  {
+    id: text("id").primaryKey(),
+    placementId: text("placement_id")
+      .notNull()
+      .references(() => placements.id, { onDelete: "cascade" }),
+    checkedByUserId: text("checked_by_user_id")
+      .notNull()
+      .references(() => appUser.id),
+    checkedAt: timestamp("checked_at").notNull().defaultNow(),
+    /** The single-question outcome. A `false` answer is the path into
+     *  Tier 3's departure capture flow. */
+    stillEmployed: boolean("still_employed").notNull(),
+    /** Optional 500-char check-time note (validated by the action).
+     *  Free-form context for THIS check; durable org-private notes
+     *  live on `placements.internalNote`. PII-flagged in audit. */
+    note: text("note"),
+  },
+  (t) => ({
+    placementAtIdx: index("placement_status_checks_placement_at_idx").on(
+      t.placementId,
+      t.checkedAt,
+    ),
+  }),
+);
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Phase 9.8  Vacancies & demand-driven matching
