@@ -50,6 +50,7 @@ import {
   Landmark,
   Target,
 } from "lucide-react";
+import { HelpLink } from "@/components/feature/help/HelpLink";
 
 export default async function CareerCompassPage({
   params,
@@ -156,6 +157,13 @@ export default async function CareerCompassPage({
       pageTitle={t("title")}
       pageSubtitle={t("subtitle")}
     >
+      {/* Phase 10.2  help deep-links (D6). */}
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        <HelpLink role="seeker" slug="career-compass-recommendations" label="How recommendations work" />
+        <HelpLink role="seeker" slug="learning-paths-and-proficiency" label="Learning paths" />
+        <HelpLink role="seeker" slug="adjacent-roles-and-skill-gaps" label="Adjacent roles" />
+      </div>
+
       {/* ───────────── Vacancy-outcome deep-link banner (Phase 9.11) ─────────────
           Lands here when a seeker opens the in-app / email notification
           about a vacancy that was filled with another candidate. The

@@ -1,29 +1,38 @@
 /**
- * Phase 10.1  Employer help center index.
+ * Phase 10.2 — seeker help center index.
  *
- * Auth-gated like every other /employer/* surface. Hero search bar
- * (client island) on top, then 7 category sections rendered in the
- * order declared in `EMPLOYER_HELP_CATEGORIES`. URL state (`?q=`) is
+ * Mirrors the employer help index (`/employer/help`) but for the
+ * (seeker) route group. Auth-gated by `verifyRole("seeker")`. Hero
+ * search bar (client island) on top, then 7 category sections in the
+ * order declared in `SEEKER_HELP_CATEGORIES`. URL state (`?q=`) is
  * read server-side so deep-links / refresh / share-link preserve the
  * search.
+ *
+ * Lessons from Phase 10.1 baked in (see PHASE_10_1_COMPLETE doc):
+ *   - HelpSearchIsland is role-agnostic; we pass basePath + labels.
+ *   - The article page wraps content in `max-w-3xl` at the page level
+ *     (no double-constraint inside HelpProse).
+ *   - No `updatedAt` is rendered in the article view.
  */
 
 import { setRequestLocale } from "next-intl/server";
+import { redirect } from "next/navigation";
 import { Link } from "@/i18n/navigation";
 import { DashboardShell } from "@/components/layout/DashboardShell";
-import { EMPLOYER_NAV, MOCK_EMPLOYER } from "@/components/layout/employerNav";
-import { verifyEmployer } from "@/lib/auth/dal";
+import { SEEKER_NAV } from "@/components/layout/seekerNav";
+import { verifyRole } from "@/lib/auth/dal";
+import { getMyProfile } from "@/lib/profile/me";
 import {
-  EMPLOYER_HELP_ARTICLES,
+  SEEKER_HELP_ARTICLES,
   articlesByCategory,
-} from "@/content/help/employer/_index";
-import { EMPLOYER_HELP_CATEGORIES } from "@/content/help/types";
+} from "@/content/help/seeker/_index";
+import { SEEKER_HELP_CATEGORIES } from "@/content/help/types";
 import { HelpSearchIsland } from "@/components/feature/help/HelpSearchIsland";
 import { ChevronRight, ArrowUpRight } from "lucide-react";
 
 export const revalidate = 0;
 
-export default async function EmployerHelpIndexPage({
+export default async function SeekerHelpIndexPage({
   params,
   searchParams,
 }: {
@@ -32,36 +41,38 @@ export default async function EmployerHelpIndexPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const session = await verifyEmployer();
+  await verifyRole("seeker");
+  const me = await getMyProfile();
+  if (!me) redirect("/sign-in?next=/dashboard/help");
   const { q } = await searchParams;
   const initialQuery = q?.trim() ?? "";
 
   return (
     <DashboardShell
-      role="employer"
-      workspaceLabel={session.orgName ?? "Your organisation"}
-      workspaceEyebrow="Employer · workspace"
-      nav={EMPLOYER_NAV}
+      role="seeker"
+      workspaceLabel={me.displayName ?? "Your profile"}
+      workspaceEyebrow="Seeker · workspace"
+      nav={SEEKER_NAV}
       activeKey="help"
       pageEyebrow="Documentation"
       pageTitle="Help center"
-      pageSubtitle="Everything you can do as an employer on Sebenza  laid out by category, searchable, with deep-links back to the dashboard surfaces they cover. English only at v1; translations follow."
+      pageSubtitle="Everything you can do as a job seeker on Sebenza  laid out by category, searchable, with deep-links back to the dashboard surfaces they cover. English only at v1; translations follow."
     >
       <HelpSearchIsland
-        articles={EMPLOYER_HELP_ARTICLES.map((a) => a.meta)}
+        articles={SEEKER_HELP_ARTICLES.map((a) => a.meta)}
         initialQuery={initialQuery}
-        basePath="/employer/help"
+        basePath="/dashboard/help"
         categoryLabels={Object.fromEntries(
-          EMPLOYER_HELP_CATEGORIES.map((c) => [c.value, c.label]),
+          SEEKER_HELP_CATEGORIES.map((c) => [c.value, c.label]),
         )}
-        placeholder="Search the employer help center"
+        placeholder="Search the seeker help center"
       />
 
       {/* Categories appear only when no search is active  the search
           island handles the "results" state above. */}
       {initialQuery.length === 0 && (
         <div className="space-y-12">
-          {EMPLOYER_HELP_CATEGORIES.map((cat) => {
+          {SEEKER_HELP_CATEGORIES.map((cat) => {
             const arts = articlesByCategory(cat.value);
             if (arts.length === 0) return null;
             return (
@@ -78,7 +89,7 @@ export default async function EmployerHelpIndexPage({
                   {arts.map((art) => (
                     <li key={art.meta.slug}>
                       <Link
-                        href={`/employer/help/${art.meta.slug}` as never}
+                        href={`/dashboard/help/${art.meta.slug}` as never}
                         className="group flex h-full items-start justify-between gap-3 rounded-[var(--radius-md)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-4 no-underline transition-colors hover:border-[color:var(--color-ink)]"
                       >
                         <div className="flex-1">
@@ -113,9 +124,9 @@ export default async function EmployerHelpIndexPage({
       )}
 
       <p className="mt-12 text-xs italic text-[color:var(--color-ink-soft)]">
-        Seeker, admin + government help centres land in Phase 10.2 / 10.3 / 10.4.
+        Admin + government help centres land in Phase 10.3 / 10.4.
         Translations to isiZulu, isiXhosa + Afrikaans follow once the
-        employer surface is proven  POPIA / consent copy is
+        seeker surface is proven  POPIA / consent copy is
         human-translated only.
       </p>
     </DashboardShell>
@@ -123,24 +134,21 @@ export default async function EmployerHelpIndexPage({
 }
 
 /**
- * Phase 10.1  short label for the &ldquo;Try it&rdquo; chip on each
- * article card. We don&rsquo;t want raw URLs in the UI; this maps the
- * most-common surfaces to human labels. Unknown paths fall back to
- * the path itself (shouldn&rsquo;t happen in normal authoring).
+ * Phase 10.2 — short label for the "Try it" chip on each article
+ * card. Maps the most-common seeker surfaces to human labels. Unknown
+ * paths fall back to the path itself (shouldn't happen in normal
+ * authoring).
  */
 function dashboardLabelFor(surface: string): string {
-  if (surface === "/employer") return "Overview";
-  if (surface === "/employer/vacancies") return "Vacancies";
-  if (surface === "/employer/vacancies/new") return "New vacancy form";
-  if (surface === "/employer/placements") return "Employees";
-  if (surface === "/employer/invites") return "Invites";
-  if (surface === "/employer/saved-searches") return "Saved searches";
-  if (surface === "/employer/shortlists") return "Talent pools";
-  if (surface === "/employer/organisation") return "Organisation";
-  if (surface === "/employer/onboarding") return "Onboarding";
-  if (surface === "/employer/team") return "Team";
-  if (surface === "/employer/notifications") return "Notifications";
-  if (surface === "/employer/account") return "Account";
-  if (surface === "/search") return "Talent search";
+  if (surface === "/dashboard") return "Overview";
+  if (surface === "/dashboard/profile") return "Profile editor";
+  if (surface === "/dashboard/experience") return "Experience";
+  if (surface === "/dashboard/qualifications") return "Qualifications";
+  if (surface === "/dashboard/invitations") return "Vacancy invites";
+  if (surface === "/dashboard/grow") return "Career compass";
+  if (surface === "/dashboard/activity") return "Activity";
+  if (surface === "/dashboard/notifications") return "Notifications";
+  if (surface === "/dashboard/privacy") return "Privacy & consent";
+  if (surface === "/dashboard/account") return "Account";
   return surface;
 }

@@ -32,6 +32,7 @@ import {
   TextField,
   SelectField,
 } from "@/components/ui/FormField";
+import { HelpLink } from "@/components/feature/help/HelpLink";
 
 export default async function ProfileEditorPage({
   params,
@@ -95,6 +96,13 @@ export default async function ProfileEditorPage({
         </div>
       }
     >
+      {/* Phase 10.2  help deep-links (D6). */}
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        <HelpLink role="seeker" slug="setting-up-your-profile-photo" label="Profile photo guide" />
+        <HelpLink role="seeker" slug="adding-skills-from-the-taxonomy" label="Adding skills" />
+        <HelpLink role="seeker" slug="employment-history-entry" label="Work history" />
+      </div>
+
       <div className="grid gap-10 md:grid-cols-[240px_1fr] md:gap-16">
         {/* Sticky section nav */}
         <aside className="hidden md:block md:sticky md:top-6 md:self-start">

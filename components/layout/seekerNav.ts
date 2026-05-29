@@ -9,6 +9,7 @@ import {
   Inbox,
   ShieldCheck,
   Settings,
+  HelpCircle,
 } from "lucide-react";
 import type { DashboardNavItem } from "./DashboardShell";
 
@@ -25,6 +26,11 @@ export const SEEKER_NAV: DashboardNavItem[] = [
   { key: "grow", label: "Career compass", href: "/dashboard/grow", icon: Compass },
   { key: "activity", label: "Activity", href: "/dashboard/activity", icon: Activity },
   { key: "notifications", label: "Notifications", href: "/dashboard/notifications", icon: Bell },
+  // Phase 10.2  seeker help center. Sits between Notifications and
+  // Privacy so it's reachable in one scroll on a 360px viewport;
+  // mirrors the placement on the employer side (between Notifications
+  // and Account).
+  { key: "help", label: "Help", href: "/dashboard/help", icon: HelpCircle },
   { key: "privacy", label: "Privacy & consent", href: "/dashboard/privacy", icon: ShieldCheck },
   { key: "account", label: "Account", href: "/dashboard/account", icon: Settings },
 ];

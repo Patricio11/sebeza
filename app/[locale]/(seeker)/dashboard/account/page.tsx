@@ -14,6 +14,7 @@ import { NotificationPrefsPanel } from "@/components/feature/notifications/Notif
 import { getMyNotificationPrefs } from "@/lib/notifications/query";
 import type { NotificationKind } from "@/lib/notifications/catalog";
 import { getSetting } from "@/lib/admin/settings";
+import { HelpLink } from "@/components/feature/help/HelpLink";
 
 export default async function AccountPage({
   params,
@@ -53,6 +54,13 @@ export default async function AccountPage({
       pageSubtitle={t("subtitle")}
       pageActions={<SignOutButton label={t("signOut")} />}
     >
+      {/* Phase 10.2  help deep-links (D6). */}
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        <HelpLink role="seeker" slug="two-factor-authentication-setup" label="Enable 2FA" />
+        <HelpLink role="seeker" slug="resetting-your-password" label="Reset your password" />
+        <HelpLink role="seeker" slug="managing-notification-preferences" label="Notifications guide" />
+      </div>
+
       <div className="grid gap-10 md:grid-cols-2">
         <section aria-labelledby="email-h">
           <h2

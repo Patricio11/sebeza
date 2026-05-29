@@ -21,6 +21,7 @@ import { verifyRole } from "@/lib/auth/dal";
 import { listMyInvitations } from "@/lib/seeker/invitations";
 import { PROVINCES, PROFESSIONS } from "@/lib/mock/taxonomy";
 import { ChevronRight, Inbox, MapPin } from "lucide-react";
+import { HelpLink } from "@/components/feature/help/HelpLink";
 
 export const revalidate = 0;
 
@@ -61,6 +62,13 @@ export default async function SeekerInvitationsPage({
       pageTitle="Vacancy invites"
       pageSubtitle="Verified employers can flag you for a specific role. Accept, decline (with or without a reason), or accept with notice. Declining is free and never affects your visibility in search."
     >
+      {/* Phase 10.2  help deep-links (D6). */}
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        <HelpLink role="seeker" slug="vacancy-invitations-explained" label="How invitations work" />
+        <HelpLink role="seeker" slug="how-to-accept-decline-or-reconsider" label="Accept, decline, reconsider" />
+        <HelpLink role="seeker" slug="decline-reasons-and-what-they-mean" label="Decline reasons explained" />
+      </div>
+
       {all.length === 0 ? (
         <EmptyState />
       ) : (

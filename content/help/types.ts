@@ -30,6 +30,33 @@ export type EmployerHelpCategory =
   | "organisation"
   | "privacy";
 
+/**
+ * Phase 10.2 — seeker categories. Parallel to the employer set but
+ * the user journey is different: seekers don't post vacancies and
+ * don't manage a team, but they DO need to understand profile
+ * visibility, invitations from the receiving end, career growth,
+ * and the consent toggles that gate every employer interaction with
+ * their record.
+ */
+export type SeekerHelpCategory =
+  | "getting_started"
+  | "profile"
+  | "invitations"
+  | "growth"
+  | "privacy"
+  | "activity"
+  | "account";
+
+/**
+ * Discriminated union of every role's category. `meta.category` is
+ * just a string at the wire level — the category label lookup happens
+ * against whichever role's CATEGORIES constant is in scope on the
+ * page rendering the article. Keeping the union loose here means the
+ * seeker / admin / gov help centres in Phase 10.2 / 10.3 / 10.4 don't
+ * have to fork the `HelpArticleMeta` shape.
+ */
+export type HelpCategory = EmployerHelpCategory | SeekerHelpCategory;
+
 export interface HelpArticleMeta {
   /** URL slug. Stable + permanent  becomes /employer/help/<slug>.
    *  Kebab-case, no leading slash. */
@@ -40,7 +67,7 @@ export interface HelpArticleMeta {
    *  search-rankable shortDescription. Cap at ~140 chars. */
   shortDescription: string;
   /** Category bucket  drives the index-page section grouping. */
-  category: EmployerHelpCategory;
+  category: HelpCategory;
   /**
    * Extra search keywords beyond what's already in the title +
    * shortDescription. Lowercase, no punctuation. Used by the search
@@ -132,5 +159,60 @@ export const EMPLOYER_HELP_CATEGORIES: ReadonlyArray<{
     label: "Privacy & POPIA",
     description:
       "What data Sebenza holds about your organisation + how to read your own audit log.",
+  },
+];
+
+/**
+ * Phase 10.2 — seeker category labels + display order. Top-down by
+ * user journey: get oriented → tune your profile → respond to
+ * vacancies → grow your skills → read your audit trail → manage your
+ * account + privacy controls.
+ */
+export const SEEKER_HELP_CATEGORIES: ReadonlyArray<{
+  value: SeekerHelpCategory;
+  label: string;
+  description: string;
+}> = [
+  {
+    value: "getting_started",
+    label: "Getting started",
+    description:
+      "Orient yourself in your first hour: what Sebenza is, how the platform finds work for you, and what to fill in first.",
+  },
+  {
+    value: "profile",
+    label: "Profile & visibility",
+    description:
+      "What employers see, what stays private, and how to make your profile work harder for you. Verifications + completeness explained.",
+  },
+  {
+    value: "invitations",
+    label: "Vacancy invitations",
+    description:
+      "How invitations arrive, how to accept / decline / reconsider, and what each response signals to the employer.",
+  },
+  {
+    value: "growth",
+    label: "Skills & learning",
+    description:
+      "Your career compass: skill recommendations ranked by local demand, learning paths, and how to move into adjacent roles.",
+  },
+  {
+    value: "privacy",
+    label: "Consent & privacy",
+    description:
+      "POPIA consents, what each toggle controls, how to export your data, and how to delete your account.",
+  },
+  {
+    value: "activity",
+    label: "Activity & audit",
+    description:
+      "Who viewed your profile, who requested contact, what was downloaded — every PII-touching action recorded.",
+  },
+  {
+    value: "account",
+    label: "Account & security",
+    description:
+      "Email, password, two-factor authentication, notification preferences, sessions.",
   },
 ];

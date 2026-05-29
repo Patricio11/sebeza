@@ -7,6 +7,7 @@ import { getMyProfile } from "@/lib/profile/me";
 import { getSeekerActivity } from "@/lib/profile/activity";
 import { formatRelativeTime } from "@/lib/utils";
 import { Eye, MessageCircle, FileText, Download } from "lucide-react";
+import { HelpLink } from "@/components/feature/help/HelpLink";
 
 const ICONS = {
   "profile.view": Eye,
@@ -40,6 +41,12 @@ export default async function ActivityPage({
       pageTitle={t("title")}
       pageSubtitle={t("subtitle")}
     >
+      {/* Phase 10.2  help deep-links (D6). */}
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        <HelpLink role="seeker" slug="understanding-your-activity-ledger" label="Reading your ledger" />
+        <HelpLink role="seeker" slug="who-viewed-your-profile" label="Profile viewers" />
+      </div>
+
       <div className="grid gap-4 md:grid-cols-4">
         <KPI label={t("viewers")} value={kpis.viewers} delta={formatDelta(kpis.viewersDelta)} />
         <KPI label={t("contacts")} value={kpis.contacts} delta={formatDelta(kpis.contactsDelta)} />

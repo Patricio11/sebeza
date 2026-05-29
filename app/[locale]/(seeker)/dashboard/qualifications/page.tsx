@@ -13,6 +13,7 @@ import {
 } from "@/components/feature/profile/QualificationsManager";
 import type { VerificationStatus } from "@/lib/mock/types";
 import { getSetting } from "@/lib/admin/settings";
+import { HelpLink } from "@/components/feature/help/HelpLink";
 
 export default async function QualificationsPage({
   params,
@@ -57,6 +58,11 @@ export default async function QualificationsPage({
       pageTitle={t("title")}
       pageSubtitle={t("subtitle")}
     >
+      {/* Phase 10.2  help deep-links (D6). */}
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        <HelpLink role="seeker" slug="uploading-certificates-and-verification" label="How verification works" />
+      </div>
+
       <div className="grid gap-6 md:grid-cols-3">
         {/* Verification info  left rail */}
         <section className="rounded-[var(--radius-md)] border-2 border-dashed border-[color:var(--color-ink)] bg-[color:var(--color-surface-sunk)] p-6 md:col-span-1">

@@ -27,6 +27,7 @@ import { StatusNudgeBanner } from "@/components/feature/profile/StatusNudgeBanne
 import { listMyInvitations } from "@/lib/seeker/invitations";
 import { getSetting } from "@/lib/admin/settings";
 import { Inbox } from "lucide-react";
+import { HelpLink } from "@/components/feature/help/HelpLink";
 
 export default async function SeekerOverviewPage({
   params,
@@ -138,6 +139,13 @@ export default async function SeekerOverviewPage({
       }
     >
       <StatusNudgeBanner band={freshness.band} days={freshness.days} />
+
+      {/* Phase 10.2  help deep-links (D6 mirror from employer). */}
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        <HelpLink role="seeker" slug="how-search-ranking-works" label="How ranking works" />
+        <HelpLink role="seeker" slug="understanding-profile-completeness" label="Profile completeness" />
+        <HelpLink role="seeker" slug="career-compass-recommendations" label="Career compass" />
+      </div>
 
       {/* Phase 9.9 sweep  vacancy-invite callout. Only renders when
           there's at least one pending invite. Mobile-first: stacks
