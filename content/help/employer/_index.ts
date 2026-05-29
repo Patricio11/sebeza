@@ -58,6 +58,23 @@ import * as twoFactor from "./organisation/two-factor";
 import * as whatWeHold from "./privacy/what-we-hold";
 import * as auditLog from "./privacy/audit-log";
 
+/**
+ * `import * as` yields a Module Namespace Object where each named
+ * export is a property + the default export lives at `.default`. The
+ * article files use the natural authoring pattern (named `meta` +
+ * default React component); the aggregator maps each module to the
+ * `{ meta, Article }` shape the renderer expects, so `article.Article`
+ * is the React component, not `undefined`.
+ */
+type ArticleModule = {
+  meta: HelpArticle["meta"];
+  default: HelpArticle["Article"];
+};
+
+function toArticle(mod: ArticleModule): HelpArticle {
+  return { meta: mod.meta, Article: mod.default };
+}
+
 export const EMPLOYER_HELP_ARTICLES: HelpArticle[] = [
   whatSebenzaIs,
   settingUpOrganisation,
@@ -89,7 +106,7 @@ export const EMPLOYER_HELP_ARTICLES: HelpArticle[] = [
   twoFactor,
   whatWeHold,
   auditLog,
-] as unknown as HelpArticle[];
+].map((mod) => toArticle(mod as ArticleModule));
 
 export function findArticleBySlug(slug: string): HelpArticle | null {
   return (
