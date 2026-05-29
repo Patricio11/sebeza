@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/Button";
 import { recentAuditEventsFromDb, type AuditKind } from "@/lib/audit";
 import { verifyAdmin } from "@/lib/auth/dal";
 import { Download } from "lucide-react";
+import { HelpLink } from "@/components/feature/help/HelpLink";
 import { CustomSelect } from "@/components/ui/CustomSelect";
 import Link from "next/link";
 
@@ -94,6 +95,13 @@ export default async function AuditLogPage({
         </Link>
       }
     >
+      {/* Phase 10.3  help deep-links (D6). */}
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        <HelpLink role="admin" slug="understanding-the-audit-log-structure" label="Schema + filters" />
+        <HelpLink role="admin" slug="incident-response-via-audit-log" label="Incident response" />
+        <HelpLink role="admin" slug="flagging-suspicious-activity" label="Suspicious patterns" />
+      </div>
+
       {/* Filters  plain GET form so URL state survives reloads / sharing */}
       <form
         method="get"

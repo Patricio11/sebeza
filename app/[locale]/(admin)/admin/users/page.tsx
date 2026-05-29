@@ -7,6 +7,7 @@ import { listUsersQuery, type AdminUserRow } from "@/lib/admin/users";
 import { CustomSelect } from "@/components/ui/CustomSelect";
 import { UserRowActions } from "@/components/feature/admin/UserRowActions";
 import type { UserRole } from "@/lib/mock/types";
+import { HelpLink } from "@/components/feature/help/HelpLink";
 
 export default async function UsersPage({
   params,
@@ -44,6 +45,13 @@ export default async function UsersPage({
       pageTitle={t("title")}
       pageSubtitle={t("subtitle")}
     >
+      {/* Phase 10.3  help deep-links (D6). */}
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        <HelpLink role="admin" slug="when-to-suspend-an-account" label="When to suspend" />
+        <HelpLink role="admin" slug="suspension-appeals-and-restoration" label="Appeals + restoration" />
+        <HelpLink role="admin" slug="handling-data-subject-requests" label="POPIA DSRs" />
+      </div>
+
       <form
         method="get"
         className="mb-6 grid gap-3 md:grid-cols-[2fr_1fr_1fr_auto]"

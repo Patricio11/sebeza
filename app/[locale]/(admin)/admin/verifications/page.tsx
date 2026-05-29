@@ -18,6 +18,7 @@ import {
   ShieldOff,
   XCircle,
 } from "lucide-react";
+import { HelpLink } from "@/components/feature/help/HelpLink";
 
 export default async function VerificationsPage({
   params,
@@ -71,6 +72,14 @@ export default async function VerificationsPage({
       pageTitle={t("title")}
       pageSubtitle={t("subtitle")}
     >
+      {/* Phase 10.3  help deep-links (D6). */}
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        <HelpLink role="admin" slug="reviewing-seeker-id-submissions" label="Reviewing KYC" />
+        <HelpLink role="admin" slug="qualification-review-and-saqa-workflow" label="Qualifications + SAQA" />
+        <HelpLink role="admin" slug="organisation-kyc-verification" label="Organisation KYC" />
+        <HelpLink role="admin" slug="approval-rejection-and-appeals" label="Writing dispositions" />
+      </div>
+
       {/* Tabs */}
       <nav className="mb-6 flex gap-1 border-b border-[color:var(--color-hairline)]">
         <TabLink

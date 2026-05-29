@@ -24,6 +24,7 @@ import { oversightLogQuery } from "@/lib/gov/oversight-query";
 import { REASON_LABELS } from "@/lib/gov/employer-lookup-types";
 import { Download, ShieldAlert, Search, FileBarChart } from "lucide-react";
 import Link from "next/link";
+import { HelpLink } from "@/components/feature/help/HelpLink";
 
 const PAGE_LIMIT = 200;
 
@@ -89,6 +90,12 @@ export default async function OversightPage({
         </Link>
       }
     >
+      {/* Phase 10.3  help deep-links (D6). */}
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        <HelpLink role="admin" slug="monitoring-gov-lookups-for-patterns" label="Reading patterns" />
+        <HelpLink role="admin" slug="flagging-suspicious-activity" label="Suspicious patterns" />
+      </div>
+
       {/* Summary tiles */}
       <section className="grid gap-3 md:grid-cols-5">
         <Tile

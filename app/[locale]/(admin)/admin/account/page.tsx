@@ -8,6 +8,7 @@ import { getMyNotificationPrefs } from "@/lib/notifications/query";
 import type { NotificationKind } from "@/lib/notifications/catalog";
 import { verifyAdmin } from "@/lib/auth/dal";
 import { getSetting } from "@/lib/admin/settings";
+import { HelpLink } from "@/components/feature/help/HelpLink";
 
 const ADMIN_NOTIFICATION_KINDS: NotificationKind[] = [
   "moderation.reported",
@@ -38,6 +39,13 @@ export default async function AdminAccountPage({
       pageSubtitle="Your administrator session and notification preferences."
       pageActions={<SignOutButton />}
     >
+      {/* Phase 10.3  help deep-links (D6). */}
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        <HelpLink role="admin" slug="first-login-and-2fa-setup" label="2FA setup" />
+        <HelpLink role="admin" slug="team-roles-and-permissions" label="Roles + permissions" />
+        <HelpLink role="admin" slug="notification-settings-for-admins" label="Notifications" />
+      </div>
+
       <div className="grid gap-10 md:grid-cols-2">
         <section>
           <h2 className="mb-4 border-b-2 border-[color:var(--color-ink)] pb-2 font-display text-xl">

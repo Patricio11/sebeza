@@ -12,6 +12,7 @@ import { getDb } from "@/db/client";
 import * as schema from "@/db/schema";
 import { eq, count } from "drizzle-orm";
 import { Inbox } from "lucide-react";
+import { HelpLink } from "@/components/feature/help/HelpLink";
 
 export default async function TaxonomyPage({
   params,
@@ -58,6 +59,12 @@ export default async function TaxonomyPage({
       pageTitle={t("title")}
       pageSubtitle={t("subtitle")}
     >
+      {/* Phase 10.3  help deep-links (D6). */}
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        <HelpLink role="admin" slug="managing-skills-and-professions" label="Managing skills" />
+        <HelpLink role="admin" slug="suggestion-workflow-user-other-entries" label="Suggestion workflow" />
+      </div>
+
       {/* Phase 9.15  suggestion-queue banner. Shows pending count + deep-link. */}
       <Link
         href="/admin/taxonomy/suggestions"

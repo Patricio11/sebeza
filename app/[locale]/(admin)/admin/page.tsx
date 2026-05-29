@@ -6,6 +6,7 @@ import { recentAuditEventsFromDb } from "@/lib/audit";
 import { verifyAdmin } from "@/lib/auth/dal";
 import { adminOverviewCounts } from "@/lib/admin/users";
 import { ShieldCheck, Flag, Users, ScrollText } from "lucide-react";
+import { HelpLink } from "@/components/feature/help/HelpLink";
 
 export default async function AdminOverviewPage({
   params,
@@ -44,6 +45,13 @@ export default async function AdminOverviewPage({
       pageTitle={t("title")}
       pageSubtitle={t("subtitle")}
     >
+      {/* Phase 10.3  help deep-links (D6 mirror from employer + seeker). */}
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        <HelpLink role="admin" slug="what-sebenza-is-for-admins" label="Console orientation" />
+        <HelpLink role="admin" slug="admin-dashboard-tour" label="Dashboard tour" />
+        <HelpLink role="admin" slug="troubleshooting-common-issues" label="Troubleshooting" />
+      </div>
+
       {/* KPI strip */}
       <section className="grid gap-4 md:grid-cols-4">
         <KPI

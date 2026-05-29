@@ -1,6 +1,6 @@
 /**
- * Phase 10.1 / 10.2 — in-context deep-link from a dashboard surface
- * to the relevant help article.
+ * Phase 10.1 / 10.2 / 10.3 — in-context deep-link from a dashboard
+ * surface to the relevant help article.
  *
  * Used on the top dashboard surfaces (~8 per role) so users discover
  * help in the place they hit friction, not only when they go looking.
@@ -13,12 +13,15 @@
  * `/dashboard/help/*` (under the seeker dashboard route group). The
  * default is "employer" so the existing 8 employer surfaces using
  * `<HelpLink slug="..." />` keep working without edits.
+ *
+ * Phase 10.3 added the "admin" role pointing at `/admin/help/*`. Gov
+ * follows in Phase 10.4 and slots in here too.
  */
 
 import { Link } from "@/i18n/navigation";
 import { HelpCircle } from "lucide-react";
 
-type HelpRole = "employer" | "seeker";
+type HelpRole = "employer" | "seeker" | "admin";
 
 interface Props {
   /** Slug of the help article to deep-link to. */
@@ -35,6 +38,7 @@ interface Props {
 const BASE_PATH: Record<HelpRole, string> = {
   employer: "/employer/help",
   seeker: "/dashboard/help",
+  admin: "/admin/help",
 };
 
 export function HelpLink({

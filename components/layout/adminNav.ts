@@ -9,6 +9,7 @@ import {
   Bell,
   SlidersHorizontal,
   UserCog,
+  HelpCircle,
 } from "lucide-react";
 import type { DashboardNavItem } from "./DashboardShell";
 
@@ -29,6 +30,10 @@ export const ADMIN_NAV: DashboardNavItem[] = [
   },
   { key: "users", label: "Users", href: "/admin/users", icon: Users },
   { key: "notifications", label: "Notifications", href: "/admin/notifications", icon: Bell },
+  // Phase 10.3  admin help center. Sits between Notifications and
+  // Platform settings so it's reachable without scrolling through
+  // settings; mirrors the placement on seeker / employer sides.
+  { key: "help", label: "Help", href: "/admin/help", icon: HelpCircle },
   { key: "settings", label: "Platform settings", href: "/admin/settings", icon: SlidersHorizontal },
   { key: "account", label: "My account", href: "/admin/account", icon: UserCog },
 ];

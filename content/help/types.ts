@@ -48,6 +48,22 @@ export type SeekerHelpCategory =
   | "account";
 
 /**
+ * Phase 10.3 — admin categories. Admin staff are platform operators
+ * (Sebenza employees) running KYC review, qualification verification,
+ * moderation, POPIA compliance, and oversight. The categories carry
+ * the daily-work shape: verification queues first, then moderation,
+ * then compliance, then taxonomy/settings, then reports.
+ */
+export type AdminHelpCategory =
+  | "getting_started"
+  | "kyc_verification"
+  | "moderation"
+  | "popia_compliance"
+  | "taxonomy_settings"
+  | "reports_oversight"
+  | "operations";
+
+/**
  * Discriminated union of every role's category. `meta.category` is
  * just a string at the wire level — the category label lookup happens
  * against whichever role's CATEGORIES constant is in scope on the
@@ -55,7 +71,10 @@ export type SeekerHelpCategory =
  * seeker / admin / gov help centres in Phase 10.2 / 10.3 / 10.4 don't
  * have to fork the `HelpArticleMeta` shape.
  */
-export type HelpCategory = EmployerHelpCategory | SeekerHelpCategory;
+export type HelpCategory =
+  | EmployerHelpCategory
+  | SeekerHelpCategory
+  | AdminHelpCategory;
 
 export interface HelpArticleMeta {
   /** URL slug. Stable + permanent  becomes /employer/help/<slug>.
@@ -214,5 +233,61 @@ export const SEEKER_HELP_CATEGORIES: ReadonlyArray<{
     label: "Account & security",
     description:
       "Email, password, two-factor authentication, notification preferences, sessions.",
+  },
+];
+
+/**
+ * Phase 10.3 — admin category labels + display order. The IA reads
+ * top-down by frequency of daily work: get oriented → review the
+ * verification queue → moderate accounts → process POPIA / DSR work
+ * → curate taxonomy + settings → read aggregate reports → operate
+ * the platform.
+ */
+export const ADMIN_HELP_CATEGORIES: ReadonlyArray<{
+  value: AdminHelpCategory;
+  label: string;
+  description: string;
+}> = [
+  {
+    value: "getting_started",
+    label: "Getting started",
+    description:
+      "Orient yourself as a new admin: what the console is for, how to set up 2FA on day one, and what each nav entry does.",
+  },
+  {
+    value: "kyc_verification",
+    label: "KYC & verification",
+    description:
+      "The daily verification queue: seeker IDs, organisation KYC, qualifications. How to review, when to approve, how to write a reject reason that helps the user.",
+  },
+  {
+    value: "moderation",
+    label: "Moderation",
+    description:
+      "Profile reports, suspensions + restorations, appeals, the suspicious-activity signals you should escalate.",
+  },
+  {
+    value: "popia_compliance",
+    label: "POPIA & compliance",
+    description:
+      "Data subject rights (export, deletion, correction), audit-log incident response, and the consent posture you defend.",
+  },
+  {
+    value: "taxonomy_settings",
+    label: "Taxonomy & settings",
+    description:
+      "Curating the skill + profession taxonomy, processing user 'Other' suggestions, and managing feature flags + platform settings.",
+  },
+  {
+    value: "reports_oversight",
+    label: "Reports & oversight",
+    description:
+      "Aggregate stats, decline-reason patterns, retention cohorts, and how to monitor government employer-lookups for fishing patterns.",
+  },
+  {
+    value: "operations",
+    label: "Operations",
+    description:
+      "How the audit log is structured, notification preferences for admins, cron-job health, troubleshooting + the team-role permissions matrix.",
   },
 ];

@@ -6,6 +6,7 @@ import { verifyAdmin } from "@/lib/auth/dal";
 import { listOpenReports } from "@/lib/admin/moderation-query";
 import { ReportActions } from "@/components/feature/admin/ReportActions";
 import { Flag } from "lucide-react";
+import { HelpLink } from "@/components/feature/help/HelpLink";
 
 const REASON_LABEL_KEY: Record<
   "fake_identity" | "inappropriate" | "harassment" | "spam" | "other",
@@ -50,6 +51,13 @@ export default async function ModerationPage({
       pageTitle={t("title")}
       pageSubtitle={t("subtitle")}
     >
+      {/* Phase 10.3  help deep-links (D6). */}
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        <HelpLink role="admin" slug="reading-profile-reports" label="Reading reports" />
+        <HelpLink role="admin" slug="when-to-suspend-an-account" label="When to suspend" />
+        <HelpLink role="admin" slug="decline-reason-oversight-and-patterns" label="Decline-reason oversight" />
+      </div>
+
       {reports.length === 0 ? (
         <p className="rounded-[var(--radius-md)] border border-dashed border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-6 text-sm text-[color:var(--color-ink-soft)]">
           No open reports. When a public visitor or signed-in user flags a
