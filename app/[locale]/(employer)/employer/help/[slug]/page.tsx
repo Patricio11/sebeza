@@ -92,15 +92,6 @@ export default async function EmployerHelpArticlePage({
       <div className="mx-auto max-w-3xl">
         <article className="rounded-[var(--radius-md)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-6 md:p-8">
           <Body />
-          <p className="mt-10 border-t border-dashed border-[color:var(--color-hairline)] pt-4 text-xs text-[color:var(--color-ink-soft)]">
-            Last updated{" "}
-            {new Date(article.meta.updatedAt).toLocaleDateString("en-ZA", {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            })}
-            .
-          </p>
         </article>
 
         {relatedArticles.length > 0 && (
