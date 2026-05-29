@@ -23,6 +23,7 @@ import {
 } from "@/components/feature/employer/vacancies/VacancyForm";
 import { getProfessions } from "@/lib/taxonomy/query";
 import { PROVINCES, SKILLS } from "@/lib/mock/taxonomy";
+import { HelpLink } from "@/components/feature/help/HelpLink";
 
 export const revalidate = 0;
 
@@ -100,6 +101,11 @@ export default async function NewVacancyPage({
       pageTitle={initial ? "Duplicate vacancy" : "New vacancy"}
       pageSubtitle={pageSubtitle}
     >
+      {/* Phase 10.1  in-context help deep-link (D6). */}
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        <HelpLink slug="creating-a-vacancy" label="How to create a vacancy" />
+        <HelpLink slug="match-requirements" label="Match requirements explained" />
+      </div>
       <div className="rounded-[var(--radius-md)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-5 md:p-8">
         <VacancyForm
           initial={initial}

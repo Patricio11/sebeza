@@ -20,6 +20,7 @@ import { OrgVerificationBanner } from "@/components/layout/OrgVerificationBanner
 import { Button } from "@/components/ui/Button";
 import { VerificationBadge } from "@/components/ui/VerificationBadge";
 import { Pencil, ShieldCheck } from "lucide-react";
+import { HelpLink } from "@/components/feature/help/HelpLink";
 import { verifyEmployer } from "@/lib/auth/dal";
 import { getMyOrgVettingState } from "@/lib/employer/vetting";
 
@@ -60,6 +61,11 @@ export default async function OrganisationPage({
         ) : null
       }
     >
+      {/* Phase 10.1  help deep-links (D6). */}
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        <HelpLink slug="kyc" label="KYC walkthrough" />
+        <HelpLink slug="what-we-hold" label="What data we hold" />
+      </div>
       <div className="grid gap-10 md:grid-cols-[1fr_320px]">
         {/* ── Read-only summary; edits go via /employer/onboarding ─── */}
         <section>

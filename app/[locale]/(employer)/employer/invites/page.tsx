@@ -23,6 +23,7 @@ import { verifyOrgVerified } from "@/lib/auth/dal";
 import { listOrgInvitations, type InviteListRow } from "@/lib/employer/seeker-invitations";
 import { getProfessions } from "@/lib/taxonomy/query";
 import { InviteSeekerForm } from "@/components/feature/employer/invites/InviteSeekerForm";
+import { HelpLink } from "@/components/feature/help/HelpLink";
 import { InvitationActions } from "@/components/feature/employer/invites/InvitationActions";
 import {
   CheckCircle2,
@@ -72,6 +73,11 @@ export default async function EmployerInvitesPage({
       pageTitle="Invites"
       pageSubtitle="Bring known candidates onto Sebenza, one email at a time. They control the signup; you get a clean audit trail."
     >
+      {/* Phase 10.1  help deep-link (D6). The invites surface is
+          adjacent to bulk-invite + the broader invitation lifecycle. */}
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        <HelpLink slug="invitation-lifecycle" label="Invitation lifecycle" />
+      </div>
       <div className="space-y-10">
         <InviteSeekerForm professions={professions} />
 

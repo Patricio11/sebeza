@@ -48,6 +48,7 @@ import { getProfessions } from "@/lib/taxonomy/query";
 import { PROVINCES, PROFESSIONS, SKILLS } from "@/lib/mock/taxonomy";
 import { ChevronLeft, Lock, MapPin, Users } from "lucide-react";
 import type { WorkAvailabilityKind } from "@/lib/mock/types";
+import { HelpLink } from "@/components/feature/help/HelpLink";
 
 export const revalidate = 0;
 
@@ -134,6 +135,9 @@ export default async function VacancyDetailPage({
           <ChevronLeft className="size-3" aria-hidden="true" />
           Back to vacancies
         </Link>
+        {/* Phase 10.1  help deep-links (D6). */}
+        <HelpLink slug="vacancy-lifecycle" label="Vacancy lifecycle" />
+        <HelpLink slug="accept-rate-strip" label="Reading the accept-rate" />
         <span aria-hidden="true" className="text-[color:var(--color-ink-soft)]">·</span>
         <VacancyStatusChip status={vacancy.status} />
         <span aria-hidden="true" className="text-[color:var(--color-ink-soft)]">·</span>

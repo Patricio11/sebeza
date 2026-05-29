@@ -41,6 +41,7 @@ import { getMyOrgRole } from "@/lib/employer/vacancies";
 import { canEditVacancies } from "@/lib/employer/vacancies-types";
 import { ConfirmStatusIsland } from "@/components/feature/employer/placements/ConfirmStatusIsland";
 import { Search, MapPin, Calendar, Clock, AlertCircle } from "lucide-react";
+import { HelpLink } from "@/components/feature/help/HelpLink";
 
 export const revalidate = 0;
 
@@ -119,6 +120,11 @@ export default async function EmployeesListPage({
         ) : null
       }
     >
+      {/* Phase 10.1  help deep-links (D6). */}
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        <HelpLink slug="lifecycle-view" label="How the Employees view works" />
+        <HelpLink slug="check-ins" label="Status check-ins" />
+      </div>
       {totalCount === 0 ? (
         <EmptyState
           title="No placements logged yet"

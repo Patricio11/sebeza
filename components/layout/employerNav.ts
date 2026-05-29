@@ -9,6 +9,7 @@ import {
   UsersRound,
   UserPlus,
   Bell,
+  HelpCircle,
   Settings,
 } from "lucide-react";
 import type { DashboardNavItem } from "./DashboardShell";
@@ -34,6 +35,10 @@ export const EMPLOYER_NAV: DashboardNavItem[] = [
   { key: "organisation", label: "Organisation", href: "/employer/organisation", icon: Building2 },
   { key: "team", label: "Team", href: "/employer/team", icon: UsersRound },
   { key: "notifications", label: "Notifications", href: "/employer/notifications", icon: Bell },
+  // Phase 10.1  in-product help center. Sits between Notifications
+  // and Account so the most-used surfaces stay above the fold on a
+  // 360px viewport + Help is reachable in one scroll on phones.
+  { key: "help", label: "Help", href: "/employer/help", icon: HelpCircle },
   { key: "account", label: "Account", href: "/employer/account", icon: Settings },
 ];
 

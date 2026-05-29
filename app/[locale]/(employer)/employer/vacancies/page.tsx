@@ -28,6 +28,7 @@ import { VacancyStatusChip } from "@/components/feature/employer/vacancies/Vacan
 import { DeclineReasonsCard } from "@/components/feature/analytics/DeclineReasonsCard";
 import { declineReasonAggregateQuery } from "@/db/queries/decline-reasons";
 import { Plus, MapPin, Briefcase, Calendar, Copy } from "lucide-react";
+import { HelpLink } from "@/components/feature/help/HelpLink";
 import { PROVINCES, PROFESSIONS } from "@/lib/mock/taxonomy";
 
 export const revalidate = 0; // Always fresh  this is the employer's pipeline view.
@@ -78,6 +79,12 @@ export default async function VacanciesListPage({
         ) : null
       }
     >
+      {/* Phase 10.1  help deep-links (D6). */}
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        <HelpLink slug="creating-a-vacancy" label="Create a vacancy" />
+        <HelpLink slug="vacancy-lifecycle" label="Lifecycle states" />
+        <HelpLink slug="duplicate-vacancy" label="Duplicate an existing" />
+      </div>
       {!canEdit && (
         <p className="mb-6 rounded-[var(--radius-sm)] border border-dashed border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] px-4 py-3 text-xs text-[color:var(--color-ink-soft)]">
           Your workspace role is <strong>Viewer</strong>  vacancy list is

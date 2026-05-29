@@ -48,6 +48,7 @@ import { getSetting } from "@/lib/admin/settings";
 import { getDb } from "@/db/client";
 import * as schema from "@/db/schema";
 import { ChevronLeft, MapPin, Search, Users } from "lucide-react";
+import { HelpLink } from "@/components/feature/help/HelpLink";
 
 export const revalidate = 0;
 
@@ -144,6 +145,8 @@ export default async function VacancyMatchPage({
           <MapPin className="size-3" aria-hidden="true" />
           {provinceLabel}
         </span>
+        <HelpLink slug="finding-matches" label="How matches work" />
+        <HelpLink slug="bulk-invite" label="Bulk invite guide" />
       </div>
 
       {/* Honest-supply line  sticky on top so it stays visible while

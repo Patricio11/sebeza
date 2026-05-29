@@ -42,6 +42,7 @@ import { canEditVacancies } from "@/lib/employer/vacancies-types";
 import { ConfirmStatusIsland } from "@/components/feature/employer/placements/ConfirmStatusIsland";
 import { InternalNoteEditorIsland } from "@/components/feature/employer/placements/InternalNoteEditorIsland";
 import { DepartureIsland } from "@/components/feature/employer/placements/DepartureIsland";
+import { HelpLink } from "@/components/feature/help/HelpLink";
 import {
   ChevronLeft,
   Calendar,
@@ -99,6 +100,8 @@ export default async function EmployeeDetailPage({
           ·
         </span>
         <StatusPill employee={employee} />
+        <HelpLink slug="check-ins" label="Check-in cadence" />
+        <HelpLink slug="departures-reengage" label="Departures + re-engage" />
         <span aria-hidden="true" className="text-[color:var(--color-ink-soft)]">
           ·
         </span>
