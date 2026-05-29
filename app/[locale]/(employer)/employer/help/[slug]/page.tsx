@@ -85,25 +85,32 @@ export default async function EmployerHelpArticlePage({
         </Link>
       </div>
 
-      <article className="rounded-[var(--radius-md)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-6 md:p-8">
-        <Body />
-        <p className="mt-10 border-t border-dashed border-[color:var(--color-hairline)] pt-4 text-xs text-[color:var(--color-ink-soft)]">
-          Last updated{" "}
-          {new Date(article.meta.updatedAt).toLocaleDateString("en-ZA", {
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-          })}
-          .
-        </p>
-      </article>
+      {/* Phase 10.1  the reading column. ~65ch wide (max-w-3xl is
+          ~768px which holds 6065 chars of Hanken Grotesk at our body
+          size). Centered so the dashboard page surrounds the article
+          symmetrically instead of stranding text on the left edge. */}
+      <div className="mx-auto max-w-3xl">
+        <article className="rounded-[var(--radius-md)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-6 md:p-8">
+          <Body />
+          <p className="mt-10 border-t border-dashed border-[color:var(--color-hairline)] pt-4 text-xs text-[color:var(--color-ink-soft)]">
+            Last updated{" "}
+            {new Date(article.meta.updatedAt).toLocaleDateString("en-ZA", {
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            })}
+            .
+          </p>
+        </article>
 
-      {relatedArticles.length > 0 && (
-        <section className="mt-10">
-          <h2 className="mb-4 font-display text-lg text-[color:var(--color-ink)]">
-            Related
-          </h2>
-          <ul className="grid gap-3 md:grid-cols-3">
+        {relatedArticles.length > 0 && (
+          <section className="mt-10">
+            <h2 className="mb-4 font-display text-lg text-[color:var(--color-ink)]">
+              Related
+            </h2>
+            {/* Two columns at this reading width  three would crush
+                the cards into postage-stamp size. */}
+            <ul className="grid gap-3 md:grid-cols-2">
             {relatedArticles.map((r) => {
               const rCat =
                 EMPLOYER_HELP_CATEGORIES.find(
@@ -136,7 +143,8 @@ export default async function EmployerHelpArticlePage({
             })}
           </ul>
         </section>
-      )}
+        )}
+      </div>
     </DashboardShell>
   );
 }

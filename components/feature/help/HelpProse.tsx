@@ -38,7 +38,10 @@ export function HelpProse({ children }: HelpProseProps) {
   return (
     <div
       className={
-        "max-w-[65ch] " +
+        // No max-width here  the surrounding article card constrains
+        // the reading column at the page level. Keeping the cap on
+        // HelpProse AND on the card double-constrains + leaves the
+        // ugly right gutter visible.
         "[&_p]:my-4 [&_p]:text-[0.95rem] [&_p]:leading-relaxed [&_p]:text-[color:var(--color-ink)] " +
         "[&_h2]:font-display [&_h2]:text-2xl [&_h2]:mt-10 [&_h2]:mb-3 [&_h2]:text-[color:var(--color-ink)] [&_h2]:tracking-tight " +
         "[&_h3]:font-display [&_h3]:text-lg [&_h3]:mt-7 [&_h3]:mb-2 [&_h3]:text-[color:var(--color-ink)] " +
