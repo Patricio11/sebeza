@@ -224,6 +224,21 @@ export const NOTIFICATION_CATALOG = {
       "Fires nightly when a placement passes one of its check-in milestones (3 / 6 / 12 months, then annual) without an Owner / Recruiter confirming the person is still in the role. One question, one tap  keeps the platform's retention figure honest.",
     dedupeWindowSeconds: 0,
   },
+  // Phase 9.23  employment-verification outcome. Fires once when a
+  // verification request transitions to verified / declined /
+  // disputed / expired / superseded. Body is binary-outcome only
+  // (D9: no retaliation surface  the seeker never sees the
+  // contact's actual choice text). Default email ON because this is
+  // a transactional state change the seeker requested.
+  "employment.verification.outcome": {
+    defaultInApp: true,
+    defaultEmail: true,
+    audience: "seeker",
+    label: "Employment-verification outcome",
+    description:
+      "Fires when the contact you nominated responds to your employment-verification request, or when the 14-day window closes without a response. Binary outcome only  the contact's actual response stays in their conversation with the platform, never surfaces to you beyond verified vs not.",
+    dedupeWindowSeconds: 0,
+  },
   "vacancy.response": {
     defaultInApp: true,
     defaultEmail: true,

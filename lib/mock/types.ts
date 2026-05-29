@@ -157,6 +157,15 @@ export interface PublicProfile {
   /** Phase 9.22  ISO yyyy-mm-dd start date of the current role.
    *  Only meaningful when `currentEmployerName` is set. */
   currentRoleStartedAt?: string | null;
+  /**
+   * Phase 9.23  the date the seeker's employment-at-current-employer
+   * was verified by a contact via the one-shot email flow. NULL when
+   * not verified, or when the verification has aged past the 12-month
+   * badge lifetime (D6). When set, the public renderer surfaces an
+   * "Employer-verified · MMM YYYY" badge alongside the existing
+   * "Currently at" line.
+   */
+  employmentVerifiedAt?: string | null;
 }
 
 export interface ExperienceItem {

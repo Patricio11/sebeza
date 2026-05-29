@@ -17,7 +17,9 @@ import { ProfileBasicsForm } from "@/components/feature/profile/ProfileBasicsFor
 import { SkillsEditor } from "@/components/feature/profile/SkillsEditor";
 import { WorkAvailabilityEditor } from "@/components/feature/profile/WorkAvailabilityEditor";
 import { CurrentEmploymentEditor } from "@/components/feature/profile/CurrentEmploymentEditor";
+import { EmploymentVerificationPanel } from "@/components/feature/profile/EmploymentVerificationPanel";
 import { listEmployerOptions } from "@/lib/profile/employment";
+import { getMyEmploymentVerification } from "@/lib/profile/employment-verification";
 import { NationalIdControls } from "@/components/feature/profile/NationalIdControls";
 import { KycPanel } from "@/components/feature/profile/KycPanel";
 import { DateOfBirthEditor } from "@/components/feature/profile/DateOfBirthEditor";
@@ -47,6 +49,8 @@ export default async function ProfileEditorPage({
   );
   // Phase 9.22  picker-visible employers for the new editor.
   const employerOptions = await listEmployerOptions("");
+  // Phase 9.23  most recent verification record for the new panel.
+  const verification = await getMyEmploymentVerification();
 
   const t = await getTranslations("seekerDash.profileEditor");
   const tAcademic = await getTranslations("seekerDash.profileEditor.academic");
@@ -259,6 +263,18 @@ export default async function ProfileEditorPage({
                 me.currentEmployerIsPending ? me.currentEmployerName : null
               }
             />
+            {/* Phase 9.23  opt-in verification panel. Renders only
+                when status='employed' (D2); hidden otherwise. The
+                panel handles its own three states (none / pending /
+                resolved). */}
+            <div className="mt-4">
+              <EmploymentVerificationPanel
+                current={verification}
+                status={me.status}
+                currentEmployerOrgId={me.currentEmployerOrgId}
+                currentEmployerName={me.currentEmployerName}
+              />
+            </div>
           </section>
 
           {/* National ID */}

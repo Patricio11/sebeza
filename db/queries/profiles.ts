@@ -289,7 +289,16 @@ export async function searchProfilesQuery(
   // We bound the list (max 5 per profile, in proficiency order) to keep the
   // payload light  public/search reads don't need every skill.
   const ids = rows.map((r) => r.id);
-  const skillsByProfile = ids.length > 0 ? await topSkillsByProfile(ids) : new Map();
+  const [skillsByProfile, verifiedAtByProfile] =
+    ids.length > 0
+      ? await Promise.all([
+          topSkillsByProfile(ids),
+          // Phase 9.23  one batched lookup of the latest verified
+          // verification per (profile, current_employer) within the
+          // 12-month badge window.
+          verificationBadgeDatesByProfile(rows),
+        ])
+      : [new Map(), new Map<string, string>()];
 
   const profiles: SearchResultRow[] = rows.map((r) => ({
     handle: r.handle,
@@ -323,6 +332,7 @@ export async function searchProfilesQuery(
           ? r.current_role_started_at.toISOString().slice(0, 10)
           : r.current_role_started_at,
     }),
+    employmentVerifiedAt: verifiedAtByProfile.get(r.id) ?? null,
   }));
 
   // Skills-gap signal  every search writes a row. Phase 6 builds on this.
@@ -500,12 +510,15 @@ export async function findProfileByHandleQuery(
   const p = rows[0];
   if (!p) return null;
 
-  const [topSkills, experience, qualifications, academic] = await Promise.all([
-    loadTopSkills(p.id),
-    loadExperience(p.id),
-    loadQualifications(p.id),
-    loadAcademic(p.id),
-  ]);
+  const [topSkills, experience, qualifications, academic, verifiedAtIso] =
+    await Promise.all([
+      loadTopSkills(p.id),
+      loadExperience(p.id),
+      loadQualifications(p.id),
+      loadAcademic(p.id),
+      // Phase 9.23  verification badge date (D6: only within 12mo).
+      loadVerificationBadgeDate(p.id, p.currentEmployerOrgId),
+    ]);
 
   await logAccess({
     kind: "profile.view",
@@ -545,7 +558,106 @@ export async function findProfileByHandleQuery(
       verification: p.currentEmployerVerification,
       roleStartedAt: p.currentRoleStartedAt,
     }),
+    // Phase 9.23  badge date only when within the 12-month lifetime.
+    employmentVerifiedAt: verifiedAtIso,
   };
+}
+
+/**
+ * Phase 9.23  load the most recent verified-state verification
+ * row for (profile, current_employer_org_id). Returns the responded_at
+ * ISO date when state='verified' AND the response is within the
+ * 12-month badge lifetime (D6). Anything older or non-verified
+ * returns NULL  the badge silently decays.
+ */
+const VERIFICATION_BADGE_LIFETIME_MS = 365 * 24 * 60 * 60 * 1000;
+
+/**
+ * Phase 9.23  batched variant for searchProfilesQuery. Takes the
+ * page of search rows + returns a Map<profileId, ISO> for those
+ * whose current employer has a verified verification within the
+ * 12-month window. Profiles without an employer or without a
+ * recent verified row simply don't appear in the map (caller falls
+ * back to NULL).
+ */
+async function verificationBadgeDatesByProfile(
+  rows: Array<{
+    id: string;
+    current_employer_org_id: string | null;
+  }>,
+): Promise<Map<string, string>> {
+  const result = new Map<string, string>();
+  const pairs = rows.filter(
+    (r): r is typeof r & { current_employer_org_id: string } =>
+      r.current_employer_org_id !== null,
+  );
+  if (pairs.length === 0) return result;
+  const db = getDb();
+  const cutoff = new Date(Date.now() - VERIFICATION_BADGE_LIFETIME_MS);
+  const profileIds = pairs.map((p) => p.id);
+  const employerIds = pairs.map((p) => p.current_employer_org_id);
+  const verRows = await db
+    .select({
+      profileId: schema.employmentVerifications.profileId,
+      employerOrgId: schema.employmentVerifications.employerOrgId,
+      respondedAt: schema.employmentVerifications.respondedAt,
+    })
+    .from(schema.employmentVerifications)
+    .where(
+      and(
+        eq(schema.employmentVerifications.state, "verified"),
+        sql`${schema.employmentVerifications.respondedAt} >= ${cutoff}`,
+        inArray(schema.employmentVerifications.profileId, profileIds),
+        inArray(schema.employmentVerifications.employerOrgId, employerIds),
+      ),
+    )
+    .orderBy(desc(schema.employmentVerifications.respondedAt));
+  // Keep only the most recent per (profile, employer) pair where the
+  // employer matches the current declared employer.
+  const employerByProfile = new Map(
+    pairs.map((p) => [p.id, p.current_employer_org_id]),
+  );
+  for (const v of verRows) {
+    if (employerByProfile.get(v.profileId) !== v.employerOrgId) continue;
+    if (result.has(v.profileId)) continue;
+    if (!v.respondedAt) continue;
+    result.set(
+      v.profileId,
+      v.respondedAt instanceof Date
+        ? v.respondedAt.toISOString()
+        : new Date(v.respondedAt).toISOString(),
+    );
+  }
+  return result;
+}
+
+async function loadVerificationBadgeDate(
+  profileId: string,
+  employerOrgId: string | null,
+): Promise<string | null> {
+  if (!employerOrgId) return null;
+  const db = getDb();
+  const cutoff = new Date(Date.now() - VERIFICATION_BADGE_LIFETIME_MS);
+  const rows = await db
+    .select({
+      respondedAt: schema.employmentVerifications.respondedAt,
+    })
+    .from(schema.employmentVerifications)
+    .where(
+      and(
+        eq(schema.employmentVerifications.profileId, profileId),
+        eq(schema.employmentVerifications.employerOrgId, employerOrgId),
+        eq(schema.employmentVerifications.state, "verified"),
+        sql`${schema.employmentVerifications.respondedAt} >= ${cutoff}`,
+      ),
+    )
+    .orderBy(desc(schema.employmentVerifications.respondedAt))
+    .limit(1);
+  const r = rows[0];
+  if (!r?.respondedAt) return null;
+  return r.respondedAt instanceof Date
+    ? r.respondedAt.toISOString()
+    : new Date(r.respondedAt).toISOString();
 }
 
 /**

@@ -36,6 +36,7 @@ import { z } from "zod";
 import { verifyRole } from "@/lib/auth/dal";
 import { logAccess } from "@/lib/audit";
 import { submitTaxonomySuggestion } from "@/lib/taxonomy/suggestions";
+import { supersedeEmploymentVerifications } from "@/lib/profile/employment-verification";
 
 export type ActionResult<T extends object = object> =
   | ({ ok: true } & T)
@@ -291,6 +292,27 @@ export async function updateCurrentEmployment(
       cleared: resolvedEmployerOrgId === null,
     },
   });
+
+  // Phase 9.23 D7  when the seeker switches employer (or clears it),
+  // any active verification for the prior employer is superseded
+  // immediately. The hook flips state, redacts the contact email,
+  // and  for previously-verified records  fires an outcome
+  // notification. Best-effort; failure here is informational, not a
+  // reason to roll back the employer change.
+  if (
+    priorEmployerOrgId &&
+    priorEmployerOrgId !== resolvedEmployerOrgId
+  ) {
+    try {
+      await supersedeEmploymentVerifications({
+        profileId: profile.id,
+        priorEmployerOrgId,
+      });
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error("[employment] supersede on change failed:", e);
+    }
+  }
 
   revalidatePath("/dashboard/profile");
   revalidatePath("/dashboard");

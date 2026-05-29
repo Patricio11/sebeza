@@ -452,7 +452,12 @@ async function ProfileHero({
               )}
               {/* Phase 9.22  current employer. Only shown for picker-
                   visible orgs (pending seeker_named never appears).
-                  Badge spells out the verification posture honestly. */}
+                  Badge spells out the verification posture honestly.
+                  Phase 9.23  when the seeker has a verified
+                  employment record within the 12-month badge window,
+                  the dossier row also shows the Employer-verified
+                  badge with the date. The badge silently decays at
+                  12 months. */}
               {profile.currentEmployerName && profile.currentEmployerBadge && (
                 <DossierRow label="Currently at">
                   <div className="text-sm text-[color:var(--color-ink)]">
@@ -465,6 +470,11 @@ async function ProfileHero({
                         ? ` · since ${formatRoleStartedAt(profile.currentRoleStartedAt)}`
                         : ""}
                     </div>
+                    {profile.employmentVerifiedAt && (
+                      <div className="mt-1.5 inline-flex items-center gap-1 rounded-[var(--radius-pill)] border border-[color:var(--color-brand)] bg-[color:var(--color-brand-tint)] px-2 py-0.5 text-[0.6rem] uppercase tracking-[0.18em] text-[color:var(--color-brand-strong)]">
+                        Employer-verified · {formatRoleStartedAt(profile.employmentVerifiedAt)}
+                      </div>
+                    )}
                   </div>
                 </DossierRow>
               )}

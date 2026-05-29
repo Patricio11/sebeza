@@ -47,6 +47,17 @@ export type AuditKind =
   // change. The seeker's "Other" submission has its own audit kind
   // (taxonomy.suggestion.submit) and shouldn't be double-logged here.
   | "profile.employment.update"
+  // Phase 9.23  opt-in employment verification lifecycle. Meta
+  // carries `contact_email_hash` (SHA-256) instead of the raw email
+  // so the audit trail proves consent existed at submission without
+  // persisting third-party PII (D0 in the plan).
+  | "employment.verification.request"
+  | "employment.verification.contact_verified"
+  | "employment.verification.contact_declined"
+  | "employment.verification.contact_disputed"
+  | "employment.verification.expired"
+  | "employment.verification.superseded"
+  | "employment.verification.withdrawn"
   | "profile.qualification.add"
   | "profile.qualification.delete"
   | "profile.qualification.document.upload"

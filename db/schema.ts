@@ -1753,3 +1753,82 @@ export const seekerInvitations = pgTable(
     expiryIdx: index("seeker_invites_expires_idx").on(t.expiresAt),
   }),
 );
+
+// ──────────────────────────────────────────────────────────────────────
+// Phase 9.23  opt-in employment verification (consent + one-shot
+// email). The contact's email lives at most 14 days in encrypted form;
+// state changes (verified / declined / disputed / expired / superseded
+// / withdrawn) immediately redact the encrypted email. The SHA-256
+// hash stays for the per-(seeker, contact) rate-limit + the
+// consent.grant audit proof; the raw email never lives in the durable
+// record after the verification window.
+// ──────────────────────────────────────────────────────────────────────
+
+export const employmentVerificationState = pgEnum(
+  "employment_verification_state",
+  [
+    "pending",
+    "verified",
+    "declined",
+    "disputed",
+    "expired",
+    "superseded",
+    "withdrawn",
+  ],
+);
+
+export const employmentVerifications = pgTable(
+  "employment_verifications",
+  {
+    id: text("id").primaryKey(),
+    profileId: text("profile_id")
+      .notNull()
+      .references((): AnyPgColumn => profiles.id, { onDelete: "cascade" }),
+    employerOrgId: text("employer_org_id")
+      .notNull()
+      .references((): AnyPgColumn => organizations.id, { onDelete: "cascade" }),
+    /** Contact's display name. Stays durable  identifies the consent
+     *  context + is shown to the contact in the verify email. */
+    contactName: text("contact_name").notNull(),
+    /** AES-GCM-encrypted contact email. Cleared (NULL) on response or
+     *  expiry per D4. Never displayed back to the seeker. */
+    contactEmailEnc: text("contact_email_enc"),
+    /** SHA-256 hex of the contact email at submit time. Stays durable
+     *  for the consent.grant proof + the (seeker, contact-hash)
+     *  rate-limit (D8). */
+    contactEmailHash: text("contact_email_hash").notNull(),
+    state: employmentVerificationState("state").notNull().default("pending"),
+    requestedAt: timestamp("requested_at").notNull().defaultNow(),
+    respondedAt: timestamp("responded_at"),
+    /** Fixed 14-day window per D3. Cron flips pending  expired past
+     *  this timestamp. */
+    expiresAt: timestamp("expires_at").notNull(),
+    /** URL-safe random token. Cleared on response/expiry so the link
+     *  can't be replayed. Unique index ensures one row per token. */
+    verificationToken: text("verification_token"),
+    /** Reserved for future "this was replaced by verification id X"
+     *  lineage. Unused on the initial ship; state='superseded' is
+     *  written without setting this. */
+    supersededById: text("superseded_by_id").references(
+      (): AnyPgColumn => employmentVerifications.id,
+      { onDelete: "set null" },
+    ),
+  },
+  (t) => ({
+    profileStateIdx: index(
+      "employment_verifications_profile_state_idx",
+    ).on(t.profileId, t.state),
+    /** Token lookup for the verify landing page. Drizzle's basic
+     *  unique() can't carry a partial WHERE; the migration's
+     *  CREATE UNIQUE INDEX … WHERE is the authoritative version. */
+    tokenIdx: uniqueIndex("employment_verifications_token_uniq").on(
+      t.verificationToken,
+    ),
+    expiryIdx: index("employment_verifications_expiry_idx").on(t.expiresAt),
+    dedupeIdx: index("employment_verifications_dedupe_idx").on(
+      t.profileId,
+      t.contactEmailHash,
+      t.requestedAt,
+    ),
+  }),
+);
