@@ -41,6 +41,7 @@ import { declineReasonAggregateQuery } from "@/db/queries/decline-reasons";
 import { StallReasonsCard } from "@/components/feature/analytics/StallReasonsCard";
 import { stallReasonAggregateQuery } from "@/db/queries/stall-reasons";
 import { Download } from "lucide-react";
+import { HelpLink } from "@/components/feature/help/HelpLink";
 
 export const revalidate = 300;
 
@@ -99,6 +100,13 @@ export default async function GovShortagePage({
         </Link>
       }
     >
+      {/* Phase 10.4  help deep-links (D6). */}
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        <HelpLink role="gov" slug="shortage-justification-index-explained" label="Index explained" />
+        <HelpLink role="gov" slug="interpreting-demand-and-supply-ratios" label="Reading the ratios" />
+        <HelpLink role="gov" slug="decline-reasons-and-stall-reasons" label="Decline + stall signals" />
+      </div>
+
       {/* Formula  published verbatim per D1. Government must be able to
           read the rule from the page and argue with the thresholds. */}
       <section

@@ -24,6 +24,7 @@ import { justificationIndexQuery } from "@/db/queries/justification";
 import { PROVINCES } from "@/lib/mock/taxonomy";
 import { OpportunityHeatmap } from "@/components/feature/gov/OpportunityHeatmap";
 import { Download, Sprout } from "lucide-react";
+import { HelpLink } from "@/components/feature/help/HelpLink";
 
 export const revalidate = 300;
 
@@ -82,6 +83,12 @@ export default async function GovOpportunityPage({
         </Link>
       }
     >
+      {/* Phase 10.4  help deep-links (D6). */}
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        <HelpLink role="gov" slug="local-supply-available-incentives" label="Designing incentives" />
+        <HelpLink role="gov" slug="shortage-justification-index-explained" label="Shortage index" />
+      </div>
+
       {/* Headline tiles */}
       <section className="grid gap-3 md:grid-cols-3">
         <Tile

@@ -21,6 +21,7 @@ import { verifyGov } from "@/lib/auth/dal";
 import { getSetting } from "@/lib/admin/settings";
 import { EmployerLookupForm } from "@/components/feature/gov/EmployerLookupForm";
 import { AlertTriangle, ShieldCheck } from "lucide-react";
+import { HelpLink } from "@/components/feature/help/HelpLink";
 
 export const revalidate = 0; // Always dynamic  the flag may change.
 
@@ -49,6 +50,14 @@ export default async function GovEmployerLookupPage({
       pageTitle="Per-employer mix lookup"
       pageSubtitle="One employer at a time. Exact-match input only  no autocomplete, no browse, no leaderboard. Every lookup writes an audit row carrying the stated reason; the oversight log makes the trail itself reviewable."
     >
+      {/* Phase 10.4  help deep-links (D6). */}
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        <HelpLink role="gov" slug="per-employer-lookup-what-you-can-query" label="How to query" />
+        <HelpLink role="gov" slug="case-reference-documenting-your-query" label="Case reference rules" />
+        <HelpLink role="gov" slug="reading-employment-status-mix" label="Reading the mix" />
+        <HelpLink role="gov" slug="the-oversight-log-your-lookups" label="Oversight log" />
+      </div>
+
       {/* Bounded-query framing strip  what this surface is and isn't,
           without making specific regulatory-mandate claims. */}
       <section

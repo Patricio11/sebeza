@@ -64,6 +64,23 @@ export type AdminHelpCategory =
   | "operations";
 
 /**
+ * Phase 10.4 — gov categories. Gov users (labour-market analysts,
+ * treasury, DHET, provinces, municipalities) see aggregated data
+ * only; the categories follow their actual surfaces: orient yourself
+ * → read provincial briefs → understand shortage + opportunity →
+ * read curriculum-vs-demand → use employer lookup (regulated) →
+ * pull exports → manage your account.
+ */
+export type GovHelpCategory =
+  | "getting_started"
+  | "provincial_briefs"
+  | "shortage_opportunity"
+  | "curriculum_outcomes"
+  | "employer_lookup"
+  | "exports_reports"
+  | "account_oversight";
+
+/**
  * Discriminated union of every role's category. `meta.category` is
  * just a string at the wire level — the category label lookup happens
  * against whichever role's CATEGORIES constant is in scope on the
@@ -74,7 +91,8 @@ export type AdminHelpCategory =
 export type HelpCategory =
   | EmployerHelpCategory
   | SeekerHelpCategory
-  | AdminHelpCategory;
+  | AdminHelpCategory
+  | GovHelpCategory;
 
 export interface HelpArticleMeta {
   /** URL slug. Stable + permanent  becomes /employer/help/<slug>.
@@ -289,5 +307,60 @@ export const ADMIN_HELP_CATEGORIES: ReadonlyArray<{
     label: "Operations",
     description:
       "How the audit log is structured, notification preferences for admins, cron-job health, troubleshooting + the team-role permissions matrix.",
+  },
+];
+
+/**
+ * Phase 10.4 — gov category labels + display order. IA follows the
+ * actual gov user journey: orient → read provincial briefs →
+ * shortage + opportunity → curriculum + outcomes → employer lookup
+ * (regulated, audit-logged) → exports → account + oversight.
+ */
+export const GOV_HELP_CATEGORIES: ReadonlyArray<{
+  value: GovHelpCategory;
+  label: string;
+  description: string;
+}> = [
+  {
+    value: "getting_started",
+    label: "Getting started",
+    description:
+      "Orient yourself as a new gov user: what Sebenza is, what aggregate data you see, what you never see, and the privacy floor that makes the platform usable as policy evidence.",
+  },
+  {
+    value: "provincial_briefs",
+    label: "Provincial & municipal briefs",
+    description:
+      "Reading the per-province labour-market brief: supply, demand, top gaps, freshness signals. What the (coming-soon) municipal layer will show.",
+  },
+  {
+    value: "shortage_opportunity",
+    label: "Shortage & opportunity",
+    description:
+      "The Shortage Justification Index and the Local-Hiring Opportunity map. How cells are classified, what each signal means, how to slice + export.",
+  },
+  {
+    value: "curriculum_outcomes",
+    label: "Curriculum & outcomes",
+    description:
+      "Curriculum-vs-market-demand analytics for DHET + tertiary institutions. Programme-level cohort outcomes + retention. Why small cohorts are suppressed.",
+  },
+  {
+    value: "employer_lookup",
+    label: "Employer lookup & compliance",
+    description:
+      "The regulated per-employer query: exact-match only, case-reference required, every lookup audit-logged. Reading employment-status mix without overreading it.",
+  },
+  {
+    value: "exports_reports",
+    label: "Exports & reports",
+    description:
+      "Bulk CSV / JSON downloads, the printable Policy Brief artefact, the public LMI JSON API. What each export contains + when to use which.",
+  },
+  {
+    value: "account_oversight",
+    label: "Account & oversight",
+    description:
+      "Two-factor authentication, sign-in security, and how to read the oversight log that records your own lookup activity for admin review.",
   },
 ];

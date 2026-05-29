@@ -5,6 +5,7 @@ import { GOV_NAV } from "@/components/layout/govNav";
 import { verifyGov } from "@/lib/auth/dal";
 import { PROVINCES } from "@/lib/mock/taxonomy";
 import { ArrowRight } from "lucide-react";
+import { HelpLink } from "@/components/feature/help/HelpLink";
 
 export const revalidate = 300;
 
@@ -28,6 +29,13 @@ export default async function GovProvincesIndexPage({
       pageTitle="Provinces"
       pageSubtitle="Per-province deep dives  supply, top local gaps, freshness, monthly trend."
     >
+      {/* Phase 10.4  help deep-links (D6). */}
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        <HelpLink role="gov" slug="reading-your-provincial-brief" label="Reading provincial briefs" />
+        <HelpLink role="gov" slug="top-skills-gaps-supply-freshness" label="Gaps + freshness" />
+        <HelpLink role="gov" slug="cities-coming-soon" label="Cities (coming soon)" />
+      </div>
+
       <ul className="grid gap-3 md:grid-cols-3">
         {PROVINCES.map((p) => (
           <li key={p.slug}>

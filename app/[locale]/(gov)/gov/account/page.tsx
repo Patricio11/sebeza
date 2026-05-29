@@ -5,6 +5,7 @@ import { SignOutButton } from "@/components/feature/auth/SignOutButton";
 import { TwoFactorAccountPanel } from "@/components/feature/auth/TwoFactorAccountPanel";
 import { verifyGov } from "@/lib/auth/dal";
 import { getSetting } from "@/lib/admin/settings";
+import { HelpLink } from "@/components/feature/help/HelpLink";
 
 export default async function GovAccountPage({
   params,
@@ -28,6 +29,12 @@ export default async function GovAccountPage({
       pageSubtitle="Government / policy workspace session + 2FA. POPIA-grade accounts always use 2FA."
       pageActions={<SignOutButton />}
     >
+      {/* Phase 10.4  help deep-links (D6). */}
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        <HelpLink role="gov" slug="two-factor-authentication" label="2FA setup" />
+        <HelpLink role="gov" slug="your-activity-audit-trail" label="Audit trail + POPIA rights" />
+      </div>
+
       <div className="grid gap-10 md:grid-cols-2">
         <section>
           <h2 className="mb-4 border-b-2 border-[color:var(--color-ink)] pb-2 font-display text-xl">

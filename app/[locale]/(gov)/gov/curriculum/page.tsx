@@ -21,6 +21,7 @@ import { demandVsCurriculumQuery } from "@/db/queries/curriculum";
 import { PROVINCES } from "@/lib/mock/taxonomy";
 import { ProgrammeVsMarketCard } from "@/components/feature/analytics/ProgrammeVsMarketCard";
 import { Download } from "lucide-react";
+import { HelpLink } from "@/components/feature/help/HelpLink";
 
 export const revalidate = 300;
 
@@ -69,6 +70,13 @@ export default async function GovCurriculumPage({
         </Link>
       }
     >
+      {/* Phase 10.4  help deep-links (D6). */}
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        <HelpLink role="gov" slug="curriculum-vs-market-demand" label="Reading this surface" />
+        <HelpLink role="gov" slug="programme-cohort-outcomes-and-retention" label="Cohort outcomes" />
+        <HelpLink role="gov" slug="what-suppressed-cells-mean" label="Suppressed cells" />
+      </div>
+
       {/* Methodology  honest framing: hand-curated mapping. */}
       <section
         aria-labelledby="method-h"

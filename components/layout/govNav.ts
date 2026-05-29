@@ -9,6 +9,7 @@ import {
   FileSearch,
   FileText,
   GraduationCap,
+  HelpCircle,
 } from "lucide-react";
 import type { DashboardNavItem } from "./DashboardShell";
 
@@ -70,6 +71,15 @@ export const GOV_NAV: DashboardNavItem[] = [
     label: "Policy brief",
     href: "/gov/brief",
     icon: FileText,
+  },
+  // Phase 10.4  gov help center. Sits between Policy brief and
+  // My account, matching the placement of the help entry on the
+  // employer / seeker / admin sides.
+  {
+    key: "help",
+    label: "Help",
+    href: "/gov/help",
+    icon: HelpCircle,
   },
   { key: "account", label: "My account", href: "/gov/account", icon: UserCog },
 ];

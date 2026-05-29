@@ -10,6 +10,7 @@ import { statusMixByNationalityQuery } from "@/db/queries/nationality";
 import { getSetting } from "@/lib/admin/settings";
 import { ArrowDown, ArrowUp, Minus, MapPin, Download, Users, FileText } from "lucide-react";
 import { NationalityStatusMixCard } from "@/components/feature/gov/NationalityStatusMixCard";
+import { HelpLink } from "@/components/feature/help/HelpLink";
 
 export const revalidate = 300;
 
@@ -79,6 +80,13 @@ export default async function GovOverviewPage({
         </div>
       }
     >
+      {/* Phase 10.4  help deep-links (D6 mirror). */}
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        <HelpLink role="gov" slug="what-sebenza-is-for-government" label="What this is" />
+        <HelpLink role="gov" slug="reading-the-lmi" label="Reading the LMI" />
+        <HelpLink role="gov" slug="privacy-floor-explained" label="Privacy floor" />
+      </div>
+
       {/* LMI hero */}
       <section className="rounded-[var(--radius-md)] border-2 border-[color:var(--color-brand-strong)] bg-[color:var(--color-brand-tint)] p-6 md:p-10">
         <div className="text-[0.7rem] uppercase tracking-[0.24em] text-[color:var(--color-brand-strong)]">

@@ -21,7 +21,7 @@
 import { Link } from "@/i18n/navigation";
 import { HelpCircle } from "lucide-react";
 
-type HelpRole = "employer" | "seeker" | "admin";
+type HelpRole = "employer" | "seeker" | "admin" | "gov";
 
 interface Props {
   /** Slug of the help article to deep-link to. */
@@ -39,6 +39,7 @@ const BASE_PATH: Record<HelpRole, string> = {
   employer: "/employer/help",
   seeker: "/dashboard/help",
   admin: "/admin/help",
+  gov: "/gov/help",
 };
 
 export function HelpLink({

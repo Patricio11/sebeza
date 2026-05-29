@@ -4,6 +4,7 @@ import { DashboardShell } from "@/components/layout/DashboardShell";
 import { GOV_NAV } from "@/components/layout/govNav";
 import { verifyGov } from "@/lib/auth/dal";
 import { Download } from "lucide-react";
+import { HelpLink } from "@/components/feature/help/HelpLink";
 
 export default async function GovExportsPage({
   params,
@@ -25,6 +26,13 @@ export default async function GovExportsPage({
       pageTitle="Exports"
       pageSubtitle="Hardened CSV exports of the publishable aggregates. Every download is audit-logged as analytics.export."
     >
+      {/* Phase 10.4  help deep-links (D6). */}
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        <HelpLink role="gov" slug="bulk-csv-downloads" label="Export schemas" />
+        <HelpLink role="gov" slug="policy-brief-as-pdf" label="Policy brief PDF" />
+        <HelpLink role="gov" slug="lmi-json-public-api" label="LMI public API" />
+      </div>
+
       <ul className="grid gap-3 md:grid-cols-2">
         <ExportCard
           title="Longitudinal outcomes"
