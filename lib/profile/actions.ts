@@ -195,10 +195,12 @@ const WORK_AVAILABILITY_VALUES = [
   // Phase 9.18  work-mode values share the enum with employment-type.
   "remote",
   "hybrid",
+  // Phase 9.21  recurring calendar-window work.
+  "seasonal",
 ] as const;
 
 const workAvailabilitySchema = z.object({
-  values: z.array(z.enum(WORK_AVAILABILITY_VALUES)).max(6),
+  values: z.array(z.enum(WORK_AVAILABILITY_VALUES)).max(7),
 });
 
 export async function updateWorkAvailability(

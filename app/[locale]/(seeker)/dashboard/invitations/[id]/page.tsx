@@ -124,6 +124,19 @@ export default async function SeekerInvitationDetailPage({
               </dd>
             </div>
           )}
+          {/* Phase 9.21  surface the season window when the vacancy
+              declared one. Informational only (D5)  the seeker reads
+              the months and decides; nothing here is a filter. */}
+          {inv.seasonalWindow && (
+            <div>
+              <dt className="text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--color-ink-soft)]">
+                Season window
+              </dt>
+              <dd className="mt-1 text-[color:var(--color-ink)]">
+                {formatSeasonalWindowLabel(inv.seasonalWindow)}
+              </dd>
+            </div>
+          )}
         </dl>
 
         {inv.description && (
@@ -164,4 +177,36 @@ export default async function SeekerInvitationDetailPage({
       </p>
     </DashboardShell>
   );
+}
+
+/**
+ * Phase 9.21  short human label for a vacancy's season window.
+ * Mirrors the employer-side helper in
+ * `app/[locale]/(employer)/employer/vacancies/[id]/page.tsx`. The
+ * two helpers stay in lockstep deliberately  the seeker reads
+ * exactly what the employer published.
+ */
+function formatSeasonalWindowLabel(
+  window: import("@/lib/mock/types").SeasonalWindow,
+): string {
+  const months = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ];
+  const start = months[window.startMonth - 1] ?? "?";
+  const end = months[window.endMonth - 1] ?? "?";
+  const range =
+    window.startMonth === window.endMonth ? start : `${start}${end}`;
+  const tail = window.recurringAnnually ? ", annually" : ", one-off";
+  return `${range}${tail}`;
 }

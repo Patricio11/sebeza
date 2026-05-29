@@ -55,4 +55,12 @@ export interface SeekerInvitationRow {
   description: string | null;
   orgId: string;
   orgName: string;
+  /**
+   * Phase 9.21  vacancy-side season window. Surfaced on the seeker
+   * detail page when present so the seeker can read the months before
+   * accepting / declining. NULL when the vacancy didn't declare a
+   * window (D0  blank means no constraint). The seeker never has a
+   * window of their own (D2); this is read-only context.
+   */
+  seasonalWindow: import("@/lib/mock/types").SeasonalWindow | null;
 }

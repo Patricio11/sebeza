@@ -106,6 +106,11 @@ export async function listMyInvitations(): Promise<SeekerInvitationRow[]> {
       description: schema.vacancies.description,
       orgId: schema.organizations.id,
       orgName: schema.organizations.name,
+      // Phase 9.21  season window for the detail page.
+      seasonalWindowStartMonth: schema.vacancies.seasonalWindowStartMonth,
+      seasonalWindowEndMonth: schema.vacancies.seasonalWindowEndMonth,
+      seasonalWindowRecurringAnnually:
+        schema.vacancies.seasonalWindowRecurringAnnually,
     })
     .from(schema.vacancyInvitations)
     .innerJoin(
@@ -154,6 +159,11 @@ export async function getMyInvitation(
       orgId: schema.organizations.id,
       orgName: schema.organizations.name,
       ownerUserId: schema.profiles.userId,
+      // Phase 9.21  season window for the detail page.
+      seasonalWindowStartMonth: schema.vacancies.seasonalWindowStartMonth,
+      seasonalWindowEndMonth: schema.vacancies.seasonalWindowEndMonth,
+      seasonalWindowRecurringAnnually:
+        schema.vacancies.seasonalWindowRecurringAnnually,
     })
     .from(schema.vacancyInvitations)
     .innerJoin(
@@ -195,6 +205,9 @@ function toSeekerRow(r: {
   description: string | null;
   orgId: string;
   orgName: string;
+  seasonalWindowStartMonth: number | null;
+  seasonalWindowEndMonth: number | null;
+  seasonalWindowRecurringAnnually: boolean | null;
 }): SeekerInvitationRow {
   return {
     id: r.id,
@@ -214,6 +227,16 @@ function toSeekerRow(r: {
     description: r.description,
     orgId: r.orgId,
     orgName: r.orgName,
+    // Phase 9.21  fold partial windows to NULL (same read-side
+    // guard as VacancyRow's rowToVacancy mapper).
+    seasonalWindow:
+      r.seasonalWindowStartMonth != null && r.seasonalWindowEndMonth != null
+        ? {
+            startMonth: r.seasonalWindowStartMonth,
+            endMonth: r.seasonalWindowEndMonth,
+            recurringAnnually: r.seasonalWindowRecurringAnnually ?? true,
+          }
+        : null,
   };
 }
 

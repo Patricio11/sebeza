@@ -59,6 +59,11 @@ const WORK_AVAILABILITY_LABELS: Record<WorkAvailabilityKind, string> = {
   part_time: "Part-time",
   contract: "Contract",
   casual: "Casual",
+  // Phase 9.21  recurring calendar-window work (lodge in Dec-Feb,
+  // citrus harvest May-Oct). The associated date range is rendered
+  // separately on the Match-requirements strip; this label is just
+  // the chip name.
+  seasonal: "Seasonal",
   remote: "Remote",
   hybrid: "Hybrid",
 };
@@ -450,6 +455,12 @@ function MatchRequirementsStrip({
     vacancy.minNqfLevel != null
       ? `NQF ${vacancy.minNqfLevel}+`
       : "Not required";
+  // Phase 9.21  surface the season window when the vacancy picked
+  // 'seasonal' from work_availability. The fourth dl row only renders
+  // for seasonal vacancies; non-seasonal vacancies keep the original
+  // 3-column layout untouched.
+  const isSeasonal = vacancy.workAvailability.includes("seasonal");
+  const seasonLabel = formatSeasonalWindowLabel(vacancy.seasonalWindow);
   return (
     <section
       aria-label="Match requirements"
@@ -458,7 +469,12 @@ function MatchRequirementsStrip({
       <div className="mb-2 text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--color-ink-soft)]">
         Match requirements
       </div>
-      <dl className="grid gap-3 text-sm md:grid-cols-3">
+      <dl
+        className={
+          "grid gap-3 text-sm " +
+          (isSeasonal ? "md:grid-cols-4" : "md:grid-cols-3")
+        }
+      >
         <div>
           <dt className="text-[0.68rem] uppercase tracking-[0.18em] text-[color:var(--color-ink-soft)]">
             Work mode &amp; type
@@ -479,9 +495,55 @@ function MatchRequirementsStrip({
           </dt>
           <dd className="mt-0.5 text-[color:var(--color-ink)]">{nqfLabel}</dd>
         </div>
+        {isSeasonal && (
+          <div>
+            <dt className="text-[0.68rem] uppercase tracking-[0.18em] text-[color:var(--color-ink-soft)]">
+              Season window
+            </dt>
+            <dd className="mt-0.5 text-[color:var(--color-ink)]">
+              {seasonLabel ?? "No window declared"}
+            </dd>
+          </div>
+        )}
       </dl>
     </section>
   );
+}
+
+/**
+ * Phase 9.21  render a vacancy's season window as a short human
+ * string. Returns null when the window is unset; the caller decides
+ * how to display the absence ("No window declared" on the detail
+ * strip, hidden entirely from the seeker notification line). Handles
+ * D4's year-wrap (start > end) and the single-month case (start ===
+ * end).
+ */
+function formatSeasonalWindowLabel(
+  window: import("@/lib/mock/types").SeasonalWindow | null,
+): string | null {
+  if (!window) return null;
+  const months = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ];
+  const startLabel = months[window.startMonth - 1] ?? "?";
+  const endLabel = months[window.endMonth - 1] ?? "?";
+  const range =
+    window.startMonth === window.endMonth
+      ? startLabel
+      : `${startLabel}${endLabel}`;
+  const tail = window.recurringAnnually ? ", annually" : ", one-off";
+  return `${range}${tail}`;
 }
 
 function ReadOnlyDetail({

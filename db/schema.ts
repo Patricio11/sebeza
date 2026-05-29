@@ -146,6 +146,13 @@ export const workAvailabilityKind = pgEnum("work_availability_kind", [
   // single "what work are you open to" set for UX simplicity.
   "remote",
   "hybrid",
+  // Phase 9.21  seasonal work pattern. Distinct from `casual`
+  // (irregular ad-hoc) and `contract` (fixed-term, often years):
+  // seasonal is RECURRING + tied to a calendar window. Lodges in
+  // Dec-Feb, citrus pickers May-Oct, Christmas retail trade. The
+  // vacancy carries the actual window (seasonal_window_* cols on
+  // vacancies); the seeker chip is "yes to this work pattern."
+  "seasonal",
 ]);
 
 /**
@@ -973,6 +980,24 @@ export const vacancies = pgTable(
       .default(sql`'{}'::work_availability_kind[]`),
     minYearsExperience: integer("min_years_experience"),
     minNqfLevel: integer("min_nqf_level"),
+    /**
+     * Phase 9.21  optional season window when the vacancy has
+     * picked `seasonal` from work_availability. Months are 1-12;
+     * start > end means the window wraps the year (D4 in the plan,
+     * e.g. start=11, end=2 = NovFeb). Both NULL = "seasonal work,
+     * timing TBD" (D0  blank means no constraint). NEVER one set
+     * without the other (the Zod schema enforces this; SQL is
+     * permissive so a partial state doesn't make the row invalid
+     * pre-migration).
+     */
+    seasonalWindowStartMonth: integer("seasonal_window_start_month"),
+    seasonalWindowEndMonth: integer("seasonal_window_end_month"),
+    /** Phase 9.21  most seasonal roles repeat annually; the boolean
+     *  lets the rare one-off (e.g. Dec 2026 World Cup pop-up) opt
+     *  out. NULL when the window itself is NULL. */
+    seasonalWindowRecurringAnnually: boolean(
+      "seasonal_window_recurring_annually",
+    ),
     /**
      * Phase 9.19 D8  follow-up nudges are opt-in per vacancy. When true,
      * a nightly cron looks for `invited`-state invitations older than 7

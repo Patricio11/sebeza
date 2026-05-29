@@ -101,6 +101,8 @@ interface FormState {
     | "full_time"
     | "remote"
     | "hybrid"
+    // Phase 9.21  recurring calendar-window work.
+    | "seasonal"
   )[];
   academic: AcademicState;
 }
@@ -864,6 +866,10 @@ export function SeekerSignUpForm({
               {(
                 [
                   ["casual", "Casual / shift work"],
+                  // Phase 9.21  position between casual and part_time
+                  // groups the "non-traditional employment patterns"
+                  // together (casual / seasonal / remote / hybrid).
+                  ["seasonal", "Seasonal"],
                   ["part_time", "Part-time"],
                   ["contract", "Contract"],
                   ["full_time", "Full-time"],

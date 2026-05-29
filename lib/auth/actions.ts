@@ -112,7 +112,8 @@ const seekerSignUpSchema = z.object({
     "open_to_work",
   ]),
   // Phase 7.5  optional at sign-up (also editable later from
-  // /dashboard/profile). Empty = no signal.
+  // /dashboard/profile). Empty = no signal. Phase 9.21 adds
+  // 'seasonal' to the enum without widening anything else.
   workAvailability: z
     .array(
       z.enum([
@@ -122,9 +123,10 @@ const seekerSignUpSchema = z.object({
         "full_time",
         "remote",
         "hybrid",
+        "seasonal",
       ]),
     )
-    .max(6)
+    .max(7)
     .optional(),
   // Optional academic block when "I'm a student" is on
   academic: z

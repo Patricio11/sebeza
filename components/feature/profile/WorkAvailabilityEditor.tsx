@@ -17,6 +17,9 @@ import { Checkbox } from "@/components/ui/Checkbox";
 
 const LABEL: Record<WorkAvailabilityKind, string> = {
   casual: "Casual / shift work",
+  // Phase 9.21  recurring calendar-window work. See the HINT below
+  // for the SA examples that motivated the chip.
+  seasonal: "Seasonal",
   part_time: "Part-time",
   contract: "Contract",
   full_time: "Full-time",
@@ -26,6 +29,8 @@ const LABEL: Record<WorkAvailabilityKind, string> = {
 
 const HINT: Record<WorkAvailabilityKind, string> = {
   casual: "Hourly / per-shift. Waitressing, retail, event work.",
+  seasonal:
+    "Recurring window each year  lodges in Dec-Feb, citrus pickers May-Oct, Christmas trade.",
   part_time: "Regular but < 35 hours a week. Compatible with study.",
   contract: "Fixed-term or project work.",
   full_time: "Permanent, full-time roles.",

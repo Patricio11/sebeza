@@ -35,16 +35,43 @@ export type WorkAvailabilityKind =
   // values. Two axes, one field, simpler UX. See migration 0030 + the
   // operator-review note on the same phase.
   | "remote"
-  | "hybrid";
+  | "hybrid"
+  // Phase 9.21  seasonal work pattern. Distinct from casual (ad-hoc,
+  // irregular) and contract (fixed-term, often years): seasonal is
+  // recurring + tied to a calendar window. The window itself lives on
+  // the vacancy (`SeasonalWindow`); the seeker chip is just "yes to
+  // this work pattern."
+  | "seasonal";
 
 export const WORK_AVAILABILITY_KINDS: WorkAvailabilityKind[] = [
   "casual",
+  // Phase 9.21  position between casual and remote groups the
+  // "non-traditional employment patterns" together (casual /
+  // seasonal / remote / hybrid).
+  "seasonal",
   "part_time",
   "contract",
   "full_time",
   "remote",
   "hybrid",
 ];
+
+/**
+ * Phase 9.21  vacancy-side season window. Both month values are
+ * 1-12 (1 = January). `startMonth > endMonth` means the window wraps
+ * the year (D4 in the plan, e.g. NovFeb is `{start: 11, end: 2}`).
+ * `recurringAnnually` defaults true; the rare one-off seasonal role
+ * sets it false.
+ *
+ * NEVER present in any read with one month set and the other NULL;
+ * the action layer treats "one set, one NULL" the same as "neither
+ * set" so the public payload is always either complete or absent.
+ */
+export interface SeasonalWindow {
+  startMonth: number;
+  endMonth: number;
+  recurringAnnually: boolean;
+}
 
 export interface SkillRef {
   name: string;

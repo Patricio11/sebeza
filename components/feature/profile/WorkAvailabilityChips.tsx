@@ -11,6 +11,10 @@ import type { WorkAvailabilityKind } from "@/lib/mock/types";
 
 const LABEL: Record<WorkAvailabilityKind, string> = {
   casual: "Casual / shift work",
+  // Phase 9.21  recurring calendar-window work (lodge in Dec-Feb,
+  // citrus harvest May-Oct, Christmas retail trade). Distinct from
+  // casual (ad-hoc) and contract (fixed-term but often years).
+  seasonal: "Seasonal",
   part_time: "Part-time",
   contract: "Contract",
   full_time: "Full-time",

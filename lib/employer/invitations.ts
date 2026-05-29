@@ -60,6 +60,46 @@ function fail(message: string): { ok: false; message: string } {
   return { ok: false, message };
 }
 
+const SEASONAL_MONTH_LABELS = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+];
+
+/**
+ * Phase 9.21 D6  render a vacancy's season window as a one-line
+ * suffix for the invitation notification body. Returns "" when the
+ * window is unset so the body concatenation stays clean. Handles
+ * D4's year-wrap (start > end is e.g. NovFeb) and the single-month
+ * case (start === end is "December only").
+ *
+ * Lives in this file (not on the vacancy reader) because the
+ * notification copy is its own concern  the vacancy detail page has
+ * its own renderer with slightly different framing.
+ */
+function formatSeasonalWindowLine(
+  window: import("@/lib/mock/types").SeasonalWindow | null,
+): string {
+  if (!window) return "";
+  const start = SEASONAL_MONTH_LABELS[window.startMonth - 1] ?? "?";
+  const end = SEASONAL_MONTH_LABELS[window.endMonth - 1] ?? "?";
+  const range =
+    window.startMonth === window.endMonth ? start : `${start}${end}`;
+  const tail = window.recurringAnnually
+    ? "annually"
+    : "this year only, no recurrence";
+  return `\n\nSeasonal window: ${range}, ${tail}.`;
+}
+
 /** Skip reason recorded in the audit log per D5. NEVER exposed to the
  *  employer UI  the action's response carries only counts. */
 export type SkipReason =
@@ -305,6 +345,10 @@ export async function bulkInviteToVacancy(
       const noteSuffix = noteForMeta
         ? `\n\nNote from ${orgName}: ${noteForMeta}`
         : "";
+      // Phase 9.21 D6  season window line riding on the same body.
+      // Informational only (D5)  the seeker reads it to decide; we
+      // don't filter on it at the match layer.
+      const seasonalLine = formatSeasonalWindowLine(vacancy.seasonalWindow);
       await createNotification({
         userId: profile.userId,
         kind: "vacancy.invite",
@@ -314,6 +358,7 @@ export async function bulkInviteToVacancy(
           (expiresAt
             ? `Responds-by: ${expiresAt.toISOString().slice(0, 10)}.`
             : `No expiry on this invite.`) +
+          seasonalLine +
           noteSuffix,
         link: `/dashboard/invitations/${invitationId}`,
         meta: {

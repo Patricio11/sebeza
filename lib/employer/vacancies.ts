@@ -48,6 +48,7 @@ import {
 } from "@/lib/mock/taxonomy";
 import type {
   SearchFilters,
+  SeasonalWindow,
   Seniority,
   WorkAvailabilityKind,
 } from "@/lib/mock/types";
@@ -66,6 +67,21 @@ function ok<T extends object>(extra?: T): { ok: true } & T {
 }
 function fail(message: string): { ok: false; message: string } {
   return { ok: false, message };
+}
+
+/**
+ * Phase 9.21  defensive paired-month helper. Returns the column's
+ * own value if BOTH paired months are set, NULL otherwise. The Zod
+ * refine() catches partial windows at the action boundary; this is
+ * the belt to that braces so an unrelated bug can't write a half-
+ * window directly to Postgres.
+ */
+function pairedMonth(
+  own: number | null | undefined,
+  pair: number | null | undefined,
+): number | null {
+  if (own == null || pair == null) return null;
+  return own;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -101,6 +117,11 @@ export interface VacancyRow {
   /** Phase 9.19 D8  opt-in 7-day follow-up nudges. Default false; the
    *  nightly cron only runs against vacancies that have it set. */
   followUpNudgesEnabled: boolean;
+  /** Phase 9.21  optional season window. Always either fully present
+   *  or NULL  the read mapper folds "one set, one NULL" to NULL so
+   *  consumers never see a partial window. Only meaningful when
+   *  workAvailability includes 'seasonal'. */
+  seasonalWindow: SeasonalWindow | null;
   createdAt: string; // ISO
   closedAt: string | null;
 }
@@ -125,6 +146,18 @@ function rowToVacancy(r: typeof schema.vacancies.$inferSelect): VacancyRow {
     minYearsExperience: r.minYearsExperience ?? null,
     minNqfLevel: r.minNqfLevel ?? null,
     followUpNudgesEnabled: r.followUpNudgesEnabled ?? false,
+    // Phase 9.21  fold "one month set, the other NULL" to NULL so
+    // consumers never have to defend against half-windows. The action
+    // layer never writes a partial window, but legacy / hand-edited
+    // rows could exist; this is the read-side guard.
+    seasonalWindow:
+      r.seasonalWindowStartMonth != null && r.seasonalWindowEndMonth != null
+        ? {
+            startMonth: r.seasonalWindowStartMonth,
+            endMonth: r.seasonalWindowEndMonth,
+            recurringAnnually: r.seasonalWindowRecurringAnnually ?? true,
+          }
+        : null,
     createdAt:
       r.createdAt instanceof Date
         ? r.createdAt.toISOString()
@@ -219,6 +252,9 @@ const WORK_AVAILABILITY_VALUES = [
   "full_time",
   "remote",
   "hybrid",
+  // Phase 9.21  seasonal joins the same array-overlap match. The
+  // associated date-range lives on the seasonalWindow* fields below.
+  "seasonal",
 ] as const satisfies readonly WorkAvailabilityKind[];
 
 const vacancyInputSchema = z.object({
@@ -270,7 +306,42 @@ const vacancyInputSchema = z.object({
    *  current value alone (no surprise toggle on partial form payloads
    *  from older clients). */
   followUpNudgesEnabled: z.boolean().optional(),
-});
+  /**
+   * Phase 9.21  optional season window when workAvailability
+   * includes 'seasonal'. NULL = "seasonal work, timing TBD" per D0.
+   * The two month fields are 1-12 and must BOTH be set or BOTH be
+   * NULL; the refine() below enforces the pairing. Year-wrap
+   * (start > end) is legal per D4.
+   */
+  seasonalWindowStartMonth: z.coerce
+    .number()
+    .int()
+    .min(1)
+    .max(12)
+    .nullable()
+    .optional(),
+  seasonalWindowEndMonth: z.coerce
+    .number()
+    .int()
+    .min(1)
+    .max(12)
+    .nullable()
+    .optional(),
+  seasonalWindowRecurringAnnually: z.boolean().nullable().optional(),
+}).refine(
+  (v) => {
+    const start = v.seasonalWindowStartMonth ?? null;
+    const end = v.seasonalWindowEndMonth ?? null;
+    // Both set or both unset; never one of each (D3 pairing rule).
+    if ((start === null) !== (end === null)) return false;
+    return true;
+  },
+  {
+    message:
+      "Set both the start and end month of the seasonal window, or leave both blank.",
+    path: ["seasonalWindowEndMonth"],
+  },
+);
 
 const transitionSchema = z.object({
   vacancyId: z.string().min(1),
@@ -334,6 +405,15 @@ export async function createVacancy(
     minYearsExperience: v.minYearsExperience ?? null,
     minNqfLevel: v.minNqfLevel ?? null,
     followUpNudgesEnabled: v.followUpNudgesEnabled ?? false,
+    // Phase 9.21  the refine() above guarantees these are paired;
+    // we still defensively null both together so an unrelated bug
+    // can't write a half-window.
+    seasonalWindowStartMonth: pairedMonth(v.seasonalWindowStartMonth, v.seasonalWindowEndMonth),
+    seasonalWindowEndMonth: pairedMonth(v.seasonalWindowEndMonth, v.seasonalWindowStartMonth),
+    seasonalWindowRecurringAnnually:
+      v.seasonalWindowStartMonth != null && v.seasonalWindowEndMonth != null
+        ? v.seasonalWindowRecurringAnnually ?? true
+        : null,
   });
 
   await logAccess({
@@ -395,6 +475,13 @@ export async function updateVacancy(
       ...(v.followUpNudgesEnabled !== undefined
         ? { followUpNudgesEnabled: v.followUpNudgesEnabled }
         : {}),
+      // Phase 9.21  paired-month guard mirrors the create insert.
+      seasonalWindowStartMonth: pairedMonth(v.seasonalWindowStartMonth, v.seasonalWindowEndMonth),
+      seasonalWindowEndMonth: pairedMonth(v.seasonalWindowEndMonth, v.seasonalWindowStartMonth),
+      seasonalWindowRecurringAnnually:
+        v.seasonalWindowStartMonth != null && v.seasonalWindowEndMonth != null
+          ? v.seasonalWindowRecurringAnnually ?? true
+          : null,
     })
     .where(
       and(

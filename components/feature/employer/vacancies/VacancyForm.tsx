@@ -25,6 +25,7 @@ import { Lock } from "lucide-react";
 import type {
   TaxonomyEntry,
   Province,
+  SeasonalWindow,
   WorkAvailabilityKind,
 } from "@/lib/mock/types";
 import { useSessionDraft } from "@/lib/hooks/useSessionDraft";
@@ -48,10 +49,29 @@ export interface VacancyFormValue {
   minNqfLevel?: number | null;
   /** Phase 9.19 D8  opt-in 7-day follow-up nudge cron (default off). */
   followUpNudgesEnabled?: boolean;
+  /** Phase 9.21  vacancy-side season window. Flat fields rather than
+   *  a nested object so the form value matches the Zod schema in
+   *  `vacancies.ts` 1:1 (the server action accepts these three fields
+   *  directly). NULL clears the column; the action layer's pairing
+   *  guard ensures both months are NULL when one is. Read shapes
+   *  (VacancyRow.seasonalWindow) use the nested object  the form
+   *  accepts either via the widened `initial` prop. */
+  seasonalWindowStartMonth?: number | null;
+  seasonalWindowEndMonth?: number | null;
+  seasonalWindowRecurringAnnually?: boolean | null;
 }
 
 export interface VacancyFormProps {
-  initial?: Partial<VacancyFormValue>;
+  /**
+   * Optional preset values. Accepts either the flat form shape OR the
+   * nested `seasonalWindow` object that `VacancyRow` carries  the
+   * detail-page edit flow passes the row directly, and we don't want
+   * every call site to manually unwrap. The form reads from whichever
+   * shape is present.
+   */
+  initial?: Partial<VacancyFormValue> & {
+    seasonalWindow?: SeasonalWindow | null;
+  };
   professions: TaxonomyEntry[];
   provinces: Province[];
   skills: TaxonomyEntry[];
@@ -89,6 +109,12 @@ interface VacancyDraft {
   minYearsExperience: string;
   minNqfLevel: string;
   followUpNudgesEnabled: boolean;
+  // Phase 9.21  season window as form strings so the JSON draft
+  // round-trip is lossless. Empty strings = "no window" (D7); they
+  // only get persisted when 'seasonal' is in the chip set.
+  seasonalWindowStartMonth: string;
+  seasonalWindowEndMonth: string;
+  seasonalWindowRecurringAnnually: boolean;
 }
 
 const SENIORITY_OPTIONS = [
@@ -110,9 +136,73 @@ const WORK_AVAILABILITY_CHOICES: ReadonlyArray<{
   { value: "part_time", label: "Part-time" },
   { value: "contract", label: "Contract" },
   { value: "casual", label: "Casual" },
+  // Phase 9.21  recurring calendar-window work; reveals the
+  // optional season window sub-block below the chips when picked.
+  { value: "seasonal", label: "Seasonal" },
   { value: "remote", label: "Remote" },
   { value: "hybrid", label: "Hybrid" },
 ];
+
+// Phase 9.21  month picker options. Plain English labels, 1-12
+// payload values so the Zod schema can validate without locale lookups.
+const MONTH_OPTIONS: ReadonlyArray<{ value: number; label: string }> = [
+  { value: 1, label: "January" },
+  { value: 2, label: "February" },
+  { value: 3, label: "March" },
+  { value: 4, label: "April" },
+  { value: 5, label: "May" },
+  { value: 6, label: "June" },
+  { value: 7, label: "July" },
+  { value: 8, label: "August" },
+  { value: 9, label: "September" },
+  { value: 10, label: "October" },
+  { value: 11, label: "November" },
+  { value: 12, label: "December" },
+];
+
+/**
+ * Phase 9.21  build the season-window subset of the submit payload.
+ * Clears the window entirely when 'seasonal' isn't picked (D7); when
+ * one month is set but the other isn't, treats it as no window (the
+ * Zod refine() catches the pairing too  this is the form's belt).
+ */
+function buildSeasonalWindowSubmit({
+  seasonalSelected,
+  startRaw,
+  endRaw,
+  recurringAnnually,
+}: {
+  seasonalSelected: boolean;
+  startRaw: string;
+  endRaw: string;
+  recurringAnnually: boolean;
+}): {
+  seasonalWindowStartMonth: number | null;
+  seasonalWindowEndMonth: number | null;
+  seasonalWindowRecurringAnnually: boolean | null;
+} {
+  if (!seasonalSelected) {
+    return {
+      seasonalWindowStartMonth: null,
+      seasonalWindowEndMonth: null,
+      seasonalWindowRecurringAnnually: null,
+    };
+  }
+  const start = startRaw.trim() === "" ? null : Number(startRaw);
+  const end = endRaw.trim() === "" ? null : Number(endRaw);
+  if (start === null || end === null) {
+    return {
+      seasonalWindowStartMonth: null,
+      seasonalWindowEndMonth: null,
+      seasonalWindowRecurringAnnually: null,
+    };
+  }
+  return {
+    seasonalWindowStartMonth: start,
+    seasonalWindowEndMonth: end,
+    seasonalWindowRecurringAnnually: recurringAnnually,
+  };
+}
 
 // Phase 9.19  NQF dropdown options. The seeker side (`NqfLevel`) only
 // captures 4-10 (post-Matric) so we offer the same range here  asking
@@ -178,6 +268,32 @@ export function VacancyForm({
   const [followUpNudgesEnabled, setFollowUpNudgesEnabled] = useState<boolean>(
     initial?.followUpNudgesEnabled ?? false,
   );
+  // Phase 9.21  season window state. Strings so the draft round-trips
+  // through JSON; only persisted when 'seasonal' is in the chip set.
+  // Reads from either the nested `seasonalWindow` (when initial is a
+  // VacancyRow) or the flat fields (when initial is already shaped for
+  // submit).
+  const [seasonalWindowStartMonth, setSeasonalWindowStartMonth] =
+    useState<string>(() => {
+      const flat = initial?.seasonalWindowStartMonth;
+      if (flat != null) return String(flat);
+      const nested = initial?.seasonalWindow?.startMonth;
+      return nested != null ? String(nested) : "";
+    });
+  const [seasonalWindowEndMonth, setSeasonalWindowEndMonth] = useState<string>(
+    () => {
+      const flat = initial?.seasonalWindowEndMonth;
+      if (flat != null) return String(flat);
+      const nested = initial?.seasonalWindow?.endMonth;
+      return nested != null ? String(nested) : "";
+    },
+  );
+  const [seasonalWindowRecurringAnnually, setSeasonalWindowRecurringAnnually] =
+    useState<boolean>(
+      initial?.seasonalWindowRecurringAnnually ??
+        initial?.seasonalWindow?.recurringAnnually ??
+        true,
+    );
 
   // Persist the draft so locale-switching mid-edit doesn't wipe it.
   // Scoped per (create vs edit-vacancy-id) so drafts don't bleed
@@ -197,6 +313,9 @@ export function VacancyForm({
       minYearsExperience,
       minNqfLevel,
       followUpNudgesEnabled,
+      seasonalWindowStartMonth,
+      seasonalWindowEndMonth,
+      seasonalWindowRecurringAnnually,
     }),
     [
       title,
@@ -211,6 +330,9 @@ export function VacancyForm({
       minYearsExperience,
       minNqfLevel,
       followUpNudgesEnabled,
+      seasonalWindowStartMonth,
+      seasonalWindowEndMonth,
+      seasonalWindowRecurringAnnually,
     ],
   );
   const { clear: clearDraft } = useSessionDraft<VacancyDraft>(
@@ -235,6 +357,14 @@ export function VacancyForm({
         if (draft.minNqfLevel !== undefined) setMinNqfLevel(draft.minNqfLevel);
         if (typeof draft.followUpNudgesEnabled === "boolean")
           setFollowUpNudgesEnabled(draft.followUpNudgesEnabled);
+        if (draft.seasonalWindowStartMonth !== undefined)
+          setSeasonalWindowStartMonth(draft.seasonalWindowStartMonth);
+        if (draft.seasonalWindowEndMonth !== undefined)
+          setSeasonalWindowEndMonth(draft.seasonalWindowEndMonth);
+        if (typeof draft.seasonalWindowRecurringAnnually === "boolean")
+          setSeasonalWindowRecurringAnnually(
+            draft.seasonalWindowRecurringAnnually,
+          );
       },
     },
   );
@@ -308,6 +438,16 @@ export function VacancyForm({
       minYearsExperience: yearsNum,
       minNqfLevel: nqfNum,
       followUpNudgesEnabled,
+      // Phase 9.21  D7: only persist the window when 'seasonal' is
+      // in the chip set; clearing the chip clears the window. The
+      // refine() in the Zod schema also catches half-windows; the
+      // parseInt + paired check below is the in-form belt-and-braces.
+      ...buildSeasonalWindowSubmit({
+        seasonalSelected: workAvailabilitySet.has("seasonal"),
+        startRaw: seasonalWindowStartMonth,
+        endRaw: seasonalWindowEndMonth,
+        recurringAnnually: seasonalWindowRecurringAnnually,
+      }),
     };
 
     startTransition(async () => {
@@ -490,6 +630,81 @@ export function VacancyForm({
               );
             })}
           </ul>
+
+          {/* Phase 9.21 D7  conditional season-window sub-block.
+              Only renders when 'seasonal' is in the chip set; untoggling
+              the chip clears the displayed inputs but keeps the local
+              state so re-toggling restores the user's draft (the
+              submit path still gates on the chip being on). */}
+          {workAvailabilitySet.has("seasonal") && (
+            <div className="mt-3 rounded-[var(--radius-sm)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface-sunk)] p-3">
+              <p className="text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--color-ink-soft)]">
+                Season window
+              </p>
+              <p className="mt-1 text-xs text-[color:var(--color-ink-soft)]">
+                Optional. When set, seekers see the exact months in
+                their invitation. Leave both blank for &ldquo;seasonal work,
+                timing TBD.&rdquo; If the window crosses December (e.g. lodges
+                NovFeb), set start to November and end to February.
+              </p>
+              <div className="mt-3 grid gap-3 md:grid-cols-2">
+                <SelectField
+                  id="seasonalWindowStartMonth"
+                  name="seasonalWindowStartMonth"
+                  label="Season starts"
+                  optional
+                  value={seasonalWindowStartMonth}
+                  onChange={(e) =>
+                    setSeasonalWindowStartMonth(e.target.value)
+                  }
+                  disabled={pending}
+                >
+                  <option value=""></option>
+                  {MONTH_OPTIONS.map((opt) => (
+                    <option key={opt.value} value={String(opt.value)}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </SelectField>
+                <SelectField
+                  id="seasonalWindowEndMonth"
+                  name="seasonalWindowEndMonth"
+                  label="Season ends"
+                  optional
+                  value={seasonalWindowEndMonth}
+                  onChange={(e) => setSeasonalWindowEndMonth(e.target.value)}
+                  disabled={pending}
+                >
+                  <option value=""></option>
+                  {MONTH_OPTIONS.map((opt) => (
+                    <option key={opt.value} value={String(opt.value)}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </SelectField>
+              </div>
+              <label className="mt-3 flex items-start gap-3">
+                <input
+                  type="checkbox"
+                  checked={seasonalWindowRecurringAnnually}
+                  onChange={(e) =>
+                    setSeasonalWindowRecurringAnnually(e.target.checked)
+                  }
+                  disabled={pending}
+                  className="mt-0.5 size-4 cursor-pointer accent-[color:var(--color-ink)]"
+                />
+                <span className="flex-1 text-sm">
+                  <span className="font-display text-base text-[color:var(--color-ink)]">
+                    This window repeats every year
+                  </span>
+                  <span className="mt-0.5 block text-xs text-[color:var(--color-ink-soft)]">
+                    Default for most seasonal roles. Untick for one-off
+                    runs (e.g. a tournament pop-up that won&rsquo;t repeat).
+                  </span>
+                </span>
+              </label>
+            </div>
+          )}
         </fieldset>
 
         <div className="grid gap-5 md:grid-cols-2">

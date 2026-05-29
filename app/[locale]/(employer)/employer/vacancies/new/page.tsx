@@ -48,7 +48,15 @@ export default async function NewVacancyPage({
   // vacancy is its own draft  saving doesn't touch the source row.
   // Title suffix " (copy)" so the editor knows which is which.
   const { duplicateFrom } = await searchParams;
-  let initial: Partial<VacancyFormValue> | undefined;
+  // Phase 9.21  the form's `initial` prop accepts either the flat
+  // VacancyFormValue shape OR a nested `seasonalWindow` object (read
+  // shape). The duplicate-from-existing path uses the nested object
+  // because the source is a VacancyRow.
+  let initial:
+    | (Partial<VacancyFormValue> & {
+        seasonalWindow?: import("@/lib/mock/types").SeasonalWindow | null;
+      })
+    | undefined;
   let pageSubtitle =
     "Private to your organisation. Vacancies start as drafts  open them when ready to invite candidates.";
   if (duplicateFrom) {
@@ -68,6 +76,12 @@ export default async function NewVacancyPage({
         workAvailability: source.workAvailability,
         minYearsExperience: source.minYearsExperience,
         minNqfLevel: source.minNqfLevel,
+        // Phase 9.21  the form widens `initial` to accept either the
+        // nested `seasonalWindow` object (this path  source is a
+        // VacancyRow) or the three flat fields. Passing the nested
+        // object keeps this duplicate-from-existing intact for
+        // seasonal vacancies.
+        seasonalWindow: source.seasonalWindow,
       };
       pageSubtitle = `Pre-filled from "${source.title}". Edit anything before saving  this creates a fresh draft, the original stays untouched.`;
     }
