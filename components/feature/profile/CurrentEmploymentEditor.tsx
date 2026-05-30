@@ -16,8 +16,9 @@
  */
 
 import { useState, useTransition } from "react";
-import { TextField, SelectField } from "@/components/ui/FormField";
+import { TextField } from "@/components/ui/FormField";
 import { ComboboxField } from "@/components/ui/ComboboxField";
+import { MonthYearPicker } from "@/components/ui/MonthYearPicker";
 import { Button } from "@/components/ui/Button";
 import { updateCurrentEmployment } from "@/lib/profile/employment";
 import { Building2 } from "lucide-react";
@@ -67,14 +68,14 @@ export function CurrentEmploymentEditor({
 
   const [employerValue, setEmployerValue] = useState(initialValue);
   const [employerCity, setEmployerCity] = useState("");
-  const [roleStartedYear, setRoleStartedYear] = useState(
+  // Phase 10 follow-up  consolidated month+year into a single ISO
+  // yyyy-mm string the MonthYearPicker round-trips natively. The
+  // wire payload to the server action is still a full ISO date
+  // (yyyy-mm-01); we just stop carrying month + year separately on
+  // the client.
+  const [roleStartedIso, setRoleStartedIso] = useState(
     initial.currentRoleStartedAt
-      ? initial.currentRoleStartedAt.slice(0, 4)
-      : "",
-  );
-  const [roleStartedMonth, setRoleStartedMonth] = useState(
-    initial.currentRoleStartedAt
-      ? String(Number(initial.currentRoleStartedAt.slice(5, 7)))
+      ? initial.currentRoleStartedAt.slice(0, 7)
       : "",
   );
   const [roleCity, setRoleCity] = useState(initial.currentRoleCity ?? "");
@@ -98,10 +99,10 @@ export function CurrentEmploymentEditor({
                 : {}),
             }
           : {}),
-        roleStartedAt:
-          roleStartedYear && roleStartedMonth
-            ? `${roleStartedYear}-${roleStartedMonth.padStart(2, "0")}-01`
-            : null,
+        // Phase 10 follow-up  the picker emits ISO yyyy-mm; the
+        // server expects a full date, so we pin the day to 01
+        // (the existing "started this month" convention).
+        roleStartedAt: roleStartedIso ? `${roleStartedIso}-01` : null,
         roleCity: roleCity.trim() || null,
       });
       if (!res.ok) {
@@ -117,8 +118,7 @@ export function CurrentEmploymentEditor({
     setSaved(false);
     setEmployerValue("");
     setEmployerCity("");
-    setRoleStartedYear("");
-    setRoleStartedMonth("");
+    setRoleStartedIso("");
     setRoleCity("");
     startTransition(async () => {
       const res = await updateCurrentEmployment({
@@ -176,48 +176,18 @@ export function CurrentEmploymentEditor({
             onChange={(e) => setEmployerCity(e.target.value)}
           />
         )}
-        <SelectField
-          id="role-started-month-dash"
-          label="Started (month)"
-          value={roleStartedMonth}
-          onChange={(e) => setRoleStartedMonth(e.target.value)}
-        >
-          <option value=""></option>
-          {[
-            [1, "January"],
-            [2, "February"],
-            [3, "March"],
-            [4, "April"],
-            [5, "May"],
-            [6, "June"],
-            [7, "July"],
-            [8, "August"],
-            [9, "September"],
-            [10, "October"],
-            [11, "November"],
-            [12, "December"],
-          ].map(([n, label]) => (
-            <option key={n} value={String(n)}>
-              {label}
-            </option>
-          ))}
-        </SelectField>
-        <SelectField
-          id="role-started-year-dash"
-          label="Started (year)"
-          value={roleStartedYear}
-          onChange={(e) => setRoleStartedYear(e.target.value)}
-        >
-          <option value=""></option>
-          {Array.from({ length: 40 }, (_, i) => {
-            const y = new Date().getFullYear() - i;
-            return (
-              <option key={y} value={String(y)}>
-                {y}
-              </option>
-            );
-          })}
-        </SelectField>
+        {/* Phase 10 follow-up  consolidated month+year picker. Matches
+            the seasonal-window picker on the vacancy form; civic-
+            editorial UI instead of the previous two browser-default
+            dropdowns. */}
+        <MonthYearPicker
+          id="role-started-dash"
+          label="Started"
+          value={roleStartedIso}
+          onChange={setRoleStartedIso}
+          maxYear={new Date().getFullYear()}
+          minYear={new Date().getFullYear() - 40}
+        />
         <TextField
           id="role-city-dash"
           label="City you work in"

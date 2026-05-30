@@ -7,6 +7,7 @@
 
 import { useState, useTransition } from "react";
 import { TextField, TextareaField } from "@/components/ui/FormField";
+import { MonthYearPicker } from "@/components/ui/MonthYearPicker";
 import { Button } from "@/components/ui/Button";
 import { Checkbox } from "@/components/ui/Checkbox";
 import {
@@ -190,20 +191,25 @@ export function ExperienceManager({ initial, labels }: Props) {
               onChange={(e) => setForm({ ...form, city: e.target.value })}
               autoComplete="address-level2"
             />
-            <TextField
+            {/* Phase 10 follow-up  civic-editorial month+year pickers
+                replace the browser-default <input type="month">. The
+                wire shape (ISO yyyy-mm) is unchanged. */}
+            <MonthYearPicker
               id="exp-start"
               label="Started"
-              type="month"
               value={form.startedAt}
-              onChange={(e) => setForm({ ...form, startedAt: e.target.value })}
+              onChange={(v) => setForm({ ...form, startedAt: v })}
+              maxYear={new Date().getFullYear()}
+              minYear={new Date().getFullYear() - 60}
             />
-            <TextField
+            <MonthYearPicker
               id="exp-end"
               label={labels.to}
-              type="month"
               value={form.isCurrent ? "" : form.endedAt}
-              onChange={(e) => setForm({ ...form, endedAt: e.target.value })}
+              onChange={(v) => setForm({ ...form, endedAt: v })}
               disabled={form.isCurrent}
+              maxYear={new Date().getFullYear()}
+              minYear={new Date().getFullYear() - 60}
             />
             <Checkbox
               className="mt-2 md:mt-auto md:pb-3"
