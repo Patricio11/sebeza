@@ -1,0 +1,68 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/hard-delete-erased",
+      "schedule": "0 2 * * *"
+    },
+    {
+      "path": "/api/cron/status-stale-warning",
+      "schedule": "15 2 * * *"
+    },
+    {
+      "path": "/api/cron/saved-search-matches",
+      "schedule": "30 2 * * *"
+    },
+    {
+      "path": "/api/cron/skill-gap-snapshot",
+      "schedule": "45 2 * * *"
+    },
+    {
+      "path": "/api/cron/outcome-snapshots",
+      "schedule": "0 3 * * *"
+    },
+    {
+      "path": "/api/cron/lmi-snapshot",
+      "schedule": "15 3 * * *"
+    },
+    {
+      "path": "/api/cron/saqa-worker",
+      "schedule": "30 3 * * *"
+    },
+    {
+      "path": "/api/cron/vacancy-invite-expiry",
+      "schedule": "45 3 * * *"
+    },
+    {
+      "path": "/api/cron/seeker-invite-expiry",
+      "schedule": "0 4 * * *"
+    },
+    {
+      "path": "/api/cron/seeker-weekly-digest",
+      "schedule": "0 4 * * 1"
+    },
+    {
+      "path": "/api/cron/learning-nudge",
+      "schedule": "15 4 * * *"
+    },
+    {
+      "path": "/api/cron/vacancy-follow-up-nudges",
+      "schedule": "30 4 * * *"
+    },
+    {
+      "path": "/api/cron/placement-status-check-due",
+      "schedule": "45 4 * * *"
+    },
+    {
+      "path": "/api/cron/placement-retention-snapshot",
+      "schedule": "0 5 * * *"
+    },
+    {
+      "path": "/api/cron/employment-verification-expire",
+      "schedule": "15 5 * * *"
+    },
+    {
+      "path": "/api/cron/seeker-badge-sweep",
+      "schedule": "30 5 * * *"
+    }
+  ]
+}

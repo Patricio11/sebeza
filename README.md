@@ -34,7 +34,7 @@ with zero paid credentials. Each integration has one obvious activation path.
 | **Per-employer mix lookup** (gov) | `feature_flag_employer_mix_lookup` (default OFF) | `/gov/employer-lookup` renders informative dormant notice; query refuses | Admin flips the flag once the partnership + oversight protocol is in place |
 | **2FA enforcement** | `feature_flag_2fa_enforced` (default OFF for seekers) | Admins must enrol; seekers + employers are encouraged but not forced | Admin flips the flag when the roll-out is communicated |
 | **Upstash rate limiter** | No call sites wired | In-memory `RateLimiter` exists; nothing is enforced | Import `enforce(bucket, key)` on the Server Action you want to gate |
-| **Vercel Cron** | `CRON_SECRET` unset | `isAuthorizedCron` refuses every request | Set `CRON_SECRET` + add cron paths to `vercel.json` |
+| **Vercel Cron** | `CRON_SECRET` unset | `isAuthorizedCron` refuses every request | Set `CRON_SECRET`  paths already declared in `vercel.json` (16 jobs, staggered 02:0005:30 UTC) |
 
 ### On rate limiting
 
@@ -197,10 +197,12 @@ for the 9.12 My Learning section; 10 abandoned learning items on
 - `GET /api/gov/decline-reasons/export` — "why roles go unfilled" CSV (suppressed)
 - `GET /api/gov/stall-reasons/export` — "why learners stall" CSV (suppressed + `outcomes_research`-gated)
 - `GET /api/gov/curriculum/export` — curriculum-vs-demand CSV (suppressed)
-- `GET /api/cron/*` — 9 Vercel Cron entry points (CRON_SECRET-gated; fail-closed):
-  `hard-delete-erased`, `lmi-snapshot`, `outcome-snapshots`, `saqa-worker`,
-  `saved-search-matches`, `skill-gap-snapshot`, `status-stale-warning`,
-  `vacancy-invite-expiry`, `learning-nudge`
+- `GET /api/cron/*` — 16 Vercel Cron entry points (CRON_SECRET-gated; fail-closed; schedules in `vercel.json`, staggered 02:00–05:30 UTC = 04:00–07:30 SAST):
+  `hard-delete-erased`, `status-stale-warning`, `saved-search-matches`,
+  `skill-gap-snapshot`, `outcome-snapshots`, `lmi-snapshot`, `saqa-worker`,
+  `vacancy-invite-expiry`, `seeker-invite-expiry`, `seeker-weekly-digest` (Mondays only),
+  `learning-nudge`, `vacancy-follow-up-nudges`, `placement-status-check-due`,
+  `placement-retention-snapshot`, `employment-verification-expire`, `seeker-badge-sweep`
 
 All authed routes localised at `/[locale]/...` for `en`, `zu`, `xh`, `af`.
 
@@ -253,7 +255,7 @@ When it's time to activate a deferred service, the runbook is already written:
 
 - **AWS Cape Town `af-south-1` migration** — [docs/AWS_MIGRATION_RUNBOOK.md](docs/AWS_MIGRATION_RUNBOOK.md) (~4 hours, zero remaining POPIA work).
 - **KYC / SAQA / Resend activation** — [docs/completed/PHASE_8_COMPLETE.md](docs/completed/PHASE_8_COMPLETE.md) "Activation" section.
-- **Cron + CRON_SECRET wiring** — [docs/completed/PHASE_8_COMPLETE.md](docs/completed/PHASE_8_COMPLETE.md). 9 cron routes total through 9.12.
+- **Cron + CRON_SECRET wiring** — schedules in `vercel.json` (16 jobs, staggered 02:00–05:30 UTC). Background in [docs/completed/PHASE_8_COMPLETE.md](docs/completed/PHASE_8_COMPLETE.md).
 - **Per-employer mix lookup activation** — [docs/completed/PHASE_9_7_COMPLETE.md](docs/completed/PHASE_9_7_COMPLETE.md) "Dormant-by-default" section + oversight log protocol.
 - **Outcomes-dataset compliance** — `GET /api/admin/outcomes-compliance` runs the 18 assertions live; CI hookup is the Phase 10 polish.
 

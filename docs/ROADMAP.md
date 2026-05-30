@@ -822,8 +822,8 @@ Migration `0018_phase9_9_years_experience.sql` applied to Neon. Companion docs: 
 
 Five sub-phases, ordered by ROI per LOC:
 
-### Task 11.1: Engagement velocity (retention surfacing)
-- [ ] Weekly digest email · "Why no invites?" diagnostic card · welcome-back delta card · achievement badges · invitation urgency chip · audit-log link prominence. *See `docs/PHASE_11_1_PLAN.md`.*
+### Task 11.1: Engagement velocity (retention surfacing) ✅ *(shipped 2026-05-30)*
+- [x] Weekly digest email · "Why no invites?" diagnostic card · welcome-back delta card · achievement badges · invitation urgency chip · audit-log link prominence. *See `docs/completed/PHASE_11_1_COMPLETE.md` (+ archived plan).*
 
 ### Task 11.2: Learning loop completion (skill-growth conversion)
 - [ ] LearningPath `url` field · free-alternative on cost-abandon · completion  cert upload bridge · "interested" parking-lot state · skill journey timeline · city-demand drill-down · compass auto-revalidate · adjacent profession CTA · student-lane discoverability. *See `docs/PHASE_11_2_PLAN.md`.*

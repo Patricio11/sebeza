@@ -1849,3 +1849,40 @@ export const employmentVerifications = pgTable(
     ),
   }),
 );
+
+// ──────────────────────────────────────────────────────────────────────
+// Phase 11.1.4  seeker achievement badges
+// ──────────────────────────────────────────────────────────────────────
+
+/**
+ * Six honest milestones surfaced as small medallions on /dashboard.
+ * Each derived from existing audit-log data (no new event source).
+ * Awarded by a nightly cron via idempotent insert  the UNIQUE
+ * constraint catches re-runs. Never auto-revoked  badges accumulate
+ * across a profile's lifetime.
+ *
+ * Slugs are open string + validated client-side against the canonical
+ * list in `lib/seeker/badge-catalog.ts`; storing as text (not enum)
+ * keeps adding a new slug a code-only change with no migration.
+ */
+export const seekerBadges = pgTable(
+  "seeker_badges",
+  {
+    id: text("id").primaryKey(),
+    profileId: text("profile_id")
+      .notNull()
+      .references(() => profiles.id, { onDelete: "cascade" }),
+    slug: text("slug").notNull(),
+    awardedAt: timestamp("awarded_at").notNull().defaultNow(),
+  },
+  (t) => ({
+    uniq: uniqueIndex("seeker_badges_profile_slug_uniq").on(
+      t.profileId,
+      t.slug,
+    ),
+    byProfile: index("idx_seeker_badges_by_profile").on(
+      t.profileId,
+      t.awardedAt,
+    ),
+  }),
+);

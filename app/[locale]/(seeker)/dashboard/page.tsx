@@ -28,6 +28,10 @@ import { listMyInvitations } from "@/lib/seeker/invitations";
 import { getSetting } from "@/lib/admin/settings";
 import { Inbox } from "lucide-react";
 import { HelpLink } from "@/components/feature/help/HelpLink";
+import { WelcomeBackCard } from "@/components/feature/seeker/WelcomeBackCard";
+import { readAndSetLastSeen } from "@/lib/cookies/welcome-back";
+import { RecentAchievementsStrip } from "@/components/feature/seeker/RecentAchievementsStrip";
+import { listMyBadges } from "@/lib/seeker/badges";
 
 export default async function SeekerOverviewPage({
   params,
@@ -39,6 +43,10 @@ export default async function SeekerOverviewPage({
 
   const me = await getMyProfile();
   if (!me) redirect("/sign-in?next=/dashboard");
+
+  // Phase 11.1.3  read-and-set the welcome-back cookie. Returns the
+  // absence days when >= 7, null otherwise.
+  const absenceDays = await readAndSetLastSeen();
 
   const t = await getTranslations("seekerDash");
   const verificationVisible = await getSetting<boolean>(
@@ -119,6 +127,11 @@ export default async function SeekerOverviewPage({
   const allInvites = await listMyInvitations();
   const pendingInvites = allInvites.filter((i) => i.state === "invited");
 
+  // Phase 11.1.4  recent achievement badges. Cron at
+  // /api/cron/seeker-badge-sweep awards them nightly; the strip is
+  // hidden silently when the seeker has none.
+  const recentBadges = await listMyBadges(me.profileId, 3);
+
   return (
     <DashboardShell
       role="seeker"
@@ -138,6 +151,20 @@ export default async function SeekerOverviewPage({
         </Link>
       }
     >
+      {/* Phase 11.1.3  welcome-back delta card. Renders only when the
+          seeker has been absent >= 7 days AND at least one delta number
+          is positive. The card is suppressed silently when the absence
+          delivered nothing  nothing-changed is its own honest signal
+          but doesn't need celebrating. */}
+      {absenceDays !== null && (
+        <WelcomeBackCard
+          absenceDays={absenceDays}
+          viewers={activity.kpis.viewersDelta ?? 0}
+          contacts={activity.kpis.contactsDelta ?? 0}
+          newInvites={pendingInvites.length}
+        />
+      )}
+
       <StatusNudgeBanner band={freshness.band} days={freshness.days} />
 
       {/* Phase 10.2  help deep-links (D6 mirror from employer). */}
@@ -146,6 +173,42 @@ export default async function SeekerOverviewPage({
         <HelpLink role="seeker" slug="understanding-profile-completeness" label="Profile completeness" />
         <HelpLink role="seeker" slug="career-compass-recommendations" label="Career compass" />
       </div>
+
+      {/* Phase 11.1.6  audit-log link prominence. Surfaces the "who
+          looked at me this week" signal as a top-of-page callout when
+          there's something worth noticing  Sebenza gives this data
+          away by default, but most seekers never discovered the
+          activity ledger. Only renders when viewersDelta > 0 (something
+          actually happened this week) to avoid an empty boast. */}
+      {(activity.kpis.viewersDelta ?? 0) > 0 && (
+        <Link
+          href="/dashboard/activity"
+          aria-label={`${activity.kpis.viewersDelta} employers viewed your profile this week. Open activity ledger to see who.`}
+          className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-[var(--radius-md)] border border-[color:var(--color-accent)] bg-[color:var(--color-accent)]/5 p-3 transition-colors hover:bg-[color:var(--color-accent)]/10 md:p-4"
+        >
+          <div className="flex items-start gap-3">
+            <Eye
+              className="mt-0.5 size-5 shrink-0 text-[color:var(--color-accent)]"
+              aria-hidden="true"
+            />
+            <div>
+              <p className="text-sm text-[color:var(--color-ink)]">
+                <strong>{activity.kpis.viewersDelta}</strong> employer
+                {activity.kpis.viewersDelta === 1 ? "" : "s"} viewed your
+                profile this week.
+              </p>
+              <p className="mt-0.5 text-xs text-[color:var(--color-ink-soft)]">
+                Sebenza records every PII-touching action. You can see
+                exactly who.
+              </p>
+            </div>
+          </div>
+          <span className="inline-flex h-7 items-center gap-1 rounded-[var(--radius-pill)] border border-[color:var(--color-accent)] px-3 text-xs font-medium text-[color:var(--color-accent)]">
+            See who
+            <ArrowUpRight className="size-3" aria-hidden="true" />
+          </span>
+        </Link>
+      )}
 
       {/* Phase 9.9 sweep  vacancy-invite callout. Only renders when
           there's at least one pending invite. Mobile-first: stacks
@@ -431,6 +494,10 @@ export default async function SeekerOverviewPage({
               />
             ))}
         </ActivitySection>
+
+        {/* Phase 11.1.4  recent achievement badges. Silent when the
+            seeker has none  no badges is honest, not a scolding. */}
+        <RecentAchievementsStrip badges={recentBadges} locale={locale} />
       </div>
     </DashboardShell>
   );

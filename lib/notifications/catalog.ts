@@ -394,6 +394,25 @@ export const NOTIFICATION_CATALOG = {
       "An invitation recipient flagged an invite as abusive. Open the admin verifications page to review the inviting org.",
     dedupeWindowSeconds: 0,
   },
+  // ──────────────────────────────────────────────────────────────────────
+  // Phase 11.1.1  weekly seeker digest. Email-first by design (the
+  // whole point is to reach seekers who haven't opened the app this
+  // week)  in-app default OFF so the bell isn't doubled-up with the
+  // very same numbers the dashboard already shows. The Monday cron
+  // composes it from the activity feed + rank + freshness queries
+  // we already run; no new data category. Per the platform-wide
+  // killswitch, email still won't dispatch unless
+  // `feature_flag_email_notifications` is on.
+  // ──────────────────────────────────────────────────────────────────────
+  "seeker.weekly_digest": {
+    defaultInApp: false,
+    defaultEmail: true,
+    audience: "seeker",
+    label: "Weekly recap email",
+    description:
+      "Every Monday morning: a short email with the activity, rank, and freshness changes from the past 7 days. Off-channel reach for the weeks you don't open the app. You can opt out anytime  the email itself carries the preferences link.",
+    dedupeWindowSeconds: 6 * 24 * 60 * 60,
+  },
 } as const satisfies Record<string, NotificationKindMeta>;
 
 export type NotificationKind = keyof typeof NOTIFICATION_CATALOG;

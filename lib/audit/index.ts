@@ -218,7 +218,11 @@ export type AuditKind =
   | "org.seeker_invite.decline"
   | "org.seeker_invite.withdraw"
   | "org.seeker_invite.expire"
-  | "org.seeker_invite.reported";
+  | "org.seeker_invite.reported"
+  // Phase 11.1.4  seeker achievement badge awarded. Idempotent at the
+  // table layer (UNIQUE(profile_id, slug)); the audit row is the
+  // historical record  one per badge per profile.
+  | "achievement.awarded";
 
 export interface AuditEvent {
   kind: AuditKind;

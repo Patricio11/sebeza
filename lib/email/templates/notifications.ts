@@ -151,7 +151,84 @@ const TEMPLATES: Partial<
   // employer invites page where the new "Joined" row is waiting.
   "org.seeker_invite.accepted": (ctx) =>
     genericTemplate(ctx, "Open the Invites tab", "Invited seeker joined"),
+  // ── Phase 11.1.1  weekly seeker digest ────────────────────────────────
+  // Bespoke template (not genericTemplate)  the body composes four
+  // labelled numbers (viewers / contacts / new invites / rank), each
+  // with a one-line caption derived from the catalog. The CTA returns
+  // the recipient to the dashboard where the same data is in context.
+  "seeker.weekly_digest": (ctx) => weeklyDigestTemplate(ctx),
 };
+
+function weeklyDigestTemplate(
+  ctx: NotificationEmailContext,
+): NotificationEmailContent {
+  const m = (ctx.meta ?? {}) as Record<string, unknown>;
+  const link = fullLink(ctx.link ?? "/dashboard");
+  const viewers = Number(m["viewers7d"] ?? 0);
+  const contacts = Number(m["contacts7d"] ?? 0);
+  const newInvites = Number(m["newInvites7d"] ?? 0);
+  const rank = m["rank"] != null ? Number(m["rank"]) : null;
+  const poolTotal = m["poolTotal"] != null ? Number(m["poolTotal"]) : null;
+  const freshnessBand = String(m["freshnessBand"] ?? "fresh");
+  const daysStale = Number(m["daysStale"] ?? 0);
+
+  const rankLine =
+    rank != null && poolTotal != null
+      ? `<strong>#${rank}</strong> of ${poolTotal} in your local pool.`
+      : `Not yet ranked  confirm your status to enter the pool.`;
+  const freshnessLine =
+    freshnessBand === "fresh"
+      ? `Status is fresh (${daysStale} day${daysStale === 1 ? "" : "s"} since last confirmed).`
+      : freshnessBand === "ageing"
+        ? `Status is ${daysStale} days old  a re-confirm puts you back at the top.`
+        : `Status is stale (${daysStale} days). Re-confirming restores full ranking weight.`;
+
+  const html = emailShell(`
+    <p style="font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:#003d1f;margin:16px 0 8px;">This week on Sebenza</p>
+    <h1 style="font-family:'Fraunces',Georgia,serif;font-size:28px;line-height:1.2;margin:0 0 16px;color:#14110d;">
+      ${escapeHtml(ctx.title)}
+    </h1>
+    <p style="font-size:16px;line-height:1.6;margin:0 0 16px;color:#14110d;">
+      ${greeting(ctx.recipientName)}
+    </p>
+    <p style="font-size:16px;line-height:1.6;margin:0 0 24px;color:#14110d;">
+      The numbers from the last seven days.
+    </p>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 24px;">
+      <tr>
+        <td style="padding:12px 16px;background:#f3efe7;border-radius:8px 8px 0 0;">
+          <div style="font-size:12px;color:#5a5249;letter-spacing:0.04em;text-transform:uppercase;">Employers viewed you</div>
+          <div style="font-family:'Fraunces',Georgia,serif;font-size:32px;line-height:1.1;color:#14110d;">${viewers}</div>
+        </td>
+      </tr>
+      <tr>
+        <td style="padding:12px 16px;background:#fbf8f0;">
+          <div style="font-size:12px;color:#5a5249;letter-spacing:0.04em;text-transform:uppercase;">New contacts</div>
+          <div style="font-family:'Fraunces',Georgia,serif;font-size:32px;line-height:1.1;color:#14110d;">${contacts}</div>
+        </td>
+      </tr>
+      <tr>
+        <td style="padding:12px 16px;background:#f3efe7;">
+          <div style="font-size:12px;color:#5a5249;letter-spacing:0.04em;text-transform:uppercase;">New vacancy invitations</div>
+          <div style="font-family:'Fraunces',Georgia,serif;font-size:32px;line-height:1.1;color:#14110d;">${newInvites}</div>
+        </td>
+      </tr>
+      <tr>
+        <td style="padding:12px 16px;background:#fbf8f0;border-radius:0 0 8px 8px;">
+          <div style="font-size:12px;color:#5a5249;letter-spacing:0.04em;text-transform:uppercase;">Rank</div>
+          <div style="font-size:16px;line-height:1.4;color:#14110d;margin-top:4px;">${rankLine}</div>
+          <div style="font-size:13px;line-height:1.5;color:#5a5249;margin-top:6px;">${freshnessLine}</div>
+        </td>
+      </tr>
+    </table>
+    ${ctaButton(link, "Open your dashboard")}
+    <p style="font-size:12px;line-height:1.6;color:#5a5249;margin:24px 0 0;font-style:italic;">
+      You can change which Sebenza emails you receive in your account's
+      Notification preferences.
+    </p>
+  `);
+  return { subject: ctx.title, html };
+}
 
 export function emailContentFor(
   kind: NotificationKind,

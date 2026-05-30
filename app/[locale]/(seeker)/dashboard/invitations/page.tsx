@@ -22,6 +22,11 @@ import { listMyInvitations } from "@/lib/seeker/invitations";
 import { PROVINCES, PROFESSIONS } from "@/lib/mock/taxonomy";
 import { ChevronRight, Inbox, MapPin } from "lucide-react";
 import { HelpLink } from "@/components/feature/help/HelpLink";
+import { NoInvitesDiagnosticCard } from "@/components/feature/seeker/NoInvitesDiagnosticCard";
+import { getMyProfile } from "@/lib/profile/me";
+import { freshnessSummary } from "@/lib/status";
+import { hasVacancyMatchingConsent } from "@/lib/consent/check";
+import { rankInPoolQuery } from "@/db/queries/analytics";
 
 export const revalidate = 0;
 
@@ -70,7 +75,13 @@ export default async function SeekerInvitationsPage({
       </div>
 
       {all.length === 0 ? (
-        <EmptyState />
+        <>
+          {/* Phase 11.1.2  "Why no invites?" diagnostic. Composed
+              server-side from existing reads; only fetched when there
+              are zero invitations. */}
+          <DiagnosticWrapper userId={user.id} />
+          <EmptyState />
+        </>
       ) : (
         <div className="space-y-8">
           {active.length > 0 && (
@@ -113,6 +124,37 @@ export default async function SeekerInvitationsPage({
   );
 }
 
+/**
+ * Phase 11.1.2  composes the four diagnostic checks server-side.
+ * Pulled into its own server component so the page can keep its
+ * imports tight + the conditional render reads cleanly. The four
+ * checks compose over reads the page already trusts (profile,
+ * consent, rank-in-pool).
+ */
+async function DiagnosticWrapper({ userId }: { userId: string }) {
+  const me = await getMyProfile();
+  if (!me) return null;
+  const fresh = freshnessSummary(me.statusConfirmedAt);
+  const consent = await hasVacancyMatchingConsent(userId);
+  const rank = await rankInPoolQuery({
+    handle: me.handle,
+    profession: me.profession,
+    province: me.province,
+  });
+  const poolTotal = rank?.poolTotal ?? 0;
+  return (
+    <NoInvitesDiagnosticCard
+      statusFresh={{ pass: !fresh.urgent, days: fresh.days }}
+      completenessOk={{
+        pass: me.completeness >= 50,
+        percent: me.completeness,
+      }}
+      vacancyMatchingConsent={consent}
+      poolHasEmployers={{ pass: poolTotal >= 10, poolTotal }}
+    />
+  );
+}
+
 const STATE_COPY: Record<
   string,
   { label: string; tone: "brand" | "accent" | "muted" | "danger" }
@@ -140,6 +182,32 @@ const TONE_CLASS: Record<
     "border-[color:var(--color-danger)] bg-[color:var(--color-danger)]/10 text-[color:var(--color-danger)]",
 };
 
+/**
+ * Phase 11.1.5  invitation urgency chip. Returns a tone-coded chip for
+ * pending invitations approaching (or past) their responds-by date.
+ * Silent for invitations not in `invited` state, or with no `expiresAt`,
+ * or with > 48h remaining. The visual urgency cuts the auto-expiration
+ * rate without nagging seekers who have time.
+ */
+function urgencyChip(
+  inv: Awaited<ReturnType<typeof listMyInvitations>>[number],
+): { label: string; tone: "danger" | "muted" } | null {
+  if (inv.state !== "invited") return null;
+  if (!inv.expiresAt) return null;
+  const hoursLeft =
+    (new Date(inv.expiresAt).getTime() - Date.now()) / (60 * 60 * 1000);
+  if (hoursLeft < 0) {
+    return { label: "Expires soon", tone: "muted" };
+  }
+  if (hoursLeft < 24) {
+    return { label: "Responds today", tone: "danger" };
+  }
+  if (hoursLeft < 48) {
+    return { label: "1 day left", tone: "danger" };
+  }
+  return null;
+}
+
 function InvitationCard({
   inv,
   dfmt,
@@ -156,6 +224,7 @@ function InvitationCard({
   const provinceLabel =
     PROVINCES.find((p) => p.slug === inv.provinceSlug)?.label ??
     inv.provinceSlug;
+  const urgency = urgencyChip(inv);
 
   const stateLabel = STATE_COPY[inv.state]?.label ?? inv.state;
   return (
@@ -192,6 +261,15 @@ function InvitationCard({
             >
               {stateMeta.label}
             </span>
+            {/* Phase 11.1.5  urgency chip when responds-by is approaching. */}
+            {urgency && (
+              <span
+                className={`inline-flex items-center rounded-[var(--radius-pill)] border px-2 py-0.5 text-[0.65rem] uppercase tracking-[0.18em] ${TONE_CLASS[urgency.tone]}`}
+                aria-label={urgency.label}
+              >
+                {urgency.label}
+              </span>
+            )}
             <span className="text-xs text-[color:var(--color-ink-soft)]">
               Invited {dfmt.format(new Date(inv.invitedAt))}
               {inv.expiresAt &&
