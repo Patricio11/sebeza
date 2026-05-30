@@ -409,6 +409,12 @@ export async function createVacancy(
   const id = `vac_${randomUUID()}`;
   const db = getDb();
 
+  // Phase 10 follow-up  split skill_slugs into canonical (matcher-
+  // visible) + pending (submitted to admin queue, not stored on the
+  // vacancy). Mirrors the seeker-side filter in updateSkills.
+  const { canonical: canonicalVacancySkills, pending: pendingVacancySkills } =
+    splitCanonicalSkills(v.skillSlugs ?? []);
+
   await db.insert(schema.vacancies).values({
     id,
     organizationId: guard.orgId,
@@ -417,7 +423,7 @@ export async function createVacancy(
     professionSlug: v.professionSlug,
     provinceSlug: v.provinceSlug,
     citySlug: v.citySlug ?? null,
-    skillSlugs: v.skillSlugs ?? [],
+    skillSlugs: canonicalVacancySkills,
     seniority: v.seniority ?? null,
     salaryBand: v.salaryBand ?? null,
     description: v.description ?? null,
@@ -475,6 +481,18 @@ export async function createVacancy(
     via: "vacancy-create",
   });
 
+  // Phase 10 follow-up  submit skill suggestions for any "Other"
+  // entries the employer typed. The non-canonical slugs were
+  // filtered out of the vacancy row above so they don't affect
+  // matching; here we hand them to the admin queue.
+  for (const slug of pendingVacancySkills) {
+    await maybeSubmitSkillSuggestion({
+      skillSlug: slug,
+      actorUserId: guard.userId,
+      via: "vacancy-create",
+    });
+  }
+
   revalidatePath("/employer/vacancies");
   return ok({ vacancyId: id });
 }
@@ -501,6 +519,12 @@ export async function updateVacancy(
   const v = parsed.data;
   const db = getDb();
 
+  // Phase 10 follow-up  mirror createVacancy: filter non-canonical
+  // skills out of the vacancy row + submit them to the admin queue
+  // post-update.
+  const { canonical: canonicalUpdateSkills, pending: pendingUpdateSkills } =
+    splitCanonicalSkills(v.skillSlugs ?? []);
+
   await db
     .update(schema.vacancies)
     .set({
@@ -508,7 +532,7 @@ export async function updateVacancy(
       professionSlug: v.professionSlug,
       provinceSlug: v.provinceSlug,
       citySlug: v.citySlug ?? null,
-      skillSlugs: v.skillSlugs ?? [],
+      skillSlugs: canonicalUpdateSkills,
       seniority: v.seniority ?? null,
       salaryBand: v.salaryBand ?? null,
       description: v.description ?? null,
@@ -563,6 +587,16 @@ export async function updateVacancy(
     });
   }
 
+  // Phase 10 follow-up  pending skill suggestions for any "Other"
+  // entries on this edit.
+  for (const slug of pendingUpdateSkills) {
+    await maybeSubmitSkillSuggestion({
+      skillSlug: slug,
+      actorUserId: guard.userId,
+      via: "vacancy-update",
+    });
+  }
+
   revalidatePath("/employer/vacancies");
   revalidatePath(`/employer/vacancies/${vacancyId}`);
   return ok();
@@ -611,6 +645,70 @@ async function maybeSubmitProfessionSuggestion(args: {
   } catch (e) {
     // eslint-disable-next-line no-console
     console.error("[vacancies] profession suggestion submit failed:", e);
+  }
+}
+
+/**
+ * Phase 10 follow-up  partition a vacancy skill list into canonical
+ * (in the SKILLS taxonomy) + pending (free-text "Other" entries the
+ * employer typed via the multi-select). Pending entries are stripped
+ * from the persisted vacancy row + handed to the admin queue
+ * separately.
+ */
+function splitCanonicalSkills(skillSlugs: string[]): {
+  canonical: string[];
+  pending: string[];
+} {
+  const validSet = new Set(MOCK_SKILLS.map((s) => s.slug));
+  const canonical: string[] = [];
+  const pending: string[] = [];
+  for (const slug of skillSlugs) {
+    if (validSet.has(slug)) canonical.push(slug);
+    else pending.push(slug);
+  }
+  return { canonical, pending };
+}
+
+/**
+ * Phase 10 follow-up  mirror of maybeSubmitProfessionSuggestion for
+ * the new skill-suggestion path. Writes one taxonomy_suggestions row
+ * + notifies admins. The non-canonical slug is NOT stored on the
+ * vacancy (the matcher would treat it as a no-match), so the
+ * suggestion-then-promote flow is the only way it lands on the
+ * vacancy after admin approval.
+ */
+async function maybeSubmitSkillSuggestion(args: {
+  skillSlug: string;
+  actorUserId: string;
+  via: "vacancy-create" | "vacancy-update";
+}): Promise<void> {
+  const { skillSlug, actorUserId, via } = args;
+  const db = getDb();
+  try {
+    const suggestionId = `tx_${randomUUID()}`;
+    await db.insert(schema.taxonomySuggestions).values({
+      id: suggestionId,
+      kind: "skill",
+      customText: skillSlug,
+      submittedByUserId: actorUserId,
+    });
+    await logAccess({
+      kind: "taxonomy.suggestion.submit",
+      actor: actorUserId,
+      subject: suggestionId,
+      meta: { kind: "skill", customText: skillSlug, via },
+    });
+    await notifyAllAdmins({
+      kind: "taxonomy.suggestion.received",
+      title: `New skill suggestion: ${skillSlug}`,
+      body: `An employer picked "Other" while ${via === "vacancy-create" ? "creating" : "editing"} a vacancy + entered "${skillSlug}". Review at /admin/taxonomy.`,
+      link: "/admin/taxonomy",
+      dedupeKey: `skill::${skillSlug.toLowerCase()}`,
+      meta: { suggestionId, kind: "skill", customText: skillSlug },
+    });
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.error("[vacancies] skill suggestion submit failed:", e);
   }
 }
 

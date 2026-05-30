@@ -21,8 +21,10 @@ import {
 } from "@/components/ui/FormField";
 import { Button } from "@/components/ui/Button";
 import { ComboboxField } from "@/components/ui/ComboboxField";
+import { MultiSelectComboboxField } from "@/components/ui/MultiSelectComboboxField";
 import { MonthYearPicker } from "@/components/ui/MonthYearPicker";
 import { Lock } from "lucide-react";
+import { PROFESSION_SKILLS_MAP } from "@/lib/mock/taxonomy";
 import type {
   TaxonomyEntry,
   Province,
@@ -428,15 +430,6 @@ export function VacancyForm({
     },
   );
 
-  function toggleSkill(slug: string) {
-    setSkillSet((prev) => {
-      const next = new Set(prev);
-      if (next.has(slug)) next.delete(slug);
-      else next.add(slug);
-      return next;
-    });
-  }
-
   function toggleWorkAvailability(value: WorkAvailabilityKind) {
     setWorkAvailabilitySet((prev) => {
       const next = new Set(prev);
@@ -598,39 +591,26 @@ export function VacancyForm({
           ))}
         </SelectField>
 
-        {/* Skills  taxonomy-controlled multi-chip selector */}
-        <fieldset className="flex flex-col gap-2">
-          <legend className="text-[0.72rem] uppercase tracking-[0.22em] text-[color:var(--color-ink)]">
-            Required skills
-          </legend>
-          <p className="text-xs text-[color:var(--color-ink-soft)]">
-            Tap to add or remove. These drive the &ldquo;Find matches&rdquo;
-            ranking in 9.8.2.
-          </p>
-          <ul className="-mb-2 flex flex-wrap gap-2 pt-1">
-            {skills.map((s) => {
-              const on = skillSet.has(s.slug);
-              return (
-                <li key={s.slug}>
-                  <button
-                    type="button"
-                    onClick={() => toggleSkill(s.slug)}
-                    disabled={pending}
-                    aria-pressed={on}
-                    className={
-                      "rounded-[var(--radius-pill)] border px-3 py-1.5 text-xs transition-colors " +
-                      (on
-                        ? "border-[color:var(--color-brand)] bg-[color:var(--color-brand-tint)] text-[color:var(--color-brand-strong)]"
-                        : "border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] text-[color:var(--color-ink)] hover:border-[color:var(--color-ink)]")
-                    }
-                  >
-                    {s.label}
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
-        </fieldset>
+        {/* Phase 10 follow-up  skills are now a typeahead multi-select
+            with profession-scoped suggestions surfaced first. The old
+            chip-toggle (every skill in the taxonomy shown as a chip)
+            doesn't scale past ~30 entries  see PROFESSION_SKILLS_MAP
+            in lib/mock/taxonomy.ts for the ranking source. */}
+        <MultiSelectComboboxField
+          id="skillSlugs"
+          label="Required skills"
+          helpText="Pick the skills this vacancy needs. The matcher uses them to rank candidates; suggested skills are the ones common for this profession."
+          values={Array.from(skillSet)}
+          onChange={(next) => setSkillSet(new Set(next))}
+          options={skills.map((s) => ({ value: s.slug, label: s.label }))}
+          suggestedValues={
+            profession ? PROFESSION_SKILLS_MAP[profession] ?? [] : []
+          }
+          placeholder="Type to search skills…"
+          disabled={pending}
+          allowOther
+          otherLabel="Skill not listed?"
+        />
 
         <TextareaField
           id="description"

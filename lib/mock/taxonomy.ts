@@ -232,22 +232,159 @@ export const PROFESSIONS: TaxonomyEntry[] = [
 ];
 
 export const SKILLS: TaxonomyEntry[] = [
+  // ── Hospitality ──────────────────────────────────────────────────────
   { slug: "pastry", label: "Pastry" },
+  { slug: "baking", label: "Baking" },
   { slug: "menu-design", label: "Menu design" },
   { slug: "kitchen-mgmt", label: "Kitchen management" },
   { slug: "grill", label: "Grill" },
   { slug: "prep", label: "Prep" },
   { slug: "plating", label: "Plating" },
-  { slug: "wiring", label: "Domestic wiring" },
-  { slug: "industrial-wiring", label: "Industrial wiring" },
+  { slug: "food-safety", label: "Food safety / hygiene" },
+  { slug: "coffee-art", label: "Espresso & latte art" },
+  { slug: "mixology", label: "Mixology" },
+  { slug: "pos-systems", label: "Point-of-sale systems" },
+  { slug: "customer-service", label: "Customer service" },
+  // ── Tech + IT ────────────────────────────────────────────────────────
   { slug: "react", label: "React" },
   { slug: "node", label: "Node.js" },
   { slug: "typescript", label: "TypeScript" },
+  { slug: "python", label: "Python" },
+  { slug: "sql", label: "SQL" },
   { slug: "postgres", label: "PostgreSQL" },
+  { slug: "aws", label: "AWS" },
+  { slug: "figma", label: "Figma" },
+  // ── Trades + electrical ──────────────────────────────────────────────
+  { slug: "wiring", label: "Domestic wiring" },
+  { slug: "industrial-wiring", label: "Industrial wiring" },
+  { slug: "pipe-fitting", label: "Pipe fitting" },
+  // ── Finance + accounting ─────────────────────────────────────────────
   { slug: "ifrs", label: "IFRS reporting" },
   { slug: "payroll", label: "Payroll" },
+  { slug: "bookkeeping-skill", label: "Bookkeeping" },
+  { slug: "saipa", label: "SAIPA membership" },
+  // ── Office + admin ───────────────────────────────────────────────────
+  { slug: "excel", label: "Microsoft Excel" },
+  { slug: "word", label: "Microsoft Word" },
+  // ── Automotive ───────────────────────────────────────────────────────
   { slug: "pdi", label: "Pre-delivery inspection" },
+  // ── Transport + driving (SA-specific licence codes) ──────────────────
+  { slug: "code-08-licence", label: "Code 08 driver's licence" },
+  { slug: "code-10-licence", label: "Code 10 driver's licence" },
+  { slug: "code-14-licence", label: "Code 14 driver's licence" },
+  { slug: "defensive-driving", label: "Defensive driving" },
+  { slug: "forklift-licence", label: "Forklift licence" },
+  // ── Security (PSIRA grades) ──────────────────────────────────────────
+  { slug: "psira-grade-c", label: "PSIRA Grade C" },
+  { slug: "psira-grade-a", label: "PSIRA Grade A" },
+  // ── Healthcare + caregiving ──────────────────────────────────────────
+  { slug: "cpr", label: "CPR" },
+  { slug: "first-aid", label: "First aid" },
+  { slug: "pediatric-care", label: "Paediatric care" },
+  { slug: "elderly-care", label: "Elderly care" },
+  { slug: "medication-administration", label: "Medication administration" },
+  // ── Education ────────────────────────────────────────────────────────
+  { slug: "classroom-management", label: "Classroom management" },
+  { slug: "ecd-pedagogy", label: "ECD pedagogy" },
+  { slug: "lesson-planning", label: "Lesson planning" },
+  // ── Aquatics + recreation ────────────────────────────────────────────
+  // Added with the lifeguard professions; the metro seasonal scenario
+  // is the canonical use case but the same skills apply to leisure
+  // facilities + sports clubs.
+  { slug: "lifesaving-cert", label: "Lifesaving SA certification" },
+  { slug: "pool-rescue", label: "Pool rescue" },
+  { slug: "open-water-rescue", label: "Open water rescue" },
+  { slug: "pool-chemistry", label: "Pool water chemistry" },
+  { slug: "pool-maintenance", label: "Pool maintenance" },
+  { slug: "swim-coaching", label: "Swim coaching" },
 ];
+
+/**
+ * Phase 10 follow-up  profession  related skills association map.
+ *
+ * Drives the *suggestion ranking* on the skill multi-select picker.
+ * When an employer creates a vacancy for `chef`, the picker surfaces
+ * the chef-related skills FIRST (Pastry, Grill, Menu design, etc.)
+ * and pushes the unrelated skills (PSIRA Grade C, AWS) below the
+ * fold. Employers can still type any term + see global matches.
+ *
+ * Curated by hand; intentionally not exhaustive. A profession with no
+ * entry just falls back to the global alphabetical list. Adding a
+ * profession to the map is a 30-second edit; the picker reads this
+ * at render time + the admin team can extend as new professions land
+ * via the suggestion queue.
+ *
+ * NOT used by the matcher  the matcher ranks against profile skills,
+ * not vacancy skill picker UX. This map is purely about the picker's
+ * "which skills should I show first?" question.
+ */
+export const PROFESSION_SKILLS_MAP: Record<string, string[]> = {
+  // Hospitality
+  chef: ["pastry", "menu-design", "kitchen-mgmt", "grill", "prep", "plating", "food-safety", "baking"],
+  cook: ["grill", "prep", "plating", "food-safety", "kitchen-mgmt"],
+  "kitchen-porter": ["food-safety", "prep"],
+  waitstaff: ["customer-service", "pos-systems", "food-safety"],
+  barista: ["coffee-art", "customer-service", "pos-systems"],
+  bartender: ["mixology", "customer-service", "pos-systems"],
+  "restaurant-manager": ["customer-service", "pos-systems", "kitchen-mgmt", "food-safety"],
+  "hotel-receptionist": ["customer-service", "excel", "word"],
+  housekeeping: ["customer-service"],
+  // Tech + IT
+  "software-developer": ["typescript", "react", "node", "python", "sql", "postgres", "aws"],
+  "help-desk": ["excel", "word", "customer-service"],
+  "ux-ui-designer": ["figma"],
+  // Admin + office
+  "call-centre-agent": ["customer-service", "excel"],
+  "hr-practitioner": ["payroll", "excel", "word"],
+  receptionist: ["customer-service", "excel", "word"],
+  "admin-clerk": ["excel", "word"],
+  "personal-assistant": ["excel", "word"],
+  // Finance
+  accountant: ["ifrs", "bookkeeping-skill", "saipa", "excel"],
+  bookkeeper: ["bookkeeping-skill", "payroll", "excel"],
+  // Trades
+  electrician: ["wiring", "industrial-wiring"],
+  plumber: ["pipe-fitting"],
+  // Automotive
+  mechanic: ["pdi", "code-08-licence"],
+  // Healthcare
+  nurse: ["cpr", "first-aid", "medication-administration"],
+  caregiver: ["elderly-care", "pediatric-care", "first-aid"],
+  paramedic: ["cpr", "first-aid", "code-08-licence"],
+  // Education
+  teacher: ["classroom-management", "lesson-planning"],
+  tutor: ["lesson-planning"],
+  "ecd-practitioner": ["ecd-pedagogy", "lesson-planning", "first-aid"],
+  lecturer: ["lesson-planning"],
+  "sports-coach": ["lesson-planning", "first-aid"],
+  // Transport
+  driver: ["code-08-licence", "defensive-driving"],
+  "truck-driver": ["code-14-licence", "defensive-driving"],
+  "delivery-driver": ["code-10-licence", "defensive-driving"],
+  "taxi-driver": ["code-10-licence", "defensive-driving"],
+  "forklift-operator": ["forklift-licence"],
+  "crane-operator": ["forklift-licence"],
+  // Security
+  "security-officer": ["psira-grade-c", "first-aid"],
+  "armed-response": ["psira-grade-a", "first-aid", "defensive-driving", "code-08-licence"],
+  // Aquatics + recreation (the lifeguard scenario this map was added for)
+  lifeguard: [
+    "lifesaving-cert",
+    "cpr",
+    "first-aid",
+    "pool-rescue",
+    "open-water-rescue",
+    "pool-chemistry",
+  ],
+  "pool-attendant": ["pool-chemistry", "pool-maintenance", "customer-service", "first-aid"],
+  "swim-instructor": [
+    "swim-coaching",
+    "lesson-planning",
+    "lifesaving-cert",
+    "first-aid",
+    "cpr",
+  ],
+};
 
 export function findProvinceBySlug(slug: string | null | undefined) {
   if (!slug) return null;

@@ -7,12 +7,12 @@
  * Per Phase 3 plan re-check #5: no free-text  keeps search and analytics clean.
  */
 
-import { useMemo, useState, useTransition } from "react";
-import { CustomSelect } from "@/components/ui/CustomSelect";
+import { useState, useTransition } from "react";
+import { MultiSelectComboboxField } from "@/components/ui/MultiSelectComboboxField";
 import { Button } from "@/components/ui/Button";
-import { X, Plus } from "lucide-react";
+import { X } from "lucide-react";
 import { updateSkills } from "@/lib/profile/actions";
-import { SKILLS } from "@/lib/mock/taxonomy";
+import { SKILLS, PROFESSION_SKILLS_MAP } from "@/lib/mock/taxonomy";
 import { useSessionDraft } from "@/lib/hooks/useSessionDraft";
 
 interface SkillState {
@@ -26,25 +26,18 @@ interface SkillState {
 
 interface Props {
   initial: SkillState[];
+  /** Phase 10 follow-up  used to surface profession-related skills
+   *  first in the picker. Optional; when missing, the picker falls
+   *  back to alphabetical only. */
+  professionSlug?: string;
 }
 
-export function SkillsEditor({ initial }: Props) {
+export function SkillsEditor({ initial, professionSlug }: Props) {
   const [items, setItems] = useState<SkillState[]>(initial);
-  const [pickerSlug, setPickerSlug] = useState<string>("");
   const [pending, startTransition] = useTransition();
   const [message, setMessage] = useState<
     { kind: "ok" | "error"; text: string } | null
   >(null);
-
-  const usedSlugs = new Set(items.map((i) => i.slug));
-  const remaining = useMemo(
-    () =>
-      SKILLS.filter((s) => !usedSlugs.has(s.slug)).map((s) => ({
-        value: s.slug,
-        label: s.label,
-      })),
-    [usedSlugs],
-  );
 
   // Persist the skills list so locale-switching mid-edit doesn't
   // wipe a freshly-curated set of skills + proficiencies. Items
@@ -58,29 +51,40 @@ export function SkillsEditor({ initial }: Props) {
         if (Array.isArray(draft.items)) {
           // Validate each slug against the live taxonomy; drop unknowns
           // (catalogue items may have been removed between sessions).
-          const valid = draft.items.filter((d) =>
-            SKILLS.some((s) => s.slug === d.slug),
-          );
-          if (valid.length > 0) setItems(valid);
+          // Phase 10 follow-up  "Other" suggestions (non-canonical
+          // slugs) also pass through; they render as pending chips
+          // until admin promotes.
+          if (draft.items.length > 0) setItems(draft.items);
         }
       },
     },
   );
 
-  function addSkill() {
-    if (!pickerSlug) return;
-    const candidate = SKILLS.find((s) => s.slug === pickerSlug);
-    if (!candidate) return;
-    setItems((prev) => [
-      ...prev,
-      {
-        slug: candidate.slug,
-        label: candidate.label,
-        proficiency: 3,
-        yearsOfExperience: null,
-      },
-    ]);
-    setPickerSlug("");
+  /**
+   * Phase 10 follow-up  the new multi-select picker emits a flat
+   * array of slugs; we diff against the current items + add/remove
+   * accordingly. Newly-added skills land with default
+   * proficiency=3 and null years (user edits inline below). The
+   * per-row UI for proficiency + years stays unchanged.
+   */
+  function handlePickerChange(nextSlugs: string[]) {
+    const currentSet = new Set(items.map((i) => i.slug));
+    const nextSet = new Set(nextSlugs);
+    const kept = items.filter((i) => nextSet.has(i.slug));
+    const added = nextSlugs
+      .filter((s) => !currentSet.has(s))
+      .map((slug) => {
+        const fromCatalogue = SKILLS.find((s) => s.slug === slug);
+        return {
+          slug,
+          // Catalogue label when canonical; else the raw text the
+          // user typed for "Other" submissions.
+          label: fromCatalogue?.label ?? slug,
+          proficiency: 3,
+          yearsOfExperience: null,
+        };
+      });
+    setItems([...kept, ...added]);
   }
 
   function setYears(slug: string, raw: string) {
@@ -191,40 +195,36 @@ export function SkillsEditor({ initial }: Props) {
         )}
       </ul>
 
-      <div className="flex flex-wrap items-end gap-3 border-t border-dashed border-[color:var(--color-hairline)] pt-4">
-        <div className="flex-1 min-w-[220px]">
-          <label className="mb-1 block text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--color-ink-soft)]">
-            Add a skill
-          </label>
-          <CustomSelect
-            ariaLabel="Add a skill"
-            variant="compact"
-            value={pickerSlug}
-            onChange={setPickerSlug}
-            options={remaining}
-            placeholder={remaining.length === 0 ? "All catalog skills added" : "Pick from catalog…"}
-            disabled={remaining.length === 0}
-          />
+      {/* Phase 10 follow-up  typeahead multi-select replaces the
+          dropdown-then-Add pattern. Picking a skill adds it to the
+          list above with default proficiency=3 and null years;
+          inline UI on each row lets the user adjust. */}
+      <div className="border-t border-dashed border-[color:var(--color-hairline)] pt-4">
+        <MultiSelectComboboxField
+          id="skill-picker"
+          label="Add skills"
+          helpText="Type to search the catalogue. Suggested skills are common for your profession; you can pick any of them."
+          values={items.map((i) => i.slug)}
+          onChange={handlePickerChange}
+          options={SKILLS.map((s) => ({ value: s.slug, label: s.label }))}
+          suggestedValues={
+            professionSlug ? PROFESSION_SKILLS_MAP[professionSlug] ?? [] : []
+          }
+          placeholder="Type to search skills…"
+          allowOther
+          otherLabel="Skill not listed?"
+        />
+        <div className="mt-3 flex justify-end">
+          <Button
+            type="button"
+            variant="primary"
+            size="sm"
+            onClick={handleSave}
+            disabled={pending}
+          >
+            {pending ? "Saving…" : "Save skills"}
+          </Button>
         </div>
-        <Button
-          type="button"
-          variant="secondary"
-          size="sm"
-          onClick={addSkill}
-          disabled={!pickerSlug}
-        >
-          <Plus className="size-4" aria-hidden="true" />
-          Add
-        </Button>
-        <Button
-          type="button"
-          variant="primary"
-          size="sm"
-          onClick={handleSave}
-          disabled={pending}
-        >
-          {pending ? "Saving…" : "Save skills"}
-        </Button>
       </div>
 
       {message && (

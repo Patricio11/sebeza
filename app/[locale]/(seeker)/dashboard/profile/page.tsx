@@ -236,7 +236,7 @@ export default async function ProfileEditorPage({
               title={t("sections.skillsTitle")}
               hint="Skills must come from our controlled taxonomy  keeps search and analytics clean."
             />
-            <SkillsEditor initial={initialSkills} />
+            <SkillsEditor initial={initialSkills} professionSlug={me.profession} />
           </section>
 
           {/* Work availability (Phase 7.5) */}

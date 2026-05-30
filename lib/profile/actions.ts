@@ -186,21 +186,27 @@ export async function updateSkills(
   const profile = await loadOwnedProfile(db, session.id);
   if (!profile) return fail("Profile not found.");
 
-  // Validate every slug against the controlled taxonomy.
+  // Phase 10 follow-up  the multi-select skill picker can emit "Other"
+  // suggestions (free-text not in the canonical taxonomy). Split them:
+  // canonical skills land in profile_skills (matcher-visible); pending
+  // ones go to the admin taxonomy queue + are dropped from this save.
+  // The seeker UI shows them as "pending" chips client-side; on
+  // reload they fall off the profile until admin promotes them.
   const validSlugs = new Set(SKILLS.map((s) => s.slug));
-  for (const s of parsed.data.skills) {
-    if (!validSlugs.has(s.slug)) {
-      return fail(`Skill "${s.slug}" isn't in the catalog yet.`);
-    }
-  }
+  const canonicalSkills = parsed.data.skills.filter((s) =>
+    validSlugs.has(s.slug),
+  );
+  const pendingSkills = parsed.data.skills.filter(
+    (s) => !validSlugs.has(s.slug),
+  );
 
   await db.transaction(async (tx) => {
     await tx
       .delete(schema.profileSkills)
       .where(eq(schema.profileSkills.profileId, profile.id));
-    if (parsed.data.skills.length > 0) {
+    if (canonicalSkills.length > 0) {
       await tx.insert(schema.profileSkills).values(
-        parsed.data.skills.map((s) => ({
+        canonicalSkills.map((s) => ({
           profileId: profile.id,
           skillSlug: s.slug,
           proficiency: s.proficiency,
@@ -209,6 +215,38 @@ export async function updateSkills(
       );
     }
   });
+
+  // Submit taxonomy suggestions for the pending entries. Auxiliary
+  // failure logs but doesn't tank the parent save. Same pattern as
+  // the profession suggestion path in updateProfileBasics.
+  for (const s of pendingSkills) {
+    try {
+      const suggestionId = `tx_${randomUUID()}`;
+      await db.insert(schema.taxonomySuggestions).values({
+        id: suggestionId,
+        kind: "skill",
+        customText: s.slug,
+        submittedByUserId: session.id,
+      });
+      await logAccess({
+        kind: "taxonomy.suggestion.submit",
+        actor: session.id,
+        subject: suggestionId,
+        meta: { kind: "skill", customText: s.slug, via: "profile-editor" },
+      });
+      await notifyAllAdmins({
+        kind: "taxonomy.suggestion.received",
+        title: `New skill suggestion: ${s.slug}`,
+        body: `A seeker picked "Other" on their skill picker + entered "${s.slug}". Review at /admin/taxonomy.`,
+        link: "/admin/taxonomy",
+        dedupeKey: `skill::${s.slug.toLowerCase()}`,
+        meta: { suggestionId, kind: "skill", customText: s.slug },
+      });
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error("[skills] suggestion submit failed:", e);
+    }
+  }
 
   await logAccess({
     kind: "profile.skills.update",

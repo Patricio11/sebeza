@@ -61,7 +61,7 @@ function fail(message: string): { ok: false; message: string } {
 // ─────────────────────────────────────────────────────────────────────
 
 const submitSchema = z.object({
-  kind: z.enum(["profession", "institution", "organisation"]),
+  kind: z.enum(["profession", "institution", "organisation", "skill"]),
   customText: z
     .string()
     .min(2, "Too short  at least 2 characters.")
@@ -267,7 +267,11 @@ export async function submitTaxonomySuggestion(
 // Admin reads
 // ─────────────────────────────────────────────────────────────────────
 
-export type SuggestionKind = "profession" | "institution" | "organisation";
+export type SuggestionKind =
+  | "profession"
+  | "institution"
+  | "organisation"
+  | "skill";
 
 export interface SuggestionRow {
   id: string;

@@ -1575,6 +1575,12 @@ export const taxonomySuggestionKind = pgEnum("taxonomy_suggestion_kind", [
   // edit. Admin queue at /admin/taxonomy/suggestions reviews + edits +
   // promotes; the pending organizations row carries the user data.
   "organisation",
+  // Phase 10 follow-up  seeker- or employer-suggested skill from the
+  // multi-select skill combobox. Same promote / merge / reject
+  // lifecycle as profession. Admin queue at /admin/taxonomy/suggestions
+  // groups by lowercased custom_text + kind so the existing UI
+  // handles both kinds without further changes.
+  "skill",
 ]);
 
 export const taxonomySuggestionState = pgEnum("taxonomy_suggestion_state", [
