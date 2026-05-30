@@ -115,7 +115,12 @@ export type SkipReason =
   | "consent_not_granted"
   | "already_invited"
   | "profile_deleted"
-  | "profile_not_found";
+  | "profile_not_found"
+  // Phase 11.3.1  seeker's searchability is paused. Silent skip; the
+  // employer sees only the soft "N not eligible right now" summary.
+  | "searchability_paused"
+  // Phase 11.3.2  seeker has blocked this org. Silent skip per D2.
+  | "blocked_by_seeker";
 
 /** Detail row for the employer's per-vacancy invitations panel. The
  *  `displayName` + `handle` come from the profile join; nothing here is
@@ -305,6 +310,26 @@ export async function bulkInviteToVacancy(
         )
       : null;
 
+  // Phase 11.3.4  freeze the vacancy spec at send time. The seeker sees
+  // what the employer actually published when they sent the invite; the
+  // snapshot is immutable for the lifetime of the invitation row. We
+  // keep the shape minimal  enough for the seeker to evaluate the
+  // role, nothing more.
+  const vacancySnapshot = {
+    title: vacancy.title,
+    description: vacancy.description,
+    professionSlug: vacancy.professionSlug,
+    provinceSlug: vacancy.provinceSlug,
+    citySlug: vacancy.citySlug,
+    seniority: vacancy.seniority,
+    skillSlugs: vacancy.skillSlugs,
+    workAvailability: vacancy.workAvailability,
+    minYearsExperience: vacancy.minYearsExperience,
+    minNqfLevel: vacancy.minNqfLevel,
+    salaryBand: vacancy.salaryBand,
+    capturedAt: new Date().toISOString(),
+  };
+
   let invitedCount = 0;
   let skippedCount = 0;
 
@@ -334,6 +359,45 @@ export async function bulkInviteToVacancy(
       continue;
     }
 
+    // Phase 11.3.1  searchability pause. Treated as a silent skip per
+    // the D1 invariant ("not interested right now"). Same UX as the
+    // consent-not-granted path: per-seeker reason in audit only, never
+    // surfaced to the employer.
+    const paused = await db
+      .select({ pausedUntil: schema.consents.pausedUntil })
+      .from(schema.consents)
+      .where(
+        and(
+          eq(schema.consents.userId, profile.userId),
+          eq(schema.consents.purpose, "searchability"),
+        ),
+      )
+      .limit(1);
+    const pausedUntil = paused[0]?.pausedUntil;
+    if (pausedUntil && pausedUntil.getTime() > Date.now()) {
+      await logSkip(guard.userId, vacancyId, pid, "searchability_paused");
+      skippedCount++;
+      continue;
+    }
+
+    // Phase 11.3.2  seeker has blocked this org. Silent skip per D2;
+    // the employer never sees a block-specific reason.
+    const blocked = await db
+      .select({ id: schema.seekerBlockedEmployers.id })
+      .from(schema.seekerBlockedEmployers)
+      .where(
+        and(
+          eq(schema.seekerBlockedEmployers.profileId, pid),
+          eq(schema.seekerBlockedEmployers.orgId, guard.orgId),
+        ),
+      )
+      .limit(1);
+    if (blocked.length > 0) {
+      await logSkip(guard.userId, vacancyId, pid, "blocked_by_seeker");
+      skippedCount++;
+      continue;
+    }
+
     // Eligible  write the invitation row + fire notification + audit.
     const invitationId = `inv_${randomUUID()}`;
     try {
@@ -344,6 +408,7 @@ export async function bulkInviteToVacancy(
         invitedByUserId: guard.userId,
         expiresAt,
         state: "invited",
+        vacancySnapshot,
       });
 
       // Attributed notification per the plan: name the employer + the

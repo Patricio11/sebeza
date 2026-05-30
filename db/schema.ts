@@ -120,6 +120,11 @@ export const reportReason = pgEnum("report_reason", [
   "harassment",
   "spam",
   "other",
+  // Phase 11.3.3  invitation-specific reasons (used when the report
+  // points at a vacancy invitation rather than a profile).
+  "irrelevant_role",
+  "bad_faith_company",
+  "off_platform_contact_request",
 ]);
 
 /** Phase 7  moderation lifecycle. */
@@ -1168,6 +1173,17 @@ export const vacancyInvitations = pgTable(
         as PII in exports + audit-log meta (the seeker may inadvertently
         include identifying detail despite the on-screen reminder). */
     declineNote: text("decline_note"),
+    /**
+     * Phase 11.3.4  vacancy spec frozen at invitation-send time. The
+     * seeker sees what the employer published when they sent the invite,
+     * even if the vacancy is later edited. Pre-migration invitations
+     * have NULL; the UI falls back to live-querying with a "may have
+     * changed" annotation. Shape mirrors a subset of `vacancies`
+     * columns (title, description, skillSlugs, workAvailability, season
+     * window, salary band, profession + province + city). Stored as
+     * jsonb so future spec additions don't need a column rev.
+     */
+    vacancySnapshot: jsonb("vacancy_snapshot"),
   },
   (t) => ({
     /**
@@ -1324,6 +1340,13 @@ export const consents = pgTable("consents", {
   version: text("version").notNull(),
   grantedAt: timestamp("granted_at"),
   revokedAt: timestamp("revoked_at"),
+  // Phase 11.3.1  pause-searchability columns. `pausedUntil` is the
+  // canonical signal: state='granted' AND pausedUntil > now() means
+  // paused. The nightly cron clears expired pauses; `pausedAt` +
+  // `pausedReason` are historical context for the audit trail.
+  pausedUntil: timestamp("paused_until"),
+  pausedAt: timestamp("paused_at"),
+  pausedReason: text("paused_reason"),
 });
 
 export const auditLog = pgTable("audit_log", {
@@ -1345,9 +1368,23 @@ export const auditLog = pgTable("audit_log", {
  */
 export const reports = pgTable("reports", {
   id: text("id").primaryKey(),
-  subjectProfileId: text("subject_profile_id")
-    .notNull()
-    .references(() => profiles.id, { onDelete: "cascade" }),
+  // Phase 11.3.3  subjectProfileId now nullable; an invite report
+  // points at an org + invitation, not a profile. Legacy profile
+  // reports keep the column populated.
+  subjectProfileId: text("subject_profile_id").references(
+    () => profiles.id,
+    { onDelete: "cascade" },
+  ),
+  // Phase 11.3.3  invite reports populate these two columns. Either
+  // (subject_profile_id) or (subject_org_id, subject_invitation_id)
+  // is set; the admin queue surfaces whichever path was used.
+  subjectOrgId: text("subject_org_id").references((): AnyPgColumn => organizations.id, {
+    onDelete: "cascade",
+  }),
+  subjectInvitationId: text("subject_invitation_id").references(
+    (): AnyPgColumn => vacancyInvitations.id,
+    { onDelete: "set null" },
+  ),
   reporterUserId: text("reporter_user_id"),
   reason: reportReason("reason").notNull(),
   note: text("note"),
@@ -1885,5 +1922,41 @@ export const seekerBadges = pgTable(
       t.profileId,
       t.awardedAt,
     ),
+  }),
+);
+
+/**
+ * Phase 11.3.2  seeker-private employer block list.
+ *
+ * D2 invariant: the employer NEVER reads this table. Only the seeker's
+ * own surfaces + the search/invite enforcement paths read. UNIQUE on
+ * (profile_id, org_id) dedupes  re-block is a no-op. Cascading delete
+ * on both FKs keeps the table consistent when either side is erased
+ * (profile soft-deletion happens elsewhere; the row stays until hard-
+ * delete, by design).
+ */
+export const seekerBlockedEmployers = pgTable(
+  "seeker_blocked_employers",
+  {
+    id: text("id").primaryKey(),
+    profileId: text("profile_id")
+      .notNull()
+      .references(() => profiles.id, { onDelete: "cascade" }),
+    orgId: text("org_id")
+      .notNull()
+      .references(() => organizations.id, { onDelete: "cascade" }),
+    blockedAt: timestamp("blocked_at").notNull().defaultNow(),
+    /** Optional free-text  PII-flagged in audit + exports. Capped 200
+     *  at the action boundary; never surfaced to the employer (privacy
+     *  invariant D2). */
+    reason: text("reason"),
+  },
+  (t) => ({
+    uniq: uniqueIndex("seeker_blocked_employers_profile_org_uq").on(
+      t.profileId,
+      t.orgId,
+    ),
+    byProfile: index("idx_blocked_employers_by_profile").on(t.profileId),
+    byOrg: index("idx_blocked_employers_by_org").on(t.orgId),
   }),
 );

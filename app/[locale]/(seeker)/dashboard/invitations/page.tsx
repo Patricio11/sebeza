@@ -21,6 +21,7 @@ import { verifyRole } from "@/lib/auth/dal";
 import { listMyInvitations } from "@/lib/seeker/invitations";
 import { PROVINCES, PROFESSIONS } from "@/lib/mock/taxonomy";
 import { ChevronRight, Inbox, MapPin } from "lucide-react";
+import { EmployerVerificationChip } from "@/components/feature/seeker/invitations/EmployerVerificationChip";
 import { HelpLink } from "@/components/feature/help/HelpLink";
 import { NoInvitesDiagnosticCard } from "@/components/feature/seeker/NoInvitesDiagnosticCard";
 import { getMyProfile } from "@/lib/profile/me";
@@ -240,8 +241,11 @@ function InvitationCard({
     >
       <div className="flex items-start gap-3">
         <div className="flex-1 min-w-0">
-          <div className="text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--color-ink-soft)]">
-            {inv.orgName}
+          <div className="flex flex-wrap items-center gap-2 text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--color-ink-soft)]">
+            <span className="truncate">{inv.orgName}</span>
+            {/* Phase 11.3.5  verification chip inline with the org
+                name on the inbox card  trust signal at a glance. */}
+            <EmployerVerificationChip state={inv.orgVerification} />
           </div>
           <h3 className="mt-0.5 font-display text-lg text-[color:var(--color-ink)]">
             {inv.vacancyTitle}

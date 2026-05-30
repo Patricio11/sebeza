@@ -44,6 +44,7 @@ import { notifyOrgMembers } from "@/lib/notifications/server";
 // scoped imports.
 import {
   DECLINE_REASON_LABEL,
+  isVacancySnapshot,
   type DeclineReasonValue,
   type InvitationStateSeeker,
   type SeekerInvitationRow,
@@ -106,6 +107,8 @@ export async function listMyInvitations(): Promise<SeekerInvitationRow[]> {
       description: schema.vacancies.description,
       orgId: schema.organizations.id,
       orgName: schema.organizations.name,
+      orgVerification: schema.organizations.verification,
+      vacancySnapshot: schema.vacancyInvitations.vacancySnapshot,
       // Phase 9.21  season window for the detail page.
       seasonalWindowStartMonth: schema.vacancies.seasonalWindowStartMonth,
       seasonalWindowEndMonth: schema.vacancies.seasonalWindowEndMonth,
@@ -160,6 +163,8 @@ export async function getMyInvitation(
       description: schema.vacancies.description,
       orgId: schema.organizations.id,
       orgName: schema.organizations.name,
+      orgVerification: schema.organizations.verification,
+      vacancySnapshot: schema.vacancyInvitations.vacancySnapshot,
       ownerUserId: schema.profiles.userId,
       // Phase 9.21  season window for the detail page.
       seasonalWindowStartMonth: schema.vacancies.seasonalWindowStartMonth,
@@ -209,6 +214,8 @@ function toSeekerRow(r: {
   description: string | null;
   orgId: string;
   orgName: string;
+  orgVerification: string;
+  vacancySnapshot: unknown;
   seasonalWindowStartMonth: number | null;
   seasonalWindowEndMonth: number | null;
   seasonalWindowStartYear: number | null;
@@ -233,6 +240,11 @@ function toSeekerRow(r: {
     description: r.description,
     orgId: r.orgId,
     orgName: r.orgName,
+    orgVerification:
+      r.orgVerification as SeekerInvitationRow["orgVerification"],
+    vacancySnapshot: isVacancySnapshot(r.vacancySnapshot)
+      ? r.vacancySnapshot
+      : null,
     // Phase 9.21  fold partial windows to NULL (same read-side
     // guard as VacancyRow's rowToVacancy mapper).
     seasonalWindow:

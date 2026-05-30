@@ -13,10 +13,22 @@ import { verifyAdmin } from "@/lib/auth/dal";
 
 export interface AdminOpenReport {
   id: string;
-  subjectProfileId: string;
+  /** Phase 11.3.3  nullable now that invite-reports point at the org +
+   *  invitation columns rather than a profile. The admin queue shows
+   *  either the seeker handle (legacy reports) or the org + invitation
+   *  context (invite reports). */
+  subjectProfileId: string | null;
   subjectUserId: string | null;
   subjectHandle: string;
-  reason: "fake_identity" | "inappropriate" | "harassment" | "spam" | "other";
+  reason:
+    | "fake_identity"
+    | "inappropriate"
+    | "harassment"
+    | "spam"
+    | "other"
+    | "irrelevant_role"
+    | "bad_faith_company"
+    | "off_platform_contact_request";
   note: string | null;
   reporterUserId: string | null;
   createdAt: Date;
@@ -68,6 +80,7 @@ export async function listOpenReports(): Promise<AdminOpenReport[]> {
     note: r.note,
     reporterUserId: r.reporterUserId,
     createdAt: r.createdAt,
-    totalAgainstSubject: tally.get(r.subjectProfileId) ?? 1,
+    totalAgainstSubject:
+      (r.subjectProfileId ? tally.get(r.subjectProfileId) : null) ?? 1,
   }));
 }

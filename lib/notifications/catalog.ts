@@ -427,6 +427,19 @@ export const NOTIFICATION_CATALOG = {
       "Fires when you abandoned a paid path for cost or access reasons and accepted the free alternative on the spot. The original abandonment is preserved as honest signal for SA-policy analytics; this celebrates the swap.",
     dedupeWindowSeconds: 0,
   },
+  // Phase 11.3.1  pause-searchability confirmation. Quiet
+  // acknowledgement that the seeker just stepped out of the recruiter
+  // funnel for a defined window  the artefact lives in /dashboard/
+  // privacy; the bell row is the receipt.
+  "consent.searchability.paused": {
+    defaultInApp: true,
+    defaultEmail: false,
+    audience: "seeker",
+    label: "Searchability paused",
+    description:
+      "Confirmation that you paused appearing in employer search for a defined window. Your record stays intact; existing relationships hold; the cron auto-unpauses you on the expiry date.",
+    dedupeWindowSeconds: 0,
+  },
 } as const satisfies Record<string, NotificationKindMeta>;
 
 export type NotificationKind = keyof typeof NOTIFICATION_CATALOG;

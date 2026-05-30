@@ -12,6 +12,10 @@ import { eq } from "drizzle-orm";
 import { Download } from "lucide-react";
 import { SelfEraseForm } from "@/components/feature/profile/SelfEraseForm";
 import { HelpLink } from "@/components/feature/help/HelpLink";
+import { SearchabilityPauseControl } from "@/components/feature/privacy/SearchabilityPauseControl";
+import { readMyPauseState } from "@/lib/consent/pause";
+import { BlockedEmployersList } from "@/components/feature/privacy/BlockedEmployersList";
+import { listMyBlocks } from "@/lib/seeker/blocks";
 
 interface ConsentSnapshot {
   state: ConsentState;
@@ -94,6 +98,10 @@ export default async function PrivacyPage({
 
   // Read live consents for the signed-in user.
   const rows = await loadConsents(session.id);
+  // Phase 11.3.1  pause state (only meaningful when searchability is granted).
+  const pauseState = await readMyPauseState();
+  // Phase 11.3.2  current employer blocks for the seeker.
+  const blocks = await listMyBlocks();
 
   return (
     <DashboardShell
@@ -124,19 +132,48 @@ export default async function PrivacyPage({
           {CONSENT_PURPOSES.map((purpose) => {
             const c = rows[purpose] ?? FALLBACK_CONSENT[purpose];
             return (
-              <ConsentRow
-                key={purpose}
-                purpose={purpose}
-                label={PURPOSE_LABEL[purpose]}
-                body={PURPOSE_BODY[purpose]}
-                explainer={PURPOSE_EXPLAINER[purpose]}
-                initialState={c.state}
-                grantedAt={c.grantedAt}
-                version={c.version}
-              />
+              <li key={purpose}>
+                <ConsentRow
+                  purpose={purpose}
+                  label={PURPOSE_LABEL[purpose]}
+                  body={PURPOSE_BODY[purpose]}
+                  explainer={PURPOSE_EXPLAINER[purpose]}
+                  initialState={c.state}
+                  grantedAt={c.grantedAt}
+                  version={c.version}
+                />
+                {/* Phase 11.3.1  pause control sits directly under the
+                    searchability toggle. Hidden when consent is off. */}
+                {purpose === "searchability" && (
+                  <SearchabilityPauseControl
+                    searchabilityOn={c.state === "granted"}
+                    pausedUntil={pauseState.pausedUntil}
+                    pausedAt={pauseState.pausedAt}
+                    pausedReason={pauseState.pausedReason}
+                    locale={locale}
+                  />
+                )}
+              </li>
             );
           })}
         </ul>
+      </section>
+
+      {/* Phase 11.3.2  blocked employers (private). */}
+      <section aria-labelledby="blocks-h" className="mt-12">
+        <h2
+          id="blocks-h"
+          className="mb-4 border-b-2 border-[color:var(--color-ink)] pb-2 font-display text-2xl"
+        >
+          Blocked employers
+        </h2>
+        <p className="mb-4 max-w-prose text-sm text-[color:var(--color-ink-soft)]">
+          Private to you. Blocked employers can&rsquo;t find you in search or
+          send you new invites; they are <strong>not</strong> told. Use the
+          report flow on an invitation card instead if you want admins to
+          review the employer&rsquo;s conduct.
+        </p>
+        <BlockedEmployersList initial={blocks} locale={locale} />
       </section>
 
       <section aria-labelledby="data-h" className="mt-12">

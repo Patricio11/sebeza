@@ -9,14 +9,26 @@ import { Flag } from "lucide-react";
 import { HelpLink } from "@/components/feature/help/HelpLink";
 
 const REASON_LABEL_KEY: Record<
-  "fake_identity" | "inappropriate" | "harassment" | "spam" | "other",
-  "fakeIdentity" | "inappropriate" | "harassment" | "spam" | "other"
+  | "fake_identity"
+  | "inappropriate"
+  | "harassment"
+  | "spam"
+  | "other"
+  | "irrelevant_role"
+  | "bad_faith_company"
+  | "off_platform_contact_request",
+  string
 > = {
   fake_identity: "fakeIdentity",
   inappropriate: "inappropriate",
   harassment: "harassment",
   spam: "spam",
   other: "other",
+  // Phase 11.3.3  invite-specific reasons. Fall back to the existing
+  // translation key set until the admin help catalogs add bespoke copy.
+  irrelevant_role: "other",
+  bad_faith_company: "other",
+  off_platform_contact_request: "other",
 };
 
 export default async function ModerationPage({

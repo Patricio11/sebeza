@@ -210,6 +210,35 @@ export async function searchProfilesQuery(
     );
   }
 
+  // Phase 11.3.1  pause-searchability exclusion. A seeker whose
+  // `searchability` consent has `paused_until > now()` is paused; we
+  // silently drop them from results until the pause expires (cron
+  // unpauses; UI shows the chip). NOT EXISTS keeps the row in the
+  // result set when no consent row, or when paused_until is NULL.
+  conditions.push(
+    sql`NOT EXISTS (
+      SELECT 1 FROM consents c
+      WHERE c.user_id = p.user_id
+        AND c.purpose = 'searchability'
+        AND c.paused_until IS NOT NULL
+        AND c.paused_until > now()
+    )`,
+  );
+
+  // Phase 11.3.2  seeker-private employer block. When the search is
+  // run by a verified employer (callerOrgId set), exclude any profile
+  // that has blocked the org. Anonymous + gov + admin callers pass
+  // null and the block enforcement is a no-op.
+  if (filters.callerOrgId) {
+    conditions.push(
+      sql`NOT EXISTS (
+        SELECT 1 FROM seeker_blocked_employers sbe
+        WHERE sbe.profile_id = p.id
+          AND sbe.org_id = ${filters.callerOrgId}
+      )`,
+    );
+  }
+
   const whereClause = sql.join(conditions, sql` AND `);
 
   // Single query: enumerated columns (redaction!), composed score, ordered.

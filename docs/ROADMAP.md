@@ -828,8 +828,8 @@ Five sub-phases, ordered by ROI per LOC:
 ### Task 11.2: Learning loop completion (skill-growth conversion) ✅ *(shipped 2026-05-30)*
 - [x] LearningPath `url` field · free-alternative on cost-abandon · completion  cert upload bridge · "interested" parking-lot state · skill journey timeline · city-demand drill-down · compass auto-revalidate · adjacent profession CTA · student-lane discoverability. *See `docs/completed/PHASE_11_2_COMPLETE.md` (+ archived plan).*
 
-### Task 11.3: Seeker control + trust posture
-- [ ] Pause searchability · block this employer (private) · report this invite · vacancy snapshot in invitation detail · employer verification badge on invite card · employment-verification audit-trail visibility. *See `docs/PHASE_11_3_PLAN.md`.*
+### Task 11.3: Seeker control + trust posture ✅ *(shipped 2026-05-30)*
+- [x] Pause searchability · block this employer (private) · report this invite · vacancy snapshot in invitation detail · employer verification badge on invite card · employment-verification audit-trail visibility. *See `docs/completed/PHASE_11_3_COMPLETE.md` (+ archived plan).*
 
 ### Task 11.4: SA distribution surface (WhatsApp + SMS + share card)
 - [ ] Profile shareable summary card (PNG + WhatsApp deep-link) · follow employer (save list) · data-saver mode · SMS / WhatsApp notification channel (gated rollout, cost-controlled) · recommended employers by profession. *See `docs/PHASE_11_4_PLAN.md`.*

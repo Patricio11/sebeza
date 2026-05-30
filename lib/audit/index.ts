@@ -32,6 +32,20 @@ export type AuditKind =
   | "auth.signout"
   | "consent.grant"
   | "consent.revoke"
+  // Phase 11.3.1  pause-searchability lifecycle. Pause is a state on
+  // the existing searchability consent, not a new purpose (D1). Three
+  // kinds: manual pause, manual unpause, cron-driven auto-expiry.
+  | "consent.searchability.paused"
+  | "consent.searchability.unpaused"
+  | "consent.searchability.pause_expired"
+  // Phase 11.3.2  seeker-private employer block lifecycle. The
+  // employer NEVER sees these rows (privacy invariant D2).
+  | "seeker.block.added"
+  | "seeker.block.removed"
+  // Phase 11.3.3  invitation reports. Distinct from `report.flag`
+  // (which targets a profile)  invite reports point at an org +
+  // invitation. Same admin queue.
+  | "moderation.invite_report.created"
   // Phase 3  self-edit events on the seeker dashboard.
   | "profile.update"
   | "profile.skills.update"

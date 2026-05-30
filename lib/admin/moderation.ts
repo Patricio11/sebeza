@@ -245,6 +245,8 @@ export async function closeReport(
     .select({
       id: schema.reports.id,
       subjectProfileId: schema.reports.subjectProfileId,
+      subjectOrgId: schema.reports.subjectOrgId,
+      subjectInvitationId: schema.reports.subjectInvitationId,
       status: schema.reports.status,
     })
     .from(schema.reports)
@@ -267,7 +269,14 @@ export async function closeReport(
   await logAccess({
     kind: "report.close",
     actor: session.id,
-    subject: report.subjectProfileId,
+    // Phase 11.3.3  subjectProfileId is nullable now (invite reports
+    // point at the org + invitation instead). Fall back to the org id
+    // or the invitation id for the audit row's subject.
+    subject:
+      report.subjectProfileId ??
+      report.subjectOrgId ??
+      report.subjectInvitationId ??
+      report.id,
     meta: {
       reportId: report.id,
       resolution: parsed.data.resolution,

@@ -56,6 +56,12 @@ export interface SeekerInvitationRow {
   orgId: string;
   orgName: string;
   /**
+   * Phase 11.3.5  verification tier of the inviting org. Surfaced on
+   * the seeker's invitation card + detail so the seeker can tell at a
+   * glance whether this is a Sebenza-verified employer.
+   */
+  orgVerification: "unverified" | "pending" | "verified" | "rejected";
+  /**
    * Phase 9.21  vacancy-side season window. Surfaced on the seeker
    * detail page when present so the seeker can read the months before
    * accepting / declining. NULL when the vacancy didn't declare a
@@ -63,4 +69,45 @@ export interface SeekerInvitationRow {
    * window of their own (D2); this is read-only context.
    */
   seasonalWindow: import("@/lib/mock/types").SeasonalWindow | null;
+  /**
+   * Phase 11.3.4  vacancy spec frozen at invitation-send time. Null
+   * for pre-migration invitations; the UI falls back to the live
+   * `description` + a "may have changed" annotation.
+   */
+  vacancySnapshot: VacancySnapshot | null;
+}
+
+/**
+ * Phase 11.3.4  the frozen-at-send-time vacancy snapshot shape. Mirrors
+ * the relevant subset of `vacancies` columns the seeker needs to
+ * evaluate the role. Stored as jsonb on `vacancy_invitations`; the
+ * jsonb column is typed as `unknown` server-side  pass through a
+ * runtime guard before rendering.
+ */
+export interface VacancySnapshot {
+  title: string;
+  description: string | null;
+  professionSlug: string;
+  provinceSlug: string;
+  citySlug: string | null;
+  seniority: string | null;
+  skillSlugs: string[];
+  workAvailability: string[];
+  minYearsExperience: number | null;
+  minNqfLevel: number | null;
+  salaryBand: string | null;
+  /** ISO timestamp the snapshot was captured. */
+  capturedAt: string;
+}
+
+export function isVacancySnapshot(v: unknown): v is VacancySnapshot {
+  if (!v || typeof v !== "object") return false;
+  const r = v as Record<string, unknown>;
+  return (
+    typeof r["title"] === "string" &&
+    typeof r["professionSlug"] === "string" &&
+    typeof r["provinceSlug"] === "string" &&
+    Array.isArray(r["skillSlugs"]) &&
+    typeof r["capturedAt"] === "string"
+  );
 }

@@ -276,6 +276,13 @@ export interface SearchFilters {
    * rarely require formal qualifications).
    */
   minNqfLevel?: number | null;
+  /**
+   * Phase 11.3.2  caller's org id (when the search is run by a
+   * verified employer). When set, profiles that have blocked the org
+   * are silently excluded via `seeker_blocked_employers`. Always null
+   * for anonymous / non-employer searches  no block enforcement.
+   */
+  callerOrgId?: string | null;
 }
 
 export interface SearchResult {

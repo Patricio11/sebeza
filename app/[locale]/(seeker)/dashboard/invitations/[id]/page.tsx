@@ -21,6 +21,10 @@ import { SEEKER_NAV } from "@/components/layout/seekerNav";
 import { verifyRole } from "@/lib/auth/dal";
 import { getMyInvitation } from "@/lib/seeker/invitations";
 import { InvitationResponseIsland } from "@/components/feature/seeker/invitations/InvitationResponseIsland";
+import { VacancySnapshotCard } from "@/components/feature/seeker/invitations/VacancySnapshotCard";
+import { EmployerVerificationChip } from "@/components/feature/seeker/invitations/EmployerVerificationChip";
+import { BlockEmployerControl } from "@/components/feature/seeker/BlockEmployerControl";
+import { ReportInvitationControl } from "@/components/feature/seeker/ReportInvitationControl";
 import { PROVINCES, PROFESSIONS } from "@/lib/mock/taxonomy";
 import { Building2, ChevronLeft, Clock, MapPin } from "lucide-react";
 
@@ -78,9 +82,15 @@ export default async function SeekerInvitationDetailPage({
         <div className="text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--color-ink-soft)]">
           From
         </div>
-        <div className="mt-1 flex items-center gap-2 font-display text-xl text-[color:var(--color-ink)]">
+        <div className="mt-1 flex flex-wrap items-center gap-2 font-display text-xl text-[color:var(--color-ink)]">
           <Building2 className="size-5" aria-hidden="true" />
           {inv.orgName}
+          {/* Phase 11.3.5  verification chip + honest-signal line when
+              the org isn't verified. */}
+          <EmployerVerificationChip
+            state={inv.orgVerification}
+            withDetail
+          />
         </div>
 
         <dl className="mt-5 grid grid-cols-1 gap-4 text-sm md:grid-cols-2">
@@ -139,7 +149,7 @@ export default async function SeekerInvitationDetailPage({
           )}
         </dl>
 
-        {inv.description && (
+        {inv.description && !inv.vacancySnapshot && (
           <div className="mt-5 border-t border-[color:var(--color-hairline)] pt-4">
             <dt className="text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--color-ink-soft)]">
               About the role
@@ -151,6 +161,17 @@ export default async function SeekerInvitationDetailPage({
         )}
       </section>
 
+      {/* Phase 11.3.4  vacancy snapshot card. Frozen-at-send spec
+          when one exists; falls back to the live description for
+          pre-migration invitations. */}
+      <VacancySnapshotCard
+        snapshot={inv.vacancySnapshot}
+        liveDescription={inv.description}
+        liveProfession={professionLabel}
+        liveProvince={provinceLabel}
+        locale={locale}
+      />
+
       <InvitationResponseIsland
         invitationId={inv.id}
         state={inv.state}
@@ -160,6 +181,15 @@ export default async function SeekerInvitationDetailPage({
         declineReason={inv.declineReason}
         declineNote={inv.declineNote}
       />
+
+      {/* Phase 11.3.2 + 11.3.3  agency controls. Report fires a
+          moderation row; block silences this org platform-wide for
+          this seeker. Neither flips the invitation state by itself
+          (D3 + D2). */}
+      <div className="mt-6 flex flex-wrap items-center gap-4 rounded-[var(--radius-md)] border border-dashed border-[color:var(--color-hairline)] bg-[color:var(--color-surface-sunk)] p-4">
+        <ReportInvitationControl invitationId={inv.id} />
+        <BlockEmployerControl orgId={inv.orgId} orgName={inv.orgName} />
+      </div>
 
       <p className="mt-8 text-xs italic text-[color:var(--color-ink-soft)]">
         Salary band, internal notes, and the employer&rsquo;s candidate

@@ -340,6 +340,43 @@ function ResolvedStrip({ current }: { current: MyVerificationRow }) {
         <p className="mt-0.5 text-xs text-[color:var(--color-ink-soft)]">
           {config.body}
         </p>
+        {/* Phase 11.3.6  audit-trail visibility. The seeker sees the
+            provenance of their own verification: who confirmed, when,
+            and the durable reference number from the
+            `employment_verifications.id`. Aligns with POPIA s.23
+            (right of access to personal information). */}
+        {(current.state === "verified" ||
+          current.state === "declined" ||
+          current.state === "disputed") && (
+          <p className="mt-2 inline-flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[0.62rem] uppercase tracking-[0.18em] text-[color:var(--color-ink-soft)]">
+            <span>Audit trail</span>
+            <span aria-hidden="true">·</span>
+            <span>
+              {current.state === "verified"
+                ? "Verified"
+                : current.state === "declined"
+                  ? "Declined"
+                  : "Disputed"}{" "}
+              by {current.contactName}
+            </span>
+            {current.respondedAt && (
+              <>
+                <span aria-hidden="true">·</span>
+                <span>
+                  {new Date(current.respondedAt).toLocaleDateString("en-ZA", {
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric",
+                  })}
+                </span>
+              </>
+            )}
+            <span aria-hidden="true">·</span>
+            <span className="font-mono">
+              Ref EV-{current.id.replace(/[^A-Za-z0-9]/g, "").slice(-8).toUpperCase()}
+            </span>
+          </p>
+        )}
       </div>
     </div>
   );
