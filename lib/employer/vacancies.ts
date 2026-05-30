@@ -28,7 +28,7 @@ import { randomUUID } from "node:crypto";
 import { z } from "zod";
 import { verifyEmployer, verifyOrgVerified } from "@/lib/auth/dal";
 import { logAccess } from "@/lib/audit";
-import { createNotification } from "@/lib/notifications/server";
+import { createNotification, notifyAllAdmins } from "@/lib/notifications/server";
 import {
   composeOutcomeNotification,
   type OutcomeComposerInput,
@@ -155,6 +155,8 @@ function rowToVacancy(r: typeof schema.vacancies.$inferSelect): VacancyRow {
         ? {
             startMonth: r.seasonalWindowStartMonth,
             endMonth: r.seasonalWindowEndMonth,
+            startYear: r.seasonalWindowStartYear ?? null,
+            endYear: r.seasonalWindowEndYear ?? null,
             recurringAnnually: r.seasonalWindowRecurringAnnually ?? true,
           }
         : null,
@@ -327,6 +329,27 @@ const vacancyInputSchema = z.object({
     .max(12)
     .nullable()
     .optional(),
+  /**
+   * Phase 9.21 follow-up  optional anchor years. When set, the form
+   * surfaces them alongside the month for unambiguous summer-season
+   * windows (e.g. Nov 2026  Feb 2027). For recurring vacancies,
+   * year = first occurrence. Bounded by reasonable past/future so
+   * typo'd four-digit years don't escape (e.g. year 20206).
+   */
+  seasonalWindowStartYear: z.coerce
+    .number()
+    .int()
+    .min(2020)
+    .max(2099)
+    .nullable()
+    .optional(),
+  seasonalWindowEndYear: z.coerce
+    .number()
+    .int()
+    .min(2020)
+    .max(2099)
+    .nullable()
+    .optional(),
   seasonalWindowRecurringAnnually: z.boolean().nullable().optional(),
 }).refine(
   (v) => {
@@ -410,6 +433,17 @@ export async function createVacancy(
     // can't write a half-window.
     seasonalWindowStartMonth: pairedMonth(v.seasonalWindowStartMonth, v.seasonalWindowEndMonth),
     seasonalWindowEndMonth: pairedMonth(v.seasonalWindowEndMonth, v.seasonalWindowStartMonth),
+    // Phase 9.21 follow-up  optional year anchors. Only persisted
+    // alongside a valid month window; null otherwise so half-states
+    // don't accumulate.
+    seasonalWindowStartYear:
+      v.seasonalWindowStartMonth != null && v.seasonalWindowEndMonth != null
+        ? v.seasonalWindowStartYear ?? null
+        : null,
+    seasonalWindowEndYear:
+      v.seasonalWindowStartMonth != null && v.seasonalWindowEndMonth != null
+        ? v.seasonalWindowEndYear ?? null
+        : null,
     seasonalWindowRecurringAnnually:
       v.seasonalWindowStartMonth != null && v.seasonalWindowEndMonth != null
         ? v.seasonalWindowRecurringAnnually ?? true
@@ -426,6 +460,19 @@ export async function createVacancy(
       profession: v.professionSlug,
       province: v.provinceSlug,
     },
+  });
+
+  // Phase 10 follow-up  if the employer picked "Other" on the
+  // profession combobox, the value isn't a canonical slug. Submit a
+  // taxonomy suggestion so admins can promote (same pattern as the
+  // seeker sign-up + profile-editor flows). Vacancy still saves
+  // even when the slug is non-canonical; the matcher just returns
+  // empty results until admin promotes. Auxiliary  failure logs
+  // but doesn't tank the create.
+  await maybeSubmitProfessionSuggestion({
+    professionSlug: v.professionSlug,
+    actorUserId: guard.userId,
+    via: "vacancy-create",
   });
 
   revalidatePath("/employer/vacancies");
@@ -478,6 +525,14 @@ export async function updateVacancy(
       // Phase 9.21  paired-month guard mirrors the create insert.
       seasonalWindowStartMonth: pairedMonth(v.seasonalWindowStartMonth, v.seasonalWindowEndMonth),
       seasonalWindowEndMonth: pairedMonth(v.seasonalWindowEndMonth, v.seasonalWindowStartMonth),
+      seasonalWindowStartYear:
+        v.seasonalWindowStartMonth != null && v.seasonalWindowEndMonth != null
+          ? v.seasonalWindowStartYear ?? null
+          : null,
+      seasonalWindowEndYear:
+        v.seasonalWindowStartMonth != null && v.seasonalWindowEndMonth != null
+          ? v.seasonalWindowEndYear ?? null
+          : null,
       seasonalWindowRecurringAnnually:
         v.seasonalWindowStartMonth != null && v.seasonalWindowEndMonth != null
           ? v.seasonalWindowRecurringAnnually ?? true
@@ -497,9 +552,66 @@ export async function updateVacancy(
     meta: { orgId: guard.orgId },
   });
 
+  // Phase 10 follow-up  mirrors createVacancy: if the picker emitted
+  // a non-canonical profession, queue an admin suggestion. Only fires
+  // when the profession actually changed (or wasn't canonical before).
+  if (v.professionSlug !== existing.professionSlug) {
+    await maybeSubmitProfessionSuggestion({
+      professionSlug: v.professionSlug,
+      actorUserId: guard.userId,
+      via: "vacancy-update",
+    });
+  }
+
   revalidatePath("/employer/vacancies");
   revalidatePath(`/employer/vacancies/${vacancyId}`);
   return ok();
+}
+
+/**
+ * Phase 10 follow-up  shared helper for both createVacancy +
+ * updateVacancy. If the picker value isn't in the canonical
+ * PROFESSIONS taxonomy, write one taxonomy_suggestions row + notify
+ * admins via the existing /admin/taxonomy queue. Auxiliary: failure
+ * is logged but never tanks the parent action.
+ */
+async function maybeSubmitProfessionSuggestion(args: {
+  professionSlug: string;
+  actorUserId: string;
+  via: "vacancy-create" | "vacancy-update";
+}): Promise<void> {
+  const { professionSlug, actorUserId, via } = args;
+  const isCanonical = MOCK_PROFESSIONS.some(
+    (p) => p.slug === professionSlug || p.label.toLowerCase() === professionSlug.toLowerCase(),
+  );
+  if (isCanonical) return;
+  const db = getDb();
+  try {
+    const suggestionId = `tx_${randomUUID()}`;
+    await db.insert(schema.taxonomySuggestions).values({
+      id: suggestionId,
+      kind: "profession",
+      customText: professionSlug,
+      submittedByUserId: actorUserId,
+    });
+    await logAccess({
+      kind: "taxonomy.suggestion.submit",
+      actor: actorUserId,
+      subject: suggestionId,
+      meta: { kind: "profession", customText: professionSlug, via },
+    });
+    await notifyAllAdmins({
+      kind: "taxonomy.suggestion.received",
+      title: `New profession suggestion: ${professionSlug}`,
+      body: `An employer picked "Other" while ${via === "vacancy-create" ? "creating" : "editing"} a vacancy + entered "${professionSlug}". Review at /admin/taxonomy.`,
+      link: "/admin/taxonomy",
+      dedupeKey: `profession::${professionSlug.toLowerCase()}`,
+      meta: { suggestionId, kind: "profession", customText: professionSlug },
+    });
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.error("[vacancies] profession suggestion submit failed:", e);
+  }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

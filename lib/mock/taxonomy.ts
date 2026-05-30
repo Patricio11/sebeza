@@ -176,6 +176,13 @@ export const PROFESSIONS: TaxonomyEntry[] = [
   { slug: "fitness-instructor", label: "Fitness Instructor" },
   { slug: "yoga-instructor", label: "Yoga Instructor" },
   { slug: "pilates-instructor", label: "Pilates Instructor" },
+  // ── Aquatics + recreation ────────────────────────────────────────────
+  // Added to support metro seasonal-hire patterns (e.g. ~600 summer
+  // beach + pool lifeguards). All three roles map cleanly to the
+  // seasonal work-availability axis.
+  { slug: "lifeguard", label: "Lifeguard" },
+  { slug: "pool-attendant", label: "Pool Attendant" },
+  { slug: "swim-instructor", label: "Swimming Instructor" },
   // ── Agriculture + mining ─────────────────────────────────────────────
   { slug: "farm-worker", label: "Farm Worker" },
   { slug: "miner", label: "Miner" },

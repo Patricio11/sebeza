@@ -252,6 +252,8 @@ export function ProfileBasicsForm({
               label: p.label,
             }))}
             placeholder="Search professions…"
+            allowOther
+            otherLabel="My profession isn't listed"
           />
           <SelectField
             id="seniority"

@@ -203,10 +203,17 @@ function formatSeasonalWindowLabel(
     "Nov",
     "Dec",
   ];
-  const start = months[window.startMonth - 1] ?? "?";
-  const end = months[window.endMonth - 1] ?? "?";
-  const range =
-    window.startMonth === window.endMonth ? start : `${start}${end}`;
+  const startMonth = months[window.startMonth - 1] ?? "?";
+  const endMonth = months[window.endMonth - 1] ?? "?";
+  // Phase 9.21 follow-up  surface anchor year when the employer set
+  // it. Seeker reads "Nov 2026  Feb 2027" rather than the ambiguous
+  // month-only "Nov  Feb" for windows that cross December.
+  const start = window.startYear ? `${startMonth} ${window.startYear}` : startMonth;
+  const end = window.endYear ? `${endMonth} ${window.endYear}` : endMonth;
+  const sameMonthAndYear =
+    window.startMonth === window.endMonth &&
+    (window.startYear ?? null) === (window.endYear ?? null);
+  const range = sameMonthAndYear ? start : `${start}${end}`;
   const tail = window.recurringAnnually ? ", annually" : ", one-off";
   return `${range}${tail}`;
 }

@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/FormField";
 import { Button } from "@/components/ui/Button";
 import { ComboboxField } from "@/components/ui/ComboboxField";
+import { MonthYearPicker } from "@/components/ui/MonthYearPicker";
 import { Lock } from "lucide-react";
 import type {
   TaxonomyEntry,
@@ -58,6 +59,8 @@ export interface VacancyFormValue {
    *  accepts either via the widened `initial` prop. */
   seasonalWindowStartMonth?: number | null;
   seasonalWindowEndMonth?: number | null;
+  seasonalWindowStartYear?: number | null;
+  seasonalWindowEndYear?: number | null;
   seasonalWindowRecurringAnnually?: boolean | null;
 }
 
@@ -114,6 +117,11 @@ interface VacancyDraft {
   // only get persisted when 'seasonal' is in the chip set.
   seasonalWindowStartMonth: string;
   seasonalWindowEndMonth: string;
+  /** Phase 9.21 follow-up  optional anchor years. Empty string = unset.
+   *  Year is paired with month via the MonthYearPicker; the form keeps
+   *  them as separate scalars in the draft so empty-string round-trips. */
+  seasonalWindowStartYear: string;
+  seasonalWindowEndYear: string;
   seasonalWindowRecurringAnnually: boolean;
 }
 
@@ -143,22 +151,33 @@ const WORK_AVAILABILITY_CHOICES: ReadonlyArray<{
   { value: "hybrid", label: "Hybrid" },
 ];
 
-// Phase 9.21  month picker options. Plain English labels, 1-12
-// payload values so the Zod schema can validate without locale lookups.
-const MONTH_OPTIONS: ReadonlyArray<{ value: number; label: string }> = [
-  { value: 1, label: "January" },
-  { value: 2, label: "February" },
-  { value: 3, label: "March" },
-  { value: 4, label: "April" },
-  { value: 5, label: "May" },
-  { value: 6, label: "June" },
-  { value: 7, label: "July" },
-  { value: 8, label: "August" },
-  { value: 9, label: "September" },
-  { value: 10, label: "October" },
-  { value: 11, label: "November" },
-  { value: 12, label: "December" },
-];
+/**
+ * Phase 9.21 follow-up  bridge between the MonthYearPicker (ISO
+ * yyyy-mm) and the form's flat month/year string state. When year is
+ * blank, we still want the picker to show the chosen month, so we
+ * synthesise the current year for the picker's display only  the
+ * actual year state stays empty (= not anchored).
+ */
+function composeIsoMonth(monthRaw: string, yearRaw: string): string {
+  if (!monthRaw) return "";
+  const m = String(monthRaw).padStart(2, "0");
+  const y = yearRaw && yearRaw.length === 4 ? yearRaw : String(new Date().getFullYear());
+  return `${y}-${m}`;
+}
+
+/** Inverse of composeIsoMonth. Returns the raw month + year separately;
+ *  caller decides whether to persist the year (we don't anchor unless
+ *  the user explicitly set it via the picker). */
+function decomposeIsoMonth(iso: string): { month: string; year: string } {
+  if (!iso) return { month: "", year: "" };
+  const parts = iso.split("-");
+  if (parts.length !== 2) return { month: "", year: "" };
+  const [y, m] = parts;
+  return {
+    month: String(parseInt(m ?? "0", 10) || ""),
+    year: y && y.length === 4 ? y : "",
+  };
+}
 
 /**
  * Phase 9.21  build the season-window subset of the submit payload.
@@ -170,21 +189,29 @@ function buildSeasonalWindowSubmit({
   seasonalSelected,
   startRaw,
   endRaw,
+  startYearRaw,
+  endYearRaw,
   recurringAnnually,
 }: {
   seasonalSelected: boolean;
   startRaw: string;
   endRaw: string;
+  startYearRaw: string;
+  endYearRaw: string;
   recurringAnnually: boolean;
 }): {
   seasonalWindowStartMonth: number | null;
   seasonalWindowEndMonth: number | null;
+  seasonalWindowStartYear: number | null;
+  seasonalWindowEndYear: number | null;
   seasonalWindowRecurringAnnually: boolean | null;
 } {
   if (!seasonalSelected) {
     return {
       seasonalWindowStartMonth: null,
       seasonalWindowEndMonth: null,
+      seasonalWindowStartYear: null,
+      seasonalWindowEndYear: null,
       seasonalWindowRecurringAnnually: null,
     };
   }
@@ -194,12 +221,20 @@ function buildSeasonalWindowSubmit({
     return {
       seasonalWindowStartMonth: null,
       seasonalWindowEndMonth: null,
+      seasonalWindowStartYear: null,
+      seasonalWindowEndYear: null,
       seasonalWindowRecurringAnnually: null,
     };
   }
+  // Year is optional; only submit when present + paired with a valid month.
+  const startYear =
+    startYearRaw.trim() === "" ? null : Number(startYearRaw);
+  const endYear = endYearRaw.trim() === "" ? null : Number(endYearRaw);
   return {
     seasonalWindowStartMonth: start,
     seasonalWindowEndMonth: end,
+    seasonalWindowStartYear: startYear,
+    seasonalWindowEndYear: endYear,
     seasonalWindowRecurringAnnually: recurringAnnually,
   };
 }
@@ -288,6 +323,22 @@ export function VacancyForm({
       return nested != null ? String(nested) : "";
     },
   );
+  // Phase 9.21 follow-up  optional anchor years.
+  const [seasonalWindowStartYear, setSeasonalWindowStartYear] =
+    useState<string>(() => {
+      const flat = initial?.seasonalWindowStartYear;
+      if (flat != null) return String(flat);
+      const nested = initial?.seasonalWindow?.startYear;
+      return nested != null ? String(nested) : "";
+    });
+  const [seasonalWindowEndYear, setSeasonalWindowEndYear] = useState<string>(
+    () => {
+      const flat = initial?.seasonalWindowEndYear;
+      if (flat != null) return String(flat);
+      const nested = initial?.seasonalWindow?.endYear;
+      return nested != null ? String(nested) : "";
+    },
+  );
   const [seasonalWindowRecurringAnnually, setSeasonalWindowRecurringAnnually] =
     useState<boolean>(
       initial?.seasonalWindowRecurringAnnually ??
@@ -315,6 +366,8 @@ export function VacancyForm({
       followUpNudgesEnabled,
       seasonalWindowStartMonth,
       seasonalWindowEndMonth,
+      seasonalWindowStartYear,
+      seasonalWindowEndYear,
       seasonalWindowRecurringAnnually,
     }),
     [
@@ -332,6 +385,8 @@ export function VacancyForm({
       followUpNudgesEnabled,
       seasonalWindowStartMonth,
       seasonalWindowEndMonth,
+      seasonalWindowStartYear,
+      seasonalWindowEndYear,
       seasonalWindowRecurringAnnually,
     ],
   );
@@ -361,6 +416,10 @@ export function VacancyForm({
           setSeasonalWindowStartMonth(draft.seasonalWindowStartMonth);
         if (draft.seasonalWindowEndMonth !== undefined)
           setSeasonalWindowEndMonth(draft.seasonalWindowEndMonth);
+        if (draft.seasonalWindowStartYear !== undefined)
+          setSeasonalWindowStartYear(draft.seasonalWindowStartYear);
+        if (draft.seasonalWindowEndYear !== undefined)
+          setSeasonalWindowEndYear(draft.seasonalWindowEndYear);
         if (typeof draft.seasonalWindowRecurringAnnually === "boolean")
           setSeasonalWindowRecurringAnnually(
             draft.seasonalWindowRecurringAnnually,
@@ -446,6 +505,8 @@ export function VacancyForm({
         seasonalSelected: workAvailabilitySet.has("seasonal"),
         startRaw: seasonalWindowStartMonth,
         endRaw: seasonalWindowEndMonth,
+        startYearRaw: seasonalWindowStartYear,
+        endYearRaw: seasonalWindowEndYear,
         recurringAnnually: seasonalWindowRecurringAnnually,
       }),
     };
@@ -501,6 +562,8 @@ export function VacancyForm({
               label: p.label,
             }))}
             placeholder="Search professions…"
+            allowOther
+            otherLabel="Suggest a new profession"
           />
           <SelectField
             id="province"
@@ -642,46 +705,65 @@ export function VacancyForm({
                 Season window
               </p>
               <p className="mt-1 text-xs text-[color:var(--color-ink-soft)]">
-                Optional. When set, seekers see the exact months in
-                their invitation. Leave both blank for &ldquo;seasonal work,
-                timing TBD.&rdquo; If the window crosses December (e.g. lodges
-                NovFeb), set start to November and end to February.
+                Optional. Pick the month (and, if you want, the year) for
+                each endpoint. Year is optional but recommended for
+                summer windows that cross December &mdash; e.g.{" "}
+                <em>Nov 2026  Feb 2027</em> reads unambiguously.
+                Leave both blank for &ldquo;seasonal work, timing
+                TBD.&rdquo;
               </p>
               <div className="mt-3 grid gap-3 md:grid-cols-2">
-                <SelectField
-                  id="seasonalWindowStartMonth"
-                  name="seasonalWindowStartMonth"
+                <MonthYearPicker
+                  id="seasonalWindowStart"
                   label="Season starts"
-                  optional
+                  value={composeIsoMonth(
+                    seasonalWindowStartMonth,
+                    seasonalWindowStartYear,
+                  )}
+                  onChange={(iso) => {
+                    const { month, year } = decomposeIsoMonth(iso);
+                    setSeasonalWindowStartMonth(month);
+                    setSeasonalWindowStartYear(year);
+                  }}
+                  disabled={pending}
+                />
+                {/* Hidden inputs ferry the month + year into the form post
+                    (the MonthYearPicker stores a single ISO string; the
+                    server action reads the flat month/year fields). */}
+                <input
+                  type="hidden"
+                  name="seasonalWindowStartMonth"
                   value={seasonalWindowStartMonth}
-                  onChange={(e) =>
-                    setSeasonalWindowStartMonth(e.target.value)
-                  }
-                  disabled={pending}
-                >
-                  <option value=""></option>
-                  {MONTH_OPTIONS.map((opt) => (
-                    <option key={opt.value} value={String(opt.value)}>
-                      {opt.label}
-                    </option>
-                  ))}
-                </SelectField>
-                <SelectField
-                  id="seasonalWindowEndMonth"
-                  name="seasonalWindowEndMonth"
+                />
+                <input
+                  type="hidden"
+                  name="seasonalWindowStartYear"
+                  value={seasonalWindowStartYear}
+                />
+                <MonthYearPicker
+                  id="seasonalWindowEnd"
                   label="Season ends"
-                  optional
-                  value={seasonalWindowEndMonth}
-                  onChange={(e) => setSeasonalWindowEndMonth(e.target.value)}
+                  value={composeIsoMonth(
+                    seasonalWindowEndMonth,
+                    seasonalWindowEndYear,
+                  )}
+                  onChange={(iso) => {
+                    const { month, year } = decomposeIsoMonth(iso);
+                    setSeasonalWindowEndMonth(month);
+                    setSeasonalWindowEndYear(year);
+                  }}
                   disabled={pending}
-                >
-                  <option value=""></option>
-                  {MONTH_OPTIONS.map((opt) => (
-                    <option key={opt.value} value={String(opt.value)}>
-                      {opt.label}
-                    </option>
-                  ))}
-                </SelectField>
+                />
+                <input
+                  type="hidden"
+                  name="seasonalWindowEndMonth"
+                  value={seasonalWindowEndMonth}
+                />
+                <input
+                  type="hidden"
+                  name="seasonalWindowEndYear"
+                  value={seasonalWindowEndYear}
+                />
               </div>
               <label className="mt-3 flex items-start gap-3">
                 <input
@@ -698,8 +780,10 @@ export function VacancyForm({
                     This window repeats every year
                   </span>
                   <span className="mt-0.5 block text-xs text-[color:var(--color-ink-soft)]">
-                    Default for most seasonal roles. Untick for one-off
-                    runs (e.g. a tournament pop-up that won&rsquo;t repeat).
+                    Default for most seasonal roles. When ticked, the
+                    year is the FIRST occurrence anchor. Untick for
+                    one-off runs (e.g. a tournament pop-up that
+                    won&rsquo;t repeat).
                   </span>
                 </span>
               </label>

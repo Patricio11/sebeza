@@ -90,10 +90,19 @@ function formatSeasonalWindowLine(
   window: import("@/lib/mock/types").SeasonalWindow | null,
 ): string {
   if (!window) return "";
-  const start = SEASONAL_MONTH_LABELS[window.startMonth - 1] ?? "?";
-  const end = SEASONAL_MONTH_LABELS[window.endMonth - 1] ?? "?";
-  const range =
-    window.startMonth === window.endMonth ? start : `${start}${end}`;
+  const startMonth = SEASONAL_MONTH_LABELS[window.startMonth - 1] ?? "?";
+  const endMonth = SEASONAL_MONTH_LABELS[window.endMonth - 1] ?? "?";
+  // Year follow-up  if the employer set anchor years, surface them so
+  // the seeker reads "Nov 2026  Feb 2027" rather than the ambiguous
+  // month-only "Nov  Feb". Year-less rows keep their original copy.
+  const start = window.startYear
+    ? `${startMonth} ${window.startYear}`
+    : startMonth;
+  const end = window.endYear ? `${endMonth} ${window.endYear}` : endMonth;
+  const sameMonthAndYear =
+    window.startMonth === window.endMonth &&
+    (window.startYear ?? null) === (window.endYear ?? null);
+  const range = sameMonthAndYear ? start : `${start}${end}`;
   const tail = window.recurringAnnually
     ? "annually"
     : "this year only, no recurrence";

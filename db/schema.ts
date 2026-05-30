@@ -1059,6 +1059,17 @@ export const vacancies = pgTable(
      */
     seasonalWindowStartMonth: integer("seasonal_window_start_month"),
     seasonalWindowEndMonth: integer("seasonal_window_end_month"),
+    /**
+     * Phase 9.21 follow-up  optional anchor year for each endpoint.
+     * Lets employers express &ldquo;Nov 2026  Feb 2027&rdquo;
+     * unambiguously (the lifeguard / hospitality summer-season case
+     * spans years). When the vacancy is recurring annually, the year
+     * is the FIRST occurrence; downstream display can roll forward.
+     * Nullable to keep Phase 9.21-era rows working; the form copy
+     * guides users that year is optional but recommended.
+     */
+    seasonalWindowStartYear: integer("seasonal_window_start_year"),
+    seasonalWindowEndYear: integer("seasonal_window_end_year"),
     /** Phase 9.21  most seasonal roles repeat annually; the boolean
      *  lets the rare one-off (e.g. Dec 2026 World Cup pop-up) opt
      *  out. NULL when the window itself is NULL. */

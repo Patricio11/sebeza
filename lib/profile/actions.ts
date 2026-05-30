@@ -24,8 +24,9 @@ import { encryptField } from "@/lib/crypto";
 import { validateSaIdNumber } from "@/lib/id-number";
 import { validateDob } from "@/lib/auth/id-validation";
 import { computeCompleteness } from "@/lib/mock/helpers";
-import { SKILLS } from "@/lib/mock/taxonomy";
+import { SKILLS, PROFESSIONS } from "@/lib/mock/taxonomy";
 import type { EmploymentStatus } from "@/lib/mock/types";
+import { notifyAllAdmins } from "@/lib/notifications/server";
 
 export type ActionResult<T extends object = object> =
   | ({ ok: true } & T)
@@ -112,6 +113,44 @@ export async function updateProfileBasics(
     subject: profile.id,
     meta: { fields: Object.keys(v) },
   });
+
+  // Phase 10 follow-up  if the user picked "Other" on the profession
+  // combobox, the value isn't a canonical slug. Submit a taxonomy
+  // suggestion so admins can review + promote (same pattern as the
+  // sign-up flow). Dedupes via the suggestion-table lookup;
+  // case-insensitive against existing customText. Failure is
+  // logged but doesn't tank the profile update.
+  const isCanonical = PROFESSIONS.some(
+    (p) => p.slug === v.profession || p.label.toLowerCase() === v.profession.toLowerCase(),
+  );
+  if (!isCanonical) {
+    try {
+      const suggestionId = `tx_${randomUUID()}`;
+      await db.insert(schema.taxonomySuggestions).values({
+        id: suggestionId,
+        kind: "profession",
+        customText: v.profession,
+        submittedByUserId: session.id,
+      });
+      await logAccess({
+        kind: "taxonomy.suggestion.submit",
+        actor: session.id,
+        subject: suggestionId,
+        meta: { kind: "profession", customText: v.profession, via: "profile-editor" },
+      });
+      await notifyAllAdmins({
+        kind: "taxonomy.suggestion.received",
+        title: `New profession suggestion: ${v.profession}`,
+        body: `A seeker picked "Other" on their profile + entered "${v.profession}". Review at /admin/taxonomy.`,
+        link: "/admin/taxonomy",
+        dedupeKey: `profession::${v.profession.toLowerCase()}`,
+        meta: { suggestionId, kind: "profession", customText: v.profession },
+      });
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error("[profile] profession suggestion submit failed:", e);
+    }
+  }
 
   revalidatePath("/dashboard");
   revalidatePath("/dashboard/profile");

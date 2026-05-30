@@ -540,12 +540,17 @@ function formatSeasonalWindowLabel(
     "Nov",
     "Dec",
   ];
-  const startLabel = months[window.startMonth - 1] ?? "?";
-  const endLabel = months[window.endMonth - 1] ?? "?";
-  const range =
-    window.startMonth === window.endMonth
-      ? startLabel
-      : `${startLabel}${endLabel}`;
+  const startMonth = months[window.startMonth - 1] ?? "?";
+  const endMonth = months[window.endMonth - 1] ?? "?";
+  // Phase 9.21 follow-up  surface the year alongside the month when
+  // the employer anchored the window. Year-less rows keep their
+  // original month-only display.
+  const start = window.startYear ? `${startMonth} ${window.startYear}` : startMonth;
+  const end = window.endYear ? `${endMonth} ${window.endYear}` : endMonth;
+  const sameMonthAndYear =
+    window.startMonth === window.endMonth &&
+    (window.startYear ?? null) === (window.endYear ?? null);
+  const range = sameMonthAndYear ? start : `${start}${end}`;
   const tail = window.recurringAnnually ? ", annually" : ", one-off";
   return `${range}${tail}`;
 }

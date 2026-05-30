@@ -70,6 +70,15 @@ export const WORK_AVAILABILITY_KINDS: WorkAvailabilityKind[] = [
 export interface SeasonalWindow {
   startMonth: number;
   endMonth: number;
+  /**
+   * Optional anchor years for each endpoint. Lets employers express
+   * "Nov 2026  Feb 2027" unambiguously (the lifeguard / hospitality
+   * summer-season case spans years). For recurring vacancies, year =
+   * the FIRST occurrence; display rolls forward. Nullable so existing
+   * month-only rows keep working unchanged.
+   */
+  startYear?: number | null;
+  endYear?: number | null;
   recurringAnnually: boolean;
 }
 

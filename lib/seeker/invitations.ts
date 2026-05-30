@@ -109,6 +109,8 @@ export async function listMyInvitations(): Promise<SeekerInvitationRow[]> {
       // Phase 9.21  season window for the detail page.
       seasonalWindowStartMonth: schema.vacancies.seasonalWindowStartMonth,
       seasonalWindowEndMonth: schema.vacancies.seasonalWindowEndMonth,
+      seasonalWindowStartYear: schema.vacancies.seasonalWindowStartYear,
+      seasonalWindowEndYear: schema.vacancies.seasonalWindowEndYear,
       seasonalWindowRecurringAnnually:
         schema.vacancies.seasonalWindowRecurringAnnually,
     })
@@ -162,6 +164,8 @@ export async function getMyInvitation(
       // Phase 9.21  season window for the detail page.
       seasonalWindowStartMonth: schema.vacancies.seasonalWindowStartMonth,
       seasonalWindowEndMonth: schema.vacancies.seasonalWindowEndMonth,
+      seasonalWindowStartYear: schema.vacancies.seasonalWindowStartYear,
+      seasonalWindowEndYear: schema.vacancies.seasonalWindowEndYear,
       seasonalWindowRecurringAnnually:
         schema.vacancies.seasonalWindowRecurringAnnually,
     })
@@ -207,6 +211,8 @@ function toSeekerRow(r: {
   orgName: string;
   seasonalWindowStartMonth: number | null;
   seasonalWindowEndMonth: number | null;
+  seasonalWindowStartYear: number | null;
+  seasonalWindowEndYear: number | null;
   seasonalWindowRecurringAnnually: boolean | null;
 }): SeekerInvitationRow {
   return {
@@ -234,6 +240,8 @@ function toSeekerRow(r: {
         ? {
             startMonth: r.seasonalWindowStartMonth,
             endMonth: r.seasonalWindowEndMonth,
+            startYear: r.seasonalWindowStartYear ?? null,
+            endYear: r.seasonalWindowEndYear ?? null,
             recurringAnnually: r.seasonalWindowRecurringAnnually ?? true,
           }
         : null,
