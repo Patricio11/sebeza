@@ -35,14 +35,18 @@ export default async function TaxonomySuggestionsPage({
     professionSuggestions,
     institutionSuggestions,
     organisationSuggestions,
+    skillSuggestions,
     canonicalProfessions,
     canonicalInstitutions,
     canonicalOrganisations,
+    canonicalSkills,
   ] = await Promise.all([
     listPendingSuggestions("profession"),
     listPendingSuggestions("institution"),
     // Phase 9.22  org-kind suggestions.
     listPendingSuggestions("organisation"),
+    // Phase 10 follow-up  skill suggestions queue.
+    listPendingSuggestions("skill"),
     db
       .select({ slug: schema.professions.slug, label: schema.professions.label })
       .from(schema.professions)
@@ -72,12 +76,18 @@ export default async function TaxonomySuggestionsPage({
       )
       .orderBy(asc(schema.organizations.name))
       .limit(500),
+    // Phase 10 follow-up  canonical skills for the skill-merge picker.
+    db
+      .select({ slug: schema.skills.slug, label: schema.skills.label })
+      .from(schema.skills)
+      .orderBy(asc(schema.skills.label)),
   ]);
 
   const totalPending =
     professionSuggestions.length +
     institutionSuggestions.length +
-    organisationSuggestions.length;
+    organisationSuggestions.length +
+    skillSuggestions.length;
 
   return (
     <DashboardShell
@@ -90,8 +100,8 @@ export default async function TaxonomySuggestionsPage({
       pageTitle="Taxonomy suggestions"
       pageSubtitle={
         totalPending === 0
-          ? "Nothing pending. When users pick \"Other\" + enter free-text on profession or institution pickers, suggestions land here."
-          : `${totalPending} pending ${totalPending === 1 ? "suggestion" : "suggestions"} across professions + institutions.`
+          ? "Nothing pending. When users pick \"Other\" + enter free-text on profession, institution, organisation, or skill pickers, suggestions land here."
+          : `${totalPending} pending ${totalPending === 1 ? "suggestion" : "suggestions"} across professions, institutions, organisations + skills.`
       }
     >
       <div className="mb-4">
@@ -108,6 +118,7 @@ export default async function TaxonomySuggestionsPage({
         professionSuggestions={professionSuggestions}
         institutionSuggestions={institutionSuggestions}
         organisationSuggestions={organisationSuggestions}
+        skillSuggestions={skillSuggestions}
         canonicalProfessions={canonicalProfessions.map((p) => ({
           value: p.slug,
           label: p.label,
@@ -119,6 +130,10 @@ export default async function TaxonomySuggestionsPage({
         canonicalOrganisations={canonicalOrganisations.map((o) => ({
           value: o.slug,
           label: o.label,
+        }))}
+        canonicalSkills={canonicalSkills.map((s) => ({
+          value: s.slug,
+          label: s.label,
         }))}
       />
 

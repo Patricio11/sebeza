@@ -513,6 +513,20 @@ export async function promoteTaxonomySuggestion(
       .where(eq(schema.organizations.id, row.pendingOrganisationId));
 
     targetSlug = row.pendingOrganisationId;
+  } else if (row.kind === "skill") {
+    // Phase 10 follow-up  promote a skill suggestion. The suggested
+    // slug never persisted to profile_skills or vacancy.skill_slugs
+    // (the seeker / employer save paths filter non-canonical entries
+    // out at write time), so there's no backfill on this branch  the
+    // promote is pure "add to canonical skills + close the
+    // suggestion." After promotion the submitting user has to re-add
+    // the skill via the picker; the resolved suggestion stays on
+    // record so the admin can see who asked.
+    await db
+      .insert(schema.skills)
+      .values({ slug: finalSlug, label: finalLabel })
+      .onConflictDoNothing();
+    backfilledRows = 0;
   } else {
     // Institution: flip is_pending=false on the existing pending row.
     // Also update label if the admin corrected it.
@@ -674,6 +688,20 @@ export async function mergeTaxonomySuggestion(
     await db
       .delete(schema.organizations)
       .where(eq(schema.organizations.id, row.pendingOrganisationId));
+  } else if (row.kind === "skill") {
+    // Phase 10 follow-up  merge skill suggestion into existing
+    // canonical skill. Verify the target exists; no backfill needed
+    // (non-canonical skills never persisted to profile_skills /
+    // vacancy.skill_slugs). The targetSlug stamp on the resolved
+    // suggestion lets the admin retrace which canonical entry the
+    // merge pointed to.
+    const targetRows = await db
+      .select({ slug: schema.skills.slug })
+      .from(schema.skills)
+      .where(eq(schema.skills.slug, parsed.data.targetSlug))
+      .limit(1);
+    if (!targetRows[0]) return fail("Target skill not found.");
+    backfilledRows = 0;
   } else {
     if (!row.pendingInstitutionSlug) {
       return fail("Suggestion is missing its pending institution slug.");

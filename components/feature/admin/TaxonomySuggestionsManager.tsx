@@ -44,21 +44,27 @@ interface Props {
   institutionSuggestions: SuggestionRow[];
   /** Phase 9.22  organisation suggestions (kind='organisation'). */
   organisationSuggestions?: SuggestionRow[];
+  /** Phase 10 follow-up  skill suggestions (kind='skill'). */
+  skillSuggestions?: SuggestionRow[];
   /** Canonical professions for the merge-into picker. */
   canonicalProfessions: CanonicalOption[];
   /** Canonical institutions (non-pending, non-deleted) for the merge picker. */
   canonicalInstitutions: CanonicalOption[];
   /** Phase 9.22  picker-visible orgs for the org-merge picker. */
   canonicalOrganisations?: CanonicalOption[];
+  /** Phase 10 follow-up  canonical skills for the skill-merge picker. */
+  canonicalSkills?: CanonicalOption[];
 }
 
 export function TaxonomySuggestionsManager({
   professionSuggestions,
   institutionSuggestions,
   organisationSuggestions,
+  skillSuggestions,
   canonicalProfessions,
   canonicalInstitutions,
   canonicalOrganisations,
+  canonicalSkills,
 }: Props) {
   return (
     <div className="space-y-10">
@@ -68,6 +74,19 @@ export function TaxonomySuggestionsManager({
         rows={professionSuggestions}
         canonical={canonicalProfessions}
         kindLabel="profession"
+      />
+      {/* Phase 10 follow-up  skill queue. Same Promote / Merge / Reject
+          lifecycle as profession; Promote inserts the entry into the
+          skills table. The submitting seeker / employer re-adds the
+          skill on their next profile / vacancy edit (no automatic
+          backfill  non-canonical entries weren't persisted in the
+          first place). */}
+      <Section
+        title="Skill suggestions"
+        empty="No pending skill suggestions. When seekers or employers pick 'Other' on the skill multi-select, submissions land here."
+        rows={skillSuggestions ?? []}
+        canonical={canonicalSkills ?? []}
+        kindLabel="skill"
       />
       <Section
         title="Institution suggestions"
