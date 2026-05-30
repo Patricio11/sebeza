@@ -190,11 +190,11 @@ These are documented gaps with a phase number against each, not oversights:
 | SAQA + Home Affairs verification for `academic_profiles` + nationalIdEnc | Phase 8 |
 | Cron-driven status nudge emails (banner only today) | Phase 8 |
 | Rate limiting via Upstash (in-memory today) | Phase 9 |
-| Encryption key rotation tested end-to-end | Phase 9 + Phase 11 |
+| Encryption key rotation tested end-to-end | Phase 9 + Phase 12 |
 | Postgres → AWS Cape Town (`af-south-1`) for in-country residency | Phase 9 |
 | Pen-test / dependency audit | Phase 9 |
 | WCAG 2.2 AA audit | Phase 10 |
-| E2E security tests (Playwright)  assert no PII leaks in payload | Phase 11 |
+| E2E security tests (Playwright)  assert no PII leaks in payload | Phase 12 |
 
 ---
 

@@ -15,7 +15,7 @@
  * No modal  the org-vetting one is overkill here because there's a
  * single document, the signed-URL is already on the row, and the
  * actions are short. We use the native `prompt()` for reason capture
- * (yes, dated, but lightweight; Phase 11 swaps for a proper sheet
+ * (yes, dated, but lightweight; Phase 12 swaps for a proper sheet
  * if/when admin teams scale).
  */
 

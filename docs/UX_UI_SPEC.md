@@ -452,7 +452,7 @@ Phase 4 is a swap, not a rewrite.
 - **4.3 Search query:** `websearch_to_tsquery` + `pg_trgm` similarity; ranking SQL mirrors `rankProfiles()`;
   **select-list redaction** (sensitive columns physically never selected on public paths).
 - **4.4 `searchEvents` capture** on every query (terms, filters, resultCount, employerId?) → powers §2.6 gap analysis.
-- **4.5 Integrity:** all mutations via Server Actions + Zod; typed query fns in `db/`; `logAccess()` enforced; tests assert no PII leaks (Phase 11 §11.4).
+- **4.5 Integrity:** all mutations via Server Actions + Zod; typed query fns in `db/`; `logAccess()` enforced; tests assert no PII leaks (Phase 12 §12.4).
 
 ### PHASE 5  EMPLOYER PORTAL (expanded)
 - **5.1 Org KYC slot:** pluggable provider behind `organizations.verification`; manual admin fallback for MVP.

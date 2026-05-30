@@ -28,7 +28,7 @@
  *
  * Authorisation: every action goes through verifyAdmin(). Reads are
  * paginated client-side from a single batch (admin queue is small for
- * Phase 9 launch  Phase 11 adds proper pagination if needed).
+ * Phase 9 launch  a later phase adds proper pagination if needed).
  */
 
 import { getDb } from "@/db/client";

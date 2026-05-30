@@ -8,7 +8,7 @@
  *   { ok: true,  checks: [{ name, message }, …] }
  *   { ok: false, checks: […] }   (HTTP 500 on any failure)
  *
- * Phase 11.4 will wire these same assertions into the test runner so
+ * Phase 12.4 will wire these same assertions into the test runner so
  * they run on every CI build. Until then this route is the manual
  * verification path.
  */

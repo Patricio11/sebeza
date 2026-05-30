@@ -2,7 +2,7 @@
 
 *Opened during Phase 10 (PHASE_10_LAUNCH_PLAN.md). The "things we deliberately did not build before public launch" collection.*
 
-> **The fence**: Phase 10 is polish + audit + go-live. Feature requests that arrive during Phase 10 land here, not in main. Phase 11+ pulls from this list.
+> **The fence**: Phase 10 is polish + audit + go-live. Feature requests that arrive during Phase 10 land here, not in main. Phase 11+ pulls from this list  in particular, items here that fit Phase 11's seeker-retention or skill-growth-conversion thesis may be promoted into one of the `PHASE_11_{1,2,3,4,5}_PLAN.md` sub-phases.
 
 ---
 
@@ -21,7 +21,7 @@ Keep entries terse  this is a triage list, not a spec.
 
 ## Quick wins (small, high-leverage)
 
-> Sub-half-day items that could ship as a small Phase 11.x point release.
+> Sub-half-day items that could ship as a small point release between Phase 10 close and a Phase 11 sub-phase starting.
 
 - _empty for now  add as they arrive_
 

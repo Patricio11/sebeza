@@ -1,7 +1,7 @@
 /**
  * Phase 7.5.6  Compliance assertions for the outcomes dataset.
  *
- * These are runnable functions (not Vitest tests yet  Phase 11.4 wires
+ * These are runnable functions (not Vitest tests yet  Phase 12.4 wires
  * the test runner). They live alongside the query they verify so any
  * future change to `outcomesQuery()` can be checked in a one-liner:
  *

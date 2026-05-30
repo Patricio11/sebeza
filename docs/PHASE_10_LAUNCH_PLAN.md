@@ -28,7 +28,7 @@ This is **not** a feature phase. Feature work is done. Phase 10 is the polish + 
 - **Performance posture**: No-Flash Rule encoded since Phase 0; Recharts is the only chart library and it's mount-gated; no Framer Motion; Lighthouse-aware route design throughout 4–9.8.
 - **Accessibility groundwork**: semantic HTML, `aria-labelledby` on every section, focus styles on every interactive element, `prefers-reduced-motion` honoured in every CSS transition. WCAG-aware but not yet audited.
 - **Sentry + rate limit + CSP**: Phase 9 shipped headers + a Sentry skeleton + an Upstash-ready rate limiter, all dormant by default. Phase 10 flips them on with the matching credentials.
-- **AWS Cape Town `af-south-1` migration**: turnkey runbook at `docs/AWS_MIGRATION_RUNBOOK.md`. Phase 10 may run it (or may defer to Phase 11.x) depending on operator + partnership state. Drizzle is driver-agnostic; the swap is `db/client.ts` only.
+- **AWS Cape Town `af-south-1` migration**: turnkey runbook at `docs/AWS_MIGRATION_RUNBOOK.md`. Phase 10 may run it as Task 10.9 (or may defer to a later phase) depending on operator + partnership state. Drizzle is driver-agnostic; the swap is `db/client.ts` only.
 
 ---
 
@@ -61,7 +61,7 @@ This is **not** a feature phase. Feature work is done. Phase 10 is the polish + 
 - [ ] KYC + SAQA: `feature_flag_kyc_provider` + `feature_flag_saqa_worker` ON only when the partnership confirms. Otherwise stay dormant.
 
 ### Task 10.9: AWS Cape Town af-south-1 migration (optional in this phase)
-- [ ] Decision point: run the `docs/AWS_MIGRATION_RUNBOOK.md` swap now (POPIA in-country residency before public launch) OR defer to Phase 11.x once partnership confirms scale. Operator call.
+- [ ] Decision point: run the `docs/AWS_MIGRATION_RUNBOOK.md` swap now (POPIA in-country residency before public launch) OR defer to a later phase once partnership confirms scale. Operator call.
 - [ ] If running: Drizzle stays the same, `db/client.ts` swaps from `@neondatabase/serverless` to `pg` driver, the schema + migrations + queries + seed are unchanged. Verify with the existing test + compliance suite.
 
 ### Task 10.10: Smoke + soak
@@ -75,8 +75,8 @@ This is **not** a feature phase. Feature work is done. Phase 10 is the polish + 
 
 ## 🚫 OUT OF SCOPE FOR PHASE 10 (explicit guardrails)
 
-- ❌ **New features**. The whole point is to ship what's built. Feature requests collect in a backlog file (`docs/POST_LAUNCH_BACKLOG.md`) for Phase 11+.
-- ❌ **Schema changes that aren't bug fixes**. Pure migration work that's not addressing a launch blocker waits for Phase 11.
+- ❌ **New features**. The whole point is to ship what's built. Feature requests collect in a backlog file (`docs/POST_LAUNCH_BACKLOG.md`); Phase 11 (seeker retention + skill-growth conversion) is the structured next phase, plans at `docs/PHASE_11_PLAN.md`.
+- ❌ **Schema changes that aren't bug fixes**. Pure migration work that's not addressing a launch blocker waits for Phase 11 (where the data shapes are documented in the sub-phase plans) or later.
 - ❌ **Charting library / heavy animation**. The Civic Editorial bar / Recharts mount-gated combo is the rule; no new chart engines.
 - ❌ **Anonymous / unattributed flows on any seeker-facing surface**. Every invite + every contact + every analytics export still attributes the actor.
 

@@ -405,7 +405,7 @@ that registry  we win on **data quality, usability, and analytics.** The system 
 
 ### Task 7.5.6: Wiring, verification, doc convention ✅
 - [x] All new strings in `messages/en.json`; `zu/xh/af` keep the deepMerge fallback (Phase 10 ships full translation, including the consent copy from 7.5.3)
-- [x] Compliance assertions in `lib/analytics/outcomes-compliance.ts` (no cohort below floor / unconsented never appears / seeker_reported excluded / work_availability values in enum). Exposed via admin-only `/api/admin/outcomes-compliance`; wired into the Phase 11.4 test runner later
+- [x] Compliance assertions in `lib/analytics/outcomes-compliance.ts` (no cohort below floor / unconsented never appears / seeker_reported excluded / work_availability values in enum). Exposed via admin-only `/api/admin/outcomes-compliance`; wired into the Phase 12.4 test runner later
 - [x] Seed: workAvailability backfill for the 8 seeded profiles; `outcomes_research` grants for 3 named seekers; **12-person synthetic Wits BSc CS cohort** with 3 employer-confirmed Discovery Bank placements so the /insights outcomes section renders a real row out of the box
 - [x] `docs/completed/PHASE_7_5_COMPLETE.md` written; `docs/completed/PHASE_7_5_PLAN.md` moved + boxes ticked; this ROADMAP header ✅; `TO_START_EVERY_SESSION.md` Current State refreshed; committed as `Phase 7.5 complete + Phase 8 opens`
 
@@ -815,21 +815,47 @@ Migration `0018_phase9_9_years_experience.sql` applied to Neon. Companion docs: 
 
 ---
 
-## 🧪 PHASE 11: TESTING & QA
-*Goal: Production-ready and trustworthy.*
+## 🌱 PHASE 11: SEEKER RETENTION & SKILL-GROWTH CONVERSION
+*Opens after Phase 10 (public launch) ships. Companion docs: `docs/PHASE_11_PLAN.md` + five sub-phase plans `PHASE_11_{1,2,3,4,5}_PLAN.md`.*
 
-### Task 11.1: Unit
+> **Thesis:** Sebenza's seeker side is architecturally sound but engagement velocity is low. Most retention gaps are *surfacing* problems, not missing-feature problems  the data exists, the cron jobs run, the audit log records the events; we just don't tell the seeker. Phase 11 closes that loop + also closes the skill-growth conversion gaps in Career Compass (Learning Loop is ornamental until learning paths have URLs, cost-driven abandons surface free alternatives, and completion bridges into the verified-cert flow).
+
+Five sub-phases, ordered by ROI per LOC:
+
+### Task 11.1: Engagement velocity (retention surfacing)
+- [ ] Weekly digest email · "Why no invites?" diagnostic card · welcome-back delta card · achievement badges · invitation urgency chip · audit-log link prominence. *See `docs/PHASE_11_1_PLAN.md`.*
+
+### Task 11.2: Learning loop completion (skill-growth conversion)
+- [ ] LearningPath `url` field · free-alternative on cost-abandon · completion  cert upload bridge · "interested" parking-lot state · skill journey timeline · city-demand drill-down · compass auto-revalidate · adjacent profession CTA · student-lane discoverability. *See `docs/PHASE_11_2_PLAN.md`.*
+
+### Task 11.3: Seeker control + trust posture
+- [ ] Pause searchability · block this employer (private) · report this invite · vacancy snapshot in invitation detail · employer verification badge on invite card · employment-verification audit-trail visibility. *See `docs/PHASE_11_3_PLAN.md`.*
+
+### Task 11.4: SA distribution surface (WhatsApp + SMS + share card)
+- [ ] Profile shareable summary card (PNG + WhatsApp deep-link) · follow employer (save list) · data-saver mode · SMS / WhatsApp notification channel (gated rollout, cost-controlled) · recommended employers by profession. *See `docs/PHASE_11_4_PLAN.md`.*
+
+### Task 11.5: Profile depth + mobile / a11y polish
+- [ ] "Open to ___" tags · CV upload (personal backup) · mobile profile-editor jump-to-section · responsive avatar sizes · Career Compass lazy-load below fold · 9 a11y fixes from the static scan (skip link, html dir, listbox group roles, ordinal aria-labels, modal focus return, MonthYearPicker semantics, status confirm copy). *See `docs/PHASE_11_5_PLAN.md`.*
+
+**Founder priority** (from the umbrella plan): 3 days = ship 11.1 alone; 2 weeks = 11.1 + 11.2 + trust trio from 11.3; 6 weeks = full Phase 11. Measurement at +30 days post-ship: week-4 retention ≥ 55%, weekly digest open rate ≥ 35%, learning-item completion rate ≥ 35%.
+
+---
+
+## 🧪 PHASE 12: TESTING & QA
+*Goal: Production-ready and trustworthy. **Renumbered 2026-05-30** to make room for Phase 11 (seeker retention). The substance is unchanged.*
+
+### Task 12.1: Unit
 - [ ] Status-freshness/confidence logic. Search ranking. Encryption round-trip. Consent state machine.
 
-### Task 11.2: Integration
+### Task 12.2: Integration
 - [ ] Sign-up → consent → searchable. Employer reveal → audit-log written. Placement → analytics update.
 
-### Task 11.3: E2E (Playwright)
+### Task 12.3: E2E (Playwright)
 - [ ] Seeker: sign up → build profile → appear in search.
 - [ ] Employer: verify org → search → shortlist → contact → log hire.
 - [ ] Privacy: request export; request erasure; verify redaction.
 
-### Task 11.4: Compliance Tests
+### Task 12.4: Compliance Tests
 - [ ] Assert no PII (ID/docs/contact) ever appears in public/search responses.
 - [ ] Assert every PII access writes an audit-log row.
 
