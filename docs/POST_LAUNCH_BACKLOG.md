@@ -1,6 +1,6 @@
 # Post-launch backlog
 
-*Opened during Phase 10 (PHASE_10_PLAN.md). The "things we deliberately did not build before public launch" collection.*
+*Opened during Phase 10 (PHASE_10_LAUNCH_PLAN.md). The "things we deliberately did not build before public launch" collection.*
 
 > **The fence**: Phase 10 is polish + audit + go-live. Feature requests that arrive during Phase 10 land here, not in main. Phase 11+ pulls from this list.
 
@@ -27,6 +27,14 @@ Keep entries terse  this is a triage list, not a spec.
 
 ---
 
+## Accessibility automation
+
+> The Phase 10.5 audit (`A11Y_AUDIT.md`) ships with static scan + manual screen-reader passes; the automated runtime layer is deferred for capacity reasons.
+
+- **Playwright + `@axe-core/playwright` a11y suite**  one spec per route group (`public`, `seeker`, `employer`, `admin`, `gov`); per-test pattern is `new AxeBuilder({ page }).analyze()` against `npm run build && npm run start`, asserting zero serious / critical violations. Setup is `npm i -D @playwright/test @axe-core/playwright && npx playwright install --with-deps chromium`. Land when there's a person to write + maintain the suite; the static + manual layers cover the audit floor until then.
+
+---
+
 ## Trust + safety follow-ups
 
 > POPIA, moderation, audit  things that ladder up to the trust posture.
@@ -47,7 +55,7 @@ Keep entries terse  this is a triage list, not a spec.
 
 ## Localisation expansion
 
-> Phase 10.3 scaffolded Tier-2 / Tier-3 catalogs (`messages/{nso,tn,st,ts,ve,ss,nr,pt,fr,sw}.json`) with `__notice` markers. As professional human translations arrive, each crossing the readiness threshold (per `lib/i18n/config.ts:PENDING_LOCALES`) gets enabled in `i18n/routing.ts`.
+> Phase 10.7 scaffolded Tier-2 / Tier-3 catalogs (`messages/{nso,tn,st,ts,ve,ss,nr,pt,fr,sw}.json`) with `__notice` markers. As professional human translations arrive, each crossing the readiness threshold (per `lib/i18n/config.ts:PENDING_LOCALES`) gets enabled in `i18n/routing.ts`.
 
 - **Tier 2 rollout**  Sepedi, Setswana, Sesotho, Xitsonga, Tshivenda, siSwati, isiNdebele.
 - **Tier 3 rollout**  Portuguese, French, Swahili.
@@ -57,7 +65,7 @@ Keep entries terse  this is a triage list, not a spec.
 
 ## Help center expansion
 
-> The Phase 10.1-10.4 commits (mis-labelled as Phase 10 sub-phases pre-PHASE_10_PLAN.md realignment) shipped four role-specific help centers. Follow-ups:
+> Phase 10.1-10.4 shipped four role-specific help centers (employer, seeker, admin, gov). The launch tasks live in Phase 10.5-10.11 (`PHASE_10_LAUNCH_PLAN.md`). Follow-ups:
 
 - **Translation**  help articles are English-only at v1. Once Tier-2 / Tier-3 catalogs cross readiness, key articles (orientation, consent, POPIA rights) translate first.
 - **Help-search analytics**  D8 in PHASE_10_1_COMPLETE.md deferred this. If support load patterns suggest the search isn't surfacing the right articles, add minimal anonymised search-query logging (with a privacy story).

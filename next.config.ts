@@ -13,7 +13,7 @@ const nextConfig: NextConfig = {
 };
 
 /**
- * Phase 10.2 (PHASE_10_PLAN.md)  bundle-size analyzer gated behind
+ * Phase 10.6 (PHASE_10_LAUNCH_PLAN.md)  bundle-size analyzer gated behind
  * the `ANALYZE=true` env var. Install once via
  *
  *   npm install --save-dev @next/bundle-analyzer

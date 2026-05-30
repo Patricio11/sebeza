@@ -1,6 +1,6 @@
 # Accessibility audit  WCAG 2.2 AA
 
-*Opened during Phase 10.1 (PHASE_10_PLAN.md). Updated as findings land. Target: ship before public launch.*
+*Opened during Phase 10.5 (PHASE_10_LAUNCH_PLAN.md). Updated as findings land. Target: ship before public launch.*
 
 > **Floor**: WCAG 2.2 AA on every route group. Operators read this doc; the static checklist below is the contract.
 
@@ -8,17 +8,18 @@
 
 ## Methodology
 
-Three layers, in this order:
+Two layers, in this order:
 
 1. **Static scan** (this commit)  grep + axe-core static rules across the component tree. Captured below.
-2. **Automated runtime** (operator)  Playwright + `@axe-core/playwright` against `npm run build && npm run start`. One test file per route group; assertions are zero violations for `serious` + `critical` severities.
-3. **Manual screen-reader + keyboard pass** (operator)  VoiceOver (macOS), NVDA (Windows), JAWS (Windows, optional). Specific flows the plan calls out: seeker sign-up, privacy + consent, dossier, vacancy detail, decline-with-reason modal.
+2. **Manual screen-reader + keyboard pass** (operator)  VoiceOver (macOS), NVDA (Windows), JAWS (Windows, optional). Specific flows the plan calls out: seeker sign-up, privacy + consent, dossier, vacancy detail, decline-with-reason modal.
 
 Each finding gets a row below + a commit. WCAG 2.2 AA is the floor; AAA is welcome where it lands cleanly.
 
+*A Playwright + `@axe-core/playwright` automated-runtime layer is tracked in [`POST_LAUNCH_BACKLOG.md`](./POST_LAUNCH_BACKLOG.md) but deferred  no resources for the test-harness build right now. Static scan + manual passes carry the audit until that lands.*
+
 ---
 
-## Phase 10.1 static-scan results
+## Phase 10.5 static-scan results
 
 > Captured 2026-05-30 against commit `0059564`. Re-run as the codebase evolves.
 
@@ -54,28 +55,6 @@ Each finding gets a row below + a commit. WCAG 2.2 AA is the floor; AAA is welco
 - [ ] Screen-reader announcement of the decline-with-reason modal (Phase 9.8.5 highest-stakes form). The radio group label + reason copy must read correctly.
 - [ ] Pinch-zoom to 200% on the home page  no content cut off, no horizontal scroll inside content.
 
-### Automated Playwright suite  pending (operator)
-
-Setup (one-time):
-
-```bash
-npm install --save-dev @playwright/test @axe-core/playwright
-npx playwright install --with-deps chromium
-```
-
-Suggested test layout:
-
-```
-tests/a11y/
-  public.spec.ts        # /, /search, /p/[handle], /sign-in, /sign-up
-  seeker.spec.ts        # /dashboard/* (authenticated fixtures required)
-  employer.spec.ts      # /employer/*
-  admin.spec.ts         # /admin/*
-  gov.spec.ts           # /gov/*
-```
-
-Per-test pattern: navigate, wait for the page heading, run `new AxeBuilder({ page }).analyze()`. Assert `expect(results.violations).toEqual([])`.
-
 ---
 
 ## Running the audit
@@ -83,8 +62,7 @@ Per-test pattern: navigate, wait for the page heading, run `new AxeBuilder({ pag
 1. `npm run build && npm run start` (separate terminal).
 2. Static scan: this doc captures the state at commit time; re-run grep patterns when components change.
 3. Lighthouse CI (perf is in `docs/PERF_BUDGET.md`; the accessibility category lives here): `npx @lhci/cli autorun`  the a11y category must score 1.0 per `lighthouserc.json`.
-4. Playwright a11y: once installed, `npx playwright test tests/a11y/`.
-5. Manual: walk the screen-reader checklist above.
+4. Manual: walk the screen-reader checklist above.
 
 ---
 
@@ -92,7 +70,7 @@ Per-test pattern: navigate, wait for the page heading, run `new AxeBuilder({ pag
 
 Each High / Medium finding lands as a separate commit cited back to this doc. The aim is to keep the audit dossier reproducible: a reviewer reading this doc + the commit history can retrace exactly what was found, what was fixed, and what was deliberately left for post-launch.
 
-*Authoring rule*: no machine-translated copy on screen-reader content (the rule from `TO_START_EVERY_SESSION.md`). Tier-2 / Tier-3 catalog rollout (Phase 10.3) cascades into this audit  re-run the manual screen-reader pass once each locale enables.
+*Authoring rule*: no machine-translated copy on screen-reader content (the rule from `TO_START_EVERY_SESSION.md`). Tier-2 / Tier-3 catalog rollout (Phase 10.7) cascades into this audit  re-run the manual screen-reader pass once each locale enables.
 
 ---
 

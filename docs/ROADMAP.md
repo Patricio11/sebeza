@@ -781,22 +781,37 @@ Migration `0018_phase9_9_years_experience.sql` applied to Neon. Companion docs: 
 
 ---
 
-## ♿ PHASE 10: ACCESSIBILITY, PERFORMANCE & LOW-BANDWIDTH
-*Goal: Genuinely usable for the people the platform exists to serve.*
+## 📚 PHASE 10: HELP CENTRES (10.1  10.4) ✅ + PUBLIC LAUNCH (10.5  10.11)
 
-- [ ] WCAG 2.2 AA audit (contrast, keyboard, screen-reader labels, focus order).
-- [ ] Performance budget enforced; Lighthouse on throttled 3G / low-end device profile.
-- [ ] Image discipline (responsive, lazy, tiny); minimal JS on public + search routes.
-- [ ] Offline-tolerant where sensible (cached recent results); graceful degradation.
-- [ ] **Localization rollout (next-intl):**
-  - **Tier 1 (launch):** English (base), isiZulu (`zu`), isiXhosa (`xh`), Afrikaans (`af`).
-  - **Tier 2 (fast follow):** Sepedi (`nso`), Setswana (`tn`), Sesotho (`st`)  Sotho-Tswana cluster → ~90% home-language coverage.
-  - **Tier 3 (full official compliance):** siSwati (`ss`), Tshivenda (`ve`), Xitsonga (`ts`), isiNdebele (`nr`).
-  - ICU message format for plurals/noun-class agreement; locale-aware date/number formatting.
-  - **Consent / POPIA / legal copy: professional human translation only  never machine-translated.**
-  - Verify display + body fonts cover required diacritics (esp. Tshivenda: ṅ ḓ ṱ ḽ ṋ). Subset per locale.
-  - Persistent language switcher; remember choice per user; detect from `Accept-Language` on first visit.
-  - Budget for ~30% text expansion (isiXhosa/Afrikaans run longer)  no fixed-width labels.
+*Phase 10 ended up with two arcs that ran in sequence. Arc A (10.1  10.4) shipped in-product documentation across all four roles; Arc B (10.5  10.11) is the public-launch polish + audit + go-live. Companion docs: `docs/PHASE_10_LAUNCH_PLAN.md` + `docs/completed/PHASE_10_{1,2,3,4}_COMPLETE.md`.*
+
+### Arc A  Role-specific help centres ✅ shipped 2026-05-29
+
+108 hand-written articles, four auth-gated help centres, ~80 in-context `HelpLink` chips across 33 dashboard surfaces. Shared role-agnostic infrastructure (`HelpProse`, `HelpSearchIsland`, `HelpLink`); zero new tables, audit kinds, or external deps.
+
+- [x] **Phase 10.1**  Employer help centre (30 articles, 7 categories) at `/employer/help`. Companion: `docs/completed/PHASE_10_1_COMPLETE.md`. Post-ship fixes captured (aggregator default-export bug; reading-column width; `updatedAt` footer removed).
+- [x] **Phase 10.2**  Seeker help centre (27 articles) at `/dashboard/help`. Same post-ship fixes baked in from day one. Role-agnostic refactor of `HelpLink` + `HelpSearchIsland`. Companion: `docs/completed/PHASE_10_2_COMPLETE.md`.
+- [x] **Phase 10.3**  Admin help centre (28 articles) at `/admin/help`. Internal-only, English-only by design. Companion: `docs/completed/PHASE_10_3_COMPLETE.md`.
+- [x] **Phase 10.4**  Government help centre (23 articles) at `/gov/help`. Documents the aggregate-only / k-anonymity posture + `watch-the-watchers` Oversight log relationship. Companion: `docs/completed/PHASE_10_4_COMPLETE.md`.
+
+**Hiring UX polish (between Arc A + Arc B)** ✅ shipped 2026-05-30:
+
+- [x] Lifeguard / pool-attendant / swim-instructor added to `PROFESSIONS`; **profession "Other"** affordance added to `ProfileBasicsForm` + `VacancyForm` (suggestion lands in `/admin/taxonomy/suggestions`); seasonal window gains optional anchor-year fields (commit `e24e7f9`).
+- [x] **Skill chip-toggle replaced with typeahead `MultiSelectComboboxField`** + profession-scoped suggestion ranking via `PROFESSION_SKILLS_MAP`; SKILLS taxonomy expanded from 15 to ~50 entries; **skill "Other"** path with `kind='skill'` added to `taxonomy_suggestion_kind` enum (commit `b710428`).
+- [x] **Admin skill-suggestion Promote / Merge / Reject** wired in `lib/taxonomy/suggestions.ts` + the queue page + `TaxonomySuggestionsManager`; no automatic profile/vacancy backfill on promotion (submitter re-adds via picker, see commit `4a90f8f`).
+- [x] **`MonthYearPicker` consolidation**  the screenshot-flagged separate Month + Year dropdowns on `CurrentEmploymentEditor` replaced with one picker; same for `ExperienceManager`'s start + end fields. The platform now uses one canonical month+year input across vacancy seasonal window, current employment, experience rows (commit `0059564`).
+
+### Arc B  Public launch (10.5  10.11)
+
+*Stop signal: every change here is in front of real seekers, employers, and government users. Operator-hands tasks  credentials, AWS, soak, professional translation, manual screen-reader passes  are explicit. Code-side prep landed in commit `62e7734`.*
+
+- [ ] **Task 10.5**  Accessibility audit (WCAG 2.2 AA). Static scan captured in `docs/A11Y_AUDIT.md` (Phase 10.5 code-side prep ✅); manual screen-reader passes + the Playwright suite (deferred  see `POST_LAUNCH_BACKLOG.md`) remain. Findings table tracks each gap.
+- [ ] **Task 10.6**  Performance budget on throttled 3G. `lighthouserc.json` + `lighthouse-budgets.json` shipped; `next.config.ts` gates `@next/bundle-analyzer` behind `ANALYZE=true`. `docs/PERF_BUDGET.md` carries the route-by-route table to fill as LHCI runs complete.
+- [ ] **Task 10.7**  Tier-1 + Tier-2 + Tier-3 localisation rollout. Tier-2 + Tier-3 stub catalogs landed (`messages/{nso,tn,st,ts,ve,ss,nr,pt,fr,sw}.json` with `__notice` markers); readiness checklist in `lib/i18n/config.ts:PENDING_LOCALES`. Consent / POPIA copy is human-translator only (the rule from `TO_START_EVERY_SESSION.md`).
+- [ ] **Task 10.8**  Live-credentials flip (Resend / Sentry / Upstash rate-limit / KYC / SAQA). Code-side dormant-by-default; operator sets env vars + flips `feature_flag_email_notifications` etc. in `/admin/settings`.
+- [ ] **Task 10.9**  AWS Cape Town af-south-1 migration (optional in this phase). Runbook at `docs/AWS_MIGRATION_RUNBOOK.md`; decision deferred to operator + partnership timing.
+- [ ] **Task 10.10**  Smoke + soak. 100 concurrent sessions × 30 min synthetic traffic + eight golden-path browser walks. Operator-side.
+- [ ] **Task 10.11**  Doc + comms. `docs/completed/PHASE_10_LAUNCH_COMPLETE.md` on go-live; tick the Arc B tasks here ✅; refresh **Current State** in `TO_START_EVERY_SESSION.md`; git-tag the release.
 
 ---
 

@@ -1,7 +1,7 @@
 [
   {
     "path": "/*",
-    "$comment": "Phase 10.2 - global resource budgets per the No-Flash Rule in TO_START_EVERY_SESSION.md. The ~150KB JS target on key routes is encoded here as 160KB to allow modest headroom. Any route shipping more JS than this fails the budget assertion in lighthouserc.json.",
+    "$comment": "Phase 10.6 - global resource budgets per the No-Flash Rule in TO_START_EVERY_SESSION.md. The ~150KB JS target on key routes is encoded here as 160KB to allow modest headroom. Any route shipping more JS than this fails the budget assertion in lighthouserc.json.",
     "resourceSizes": [
       { "resourceType": "script", "budget": 160 },
       { "resourceType": "stylesheet", "budget": 40 },

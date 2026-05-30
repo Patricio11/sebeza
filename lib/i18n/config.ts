@@ -12,7 +12,7 @@ export const LOCALE_LABELS: Record<AppLocale, string> = {
 export const LOCALES: AppLocale[] = ["en", "zu", "xh", "af"];
 
 /**
- * Phase 10.3 (PHASE_10_PLAN.md)  scaffolded Tier-2 / Tier-3 locale
+ * Phase 10.7 (PHASE_10_LAUNCH_PLAN.md)  scaffolded Tier-2 / Tier-3 locale
  * stubs that exist as `messages/<code>.json` with `__notice` markers
  * but are NOT yet enabled in `i18n/routing.ts`. Adding any of these
  * to routing requires:

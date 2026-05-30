@@ -1,5 +1,5 @@
 {
-  "$comment": "Phase 10.2 (PHASE_10_PLAN.md) - Lighthouse CI config for the public-launch perf budget. Run via `npx @lhci/cli autorun` after `npm run build && npm run start`. The throttling profile mirrors a mid-tier SA mobile device on Slow 3G to honor the No-Flash Rule from TO_START_EVERY_SESSION.md.",
+  "$comment": "Phase 10.6 (PHASE_10_LAUNCH_PLAN.md) - Lighthouse CI config for the public-launch perf budget. Run via `npx @lhci/cli autorun` after `npm run build && npm run start`. The throttling profile mirrors a mid-tier SA mobile device on Slow 3G to honor the No-Flash Rule from TO_START_EVERY_SESSION.md.",
   "ci": {
     "collect": {
       "$comment": "Routes the operator-facing audit hits. Locale prefix omitted - LHCI follows the default locale (en) via the `localePrefix: 'as-needed'` routing posture.",
@@ -40,7 +40,7 @@
       }
     },
     "assert": {
-      "$comment": "Phase 10.2 floors per PHASE_10_PLAN.md task 10.2. Performance is the strictest; SEO is auth-gated for most surfaces so the floor is per-route.",
+      "$comment": "Phase 10.6 floors per PHASE_10_LAUNCH_PLAN.md task 10.6. Performance is the strictest; SEO is auth-gated for most surfaces so the floor is per-route.",
       "preset": "lighthouse:recommended",
       "assertions": {
         "categories:performance": ["error", { "minScore": 0.9 }],

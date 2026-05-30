@@ -1,6 +1,6 @@
 # Performance budget  public launch
 
-*Opened during Phase 10.2 (PHASE_10_PLAN.md). Updated as routes change. Target: ship before public launch.*
+*Opened during Phase 10.6 (PHASE_10_LAUNCH_PLAN.md). Updated as routes change. Target: ship before public launch.*
 
 > **Floor (from `TO_START_EVERY_SESSION.md`)**: works on a low-end Android over 3G; JS budget ~150 KB on key routes; no heavy animation; no 3D; Recharts mount-gated.
 
