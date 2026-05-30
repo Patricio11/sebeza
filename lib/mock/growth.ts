@@ -54,6 +54,20 @@ export interface LearningPath {
   unlocksSkills: string[];
   /** True when this provider is widely accessible nationally. */
   national?: boolean;
+  /**
+   * Phase 11.2.1  direct URL to the provider's enrolment / application
+   * page. Populated only for paths Sebenza has actually visited +
+   * verified. Empty URL is honest  better than a stale or wrong link.
+   * NEVER a redirect URL, NEVER a tracking pixel  direct deep-link so
+   * the trust chain isn't tainted (D1).
+   */
+  url?: string;
+  /**
+   * Phase 11.2.1  set when Sebenza has editorially reviewed the
+   * provider + the specific course. Distinct from `providerKind`
+   * (which is taxonomic)  this is the trust signal.
+   */
+  sebenzaReviewed?: boolean;
 }
 
 export interface AdjacentProfession {
@@ -134,6 +148,8 @@ export const MOCK_COMPASS: CompassSnapshot = {
       outcome: "NQF Level 5 Cloud Engineer certificate · covers Kubernetes, AWS basics",
       unlocksSkills: ["Kubernetes", "AWS", "CI/CD"],
       national: true,
+      url: "https://www.mict.org.za/learnerships/",
+      sebenzaReviewed: true,
     },
     {
       title: "TVET: National Diploma in IT (Systems Development)",
@@ -145,6 +161,8 @@ export const MOCK_COMPASS: CompassSnapshot = {
       outcome: "NQF Level 6 Diploma · broad systems engineering grounding",
       unlocksSkills: ["Systems analysis", "Databases", "Networking"],
       national: true,
+      url: "https://www.dhet.gov.za/SitePages/TVETColleges.aspx",
+      sebenzaReviewed: true,
     },
     {
       title: "Wits Plus  Short Course in Cloud Native Development",
@@ -155,6 +173,8 @@ export const MOCK_COMPASS: CompassSnapshot = {
       costNote: "Approx. R 14 500 · employer-sponsorship common.",
       outcome: "Certificate of completion · CKAD-aligned syllabus",
       unlocksSkills: ["Kubernetes", "Helm", "Cloud native patterns"],
+      url: "https://www.witsplus.co.za/",
+      sebenzaReviewed: true,
     },
     {
       title: "Free: official Kubernetes documentation + interactive tutorials",
@@ -166,6 +186,8 @@ export const MOCK_COMPASS: CompassSnapshot = {
       outcome: "Self-paced. Pair with the CKAD practice exams to validate.",
       unlocksSkills: ["Kubernetes basics"],
       national: true,
+      url: "https://kubernetes.io/docs/tutorials/",
+      sebenzaReviewed: true,
     },
     {
       title: "Free: web.dev Learn Accessibility",
@@ -177,6 +199,8 @@ export const MOCK_COMPASS: CompassSnapshot = {
       outcome: "Working knowledge of WCAG 2.2 AA + practical patterns",
       unlocksSkills: ["WCAG 2.2", "ARIA", "Keyboard navigation"],
       national: true,
+      url: "https://web.dev/learn/accessibility/",
+      sebenzaReviewed: true,
     },
   ],
   adjacentProfessions: [

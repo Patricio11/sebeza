@@ -186,6 +186,22 @@ export type AuditKind =
   | "learning.start"
   | "learning.complete"
   | "learning.abandon"
+  // Phase 11.2.1  click-through to the provider's enrolment page from
+  // a `<LearningPathCard>`. Subject = the learning path title (mock data
+  // doesn't have a stable id; the title + provider identify it well
+  // enough for editorial review). Meta carries `provider` + `providerKind`
+  // + `url` so the audit row is self-contained.
+  | "learning_path.opened"
+  // Phase 11.2.2  seeker swapped a cost-abandoned learning item for a
+  // free alternative. Subject = the original learning_items.id; meta
+  // carries `originalSkillSlug`, `newPathTitle`, `newProvider`.
+  | "learning.swapped_to_free"
+  // Phase 11.2.4  parking-lot lifecycle. Pre-`accepted` state for
+  // seekers who flagged interest without committing. Subject = the
+  // learning_items.id; meta carries `skillSlug` + (on promote) the
+  // resulting state.
+  | "learning.interested"
+  | "learning.interested.promote"
   // Phase 9.15  taxonomy suggestion queue. `subject` is the suggestion id;
   // `meta` carries kind + customText + (for resolve actions) targetSlug +
   // backfilledRows. Submit fires on user submission; promote/merge/reject

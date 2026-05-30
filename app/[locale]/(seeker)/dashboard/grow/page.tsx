@@ -15,6 +15,9 @@ import {
 import { COST_ACCESS_ABANDON_REASONS } from "@/lib/seeker/learning-types";
 import { MyLearningSection } from "@/components/feature/seeker/learning/MyLearningSection";
 import { AcceptRecommendationButton } from "@/components/feature/seeker/learning/AcceptRecommendationButton";
+import { OpenLearningPathButton } from "@/components/feature/seeker/learning/OpenLearningPathButton";
+import { AdjacentProfessionSwitch } from "@/components/feature/seeker/learning/AdjacentProfessionSwitch";
+import { StudentLaneDiscoveryCallout } from "@/components/feature/seeker/learning/StudentLaneDiscoveryCallout";
 import { demandVsCurriculumQuery } from "@/db/queries/curriculum";
 import { ProgrammeVsMarketCard } from "@/components/feature/analytics/ProgrammeVsMarketCard";
 import {
@@ -124,7 +127,12 @@ export default async function CareerCompassPage({
   //    surface a free alternative; for now we just tag the chip).
   const activeLearningSkills = new Set(
     myLearning
-      .filter((i) => i.state === "accepted" || i.state === "in_progress")
+      .filter(
+        (i) =>
+          i.state === "interested" ||
+          i.state === "accepted" ||
+          i.state === "in_progress",
+      )
       .map((i) => i.skillSlug),
   );
   const costAccessAbandonedSkills = new Set(
@@ -251,8 +259,18 @@ export default async function CareerCompassPage({
         </section>
       )}
 
-      {/* ───────────── My Learning (Phase 9.12) ───────────── */}
-      <MyLearningSection items={myLearning} />
+      {/* Phase 11.2.9  compact student-lane nudge on /dashboard/grow
+          itself. The non-student rendering of this page is otherwise
+          silent about the academic surface  one quiet line surfaces
+          the lane without dominating the page. */}
+      {!me.academic && (
+        <p className="mt-6">
+          <StudentLaneDiscoveryCallout hasAcademic={false} variant="compact" />
+        </p>
+      )}
+
+      {/* ───────────── My Learning (Phase 9.12 + 11.2.4/.5) ───────────── */}
+      <MyLearningSection items={myLearning} locale={locale} />
 
       {/* ───────────── Recommendations ───────────── */}
       <section aria-labelledby="rec-h" className="mt-12">
@@ -318,7 +336,12 @@ export default async function CareerCompassPage({
         </p>
         <ul className="grid gap-4 md:grid-cols-3">
           {compass.adjacentProfessions.map((adj, i) => (
-            <AdjacentProfessionCard key={i} adj={adj} t={t} />
+            <AdjacentProfessionCard
+              key={i}
+              adj={adj}
+              t={t}
+              currentProfession={me.profession}
+            />
           ))}
         </ul>
       </section>
@@ -354,12 +377,20 @@ export default async function CareerCompassPage({
             <tbody>
               {compass.cityDemand.map((row, i) => {
                 const ratio = row.gap / Math.max(row.searches, 1);
+                const href = cityDemandSearchHref(row.skill, me.province);
                 return (
                   <tr
                     key={i}
-                    className="border-t border-[color:var(--color-hairline)]"
+                    className="border-t border-[color:var(--color-hairline)] transition-colors hover:bg-[color:var(--color-surface-sunk)]"
                   >
-                    <td className="px-5 py-3">{row.skill}</td>
+                    <td className="px-5 py-3">
+                      <Link
+                        href={href as never}
+                        className="text-[color:var(--color-ink)] hover:underline"
+                      >
+                        {row.skill}
+                      </Link>
+                    </td>
                     <td className="px-5 py-3 tabular text-right">
                       {nfmt.format(row.searches)}
                     </td>
@@ -393,11 +424,16 @@ export default async function CareerCompassPage({
         <ul className="space-y-3 md:hidden">
           {compass.cityDemand.map((row, i) => {
             const ratio = row.gap / Math.max(row.searches, 1);
+            const href = cityDemandSearchHref(row.skill, me.province);
             return (
               <li
                 key={i}
                 className="rounded-xl border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-4"
               >
+                <Link
+                  href={href as never}
+                  className="block text-[color:var(--color-ink)]"
+                >
                 <div className="flex items-baseline justify-between gap-3">
                   <span className="text-sm font-medium">{row.skill}</span>
                   <span className="font-display tabular text-2xl text-[color:var(--color-ink)]">
@@ -436,6 +472,7 @@ export default async function CareerCompassPage({
                     {t("cityDemandColGap")}
                   </span>
                 </div>
+                </Link>
               </li>
             );
           })}
@@ -460,6 +497,23 @@ export default async function CareerCompassPage({
 }
 
 // ──────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Phase 11.2.6  city-demand row -> /search drill-down.
+ *
+ * The city-demand table holds free-text skill labels (e.g. "Data
+ * engineering") and the seeker's province as a display string (e.g.
+ * "Gauteng"). The /search page expects a query string + a kebab-case
+ * province slug. We slugify in place; D5 keeps the link pointing at the
+ * public search surface (the seeker runs the search the way any visitor
+ * would, no new auth surface).
+ */
+function cityDemandSearchHref(skillLabel: string, province: string): string {
+  const slug = (s: string) => s.toLowerCase().replace(/\s+/g, "-");
+  return `/search?q=${encodeURIComponent(skillLabel)}&province=${encodeURIComponent(
+    slug(province),
+  )}`;
+}
 
 function RecommendationItem({
   rec,
@@ -664,6 +718,32 @@ function LearningPathCard({
           ))}
         </div>
       )}
+
+      {/* Phase 11.2.1  outbound CTA. Honest fallback when no URL is on
+          file: a quiet hint, not a dead button. The "Reviewed" chip
+          (when set) sits next to the CTA  editorial trust signal. */}
+      <div className="flex flex-wrap items-center gap-2 border-t border-dashed border-[color:var(--color-hairline)] pt-3">
+        {path.url ? (
+          <OpenLearningPathButton
+            url={path.url}
+            title={path.title}
+            provider={path.provider}
+            providerKind={path.providerKind}
+          />
+        ) : (
+          <p className="text-xs italic text-[color:var(--color-ink-soft)]">
+            Provider link coming  search &ldquo;{path.title}&rdquo; on Google for now.
+          </p>
+        )}
+        {path.sebenzaReviewed && (
+          <span
+            className="inline-flex items-center gap-1 rounded-[var(--radius-pill)] border border-[color:var(--color-brand)] bg-[color:var(--color-brand-tint)] px-2 py-0.5 text-[0.62rem] uppercase tracking-[0.18em] text-[color:var(--color-brand-strong)]"
+            title="Sebenza editorial team reviewed this provider + course."
+          >
+            Reviewed
+          </span>
+        )}
+      </div>
     </li>
   );
 }
@@ -697,9 +777,11 @@ function CostChip({ cost }: { cost: LearningCost }) {
 function AdjacentProfessionCard({
   adj,
   t,
+  currentProfession,
 }: {
   adj: AdjacentProfession;
   t: (k: string, v?: Record<string, string | number>) => string;
+  currentProfession: string;
 }) {
   const pct = Math.round(adj.overlap * 100);
   return (
@@ -750,6 +832,16 @@ function AdjacentProfessionCard({
           {adj.demandHint}
         </p>
       )}
+
+      {/* Phase 11.2.8  pivot pathway. Opens a modal that explains the
+          full consequence before the switch lands. Reversible from the
+          profile editor; the modal copy makes that explicit. */}
+      <div className="border-t border-dashed border-[color:var(--color-hairline)] pt-3">
+        <AdjacentProfessionSwitch
+          currentProfession={currentProfession}
+          nextProfession={adj.profession.label}
+        />
+      </div>
     </li>
   );
 }

@@ -32,6 +32,7 @@ import { WelcomeBackCard } from "@/components/feature/seeker/WelcomeBackCard";
 import { readAndSetLastSeen } from "@/lib/cookies/welcome-back";
 import { RecentAchievementsStrip } from "@/components/feature/seeker/RecentAchievementsStrip";
 import { listMyBadges } from "@/lib/seeker/badges";
+import { StudentLaneDiscoveryCallout } from "@/components/feature/seeker/learning/StudentLaneDiscoveryCallout";
 
 export default async function SeekerOverviewPage({
   params,
@@ -166,6 +167,11 @@ export default async function SeekerOverviewPage({
       )}
 
       <StatusNudgeBanner band={freshness.band} days={freshness.days} />
+
+      {/* Phase 11.2.9  student-lane discoverability. Renders only when
+          the seeker hasn't yet recorded an academic programme; vanishes
+          once they do. */}
+      <StudentLaneDiscoveryCallout hasAcademic={!!me.academic} />
 
       {/* Phase 10.2  help deep-links (D6 mirror from employer). */}
       <div className="mb-4 flex flex-wrap items-center gap-2">

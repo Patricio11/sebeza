@@ -22,11 +22,12 @@
  */
 
 import { useState, useTransition } from "react";
-import { useRouter } from "@/i18n/navigation";
+import { useRouter, Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/Button";
 import {
   startLearningItem,
   completeLearningItem,
+  promoteInterestedToPlanned,
   type MyLearningRow,
 } from "@/lib/seeker/learning";
 import { AbandonModal } from "./AbandonModal";
@@ -40,6 +41,7 @@ import {
   CircleDashed,
   ExternalLink,
   Play,
+  ShieldCheck,
   Sparkles,
 } from "lucide-react";
 
@@ -69,6 +71,18 @@ export function LearningItemRow({ item }: Props) {
     startTransition(async () => {
       setError(null);
       const res = await completeLearningItem(item.id);
+      if (!res.ok) {
+        setError(res.message);
+        return;
+      }
+      router.refresh();
+    });
+  }
+
+  function onPromote() {
+    startTransition(async () => {
+      setError(null);
+      const res = await promoteInterestedToPlanned(item.id);
       if (!res.ok) {
         setError(res.message);
         return;
@@ -112,8 +126,48 @@ export function LearningItemRow({ item }: Props) {
               Reason: {ABANDON_REASON_LABEL[item.abandonReason]}
             </p>
           )}
+          {/* Phase 11.2.3  completion -> verified-cert upload bridge.
+              Per D3 the cert verification stands on its own; we don't
+              link the resulting qualification row back to this
+              learning_item. */}
+          {item.state === "completed" && (
+            <p className="mt-2 text-[0.7rem]">
+              <Link
+                href={
+                  `/dashboard/qualifications?prefillTitle=${encodeURIComponent(item.skillLabel)}&prefillInstitution=${encodeURIComponent(item.provider)}` as never
+                }
+                className="inline-flex items-center gap-1 text-[color:var(--color-brand-strong)] hover:underline"
+              >
+                <ShieldCheck className="size-3" aria-hidden="true" />
+                Got a certificate? Upload it for the verified badge
+              </Link>
+            </p>
+          )}
         </div>
         <div className="flex shrink-0 flex-wrap items-center gap-2">
+          {item.state === "interested" && (
+            <>
+              <Button
+                type="button"
+                variant="primary"
+                size="sm"
+                disabled={pending}
+                onClick={onPromote}
+              >
+                <Play className="mr-1 size-3.5" aria-hidden="true" />
+                {pending ? "Saving" : "Move to active"}
+              </Button>
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                disabled={pending}
+                onClick={() => setAbandonOpen(true)}
+              >
+                Remove
+              </Button>
+            </>
+          )}
           {item.state === "accepted" && (
             <>
               <Button
@@ -187,6 +241,14 @@ export function LearningItemRow({ item }: Props) {
 }
 
 function StateChip({ state }: { state: MyLearningRow["state"] }) {
+  if (state === "interested") {
+    return (
+      <span className="inline-flex items-center gap-1 rounded-[var(--radius-pill)] border border-dashed border-[color:var(--color-hairline)] bg-[color:var(--color-paper)] px-2 py-0.5 text-[0.62rem] uppercase tracking-[0.18em] text-[color:var(--color-ink-soft)]">
+        <CircleDashed className="size-3" aria-hidden="true" />
+        Saved for later
+      </span>
+    );
+  }
   if (state === "accepted") {
     return (
       <span className="inline-flex items-center gap-1 rounded-[var(--radius-pill)] border border-[color:var(--color-hairline)] bg-[color:var(--color-paper)] px-2 py-0.5 text-[0.62rem] uppercase tracking-[0.18em] text-[color:var(--color-ink-soft)]">

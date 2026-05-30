@@ -17,10 +17,13 @@ import { HelpLink } from "@/components/feature/help/HelpLink";
 
 export default async function QualificationsPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<{ prefillTitle?: string; prefillInstitution?: string }>;
 }) {
   const { locale } = await params;
+  const { prefillTitle, prefillInstitution } = await searchParams;
   setRequestLocale(locale);
 
   const me = await getMyProfile();
@@ -110,6 +113,14 @@ export default async function QualificationsPage({
               empty: t("empty"),
             }}
             verificationVisible={verificationVisible}
+            prefill={
+              prefillTitle || prefillInstitution
+                ? {
+                    title: prefillTitle ?? "",
+                    institution: prefillInstitution ?? "",
+                  }
+                : undefined
+            }
           />
         </div>
       </div>

@@ -10,13 +10,18 @@
 
 import type { MyLearningRow } from "@/lib/seeker/learning";
 import { LearningItemRow } from "./LearningItemRow";
-import { Sparkles } from "lucide-react";
+import { SkillJourneyTimeline } from "./SkillJourneyTimeline";
+import { Bookmark, Sparkles } from "lucide-react";
 
 interface Props {
   items: MyLearningRow[];
+  locale: string;
 }
 
-export function MyLearningSection({ items }: Props) {
+export function MyLearningSection({ items, locale }: Props) {
+  // Phase 11.2.4  parking-lot sub-section. Renders above active items
+  // when the seeker has marked anything as "Saved for later".
+  const parked = items.filter((i) => i.state === "interested");
   const active = items.filter(
     (i) => i.state === "accepted" || i.state === "in_progress",
   );
@@ -61,6 +66,19 @@ export function MyLearningSection({ items }: Props) {
         </div>
       ) : (
         <>
+          {parked.length > 0 && (
+            <div className="mb-6">
+              <h3 className="mb-2 inline-flex items-center gap-1.5 text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--color-ink-soft)]">
+                <Bookmark className="size-3" aria-hidden="true" />
+                Saved for later  {parked.length}
+              </h3>
+              <ul className="flex flex-col gap-3">
+                {parked.map((it) => (
+                  <LearningItemRow key={it.id} item={it} />
+                ))}
+              </ul>
+            </div>
+          )}
           {active.length > 0 && (
             <div className="mb-6">
               <h3 className="mb-2 text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--color-ink-soft)]">
@@ -85,6 +103,9 @@ export function MyLearningSection({ items }: Props) {
               </ul>
             </div>
           )}
+          {/* Phase 11.2.5  chronological completion record. Hidden
+              silently when nothing has completed yet. */}
+          <SkillJourneyTimeline items={items} locale={locale} />
         </>
       )}
     </section>

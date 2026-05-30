@@ -39,9 +39,14 @@ import { MOCK_COMPASS } from "@/lib/mock/growth";
 import type { LearningPath } from "@/lib/mock/growth";
 import {
   ABANDON_REASON_LABEL,
+  COST_ACCESS_ABANDON_REASONS,
   LEARNING_NOTE_MAX,
   type AbandonReasonValue,
 } from "./learning-types";
+import {
+  findFreeAlternativeForSkill,
+  type FreeAlternative,
+} from "./free-alternatives";
 
 export type ActionResult<T extends object = object> =
   | ({ ok: true } & T)
@@ -112,7 +117,12 @@ export interface MyLearningRow {
   resourceUrl: string | null;
   resourceKind: string;
   isFree: boolean;
-  state: "accepted" | "in_progress" | "completed" | "abandoned";
+  state:
+    | "interested"
+    | "accepted"
+    | "in_progress"
+    | "completed"
+    | "abandoned";
   startedAt: string | null;
   completedAt: string | null;
   abandonedAt: string | null;
@@ -292,6 +302,41 @@ export async function startLearningItem(
   return { ok: true };
 }
 
+// ──────────────────────────────────────────────────────────────────────
+// Phase 11.2.1  click-through tracking for LearningPathCard CTAs.
+// We don't redirect through Sebenza (D1: keeps the trust chain clean);
+// the seeker's browser goes straight to the provider URL. This action
+// just logs the click so quarterly editorial review knows which paths
+// actually get traffic.
+// ──────────────────────────────────────────────────────────────────────
+
+export interface OpenLearningPathInput {
+  title: string;
+  provider: string;
+  providerKind: string;
+  url: string;
+}
+
+export async function logLearningPathOpen(
+  input: OpenLearningPathInput,
+): Promise<ActionResult> {
+  const me = await verifyRole("seeker");
+  // No DB write beyond the audit row  the action is a one-shot ledger
+  // event. Per D1 we don't redirect or rewrite the URL; the seeker's
+  // browser handles the navigation.
+  await logAccess({
+    kind: "learning_path.opened",
+    actor: me.id,
+    subject: input.title,
+    meta: {
+      provider: input.provider,
+      providerKind: input.providerKind,
+      url: input.url,
+    },
+  });
+  return { ok: true };
+}
+
 export async function completeLearningItem(
   itemId: string,
 ): Promise<
@@ -416,8 +461,11 @@ export async function completeLearningItem(
     meta: { itemId, skillSlug: item.skillSlug },
   });
 
+  // Phase 11.2.7  Career-Compass + dashboard surfaces depend on the
+  // skill set; refresh both so the celebration line sees the new rank.
   revalidatePath("/dashboard/grow");
   revalidatePath("/dashboard/profile");
+  revalidatePath("/dashboard");
   return { ok: true, attachedSkill: attached, rankDelta };
 }
 
@@ -484,6 +532,263 @@ export async function abandonLearningItem(
       // itself is NOT in audit meta (would defeat the redaction posture);
       // only its presence is recorded.
     },
+  });
+
+  revalidatePath("/dashboard/grow");
+  return { ok: true };
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Phase 11.2.2  cost-driven swap to a free alternative.
+//
+// `fetchFreeAlternativeForItem` is the read used by the AbandonModal
+// once the seeker picks a cost-access reason: it excludes paths the
+// seeker has already abandoned for the same skill and returns the
+// next-best free / subsidised path, or null if nothing matches.
+//
+// `swapToFreeAlternative` is the atomic two-step: abandon the original
+// + accept the free alternative in a single transaction so a partial
+// failure can't leave the seeker stranded mid-state. Audits both
+// transitions; fires a single `learning.swapped_to_free` notification.
+// ──────────────────────────────────────────────────────────────────────
+
+export async function fetchFreeAlternativeForItem(
+  itemId: string,
+): Promise<FreeAlternative | null> {
+  const me = await verifyRole("seeker");
+  const profileId = await getMyProfileId(me.id);
+  if (!profileId) return null;
+  const item = await loadOwnedItem(itemId, profileId);
+  if (!item) return null;
+
+  const db = getDb();
+  const prior = await db
+    .select({ title: schema.learningItems.title })
+    .from(schema.learningItems)
+    .where(
+      and(
+        eq(schema.learningItems.profileId, profileId),
+        eq(schema.learningItems.skillSlug, item.skillSlug),
+        eq(schema.learningItems.state, "abandoned"),
+      ),
+    );
+  const exclude = [item.title, ...prior.map((r) => r.title)];
+  return findFreeAlternativeForSkill(item.skillSlug, exclude);
+}
+
+export interface SwapToFreeAlternativeInput {
+  abandonItemId: string;
+  reason: AbandonReasonValue;
+  note?: string;
+  freePathTitle: string;
+  freePathProvider: string;
+  freePathProviderKind: string;
+  freePathIsFree: boolean;
+}
+
+export async function swapToFreeAlternative(
+  input: SwapToFreeAlternativeInput,
+): Promise<ActionResult<{ newItemId: string }>> {
+  const me = await verifyRole("seeker");
+  const profileId = await getMyProfileId(me.id);
+  if (!profileId) return { ok: false, message: "Profile not found." };
+
+  const item = await loadOwnedItem(input.abandonItemId, profileId);
+  if (!item) return { ok: false, message: "Learning item not found." };
+  if (item.state === "completed") {
+    return { ok: false, message: "Already completed  can't be abandoned." };
+  }
+  if (item.state === "abandoned") {
+    return { ok: false, message: "Already marked as abandoned." };
+  }
+  if (!COST_ACCESS_ABANDON_REASONS.has(input.reason)) {
+    return {
+      ok: false,
+      message: "Swap-to-free only applies to cost or access reasons.",
+    };
+  }
+  const note = (input.note ?? "").trim();
+  if (note.length > LEARNING_NOTE_MAX) {
+    return {
+      ok: false,
+      message: `Note can't exceed ${LEARNING_NOTE_MAX} characters.`,
+    };
+  }
+  if (input.freePathTitle.trim().length === 0) {
+    return { ok: false, message: "Free alternative title missing." };
+  }
+
+  const db = getDb();
+  const newId = `lrn_${randomUUID()}`;
+  await db.transaction(async (tx) => {
+    await tx
+      .update(schema.learningItems)
+      .set({
+        state: "abandoned",
+        abandonedAt: new Date(),
+        abandonReason: input.reason,
+        abandonNote: note.length > 0 ? note : null,
+      })
+      .where(eq(schema.learningItems.id, input.abandonItemId));
+
+    await tx.insert(schema.learningItems).values({
+      id: newId,
+      profileId,
+      skillSlug: item.skillSlug,
+      title: input.freePathTitle,
+      provider: input.freePathProvider,
+      resourceUrl: null,
+      resourceKind: input.freePathProviderKind,
+      isFree: input.freePathIsFree,
+    });
+  });
+
+  await logAccess({
+    kind: "learning.abandon",
+    actor: me.id,
+    subject: input.abandonItemId,
+    meta: {
+      skillSlug: item.skillSlug,
+      from: item.state,
+      reason: input.reason,
+      seekerAuthoredFreeText: note.length > 0,
+      swappedToFree: true,
+    },
+  });
+  await logAccess({
+    kind: "learning.swapped_to_free",
+    actor: me.id,
+    subject: input.abandonItemId,
+    meta: {
+      originalSkillSlug: item.skillSlug,
+      newItemId: newId,
+      newPathTitle: input.freePathTitle,
+      newProvider: input.freePathProvider,
+    },
+  });
+  await logAccess({
+    kind: "learning.accept",
+    actor: me.id,
+    subject: newId,
+    meta: { skillSlug: item.skillSlug, matchedFromCatalog: true, viaSwap: true },
+  });
+
+  const skill = SKILLS.find((s) => s.slug === item.skillSlug);
+  await createNotification({
+    userId: me.id,
+    kind: "learning.swapped_to_free",
+    title: `Switched to a free path for ${skill?.label ?? item.skillSlug}`,
+    body: `${input.freePathTitle} (${input.freePathProvider}) is now on your learning list.`,
+    link: "/dashboard/grow",
+    meta: {
+      skillSlug: item.skillSlug,
+      newItemId: newId,
+      newPathTitle: input.freePathTitle,
+    },
+  });
+
+  revalidatePath("/dashboard/grow");
+  return { ok: true, newItemId: newId };
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Phase 11.2.4  parking-lot lifecycle.
+//
+// Per D4 the new `interested` state lands as a learning_state enum
+// value, not a separate column or table. `markLearningInterested`
+// creates the parking-lot row; `promoteInterestedToPlanned` upgrades
+// it to `accepted` (the existing planned/committed entry point). No
+// notification fires on either transition  parking is silent by
+// design.
+//
+// `interested` rows do NOT count toward completion/abandonment
+// analytics. The 9.13 stall analytics already filters on the
+// `abandoned` state; the celebration notifications fire only on
+// `completed`. No downstream gates need touching.
+// ──────────────────────────────────────────────────────────────────────
+
+export async function markLearningInterested(
+  skillSlug: string,
+): Promise<ActionResult<{ itemId: string }>> {
+  const me = await verifyRole("seeker");
+  const profileId = await getMyProfileId(me.id);
+  if (!profileId) {
+    return { ok: false, message: "Finish setting up your profile first." };
+  }
+  const skill = SKILLS.find((s) => s.slug === skillSlug);
+  if (!skill) return { ok: false, message: "Unknown skill." };
+
+  const db = getDb();
+  // De-dupe against any open lifecycle row for the same skill
+  // interested OR accepted OR in_progress all count as "already on the
+  // list" from the seeker's perspective.
+  const existing = await db
+    .select({ id: schema.learningItems.id, state: schema.learningItems.state })
+    .from(schema.learningItems)
+    .where(
+      and(
+        eq(schema.learningItems.profileId, profileId),
+        eq(schema.learningItems.skillSlug, skillSlug),
+        sql`${schema.learningItems.state} IN ('interested','accepted','in_progress')`,
+      ),
+    )
+    .limit(1);
+  if (existing[0]) {
+    return { ok: true, itemId: existing[0].id };
+  }
+
+  const matched = matchLearningPathForSkill(skillSlug);
+  const id = `lrn_${randomUUID()}`;
+  await db.insert(schema.learningItems).values({
+    id,
+    profileId,
+    skillSlug,
+    title: matched?.title ?? `Learn ${skill.label}`,
+    provider: matched?.provider ?? "Pick a course",
+    resourceUrl: null,
+    resourceKind: matched ? matched.providerKind : "other",
+    isFree: matched ? matched.cost === "free" : false,
+    state: "interested",
+  });
+
+  await logAccess({
+    kind: "learning.interested",
+    actor: me.id,
+    subject: id,
+    meta: { skillSlug, matchedFromCatalog: matched != null },
+  });
+
+  revalidatePath("/dashboard/grow");
+  return { ok: true, itemId: id };
+}
+
+export async function promoteInterestedToPlanned(
+  itemId: string,
+): Promise<ActionResult> {
+  const me = await verifyRole("seeker");
+  const profileId = await getMyProfileId(me.id);
+  if (!profileId) return { ok: false, message: "Profile not found." };
+
+  const item = await loadOwnedItem(itemId, profileId);
+  if (!item) return { ok: false, message: "Learning item not found." };
+  if (item.state !== "interested") {
+    return {
+      ok: false,
+      message: "This item is already past the parking-lot step.",
+    };
+  }
+
+  const db = getDb();
+  await db
+    .update(schema.learningItems)
+    .set({ state: "accepted" })
+    .where(eq(schema.learningItems.id, itemId));
+
+  await logAccess({
+    kind: "learning.interested.promote",
+    actor: me.id,
+    subject: itemId,
+    meta: { skillSlug: item.skillSlug, to: "accepted" },
   });
 
   revalidatePath("/dashboard/grow");

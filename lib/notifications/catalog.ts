@@ -413,6 +413,20 @@ export const NOTIFICATION_CATALOG = {
       "Every Monday morning: a short email with the activity, rank, and freshness changes from the past 7 days. Off-channel reach for the weeks you don't open the app. You can opt out anytime  the email itself carries the preferences link.",
     dedupeWindowSeconds: 6 * 24 * 60 * 60,
   },
+  // Phase 11.2.2  cost-driven swap to a free alternative. Quiet
+  // confirmation that the platform heard the cost signal and pointed
+  // somewhere actionable. In-app default ON; email default OFF (the
+  // seeker is mid-flow on the dashboard, the bell is enough). No
+  // dedupe  each swap is a deliberate action.
+  "learning.swapped_to_free": {
+    defaultInApp: true,
+    defaultEmail: false,
+    audience: "seeker",
+    label: "Switched to a free learning alternative",
+    description:
+      "Fires when you abandoned a paid path for cost or access reasons and accepted the free alternative on the spot. The original abandonment is preserved as honest signal for SA-policy analytics; this celebrates the swap.",
+    dedupeWindowSeconds: 0,
+  },
 } as const satisfies Record<string, NotificationKindMeta>;
 
 export type NotificationKind = keyof typeof NOTIFICATION_CATALOG;

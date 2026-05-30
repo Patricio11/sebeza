@@ -52,16 +52,29 @@ interface Props {
    * Default true so existing callers stay unchanged.
    */
   verificationVisible?: boolean;
+  /**
+   * Phase 11.2.3  bridge from the learning-loop celebration. When set,
+   * we auto-open the Add panel with the title + institution fields
+   * pre-filled (still editable). Per D3 we do NOT link the resulting
+   * qualification row to the learning_items row  decoupling is correct
+   * (seeker may have taken a different course than the suggested one).
+   */
+  prefill?: { title: string; institution: string };
 }
 
 export function QualificationsManager({
   initial,
   labels,
   verificationVisible = true,
+  prefill,
 }: Props) {
   const [items, setItems] = useState<QualificationRow[]>(initial);
-  const [adding, setAdding] = useState(false);
-  const [draft, setDraft] = useState({ title: "", institution: "", awardedYear: "" });
+  const [adding, setAdding] = useState(!!prefill);
+  const [draft, setDraft] = useState({
+    title: prefill?.title ?? "",
+    institution: prefill?.institution ?? "",
+    awardedYear: "",
+  });
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [uploadingId, setUploadingId] = useState<string | null>(null);

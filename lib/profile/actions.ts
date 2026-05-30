@@ -158,6 +158,75 @@ export async function updateProfileBasics(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Phase 11.2.8  switch primary profession (Career-Compass pivot CTA).
+//
+// Lightweight single-field action used by the AdjacentProfessionCard
+// modal. Keeps the modal client logic small: it doesn't have to
+// re-supply the full basics payload, which would couple the pivot UI
+// to every column of the basics form. Audits as `profile.update` with
+// a `pivot: true` meta flag so the audit trail distinguishes a
+// deliberate profession switch from a routine basics save.
+// ─────────────────────────────────────────────────────────────────────────────
+
+const switchProfessionSchema = z.object({
+  profession: z.string().min(2).max(80),
+});
+
+export async function switchPrimaryProfession(
+  input: z.infer<typeof switchProfessionSchema>,
+): Promise<ActionResult> {
+  const session = await getSessionUser();
+  if (!session) return fail("Not signed in.");
+  const parsed = switchProfessionSchema.safeParse(input);
+  if (!parsed.success) return fail("Pick a valid profession.");
+
+  const db = getDb();
+  const rows = await db
+    .select({
+      id: schema.profiles.id,
+      handle: schema.profiles.handle,
+      profession: schema.profiles.profession,
+    })
+    .from(schema.profiles)
+    .where(eq(schema.profiles.userId, session.id))
+    .limit(1);
+  const profile = rows[0];
+  if (!profile) return fail("Profile not found.");
+
+  const next = parsed.data.profession.trim();
+  if (next.toLowerCase() === profile.profession.toLowerCase()) {
+    return ok();
+  }
+
+  await db
+    .update(schema.profiles)
+    .set({ profession: next })
+    .where(eq(schema.profiles.id, profile.id));
+
+  await logAccess({
+    kind: "profile.update",
+    actor: session.id,
+    subject: profile.id,
+    meta: {
+      fields: ["profession"],
+      pivot: true,
+      previousProfession: profile.profession,
+      newProfession: next,
+    },
+  });
+
+  // Pivot reshapes the seeker's pool: rank, recommendations, learning
+  // paths, every search-event-driven surface needs to recompute. Same
+  // revalidation set as updateSkills (Phase 11.2.7) + the public
+  // profile page where the new profession surfaces.
+  revalidatePath("/dashboard");
+  revalidatePath("/dashboard/profile");
+  revalidatePath("/dashboard/grow");
+  revalidatePath(`/p/${profile.handle}`);
+  return ok();
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // updateSkills  replaces the set in a transaction
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -257,6 +326,12 @@ export async function updateSkills(
 
   revalidatePath("/dashboard");
   revalidatePath("/dashboard/profile");
+  // Phase 11.2.7  Career Compass reads from profile_skills + the
+  // ranking SQL; without this revalidation the seeker can mutate
+  // skills and still see the old recommendation set on /dashboard/grow
+  // until the default cache invalidates. Cheap; closes a correctness
+  // gap.
+  revalidatePath("/dashboard/grow");
   return ok();
 }
 

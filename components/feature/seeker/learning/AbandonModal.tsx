@@ -13,16 +13,21 @@
  * stays in the learning_items table, NOT in audit meta).
  */
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { Button } from "@/components/ui/Button";
-import { abandonLearningItem } from "@/lib/seeker/learning";
+import {
+  abandonLearningItem,
+  fetchFreeAlternativeForItem,
+  swapToFreeAlternative,
+} from "@/lib/seeker/learning";
+import type { FreeAlternative } from "@/lib/seeker/free-alternatives";
 import {
   ABANDON_REASON_LABEL,
   COST_ACCESS_ABANDON_REASONS,
   LEARNING_NOTE_MAX,
   type AbandonReasonValue,
 } from "@/lib/seeker/learning-types";
-import { AlertTriangle, Info, X } from "lucide-react";
+import { AlertTriangle, Info, Sparkles, X } from "lucide-react";
 
 interface Props {
   itemId: string;
@@ -46,10 +51,29 @@ export function AbandonModal({ itemId, skillLabel, onClose, onDone }: Props) {
   const [note, setNote] = useState("");
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  // Phase 11.2.2  free-alternative inline surfacing. Lazy-loaded the
+  // first time the seeker picks a cost-driven reason; cached after.
+  const [freeAlt, setFreeAlt] = useState<FreeAlternative | null>(null);
+  const [freeAltLoaded, setFreeAltLoaded] = useState(false);
+  const [freeAltLoading, setFreeAltLoading] = useState(false);
 
   const otherRequiresNote = reason === "other" && note.trim().length === 0;
   const willRecommendFreeAlt =
     reason != null && COST_ACCESS_ABANDON_REASONS.has(reason);
+
+  useEffect(() => {
+    if (!willRecommendFreeAlt || freeAltLoaded || freeAltLoading) return;
+    setFreeAltLoading(true);
+    void fetchFreeAlternativeForItem(itemId)
+      .then((alt) => {
+        setFreeAlt(alt);
+        setFreeAltLoaded(true);
+      })
+      .catch(() => {
+        setFreeAltLoaded(true);
+      })
+      .finally(() => setFreeAltLoading(false));
+  }, [willRecommendFreeAlt, freeAltLoaded, freeAltLoading, itemId]);
 
   function onSubmit() {
     if (!reason) {
@@ -66,6 +90,27 @@ export function AbandonModal({ itemId, skillLabel, onClose, onDone }: Props) {
         itemId,
         reason,
         note: note.trim() || undefined,
+      });
+      if (!res.ok) {
+        setError(res.message);
+        return;
+      }
+      onDone();
+    });
+  }
+
+  function onAcceptFreeAlt() {
+    if (!reason || !freeAlt) return;
+    setError(null);
+    startTransition(async () => {
+      const res = await swapToFreeAlternative({
+        abandonItemId: itemId,
+        reason,
+        note: note.trim() || undefined,
+        freePathTitle: freeAlt.title,
+        freePathProvider: freeAlt.provider,
+        freePathProviderKind: freeAlt.providerKind,
+        freePathIsFree: freeAlt.cost === "free",
       });
       if (!res.ok) {
         setError(res.message);
@@ -181,10 +226,60 @@ export function AbandonModal({ itemId, skillLabel, onClose, onDone }: Props) {
           </div>
 
           {willRecommendFreeAlt && (
-            <p className="mt-3 rounded-[var(--radius-sm)] border border-[color:var(--color-brand)] bg-[color:var(--color-brand-tint)] px-3 py-2 text-xs text-[color:var(--color-brand-strong)]">
-              We&rsquo;ll surface a free alternative for this skill next time
-              you open the compass.
-            </p>
+            <div
+              className="mt-3 rounded-[var(--radius-sm)] border border-[color:var(--color-brand)] bg-[color:var(--color-brand-tint)] p-3"
+              aria-live="polite"
+            >
+              {freeAltLoading && (
+                <p className="text-xs italic text-[color:var(--color-brand-strong)]">
+                  Looking for a free alternative
+                </p>
+              )}
+              {freeAltLoaded && !freeAlt && (
+                <p className="text-xs text-[color:var(--color-brand-strong)]">
+                  No free alternative on file for this skill yet  the
+                  abandonment is still useful signal for SA-policy.
+                </p>
+              )}
+              {freeAlt && (
+                <>
+                  <div className="flex items-center gap-1.5 text-[0.62rem] uppercase tracking-[0.22em] text-[color:var(--color-brand-strong)]">
+                    <Sparkles className="size-3" aria-hidden="true" />
+                    Free alternative for the same skill
+                  </div>
+                  <h3 className="mt-1 font-display text-base text-[color:var(--color-ink)]">
+                    {freeAlt.title}
+                  </h3>
+                  <p className="text-xs text-[color:var(--color-ink-soft)]">
+                    {freeAlt.provider} · {freeAlt.durationWeeks} weeks ·{" "}
+                    {freeAlt.cost === "free" ? "Free" : "Subsidised"}
+                  </p>
+                  <p className="mt-1 text-xs text-[color:var(--color-ink-soft)]">
+                    {freeAlt.outcome}
+                  </p>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    <Button
+                      type="button"
+                      variant="primary"
+                      size="sm"
+                      disabled={pending}
+                      onClick={onAcceptFreeAlt}
+                    >
+                      {pending ? "Saving" : "Accept this instead"}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      size="sm"
+                      disabled={pending}
+                      onClick={onSubmit}
+                    >
+                      Just abandon for now
+                    </Button>
+                  </div>
+                </>
+              )}
+            </div>
           )}
 
           {error && (

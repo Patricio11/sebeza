@@ -547,6 +547,7 @@ export const experiences = pgTable("experiences", {
  * on any public / employer surface (seeker-private).
  */
 export const learningState = pgEnum("learning_state", [
+  "interested",
   "accepted",
   "in_progress",
   "completed",
