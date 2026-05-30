@@ -1,0 +1,63 @@
+{
+  "$comment": "Phase 10.2 (PHASE_10_PLAN.md) - Lighthouse CI config for the public-launch perf budget. Run via `npx @lhci/cli autorun` after `npm run build && npm run start`. The throttling profile mirrors a mid-tier SA mobile device on Slow 3G to honor the No-Flash Rule from TO_START_EVERY_SESSION.md.",
+  "ci": {
+    "collect": {
+      "$comment": "Routes the operator-facing audit hits. Locale prefix omitted - LHCI follows the default locale (en) via the `localePrefix: 'as-needed'` routing posture.",
+      "url": [
+        "http://localhost:3000/",
+        "http://localhost:3000/search",
+        "http://localhost:3000/p/seed-handle-1",
+        "http://localhost:3000/sign-in",
+        "http://localhost:3000/sign-up",
+        "http://localhost:3000/sign-up/seeker",
+        "http://localhost:3000/sign-up/employer",
+        "http://localhost:3000/insights",
+        "http://localhost:3000/privacy",
+        "http://localhost:3000/paia"
+      ],
+      "numberOfRuns": 3,
+      "settings": {
+        "$comment": "Slow 3G + mid-tier CPU. The plan calls for Slow 4G + Slow 3G; this config holds Slow 3G as the floor. Operators wanting Slow 4G can pass --preset=desktop or edit throttling here.",
+        "preset": "perf",
+        "throttling": {
+          "rttMs": 300,
+          "throughputKbps": 400,
+          "cpuSlowdownMultiplier": 4
+        },
+        "screenEmulation": {
+          "mobile": true,
+          "width": 360,
+          "height": 640,
+          "deviceScaleFactor": 2,
+          "disabled": false
+        },
+        "$skipAudits_comment": "Skip the inapplicable ones for an auth-gated, locale-routed app. is-on-https is dev-only false; uses-http2 isn't actionable from app code.",
+        "skipAudits": [
+          "is-on-https",
+          "uses-http2",
+          "service-worker"
+        ]
+      }
+    },
+    "assert": {
+      "$comment": "Phase 10.2 floors per PHASE_10_PLAN.md task 10.2. Performance is the strictest; SEO is auth-gated for most surfaces so the floor is per-route.",
+      "preset": "lighthouse:recommended",
+      "assertions": {
+        "categories:performance": ["error", { "minScore": 0.9 }],
+        "categories:accessibility": ["error", { "minScore": 1.0 }],
+        "categories:best-practices": ["error", { "minScore": 0.95 }],
+        "categories:seo": ["warn", { "minScore": 0.9 }],
+        "$comment_metric_budgets": "JS budget posture - lhci will fail builds that ship more JS than the plan allows on key routes. ~150KB matches the No-Flash budget. The metrics-budget assertion is enforced via budgets.json (see ./lighthouse-budgets.json).",
+        "first-contentful-paint": ["error", { "maxNumericValue": 2000 }],
+        "largest-contentful-paint": ["error", { "maxNumericValue": 2500 }],
+        "cumulative-layout-shift": ["error", { "maxNumericValue": 0.1 }],
+        "total-blocking-time": ["error", { "maxNumericValue": 200 }]
+      },
+      "budgetsFile": "lighthouse-budgets.json"
+    },
+    "upload": {
+      "$comment": "Default to temporary public storage for development runs. Set LHCI_TOKEN + LHCI_SERVER_BASE_URL in CI to push to a self-hosted server.",
+      "target": "temporary-public-storage"
+    }
+  }
+}
