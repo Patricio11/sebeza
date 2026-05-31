@@ -6,9 +6,10 @@ and location, and gives government an honest picture of the labour market.
 
 > The trustworthy, real-time layer for South African work.
 
-Built through **Phase 9.13** (2026-05-25). The product is launch-ready against
-the current Neon (EU) database; everything beyond is operational + commercial,
-not engineering. The AWS Cape Town migration is a documented one-day cutover
+Built through **Phase 11.5** (2026-05-31  Phase 11 complete). The product
+is launch-ready against the current Neon (EU) database; everything beyond is
+operational + commercial, not engineering. The AWS Cape Town migration is
+a documented one-day cutover
 (see [docs/AWS_MIGRATION_RUNBOOK.md](docs/AWS_MIGRATION_RUNBOOK.md)) deferred
 pending partnership confirmation.
 
@@ -100,7 +101,23 @@ high-value accounts.
 | 9.11 | Mark-as-Filled + vacancy-outcome growth notifications | ✅ | [PHASE_9_11_COMPLETE](docs/completed/PHASE_9_11_COMPLETE.md) |
 | 9.12 | The learning loop (accept → start → complete → self-attested skill) | ✅ | [PHASE_9_12_COMPLETE](docs/completed/PHASE_9_12_COMPLETE.md) |
 | 9.13 | Learning-loop intelligence (curriculum-vs-demand + stall reasons) | ✅ | [PHASE_9_13_COMPLETE](docs/completed/PHASE_9_13_COMPLETE.md) |
-| 10 | Accessibility, perf budget, Tier-1/2/3 translations | planned | Public-launch phase |
+| 9.14 | Seeker verification roll-up (auto-derived from qualifications) | ✅ | [PHASE_9_14_COMPLETE](docs/completed/PHASE_9_14_COMPLETE.md) |
+| 9.15 | "Other" free-text + admin taxonomy suggestion queue | ✅ | [PHASE_9_15_COMPLETE](docs/completed/PHASE_9_15_COMPLETE.md) |
+| 9.16 | DOB + nationality at sign-up + admin-mediated ID verification | ✅ | `docs/PHASE_9_16_PLAN.md` |
+| 9.17 | Employer-initiated seeker invitations (agent workflow) | ✅ | `docs/PHASE_9_17_PLAN.md` |
+| 9.18 | Remote/Hybrid + SMTP collapse + draft persistence + domain rename | ✅ | ROADMAP §9.18 |
+| 9.19 | Years-experience floor + NQF floor + follow-up nudges + season window | ✅ | (folded into 9.21/9.22) |
+| 9.20 | Placement lifecycle ledger (status check-ins + departures) | ✅ | [PHASE_9_20_COMPLETE](docs/completed/PHASE_9_20_COMPLETE.md) |
+| 9.21 | Seasonal-window vacancies | ✅ | [PHASE_9_21_COMPLETE](docs/completed/PHASE_9_21_COMPLETE.md) |
+| 9.22 | Current-employment self-declaration | ✅ | [PHASE_9_22_COMPLETE](docs/completed/PHASE_9_22_COMPLETE.md) |
+| 9.23 | Opt-in employment verification (one-shot email flow) | ✅ | [PHASE_9_23_COMPLETE](docs/completed/PHASE_9_23_COMPLETE.md) |
+| 10 | Help centres + public-launch prep (a11y, perf, Tier-1/2/3 stubs) | ✅ | [PHASE_10_1_COMPLETE](docs/completed/PHASE_10_1_COMPLETE.md)  [10_4](docs/completed/PHASE_10_4_COMPLETE.md) |
+| 11.1 | Engagement velocity (weekly digest, "why no invites?", welcome-back, badges) | ✅ | [PHASE_11_1_COMPLETE](docs/completed/PHASE_11_1_COMPLETE.md) |
+| 11.2 | Learning-loop completion (LearningPath URLs, free-alt swap, cert bridge) | ✅ | [PHASE_11_2_COMPLETE](docs/completed/PHASE_11_2_COMPLETE.md) |
+| 11.3 | Seeker control + trust posture (pause, block, report-invite, vacancy snapshot) | ✅ | [PHASE_11_3_COMPLETE](docs/completed/PHASE_11_3_COMPLETE.md) |
+| 11.4 | SA distribution surface (share-card PNG, follow employer, data-saver, dormant SMS/WhatsApp) | ✅ | [PHASE_11_4_COMPLETE](docs/completed/PHASE_11_4_COMPLETE.md) |
+| 11.5 | Profile depth + mobile / a11y polish (Open-to tags, CV backup, lazy load, 9 a11y fixes) | ✅ | [PHASE_11_5_COMPLETE](docs/completed/PHASE_11_5_COMPLETE.md) |
+| 12 | Testing & QA (renumbered from old Phase 11) | planned | Public-launch operator phase |
 
 ---
 

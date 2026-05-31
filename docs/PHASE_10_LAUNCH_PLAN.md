@@ -75,7 +75,7 @@ This is **not** a feature phase. Feature work is done. Phase 10 is the polish + 
 
 ## 🚫 OUT OF SCOPE FOR PHASE 10 (explicit guardrails)
 
-- ❌ **New features**. The whole point is to ship what's built. Feature requests collect in a backlog file (`docs/POST_LAUNCH_BACKLOG.md`); Phase 11 (seeker retention + skill-growth conversion) is the structured next phase, plans at `docs/PHASE_11_PLAN.md`.
+- ❌ **New features**. The whole point is to ship what's built. Feature requests collect in a backlog file (`docs/POST_LAUNCH_BACKLOG.md`); Phase 11 (seeker retention + skill-growth conversion) was the structured next phase  ✅ shipped 2026-05-30  2026-05-31; archived plans at `docs/completed/PHASE_11_PLAN.md` + sub-phase plans.
 - ❌ **Schema changes that aren't bug fixes**. Pure migration work that's not addressing a launch blocker waits for Phase 11 (where the data shapes are documented in the sub-phase plans) or later.
 - ❌ **Charting library / heavy animation**. The Civic Editorial bar / Recharts mount-gated combo is the rule; no new chart engines.
 - ❌ **Anonymous / unattributed flows on any seeker-facing surface**. Every invite + every contact + every analytics export still attributes the actor.

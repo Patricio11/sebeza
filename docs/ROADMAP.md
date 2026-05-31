@@ -816,7 +816,7 @@ Migration `0018_phase9_9_years_experience.sql` applied to Neon. Companion docs: 
 ---
 
 ## 🌱 PHASE 11: SEEKER RETENTION & SKILL-GROWTH CONVERSION
-*Opens after Phase 10 (public launch) ships. Companion docs: `docs/PHASE_11_PLAN.md` + five sub-phase plans `PHASE_11_{1,2,3,4,5}_PLAN.md`.*
+*Opens after Phase 10 (public launch) ships. ✅ **All five sub-phases shipped 2026-05-30  2026-05-31.** Archived plans: `docs/completed/PHASE_11_PLAN.md` + `PHASE_11_{1,2,3,4,5}_PLAN.md`; ship reports: `PHASE_11_{1,2,3,4,5}_COMPLETE.md`.*
 
 > **Thesis:** Sebenza's seeker side is architecturally sound but engagement velocity is low. Most retention gaps are *surfacing* problems, not missing-feature problems  the data exists, the cron jobs run, the audit log records the events; we just don't tell the seeker. Phase 11 closes that loop + also closes the skill-growth conversion gaps in Career Compass (Learning Loop is ornamental until learning paths have URLs, cost-driven abandons surface free alternatives, and completion bridges into the verified-cert flow).
 

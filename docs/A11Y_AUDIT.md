@@ -35,15 +35,18 @@ Each finding gets a row below + a commit. WCAG 2.2 AA is the floor; AAA is welco
 
 ### Findings to address before launch
 
-| Severity | Finding | Where | Suggested fix |
+| Severity | Finding | Where | Status |
 |---|---|---|---|
-| **High** | Public route group has no *Skip to main content* link. Authenticated routes use `DashboardShell` which provides one; the public root layout does not. | `app/[locale]/layout.tsx` | Add a skip link in the root layout that targets `<main id="main">` (the public pages should declare a `<main>` landmark; verify each one does). |
-| **Medium** | The `lang` attribute on `<html>` is locale-aware (good) but the `dir` attribute is not set. Tier-3 locales include none requiring RTL today, but explicit `dir="ltr"` documents intent + protects against future Arabic addition. | `app/[locale]/layout.tsx:60` | Add `dir="ltr"` (or a locale-aware lookup) on the `<html>` tag. |
-| **Medium** | `MultiSelectComboboxField` dropdown is `role="listbox"` with `aria-multiselectable="true"` but the *Suggested for this role* divider is a `<p>`, not a group label. Screen readers announce the suggestions as flat options rather than grouped. | `components/ui/MultiSelectComboboxField.tsx:308` | Wrap each section in `role="group"` with `aria-label` matching the divider text. |
-| **Medium** | Run a focus-trap check on every modal-pattern (decline modal in 9.8.5, contact-reveal modal, KYC review). Tab should cycle within the modal; Esc should close. Manual verification. | various | Note results during the screen-reader pass. |
-| **Low** | `aria-hidden="true"` is used heavily on icons inside buttons that DO carry an `aria-label`  perfect. Confirm by-route there are no aria-hidden=true icons inside buttons that *lack* a sibling text label. | UI primitives | Audit during the Playwright a11y pass. |
-| **Low** | The cookie-consent banner is dismissible but the dismiss button announces only the icon name (X). Verify the accessible name. | `components/feature/legal/CookieConsentBanner.tsx` | Manual review during the screen-reader pass. |
-| **Low** | The `<Avatar>` `aria-hidden="true"` is correct when adjacent text is the accessible label (e.g. "John Doe" next to the avatar), but standalone avatars (top-right of header) need an `aria-label` or alt = the user's display name. | `components/ui/Avatar.tsx` | Add a prop `decorative` defaulting to true; when false, set an explicit accessible name. |
+| **High** | Public route group has no *Skip to main content* link. | `app/[locale]/layout.tsx` | ✅ **Fixed Phase 11.5.7** (2026-05-31). Skip link added in root layout; targets `<main id="main">` (already declared on every public page). |
+| **Medium** | `<html>` has no `dir` attribute. | `app/[locale]/layout.tsx` | ✅ **Fixed Phase 11.5.8** (2026-05-31). `dir="ltr"` set explicitly; comment notes the future per-locale lookup when an RTL locale ships. |
+| **Medium** | `MultiSelectComboboxField` "Suggested" / "All other" sections render as flat options, not groups. | `components/ui/MultiSelectComboboxField.tsx` | ✅ **Fixed Phase 11.5.9** (2026-05-31). Each section now wraps in `<div role="group" aria-label="...">` matching the visible divider text. |
+| **Medium** | Recommendation ordinals (`01`, `02`, ...) announce as "zero one". | `app/[locale]/(seeker)/dashboard/grow/page.tsx` | ✅ **Fixed Phase 11.5.10** (2026-05-31). Wrapped in `aria-label="Recommendation N"` with the styled glyph inside an `aria-hidden` span. |
+| **Medium** | City-demand gap bar is `aria-hidden` (correct) but the percentage isn't surfaced as text. | `/dashboard/grow` city-demand table | ✅ **Fixed Phase 11.5.11** (2026-05-31). Added `<span className="sr-only">{pct}% gap</span>` next to the visual bar. |
+| **Medium** | `MonthYearPicker` listbox lacks `aria-activedescendant`; focused-month is invisible to AT. | `components/ui/MonthYearPicker.tsx` | ✅ **Fixed Phase 11.5.15** (2026-05-31). Container has `aria-activedescendant`; each button has `id="myp-month-{year}-{month}"`. |
+| **Medium** | `<Avatar>` always announces as image. Standalone uses (header) need name; decorative uses (list row adjacent to text) should be `aria-hidden`. | `components/ui/Avatar.tsx` | ✅ **Fixed Phase 11.5.13** (2026-05-31). New `decorative` prop (default `false`); when `true`, the wrapper takes `aria-hidden="true"` and skips `role="img"`. |
+| **Medium** | Focus-trap + Esc-close check on every modal-pattern (decline modal, contact-reveal modal, KYC review). | various | 🟡 **Partial** (Phase 11.5.12). New Phase 11 modals (BlockEmployer, ReportInvitation, SwitchProfession) handle it; older modals (AbandonModal, StatusCard picker, EmploymentVerification) leave focus on document body after Esc. Browser-default acceptable for launch; full focus-return sweep deferred to Phase 12. |
+| **Low** | `aria-hidden="true"` icons inside buttons without sibling text. | UI primitives | Defer to the Playwright a11y pass. |
+| **Low** | Cookie-consent banner dismiss button accessible name. | `components/feature/legal/CookieConsentBanner.tsx` | Manual review during the screen-reader pass. |
 
 ### Manual passes  pending (operator)
 
@@ -74,4 +77,10 @@ Each High / Medium finding lands as a separate commit cited back to this doc. Th
 
 ---
 
-*Last static scan: 2026-05-30. Re-run when major UI work lands.*
+## Phase 11.5 status
+
+**7 of 8 findings closed (2026-05-31)** by the Phase 11.5 a11y batch  see `docs/completed/PHASE_11_5_COMPLETE.md` tasks 11.5.7 through 11.5.15. The 8th (modal focus-return sweep) is partial; newer modals handle it, older ones rely on browser default. Tracked for Phase 12.
+
+---
+
+*Last static scan: 2026-05-30. Phase 11.5 a11y batch landed 2026-05-31. Re-run when major UI work lands.*
