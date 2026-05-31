@@ -302,3 +302,227 @@ export async function demandVsCurriculumQuery(
     programmeOptions,
   };
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Phase 13.2  module_skills read path.
+//
+// Surfaces the editorial-catalogue skill inferences for a student's
+// declared modules + (when present) elective + project topic. Powers
+// the new "Skills inferred from your current modules" section on
+// <ProgrammeVsMarketCard>.
+//
+// Trigram (`pg_trgm`) similarity is the matching primitive  the
+// student's free-text module strings rarely match the catalogue
+// label exactly. Threshold is the Postgres default
+// (`pg_trgm.similarity_threshold`, ~0.3) so "DB Theory" matches
+// "Database Theory" but "DB" alone doesn't go wild and pull
+// every label.
+//
+// `llm_suggested` rows are EXCLUDED from the student-facing surface
+// until an admin approves them (they appear only on the Task 13.3
+// admin review queue). Editorial + student_signal rows ship live.
+// ─────────────────────────────────────────────────────────────────────────────
+
+export interface InferredSkillRef {
+  slug: string;
+  label: string;
+  /** 15 editorial confidence (5 = canonical, 1 = weak signal). */
+  confidence: number;
+  /** Module label (or project/elective text) that surfaced this
+   *  skill. Lets the card render "Skills from your 'Database
+   *  Systems' module: SQL · PostgreSQL". */
+  matchedFrom: string;
+}
+
+export interface ModuleSkillsForStudent {
+  /** Skills inferred from `academic_profiles.current_modules`. */
+  fromModules: InferredSkillRef[];
+  /** Skills inferred from `academic_profiles.elective_chosen`. */
+  fromElective: InferredSkillRef[];
+  /** Skills inferred from `academic_profiles.project_topic`. */
+  fromProject: InferredSkillRef[];
+}
+
+const EMPTY_STUDENT_SKILLS: ModuleSkillsForStudent = {
+  fromModules: [],
+  fromElective: [],
+  fromProject: [],
+};
+
+/**
+ * Look up the editorial catalogue inferences for one student. Caller
+ * passes the seeker's `profileId`; the function joins through
+ * `academic_profiles` to read the three context fields, then runs
+ * the trigram match against `module_skills` + (loosely)
+ * `skills.label` for the free-text elective + project topic fields.
+ *
+ * Returns the canonical empty shape when the seeker has no academic
+ * row at all (non-students) or when the academic row has no context
+ * declared yet (Day-1 student who hasn't filled in modules).
+ *
+ * Read complexity is bounded: max 8 modules per student + max one
+ * elective + max one project, each matched with `LIMIT 5` per
+ * source text.
+ */
+export async function moduleSkillsForStudent(
+  profileId: string,
+): Promise<ModuleSkillsForStudent> {
+  const db = getDb();
+
+  // Pull the three context columns + institution scope in one query
+  // so we don't round-trip on a non-student profile.
+  const ctx = (
+    (await db.execute(sql`
+      SELECT current_modules, elective_chosen, project_topic,
+             institution_slug
+      FROM academic_profiles
+      WHERE profile_id = ${profileId}
+      LIMIT 1
+    `)) as unknown as {
+      rows: Array<{
+        current_modules: string[] | string | null;
+        elective_chosen: string | null;
+        project_topic: string | null;
+        institution_slug: string | null;
+      }>;
+    }
+  ).rows[0];
+  if (!ctx) return EMPTY_STUDENT_SKILLS;
+
+  // `current_modules` returns as a real array on Postgres + as a
+  // serialised string (`{Operating Systems,Database Systems}`) on
+  // some drivers. Normalise.
+  const modules: string[] = Array.isArray(ctx.current_modules)
+    ? ctx.current_modules
+    : typeof ctx.current_modules === "string"
+      ? ctx.current_modules
+          .replace(/^\{|\}$/g, "")
+          .split(",")
+          .map((s) => s.trim().replace(/^"|"$/g, ""))
+          .filter((s) => s.length > 0)
+      : [];
+
+  const fromModules =
+    modules.length > 0
+      ? await matchModulesAgainstCatalogue(modules, ctx.institution_slug)
+      : [];
+  const fromElective = ctx.elective_chosen
+    ? await matchFreeTextAgainstSkills(ctx.elective_chosen)
+    : [];
+  const fromProject = ctx.project_topic
+    ? await matchFreeTextAgainstSkills(ctx.project_topic)
+    : [];
+
+  return { fromModules, fromElective, fromProject };
+}
+
+/**
+ * For each declared module string, find the catalogue rows whose
+ * `module_label` is trigram-similar. Prefer institution-scoped rows
+ * over canonical when both exist. Cap to 5 skills per module so a
+ * particularly chatty editorial row can't blow up the result set.
+ */
+async function matchModulesAgainstCatalogue(
+  modules: string[],
+  institutionSlug: string | null,
+): Promise<InferredSkillRef[]> {
+  const db = getDb();
+
+  // Bind the array as a Postgres text[] literal. Drizzle's `sql` tag
+  // serialises JS arrays correctly for parameter binding; explicit
+  // cast keeps the planner honest when the array is empty.
+  const out: InferredSkillRef[] = [];
+  for (const moduleText of modules) {
+    if (!moduleText || moduleText.trim().length === 0) continue;
+    const rows = (
+      (await db.execute(sql`
+        SELECT DISTINCT ON (ms.skill_slug)
+          ms.module_label  AS matched_from,
+          ms.skill_slug,
+          s.label          AS skill_label,
+          ms.confidence,
+          ms.institution_slug
+        FROM module_skills ms
+        INNER JOIN skills s ON s.slug = ms.skill_slug
+        WHERE ms.source = 'editorial'
+          AND ms.module_label % ${moduleText}
+          AND (ms.institution_slug IS NULL
+               OR ms.institution_slug = ${institutionSlug ?? null})
+        ORDER BY ms.skill_slug,
+          -- Prefer institution-scoped rows over canonical.
+          (CASE WHEN ms.institution_slug = ${institutionSlug ?? null}
+                THEN 0 ELSE 1 END),
+          ms.confidence DESC
+        LIMIT 5
+      `)) as unknown as {
+        rows: Array<{
+          matched_from: string;
+          skill_slug: string;
+          skill_label: string;
+          confidence: number;
+        }>;
+      }
+    ).rows;
+    for (const r of rows) {
+      out.push({
+        slug: r.skill_slug,
+        label: r.skill_label,
+        confidence: r.confidence,
+        matchedFrom: r.matched_from,
+      });
+    }
+  }
+  // De-dupe across modules  if "Database Systems" + "Databases"
+  // both surface SQL, we only want one chip on the card.
+  const seen = new Set<string>();
+  return out.filter((s) => {
+    if (seen.has(s.slug)) return false;
+    seen.add(s.slug);
+    return true;
+  });
+}
+
+/**
+ * Match a single free-text string (the elective name or project
+ * topic) against `skills.label` via trigram similarity. Caps to 5
+ * hits so a vague phrase ("research methods") can't surface a wall
+ * of weak matches.
+ *
+ * Note on quality: the SKILLS taxonomy today is job-skills-focused
+ * (React, AWS, SAIPA). Free-text from a third-year project topic
+ * will surface few hits until either (a) the taxonomy grows or
+ * (b) a `skill_synonyms` enrichment table lands. We ship the
+ * function with that honest limitation; the editorial catalogue
+ * pathway through `matchModulesAgainstCatalogue` is the load-bearing
+ * one for now.
+ */
+async function matchFreeTextAgainstSkills(
+  text: string,
+): Promise<InferredSkillRef[]> {
+  const db = getDb();
+  const trimmed = text.trim();
+  if (trimmed.length < 3) return [];
+  const rows = (
+    (await db.execute(sql`
+      SELECT
+        s.slug,
+        s.label,
+        similarity(s.label, ${trimmed}) AS score
+      FROM skills s
+      WHERE s.label % ${trimmed}
+      ORDER BY score DESC
+      LIMIT 5
+    `)) as unknown as {
+      rows: Array<{ slug: string; label: string; score: string }>;
+    }
+  ).rows;
+  return rows.map((r) => ({
+    slug: r.slug,
+    label: r.label,
+    // Convert pg_trgm similarity (0..1) into the 1..5 confidence
+    // band so the card renders a stable indicator. similarity >= 0.6
+    // is a strong match; 0.30.5 is weak.
+    confidence: Number(r.score) >= 0.6 ? 4 : Number(r.score) >= 0.45 ? 3 : 2,
+    matchedFrom: trimmed,
+  }));
+}

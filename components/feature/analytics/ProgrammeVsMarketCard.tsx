@@ -18,11 +18,13 @@
  */
 
 import { Link } from "@/i18n/navigation";
-import { GraduationCap, Info, TrendingUp } from "lucide-react";
+import { GraduationCap, Info, Sparkles, TrendingUp } from "lucide-react";
 
 import type {
   CurriculumCell,
   CurriculumResult,
+  InferredSkillRef,
+  ModuleSkillsForStudent,
 } from "@/db/queries/curriculum";
 import { INSTITUTIONS, PROVINCES } from "@/lib/mock/taxonomy";
 
@@ -32,6 +34,16 @@ interface Props {
   title?: string;
   subtitle?: string;
   exportHref?: string;
+  /**
+   * Phase 13.2  optional editorial-catalogue inferences from the
+   * student's `current_modules` + `elective_chosen` + `project_topic`.
+   * Only renders on student-scope cards; the gov-side
+   * cross-market view doesn't care about one student's context.
+   *
+   * Each field can be empty independently  the section renders only
+   * when at least one of the three has at least one inferred skill.
+   */
+  moduleSkills?: ModuleSkillsForStudent;
 }
 
 export function ProgrammeVsMarketCard({
@@ -40,10 +52,17 @@ export function ProgrammeVsMarketCard({
   title,
   subtitle,
   exportHref,
+  moduleSkills,
 }: Props) {
   const nfmt = new Intl.NumberFormat(locale);
   const grouped = groupByProgramme(data.cells);
   const isEmpty = grouped.length === 0;
+  const showModuleSkills =
+    data.studentScope &&
+    !!moduleSkills &&
+    (moduleSkills.fromModules.length > 0 ||
+      moduleSkills.fromElective.length > 0 ||
+      moduleSkills.fromProject.length > 0);
 
   const cardTitle =
     title ??
@@ -83,6 +102,10 @@ export function ProgrammeVsMarketCard({
           </div>
         </div>
       </header>
+
+      {showModuleSkills && moduleSkills && (
+        <ModuleSkillsSection moduleSkills={moduleSkills} />
+      )}
 
       {isEmpty ? (
         <EmptyState studentScope={data.studentScope} k={data.k} />
@@ -299,6 +322,129 @@ function StackList({
           })}
         </ul>
       )}
+    </div>
+  );
+}
+
+/**
+ * Phase 13.2  inferred-skills section. Renders above the existing
+ * programme-vs-market cells when the student has declared any
+ * current modules / elective / project topic + the editorial
+ * catalogue returned at least one inferred skill. Silent when empty
+ * (the existing programme-level analysis still renders); no empty
+ * state nudge here  the seeker's own editor is the surface that
+ * prompts capture.
+ *
+ * Grouped by source text so the student can see which input
+ * produced which skills ("Database Systems  SQL, PostgreSQL").
+ */
+function ModuleSkillsSection({
+  moduleSkills,
+}: {
+  moduleSkills: ModuleSkillsForStudent;
+}) {
+  // Group all three sources by `matchedFrom` so a student who
+  // declared the same skill via two modules sees the chip once but
+  // attributed honestly.
+  const modulesGrouped = groupByMatchedFrom(moduleSkills.fromModules);
+  const electiveGrouped = groupByMatchedFrom(moduleSkills.fromElective);
+  const projectGrouped = groupByMatchedFrom(moduleSkills.fromProject);
+
+  return (
+    <div className="border-b border-[color:var(--color-hairline)] bg-[color:var(--color-brand-tint)]/30 px-5 py-4">
+      <div className="flex items-baseline gap-2">
+        <Sparkles
+          className="size-3.5 text-[color:var(--color-brand-strong)]"
+          aria-hidden="true"
+        />
+        <h4 className="text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--color-brand-strong)]">
+          Skills from your current studies
+        </h4>
+      </div>
+      <p className="mt-1 text-xs text-[color:var(--color-ink-soft)]">
+        Inferred from the modules + elective + project topic on your
+        profile, matched against the editorial curriculum catalogue.
+      </p>
+
+      <div className="mt-3 space-y-3">
+        {modulesGrouped.map(([source, skills]) => (
+          <InferredSkillRow
+            key={`mod-${source}`}
+            label="Module"
+            source={source}
+            skills={skills}
+          />
+        ))}
+        {electiveGrouped.map(([source, skills]) => (
+          <InferredSkillRow
+            key={`elec-${source}`}
+            label="Elective"
+            source={source}
+            skills={skills}
+          />
+        ))}
+        {projectGrouped.map(([source, skills]) => (
+          <InferredSkillRow
+            key={`proj-${source}`}
+            label="Project topic"
+            source={source}
+            skills={skills}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function groupByMatchedFrom(
+  refs: InferredSkillRef[],
+): Array<[string, InferredSkillRef[]]> {
+  const map = new Map<string, InferredSkillRef[]>();
+  for (const r of refs) {
+    const list = map.get(r.matchedFrom);
+    if (list) list.push(r);
+    else map.set(r.matchedFrom, [r]);
+  }
+  return Array.from(map.entries());
+}
+
+function InferredSkillRow({
+  label,
+  source,
+  skills,
+}: {
+  label: string;
+  source: string;
+  skills: InferredSkillRef[];
+}) {
+  return (
+    <div className="grid gap-2 md:grid-cols-[10rem_1fr] md:items-baseline">
+      <div className="text-xs">
+        <span className="font-display text-sm text-[color:var(--color-ink)]">
+          {source}
+        </span>
+        <span className="ml-1.5 text-[0.62rem] uppercase tracking-[0.18em] text-[color:var(--color-ink-soft)]">
+          {label}
+        </span>
+      </div>
+      <ul className="flex flex-wrap gap-1.5">
+        {skills.map((s) => (
+          <li key={s.slug}>
+            <span
+              className="inline-flex items-center gap-1 rounded-[var(--radius-pill)] border border-[color:var(--color-hairline)] bg-[color:var(--color-paper)] px-2 py-0.5 text-[0.65rem] uppercase tracking-[0.18em] text-[color:var(--color-ink)]"
+              title={`Confidence ${s.confidence}/5`}
+            >
+              {s.label}
+              <span
+                aria-hidden="true"
+                className="text-[color:var(--color-ink-soft)]"
+              >
+                · {s.confidence}/5
+              </span>
+            </span>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

@@ -1803,6 +1803,63 @@ export const programmeSkills = pgTable(
   }),
 );
 
+/**
+ * Phase 13.2  module_skills catalogue. Module-level granularity
+ * mirror of `programme_skills` with per-row provenance metadata
+ * (source / approved_by / approved_at / confidence) so the editorial
+ * pipeline in Task 13.3 can land LLM-suggested rows in a queue for
+ * admin review before they reach students.
+ *
+ * Read path (db/queries/curriculum.ts moduleSkillsForStudent):
+ *
+ *   - Match the student's `current_modules` strings against
+ *     `module_label` via `pg_trgm` similarity (operator `%`).
+ *   - Prefer institution-scoped rows over canonical rows when both
+ *     exist for the same (module_slug, skill_slug) pair.
+ *   - Exclude `llm_suggested` rows  those only land on the admin
+ *     review queue until approved.
+ *
+ * The two unique constraints (one for institution=NULL, one for
+ * institution!=NULL) live in migration 0044 as PARTIAL indexes
+ * because Drizzle's `uniqueIndex` builder doesn't accept a `WHERE`
+ * clause. The schema here documents the intent; the DB layer
+ * enforces it.
+ */
+export const moduleSkillSource = pgEnum("module_skill_source", [
+  "editorial",
+  "llm_suggested",
+  "student_signal",
+]);
+
+export const moduleSkills = pgTable(
+  "module_skills",
+  {
+    id: text("id").primaryKey(),
+    moduleSlug: text("module_slug").notNull(),
+    moduleLabel: text("module_label").notNull(),
+    skillSlug: text("skill_slug")
+      .notNull()
+      .references(() => skills.slug, { onDelete: "cascade" }),
+    /** 1..5 editorial confidence; CHECK enforced at DB layer. */
+    confidence: integer("confidence").notNull().default(3),
+    source: moduleSkillSource("source").notNull(),
+    approvedBy: text("approved_by").references(() => appUser.id, {
+      onDelete: "set null",
+    }),
+    approvedAt: timestamp("approved_at"),
+    /** NULL = canonical cross-institution mapping. Set = scoped to
+     *  the named institution; the read path prefers it. */
+    institutionSlug: text("institution_slug").references(
+      () => institutions.slug,
+    ),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+  },
+  (t) => ({
+    byModule: index("idx_module_skills_by_module").on(t.moduleSlug),
+    bySkill: index("idx_module_skills_by_skill").on(t.skillSlug),
+  }),
+);
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Phase 9.17  employer-initiated seeker invites.
 //

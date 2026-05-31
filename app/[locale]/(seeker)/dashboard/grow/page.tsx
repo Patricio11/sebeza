@@ -22,7 +22,10 @@ import { RecommendedEmployersCard } from "@/components/feature/seeker/Recommende
 import { topEmployersByProfessionProvince } from "@/db/queries/employer-leaderboard";
 import { listMyFollows } from "@/lib/seeker/follows";
 import { LazySection } from "@/components/ui/LazySection";
-import { demandVsCurriculumQuery } from "@/db/queries/curriculum";
+import {
+  demandVsCurriculumQuery,
+  moduleSkillsForStudent,
+} from "@/db/queries/curriculum";
 import { ProgrammeVsMarketCard } from "@/components/feature/analytics/ProgrammeVsMarketCard";
 import {
   PROVIDER_LABEL,
@@ -110,9 +113,22 @@ export default async function CareerCompassPage({
         programme: me.academic.programme,
       })
     : Promise.resolve(null);
+  // Phase 13.2  module-level editorial-catalogue inferences. Runs
+  // only for students who have declared current_modules / elective /
+  // project_topic. Returns the canonical empty shape otherwise so
+  // the card just skips its new section silently.
+  const studentSkillsPromise = me.academic
+    ? moduleSkillsForStudent(me.profileId)
+    : Promise.resolve(null);
 
-  const [rawCompass, rank, myLearning, recentAbandons, curriculum] =
-    await Promise.all([
+  const [
+    rawCompass,
+    rank,
+    myLearning,
+    recentAbandons,
+    curriculum,
+    studentSkills,
+  ] = await Promise.all([
       getCompassForProfile(me),
       rankInPoolQuery({
         handle: me.handle,
@@ -123,6 +139,7 @@ export default async function CareerCompassPage({
       listMyLearningItems(),
       listRecentAbandonReasonsBySkill(),
       curriculumPromise,
+      studentSkillsPromise,
     ]);
   // Phase 9.12  D3 + Accept-button awareness. The compass needs to know:
   //  - which recommendations are already on the seeker's active learning
@@ -265,7 +282,11 @@ export default async function CareerCompassPage({
       {/* ───────────── Phase 9.13  Curriculum vs market (student-side) ───────────── */}
       {me.academic && curriculum && (
         <section className="mt-10">
-          <ProgrammeVsMarketCard data={curriculum} locale={locale} />
+          <ProgrammeVsMarketCard
+            data={curriculum}
+            locale={locale}
+            moduleSkills={studentSkills ?? undefined}
+          />
         </section>
       )}
 

@@ -1607,6 +1607,97 @@ async function seedPhase9_13ProgrammeSkills() {
   }
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Phase 13.2  module_skills editorial-catalogue seed.
+//
+// Demo-grade. Maps a handful of common SA university module names to
+// canonical skill slugs so the BSc CS + BCom seeded students render
+// something on the "Skills from your current studies" section of
+// <ProgrammeVsMarketCard>. All rows ship as `source='editorial'` with
+// `approved_by=NULL` (no admin user id seeded yet); the Task 13.3
+// admin queue will populate that on real catalogue work.
+//
+// Coverage is INTENTIONALLY thin. The Phase 13 plan calls for ~750
+// catalogue rows at Tier-1 launch, grown editorially. This seed is
+// the demo skeleton  enough to prove the read path works, not
+// pretending to be a comprehensive catalogue.
+// ─────────────────────────────────────────────────────────────────────────────
+
+async function seedPhase13_2ModuleSkills() {
+  console.log(
+    "📚  Phase 13.2  module_skills editorial seed (demo coverage)",
+  );
+
+  type MSRow = {
+    moduleSlug: string;
+    moduleLabel: string;
+    skillSlug: string;
+    confidence: number;
+  };
+
+  const rows: MSRow[] = [
+    // BSc CS modules. Mapping to job-skills we actually have in
+    // the SKILLS taxonomy (sql, postgres, aws, typescript). Modules
+    // teaching foundational concepts ("Operating Systems",
+    // "Algorithms") don't have clean skill matches today; admins
+    // can add via Task 13.3 once the taxonomy adds those entries.
+    {
+      moduleSlug: "database-systems",
+      moduleLabel: "Database Systems",
+      skillSlug: "sql",
+      confidence: 5,
+    },
+    {
+      moduleSlug: "database-systems",
+      moduleLabel: "Database Systems",
+      skillSlug: "postgres",
+      confidence: 4,
+    },
+    {
+      moduleSlug: "software-engineering",
+      moduleLabel: "Software Engineering",
+      skillSlug: "typescript",
+      confidence: 3,
+    },
+    {
+      moduleSlug: "software-engineering",
+      moduleLabel: "Software Engineering",
+      skillSlug: "react",
+      confidence: 2,
+    },
+    {
+      moduleSlug: "cloud-computing",
+      moduleLabel: "Cloud Computing",
+      skillSlug: "aws",
+      confidence: 5,
+    },
+
+    // BCom Honours Accounting modules.
+    {
+      moduleSlug: "advanced-financial-reporting",
+      moduleLabel: "Advanced Financial Reporting",
+      skillSlug: "ifrs",
+      confidence: 5,
+    },
+  ];
+
+  await db.insert(schema.moduleSkills).values(
+    rows.map((r) => ({
+      id: `ms_${r.moduleSlug}_${r.skillSlug}`,
+      moduleSlug: r.moduleSlug,
+      moduleLabel: r.moduleLabel,
+      skillSlug: r.skillSlug,
+      confidence: r.confidence,
+      source: "editorial" as const,
+      approvedBy: null,
+      approvedAt: new Date(),
+      institutionSlug: null,
+    })),
+  );
+
+  console.log(`   inserted ${rows.length} editorial module_skills rows`);
+}
+
 /**
  * Phase 9.15  Three demo taxonomy suggestions so /admin/taxonomy/suggestions
  * renders real content immediately. Demonstrates the full lifecycle:
@@ -1791,6 +1882,12 @@ async function main() {
   // query reads this table joined against academic_profiles +
   // skillDemandQuery.
   await seedPhase9_13ProgrammeSkills();
+  // Phase 13.2  editorial module → skill mapping so the seeded
+  // BSc CS + BCom Accounting students render content on the
+  // "Skills from your current studies" surface on /dashboard/grow.
+  // Demo-grade; ~6 rows. Real catalogue grows via Task 13.3 admin
+  // queue. Runs after the skills seed (FK on skill_slug).
+  await seedPhase13_2ModuleSkills();
   // Phase 9.13.5  stall-cell fixtures so the gov stall-reasons card
   // has one real (unsuppressed) cell at ship time. The 7.5 cohort
   // already opted in to outcomes_research, so the consent gate
