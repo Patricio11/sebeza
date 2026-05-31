@@ -105,6 +105,7 @@ export default async function NewVacancyPage({
       <div className="mb-4 flex flex-wrap items-center gap-2">
         <HelpLink slug="creating-a-vacancy" label="How to create a vacancy" />
         <HelpLink slug="match-requirements" label="Match requirements explained" />
+        <HelpLink slug="vacancy-snapshot-on-invites" label="What seekers see on invites" />
       </div>
       <div className="rounded-[var(--radius-md)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-5 md:p-8">
         <VacancyForm

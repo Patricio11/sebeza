@@ -34,18 +34,33 @@ import * as addingSkillsFromTheTaxonomy from "./profile/adding-skills-from-the-t
 import * as uploadingCertificatesAndVerification from "./profile/uploading-certificates-and-verification";
 import * as yourPublicProfileUrl from "./profile/your-public-profile-url";
 import * as employmentHistoryEntry from "./profile/employment-history-entry";
+//  Phase 11 profile additions
+import * as openToTags from "./profile/open-to-tags";
+import * as cvBackup from "./profile/cv-backup";
+import * as sharingYourProfile from "./profile/sharing-your-profile";
+import * as achievements from "./profile/achievements";
 
 //  Vacancy invitations
 import * as vacancyInvitationsExplained from "./invitations/vacancy-invitations-explained";
 import * as howToAcceptDeclineOrReconsider from "./invitations/how-to-accept-decline-or-reconsider";
 import * as declineReasonsAndWhatTheyMean from "./invitations/decline-reasons-and-what-they-mean";
 import * as acceptedWithNoticeHowItWorks from "./invitations/accepted-with-notice-how-it-works";
+//  Phase 11 invitations additions
+import * as whyNoInvites from "./invitations/why-no-invites";
+import * as readingTheVacancySpec from "./invitations/reading-the-vacancy-spec";
 
 //  Skills & learning
 import * as careerCompassRecommendations from "./growth/career-compass-recommendations";
 import * as learningPathsAndProficiency from "./growth/learning-paths-and-proficiency";
 import * as adjacentRolesAndSkillGaps from "./growth/adjacent-roles-and-skill-gaps";
 import * as curriculumVsMarketDemandForStudents from "./growth/curriculum-vs-market-demand-for-students";
+//  Phase 11 growth additions
+import * as findingTheRightCourse from "./growth/finding-the-right-course";
+import * as costAndFreeAlternatives from "./growth/cost-and-free-alternatives";
+import * as upgradingToVerified from "./growth/upgrading-to-verified";
+import * as switchingProfession from "./growth/switching-profession";
+import * as discoveringEmployers from "./growth/discovering-employers";
+import * as followingEmployers from "./growth/following-employers";
 
 //  Consent & privacy
 import * as whatConsentPurposesMean from "./privacy/what-consent-purposes-mean";
@@ -53,6 +68,9 @@ import * as contactRevealHowItWorks from "./privacy/contact-reveal-how-it-works"
 import * as documentSharingAndEmployerAccess from "./privacy/document-sharing-and-employer-access";
 import * as exportingYourDataPopiaSection23 from "./privacy/exporting-your-data-popia-section-23";
 import * as deletingYourAccountRightToErasure from "./privacy/deleting-your-account-right-to-erasure";
+//  Phase 11 privacy additions
+import * as pausingSearchability from "./privacy/pausing-searchability";
+import * as blockingEmployers from "./privacy/blocking-employers";
 
 //  Activity & audit
 import * as understandingYourActivityLedger from "./activity/understanding-your-activity-ledger";
@@ -62,6 +80,9 @@ import * as whoViewedYourProfile from "./activity/who-viewed-your-profile";
 import * as twoFactorAuthenticationSetup from "./account/two-factor-authentication-setup";
 import * as resettingYourPassword from "./account/resetting-your-password";
 import * as managingNotificationPreferences from "./account/managing-notification-preferences";
+//  Phase 11 account additions
+import * as dataSaverMode from "./account/data-saver-mode";
+import * as smsAndWhatsappNotifications from "./account/sms-and-whatsapp-notifications";
 
 /**
  * `import * as` yields a Module Namespace Object where each named
@@ -90,24 +111,40 @@ export const SEEKER_HELP_ARTICLES: HelpArticle[] = [
   uploadingCertificatesAndVerification,
   yourPublicProfileUrl,
   employmentHistoryEntry,
+  openToTags,
+  cvBackup,
+  sharingYourProfile,
+  achievements,
   vacancyInvitationsExplained,
   howToAcceptDeclineOrReconsider,
   declineReasonsAndWhatTheyMean,
   acceptedWithNoticeHowItWorks,
+  whyNoInvites,
+  readingTheVacancySpec,
   careerCompassRecommendations,
   learningPathsAndProficiency,
   adjacentRolesAndSkillGaps,
   curriculumVsMarketDemandForStudents,
+  findingTheRightCourse,
+  costAndFreeAlternatives,
+  upgradingToVerified,
+  switchingProfession,
+  discoveringEmployers,
+  followingEmployers,
   whatConsentPurposesMean,
   contactRevealHowItWorks,
   documentSharingAndEmployerAccess,
   exportingYourDataPopiaSection23,
   deletingYourAccountRightToErasure,
+  pausingSearchability,
+  blockingEmployers,
   understandingYourActivityLedger,
   whoViewedYourProfile,
   twoFactorAuthenticationSetup,
   resettingYourPassword,
   managingNotificationPreferences,
+  dataSaverMode,
+  smsAndWhatsappNotifications,
 ].map((mod) => toArticle(mod as ArticleModule));
 
 export function findArticleBySlug(slug: string): HelpArticle | null {

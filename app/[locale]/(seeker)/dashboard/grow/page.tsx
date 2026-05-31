@@ -173,7 +173,13 @@ export default async function CareerCompassPage({
       <div className="mb-4 flex flex-wrap items-center gap-2">
         <HelpLink role="seeker" slug="career-compass-recommendations" label="How recommendations work" />
         <HelpLink role="seeker" slug="learning-paths-and-proficiency" label="Learning paths" />
+        <HelpLink role="seeker" slug="finding-the-right-course" label="Finding the right course" />
+        <HelpLink role="seeker" slug="cost-and-free-alternatives" label="Free alternatives" />
+        <HelpLink role="seeker" slug="upgrading-to-verified" label="Upgrading to verified" />
         <HelpLink role="seeker" slug="adjacent-roles-and-skill-gaps" label="Adjacent roles" />
+        <HelpLink role="seeker" slug="switching-profession" label="Switching profession" />
+        <HelpLink role="seeker" slug="discovering-employers" label="Recommended employers" />
+        <HelpLink role="seeker" slug="following-employers" label="Following employers" />
       </div>
 
       {/* ───────────── Vacancy-outcome deep-link banner (Phase 9.11) ─────────────

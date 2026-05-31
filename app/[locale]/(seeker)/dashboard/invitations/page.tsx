@@ -71,6 +71,8 @@ export default async function SeekerInvitationsPage({
       {/* Phase 10.2  help deep-links (D6). */}
       <div className="mb-4 flex flex-wrap items-center gap-2">
         <HelpLink role="seeker" slug="vacancy-invitations-explained" label="How invitations work" />
+        <HelpLink role="seeker" slug="why-no-invites" label="Why no invites?" />
+        <HelpLink role="seeker" slug="reading-the-vacancy-spec" label="Reading the vacancy spec" />
         <HelpLink role="seeker" slug="how-to-accept-decline-or-reconsider" label="Accept, decline, reconsider" />
         <HelpLink role="seeker" slug="decline-reasons-and-what-they-mean" label="Decline reasons explained" />
       </div>

@@ -38,6 +38,8 @@ import * as shortageJustificationIndexExplained from "./shortage-opportunity/sho
 import * as interpretingDemandAndSupplyRatios from "./shortage-opportunity/interpreting-demand-and-supply-ratios";
 import * as localSupplyAvailableIncentives from "./shortage-opportunity/local-supply-available-incentives";
 import * as declineReasonsAndStallReasons from "./shortage-opportunity/decline-reasons-and-stall-reasons";
+//  Phase 11.4.5 cross-surface methodology note
+import * as seekerLeaderboardConsistency from "./shortage-opportunity/seeker-leaderboard-consistency";
 
 //  Curriculum & outcomes
 import * as curriculumVsMarketDemand from "./curriculum-outcomes/curriculum-vs-market-demand";
@@ -80,6 +82,7 @@ export const GOV_HELP_ARTICLES: HelpArticle[] = [
   interpretingDemandAndSupplyRatios,
   localSupplyAvailableIncentives,
   declineReasonsAndStallReasons,
+  seekerLeaderboardConsistency,
   curriculumVsMarketDemand,
   programmeCohortOutcomesAndRetention,
   whatSuppressedCellsMean,

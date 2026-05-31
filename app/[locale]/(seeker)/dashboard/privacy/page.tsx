@@ -127,6 +127,8 @@ export default async function PrivacyPage({
       {/* Phase 10.2  help deep-links (D6). */}
       <div className="mb-4 flex flex-wrap items-center gap-2">
         <HelpLink role="seeker" slug="what-consent-purposes-mean" label="Consent purposes explained" />
+        <HelpLink role="seeker" slug="pausing-searchability" label="Pause searchability" />
+        <HelpLink role="seeker" slug="blocking-employers" label="Block an employer" />
         <HelpLink role="seeker" slug="exporting-your-data-popia-section-23" label="Export your data (s.23)" />
         <HelpLink role="seeker" slug="deleting-your-account-right-to-erasure" label="Delete your account" />
       </div>

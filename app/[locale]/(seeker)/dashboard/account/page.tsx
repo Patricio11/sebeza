@@ -94,6 +94,8 @@ export default async function AccountPage({
         <HelpLink role="seeker" slug="two-factor-authentication-setup" label="Enable 2FA" />
         <HelpLink role="seeker" slug="resetting-your-password" label="Reset your password" />
         <HelpLink role="seeker" slug="managing-notification-preferences" label="Notifications guide" />
+        <HelpLink role="seeker" slug="data-saver-mode" label="Data saver mode" />
+        <HelpLink role="seeker" slug="sms-and-whatsapp-notifications" label="SMS &amp; WhatsApp" />
       </div>
 
       <div className="grid gap-10 md:grid-cols-2">

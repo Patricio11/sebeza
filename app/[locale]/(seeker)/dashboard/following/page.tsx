@@ -16,6 +16,7 @@ import { getMyProfile } from "@/lib/profile/me";
 import { listMyFollows } from "@/lib/seeker/follows";
 import { FollowEmployerButton } from "@/components/feature/seeker/FollowEmployerButton";
 import { EmployerVerificationChip } from "@/components/feature/seeker/invitations/EmployerVerificationChip";
+import { HelpLink } from "@/components/feature/help/HelpLink";
 import { Building2, Heart, Briefcase } from "lucide-react";
 
 export const revalidate = 0;
@@ -49,6 +50,12 @@ export default async function FollowingPage({
       pageTitle="Employers you follow"
       pageSubtitle="Private warm-intent list. The employer isn't told. You'll get a quiet bell ping when a followed employer opens a role in your profession + province."
     >
+      {/* Phase 11.4.2  help deep-links. */}
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        <HelpLink role="seeker" slug="following-employers" label="How following works" />
+        <HelpLink role="seeker" slug="discovering-employers" label="Recommended employers" />
+      </div>
+
       {follows.length === 0 ? (
         <div className="rounded-[var(--radius-md)] border border-dashed border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-8 text-center md:p-12">
           <Heart

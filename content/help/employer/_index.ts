@@ -27,6 +27,8 @@ import * as seasonalVacancies from "./vacancies/seasonal-vacancies";
 import * as vacancyLifecycle from "./vacancies/vacancy-lifecycle";
 import * as duplicateVacancy from "./vacancies/duplicate-vacancy";
 import * as followUpNudges from "./vacancies/follow-up-nudges";
+//  Phase 11.3.4
+import * as vacancySnapshotOnInvites from "./vacancies/vacancy-snapshot-on-invites";
 
 // ── Invitations ─────────────────────────────────────────────────────
 import * as findingMatches from "./invitations/finding-matches";
@@ -48,6 +50,8 @@ import * as savedSearches from "./talent-search/saved-searches";
 import * as dossierReveal from "./talent-search/dossier-reveal";
 import * as talentPools from "./talent-search/talent-pools";
 import * as listedBySeekersBadge from "./talent-search/listed-by-seekers-badge";
+//  Phase 11.4.5
+import * as recommendedEmployerLeaderboard from "./talent-search/recommended-employer-leaderboard";
 
 // ── Organisation & team ─────────────────────────────────────────────
 import * as kyc from "./organisation/kyc";
@@ -57,6 +61,9 @@ import * as twoFactor from "./organisation/two-factor";
 // ── Privacy & POPIA ─────────────────────────────────────────────────
 import * as whatWeHold from "./privacy/what-we-hold";
 import * as auditLog from "./privacy/audit-log";
+//  Phase 11.3.1 + 11.3.2 + 11.3.3  honest documentation of the
+//  seeker-side privacy invariants that affect employer reach.
+import * as seekerControlSurfaces from "./privacy/seeker-control-surfaces";
 
 /**
  * `import * as` yields a Module Namespace Object where each named
@@ -86,6 +93,7 @@ export const EMPLOYER_HELP_ARTICLES: HelpArticle[] = [
   vacancyLifecycle,
   duplicateVacancy,
   followUpNudges,
+  vacancySnapshotOnInvites,
   findingMatches,
   bulkInvite,
   invitationLifecycle,
@@ -101,11 +109,13 @@ export const EMPLOYER_HELP_ARTICLES: HelpArticle[] = [
   dossierReveal,
   talentPools,
   listedBySeekersBadge,
+  recommendedEmployerLeaderboard,
   kyc,
   inviteMembers,
   twoFactor,
   whatWeHold,
   auditLog,
+  seekerControlSurfaces,
 ].map((mod) => toArticle(mod as ArticleModule));
 
 export function findArticleBySlug(slug: string): HelpArticle | null {
