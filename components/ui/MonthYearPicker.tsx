@@ -325,12 +325,17 @@ export function MonthYearPicker({
               </div>
             </header>
 
-            {/* Month grid */}
+            {/* Month grid. Phase 11.5.15  `aria-activedescendant` lets
+                screen readers announce the currently-focused month
+                without moving DOM focus off the listbox container,
+                which is the WAI-ARIA-recommended pattern for a
+                composite single-focus widget. */}
             <div
               ref={gridRef}
               role="listbox"
               tabIndex={0}
               aria-label={`Months of ${viewYear}`}
+              aria-activedescendant={`myp-month-${viewYear}-${focusedMonth}`}
               onKeyDown={onGridKey}
               className="grid grid-cols-3 gap-1 p-3 focus:outline-none"
             >
@@ -344,6 +349,7 @@ export function MonthYearPicker({
                 return (
                   <button
                     key={m}
+                    id={`myp-month-${viewYear}-${month}`}
                     type="button"
                     role="option"
                     aria-selected={isSelected}

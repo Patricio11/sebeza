@@ -496,6 +496,24 @@ export const profiles = pgTable("profiles", {
       `status.stale.warning` for this profile. NULL = never sent.
       Idempotency anchor so we don't spam on every nightly run. */
   statusStaleLastSentAt: timestamp("status_stale_last_sent_at"),
+  /**
+   * Phase 11.5.1  voluntary secondary-intent tags. Independent of
+   * `status`  a fully-employed seeker can be open to mentorship
+   * without changing employment status. Validated against
+   * `OPEN_TO_TAGS` in the action layer; only stored values match the
+   * canonical set. GIN-indexed for `&&` overlap filter on /search.
+   */
+  openToTags: text("open_to_tags").array().notNull().default(sql`'{}'::text[]`),
+  /**
+   * Phase 11.5.2  personal CV backup. The file lives in the Supabase
+   * private bucket under `{userId}/cvs/{id}.pdf`. PRIVATE TO THE
+   * SEEKER (D3): never returned in any public projection, never
+   * referenced by employer-facing surfaces, never indexed for search.
+   * Admin access only via the existing POPIA data-export flow.
+   */
+  cvStorageKey: text("cv_storage_key"),
+  cvUploadedAt: timestamp("cv_uploaded_at"),
+  cvFilename: text("cv_filename"),
 });
 
 /** Active or recent academic enrolment. Optional 1:1 with profiles.

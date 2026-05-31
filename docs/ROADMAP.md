@@ -834,8 +834,10 @@ Five sub-phases, ordered by ROI per LOC:
 ### Task 11.4: SA distribution surface (WhatsApp + SMS + share card) ✅ *(shipped 2026-05-30)*
 - [x] Profile shareable summary card (PNG + WhatsApp deep-link) · follow employer (save list) · data-saver mode · SMS / WhatsApp notification channel (dormant + admin-gated, zero spend by default) · recommended employers by profession. *See `docs/completed/PHASE_11_4_COMPLETE.md` (+ archived plan).*
 
-### Task 11.5: Profile depth + mobile / a11y polish
-- [ ] "Open to ___" tags · CV upload (personal backup) · mobile profile-editor jump-to-section · responsive avatar sizes · Career Compass lazy-load below fold · 9 a11y fixes from the static scan (skip link, html dir, listbox group roles, ordinal aria-labels, modal focus return, MonthYearPicker semantics, status confirm copy). *See `docs/PHASE_11_5_PLAN.md`.*
+### Task 11.5: Profile depth + mobile / a11y polish ✅ *(shipped 2026-05-31)*
+- [x] "Open to ___" tags · CV upload (personal backup) · mobile profile-editor jump-to-section · responsive avatar sizes · Career Compass lazy-load below fold · 9 a11y fixes from the static scan (skip link, html dir, listbox group roles, ordinal aria-labels, modal focus return, MonthYearPicker semantics, status confirm copy). *See `docs/completed/PHASE_11_5_COMPLETE.md` (+ archived plan).*
+
+> **🎉 Phase 11 COMPLETE.** All five sub-phases shipped 2026-05-30 → 2026-05-31. Seeker retention + skill-growth conversion arc closed. **Next**: Phase 12 (Testing & QA).
 
 **Founder priority** (from the umbrella plan): 3 days = ship 11.1 alone; 2 weeks = 11.1 + 11.2 + trust trio from 11.3; 6 weeks = full Phase 11. Measurement at +30 days post-ship: week-4 retention ≥ 55%, weekly digest open rate ≥ 35%, learning-item completion rate ≥ 35%.
 

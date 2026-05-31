@@ -463,6 +463,21 @@ async function ProfileHero({
                   />
                 </DossierRow>
               )}
+              {/* Phase 11.5.1  voluntary secondary-intent tags. */}
+              {profile.openToTags && profile.openToTags.length > 0 && (
+                <DossierRow label="Open to">
+                  <ul className="flex flex-wrap gap-1.5">
+                    {profile.openToTags.map((tag) => (
+                      <li
+                        key={tag}
+                        className="inline-flex items-center rounded-[var(--radius-pill)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface-sunk)] px-2 py-0.5 text-[0.62rem] uppercase tracking-[0.18em] text-[color:var(--color-ink)]"
+                      >
+                        {tag.replace(/_/g, " ")}
+                      </li>
+                    ))}
+                  </ul>
+                </DossierRow>
+              )}
               {/* Phase 9.22  current employer. Only shown for picker-
                   visible orgs (pending seeker_named never appears).
                   Badge spells out the verification posture honestly.

@@ -14,7 +14,9 @@ import type {
   Seniority,
   VerificationStatus,
   WorkAvailabilityKind,
+  OpenToTag,
 } from "@/lib/mock/types";
+import { isOpenToTag } from "@/lib/mock/types";
 import { findProvinceBySlug, findCityBySlug, PROFESSIONS } from "@/lib/mock/taxonomy";
 import { getSetting } from "@/lib/admin/settings";
 import { SearchX } from "lucide-react";
@@ -50,6 +52,16 @@ function parseAvailableFor(
   return out.length > 0 ? out : undefined;
 }
 
+// Phase 11.5.1  parse the `?open_to=mentorship,freelance` query param.
+function parseOpenTo(raw: string | undefined): OpenToTag[] | undefined {
+  if (!raw) return undefined;
+  const out = raw
+    .split(",")
+    .map((s) => s.trim())
+    .filter((s): s is OpenToTag => isOpenToTag(s));
+  return out.length > 0 ? out : undefined;
+}
+
 export async function generateMetadata({ params }: SearchPageProps) {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "search" });
@@ -77,6 +89,9 @@ export default async function SearchPage({ params, searchParams }: SearchPagePro
     openToInternships: sp.internships === "1",
     openToGraduateProgrammes: sp.graduates === "1",
     availableFor: parseAvailableFor(asString(sp.availableFor)),
+    // Phase 11.5.1  "open to" tag filter. Comma-separated list of
+    // canonical tags. Unknown values silently dropped.
+    openTo: parseOpenTo(asString(sp.open_to)),
   };
 
   const result = await dataProvider.searchProfiles(filters);

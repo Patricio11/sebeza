@@ -21,6 +21,7 @@ import { StudentLaneDiscoveryCallout } from "@/components/feature/seeker/learnin
 import { RecommendedEmployersCard } from "@/components/feature/seeker/RecommendedEmployersCard";
 import { topEmployersByProfessionProvince } from "@/db/queries/employer-leaderboard";
 import { listMyFollows } from "@/lib/seeker/follows";
+import { LazySection } from "@/components/ui/LazySection";
 import { demandVsCurriculumQuery } from "@/db/queries/curriculum";
 import { ProgrammeVsMarketCard } from "@/components/feature/analytics/ProgrammeVsMarketCard";
 import {
@@ -357,6 +358,11 @@ export default async function CareerCompassPage({
         </ul>
       </section>
 
+      {/* Phase 11.5.5  city-demand + downstream sections lazy-load
+          when the seeker scrolls within 600px. Above-fold rendering
+          stays untouched. */}
+      <LazySection placeholderClassName="min-h-[400px]" rootMargin="600px">
+
       {/* ───────────── City demand ───────────── */}
       <section aria-labelledby="city-h" className="mt-16">
         <header className="mb-5 flex items-baseline justify-between border-b-2 border-[color:var(--color-ink)] pb-2">
@@ -410,8 +416,13 @@ export default async function CareerCompassPage({
                     </td>
                     <td className="px-5 py-3">
                       <div className="flex items-center justify-end gap-3">
+                        {/* Phase 11.5.6 + .11  hide the bar at very
+                            small viewports (≤ 480px) where it adds
+                            visual noise; add a visually-hidden span
+                            describing the gap ratio for screen
+                            readers (the bar itself is aria-hidden). */}
                         <div
-                          className="h-1.5 w-40 overflow-hidden rounded-full bg-[color:var(--color-surface-sunk)]"
+                          className="hidden h-1.5 w-40 overflow-hidden rounded-full bg-[color:var(--color-surface-sunk)] sm:block"
                           aria-hidden="true"
                         >
                           <div
@@ -419,6 +430,9 @@ export default async function CareerCompassPage({
                             style={{ width: `${Math.min(100, Math.round(ratio * 100))}%` }}
                           />
                         </div>
+                        <span className="sr-only">
+                          {Math.round(ratio * 100)}% gap
+                        </span>
                         <span className="font-display tabular text-base text-[color:var(--color-ink)]">
                           {nfmt.format(row.gap)}
                         </span>
@@ -503,6 +517,7 @@ export default async function CareerCompassPage({
           {t("honestBody")}
         </p>
       </aside>
+      </LazySection>
     </DashboardShell>
   );
 }
@@ -585,8 +600,19 @@ function RecommendationItem({
       }
     >
       <div className="grid gap-4 md:grid-cols-[2.5rem_1fr_auto] md:items-start">
-        <span className="font-display text-[1.75rem] italic leading-none text-[color:var(--color-accent)]">
-          {ordinal.toString().padStart(2, "0")}
+        {/* Phase 11.5.10  visually styled "01 / 02 / ..." ordinal.
+            Without an explicit aria-label screen readers announce
+            "zero one"  confusing. The aria-label restates it as
+            "Recommendation 1". The styled glyph stays visual via
+            aria-hidden on the inner span. */}
+        <span
+          className="font-display text-[1.75rem] italic leading-none text-[color:var(--color-accent)]"
+          aria-label={`Recommendation ${ordinal}`}
+          role="text"
+        >
+          <span aria-hidden="true">
+            {ordinal.toString().padStart(2, "0")}
+          </span>
         </span>
 
         <div>

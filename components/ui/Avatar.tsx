@@ -30,6 +30,16 @@ interface Props {
    * helper. Default false to preserve existing behaviour.
    */
   dataSaver?: boolean;
+  /**
+   * Phase 11.5.13  whether the avatar is decorative (renders next to
+   * the seeker's name in text) or standalone (e.g. top-right of the
+   * dashboard header). Decorative avatars take aria-hidden; standalone
+   * keep role="img" + aria-label.
+   *
+   * Default `false` (standalone) preserves the existing
+   * announce-as-image behaviour at every existing call site.
+   */
+  decorative?: boolean;
   className?: string;
 }
 
@@ -40,6 +50,7 @@ export function Avatar({
   size = "md",
   showRing = true,
   dataSaver = false,
+  decorative = false,
   className,
 }: Props) {
   const initials = getInitials(name);
@@ -63,8 +74,14 @@ export function Avatar({
         className,
       )}
       style={{ width: dims, height: dims }}
-      role="img"
-      aria-label={renderPhoto ? `${name} (photo)` : `${name} (initials)`}
+      {...(decorative
+        ? { "aria-hidden": true }
+        : {
+            role: "img" as const,
+            "aria-label": renderPhoto
+              ? `${name} (photo)`
+              : `${name} (initials)`,
+          })}
     >
       {renderPhoto && photoUrl ? (
         <Image

@@ -178,11 +178,32 @@ export async function uploadIdDocument(
   });
 }
 
+/**
+ * Phase 11.5.2  personal CV backup upload. PDF only (D2 keeps the
+ * scope tight). Same magic-byte sniff + rate limit; smaller 5MB cap
+ * so seekers can re-upload often without hitting storage quotas.
+ * Lives under `{userId}/cvs/...`  the seeker's own folder, never
+ * surfaced to employers.
+ */
+const CV_MAX_BYTES = 5 * MB;
+const CV_ALLOWED = new Set<string>(["application/pdf"]);
+
+export async function uploadCv(
+  opts: UploadOpts,
+): Promise<{ key: string; mime: string }> {
+  return upload({
+    ...opts,
+    kind: "cvs",
+    maxBytes: CV_MAX_BYTES,
+    allowed: CV_ALLOWED,
+  });
+}
+
 async function upload(opts: {
   userId: string;
   id: string;
   file: File;
-  kind: "documents" | "photos" | "org-documents" | "id-documents";
+  kind: "documents" | "photos" | "org-documents" | "id-documents" | "cvs";
   maxBytes: number;
   allowed: Set<string>;
 }): Promise<{ key: string; mime: string }> {

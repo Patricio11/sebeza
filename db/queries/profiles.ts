@@ -36,7 +36,9 @@ import type {
   QualificationItem,
   AcademicProfile,
   WorkAvailabilityKind,
+  OpenToTag,
 } from "@/lib/mock/types";
+import { isOpenToTag } from "@/lib/mock/types";
 import { INSTITUTIONS, PROVINCES } from "@/lib/mock/taxonomy";
 import { randomUUID } from "node:crypto";
 
@@ -187,6 +189,17 @@ export async function searchProfilesQuery(
     );
     conditions.push(sql`p.work_availability && ${kindsLiteral}`);
   }
+  // Phase 11.5.1  "open to" tag filter. Same `&&` overlap operator
+  // as workAvailability, backed by the GIN index on `open_to_tags`.
+  // Empty array (or absent) = no constraint.
+  if (filters.openTo && filters.openTo.length > 0) {
+    const tagsLiteral = sql.raw(
+      `ARRAY[${filters.openTo
+        .map((t) => `'${t.replace(/'/g, "''")}'`)
+        .join(",")}]::text[]`,
+    );
+    conditions.push(sql`p.open_to_tags && ${tagsLiteral}`);
+  }
   // Phase 9.19 D2  years-experience hard floor. Vacancy is the source
   // of truth: NULL on the vacancy = no constraint (skip entirely).
   // When the floor is set, a NULL on the seeker (`yearsExperience`
@@ -260,6 +273,7 @@ export async function searchProfilesQuery(
       p.status,
       p.status_confirmed_at,
       p.work_availability,
+      p.open_to_tags,
       p.verification,
       p.completeness,
       p.years_experience,
@@ -302,6 +316,7 @@ export async function searchProfilesQuery(
     status: string;
     status_confirmed_at: string | Date;
     work_availability: string[] | string | null;
+    open_to_tags: string[] | string | null;
     verification: string;
     completeness: number;
     years_experience: number | null;
@@ -343,6 +358,10 @@ export async function searchProfilesQuery(
     status: r.status as EmploymentStatus,
     statusConfirmedAt: new Date(r.status_confirmed_at).toISOString(),
     workAvailability: parsePgEnumArray(r.work_availability) as WorkAvailabilityKind[],
+    // Phase 11.5.1  voluntary secondary-intent tags. Same pg-array
+    // parser as workAvailability + the runtime guard filters out any
+    // out-of-set value.
+    openToTags: parsePgEnumArray(r.open_to_tags).filter(isOpenToTag) as OpenToTag[],
     verification: r.verification as VerificationStatus,
     completeness: r.completeness,
     yearsExperience: r.years_experience,
@@ -515,6 +534,7 @@ export async function findProfileByHandleQuery(
       status: schema.profiles.status,
       statusConfirmedAt: schema.profiles.statusConfirmedAt,
       workAvailability: schema.profiles.workAvailability,
+      openToTags: schema.profiles.openToTags,
       verification: schema.profiles.verification,
       completeness: schema.profiles.completeness,
       yearsExperience: schema.profiles.yearsExperience,
@@ -569,6 +589,9 @@ export async function findProfileByHandleQuery(
     status: p.status as EmploymentStatus,
     statusConfirmedAt: p.statusConfirmedAt.toISOString(),
     workAvailability: (p.workAvailability ?? []) as WorkAvailabilityKind[],
+    // Phase 11.5.1  voluntary secondary-intent tags. Unknown values
+    // filtered out by the runtime guard.
+    openToTags: ((p.openToTags ?? []) as string[]).filter(isOpenToTag) as OpenToTag[],
     verification: p.verification as VerificationStatus,
     completeness: p.completeness,
     yearsExperience: p.yearsExperience,

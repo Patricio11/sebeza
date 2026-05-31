@@ -384,7 +384,10 @@ export function MultiSelectComboboxField({
           )}
 
           {suggestedFiltered.length > 0 && (
-            <>
+            // Phase 11.5.9  wrap each section in role="group" with
+            // an aria-label matching the visible divider text so
+            // VoiceOver / NVDA announce the grouping.
+            <div role="group" aria-label="Suggested for this role">
               <p className="border-b border-[color:var(--color-hairline)] bg-[color:var(--color-surface-sunk)] px-3 py-1.5 text-[0.65rem] uppercase tracking-[0.22em] text-[color:var(--color-ink-soft)]">
                 Suggested for this role
               </p>
@@ -397,11 +400,18 @@ export function MultiSelectComboboxField({
                   onClick={() => pickOption(opt)}
                 />
               ))}
-            </>
+            </div>
           )}
 
           {restFiltered.length > 0 && (
-            <>
+            <div
+              role="group"
+              aria-label={
+                suggestedFiltered.length > 0
+                  ? "All other options"
+                  : "Options"
+              }
+            >
               {suggestedFiltered.length > 0 && (
                 <p className="border-b border-t border-[color:var(--color-hairline)] bg-[color:var(--color-surface-sunk)] px-3 py-1.5 text-[0.65rem] uppercase tracking-[0.22em] text-[color:var(--color-ink-soft)]">
                   All other options
@@ -419,7 +429,7 @@ export function MultiSelectComboboxField({
                   />
                 );
               })}
-            </>
+            </div>
           )}
 
           {showOther && (

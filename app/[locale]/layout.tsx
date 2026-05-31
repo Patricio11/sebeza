@@ -57,7 +57,16 @@ export default async function LocaleLayout({
   const consent = await readCookieConsent();
 
   return (
-    <html lang={locale} className={`${fraunces.variable} ${hanken.variable}`}>
+    // Phase 11.5.8  explicit `dir="ltr"`. Every Tier-1/2/3 locale we
+    // ship today is LTR; setting the attribute documents intent +
+    // protects against a future RTL addition (Arabic, Persian) where
+    // it becomes load-bearing. When RTL locales ship, switch this to
+    // a `routing.localeDirection[locale]` lookup.
+    <html
+      lang={locale}
+      dir="ltr"
+      className={`${fraunces.variable} ${hanken.variable}`}
+    >
       {/* suppressHydrationWarning on <body> absorbs the attribute spam
           some browser extensions (Bitdefender TrafficLight, Grammarly,
           LastPass) inject on the body element before React can hydrate
@@ -70,6 +79,16 @@ export default async function LocaleLayout({
         suppressHydrationWarning
         className="min-h-screen bg-[color:var(--color-paper)] text-[color:var(--color-ink)]"
       >
+        {/* Phase 11.5.7  skip-to-main link for keyboard users on public
+            routes. DashboardShell already provides its own; this one
+            lives in the root layout so /, /search, /p/{handle}, sign-in,
+            POPIA pages all benefit. Visually hidden until focused. */}
+        <a
+          href="#main"
+          className="sr-only absolute left-2 top-2 z-50 rounded-[var(--radius-pill)] border-2 border-[color:var(--color-ink)] bg-[color:var(--color-paper)] px-4 py-2 text-sm font-medium text-[color:var(--color-ink)] focus:not-sr-only focus:outline-none"
+        >
+          Skip to main content
+        </a>
         <NextIntlClientProvider locale={locale} messages={messages}>
           {children}
           {/* Phase 9  cookie consent banner. Renders only when no

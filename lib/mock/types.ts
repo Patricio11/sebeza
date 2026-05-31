@@ -175,6 +175,55 @@ export interface PublicProfile {
    * "Currently at" line.
    */
   employmentVerifiedAt?: string | null;
+  /**
+   * Phase 11.5.1  voluntary "open to" tags. Independent of `status`
+   * (a fully-employed senior can still be open to mentorship). Empty
+   * array when the seeker hasn't selected any.
+   */
+  openToTags?: OpenToTag[];
+}
+
+/**
+ * Phase 11.5.1  canonical "open to" tag set. Independent of
+ * employment status. The seeker opts in per tag from the profile
+ * editor; employers can filter `/search` by tag with `?open_to=`.
+ *
+ * The four tags capture real SA professional behaviour the binary
+ * employed/looking status misses:
+ *   - mentorship       informal coaching of juniors in the seeker's field
+ *   - freelance        bounded freelance / consulting work
+ *   - contract_gigs    short-term contract gigs (weekends / between roles)
+ *   - public_speaking  conference talks, panels, podcasts
+ */
+export const OPEN_TO_TAGS = [
+  "mentorship",
+  "freelance",
+  "contract_gigs",
+  "public_speaking",
+] as const;
+
+export type OpenToTag = (typeof OPEN_TO_TAGS)[number];
+
+export const OPEN_TO_TAG_LABEL: Record<OpenToTag, string> = {
+  mentorship: "Mentorship",
+  freelance: "Freelance",
+  contract_gigs: "Contract gigs",
+  public_speaking: "Public speaking",
+};
+
+export const OPEN_TO_TAG_HINT: Record<OpenToTag, string> = {
+  mentorship:
+    "Mentor a junior in your field once a month  usually unpaid.",
+  freelance:
+    "Bounded freelance or consulting work alongside your day job.",
+  contract_gigs:
+    "Short-term contract gigs on weekends or between roles.",
+  public_speaking:
+    "Conference talks, panels, podcasts, internal company sessions.",
+};
+
+export function isOpenToTag(v: string): v is OpenToTag {
+  return (OPEN_TO_TAGS as readonly string[]).includes(v);
 }
 
 export interface ExperienceItem {
@@ -283,6 +332,13 @@ export interface SearchFilters {
    * for anonymous / non-employer searches  no block enforcement.
    */
   callerOrgId?: string | null;
+  /**
+   * Phase 11.5.1  filter by "open to" tag overlap. Empty array (or
+   * absent) means no constraint; a profile matches when ANY of its
+   * `openToTags` overlaps with the requested set (array overlap via
+   * `&&`). Backed by the GIN index on `profiles.open_to_tags`.
+   */
+  openTo?: OpenToTag[];
 }
 
 export interface SearchResult {

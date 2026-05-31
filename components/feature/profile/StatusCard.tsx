@@ -137,7 +137,7 @@ export function StatusCard({
             disabled={pending}
             className="rounded-[var(--radius-pill)] border border-[color:var(--color-ink)] px-4 py-3 text-sm font-medium text-[color:var(--color-ink)] hover:bg-[color:var(--color-surface-sunk)] disabled:opacity-60"
           >
-            Update
+            I&rsquo;m in a different situation now
           </button>
         </div>
       )}

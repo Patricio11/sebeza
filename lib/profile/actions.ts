@@ -26,6 +26,7 @@ import { validateDob } from "@/lib/auth/id-validation";
 import { computeCompleteness } from "@/lib/mock/helpers";
 import { SKILLS, PROFESSIONS } from "@/lib/mock/taxonomy";
 import type { EmploymentStatus } from "@/lib/mock/types";
+import { OPEN_TO_TAGS, type OpenToTag } from "@/lib/mock/types";
 import { notifyAllAdmins } from "@/lib/notifications/server";
 
 export type ActionResult<T extends object = object> =
@@ -222,6 +223,55 @@ export async function switchPrimaryProfession(
   revalidatePath("/dashboard");
   revalidatePath("/dashboard/profile");
   revalidatePath("/dashboard/grow");
+  revalidatePath(`/p/${profile.handle}`);
+  return ok();
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Phase 11.5.1  setOpenToTags  voluntary "open to" tag set.
+//
+// Tags are independent of employment status (D1)  a fully-employed
+// seeker can still be "open to mentorship". Validation hardens against
+// out-of-set strings; only canonical `OPEN_TO_TAGS` values are stored.
+// Matcher impact: tags don't change primary ranking; they only matter
+// when an employer explicitly filters by them in /search.
+// ─────────────────────────────────────────────────────────────────────────────
+
+const openToSchema = z.object({
+  tags: z
+    .array(z.enum(OPEN_TO_TAGS))
+    .max(OPEN_TO_TAGS.length),
+});
+
+export async function setOpenToTags(
+  input: z.infer<typeof openToSchema>,
+): Promise<ActionResult> {
+  const session = await getSessionUser();
+  if (!session) return fail("Not signed in.");
+  const parsed = openToSchema.safeParse(input);
+  if (!parsed.success) return fail("Pick from the canonical tags.");
+
+  const db = getDb();
+  const profile = await loadOwnedProfile(db, session.id);
+  if (!profile) return fail("Profile not found.");
+
+  // De-dupe + ensure deterministic ordering on save (helps audit
+  // diffs read cleanly).
+  const tags = Array.from(new Set<OpenToTag>(parsed.data.tags)).sort();
+
+  await db
+    .update(schema.profiles)
+    .set({ openToTags: tags })
+    .where(eq(schema.profiles.id, profile.id));
+
+  await logAccess({
+    kind: "profile.update",
+    actor: session.id,
+    subject: profile.id,
+    meta: { fields: ["openToTags"], openToTags: tags },
+  });
+
+  revalidatePath("/dashboard/profile");
   revalidatePath(`/p/${profile.handle}`);
   return ok();
 }

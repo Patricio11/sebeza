@@ -26,7 +26,9 @@ import type {
   ExperienceItem,
   QualificationItem,
   WorkAvailabilityKind,
+  OpenToTag,
 } from "@/lib/mock/types";
+import { isOpenToTag } from "@/lib/mock/types";
 import { getSessionUser } from "@/lib/auth/guard";
 import { INSTITUTIONS } from "@/lib/mock/taxonomy";
 
@@ -74,6 +76,14 @@ export type MyProfile = PublicProfile & {
   currentEmployerIsPending: boolean;
   currentRoleStartedAt: string | null;
   currentRoleCity: string | null;
+  /**
+   * Phase 11.5.2  personal CV backup. PRIVATE to the seeker (D3)
+   * never returned in any public projection. The storage key here is
+   * the value the seeker's own download path uses; do NOT leak it.
+   */
+  cvStorageKey: string | null;
+  cvUploadedAt: string | null;
+  cvFilename: string | null;
 };
 
 export async function getMyProfile(): Promise<MyProfile | null> {
@@ -244,6 +254,15 @@ export async function loadProfileForUser(userId: string): Promise<MyProfile | nu
     currentEmployerIsPending,
     currentRoleStartedAt: p.currentRoleStartedAt ?? null,
     currentRoleCity: p.currentRoleCity ?? null,
+    // Phase 11.5.1  voluntary secondary-intent tags. The unknown-
+    // value guard keeps the union honest if the DB ever holds an
+    // out-of-set value (rare; older data, post-rollback shapes).
+    openToTags: ((p.openToTags ?? []) as string[]).filter(isOpenToTag) as OpenToTag[],
+    // Phase 11.5.2  CV backup. Storage key + filename are seeker-only;
+    // never returned in PublicProfile or any /search projection.
+    cvStorageKey: p.cvStorageKey ?? null,
+    cvUploadedAt: p.cvUploadedAt?.toISOString() ?? null,
+    cvFilename: p.cvFilename ?? null,
   };
 }
 

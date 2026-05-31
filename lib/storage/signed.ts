@@ -22,10 +22,29 @@ export async function signedDocumentUrl(key: string): Promise<string | null> {
   return data.signedUrl;
 }
 
-export async function signedPhotoUrl(key: string): Promise<string | null> {
+export async function signedPhotoUrl(
+  key: string,
+  /**
+   * Phase 11.5.4  optional width hint. When set, the signed URL is
+   * decorated with Supabase image-transform query params so the
+   * provider returns a downscaled variant. Saves bandwidth on small
+   * viewports (mobile avatars at ~64px display don't need the
+   * full-size original). Resolution-density aware variants should be
+   * computed at the call site (e.g. 64 * DPR).
+   *
+   * Supabase Storage's `?width=N&resize=cover` is honoured for image
+   * objects; non-image keys pass through unchanged.
+   */
+  options?: { width?: number },
+): Promise<string | null> {
   const { data, error } = await getStorageClient()
     .storage.from(BUCKET)
     .createSignedUrl(key, PHOTO_URL_TTL);
   if (error || !data) return null;
-  return data.signedUrl;
+  let url = data.signedUrl;
+  if (options?.width && options.width > 0) {
+    const sep = url.includes("?") ? "&" : "?";
+    url = `${url}${sep}width=${Math.round(options.width)}&resize=cover`;
+  }
+  return url;
 }

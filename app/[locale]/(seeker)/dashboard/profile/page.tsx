@@ -27,6 +27,9 @@ import { getSetting } from "@/lib/admin/settings";
 import { AvatarEditor } from "@/components/feature/profile/AvatarEditor";
 import { ShareProfileLink } from "@/components/feature/profile/ShareProfileLink";
 import { ShareMyProfileModal } from "@/components/feature/profile/ShareMyProfileModal";
+import { OpenToTagsEditor } from "@/components/feature/profile/OpenToTagsEditor";
+import { CvBackupEditor } from "@/components/feature/profile/CvBackupEditor";
+import { MobileSectionJumpNav } from "@/components/feature/profile/MobileSectionJumpNav";
 import { signedPhotoUrl } from "@/lib/storage/signed";
 import { isStorageConfigured } from "@/lib/storage/supabase";
 import {
@@ -127,6 +130,8 @@ export default async function ProfileEditorPage({
                 </a>
               </li>
             )}
+            <li><a href="#open-to" className="text-[color:var(--color-ink-soft)] hover:text-[color:var(--color-ink)]">Open to</a></li>
+            <li><a href="#cv-backup" className="text-[color:var(--color-ink-soft)] hover:text-[color:var(--color-ink)]">CV backup</a></li>
           </ul>
           <p className="mt-6 rounded-[var(--radius-sm)] border border-dashed border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-3 text-xs text-[color:var(--color-ink-soft)]">
             {t("savedHint")}
@@ -134,6 +139,10 @@ export default async function ProfileEditorPage({
         </aside>
 
         <div className="space-y-12">
+          {/* Phase 11.5.3  mobile jump-to-section picker. Hidden on
+              md+ where the sidebar nav already serves. */}
+          <MobileSectionJumpNav hasAcademic={!!academic} />
+
           {/* Share-your-profile  sits above the editorial sections so
               the seeker can grab their public URL without scrolling. */}
           <ShareProfileLink handle={me.handle} />
@@ -391,6 +400,50 @@ export default async function ProfileEditorPage({
               </p>
             </section>
           )}
+
+          {/* Phase 11.5.1  voluntary "open to" tags. Independent of
+              employment status; secondary intent only. */}
+          <section id="open-to" aria-labelledby="open-to-h" className="scroll-mt-20">
+            <header className="mb-5 border-b-2 border-[color:var(--color-ink)] pb-3">
+              <div className="flex items-baseline gap-3">
+                <span className="font-display text-2xl italic text-[color:var(--color-accent)]">
+                  07
+                </span>
+                <h2 id="open-to-h" className="font-display text-2xl">
+                  Open to
+                </h2>
+              </div>
+              <p className="mt-2 text-sm text-[color:var(--color-ink-soft)]">
+                Optional secondary intent  doesn&rsquo;t change your
+                employment status.
+              </p>
+            </header>
+            <OpenToTagsEditor initial={me.openToTags ?? []} />
+          </section>
+
+          {/* Phase 11.5.2  personal CV backup. Private to the seeker;
+              never exposed to employers. */}
+          <section id="cv-backup" aria-labelledby="cv-h" className="scroll-mt-20">
+            <header className="mb-5 border-b-2 border-[color:var(--color-ink)] pb-3">
+              <div className="flex items-baseline gap-3">
+                <span className="font-display text-2xl italic text-[color:var(--color-accent)]">
+                  08
+                </span>
+                <h2 id="cv-h" className="font-display text-2xl">
+                  Personal CV backup
+                </h2>
+              </div>
+              <p className="mt-2 text-sm text-[color:var(--color-ink-soft)]">
+                Private to you. We don&rsquo;t share this with
+                employers; it&rsquo;s a personal backup copy.
+              </p>
+            </header>
+            <CvBackupEditor
+              filename={me.cvFilename}
+              uploadedAt={me.cvUploadedAt}
+              locale={locale}
+            />
+          </section>
         </div>
       </div>
     </DashboardShell>
