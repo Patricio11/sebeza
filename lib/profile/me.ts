@@ -213,6 +213,10 @@ export async function loadProfileForUser(userId: string): Promise<MyProfile | nu
       verification: a.verification as VerificationStatus,
       openToInternships: a.openToInternships,
       openToGraduateProgrammes: a.openToGraduateProgrammes,
+      // Phase 13.1  current-semester student context.
+      currentModules: (a.currentModules ?? []) as string[],
+      electiveChosen: a.electiveChosen ?? null,
+      projectTopic: a.projectTopic ?? null,
     };
   }
 

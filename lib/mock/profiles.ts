@@ -280,6 +280,18 @@ export const mockProfiles: PublicProfile[] = [
       verification: "pending",
       openToInternships: true,
       openToGraduateProgrammes: true,
+      // Phase 13.1  realistic 3rd-year context for the seeded BSc CS
+      // demo profile. The recommender uses these to tighten skill
+      // suggestions beyond programme-level inference.
+      currentModules: [
+        "Operating Systems",
+        "Database Systems",
+        "Algorithms",
+        "Software Engineering",
+      ],
+      electiveChosen: "Cloud Computing",
+      projectTopic:
+        "Real-time anomaly detection on IoT sensor streams using stream-processing primitives",
     },
   },
   {
@@ -323,6 +335,16 @@ export const mockProfiles: PublicProfile[] = [
       verification: "verified",
       openToInternships: false,
       openToGraduateProgrammes: true,
+      // Phase 13.1  honours-year accounting student. Lighter module
+      // load + a methodology-flavoured project topic.
+      currentModules: [
+        "Advanced Financial Reporting",
+        "Audit Theory",
+        "Research Methodology",
+      ],
+      electiveChosen: "Forensic Accounting",
+      projectTopic:
+        "Detecting revenue recognition anomalies in SA-listed company filings",
     },
   },
 ];

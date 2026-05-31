@@ -539,6 +539,31 @@ export const academicProfiles = pgTable("academic_profiles", {
   openToGraduateProgrammes: boolean("open_to_graduate_programmes")
     .notNull()
     .default(false),
+  /**
+   * Phase 13.1  current-semester modules. Free text, multi-tag input
+   * (capped at 8 entries at the action boundary). The Task 13.2
+   * `module_skills` read path matches these against the editorial
+   * catalogue via `pg_trgm` similarity. GIN-indexed for `&&` overlap
+   * (mirrors the Phase 11.5.1 `open_to_tags` index pattern).
+   *
+   * Optional. Students who skip it still get programme-level
+   * recommendations as today.
+   */
+  currentModules: text("current_modules")
+    .array()
+    .notNull()
+    .default(sql`'{}'::text[]`),
+  /**
+   * Phase 13.1  elective the student chose when they had options.
+   * Surfaced from year 2. Optional free text.
+   */
+  electiveChosen: text("elective_chosen"),
+  /**
+   * Phase 13.1  3rd/4th-year project / dissertation topic. Strongest
+   * single skill signal a final-year can give. 200-char cap enforced
+   * at the action boundary. Optional.
+   */
+  projectTopic: text("project_topic"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });

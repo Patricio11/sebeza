@@ -140,6 +140,14 @@ const seekerSignUpSchema = z.object({
       nsfas: z.boolean(),
       openToInternships: z.boolean(),
       openToGraduateProgrammes: z.boolean(),
+      // Phase 13.1  optional current-context fields. All three are
+      // independent; a year-1 student can declare modules without an
+      // elective; a postgrad can declare a project topic without
+      // modules. Server-side .max() bounds match the constants in
+      // lib/mock/types.ts.
+      currentModules: z.array(z.string().min(1).max(80)).max(8).optional(),
+      electiveChosen: z.string().max(100).nullable().optional(),
+      projectTopic: z.string().max(200).nullable().optional(),
     })
     .nullable(),
   /**
@@ -394,6 +402,18 @@ export async function signUpSeeker(
 
       // Optional academic
       if (v.academic && resolvedInstitutionSlug) {
+        // Phase 13.1  defensively dedupe + trim the optional context
+        // fields. Schema enforces NOT NULL on current_modules with
+        // default '{}', so an absent value lands as an empty array.
+        const modules = Array.from(
+          new Set(
+            (v.academic.currentModules ?? [])
+              .map((m) => m.trim())
+              .filter((m) => m.length > 0),
+          ),
+        ).slice(0, 8);
+        const elective = (v.academic.electiveChosen ?? "").trim() || null;
+        const project = (v.academic.projectTopic ?? "").trim() || null;
         await tx.insert(schema.academicProfiles).values({
           id: `acad_${user.id}`,
           profileId,
@@ -407,6 +427,10 @@ export async function signUpSeeker(
           verification: "unverified",
           openToInternships: v.academic.openToInternships,
           openToGraduateProgrammes: v.academic.openToGraduateProgrammes,
+          // Phase 13.1
+          currentModules: modules,
+          electiveChosen: elective,
+          projectTopic: project,
         });
       }
     });

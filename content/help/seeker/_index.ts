@@ -39,6 +39,8 @@ import * as openToTags from "./profile/open-to-tags";
 import * as cvBackup from "./profile/cv-backup";
 import * as sharingYourProfile from "./profile/sharing-your-profile";
 import * as achievements from "./profile/achievements";
+//  Phase 13.1
+import * as studentModulesAndProject from "./profile/student-modules-and-project";
 
 //  Vacancy invitations
 import * as vacancyInvitationsExplained from "./invitations/vacancy-invitations-explained";
@@ -115,6 +117,7 @@ export const SEEKER_HELP_ARTICLES: HelpArticle[] = [
   cvBackup,
   sharingYourProfile,
   achievements,
+  studentModulesAndProject,
   vacancyInvitationsExplained,
   howToAcceptDeclineOrReconsider,
   declineReasonsAndWhatTheyMean,

@@ -285,7 +285,28 @@ export interface AcademicProfile {
   openToInternships: boolean;
   /** Whether the seeker is actively looking for full graduate-track roles. Opt-in. */
   openToGraduateProgrammes: boolean;
+  /**
+   * Phase 13.1  current-semester module list. Free-text strings; the
+   * matcher fuzzy-matches them against the editorial `module_skills`
+   * catalogue. Empty array when not declared. Max 8 entries enforced
+   * at the action boundary.
+   */
+  currentModules: string[];
+  /**
+   * Phase 13.1  elective the student picked when they had options.
+   * Only meaningful from year 2. NULL when not declared.
+   */
+  electiveChosen: string | null;
+  /**
+   * Phase 13.1  3rd/4th-year project / dissertation topic. 200-char
+   * cap enforced at the action boundary. NULL when not declared.
+   */
+  projectTopic: string | null;
 }
+
+export const STUDENT_MODULES_MAX = 8;
+export const STUDENT_PROJECT_TOPIC_MAX = 200;
+export const STUDENT_ELECTIVE_MAX = 100;
 
 export interface SearchFilters {
   query?: string;

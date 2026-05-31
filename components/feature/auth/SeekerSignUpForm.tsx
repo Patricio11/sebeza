@@ -64,6 +64,13 @@ interface AcademicState {
   nsfas: boolean;
   openToInternships: boolean;
   openToGraduateProgrammes: boolean;
+  // Phase 13.1  optional current-context fields.
+  // currentModulesText: free-text comma- or newline-separated input;
+  // we split + dedupe at submit time so the form state stays simple
+  // (no chip-input client island at sign-up; that's the editor's job).
+  currentModulesText: string;
+  electiveChosen: string;
+  projectTopic: string;
 }
 
 interface FormState {
@@ -146,6 +153,10 @@ const initialState: FormState = {
     nsfas: false,
     openToInternships: true,
     openToGraduateProgrammes: true,
+    // Phase 13.1
+    currentModulesText: "",
+    electiveChosen: "",
+    projectTopic: "",
   },
   // Phase 9.22  current-employment defaults (empty; the block only
   // renders when status is employed / self_employed).
@@ -366,6 +377,19 @@ export function SeekerSignUpForm({
             nsfas: state.academic.nsfas,
             openToInternships: state.academic.openToInternships,
             openToGraduateProgrammes: state.academic.openToGraduateProgrammes,
+            // Phase 13.1  parse current-modules free-text into a
+            // deduped array. Split on commas or newlines so seekers
+            // can paste in whatever shape they have it.
+            currentModules: Array.from(
+              new Set(
+                state.academic.currentModulesText
+                  .split(/[,\n]/)
+                  .map((m) => m.trim())
+                  .filter((m) => m.length > 0),
+              ),
+            ).slice(0, 8),
+            electiveChosen: state.academic.electiveChosen.trim() || null,
+            projectTopic: state.academic.projectTopic.trim() || null,
           }
         : null;
 
@@ -1038,6 +1062,73 @@ export function SeekerSignUpForm({
                     }
                     label={t("step3.academic.openToGraduateProgrammes")}
                   />
+
+                  {/* Phase 13.1  current-semester context. All three
+                      optional. Modules input is a single textarea
+                      (comma / newline separated)  no chip-input client
+                      island at sign-up; the editor handles the richer
+                      capture path. */}
+                  <div className="md:col-span-2 mt-2 rounded-[var(--radius-sm)] border border-dashed border-[color:var(--color-hairline)] bg-[color:var(--color-surface-sunk)] p-4">
+                    <div className="mb-3 text-[0.62rem] uppercase tracking-[0.22em] text-[color:var(--color-ink-soft)]">
+                      Current studies (optional)
+                    </div>
+                    <TextField
+                      id="academic-modules"
+                      label="Modules this semester"
+                      placeholder="Operating Systems, Database Systems, Algorithms"
+                      hint="Comma- or newline-separated; up to 8."
+                      value={state.academic.currentModulesText}
+                      onChange={(e) =>
+                        setState({
+                          ...state,
+                          academic: {
+                            ...state.academic,
+                            currentModulesText: e.target.value,
+                          },
+                        })
+                      }
+                    />
+                    {Number(state.academic.currentYear) >= 2 && (
+                      <div className="mt-3">
+                        <TextField
+                          id="academic-elective"
+                          label="Elective you chose"
+                          placeholder="e.g. Cloud Computing"
+                          hint="One elective  the one that excites you most."
+                          value={state.academic.electiveChosen}
+                          onChange={(e) =>
+                            setState({
+                              ...state,
+                              academic: {
+                                ...state.academic,
+                                electiveChosen: e.target.value.slice(0, 100),
+                              },
+                            })
+                          }
+                        />
+                      </div>
+                    )}
+                    {Number(state.academic.currentYear) >= 3 && (
+                      <div className="mt-3">
+                        <TextField
+                          id="academic-project"
+                          label="Project / dissertation topic"
+                          placeholder="e.g. Anomaly detection in IoT sensor streams"
+                          hint={`Single sentence; up to 200 chars (${state.academic.projectTopic.length}/200).`}
+                          value={state.academic.projectTopic}
+                          onChange={(e) =>
+                            setState({
+                              ...state,
+                              academic: {
+                                ...state.academic,
+                                projectTopic: e.target.value.slice(0, 200),
+                              },
+                            })
+                          }
+                        />
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             )}

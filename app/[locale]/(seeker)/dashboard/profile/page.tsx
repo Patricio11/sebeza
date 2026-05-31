@@ -30,6 +30,7 @@ import { ShareMyProfileModal } from "@/components/feature/profile/ShareMyProfile
 import { OpenToTagsEditor } from "@/components/feature/profile/OpenToTagsEditor";
 import { CvBackupEditor } from "@/components/feature/profile/CvBackupEditor";
 import { MobileSectionJumpNav } from "@/components/feature/profile/MobileSectionJumpNav";
+import { StudentContextEditor } from "@/components/feature/profile/StudentContextEditor";
 import { signedPhotoUrl } from "@/lib/storage/signed";
 import { isStorageConfigured } from "@/lib/storage/supabase";
 import {
@@ -400,8 +401,30 @@ export default async function ProfileEditorPage({
                 </SelectField>
               </div>
               <p className="mt-4 rounded-[var(--radius-sm)] border border-dashed border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-3 text-xs text-[color:var(--color-ink-soft)]">
-                Studies are read-only for now. Editing wires up in Phase 8 alongside the SAQA + institution verification integration.
+                Institution + programme + NQF level stay read-only
+                until Phase 8 wires the SAQA + institution
+                verification integration. The current-semester
+                context below is editable any time.
               </p>
+
+              {/* Phase 13.1  current-semester context editor.
+                  Independent of the credential-shaped fields above
+                  (no SAQA verification involvement). The matcher
+                  uses these to tighten skill suggestions beyond
+                  programme-level inference. */}
+              <div className="mt-6 border-t border-[color:var(--color-hairline)] pt-6">
+                <h3 className="font-display text-lg text-[color:var(--color-ink)]">
+                  Current studies (this semester)
+                </h3>
+                <div className="mt-4">
+                  <StudentContextEditor
+                    initialModules={academic.currentModules}
+                    initialElective={academic.electiveChosen}
+                    initialProject={academic.projectTopic}
+                    currentYear={academic.currentYear}
+                  />
+                </div>
+              </div>
             </section>
           )}
 

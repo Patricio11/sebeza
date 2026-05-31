@@ -878,6 +878,15 @@ async function loadAcademic(profileId: string): Promise<AcademicProfile | undefi
     verification: a.verification as VerificationStatus,
     openToInternships: a.openToInternships,
     openToGraduateProgrammes: a.openToGraduateProgrammes,
+    // Phase 13.1  current-semester student context. Surfaced on the
+    // seeker's own /dashboard/profile editor + used by the matcher;
+    // NOT rendered on the public profile (the /p/{handle} renderer
+    // doesn't reference these fields). Project topic in particular
+    // can carry identifying detail, so the default-private posture
+    // is the right one.
+    currentModules: (a.currentModules ?? []) as string[],
+    electiveChosen: a.electiveChosen ?? null,
+    projectTopic: a.projectTopic ?? null,
   };
 }
 
