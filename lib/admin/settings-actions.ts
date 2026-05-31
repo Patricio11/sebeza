@@ -70,6 +70,14 @@ const KEY_SCHEMAS = {
   feature_flag_employer_mix_lookup: z.boolean(),
   // Phase 9.16.1  global show/hide for VerificationBadge.
   feature_flag_verification_badges_visible: z.boolean(),
+  // Phase 11.4.4  SMS + WhatsApp channel gates. Default OFF. Even
+  // when flipped ON, the dispatch layer still requires per-seeker
+  // consent + verified phone + allowlist row. Zero spend without
+  // four-way agreement.
+  feature_flag_sms_channel_enabled: z.boolean(),
+  feature_flag_whatsapp_channel_enabled: z.boolean(),
+  feature_flag_sms_quiet_hours_start: z.number().int().min(0).max(23),
+  feature_flag_sms_quiet_hours_end: z.number().int().min(0).max(23),
 } as const satisfies Record<SettingKey, z.ZodTypeAny>;
 
 const updateSchema = z.object({
@@ -91,6 +99,10 @@ const updateSchema = z.object({
     "employer_mix_min_placements",
     "feature_flag_employer_mix_lookup",
     "feature_flag_verification_badges_visible",
+    "feature_flag_sms_channel_enabled",
+    "feature_flag_whatsapp_channel_enabled",
+    "feature_flag_sms_quiet_hours_start",
+    "feature_flag_sms_quiet_hours_end",
   ] as const),
   value: z.unknown(),
 });

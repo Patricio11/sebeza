@@ -34,7 +34,8 @@ with zero paid credentials. Each integration has one obvious activation path.
 | **Per-employer mix lookup** (gov) | `feature_flag_employer_mix_lookup` (default OFF) | `/gov/employer-lookup` renders informative dormant notice; query refuses | Admin flips the flag once the partnership + oversight protocol is in place |
 | **2FA enforcement** | `feature_flag_2fa_enforced` (default OFF for seekers) | Admins must enrol; seekers + employers are encouraged but not forced | Admin flips the flag when the roll-out is communicated |
 | **Upstash rate limiter** | No call sites wired | In-memory `RateLimiter` exists; nothing is enforced | Import `enforce(bucket, key)` on the Server Action you want to gate |
-| **Vercel Cron** | `CRON_SECRET` unset | `isAuthorizedCron` refuses every request | Set `CRON_SECRET`  paths already declared in `vercel.json` (17 jobs, staggered 02:0005:45 UTC) |
+| **Vercel Cron** | `CRON_SECRET` unset | `isAuthorizedCron` refuses every request | Set `CRON_SECRET`  paths already declared in `vercel.json` (18 jobs, staggered 02:0006:00 UTC) |
+| **SMS / WhatsApp channel** | `feature_flag_sms_channel_enabled` + `feature_flag_whatsapp_channel_enabled` (default OFF) + `SMS_PROVIDER` / `WHATSAPP_PROVIDER` env unset | `lib/messaging/dispatch.ts` enforces a 6-gate check; without admin flag + env vars, all sends short-circuit to `console` and audit-log as `skipped`. Zero spend. | Admin: `/admin/settings` flip flag ON. Operator: set `SMS_PROVIDER=twilio` + `SMS_FROM_NUMBER` + Twilio credentials. Per-seeker: add to `seeker_sms_allowlist` via admin action. |
 
 ### On rate limiting
 
@@ -197,13 +198,13 @@ for the 9.12 My Learning section; 10 abandoned learning items on
 - `GET /api/gov/decline-reasons/export` — "why roles go unfilled" CSV (suppressed)
 - `GET /api/gov/stall-reasons/export` — "why learners stall" CSV (suppressed + `outcomes_research`-gated)
 - `GET /api/gov/curriculum/export` — curriculum-vs-demand CSV (suppressed)
-- `GET /api/cron/*` — 17 Vercel Cron entry points (CRON_SECRET-gated; fail-closed; schedules in `vercel.json`, staggered 02:00–05:45 UTC = 04:00–07:45 SAST):
+- `GET /api/cron/*` — 18 Vercel Cron entry points (CRON_SECRET-gated; fail-closed; schedules in `vercel.json`, staggered 02:00–06:00 UTC = 04:00–08:00 SAST):
   `hard-delete-erased`, `status-stale-warning`, `saved-search-matches`,
   `skill-gap-snapshot`, `outcome-snapshots`, `lmi-snapshot`, `saqa-worker`,
   `vacancy-invite-expiry`, `seeker-invite-expiry`, `seeker-weekly-digest` (Mondays only),
   `learning-nudge`, `vacancy-follow-up-nudges`, `placement-status-check-due`,
   `placement-retention-snapshot`, `employment-verification-expire`, `seeker-badge-sweep`,
-  `searchability-pause-sweep`
+  `searchability-pause-sweep`, `followed-employer-vacancy-sweep`
 
 All authed routes localised at `/[locale]/...` for `en`, `zu`, `xh`, `af`.
 

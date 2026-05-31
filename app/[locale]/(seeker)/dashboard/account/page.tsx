@@ -15,6 +15,11 @@ import { getMyNotificationPrefs } from "@/lib/notifications/query";
 import type { NotificationKind } from "@/lib/notifications/catalog";
 import { getSetting } from "@/lib/admin/settings";
 import { HelpLink } from "@/components/feature/help/HelpLink";
+import { DataSaverPreference } from "@/components/feature/account/DataSaverPreference";
+import { PhoneChannelPanel } from "@/components/feature/account/PhoneChannelPanel";
+import { eq } from "drizzle-orm";
+import { getDb } from "@/db/client";
+import { appUser as appUserTable } from "@/db/schema";
 
 export default async function AccountPage({
   params,
@@ -29,6 +34,36 @@ export default async function AccountPage({
   const t = await getTranslations("seekerDash.account");
   const prefs = await getMyNotificationPrefs();
   const emailChannelEnabled = await getSetting<boolean>("feature_flag_email_notifications");
+
+  // Phase 11.4.3 + 11.4.4  account-row reads for the new preference
+  // surfaces. dataSaverMode flag drives bandwidth downgrades; the SMS /
+  // WhatsApp channel reads gate the phone-channel panel + read the
+  // admin platform flags.
+  const db = getDb();
+  const accountRow = await db
+    .select({
+      dataSaverMode: appUserTable.dataSaverMode,
+      phoneE164Enc: appUserTable.phoneE164Enc,
+      phoneVerifiedAt: appUserTable.phoneVerifiedAt,
+      smsChannelEnabled: appUserTable.smsChannelEnabled,
+      whatsappChannelEnabled: appUserTable.whatsappChannelEnabled,
+    })
+    .from(appUserTable)
+    .where(eq(appUserTable.id, session.id))
+    .limit(1);
+  const account = accountRow[0] ?? {
+    dataSaverMode: false,
+    phoneE164Enc: null,
+    phoneVerifiedAt: null,
+    smsChannelEnabled: false,
+    whatsappChannelEnabled: false,
+  };
+  const smsChannelEnabled = await getSetting<boolean>(
+    "feature_flag_sms_channel_enabled",
+  );
+  const whatsappChannelEnabled = await getSetting<boolean>(
+    "feature_flag_whatsapp_channel_enabled",
+  );
 
   const SEEKER_NOTIFICATION_KINDS: NotificationKind[] = [
     "contact.revealed",
@@ -132,6 +167,35 @@ export default async function AccountPage({
             initialPrefs={prefs}
             kinds={SEEKER_NOTIFICATION_KINDS}
             emailChannelEnabled={emailChannelEnabled}
+          />
+        </section>
+
+        {/* Phase 11.4.3  data-saver toggle. */}
+        <section aria-labelledby="data-saver-h" className="md:col-span-2">
+          <h2 className="mb-4 border-b-2 border-[color:var(--color-ink)] pb-2 font-display text-xl">
+            Data + bandwidth
+          </h2>
+          <DataSaverPreference initial={account.dataSaverMode} />
+        </section>
+
+        {/* Phase 11.4.4  phone + SMS/WhatsApp panel. The panel itself
+            renders a dormant "Coming soon" state when both admin flags
+            are off, and a verification flow when at least one is on.
+            Zero spend before the admin flips a flag. */}
+        <section aria-labelledby="phone-h" className="md:col-span-2">
+          <h2
+            id="phone-h"
+            className="mb-4 border-b-2 border-[color:var(--color-ink)] pb-2 font-display text-xl"
+          >
+            SMS &amp; WhatsApp notifications
+          </h2>
+          <PhoneChannelPanel
+            hasPhone={!!account.phoneE164Enc}
+            phoneVerifiedAt={account.phoneVerifiedAt?.toISOString() ?? null}
+            smsEnabled={account.smsChannelEnabled}
+            whatsappEnabled={account.whatsappChannelEnabled}
+            platformSmsEnabled={smsChannelEnabled}
+            platformWhatsappEnabled={whatsappChannelEnabled}
           />
         </section>
 

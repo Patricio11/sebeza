@@ -18,6 +18,9 @@ import { AcceptRecommendationButton } from "@/components/feature/seeker/learning
 import { OpenLearningPathButton } from "@/components/feature/seeker/learning/OpenLearningPathButton";
 import { AdjacentProfessionSwitch } from "@/components/feature/seeker/learning/AdjacentProfessionSwitch";
 import { StudentLaneDiscoveryCallout } from "@/components/feature/seeker/learning/StudentLaneDiscoveryCallout";
+import { RecommendedEmployersCard } from "@/components/feature/seeker/RecommendedEmployersCard";
+import { topEmployersByProfessionProvince } from "@/db/queries/employer-leaderboard";
+import { listMyFollows } from "@/lib/seeker/follows";
 import { demandVsCurriculumQuery } from "@/db/queries/curriculum";
 import { ProgrammeVsMarketCard } from "@/components/feature/analytics/ProgrammeVsMarketCard";
 import {
@@ -269,6 +272,14 @@ export default async function CareerCompassPage({
         </p>
       )}
 
+      {/* Phase 11.4.5  recommended employers card. Confirmed-hire
+          ranking with k=10 suppression. Silent when no orgs clear
+          the floor; otherwise lists the top 10 with one-tap Follow. */}
+      <RecommendedEmployersSection
+        profession={me.profession}
+        province={me.province}
+      />
+
       {/* ───────────── My Learning (Phase 9.12 + 11.2.4/.5) ───────────── */}
       <MyLearningSection items={myLearning} locale={locale} />
 
@@ -497,6 +508,38 @@ export default async function CareerCompassPage({
 }
 
 // ──────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Phase 11.4.5  recommended-employers section wrapper.
+ *
+ * Loads the leaderboard + the seeker's current follow set so the
+ * card can render each row with its correct initial Follow state.
+ * Renders nothing when no orgs clear the k=10 suppression floor.
+ */
+async function RecommendedEmployersSection({
+  profession,
+  province,
+}: {
+  profession: string;
+  province: string;
+}) {
+  const rows = await topEmployersByProfessionProvince({
+    profession,
+    province,
+    limit: 10,
+  });
+  if (rows.length === 0) return null;
+  const follows = await listMyFollows();
+  const followed = new Set(follows.map((f) => f.orgId));
+  return (
+    <RecommendedEmployersCard
+      rows={rows}
+      profession={profession}
+      province={province}
+      followed={followed}
+    />
+  );
+}
 
 /**
  * Phase 11.2.6  city-demand row -> /search drill-down.

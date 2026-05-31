@@ -38,6 +38,10 @@ const FALLBACK_CONSENT: Record<
   // receive vacancy invitations. Withholding does not degrade any
   // other surface.
   vacancy_matching: { state: "none", grantedAt: null, version: "v2.1" },
+  // Phase 11.4.4  per-channel opt-in. Default off; admin must
+  // additionally flip the platform flag before any send fires.
+  messaging_channel_sms: { state: "none", grantedAt: null, version: "v2.1" },
+  messaging_channel_whatsapp: { state: "none", grantedAt: null, version: "v2.1" },
 };
 
 const PURPOSE_LABEL: Record<(typeof CONSENT_PURPOSES)[number], string> = {
@@ -47,6 +51,8 @@ const PURPOSE_LABEL: Record<(typeof CONSENT_PURPOSES)[number], string> = {
   analytics_aggregate: "Aggregate analytics",
   outcomes_research: "Outcomes research (optional)",
   vacancy_matching: "Vacancy invites (optional)",
+  messaging_channel_sms: "SMS notifications (optional)",
+  messaging_channel_whatsapp: "WhatsApp notifications (optional)",
 };
 
 const PURPOSE_BODY: Record<(typeof CONSENT_PURPOSES)[number], string> = {
@@ -67,6 +73,10 @@ const PURPOSE_BODY: Record<(typeof CONSENT_PURPOSES)[number], string> = {
   // (tap-to-expand on mobile, expanded by default on md+).
   vacancy_matching:
     "Let verified employers flag me for a specific role they're trying to fill (e.g. a chef position at a particular restaurant). I'll be notified by name and can accept, decline, or decline with a reason.",
+  messaging_channel_sms:
+    "Let Sebenza send me an SMS for critical events (a new vacancy invite, a contact-reveal request) instead of waiting for me to open the app. Off-platform reach for the moments that matter.",
+  messaging_channel_whatsapp:
+    "Let Sebenza send me a WhatsApp message for critical events. Same scope as SMS  no chatty marketing, just the time-sensitive lifecycle events.",
 };
 
 /**

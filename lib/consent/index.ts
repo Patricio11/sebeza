@@ -30,6 +30,13 @@ export const CONSENT_PURPOSES = [
   // in the audit log only (per D5 — never in UI, to avoid leaking
   // consent state).
   "vacancy_matching",
+  // Phase 11.4.4 D2  per-channel opt-in for SMS + WhatsApp critical
+  // notifications. Default off; the dispatch layer multi-gates: this
+  // consent PLUS admin platform flag PLUS allowlist row PLUS verified
+  // phone. No external provider is contacted without all four
+  // simultaneously true.
+  "messaging_channel_sms",
+  "messaging_channel_whatsapp",
 ] as const;
 
 export type ConsentPurpose = (typeof CONSENT_PURPOSES)[number];

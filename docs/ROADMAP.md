@@ -831,8 +831,8 @@ Five sub-phases, ordered by ROI per LOC:
 ### Task 11.3: Seeker control + trust posture ✅ *(shipped 2026-05-30)*
 - [x] Pause searchability · block this employer (private) · report this invite · vacancy snapshot in invitation detail · employer verification badge on invite card · employment-verification audit-trail visibility. *See `docs/completed/PHASE_11_3_COMPLETE.md` (+ archived plan).*
 
-### Task 11.4: SA distribution surface (WhatsApp + SMS + share card)
-- [ ] Profile shareable summary card (PNG + WhatsApp deep-link) · follow employer (save list) · data-saver mode · SMS / WhatsApp notification channel (gated rollout, cost-controlled) · recommended employers by profession. *See `docs/PHASE_11_4_PLAN.md`.*
+### Task 11.4: SA distribution surface (WhatsApp + SMS + share card) ✅ *(shipped 2026-05-30)*
+- [x] Profile shareable summary card (PNG + WhatsApp deep-link) · follow employer (save list) · data-saver mode · SMS / WhatsApp notification channel (dormant + admin-gated, zero spend by default) · recommended employers by profession. *See `docs/completed/PHASE_11_4_COMPLETE.md` (+ archived plan).*
 
 ### Task 11.5: Profile depth + mobile / a11y polish
 - [ ] "Open to ___" tags · CV upload (personal backup) · mobile profile-editor jump-to-section · responsive avatar sizes · Career Compass lazy-load below fold · 9 a11y fixes from the static scan (skip link, html dir, listbox group roles, ordinal aria-labels, modal focus return, MonthYearPicker semantics, status confirm copy). *See `docs/PHASE_11_5_PLAN.md`.*

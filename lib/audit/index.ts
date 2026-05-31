@@ -46,6 +46,25 @@ export type AuditKind =
   // (which targets a profile)  invite reports point at an org +
   // invitation. Same admin queue.
   | "moderation.invite_report.created"
+  // Phase 11.4.2  follow-employer lifecycle. Private to the seeker;
+  // the employer never sees these rows in their org's audit log.
+  | "seeker.follow.added"
+  | "seeker.follow.removed"
+  // Phase 11.4.4  SMS / WhatsApp dispatch outcomes. `.sent` fires
+  // on actual provider success; `.skipped` fires when one of the
+  // multi-gates refused; `.failed` fires on provider error.
+  | "notification.sms.sent"
+  | "notification.sms.skipped"
+  | "notification.sms.failed"
+  | "notification.whatsapp.sent"
+  | "notification.whatsapp.skipped"
+  | "notification.whatsapp.failed"
+  // Phase 11.4.4  phone-verification flow + admin allowlist mgmt.
+  | "phone.verification.sent"
+  | "phone.verification.confirmed"
+  | "phone.verification.cleared"
+  | "admin.sms_allowlist.added"
+  | "admin.sms_allowlist.removed"
   // Phase 3  self-edit events on the seeker dashboard.
   | "profile.update"
   | "profile.skills.update"

@@ -25,6 +25,8 @@ import { VacancySnapshotCard } from "@/components/feature/seeker/invitations/Vac
 import { EmployerVerificationChip } from "@/components/feature/seeker/invitations/EmployerVerificationChip";
 import { BlockEmployerControl } from "@/components/feature/seeker/BlockEmployerControl";
 import { ReportInvitationControl } from "@/components/feature/seeker/ReportInvitationControl";
+import { FollowEmployerButton } from "@/components/feature/seeker/FollowEmployerButton";
+import { isFollowingEmployer } from "@/lib/seeker/follows";
 import { PROVINCES, PROFESSIONS } from "@/lib/mock/taxonomy";
 import { Building2, ChevronLeft, Clock, MapPin } from "lucide-react";
 
@@ -41,6 +43,9 @@ export default async function SeekerInvitationDetailPage({
 
   const inv = await getMyInvitation(id);
   if (!inv) notFound();
+
+  // Phase 11.4.2  follow-state read for the heart button.
+  const following = await isFollowingEmployer(inv.orgId);
 
   const professionLabel =
     PROFESSIONS.find((p) => p.slug === inv.professionSlug)?.label ??
@@ -182,13 +187,18 @@ export default async function SeekerInvitationDetailPage({
         declineNote={inv.declineNote}
       />
 
-      {/* Phase 11.3.2 + 11.3.3  agency controls. Report fires a
-          moderation row; block silences this org platform-wide for
-          this seeker. Neither flips the invitation state by itself
-          (D3 + D2). */}
+      {/* Phase 11.3.2 + 11.3.3 + 11.4.2  agency controls. Report
+          fires a moderation row; block silences this org platform-
+          wide for this seeker; follow saves the org to your private
+          warm-intent list (the employer is never told). */}
       <div className="mt-6 flex flex-wrap items-center gap-4 rounded-[var(--radius-md)] border border-dashed border-[color:var(--color-hairline)] bg-[color:var(--color-surface-sunk)] p-4">
         <ReportInvitationControl invitationId={inv.id} />
         <BlockEmployerControl orgId={inv.orgId} orgName={inv.orgName} />
+        <FollowEmployerButton
+          orgId={inv.orgId}
+          initialFollowing={following}
+          variant="icon"
+        />
       </div>
 
       <p className="mt-8 text-xs italic text-[color:var(--color-ink-soft)]">

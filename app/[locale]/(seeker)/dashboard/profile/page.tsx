@@ -26,6 +26,7 @@ import { DateOfBirthEditor } from "@/components/feature/profile/DateOfBirthEdito
 import { getSetting } from "@/lib/admin/settings";
 import { AvatarEditor } from "@/components/feature/profile/AvatarEditor";
 import { ShareProfileLink } from "@/components/feature/profile/ShareProfileLink";
+import { ShareMyProfileModal } from "@/components/feature/profile/ShareMyProfileModal";
 import { signedPhotoUrl } from "@/lib/storage/signed";
 import { isStorageConfigured } from "@/lib/storage/supabase";
 import {
@@ -136,6 +137,17 @@ export default async function ProfileEditorPage({
           {/* Share-your-profile  sits above the editorial sections so
               the seeker can grab their public URL without scrolling. */}
           <ShareProfileLink handle={me.handle} />
+
+          {/* Phase 11.4.1  rich-preview share modal. WhatsApp +
+              LinkedIn deep-links + Copy. Recipients see the
+              /p/{handle}/card PNG on link unfurl. */}
+          <div className="flex flex-wrap items-center justify-end">
+            <ShareMyProfileModal
+              handle={me.handle}
+              displayName={me.displayName}
+              profession={me.profession}
+            />
+          </div>
 
           {/* Avatar  sits above the editorial numbered sections */}
           <section id="avatar" aria-labelledby="avatar-h">

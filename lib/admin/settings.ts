@@ -75,7 +75,27 @@ export type SettingKey =
   // still thin and the badge would be more noise than signal. Honest
   // either way: the column still exists, the rule still holds
   // we just don't paint anything.
-  | "feature_flag_verification_badges_visible";
+  | "feature_flag_verification_badges_visible"
+  // ──────────────────────────────────────────────────────────────────────
+  // Phase 11.4.4  SMS + WhatsApp outbound notification channels.
+  // BOTH default OFF; ships dormant. Even when an admin flips one or
+  // both ON, the dispatch layer ADDITIONALLY requires (per channel):
+  //   (a) the seeker's per-purpose consent
+  //   (b) the seeker's per-channel app_user flag
+  //   (c) the seeker's phone_verified_at IS NOT NULL
+  //   (d) a row in seeker_sms_allowlist for the seeker
+  // Multi-gate by design  no external provider is contacted until
+  // an admin explicitly approves every single one. Zero spend by
+  // default.
+  // ──────────────────────────────────────────────────────────────────────
+  | "feature_flag_sms_channel_enabled"
+  | "feature_flag_whatsapp_channel_enabled"
+  // Phase 11.4.4 D6  SAST-hardcoded quiet hours. The dispatch layer
+  // refuses to send between these (inclusive start, exclusive end).
+  // Hours are integers in [0..23] expressed in UTC+2. Defaults match
+  // the plan: 21:00 SAST  07:00 SAST.
+  | "feature_flag_sms_quiet_hours_start"
+  | "feature_flag_sms_quiet_hours_end";
 
 const DEFAULTS: Record<SettingKey, unknown> = {
   freshness_band_days_fresh: 30,
@@ -96,6 +116,11 @@ const DEFAULTS: Record<SettingKey, unknown> = {
   employer_mix_min_placements: 5,
   feature_flag_employer_mix_lookup: false,
   feature_flag_verification_badges_visible: true,
+  // Phase 11.4.4  all four default to OFF / SAST 2107. Dormant ship.
+  feature_flag_sms_channel_enabled: false,
+  feature_flag_whatsapp_channel_enabled: false,
+  feature_flag_sms_quiet_hours_start: 21,
+  feature_flag_sms_quiet_hours_end: 7,
 };
 
 /**

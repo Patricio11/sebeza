@@ -23,6 +23,13 @@ interface Props {
   size?: AvatarSize;
   /** Whether to render the verification ring at all. */
   showRing?: boolean;
+  /**
+   * Phase 11.4.3  data-saver hint. When true, the avatar renders the
+   * initials block regardless of `photoUrl` (no image network request).
+   * Callers thread this from the server-side `shouldServeLight()`
+   * helper. Default false to preserve existing behaviour.
+   */
+  dataSaver?: boolean;
   className?: string;
 }
 
@@ -32,12 +39,14 @@ export function Avatar({
   verification,
   size = "md",
   showRing = true,
+  dataSaver = false,
   className,
 }: Props) {
   const initials = getInitials(name);
   const palette = paletteForName(name);
   const dims = SIZE_PX[size];
   const fontSize = FONT_PX[size];
+  const renderPhoto = !dataSaver && !!photoUrl;
 
   const ringTone =
     showRing && verification === "verified"
@@ -55,9 +64,9 @@ export function Avatar({
       )}
       style={{ width: dims, height: dims }}
       role="img"
-      aria-label={photoUrl ? `${name} (photo)` : `${name} (initials)`}
+      aria-label={renderPhoto ? `${name} (photo)` : `${name} (initials)`}
     >
-      {photoUrl ? (
+      {renderPhoto && photoUrl ? (
         <Image
           src={photoUrl}
           alt=""

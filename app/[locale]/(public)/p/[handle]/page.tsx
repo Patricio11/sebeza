@@ -52,11 +52,24 @@ export async function generateMetadata({ params }: Props) {
       description,
       type: "profile",
       siteName: "Sebenza",
+      // Phase 11.4.1  rich-preview card. Same redaction rules
+      // apply (the /card route reads through dataProvider.getProfile
+      // which enforces them). The seeker is the one sharing the URL;
+      // we don't bake the image into every public hit unprompted.
+      images: [
+        {
+          url: `/p/${p.handle}/card`,
+          width: 1200,
+          height: 630,
+          alt: `${p.displayName}  ${p.profession}`,
+        },
+      ],
     },
     twitter: {
-      card: "summary",
+      card: "summary_large_image",
       title,
       description,
+      images: [`/p/${p.handle}/card`],
     },
     alternates: {
       canonical: `/p/${p.handle}`,

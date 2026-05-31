@@ -6,6 +6,7 @@ import {
   Compass,
   Activity,
   Bell,
+  Heart,
   Inbox,
   ShieldCheck,
   Settings,
@@ -24,6 +25,10 @@ export const SEEKER_NAV: DashboardNavItem[] = [
   // response lifecycle).
   { key: "invitations", label: "Vacancy invites", href: "/dashboard/invitations", icon: Inbox },
   { key: "grow", label: "Career compass", href: "/dashboard/grow", icon: Compass },
+  // Phase 11.4.2  private follow list. Sits next to Career compass
+  // because both surfaces are about discovery + warm intent. The
+  // employer is never told.
+  { key: "following", label: "Following", href: "/dashboard/following", icon: Heart },
   { key: "activity", label: "Activity", href: "/dashboard/activity", icon: Activity },
   { key: "notifications", label: "Notifications", href: "/dashboard/notifications", icon: Bell },
   // Phase 10.2  seeker help center. Sits between Notifications and

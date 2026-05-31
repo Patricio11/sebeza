@@ -90,6 +90,13 @@ export const consentPurpose = pgEnum("consent_purpose", [
   // bulk-invite skip path records the actual reason in the audit log
   // (per D5  the per-seeker reason is never surfaced in UI).
   "vacancy_matching",
+  // Phase 11.4.4 D2  per-channel opt-in for SMS + WhatsApp critical
+  // notifications. Optional, default-off; even when granted, the
+  // dispatch layer ALSO requires the admin-controlled platform flag
+  // + an allowlist row + phone verification. Multi-gate by design
+  // we never spend without explicit operator approval.
+  "messaging_channel_sms",
+  "messaging_channel_whatsapp",
 ]);
 
 export const consentState = pgEnum("consent_state", [
@@ -230,6 +237,39 @@ export const appUser = pgTable("app_user", {
       makes a "verified" badge auditable. */
   kycTransactionId: text("kyc_transaction_id"),
   kycVerifiedAt: timestamp("kyc_verified_at"),
+  /**
+   * Phase 11.4.3  seeker-side data-saver preference. Default OFF; the
+   * visual experience is unchanged for existing users. The CSS
+   * `prefers-reduced-data` media query is the floor; this column is
+   * the ceiling  if the browser signals reduced-data, we downgrade
+   * regardless of this column.
+   */
+  dataSaverMode: boolean("data_saver_mode").notNull().default(false),
+  /**
+   * Phase 11.4.4  AES-256-GCM-encrypted E.164 phone number. NEVER
+   * stored in plaintext. NULL when no phone is on file. Wrapped by
+   * the existing lib/crypto encryptField helper (Phase 0).
+   */
+  phoneE164Enc: text("phone_e164_enc"),
+  /**
+   * Phase 11.4.4  set once the seeker entered the 6-digit verification
+   * code we SMS'd them. NULL means the phone is not yet trusted; the
+   * dispatch layer refuses sends to unverified phones. Both SMS and
+   * WhatsApp share this verification (one phone, two channels).
+   */
+  phoneVerifiedAt: timestamp("phone_verified_at"),
+  /**
+   * Phase 11.4.4  per-channel seeker opt-in. Default OFF. Even when
+   * true, an admin must additionally flip the platform-wide
+   * `feature_flag_sms_channel_enabled` / `_whatsapp_channel_enabled`
+   * AND the seeker must be in `seeker_sms_allowlist` AND
+   * `phone_verified_at` must be non-null before any provider call
+   * actually fires. Zero spend by default.
+   */
+  smsChannelEnabled: boolean("sms_channel_enabled").notNull().default(false),
+  whatsappChannelEnabled: boolean("whatsapp_channel_enabled")
+    .notNull()
+    .default(false),
 });
 
 /**
@@ -1922,6 +1962,76 @@ export const seekerBadges = pgTable(
       t.profileId,
       t.awardedAt,
     ),
+  }),
+);
+
+/**
+ * Phase 11.4.2  seeker-private "follow this employer" list.
+ *
+ * Privacy invariant (mirrors 11.3.2 block list): the employer is NEVER
+ * notified + never sees a follower count. The follow is a warm-intent
+ * capture surface for the seeker only. The followed-employer cron
+ * intersects this table with new `vacancies` rows in the seeker's
+ * profession + province to fire `employer.opened_vacancy.in_your_pool`
+ * notifications  the only side-effect the employer can ever observe
+ * is that the seeker shows up on the invite list when they search.
+ */
+export const seekerFollowedEmployers = pgTable(
+  "seeker_followed_employers",
+  {
+    id: text("id").primaryKey(),
+    profileId: text("profile_id")
+      .notNull()
+      .references(() => profiles.id, { onDelete: "cascade" }),
+    orgId: text("org_id")
+      .notNull()
+      .references(() => organizations.id, { onDelete: "cascade" }),
+    followedAt: timestamp("followed_at").notNull().defaultNow(),
+  },
+  (t) => ({
+    uniq: uniqueIndex("seeker_followed_employers_profile_org_uq").on(
+      t.profileId,
+      t.orgId,
+    ),
+    byProfile: index("idx_followed_employers_by_profile").on(t.profileId),
+    byOrg: index("idx_followed_employers_by_org").on(t.orgId),
+  }),
+);
+
+/**
+ * Phase 11.4.4  admin-managed allowlist for SMS / WhatsApp dispatch.
+ *
+ * Presence of a row here means an admin has approved this seeker for
+ * the real-provider dispatch path. Absence means the dispatcher
+ * console-logs the intent + writes an audit row, but does NOT call
+ * the external provider  zero spend by default.
+ *
+ * Multi-gate (per D5 + the operator constraint): the dispatch layer
+ * fires only when ALL of these are simultaneously true:
+ *   1. `feature_flag_sms_channel_enabled` (admin-controlled platform flag)
+ *   2. seeker's `messaging_channel_sms` consent granted
+ *   3. seeker's `app_user.sms_channel_enabled = true`
+ *   4. seeker's `phone_verified_at IS NOT NULL`
+ *   5. row exists in this table for the seeker
+ *
+ * Same five gates for WhatsApp with the parallel column / flag.
+ */
+export const seekerSmsAllowlist = pgTable(
+  "seeker_sms_allowlist",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => appUser.id, { onDelete: "cascade" }),
+    enabledAt: timestamp("enabled_at").notNull().defaultNow(),
+    /** Admin who flipped the flag; nullable for system-grants. */
+    enabledBy: text("enabled_by").references(() => appUser.id),
+    /** Optional admin-side note (private  PII-flagged). */
+    note: text("note"),
+  },
+  (t) => ({
+    uniq: uniqueIndex("seeker_sms_allowlist_user_uq").on(t.userId),
+    byUser: index("idx_sms_allowlist_by_user").on(t.userId),
   }),
 );
 

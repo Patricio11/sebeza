@@ -440,6 +440,21 @@ export const NOTIFICATION_CATALOG = {
       "Confirmation that you paused appearing in employer search for a defined window. Your record stays intact; existing relationships hold; the cron auto-unpauses you on the expiry date.",
     dedupeWindowSeconds: 0,
   },
+  // Phase 11.4.2  warm-intent capture. Fires when a followed
+  // employer opens a vacancy matching the seeker's profession +
+  // province. In-app by default; email off (the seeker chose to
+  // follow  the bell is the right surface, not the inbox). Day-long
+  // dedupe across the same (user × org) to absorb employer-burst
+  // publishing (multiple vacancies in a row).
+  "employer.opened_vacancy.in_your_pool": {
+    defaultInApp: true,
+    defaultEmail: false,
+    audience: "seeker",
+    label: "A followed employer opened a role in your pool",
+    description:
+      "Fires when an employer you've followed publishes a new vacancy in your profession + province. Day-long dedupe so a burst of postings doesn't flood the bell.",
+    dedupeWindowSeconds: 24 * 60 * 60,
+  },
 } as const satisfies Record<string, NotificationKindMeta>;
 
 export type NotificationKind = keyof typeof NOTIFICATION_CATALOG;
