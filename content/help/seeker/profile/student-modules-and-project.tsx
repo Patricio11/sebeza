@@ -28,6 +28,10 @@ export const meta: HelpArticleMeta = {
   ],
   surfaceLink: "/dashboard/profile#academic",
   updatedAt: "2026-06-01",
+  // Visible only to seekers who flagged themselves as students. A
+  // non-student seeker has no academic surface to act on, so the
+  // article would only generate confusion.
+  audienceRequires: "student",
 };
 
 export default function Article() {

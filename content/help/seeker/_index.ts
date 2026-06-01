@@ -166,3 +166,35 @@ export function articlesByCategory(
     (a) => a.meta.category === category,
   );
 }
+
+/**
+ * Phase 13.7 follow-up  audience-gated article visibility for the
+ * help center index + search input. Returns the subset of articles a
+ * viewer with the given context is allowed to see. Untagged articles
+ * always pass through; the only tag today is `audienceRequires:
+ * "student"` which requires the viewer to have an academic_profiles
+ * row.
+ *
+ * Caller convention:
+ *   visibleSeekerArticles(SEEKER_HELP_ARTICLES, { isStudent: !!me.academic })
+ *
+ * Adding new audience tags = extending HelpArticleMeta.audienceRequires
+ * (the union) + the corresponding check below. This helper stays the
+ * one place the gating logic lives.
+ */
+export function visibleSeekerArticles(
+  articles: HelpArticle[],
+  ctx: { isStudent: boolean },
+): HelpArticle[] {
+  return articles.filter((a) => isArticleVisible(a, ctx));
+}
+
+export function isArticleVisible(
+  article: HelpArticle,
+  ctx: { isStudent: boolean },
+): boolean {
+  const req = article.meta.audienceRequires;
+  if (!req) return true;
+  if (req === "student") return ctx.isStudent;
+  return true;
+}

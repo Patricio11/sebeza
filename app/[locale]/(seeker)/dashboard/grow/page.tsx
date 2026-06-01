@@ -207,7 +207,13 @@ export default async function CareerCompassPage({
         <HelpLink role="seeker" slug="switching-profession" label="Switching profession" />
         <HelpLink role="seeker" slug="discovering-employers" label="Recommended employers" />
         <HelpLink role="seeker" slug="following-employers" label="Following employers" />
-        <HelpLink role="seeker" slug="student-progression-tracker" label="Progression timeline" />
+        {/* Phase 13.7  student-only HelpLink. The article itself
+            is audience-gated in the help center; this chip only
+            surfaces for viewers who'd actually land on the
+            progression timeline section below. */}
+        {me.academic && (
+          <HelpLink role="seeker" slug="student-progression-tracker" label="Progression timeline" />
+        )}
       </div>
 
       {/* ───────────── Vacancy-outcome deep-link banner (Phase 9.11) ─────────────

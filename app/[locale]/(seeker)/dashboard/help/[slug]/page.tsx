@@ -30,6 +30,7 @@ import { getMyProfile } from "@/lib/profile/me";
 import {
   findArticleBySlug,
   SEEKER_HELP_ARTICLES,
+  isArticleVisible,
 } from "@/content/help/seeker/_index";
 import { SEEKER_HELP_CATEGORIES } from "@/content/help/types";
 import { ChevronLeft, ChevronRight } from "lucide-react";
@@ -50,6 +51,15 @@ export default async function SeekerHelpArticlePage({
   const article = findArticleBySlug(slug);
   if (!article) notFound();
 
+  // Phase 13.7 follow-up  audience gate. A non-student seeker
+  // direct-linked to a student-only article (Phase 13.1 modules /
+  // Phase 13.4 progression timeline) lands on a 404 rather than an
+  // article describing a surface they can't reach. Same notFound()
+  // shape as an unknown slug so the trail doesn't leak the
+  // article's existence to a viewer who can't see it.
+  const ctx = { isStudent: !!me.academic };
+  if (!isArticleVisible(article, ctx)) notFound();
+
   const categoryLabel =
     SEEKER_HELP_CATEGORIES.find((c) => c.value === article.meta.category)
       ?.label ?? article.meta.category;
@@ -57,11 +67,14 @@ export default async function SeekerHelpArticlePage({
   // Resolve related-article references. Broken slugs (typos in the
   // meta.related list) drop out silently; self-references are also
   // filtered out so an article can list its own slug without
-  // duplicating itself in the strip.
+  // duplicating itself in the strip. Audience-gated articles drop
+  // out for non-matching viewers, mirroring the slug-page gate
+  // above  the related strip never invites a viewer to a 404.
   const relatedArticles = article.meta.related
     .filter((s) => s !== article.meta.slug)
     .map((s) => SEEKER_HELP_ARTICLES.find((a) => a.meta.slug === s))
-    .filter((a): a is NonNullable<typeof a> => a !== undefined);
+    .filter((a): a is NonNullable<typeof a> => a !== undefined)
+    .filter((a) => isArticleVisible(a, ctx));
 
   const Body = article.Article;
 

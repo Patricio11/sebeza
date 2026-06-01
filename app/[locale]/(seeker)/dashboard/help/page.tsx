@@ -25,6 +25,7 @@ import { getMyProfile } from "@/lib/profile/me";
 import {
   SEEKER_HELP_ARTICLES,
   articlesByCategory,
+  visibleSeekerArticles,
 } from "@/content/help/seeker/_index";
 import { SEEKER_HELP_CATEGORIES } from "@/content/help/types";
 import { HelpSearchIsland } from "@/components/feature/help/HelpSearchIsland";
@@ -47,6 +48,17 @@ export default async function SeekerHelpIndexPage({
   const { q } = await searchParams;
   const initialQuery = q?.trim() ?? "";
 
+  // Phase 13.7 follow-up  audience-gated visibility. Student-only
+  // articles (Phase 13.1 modules / Phase 13.4 progression timeline)
+  // never reach a seeker who isn't a student. The same predicate
+  // narrows the search-island's input list so a student article
+  // can't be searched into either.
+  const isStudent = !!me.academic;
+  const visibleArticles = visibleSeekerArticles(SEEKER_HELP_ARTICLES, {
+    isStudent,
+  });
+  const visibleSlugs = new Set(visibleArticles.map((a) => a.meta.slug));
+
   return (
     <DashboardShell
       role="seeker"
@@ -59,7 +71,7 @@ export default async function SeekerHelpIndexPage({
       pageSubtitle="Everything you can do as a job seeker on Sebenza  laid out by category, searchable, with deep-links back to the dashboard surfaces they cover. English only at v1; translations follow."
     >
       <HelpSearchIsland
-        articles={SEEKER_HELP_ARTICLES.map((a) => a.meta)}
+        articles={visibleArticles.map((a) => a.meta)}
         initialQuery={initialQuery}
         basePath="/dashboard/help"
         categoryLabels={Object.fromEntries(
@@ -73,7 +85,9 @@ export default async function SeekerHelpIndexPage({
       {initialQuery.length === 0 && (
         <div className="space-y-12">
           {SEEKER_HELP_CATEGORIES.map((cat) => {
-            const arts = articlesByCategory(cat.value);
+            const arts = articlesByCategory(cat.value).filter((a) =>
+              visibleSlugs.has(a.meta.slug),
+            );
             if (arts.length === 0) return null;
             return (
               <section key={cat.value} id={cat.value}>

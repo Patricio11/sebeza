@@ -134,6 +134,35 @@ export interface HelpArticleMeta {
    * the UI  the article page shows it as small footnote text only.
    */
   updatedAt: string;
+  /**
+   * Phase 13.7 follow-up  audience gate.
+   *
+   * When set, the article only renders for viewers who satisfy the
+   * named audience. Missing / undefined = visible to every viewer of
+   * the role (existing behaviour for all pre-Phase-13 articles).
+   *
+   *   "student"  the viewer must be a seeker with an
+   *              `academic_profiles` row (`MyProfile.academic` is
+   *              non-null  i.e. they ticked "I'm currently a
+   *              student" on their profile). Used by the two Phase
+   *              13 articles  modules / elective / project capture
+   *              and the progression timeline  so non-student
+   *              seekers don't see help for surfaces they can't see.
+   *
+   * Gating happens in three places, by design:
+   *   1. The help-center index filters the listed articles + sections.
+   *   2. The article slug page returns notFound() for non-matching
+   *      audiences (so direct URLs / share-links degrade cleanly).
+   *   3. HelpLink chips on the dashboard surface are wrapped in
+   *      `{me.academic && ...}` at the caller, since the chip itself
+   *      has no audience awareness  the surfacing page knows the
+   *      context.
+   *
+   * The 3 sites are intentionally NOT a single-source-of-truth helper
+   * because each call carries its own context (search-island input
+   * list, single-article 404, conditional chip render).
+   */
+  audienceRequires?: "student";
 }
 
 /**

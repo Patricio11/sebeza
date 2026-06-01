@@ -27,6 +27,11 @@ export const meta: HelpArticleMeta = {
   ],
   surfaceLink: "/dashboard/grow#progression-h",
   updatedAt: "2026-06-01",
+  // Visible only to seekers who flagged themselves as students. The
+  // timeline surface itself is gated the same way on /dashboard/grow,
+  // so a non-student visitor would land on an article describing a
+  // surface they can't reach.
+  audienceRequires: "student",
 };
 
 export default function Article() {
