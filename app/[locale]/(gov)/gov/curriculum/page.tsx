@@ -17,9 +17,13 @@ import { Link } from "@/i18n/navigation";
 import { DashboardShell } from "@/components/layout/DashboardShell";
 import { GOV_NAV } from "@/components/layout/govNav";
 import { verifyGov } from "@/lib/auth/dal";
-import { demandVsCurriculumQuery } from "@/db/queries/curriculum";
+import {
+  demandVsCurriculumQuery,
+  demandVsCurriculumByModule,
+} from "@/db/queries/curriculum";
 import { PROVINCES } from "@/lib/mock/taxonomy";
 import { ProgrammeVsMarketCard } from "@/components/feature/analytics/ProgrammeVsMarketCard";
+import { ModuleDemandGapCard } from "@/components/feature/analytics/ModuleDemandGapCard";
 import { Download } from "lucide-react";
 import { HelpLink } from "@/components/feature/help/HelpLink";
 
@@ -41,13 +45,17 @@ export default async function GovCurriculumPage({
     (p) => p.slug === provinceParam || p.label === provinceParam,
   );
 
-  const result = await demandVsCurriculumQuery({
-    provinceSlug: provinceFilter?.slug,
-  });
+  const [result, moduleGap] = await Promise.all([
+    demandVsCurriculumQuery({ provinceSlug: provinceFilter?.slug }),
+    demandVsCurriculumByModule({ provinceSlug: provinceFilter?.slug }),
+  ]);
 
   const exportHref = provinceFilter
     ? `/api/gov/curriculum/export?province=${encodeURIComponent(provinceFilter.slug)}`
     : "/api/gov/curriculum/export";
+  const moduleExportHref = provinceFilter
+    ? `/api/gov/curriculum/modules/export?province=${encodeURIComponent(provinceFilter.slug)}`
+    : "/api/gov/curriculum/modules/export";
 
   return (
     <DashboardShell
@@ -148,6 +156,24 @@ export default async function GovCurriculumPage({
           locale={locale}
           exportHref={exportHref}
         />
+      </section>
+
+      {/* Phase 13.6  module-grain gap analysis. Curriculum committees
+          set modules, not programmes  this card surfaces the
+          unit of work they can actually rewrite. */}
+      <section className="mt-10">
+        <header className="mb-3 flex items-baseline justify-between gap-3 border-b-2 border-[color:var(--color-ink)] pb-2">
+          <h2 className="font-display text-2xl">Module  market</h2>
+          <Link
+            href={moduleExportHref as never}
+            prefetch={false}
+            className="inline-flex h-8 items-center gap-2 rounded-[var(--radius-pill)] border border-[color:var(--color-hairline)] px-3 text-xs font-medium hover:border-[color:var(--color-ink)]"
+          >
+            <Download className="size-3" aria-hidden="true" />
+            CSV (modules)
+          </Link>
+        </header>
+        <ModuleDemandGapCard data={moduleGap} />
       </section>
     </DashboardShell>
   );

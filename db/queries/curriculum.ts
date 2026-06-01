@@ -304,6 +304,196 @@ export async function demandVsCurriculumQuery(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Phase 13.6  Gov-side MODULE-grain demand-vs-curriculum surface.
+//
+// The sibling of demandVsCurriculumQuery one level deeper. Where the
+// programme-level query asks "which programmes don't teach the
+// in-demand skills", this one asks "which MODULES across SA
+// curricula carry the biggest gap to current employer demand".
+//
+// Why module-grain matters: curriculum committees set MODULES, not
+// programmes. A gap visible at programme level isn't actionable
+// the committee can't change "BCom" without touching every module.
+// A gap visible at module level points at exactly the unit of work
+// the committee can rewrite.
+//
+// Suppression posture is identical to the programme query: k=10
+// floor on demand_score per cell + two complementary axes
+// (institution_module + skill_province). Below-floor cells are
+// dropped + the audit row from the consumer page logs the suppressed
+// count.
+//
+// Reads ONLY editorial rows from `module_skills`  llm_suggested
+// rows are admin-only until promoted (Phase 13.3 review gate).
+// student_signal is reserved + currently unused.
+// ─────────────────────────────────────────────────────────────────────────────
+
+export interface ModuleGapCell {
+  module_slug: string;
+  module_label: string;
+  /** NULL when the catalogue row is canonical (cross-institution). */
+  institution_slug: string | null;
+  /** Province inherited from the institution row; null for canonical. */
+  province_slug: string | null;
+  skill_slug: string;
+  skill_label: string;
+  /** Editorial confidence the module teaches this skill (1-5). */
+  confidence: number;
+  /** Recent searches mentioning this skill (90-day window). */
+  demand_score: number;
+  /** Demand freshness 0..1. */
+  freshness: number;
+  /** Skill-gap delta: demand_score scaled by (5 - confidence).
+   *  High demand × low confidence = the biggest committee-actionable
+   *  gap. Calculated server-side so the render side just sorts. */
+  gap_delta: number;
+}
+
+export interface ModuleGapResult {
+  cells: ModuleGapCell[];
+  k: number;
+  suppressed: number;
+}
+
+const MODULE_GAP_AXES: SuppressionAxis<ModuleGapCell>[] = [
+  {
+    // Within (institution × module)  one surviving skill alongside
+    // suppressed siblings → reconstructable, drop the survivor too.
+    // institution_slug NULL is treated as its own group (canonical).
+    groupBy: ["institution_slug", "module_slug"],
+    complementOver: "skill_slug",
+  },
+  {
+    // Within (skill × province)  one surviving module alongside
+    // suppressed siblings → reconstructable, drop.
+    groupBy: ["skill_slug", "province_slug"],
+    complementOver: "module_slug",
+  },
+];
+
+export interface ModuleGapQueryArgs {
+  provinceSlug?: string;
+}
+
+export async function demandVsCurriculumByModule(
+  args: ModuleGapQueryArgs = {},
+): Promise<ModuleGapResult> {
+  const db = getDb();
+  const k = await getSetting<number>("outcomes_min_cohort_size");
+
+  // 1. Same demand subquery as the programme path  reuses the
+  // 90-day search_events window + freshness-weighted aggregate.
+  const demandRows = (
+    (await db.execute(sql`
+      WITH recent_searches AS (
+        SELECT LOWER(terms) AS term, at
+        FROM search_events
+        WHERE terms IS NOT NULL
+          AND length(terms) >= 2
+          AND at >= now() - (${DEMAND_WINDOW_DAYS} || ' days')::interval
+      )
+      SELECT
+        s.slug AS skill_slug,
+        s.label AS skill_label,
+        COUNT(rs.term)::int AS demand_score,
+        COALESCE(AVG(sebenza_freshness_confidence(rs.at)), 0)::numeric AS freshness
+      FROM skills s
+      LEFT JOIN recent_searches rs
+        ON rs.term LIKE '%' || LOWER(s.label) || '%'
+      GROUP BY s.slug, s.label
+    `)) as unknown as {
+      rows: Array<{
+        skill_slug: string;
+        skill_label: string;
+        demand_score: number;
+        freshness: string;
+      }>;
+    }
+  ).rows;
+  const demandBySkill = new Map(
+    demandRows.map((d) => [
+      d.skill_slug,
+      { ...d, freshness: Number(d.freshness) },
+    ]),
+  );
+
+  // 2. Module → skill rows from the editorial catalogue, joined to
+  // institutions for the province dimension. Province is NULL for
+  // canonical cross-institution rows; the optional province filter
+  // narrows to institution-scoped rows for that province.
+  //
+  // Editorial-only: llm_suggested rows live on the admin queue until
+  // approved; student_signal is reserved.
+  const provinceClause = args.provinceSlug
+    ? sql`AND i.province_slug = ${args.provinceSlug}`
+    : sql``;
+  const moduleRows = (
+    (await db.execute(sql`
+      SELECT
+        ms.module_slug,
+        ms.module_label,
+        ms.skill_slug,
+        ms.confidence,
+        ms.institution_slug,
+        i.province_slug
+      FROM module_skills ms
+      LEFT JOIN institutions i ON i.slug = ms.institution_slug
+      WHERE ms.source = 'editorial'
+      ${provinceClause}
+    `)) as unknown as {
+      rows: Array<{
+        module_slug: string;
+        module_label: string;
+        skill_slug: string;
+        confidence: number;
+        institution_slug: string | null;
+        province_slug: string | null;
+      }>;
+    }
+  ).rows;
+
+  // 3. Compose cells. Each module × skill row pairs with the demand
+  // score for that skill; the gap_delta is the server-side rank key.
+  const cells: ModuleGapCell[] = [];
+  for (const r of moduleRows) {
+    const demand = demandBySkill.get(r.skill_slug);
+    if (!demand) continue;
+    const demandScore = demand.demand_score;
+    if (demandScore <= 0) continue;
+    cells.push({
+      module_slug: r.module_slug,
+      module_label: r.module_label,
+      institution_slug: r.institution_slug,
+      province_slug: r.province_slug,
+      skill_slug: r.skill_slug,
+      skill_label: demand.skill_label,
+      confidence: r.confidence,
+      demand_score: demandScore,
+      freshness: demand.freshness,
+      // Linear scaling: high demand × low confidence = high gap.
+      // confidence=5 → 0 gap (module teaches it well); confidence=1
+      // → 4×demand (module barely touches it, market wants it).
+      gap_delta: demandScore * (5 - r.confidence),
+    });
+  }
+
+  // 4. Suppress at the same k as every other gov surface. Counts on
+  // demand_score so cells where the labour-market signal is too thin
+  // to publish drop out before reaching the render.
+  const { passed, suppressedCount } = suppress(cells, {
+    countKey: "demand_score",
+    k,
+    axes: MODULE_GAP_AXES,
+  });
+
+  // 5. Rank by gap_delta DESC. Top of the list = the modules where
+  // curriculum committees can move the dial fastest.
+  passed.sort((a, b) => b.gap_delta - a.gap_delta);
+
+  return { cells: passed, k, suppressed: suppressedCount };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Phase 13.2  module_skills read path.
 //
 // Surfaces the editorial-catalogue skill inferences for a student's
