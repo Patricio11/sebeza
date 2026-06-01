@@ -320,8 +320,189 @@ covered by this DPIA:
   flip), the verifier upgrades from admin-mediated to provider-
   mediated and the trust posture strengthens further.
 
+### R-13.1  New educational PII categories
+- **Risk**: Phase 13.1 adds three new fields on `academic_profiles`:
+  `current_modules` (text[]), `elective_chosen` (text),
+  `project_topic` (text). Module names + dissertation topics carry
+  identifying detail; a sufficiently specific project topic ("the
+  Lerato N. dissertation on Yoco POS reconciliation") can re-identify
+  a small-cohort student even with surname suppression.
+- **Mitigation**:
+  - **Default-private**: none of these three fields surface on
+    `/p/<handle>`. The `PublicProfile` redaction type does not carry
+    them. The matcher uses them; the public profile doesn't expose
+    them.
+  - **Field-length caps**: modules max 8 entries, elective ≤ 100
+    chars, project topic ≤ 200 chars. Limits the surface area of a
+    single field from carrying a full identifying paragraph.
+  - **POPIA s.23 export**: the dashboard data-export bundle includes
+    all three fields so the seeker can audit what the platform holds.
+  - **POPIA s.24 erasure**: account deletion cascades through
+    `academic_profiles` and removes the three columns alongside the
+    rest of the row. No retention.
+- **Residual risk**: low. The default-private posture is the
+  load-bearing mitigation; absent that the project topic alone would
+  be the highest re-identification vector in the system.
+
+### R-13.2  Admin-managed LLM provider sending syllabus text cross-border
+- **Risk**: Phase 13.3 adds an admin-side editorial pipeline that
+  optionally calls external LLM providers (OpenAI / Anthropic in the
+  US, Mistral in the EU) to suggest module → skill mappings. The
+  request body contains generic syllabus / module text from publicly
+  available academic documents; the provider response contains skill
+  slugs constrained to the controlled taxonomy. **No seeker PII
+  crosses the provider boundary.**
+- **Mitigation (six gates, every gate must be open before zero spend
+  becomes some spend)**:
+  1. A row exists in `llm_providers` with `active = true`.
+  2. `credentials_enc` decrypts successfully.
+  3. `monthly_budget_zar > 0` AND `total_spend_zar < monthly_budget_zar`.
+  4. Caller has `admin` role.
+  5. Platform flag `feature_flag_llm_curriculum_enabled` is ON.
+  6. Payload doesn't match obvious PII shapes (RSA 13-digit IDs,
+     email-shaped strings, SA phone-shaped strings). The dispatcher
+     refuses with `llm.curriculum.skipped` + `gate: 'payload_unsafe'`
+     when any of those patterns appear in the syllabus text.
+- **Cross-border processing (POPIA s.72)**:
+  - OpenAI + Anthropic configure flow gates configuration behind an
+    explicit s.72 acknowledgement checkbox; the timestamp lands in
+    `llm_providers.s72_acknowledged_at` AND in the
+    `admin.llm.provider.configured` audit row's `s72Acknowledged`
+    meta key.
+  - Mistral EU is treated as POPIA-equivalent (GDPR regime) so the
+    s.72 step is skipped per legal review.
+  - **Self-hosted is the POPIA-clean recommended path**: inference
+    inside the af-south-1 (Cape Town) residency boundary, no s.72
+    acknowledgement required, no per-call vendor invoice.
+- **Hallucination guard**: the dispatcher filters response slugs
+  against `skills.slug`. Any response slug outside the controlled
+  taxonomy is dropped silently with the count surfaced in the audit
+  row's `droppedHallucinationCount`. New skill tags stay on the
+  Phase 9.15 admin human-only suggestion queue; the LLM operates
+  downstream of the canonical taxonomy, never on it.
+- **Per-call audit**: `llm.curriculum.suggest` carries token count,
+  suggestion count, dropped hallucination count, estimated ZAR cost,
+  modelId, and the SHA-256 hash of the syllabus text (the plaintext
+  is never logged). `.skipped` carries the gate that refused.
+  `.failed` carries the error category (auth / network / rate_limit
+  / other) but never the upstream error body.
+- **No new consent purpose**: students do not consent to anything new
+  here  no seeker data is sent to the LLM. POPIA s.11(1)(b)
+  (performance of contract) covers the editorial catalogue work
+  itself.
+- **Residual risk**: low. The six-gate posture is by design hard to
+  bypass: the partial unique index `llm_providers_one_active` is the
+  DB-layer enforcement; the kill-switch lives on `/admin/settings`
+  one level above the per-provider configuration so an admin can
+  pause the entire pipeline in one click without losing
+  configuration.
+
+### R-13.3  Student self-declared milestones leaking onto public surface
+- **Risk**: Phase 13.4 adds `student_milestones` for self-declared
+  events (dissertation submitted, graduation confirmed, first job
+  offer accepted, studies paused, plus 'other' with a free-text
+  note). A leak onto `/p/<handle>` would expose the seeker's career
+  state alongside specific dates  more identifying than the public
+  profile is designed to be.
+- **Mitigation**: the `loadStudentProgressionTimeline` query is
+  invoked ONLY from `/dashboard/grow` (the private surface). The
+  PublicProfile read path (`db/queries/profiles.ts → publicProfile`)
+  does not touch `student_milestones`. The component file lives
+  under `components/feature/analytics/` and is only imported from
+  the seeker dashboard route. The Phase 13.4 commit message + the
+  help article both reiterate "private surface only".
+- **POPIA s.23/s.24**: included in the existing export + erasure
+  paths via the `profile_id` FK with `ON DELETE CASCADE`.
+- **Verification-Honesty Rule (R-9.10)**: a self-declared
+  `first_job_accepted` milestone does NOT flip `placements` to
+  `employer_confirmed`. Only employer Mark-as-Hired does that. The
+  timeline shows the milestone with a "Self-declared" provenance chip
+  alongside auto-derived rows so the student sees how the platform
+  knows what it knows (D6 in the Phase 13 plan).
+- **Residual risk**: very low. The default-private posture + the
+  no-public-read-path guarantee + the audit kinds
+  (`student.milestone.added` / `.removed`) collectively make this
+  the lowest-surface-area new data category in Phase 13.
+
 ## 4. Sign-off
 
 To be signed by the Information Officer once designated. Until then,
 the engineering team owns the open risks above and reviews this
 document at every phase-completion checkpoint.
+
+---
+
+## Appendix A  Phase 13 audit-kind catalogue
+
+For the auditor: the complete enumeration of audit kinds added by
+Phase 13 so the oversight log shape is documented in one place.
+
+### Student-side (Phase 13.1 + 13.4)
+- `profile.update` (re-used; meta carries `academic.currentModules` /
+  `academic.electiveChosen` / `academic.projectTopic` field names
+  when the student-context action fires).
+- `student.milestone.added`  per-row self-declared milestone insert.
+- `student.milestone.removed`  per-row milestone delete.
+
+### Admin LLM-provider lifecycle (Phase 13.3)
+- `admin.llm.provider.configured`  credentials + budget written.
+  Meta: `modelId`, `monthlyBudgetZar`, `s72Acknowledged`,
+  `keyFingerprint`.
+- `admin.llm.provider.activated`  transactional swap; meta carries
+  `previousActiveProviderId`.
+- `admin.llm.provider.deactivated`  pause posture.
+- `admin.llm.provider.tested`  probe call; meta carries
+  `ok: boolean`, `latencyMs` or `errorCategory`.
+- `admin.llm.credentials.rotated`  separate kind so the ledger
+  surfaces credential rotations distinctly. Meta carries the new
+  `keyFingerprint`.
+
+### LLM dispatch (Phase 13.3)
+- `llm.curriculum.suggest`  successful call. Meta: `modelId`,
+  `tokenCount`, `suggestionCount`, `droppedHallucinationCount`,
+  `estZarCost`, `syllabusSha256`.
+- `llm.curriculum.skipped`  refused by one of the six gates. Meta:
+  `gate` (one of: `no_active`, `kill_switch`, `no_credentials`,
+  `budget_exhausted`, `budget_zero`, `not_admin`, `payload_unsafe`),
+  `syllabusSha256`.
+- `llm.curriculum.failed`  provider call threw. Meta: `modelId`,
+  `errorCategory` (auth / network / rate_limit / other),
+  `syllabusSha256`. Upstream error body NEVER in meta.
+- `admin.llm.budget.alert`  fires when total_spend_zar crosses 80%
+  of monthly_budget_zar. Meta: `spentZar`, `budgetZar`, `percent`.
+
+### Admin curriculum curation (Phase 13.3)
+- `admin.curriculum.module_skill.approved`  meta:
+  `moduleSlug`, `skillSlug`, `fromSource` ('llm_suggested' | 'manual').
+- `admin.curriculum.module_skill.rejected`  meta: `moduleSlug`,
+  `skillSlug`, optional `reason`.
+- `admin.curriculum.module_skill.edited`  meta: `moduleSlug`,
+  `skillSlug`, `changedFields` array.
+
+### Gov-side export (Phase 13.6)
+- `analytics.export` (re-used; meta carries `grain: 'module'` to
+  distinguish the module-grain CSV from the existing programme-grain
+  export on the same surface `/gov/curriculum`).
+
+---
+
+## Appendix B  Provenance display contract (Phase 13.7 D7)
+
+Every recommendation surfaced on the student's Career Compass that
+originated from a `module_skills` row carries a small inline
+provenance annotation: `via module "<label>"`. The student sees
+*how* the recommendation was derived; the auditor can trace which
+catalogue entry was load-bearing for which seeker-facing surface.
+
+The annotation lives on `<ProgrammeVsMarketCard>` inside the
+`ModuleSkillsSection` rendered when `moduleSkills` is non-null. Each
+inferred skill row carries the originating module label so the
+attribution is one line away, never indirected through a separate
+detail view.
+
+Catalogue versioning at row granularity is documented in
+`PHASE_13_CATALOGUE_GUIDE.md` (monthly review with the 18-month
+re-validation flag). Per-row catalogue version strings are out of
+scope for Phase 13 ship; the catalogue review process gives us the
+operational equivalent without the schema cost.
+

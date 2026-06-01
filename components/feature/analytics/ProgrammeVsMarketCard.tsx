@@ -364,6 +364,8 @@ function ModuleSkillsSection({
       <p className="mt-1 text-xs text-[color:var(--color-ink-soft)]">
         Inferred from the modules + elective + project topic on your
         profile, matched against the editorial curriculum catalogue.
+        Each chip&rsquo;s tooltip names the originating module so
+        you can trace any recommendation back to its source.
       </p>
 
       <div className="mt-3 space-y-3">
@@ -432,7 +434,13 @@ function InferredSkillRow({
           <li key={s.slug}>
             <span
               className="inline-flex items-center gap-1 rounded-[var(--radius-pill)] border border-[color:var(--color-hairline)] bg-[color:var(--color-paper)] px-2 py-0.5 text-[0.65rem] uppercase tracking-[0.18em] text-[color:var(--color-ink)]"
-              title={`Confidence ${s.confidence}/5`}
+              // Phase 13.7 D7  provenance annotation. The chip's
+              // accessible title spells out the catalogue attribution
+              // so the student sees how the platform derived the
+              // recommendation (and the auditor can trace which row
+              // surfaced it).
+              title={`via module "${s.matchedFrom}"  editorial catalogue  confidence ${s.confidence}/5`}
+              aria-label={`${s.label}, via module ${s.matchedFrom}, editorial confidence ${s.confidence} of 5`}
             >
               {s.label}
               <span
