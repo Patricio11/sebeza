@@ -1608,24 +1608,39 @@ async function seedPhase9_13ProgrammeSkills() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Phase 13.2  module_skills editorial-catalogue seed.
+// Phase 13.5  module_skills Tier-1 editorial-catalogue seed.
 //
-// Demo-grade. Maps a handful of common SA university module names to
-// canonical skill slugs so the BSc CS + BCom seeded students render
-// something on the "Skills from your current studies" section of
-// <ProgrammeVsMarketCard>. All rows ship as `source='editorial'` with
-// `approved_by=NULL` (no admin user id seeded yet); the Task 13.3
-// admin queue will populate that on real catalogue work.
+// Expanded from the Phase 13.2 demo skeleton (6 rows) to cover the
+// five Tier-1 programmes named in PHASE_13_PLAN.md §Task 13.5:
+//   BSc CS, BCom (Accounting + Management Studies), BEd, BA, BSc Eng.
 //
-// Coverage is INTENTIONALLY thin. The Phase 13 plan calls for ~750
-// catalogue rows at Tier-1 launch, grown editorially. This seed is
-// the demo skeleton  enough to prove the read path works, not
-// pretending to be a comprehensive catalogue.
+// All rows ship as `source='editorial'`, `approved_by=NULL` (seed has
+// no admin user id), confidence 3-5. Canonical cross-institution
+// rows only  institution-scoped overrides are demonstrated by
+// `seedPhase13_5InstitutionOverrides` below.
+//
+// Coverage notes (honest about the gaps):
+//
+//   * The SKILLS taxonomy is presently job-skills-shaped. Engineering
+//     foundations + humanities core modules don't have clean matches
+//     yet (no "thermodynamics" or "literary criticism" skills exist).
+//     Those modules are intentionally absent from this seed; admins
+//     extend via Task 13.3 once the taxonomy lands the corresponding
+//     skill slugs through the Phase 9.15 suggestion queue.
+//
+//   * Catalogue review (PHASE_13_CATALOGUE_GUIDE.md): rows are
+//     flagged for re-validation after 18 months. The seed sets
+//     approved_at = now() so seeded rows enter the review cycle on
+//     a predictable schedule.
+//
+//   * Real production catalogue grows past this skeleton via the
+//     admin /admin/curriculum bulk-import + manual-add flows. This
+//     seed is the demo + smoke-test scaffold, not the launch state.
 // ─────────────────────────────────────────────────────────────────────────────
 
 async function seedPhase13_2ModuleSkills() {
   console.log(
-    "📚  Phase 13.2  module_skills editorial seed (demo coverage)",
+    "📚  Phase 13.5  module_skills Tier-1 editorial seed",
   );
 
   type MSRow = {
@@ -1636,11 +1651,7 @@ async function seedPhase13_2ModuleSkills() {
   };
 
   const rows: MSRow[] = [
-    // BSc CS modules. Mapping to job-skills we actually have in
-    // the SKILLS taxonomy (sql, postgres, aws, typescript). Modules
-    // teaching foundational concepts ("Operating Systems",
-    // "Algorithms") don't have clean skill matches today; admins
-    // can add via Task 13.3 once the taxonomy adds those entries.
+    // ─── BSc Computer Science ───────────────────────────────────
     {
       moduleSlug: "database-systems",
       moduleLabel: "Database Systems",
@@ -1652,6 +1663,18 @@ async function seedPhase13_2ModuleSkills() {
       moduleLabel: "Database Systems",
       skillSlug: "postgres",
       confidence: 4,
+    },
+    {
+      moduleSlug: "advanced-databases",
+      moduleLabel: "Advanced Databases",
+      skillSlug: "sql",
+      confidence: 5,
+    },
+    {
+      moduleSlug: "advanced-databases",
+      moduleLabel: "Advanced Databases",
+      skillSlug: "postgres",
+      confidence: 5,
     },
     {
       moduleSlug: "software-engineering",
@@ -1666,23 +1689,320 @@ async function seedPhase13_2ModuleSkills() {
       confidence: 2,
     },
     {
+      moduleSlug: "software-engineering",
+      moduleLabel: "Software Engineering",
+      skillSlug: "node",
+      confidence: 3,
+    },
+    {
+      moduleSlug: "web-development",
+      moduleLabel: "Web Development",
+      skillSlug: "react",
+      confidence: 5,
+    },
+    {
+      moduleSlug: "web-development",
+      moduleLabel: "Web Development",
+      skillSlug: "typescript",
+      confidence: 4,
+    },
+    {
+      moduleSlug: "web-development",
+      moduleLabel: "Web Development",
+      skillSlug: "node",
+      confidence: 4,
+    },
+    {
       moduleSlug: "cloud-computing",
       moduleLabel: "Cloud Computing",
       skillSlug: "aws",
       confidence: 5,
     },
+    {
+      moduleSlug: "programming-fundamentals",
+      moduleLabel: "Programming Fundamentals",
+      skillSlug: "python",
+      confidence: 4,
+    },
+    {
+      moduleSlug: "data-structures-and-algorithms",
+      moduleLabel: "Data Structures and Algorithms",
+      skillSlug: "python",
+      confidence: 3,
+    },
+    {
+      moduleSlug: "introduction-to-data-science",
+      moduleLabel: "Introduction to Data Science",
+      skillSlug: "python",
+      confidence: 5,
+    },
+    {
+      moduleSlug: "introduction-to-data-science",
+      moduleLabel: "Introduction to Data Science",
+      skillSlug: "sql",
+      confidence: 4,
+    },
 
-    // BCom Honours Accounting modules.
+    // ─── BCom Accounting ────────────────────────────────────────
+    {
+      moduleSlug: "financial-accounting",
+      moduleLabel: "Financial Accounting",
+      skillSlug: "ifrs",
+      confidence: 4,
+    },
+    {
+      moduleSlug: "financial-accounting",
+      moduleLabel: "Financial Accounting",
+      skillSlug: "bookkeeping-skill",
+      confidence: 4,
+    },
+    {
+      moduleSlug: "financial-accounting",
+      moduleLabel: "Financial Accounting",
+      skillSlug: "excel",
+      confidence: 3,
+    },
     {
       moduleSlug: "advanced-financial-reporting",
       moduleLabel: "Advanced Financial Reporting",
       skillSlug: "ifrs",
       confidence: 5,
     },
+    {
+      moduleSlug: "auditing",
+      moduleLabel: "Auditing",
+      skillSlug: "ifrs",
+      confidence: 4,
+    },
+    {
+      moduleSlug: "auditing",
+      moduleLabel: "Auditing",
+      skillSlug: "excel",
+      confidence: 3,
+    },
+    {
+      moduleSlug: "audit-theory",
+      moduleLabel: "Audit Theory",
+      skillSlug: "ifrs",
+      confidence: 4,
+    },
+    {
+      moduleSlug: "taxation",
+      moduleLabel: "Taxation",
+      skillSlug: "excel",
+      confidence: 3,
+    },
+    {
+      moduleSlug: "management-accounting",
+      moduleLabel: "Management Accounting",
+      skillSlug: "excel",
+      confidence: 4,
+    },
+    {
+      moduleSlug: "management-accounting",
+      moduleLabel: "Management Accounting",
+      skillSlug: "bookkeeping-skill",
+      confidence: 3,
+    },
+    {
+      moduleSlug: "payroll-administration",
+      moduleLabel: "Payroll Administration",
+      skillSlug: "payroll",
+      confidence: 5,
+    },
+    {
+      moduleSlug: "payroll-administration",
+      moduleLabel: "Payroll Administration",
+      skillSlug: "excel",
+      confidence: 4,
+    },
+    {
+      moduleSlug: "professional-accountancy",
+      moduleLabel: "Professional Accountancy",
+      skillSlug: "saipa",
+      confidence: 4,
+    },
+
+    // ─── BCom Management Studies (cross-cutting office skills) ──
+    {
+      moduleSlug: "business-management",
+      moduleLabel: "Business Management",
+      skillSlug: "excel",
+      confidence: 3,
+    },
+    {
+      moduleSlug: "human-resource-management",
+      moduleLabel: "Human Resource Management",
+      skillSlug: "payroll",
+      confidence: 3,
+    },
+    {
+      moduleSlug: "human-resource-management",
+      moduleLabel: "Human Resource Management",
+      skillSlug: "excel",
+      confidence: 3,
+    },
+    {
+      moduleSlug: "business-statistics",
+      moduleLabel: "Business Statistics",
+      skillSlug: "excel",
+      confidence: 4,
+    },
+    {
+      moduleSlug: "research-methodology",
+      moduleLabel: "Research Methodology",
+      skillSlug: "excel",
+      confidence: 3,
+    },
+
+    // ─── BEd (Foundation / Intermediate Phase) ──────────────────
+    // BEd modules teach pedagogy + classroom management. The SKILLS
+    // taxonomy has clean matches for these via the education block.
+    {
+      moduleSlug: "classroom-practice",
+      moduleLabel: "Classroom Practice",
+      skillSlug: "classroom-management",
+      confidence: 5,
+    },
+    {
+      moduleSlug: "classroom-practice",
+      moduleLabel: "Classroom Practice",
+      skillSlug: "lesson-planning",
+      confidence: 4,
+    },
+    {
+      moduleSlug: "teaching-practice",
+      moduleLabel: "Teaching Practice",
+      skillSlug: "classroom-management",
+      confidence: 5,
+    },
+    {
+      moduleSlug: "teaching-practice",
+      moduleLabel: "Teaching Practice",
+      skillSlug: "lesson-planning",
+      confidence: 5,
+    },
+    {
+      moduleSlug: "foundation-phase-pedagogy",
+      moduleLabel: "Foundation Phase Pedagogy",
+      skillSlug: "ecd-pedagogy",
+      confidence: 5,
+    },
+    {
+      moduleSlug: "foundation-phase-pedagogy",
+      moduleLabel: "Foundation Phase Pedagogy",
+      skillSlug: "classroom-management",
+      confidence: 4,
+    },
+    {
+      moduleSlug: "early-childhood-development",
+      moduleLabel: "Early Childhood Development",
+      skillSlug: "ecd-pedagogy",
+      confidence: 5,
+    },
+    {
+      moduleSlug: "curriculum-studies",
+      moduleLabel: "Curriculum Studies",
+      skillSlug: "lesson-planning",
+      confidence: 4,
+    },
+
+    // ─── BA (Humanities core) ────────────────────────────────────
+    // Humanities modules teach soft / transferable skills. The
+    // SKILLS taxonomy is presently sparse on these  the catalogue
+    // surfaces what we have honestly (research-shaped Excel work),
+    // not pretending we cover literary criticism etc.
+    {
+      moduleSlug: "research-methods",
+      moduleLabel: "Research Methods",
+      skillSlug: "excel",
+      confidence: 3,
+    },
+    {
+      moduleSlug: "academic-writing",
+      moduleLabel: "Academic Writing",
+      skillSlug: "word",
+      confidence: 4,
+    },
+
+    // ─── BSc Engineering (Electrical) ───────────────────────────
+    // Electrical engineering modules touch trade-skill territory
+    // that the SKILLS taxonomy already covers via NCV electrical.
+    // The rest of BSc Eng (mechanical, civil, industrial) needs
+    // new skill slugs (CAD, structural-analysis, mechanics) before
+    // catalogue rows make sense.
+    {
+      moduleSlug: "electrical-engineering-fundamentals",
+      moduleLabel: "Electrical Engineering Fundamentals",
+      skillSlug: "wiring",
+      confidence: 4,
+    },
+    {
+      moduleSlug: "industrial-electrical-systems",
+      moduleLabel: "Industrial Electrical Systems",
+      skillSlug: "industrial-wiring",
+      confidence: 5,
+    },
+    {
+      moduleSlug: "power-systems",
+      moduleLabel: "Power Systems",
+      skillSlug: "industrial-wiring",
+      confidence: 4,
+    },
+
+    // ─── Cross-cutting computer literacy ────────────────────────
+    // Every Tier-1 programme has a first-year computer-literacy
+    // module under some name; canonical row keys off the most
+    // common label and the trigram match catches the variants.
+    {
+      moduleSlug: "computer-literacy",
+      moduleLabel: "Computer Literacy",
+      skillSlug: "excel",
+      confidence: 5,
+    },
+    {
+      moduleSlug: "computer-literacy",
+      moduleLabel: "Computer Literacy",
+      skillSlug: "word",
+      confidence: 5,
+    },
+    {
+      moduleSlug: "information-skills",
+      moduleLabel: "Information Skills",
+      skillSlug: "excel",
+      confidence: 4,
+    },
+    {
+      moduleSlug: "information-skills",
+      moduleLabel: "Information Skills",
+      skillSlug: "word",
+      confidence: 4,
+    },
   ];
 
-  await db.insert(schema.moduleSkills).values(
-    rows.map((r) => ({
+  // Demonstrate the institution-override pattern (PHASE_13_PLAN
+  // §Task 13.5): the same module slug + skill slug can have a
+  // canonical row PLUS a per-institution row when the institution
+  // teaches the topic at a materially different depth. The read
+  // path prefers the institution-scoped row.
+  //
+  // Demo override: Wits "Database Systems" historically teaches
+  // PostgreSQL deeply (their Operating Systems lab uses it as the
+  // canonical RDBMS), so the institution-scoped confidence is
+  // pinned at 5 even though the canonical is 4.
+  type OverrideRow = MSRow & { institutionSlug: string };
+  const overrides: OverrideRow[] = [
+    {
+      moduleSlug: "database-systems",
+      moduleLabel: "Database Systems",
+      skillSlug: "postgres",
+      confidence: 5,
+      institutionSlug: "wits",
+    },
+  ];
+
+  await db.insert(schema.moduleSkills).values([
+    ...rows.map((r) => ({
       id: `ms_${r.moduleSlug}_${r.skillSlug}`,
       moduleSlug: r.moduleSlug,
       moduleLabel: r.moduleLabel,
@@ -1693,9 +2013,22 @@ async function seedPhase13_2ModuleSkills() {
       approvedAt: new Date(),
       institutionSlug: null,
     })),
-  );
+    ...overrides.map((o) => ({
+      id: `ms_${o.moduleSlug}_${o.skillSlug}_${o.institutionSlug}`,
+      moduleSlug: o.moduleSlug,
+      moduleLabel: o.moduleLabel,
+      skillSlug: o.skillSlug,
+      confidence: o.confidence,
+      source: "editorial" as const,
+      approvedBy: null,
+      approvedAt: new Date(),
+      institutionSlug: o.institutionSlug,
+    })),
+  ]);
 
-  console.log(`   inserted ${rows.length} editorial module_skills rows`);
+  console.log(
+    `   inserted ${rows.length} canonical + ${overrides.length} institution-scoped editorial rows`,
+  );
 }
 
 /**
