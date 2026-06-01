@@ -10,6 +10,8 @@ import {
   SlidersHorizontal,
   UserCog,
   HelpCircle,
+  BookOpen,
+  Sparkles,
 } from "lucide-react";
 import type { DashboardNavItem } from "./DashboardShell";
 
@@ -18,6 +20,13 @@ export const ADMIN_NAV: DashboardNavItem[] = [
   { key: "verifications", label: "Verification queue", href: "/admin/verifications", icon: ShieldCheck },
   { key: "moderation", label: "Moderation", href: "/admin/moderation", icon: Flag },
   { key: "taxonomy", label: "Taxonomy", href: "/admin/taxonomy", icon: Library },
+  // Phase 13.3  module → skill curation queue + bulk syllabus
+  // import. Sits next to taxonomy because they are the same kind of
+  // editorial work over different tables.
+  { key: "curriculum", label: "Curriculum", href: "/admin/curriculum", icon: BookOpen },
+  // Phase 13.3  LLM provider configuration. Above audit-log because
+  // every action here writes to it; the admin should be one click away.
+  { key: "llm", label: "LLM providers", href: "/admin/llm", icon: Sparkles },
   { key: "auditLog", label: "Audit log", href: "/admin/audit-log", icon: ScrollText },
   // Phase 9.7.7  watch the watchers. Sits right after the general
   // audit log because it's a curated, sensitivity-focused slice of

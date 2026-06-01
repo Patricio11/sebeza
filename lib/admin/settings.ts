@@ -95,7 +95,16 @@ export type SettingKey =
   // Hours are integers in [0..23] expressed in UTC+2. Defaults match
   // the plan: 21:00 SAST  07:00 SAST.
   | "feature_flag_sms_quiet_hours_start"
-  | "feature_flag_sms_quiet_hours_end";
+  | "feature_flag_sms_quiet_hours_end"
+  // ──────────────────────────────────────────────────────────────────────
+  // Phase 13.3  kill-switch above the DB-stored LLM provider config in
+  // `llm_providers`. Default OFF; ships dormant. Even when an admin
+  // configures + activates a provider, the dispatcher ALSO checks
+  // this flag before any outbound call. Same multi-gate posture as
+  // SMS / WhatsApp: every single gate must be open before zero spend
+  // becomes some spend.
+  // ──────────────────────────────────────────────────────────────────────
+  | "feature_flag_llm_curriculum_enabled";
 
 const DEFAULTS: Record<SettingKey, unknown> = {
   freshness_band_days_fresh: 30,
@@ -121,6 +130,9 @@ const DEFAULTS: Record<SettingKey, unknown> = {
   feature_flag_whatsapp_channel_enabled: false,
   feature_flag_sms_quiet_hours_start: 21,
   feature_flag_sms_quiet_hours_end: 7,
+  // Phase 13.3  LLM kill-switch. Default OFF; admin must explicitly
+  // flip ON after configuring + testing a provider on /admin/llm.
+  feature_flag_llm_curriculum_enabled: false,
 };
 
 /**

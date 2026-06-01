@@ -10,12 +10,14 @@
  */
 import {
   type AnyPgColumn,
+  bigint,
   boolean,
   customType,
   date,
   index,
   integer,
   jsonb,
+  numeric,
   pgEnum,
   pgTable,
   primaryKey,
@@ -1859,6 +1861,55 @@ export const moduleSkills = pgTable(
     bySkill: index("idx_module_skills_by_skill").on(t.skillSlug),
   }),
 );
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Phase 13.3  llm_providers admin-managed configuration.
+//
+// Four placeholder rows seeded in migration 0045 (openai, anthropic,
+// mistral, self_hosted), all dormant. The admin configures + activates
+// from /admin/llm. At-most-one-active enforced at the DB layer by a
+// PARTIAL UNIQUE index (`WHERE active = true`) which Drizzle's
+// `uniqueIndex` builder can't express  the schema documents intent;
+// the DB enforces it.
+//
+// `credentialsEnc` holds the AES-256-GCM ciphertext of a JSON blob
+// containing apiKey, modelId, optional endpointUrl + extraHeaders.
+// Encrypted via lib/crypto.encryptField(); never exposed plaintext
+// outside the dispatcher.
+// ─────────────────────────────────────────────────────────────────────────────
+export const llmProviders = pgTable("llm_providers", {
+  /** Stable slug. One of: 'openai' | 'anthropic' | 'mistral' | 'self_hosted'. */
+  id: text("id").primaryKey(),
+  displayName: text("display_name").notNull(),
+  /** True iff the dispatcher should route to this provider. Partial
+   *  unique index in 0045 enforces at-most-one TRUE. */
+  active: boolean("active").notNull().default(false),
+  /** AES-256-GCM ciphertext of the credentials JSON. NULL until
+   *  configured. Decrypted in-memory only inside the dispatcher. */
+  credentialsEnc: text("credentials_enc"),
+  /** Hard cap in ZAR for the current month. 0 = no LLM calls. */
+  monthlyBudgetZar: integer("monthly_budget_zar").notNull().default(0),
+  configuredBy: text("configured_by").references(() => appUser.id, {
+    onDelete: "set null",
+  }),
+  configuredAt: timestamp("configured_at"),
+  lastUsedAt: timestamp("last_used_at"),
+  totalCalls: integer("total_calls").notNull().default(0),
+  /** bigint  monthly token counts can blow past int32. */
+  totalTokens: bigint("total_tokens", { mode: "number" })
+    .notNull()
+    .default(0),
+  /** numeric(12,2) → stored as string by Drizzle to preserve precision. */
+  totalSpendZar: numeric("total_spend_zar", { precision: 12, scale: 2 })
+    .notNull()
+    .default("0"),
+  /** Cross-border POPIA s.72 acknowledgement timestamp. Set on the
+   *  configure action for openai + anthropic. NULL for self-hosted
+   *  + mistral (mistral EU region is POPIA-equivalent). */
+  s72AcknowledgedAt: timestamp("s72_acknowledged_at"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Phase 9.17  employer-initiated seeker invites.

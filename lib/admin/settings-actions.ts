@@ -78,6 +78,10 @@ const KEY_SCHEMAS = {
   feature_flag_whatsapp_channel_enabled: z.boolean(),
   feature_flag_sms_quiet_hours_start: z.number().int().min(0).max(23),
   feature_flag_sms_quiet_hours_end: z.number().int().min(0).max(23),
+  // Phase 13.3  LLM kill-switch. Default OFF; admin flips ON only
+  // after configuring + testing a provider on /admin/llm. Zero spend
+  // posture mirrors SMS / WhatsApp.
+  feature_flag_llm_curriculum_enabled: z.boolean(),
 } as const satisfies Record<SettingKey, z.ZodTypeAny>;
 
 const updateSchema = z.object({
@@ -103,6 +107,7 @@ const updateSchema = z.object({
     "feature_flag_whatsapp_channel_enabled",
     "feature_flag_sms_quiet_hours_start",
     "feature_flag_sms_quiet_hours_end",
+    "feature_flag_llm_curriculum_enabled",
   ] as const),
   value: z.unknown(),
 });

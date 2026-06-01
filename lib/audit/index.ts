@@ -271,7 +271,52 @@ export type AuditKind =
   // Phase 11.1.4  seeker achievement badge awarded. Idempotent at the
   // table layer (UNIQUE(profile_id, slug)); the audit row is the
   // historical record  one per badge per profile.
-  | "achievement.awarded";
+  | "achievement.awarded"
+  // ──────────────────────────────────────────────────────────────────────
+  // Phase 13.3  admin-managed LLM provider configuration + dispatch.
+  //
+  // Provider lifecycle on /admin/llm. `subject` is the provider id
+  // ('openai' | 'anthropic' | 'mistral' | 'self_hosted'). Meta:
+  //   configured   { modelId, monthlyBudgetZar, s72Acknowledged }
+  //   activated    { previousActiveProviderId? }
+  //   deactivated  { reason? }
+  //   tested       { ok: boolean, latencyMs?: number,
+  //                  errorCategory?: 'auth' | 'network' | 'rate_limit' | 'other' }
+  //   rotated      { keyFingerprintHash }  separate kind because
+  //                credential-rotation is the load-bearing security
+  //                event the auditor cares about distinctly.
+  | "admin.llm.provider.configured"
+  | "admin.llm.provider.activated"
+  | "admin.llm.provider.deactivated"
+  | "admin.llm.provider.tested"
+  | "admin.llm.credentials.rotated"
+  // Per-LLM-call dispatch trace. `subject` is the active provider id;
+  // meta carries:
+  //   suggest   { tokenCount, suggestionCount, syllabusSha256,
+  //               estZarCost, modelId }
+  //   skipped   { gate: 'no_active' | 'kill_switch' | 'no_credentials'
+  //                       | 'budget_exhausted' | 'budget_zero'
+  //                       | 'not_admin' | 'payload_unsafe' }
+  //   failed    { errorCategory, modelId }
+  // `subject = "n/a"` is acceptable for skipped reasons where no
+  // active provider exists yet.
+  | "llm.curriculum.suggest"
+  | "llm.curriculum.skipped"
+  | "llm.curriculum.failed"
+  // Budget alert. Fires when total_spend_zar crosses 80% of
+  // monthly_budget_zar. `subject` is provider id; meta:
+  //   { spentZar, budgetZar, percent }
+  | "admin.llm.budget.alert"
+  // Editorial-catalogue lifecycle on /admin/curriculum. `subject` is
+  // the module_skills.id. Meta:
+  //   approved   { moduleSlug, skillSlug, confidence,
+  //                fromSource: 'llm_suggested' | 'manual' }
+  //   rejected   { moduleSlug, skillSlug, reason? }
+  //   edited     { moduleSlug, skillSlug,
+  //                changedFields: ('confidence' | 'module_label' | 'institution')[] }
+  | "admin.curriculum.module_skill.approved"
+  | "admin.curriculum.module_skill.rejected"
+  | "admin.curriculum.module_skill.edited";
 
 export interface AuditEvent {
   kind: AuditKind;
