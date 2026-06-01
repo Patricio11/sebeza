@@ -2,7 +2,7 @@
 
 *Opened during Phase 10 (PHASE_10_LAUNCH_PLAN.md). The "things we deliberately did not build before public launch" collection.*
 
-> **The fence**: Phase 10 is polish + audit + go-live. Feature requests that arrive during Phase 10 land here, not in main. Phase 11+ pulls from this list  in particular, items here that fit Phase 11's seeker-retention or skill-growth-conversion thesis may be promoted into one of the `PHASE_11_{1,2,3,4,5}_PLAN.md` sub-phases.
+> **The fence**: Phase 10 is polish + audit + go-live. Feature requests that arrive during Phase 10 land here, not in main. Phase 11+ pulls from this list  in particular, items here that fit Phase 11's seeker-retention or skill-growth-conversion thesis may be promoted into one of the `PHASE_11_{1,2,3,4,5}_PLAN.md` sub-phases. **Phase 13** (student lane expansion + editorial-LLM curriculum pipeline) shipped 2026-05-31  2026-06-01 *ahead* of Phase 12 at founder direction; Phase 13 follow-ups are listed below in their own section.
 
 ---
 
@@ -88,6 +88,19 @@ Keep entries terse  this is a triage list, not a spec.
 
 - **Municipal-level analytics**  `/gov/municipalities` ships dormant in Phase 10; flips on once cell-counts cross the k-anonymity floor across most municipalities. See `content/help/gov/provincial-briefs/cities-coming-soon.tsx`.
 - **Quarterly retention report**  the cron job that snapshots placement retention runs but the gov-facing artefact is not yet generated. Pending operator-side review of which timeframes to publish.
+
+---
+
+## Phase 13 editorial + operational follow-ups
+
+> Shipped 2026-06-01 (see `docs/completed/PHASE_13_COMPLETE.md`). Code is complete; these are operational gaps that don't block the existing surface but should land before the catalogue surface is publicly promoted.
+
+- **Tier-1 catalogue expansion** (49  ~750 rows)  the demo seed in `db/seed.ts → seedPhase13_2ModuleSkills` covers BSc CS, BCom Accounting, BCom Management Studies, BEd, BA, BSc Eng Electrical at skeleton density. Editorial work to reach the Tier-1 launch target (5 programmes × ~30 modules × ~5 skills) runs through `/admin/curriculum`. Process documented in `docs/PHASE_13_CATALOGUE_GUIDE.md` (Tier-1 operational checklist).
+- **Information Officer designation**  DPIA §4 is unsigned; the engineering team owns open risks until a named IO takes the role. Land this with the launch checklist.
+- **18-month catalogue-review automation**  the review query exists in `PHASE_13_CATALOGUE_GUIDE.md` (Monthly review §). Currently surfaces via a calendar reminder; an admin-dashboard panel showing the flagged rows would close the manual gap.
+- **SKILLS taxonomy expansion for BSc Eng + BA core**  the SKILLS taxonomy is presently job-skills-shaped; engineering foundations (thermodynamics, fluid mechanics, structural analysis, CAD) + humanities core (literary criticism, historical methods, philosophical reasoning) need slugs before `module_skills` rows make sense for those programmes. Goes through the existing Phase 9.15 admin suggestion queue.
+- **Per-row catalogue version strings**  deliberately deferred per Task 13.7 in favour of the monthly-review process. Revisit only if the gov-facing surface starts citing "catalogue v2026.10" attributions in policy briefs and needs the version string at row granularity.
+- **Cross-encryption-rotation script**  per `ENCRYPTION_INVENTORY.md → Open items`: extend the planned rotation script to walk `app_user.phone_e164_enc` (Phase 11.4.4) AND `llm_providers.credentials_enc` (Phase 13.3) alongside `profiles.national_id_enc`. All three share `SEBENZA_ENCRYPTION_KEY` so they must rotate together.
 
 ---
 

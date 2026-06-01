@@ -177,6 +177,35 @@ across the whole app; the explicit `--color-sa-*` tokens are also available for 
   pill), `bare` (no chrome  used inside the SearchBar's hairline-divided cells).
 - **`<AnimatedCount>`**  single client island for IntersectionObserver-triggered count-up on
   stat numerals. Honours `prefers-reduced-motion`.
+- **`<StudentContextEditor>`** (Phase 13.1)  on `/dashboard/profile`. Chip input for current
+  modules (max 8, Enter/comma to add, Backspace to remove the last), free-text fields for
+  the chosen elective (surfaced from year ≥ 2) and the project / dissertation topic
+  (surfaced from year ≥ 3, 200-char soft cap). Independent of qualification verification
+  state  editing never reopens the credential flow. Default-private; never rendered on
+  `/p/<handle>`.
+- **`<StudentProgressionTimeline>`** + **`<StudentMilestoneEditor>`** (Phase 13.4)  on
+  `/dashboard/grow`. Vertical timeline composes auto-derived events (qualifications,
+  employer-confirmed placements, completed learning items) with self-declared milestones
+  (dissertation submitted, graduation confirmed, first job offer accepted, studies paused,
+  other). Civic-Editorial ordinal year header *Year N of M*; quiet eyebrow next-step hint
+  by priority (no qualifications → ask for one; year ≥ 3 no project → declare it; year ≥ 2
+  no elective → declare it; zero completed learning → start a path). Every row carries a
+  small provenance chip: *Self-declared* on milestone rows, no chip on auto-derived rows.
+  Editor disables one-shot kinds once already declared; DB partial unique index is the
+  safety net. Private surface only  never on `/p/<handle>`.
+- **`<ModuleDemandGapCard>`** (Phase 13.6)  on `/gov/curriculum`. Sibling of
+  `<ProgrammeVsMarketCard>` one level deeper. Top-N modules ranked by
+  `demand × (5 - confidence)` with a CSS bar for relative gap weight. Surfaces the k-floor
+  + suppressed count + an honest "limited data so far" empty state when no cells clear k;
+  never hides them. Pure CSS chrome  no charting lib.
+- **`<LlmProvidersManager>`** + **`<CurriculumQueueManager>`** (Phase 13.3)  admin-only on
+  `/admin/llm` and `/admin/curriculum`. Provider cards expose configure / activate / test /
+  rotate / deactivate; cross-border providers (OpenAI, Anthropic) gate configure behind an
+  explicit POPIA s.72 acknowledgement checkbox. Spend bar with 80 % warning state matches
+  the SMS/WhatsApp dispatch UX of a kill-switch banner sitting above per-provider state.
+  Curation surface stacks bulk-import → pending queue (inline approve / reject /
+  edit-and-approve) → recently-approved provenance ledger. Civic-Editorial typography
+  throughout; no SaaS card-grid polish.
 
 ### 1.6 Layout shells (chrome that wraps every page)
 - **`<LandingHeader>`**  absolute over the hero, chevron-marked wordmark, transparent until

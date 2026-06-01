@@ -6,7 +6,7 @@
 > mechanism. Anything not on this table doesn't exist; if it appears,
 > add a row.
 
-Last updated 2026-05-23.
+Last updated 2026-06-01 (Phase 13 added 4 new rows + 1 special-handling block).
 
 ---
 
@@ -29,6 +29,10 @@ Last updated 2026-05-23.
 | **Two-factor secrets + backup codes** | `two_factor` | Same lifecycle as the user account | CASCADE on `app_user` DELETE |
 | **KYC transaction id** | `app_user.kyc_transaction_id` | Same lifecycle as the user account | NULLed by `revokeMyKyc`; lives until user deletion |
 | **Email rate-limit clock** | `app_user.notification_email_last_sent_at` | Same lifecycle as the user account | JSON, no separate retention |
+| **Student academic context** (Phase 13.1) | `academic_profiles.current_modules` / `elective_chosen` / `project_topic` | Same lifecycle as the academic_profiles row (which is same lifecycle as the user account) | CASCADE on `app_user` DELETE via the existing profile_id FK chain |
+| **Self-declared student milestones** (Phase 13.4) | `student_milestones` | Same lifecycle as the user account | CASCADE on `app_user` DELETE via `profile_id` FK with `ON DELETE CASCADE` |
+| **Editorial module → skill catalogue** (Phase 13.2) | `module_skills` | Indefinite (editorial asset, not personal data) | None  append-only catalogue; monthly review re-validates rows older than 18 months per `PHASE_13_CATALOGUE_GUIDE.md` |
+| **LLM provider configuration** (Phase 13.3) | `llm_providers` | Indefinite while in production use; admin-controlled lifecycle | Admin deactivates / reconfigures from `/admin/llm`; rows are 4 seeded slots, never deleted at the DB layer  the credentials_enc column is overwritten on rotation |
 
 ## Audit-log retention rationale (5 years)
 
@@ -76,3 +80,26 @@ for the launch checklist.
   on user deletion we sever the link from our side but the provider's
   record persists per their own retention policy. Document this in the
   Privacy Policy when the partnership lands.
+
+### LLM editorial pipeline (Phase 13.3)  cross-border data flow
+- **No seeker PII is ever sent to the LLM.** The Phase 13.3 dispatcher
+  enforces this at Gate 6 of the six-gate posture: the payload is
+  refused server-side if it matches RSA 13-digit ID, email, or SA
+  phone shapes. The intended payload is generic syllabus / module text
+  from publicly available academic documents.
+- **OpenAI + Anthropic** are US-based processors. Configuration is
+  gated behind an explicit POPIA s.72 acknowledgement checkbox on
+  `/admin/llm`; the acknowledgement timestamp is persisted on
+  `llm_providers.s72_acknowledged_at` AND in the
+  `admin.llm.provider.configured` audit row.
+- **Mistral** hosts in the EU under GDPR (POPIA-equivalent regime);
+  no s.72 acknowledgement step.
+- **Self-hosted** is the POPIA-clean recommended path: inference
+  inside the af-south-1 (Cape Town) residency boundary, no cross-
+  border processing, no s.72 acknowledgement.
+- The vendor's own retention of the syllabus prompt is governed by
+  the vendor's terms (OpenAI: 30 days for abuse monitoring; Anthropic:
+  30 days; Mistral: 30 days; self-hosted: under our control). The
+  link from our side is the audit row carrying the syllabus SHA-256
+  hash  the plaintext is NEVER persisted by Sebenza after the call
+  completes.

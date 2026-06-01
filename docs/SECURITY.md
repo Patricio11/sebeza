@@ -151,6 +151,12 @@ POPIA-First Rule (`TO_START_EVERY_SESSION.md §4`): an audit-log write failing M
 - Profile self-edits: `profile.update`, `profile.skills.update`, `profile.status.*`, `profile.national_id.*`, `profile.experience.*`, `profile.qualification.*`, `profile.photo.*`
 - PII access (Phase 5): `profile.view`, `profile.contact.reveal`, `profile.document.download`
 - Search / analytics: `search.profiles`, `analytics.export`
+- Phase 13 student-side: `student.milestone.added`, `student.milestone.removed`
+- Phase 13 admin-side LLM lifecycle: `admin.llm.provider.{configured,activated,deactivated,tested}`, `admin.llm.credentials.rotated`, `admin.llm.budget.alert`
+- Phase 13 LLM dispatch: `llm.curriculum.{suggest,skipped,failed}`. The `.skipped` row's `meta.gate` carries which of the six gates refused; the `.failed` row's `meta.errorCategory` is bucketed (auth / network / rate_limit / other), never the upstream provider's raw error body.
+- Phase 13 admin curriculum curation: `admin.curriculum.module_skill.{approved,rejected,edited}`
+
+For the complete enumeration of Phase 13 audit kinds with meta-shape contracts, see `docs/popia/DPIA.md` Appendix A.
 
 ---
 
@@ -170,11 +176,36 @@ Uploads go through `lib/storage/upload.ts`:
 
 ## Encryption (Phase 0+)
 
-Special-category PII (only national ID numbers, for now) is encrypted at rest with **AES-256-GCM** before being written. See [`lib/crypto/index.ts`](../lib/crypto/index.ts).
+Special-category PII is encrypted at rest with **AES-256-GCM** before being written. See [`lib/crypto/index.ts`](../lib/crypto/index.ts) and `docs/popia/ENCRYPTION_INVENTORY.md`.
 
 - Wire format carries a `v1.` key-version prefix so Phase 9 key rotation is non-breaking.
 - Key lives in `SEBENZA_ENCRYPTION_KEY` (base64, 32 bytes). Rotated via KMS in Phase 9.
-- IDs are **never** echoed back to the client  not even a last-4 hint. The "ID on file · encrypted" UI is the most we expose.
+- Three columns currently use this path:
+  - `profiles.national_id_enc` (Phase 0)
+  - `app_user.phone_e164_enc` (Phase 11.4.4)
+  - `llm_providers.credentials_enc` (Phase 13.3) — AES-256-GCM over a JSON blob `{ apiKey, modelId, endpointUrl?, extraHeaders? }`. Decrypted in-memory only inside the dispatcher in `lib/llm/curriculum.ts`. The admin UI shows the SHA-256 fingerprint's first 8 hex chars only, never plaintext.
+- IDs are **never** echoed back to the client  not even a last-4 hint. The "ID on file · encrypted" UI is the most we expose for national IDs; for LLM credentials, only the fingerprint surfaces and only in the audit row, never on screen.
+
+---
+
+## LLM editorial pipeline security (Phase 13.3)
+
+Admin-only editorial-curation surface that may call external LLM providers. Six gates must be simultaneously open before any outbound HTTP fires; the dispatcher (`lib/llm/curriculum.ts`) writes `llm.curriculum.skipped` with `meta.gate` naming the refusing gate when any one fails:
+
+1. A row exists in `llm_providers` with `active = true` (enforced at-most-one via partial unique index `WHERE active = true`).
+2. `credentials_enc` decrypts successfully.
+3. `monthly_budget_zar > 0` AND `total_spend_zar < monthly_budget_zar`.
+4. Caller has `admin` role (the calling Server Action wraps `verifyAdmin()`).
+5. Platform flag `feature_flag_llm_curriculum_enabled` is ON (default OFF; kill-switch above the per-provider config).
+6. Payload doesn't match obvious PII shapes (RSA 13-digit IDs, email-shaped strings, SA phone-shaped strings). Defence-in-depth backstop  the intended payload is generic syllabus / module text.
+
+**Hallucination guard**: response slugs are filtered against `skills.slug`; unknown slugs are dropped silently and the count is surfaced in `meta.droppedHallucinationCount`. New skill tags can never enter the canonical taxonomy via the LLM path  that stays on the Phase 9.15 admin human-only suggestion queue.
+
+**Cross-border processing (POPIA s.72)**: OpenAI + Anthropic require an explicit s.72 acknowledgement checkbox on the configure flow before credentials are accepted; the acknowledgement timestamp persists on `llm_providers.s72_acknowledged_at` AND in the `admin.llm.provider.configured` audit row. Mistral (EU / GDPR-equivalent) skips this step. **Self-hosted is the POPIA-clean recommended path**  inference inside the af-south-1 (Cape Town) residency boundary, no cross-border processing, no s.72 acknowledgement.
+
+**No new consent purpose for the LLM pipeline**  students do not consent to anything new because no seeker PII is sent to the LLM. POPIA s.11(1)(b) (performance of contract) covers the editorial work.
+
+The provider can be paused without losing configuration via the `deactivateAllLlmProviders` action; the kill-switch flag on `/admin/settings` is the master gate. Zero spend until every gate is open.
 
 ---
 

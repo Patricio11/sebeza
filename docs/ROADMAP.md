@@ -838,6 +838,8 @@ Five sub-phases, ordered by ROI per LOC:
 - [x] "Open to ___" tags · CV upload (personal backup) · mobile profile-editor jump-to-section · responsive avatar sizes · Career Compass lazy-load below fold · 9 a11y fixes from the static scan (skip link, html dir, listbox group roles, ordinal aria-labels, modal focus return, MonthYearPicker semantics, status confirm copy). *See `docs/completed/PHASE_11_5_COMPLETE.md` (+ archived plan).*
 
 > **🎉 Phase 11 COMPLETE.** All five sub-phases shipped 2026-05-30 → 2026-05-31. Seeker retention + skill-growth conversion arc closed. **Next**: Phase 12 (Testing & QA).
+>
+> **🎉 Phase 13 COMPLETE** (shipped ahead of Phase 12 at founder direction, 2026-05-31 → 2026-06-01). Student lane expansion + editorial-LLM curriculum pipeline. Seven tasks: capture (modules / elective / project), `module_skills` catalogue + read path, admin-only LLM editorial pipeline with six-gate dispatch, progression timeline + self-declared milestones, Tier-1 catalogue seed + governance, gov-side module-grain demand panel, DPIA addendum + provenance annotations. See `docs/completed/PHASE_13_COMPLETE.md` + `docs/completed/PHASE_13_PLAN.md` (archived) + `docs/PHASE_13_CATALOGUE_GUIDE.md` (editorial playbook, stays live).
 
 **Founder priority** (from the umbrella plan): 3 days = ship 11.1 alone; 2 weeks = 11.1 + 11.2 + trust trio from 11.3; 6 weeks = full Phase 11. Measurement at +30 days post-ship: week-4 retention ≥ 55%, weekly digest open rate ≥ 35%, learning-item completion rate ≥ 35%.
 
@@ -860,6 +862,41 @@ Five sub-phases, ordered by ROI per LOC:
 ### Task 12.4: Compliance Tests
 - [ ] Assert no PII (ID/docs/contact) ever appears in public/search responses.
 - [ ] Assert every PII access writes an audit-log row.
+
+---
+
+## 🎓 PHASE 13: STUDENT LANE EXPANSION + EDITORIAL-LLM CURRICULUM PIPELINE ✅ *(shipped 2026-05-31 → 2026-06-01)*
+
+*Goal: The student lane on `/dashboard/grow` deepens from programme-level intelligence to per-module + per-event intelligence. National-system thinking from commit one. **Shipped ahead of Phase 12 at founder direction** — Testing & QA still pending.*
+
+### Task 13.1: Module + project + elective capture ✅
+- [x] Migration 0043 + 3 new columns on `academic_profiles` (current_modules text[] · elective_chosen · project_topic). Sign-up form + dashboard editor wire-up. Default-private. Data-export + erasure cascades.
+
+### Task 13.2: `module_skills` catalogue + student read path ✅
+- [x] Migration 0044 + `module_skills` table (canonical + per-institution rows · partial unique indexes · pg_trgm GIN). `moduleSkillsForStudent` trigram read path. `<ProgrammeVsMarketCard>` extended with `ModuleSkillsSection`.
+
+### Task 13.3: Admin LLM editorial-curriculum pipeline ✅
+- [x] Migration 0045 + `llm_providers` table with partial unique index `llm_providers_one_active`. 4 seeded dormant providers. Six-gate dispatcher with hallucination guard (constrained to `skills.slug`). 5 admin actions for provider lifecycle (configure / activate / deactivate / test / rotate). 5 curation actions (approve / reject / edit-and-approve / bulkImportSyllabus / manual add). New routes `/admin/llm` + `/admin/curriculum`. New kill-switch flag `feature_flag_llm_curriculum_enabled` (default OFF). 12 new audit kinds for admin LLM lifecycle + dispatch + curation.
+
+### Task 13.4: Student progression tracker ✅
+- [x] Migration 0046 + `student_milestones` table (5-kind enum · partial unique on one-shot kinds). Read query composes 5 sources: academic header, qualifications, employer-confirmed placements (Verification-Honesty), completed learning items, self-declared milestones. `<StudentProgressionTimeline>` + `<StudentMilestoneEditor>` on `/dashboard/grow`. Quiet next-step hint. 2 new audit kinds.
+
+### Task 13.5: National-scale catalogue strategy ✅
+- [x] Seed grown 6 → 49 canonical editorial rows covering BSc CS, BCom Accounting, BCom Management Studies, BEd, BA, BSc Eng Electrical + cross-cutting. 1 demo institution override (Wits "Database Systems" → postgres @ 5). New `docs/PHASE_13_CATALOGUE_GUIDE.md`: tier ladder · adding-a-programme recipe · monthly review process · operational checklist.
+
+### Task 13.6: Demand-vs-curriculum panel for the gov side ✅
+- [x] `demandVsCurriculumByModule` query with `gap_delta = demand × (5 - confidence)` rank key + k=10 floor + two complementary axes. `<ModuleDemandGapCard>` component. Wired into `/gov/curriculum` alongside the existing programme card. New CSV export at `/api/gov/curriculum/modules/export` with `analytics.export` audit + `grain: 'module'` meta.
+
+### Task 13.7: POPIA + auditability invariants ✅
+- [x] DPIA addendum (R-13.1 new educational PII / R-13.2 LLM cross-border / R-13.3 milestones leakage). Appendix A enumerates 14 new audit kinds. Appendix B documents the provenance display contract. Chip tooltips on `ProgrammeVsMarketCard` carry `via module "<label>" — editorial catalogue — confidence N/5` attribution.
+
+> **🎉 Phase 13 COMPLETE.** Seven tasks shipped. *See `docs/completed/PHASE_13_COMPLETE.md` for the full wrap-up.*
+
+**Open editorial follow-ups** (post-launch operational work, not blocking):
+- Grow catalogue from 49 → ~750 rows pre-public-ship via the admin queue.
+- Designate the Information Officer (DPIA §4 still unsigned).
+- Wire the 18-month catalogue-review query into a monthly admin reminder.
+- Expand the `SKILLS` taxonomy to cover BSc Eng (mech / civil / industrial) + BA core modules so the catalogue can deepen on those programmes.
 
 ---
 
@@ -933,6 +970,6 @@ HR Practitioner · Electrician · Plumber · Accountant · Nurse · Driver · Bo
 
 ---
 
-*Last Updated: 2026-05-23*
-*Version: 1.9  Phase 6.5 polish shipped (CSV injection guard + CRLF + partial-match skills-gap + heatmap CSS var + skill_gap_snapshots time-series + rankInPoolQuery + skillDemandQuery + clickable heatmap + Δ deltas)  see `docs/completed/PHASE_6_5_COMPLETE.md`. Strategic adds queued for Phase 9 (PDF / LMI / `/gov` / city / forecast)  see `docs/PHASE_9_PLAN.md`. Phase 7 (admin + 2FA + notifications) opens next  `docs/PHASE_7_PLAN.md`.*
-*Working name: Sebenza (replace with chosen brand)*
+*Last Updated: 2026-06-01*
+*Version: 2.0  Phase 13 (student lane expansion + editorial-LLM curriculum pipeline) shipped ahead of Phase 12 (Testing & QA) at founder direction. Seven tasks across capture, catalogue, admin pipeline, progression timeline, Tier-1 seed, gov panel, and POPIA wrap-up. See `docs/completed/PHASE_13_COMPLETE.md` for the full footprint. Phase 12 remains the next milestone before public ship.*
+*Working name: Sebenza  South African National Talent-Intelligence Platform.*

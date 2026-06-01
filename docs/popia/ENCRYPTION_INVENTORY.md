@@ -3,7 +3,7 @@
 > Every place we encrypt + the procedure for rotating the keys without
 > losing access. Read alongside `lib/crypto/index.ts`.
 
-Last updated 2026-05-23.
+Last updated 2026-06-01 (Phase 13 added the LLM-provider credentials row).
 
 ---
 
@@ -30,7 +30,9 @@ Last updated 2026-05-23.
 
 | Column | Algorithm | Key env | Module |
 |---|---|---|---|
-| `profiles.national_id_enc` | AES-256-GCM with versioned payload | `ID_ENCRYPTION_KEY` | `lib/crypto/index.ts` |
+| `profiles.national_id_enc` | AES-256-GCM with versioned payload | `SEBENZA_ENCRYPTION_KEY` | `lib/crypto/index.ts` |
+| `app_user.phone_e164_enc` (Phase 11.4.4) | AES-256-GCM with versioned payload | `SEBENZA_ENCRYPTION_KEY` | `lib/crypto/index.ts` |
+| `llm_providers.credentials_enc` (Phase 13.3) | AES-256-GCM with versioned payload over a JSON blob `{ apiKey, modelId, endpointUrl?, extraHeaders? }`. Decrypted in-memory only inside the dispatcher; never returned plaintext to the admin UI (which shows the SHA-256 fingerprint's first 8 hex chars only). | `SEBENZA_ENCRYPTION_KEY` | `lib/crypto/index.ts` + `lib/admin/llm-actions.ts` |
 | Passwords | Better Auth's scrypt | `BETTER_AUTH_SECRET` | Better Auth |
 | TOTP secrets | Better Auth's twoFactor plugin (encrypted) | `BETTER_AUTH_SECRET` | Better Auth |
 | Backup codes | Hashed | n/a | Better Auth |
@@ -102,6 +104,28 @@ the keyring (currently single-key; multi-key for rotation below).
 
 ---
 
+## Phase 13.3 addendum  LLM provider credential rotation
+
+The `llm_providers.credentials_enc` column is rotated independently of
+the row's own lifecycle  the admin can change API keys without touching
+the rest of the row via `rotateLlmCredentials({ providerId, newApiKey })`
+on `/admin/llm`. The server action decrypts the existing blob (preserves
+`modelId` + `endpointUrl` + `extraHeaders`), substitutes the new
+`apiKey`, re-encrypts, and writes back  no plaintext ever leaves the
+process. The audit row (`admin.llm.credentials.rotated`) carries the
+SHA-256 fingerprint's first 8 hex chars of the new key so an auditor
+can correlate the rotation event with the upstream provider's own
+key-issuance ledger without the secret ever appearing in the audit
+trail.
+
+When the team-wide encryption key (`SEBENZA_ENCRYPTION_KEY`) rotates
+via the runbook below, the LLM credentials column re-encrypts in lock-
+step with the ID and phone columns  same versioned-payload format,
+same v1.<base64> wire shape, same `decryptField` lookup. No special
+casing.
+
+---
+
 ## Open items before commercial launch
 
 - [ ] Move secrets from `.env.local` to a managed secret store (Vercel
@@ -110,3 +134,7 @@ the keyring (currently single-key; multi-key for rotation below).
 - [ ] Set the 12-month rotation reminder in the team calendar.
 - [ ] Document where Vercel + Neon + Supabase store their own audit
       logs of admin access to our environment, for forensic readiness.
+- [ ] Extend the rotation script (`scripts/rotate-id-keys.ts` in the
+      runbook above) to walk `app_user.phone_e164_enc` and
+      `llm_providers.credentials_enc` alongside `profiles.national_id_enc`
+       all three columns use the same key and need to rotate together.

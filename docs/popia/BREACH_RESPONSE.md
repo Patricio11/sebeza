@@ -5,7 +5,7 @@
 > breach involving personal information. This runbook is what we follow
 > when that happens.
 
-Last updated 2026-05-23.
+Last updated 2026-06-01.
 
 ---
 
@@ -17,8 +17,15 @@ Any of the following, suspected or confirmed:
 2. Leak of national ID ciphertext together with the encryption key.
 3. Misconfigured Supabase Storage bucket exposing private documents.
 4. A privileged employee credentials being phished or stolen.
-5. A sub-processor (Neon, Supabase, Resend, KYC SaaS) disclosing a
-   breach that touches our data.
+5. A sub-processor (Neon, Supabase, Resend, KYC SaaS, **LLM provider:
+   OpenAI / Anthropic / Mistral / self-hosted infra** [Phase 13.3])
+   disclosing a breach that touches our data. Note: the LLM
+   sub-processors process only generic syllabus / module text  no
+   seeker PII crosses that boundary (Gate 6 of the six-gate dispatch
+   refuses payloads matching PII shapes). A breach at the LLM vendor
+   does not implicate our PII; it does still implicate the audit
+   trail (the syllabus SHA-256 hash + the admin caller id), which
+   the breach assessment should consider.
 
 A near-miss (caught before exfiltration) is NOT a notifiable breach but
 is documented in this folder all the same.

@@ -6,7 +6,8 @@ and location, and gives government an honest picture of the labour market.
 
 > The trustworthy, real-time layer for South African work.
 
-Built through **Phase 11.5** (2026-05-31  Phase 11 complete). The product
+Built through **Phase 13.7** (2026-06-01  Phase 13 complete; Phase 11
+complete 2026-05-31; Phase 12 Testing & QA still pending). The product
 is launch-ready against the current Neon (EU) database; everything beyond is
 operational + commercial, not engineering. The AWS Cape Town migration is
 a documented one-day cutover
@@ -14,9 +15,12 @@ a documented one-day cutover
 pending partnership confirmation.
 
 The pre-launch gov analytics chapter is now complete end-to-end:
-**demand → curriculum → learner → barrier → hire → outcome**. Every dimension
-is suppression-floored at k=10, freshness-weighted, and consent-gated where
-appropriate.
+**demand → curriculum → learner → barrier → hire → outcome**. Phase 13 added
+the per-MODULE grain layer to curriculum-vs-demand (the level curriculum
+committees can actually act on) alongside an admin-only editorial LLM
+pipeline that bootstraps the catalogue with a human-in-the-loop on every
+suggestion. Every dimension is suppression-floored at k=10,
+freshness-weighted, and consent-gated where appropriate.
 
 ---
 
@@ -37,6 +41,7 @@ with zero paid credentials. Each integration has one obvious activation path.
 | **Upstash rate limiter** | No call sites wired | In-memory `RateLimiter` exists; nothing is enforced | Import `enforce(bucket, key)` on the Server Action you want to gate |
 | **Vercel Cron** | `CRON_SECRET` unset | `isAuthorizedCron` refuses every request | Set `CRON_SECRET`  paths already declared in `vercel.json` (18 jobs, staggered 02:0006:00 UTC) |
 | **SMS / WhatsApp channel** | `feature_flag_sms_channel_enabled` + `feature_flag_whatsapp_channel_enabled` (default OFF) + `SMS_PROVIDER` / `WHATSAPP_PROVIDER` env unset | `lib/messaging/dispatch.ts` enforces a 6-gate check; without admin flag + env vars, all sends short-circuit to `console` and audit-log as `skipped`. Zero spend. | Admin: `/admin/settings` flip flag ON. Operator: set `SMS_PROVIDER=twilio` + `SMS_FROM_NUMBER` + Twilio credentials. Per-seeker: add to `seeker_sms_allowlist` via admin action. |
+| **LLM editorial curriculum pipeline** (Phase 13.3) | `feature_flag_llm_curriculum_enabled` (default OFF) + every `llm_providers` row dormant + zero `monthly_budget_zar` | `lib/llm/curriculum.ts` enforces a 6-gate dispatch (active row · valid creds · budget > 0 · admin role · kill-switch ON · payload safety). Without all six, every call short-circuits with `llm.curriculum.skipped`. Zero spend, no outbound HTTP. Admin-side only  the student never talks to the LLM. | Admin: configure a provider on `/admin/llm` (cross-border providers require explicit POPIA s.72 acknowledgement), set a monthly budget, click Test, then Activate. Flip `feature_flag_llm_curriculum_enabled` ON in `/admin/settings`. Bulk-import on `/admin/curriculum`. Self-hosted is the POPIA-clean recommended path. |
 
 ### On rate limiting
 
@@ -118,6 +123,7 @@ high-value accounts.
 | 11.4 | SA distribution surface (share-card PNG, follow employer, data-saver, dormant SMS/WhatsApp) | ✅ | [PHASE_11_4_COMPLETE](docs/completed/PHASE_11_4_COMPLETE.md) |
 | 11.5 | Profile depth + mobile / a11y polish (Open-to tags, CV backup, lazy load, 9 a11y fixes) | ✅ | [PHASE_11_5_COMPLETE](docs/completed/PHASE_11_5_COMPLETE.md) |
 | 12 | Testing & QA (renumbered from old Phase 11) | planned | Public-launch operator phase |
+| 13 | Student lane expansion + editorial-LLM curriculum pipeline (shipped ahead of 12) | ✅ | [PHASE_13_COMPLETE](docs/completed/PHASE_13_COMPLETE.md) · [CATALOGUE_GUIDE](docs/PHASE_13_CATALOGUE_GUIDE.md) |
 
 ---
 
@@ -125,10 +131,10 @@ high-value accounts.
 
 | Role | Home | Highlights |
 |---|---|---|
-| **seeker** | `/dashboard` | Talent Pulse confirm, profile editor with years-of-experience (9.9), self-reported placement, KYC panel, §23 data export, §24 self-erase, TOTP 2FA, **vacancy invitations** with accept/decline-with-reason (9.8), **learning loop** on `/dashboard/grow` — accept → start → complete → skill lands on profile honestly as `self_attested_learning` (9.12), **honest closure** when a vacancy is filled with someone else + curriculum-vs-market view for students (9.11 + 9.13) |
+| **seeker** | `/dashboard` | Talent Pulse confirm, profile editor with years-of-experience (9.9), self-reported placement, KYC panel, §23 data export, §24 self-erase, TOTP 2FA, **vacancy invitations** with accept/decline-with-reason (9.8), **learning loop** on `/dashboard/grow` — accept → start → complete → skill lands on profile honestly as `self_attested_learning` (9.12), **honest closure** when a vacancy is filled with someone else + curriculum-vs-market view for students (9.11 + 9.13), **module/elective/project capture** + skills inferred from current studies (13.1 + 13.2), **private progression timeline** with auto-derived events + self-declared milestones (13.4) |
 | **employer** | `/employer` | Saved searches, candidate reveals (30-day window, audit-logged), **vacancies** (create / reverse-match / invite / withdraw / mark-as-filled in one action) (9.8 + 9.11), **admin-mediated KYC** at `/employer/onboarding` with 4 SA-standard docs (9.10), placement nudge banner, hire confirmation |
-| **admin** | `/admin` | Moderation queue, settings, feature flags, audit log + CSV export, **18 compliance assertions** on `/api/admin/outcomes-compliance`, **organisation review** queue with signed-URL inline document access (9.10) |
-| **gov** | `/gov` | Sebenza LMI hero, province deep-dives, **Skills-Shortage Justification Index** (9.7), **Local-Hiring Opportunity Map** (9.7), **Why roles go unfilled** (9.8.7) + **Why learners stall** (9.13) on `/gov/shortage`, **Curriculum vs demand** at `/gov/curriculum` (9.13), per-employer lookup dormant behind flag (9.7.6), printable policy brief, exports surface, 2FA panel |
+| **admin** | `/admin` | Moderation queue, settings, feature flags, audit log + CSV export, **18 compliance assertions** on `/api/admin/outcomes-compliance`, **organisation review** queue with signed-URL inline document access (9.10), **`/admin/llm`** provider configuration with at-most-one-active partial unique index + cross-border s.72 acknowledgement (13.3), **`/admin/curriculum`** editorial curation queue + bulk-import + provenance ledger (13.3) |
+| **gov** | `/gov` | Sebenza LMI hero, province deep-dives, **Skills-Shortage Justification Index** (9.7), **Local-Hiring Opportunity Map** (9.7), **Why roles go unfilled** (9.8.7) + **Why learners stall** (9.13) on `/gov/shortage`, **Curriculum vs demand** at `/gov/curriculum` (9.13) with module-grain gap panel (13.6), per-employer lookup dormant behind flag (9.7.6), printable policy brief, exports surface, 2FA panel |
 
 The proxy + DAL + Server Action layers each enforce the role gate
 (defence-in-depth). `verifyGov()` allows admins through for ops override.
@@ -333,7 +339,7 @@ that preserves the suppression floor. Every read + every export lands an
 The three documents in `docs/` are load-bearing and read together every session:
 
 1. [docs/TO_START_EVERY_SESSION.md](docs/TO_START_EVERY_SESSION.md) — non-negotiable rules + Current State block.
-2. [docs/ROADMAP.md](docs/ROADMAP.md) — phased build plan (Phase 0 → 10).
+2. [docs/ROADMAP.md](docs/ROADMAP.md) — phased build plan (Phase 0 → 13).
 3. [docs/UX_UI_SPEC.md](docs/UX_UI_SPEC.md) — design system + screen-by-screen UX.
 
 See also [CLAUDE.md](CLAUDE.md) for a per-session agent brief and

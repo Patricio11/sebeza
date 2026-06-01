@@ -304,7 +304,9 @@ await logAccess({
 
 `AuditKind` is a TypeScript union of string literals. Adding a new audit kind requires extending the union — the type checker is the gate that prevents free-text audit kinds drifting across the codebase.
 
-Audit rows never contain raw PII directly. The `meta` field carries IDs, counts, decisions — not names, emails, ID numbers, document contents.
+Audit rows never contain raw PII directly. The `meta` field carries IDs, counts, decisions — not names, emails, ID numbers, document contents. When the input itself is non-PII but voluminous (a syllabus paste; a search-term log), hash it (SHA-256) and store the hash in `meta` — never the plaintext. The hash is enough to correlate two events on the same input; nothing more leaks.
+
+**Multi-gate dispatch pattern**: when an outbound integration costs money or carries cross-border processing risk (SMS / WhatsApp / external LLM), the dispatcher enforces a fixed list of gates BEFORE the outbound HTTP fires — each gate refusal writes its own audit row with `meta.gate` naming which gate refused. The pattern guarantees zero spend until every gate is open. Examples in this codebase: `lib/messaging/dispatch.ts` (6 gates for SMS / WhatsApp) and `lib/llm/curriculum.ts` (6 gates for the editorial LLM pipeline). The principle: any single failure mode (admin forgot to flip flag, budget exhausted, payload looks like PII) is structurally impossible to ignore — the dispatcher writes it down and refuses.
 
 ### 4.6 Mock-first data seam
 
