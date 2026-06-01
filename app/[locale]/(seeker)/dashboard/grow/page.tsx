@@ -26,7 +26,9 @@ import {
   demandVsCurriculumQuery,
   moduleSkillsForStudent,
 } from "@/db/queries/curriculum";
+import { loadStudentProgressionTimeline } from "@/db/queries/student-progression";
 import { ProgrammeVsMarketCard } from "@/components/feature/analytics/ProgrammeVsMarketCard";
+import { StudentProgressionTimeline } from "@/components/feature/analytics/StudentProgressionTimeline";
 import {
   PROVIDER_LABEL,
   COST_LABEL,
@@ -120,6 +122,12 @@ export default async function CareerCompassPage({
   const studentSkillsPromise = me.academic
     ? moduleSkillsForStudent(me.profileId)
     : Promise.resolve(null);
+  // Phase 13.4  progression timeline composed from academic_profiles,
+  // qualifications, employer-confirmed placements, completed learning
+  // items, and self-declared milestones. Students only.
+  const progressionPromise = me.academic
+    ? loadStudentProgressionTimeline(me.profileId)
+    : Promise.resolve(null);
 
   const [
     rawCompass,
@@ -128,6 +136,7 @@ export default async function CareerCompassPage({
     recentAbandons,
     curriculum,
     studentSkills,
+    progression,
   ] = await Promise.all([
       getCompassForProfile(me),
       rankInPoolQuery({
@@ -140,6 +149,7 @@ export default async function CareerCompassPage({
       listRecentAbandonReasonsBySkill(),
       curriculumPromise,
       studentSkillsPromise,
+      progressionPromise,
     ]);
   // Phase 9.12  D3 + Accept-button awareness. The compass needs to know:
   //  - which recommendations are already on the seeker's active learning
@@ -197,6 +207,7 @@ export default async function CareerCompassPage({
         <HelpLink role="seeker" slug="switching-profession" label="Switching profession" />
         <HelpLink role="seeker" slug="discovering-employers" label="Recommended employers" />
         <HelpLink role="seeker" slug="following-employers" label="Following employers" />
+        <HelpLink role="seeker" slug="student-progression-tracker" label="Progression timeline" />
       </div>
 
       {/* ───────────── Vacancy-outcome deep-link banner (Phase 9.11) ─────────────
@@ -288,6 +299,15 @@ export default async function CareerCompassPage({
             moduleSkills={studentSkills ?? undefined}
           />
         </section>
+      )}
+
+      {/* ───────────── Phase 13.4  Progression timeline (student-side) ───────────── */}
+      {me.academic && progression && (
+        <StudentProgressionTimeline
+          timeline={progression}
+          locale={locale}
+          allowEdit={true}
+        />
       )}
 
       {/* Phase 11.2.9  compact student-lane nudge on /dashboard/grow

@@ -1863,6 +1863,48 @@ export const moduleSkills = pgTable(
 );
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Phase 13.4  student_milestones  self-declared events composed into
+// the StudentProgressionTimeline alongside auto-derived rows from
+// academic_profiles + qualifications + placements + learning_items.
+//
+// Private surface only  the timeline lives on /dashboard/grow.
+// Nothing in this table renders on /p/<handle>. Verification-Honesty
+// stands: a 'first_job_accepted' milestone does NOT flip placements
+// to employer_confirmed (only employer Mark-as-Hired does).
+//
+// One-shot uniqueness for everything except 'other' is enforced by
+// a PARTIAL UNIQUE index in migration 0046  Drizzle's `uniqueIndex`
+// builder doesn't accept a WHERE clause, so the schema documents the
+// intent and the DB layer enforces it.
+// ─────────────────────────────────────────────────────────────────────────────
+export const studentMilestoneKind = pgEnum("student_milestone_kind", [
+  "dissertation_submitted",
+  "graduation_confirmed",
+  "first_job_accepted",
+  "studies_paused",
+  "other",
+]);
+
+export const studentMilestones = pgTable(
+  "student_milestones",
+  {
+    id: text("id").primaryKey(),
+    profileId: text("profile_id")
+      .notNull()
+      .references(() => profiles.id, { onDelete: "cascade" }),
+    kind: studentMilestoneKind("kind").notNull(),
+    /** Calendar date the milestone occurred (not the row creation date). */
+    occurredOn: date("occurred_on").notNull(),
+    /** Optional one-line note, 200-char soft cap enforced at the action. */
+    note: text("note"),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+  },
+  (t) => ({
+    byProfile: index("idx_student_milestones_by_profile").on(t.profileId),
+  }),
+);
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Phase 13.3  llm_providers admin-managed configuration.
 //
 // Four placeholder rows seeded in migration 0045 (openai, anthropic,

@@ -41,6 +41,8 @@ import * as sharingYourProfile from "./profile/sharing-your-profile";
 import * as achievements from "./profile/achievements";
 //  Phase 13.1
 import * as studentModulesAndProject from "./profile/student-modules-and-project";
+//  Phase 13.4
+import * as studentProgressionTracker from "./profile/student-progression-tracker";
 
 //  Vacancy invitations
 import * as vacancyInvitationsExplained from "./invitations/vacancy-invitations-explained";
@@ -118,6 +120,7 @@ export const SEEKER_HELP_ARTICLES: HelpArticle[] = [
   sharingYourProfile,
   achievements,
   studentModulesAndProject,
+  studentProgressionTracker,
   vacancyInvitationsExplained,
   howToAcceptDeclineOrReconsider,
   declineReasonsAndWhatTheyMean,

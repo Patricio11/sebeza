@@ -316,7 +316,13 @@ export type AuditKind =
   //                changedFields: ('confidence' | 'module_label' | 'institution')[] }
   | "admin.curriculum.module_skill.approved"
   | "admin.curriculum.module_skill.rejected"
-  | "admin.curriculum.module_skill.edited";
+  | "admin.curriculum.module_skill.edited"
+  // Phase 13.4  student-declared milestones on /dashboard/grow.
+  // `subject` is the milestone id; meta:
+  //   added    { kind, occurredOn }
+  //   removed  { kind }
+  | "student.milestone.added"
+  | "student.milestone.removed";
 
 export interface AuditEvent {
   kind: AuditKind;
