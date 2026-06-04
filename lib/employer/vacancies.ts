@@ -196,6 +196,102 @@ export async function listMyVacancies(): Promise<VacancyRow[]> {
 }
 
 /**
+ * Phase 13.8  open vacancies belonging to the caller's org, for the
+ * inverse-direction invite flow on `/search` (single profile  pick
+ * one of MY open vacancies). Excludes draft / closed / filled so the
+ * picker only ever lists rows that actually accept new invites.
+ *
+ * Returns minimal columns the picker needs (id + title + status); the
+ * full `VacancyRow` shape is heavier than necessary for the picker
+ * UI. Empty array when the caller has no org context. Org-scoped
+ * via `verifyEmployer()`  same privacy invariant as `listMyVacancies`.
+ */
+export interface OpenVacancyOption {
+  id: string;
+  title: string;
+  professionSlug: string;
+  provinceSlug: string;
+}
+
+export async function listMyOrgOpenVacancies(): Promise<OpenVacancyOption[]> {
+  const session = await verifyEmployer();
+  if (!session.orgId) return [];
+  const db = getDb();
+  const rows = await db
+    .select({
+      id: schema.vacancies.id,
+      title: schema.vacancies.title,
+      professionSlug: schema.vacancies.professionSlug,
+      provinceSlug: schema.vacancies.provinceSlug,
+    })
+    .from(schema.vacancies)
+    .where(
+      and(
+        eq(schema.vacancies.organizationId, session.orgId),
+        eq(schema.vacancies.status, "open"),
+      ),
+    )
+    .orderBy(desc(schema.vacancies.createdAt));
+  return rows;
+}
+
+/**
+ * Phase 13.8  builds a `profileId  vacancyIds[]` map covering every
+ * active invitation across the caller's open vacancies. The
+ * <InviteFromSearchButton> modal uses it to gray out the vacancies a
+ * given profile is already on so the employer doesn't waste a click.
+ *
+ * "Active" = states that still occupy a vacancy slot in the
+ * employer's mental model: `invited` + `reconsidering` +
+ * `accepted_with_notice`. `accepted` (already hired) + `declined` +
+ * `withdrawn` + `expired` are NOT active; re-inviting after those
+ * is a deliberate employer action so we don't pre-block them at the
+ * UX layer (the DB unique constraint still prevents the literal
+ * duplicate row, but accepted/declined invites stay in history).
+ *
+ * Empty map when caller has no org context.
+ */
+export async function activeInvitationsByProfileForMyOrg(
+  profileIds: string[],
+): Promise<Map<string, Set<string>>> {
+  const map = new Map<string, Set<string>>();
+  if (profileIds.length === 0) return map;
+  const session = await verifyEmployer();
+  if (!session.orgId) return map;
+
+  const db = getDb();
+  const rows = await db
+    .select({
+      profileId: schema.vacancyInvitations.profileId,
+      vacancyId: schema.vacancyInvitations.vacancyId,
+      state: schema.vacancyInvitations.state,
+    })
+    .from(schema.vacancyInvitations)
+    .innerJoin(
+      schema.vacancies,
+      eq(schema.vacancyInvitations.vacancyId, schema.vacancies.id),
+    )
+    .where(
+      and(
+        eq(schema.vacancies.organizationId, session.orgId),
+        eq(schema.vacancies.status, "open"),
+        inArray(schema.vacancyInvitations.profileId, profileIds),
+        inArray(schema.vacancyInvitations.state, [
+          "invited",
+          "reconsidering",
+          "accepted_with_notice",
+        ]),
+      ),
+    );
+  for (const r of rows) {
+    const set = map.get(r.profileId);
+    if (set) set.add(r.vacancyId);
+    else map.set(r.profileId, new Set([r.vacancyId]));
+  }
+  return map;
+}
+
+/**
  * Load a single vacancy, scoped to the caller's org. Returns `null`
  * when the id doesn't match an org-owned vacancy  the function does
  * NOT differentiate "doesn't exist" from "exists but not yours" so

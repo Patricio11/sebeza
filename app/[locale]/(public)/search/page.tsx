@@ -20,6 +20,20 @@ import { isOpenToTag } from "@/lib/mock/types";
 import { findProvinceBySlug, findCityBySlug, PROFESSIONS } from "@/lib/mock/taxonomy";
 import { getSetting } from "@/lib/admin/settings";
 import { SearchX } from "lucide-react";
+// Phase 13.8  per-row "Invite to vacancy" affordance for the
+// employer view of /search. The page itself stays public; the
+// detection + data load happens before render and the slot is
+// either an island or null.
+import { getSessionUser } from "@/lib/auth/dal";
+import { getDb } from "@/db/client";
+import * as schemaDb from "@/db/schema";
+import { and, eq, inArray, isNull } from "drizzle-orm";
+import {
+  listMyOrgOpenVacancies,
+  activeInvitationsByProfileForMyOrg,
+  type OpenVacancyOption,
+} from "@/lib/employer/vacancies";
+import { InviteFromSearchButton } from "@/components/feature/employer/vacancies/InviteFromSearchButton";
 
 interface SearchPageProps {
   params: Promise<{ locale: string }>;
@@ -96,6 +110,76 @@ export default async function SearchPage({ params, searchParams }: SearchPagePro
 
   const result = await dataProvider.searchProfiles(filters);
   const t = await getTranslations("search");
+
+  // ─── Phase 13.8  employer-only invite affordance on result rows ────
+  //
+  // The /search route is PUBLIC: we cannot call `verifyEmployer()` (it
+  // would redirect non-employers to their role-home). So we detect
+  // the viewer manually via the cached `getSessionUser()` + a single
+  // org-membership lookup. The button only renders when:
+  //
+  //   1. The viewer is a signed-in employer.
+  //   2. Their org's verification status is 'verified' (PII-touching
+  //      action gate; matches the existing Phase 9.10 posture).
+  //   3. The org has at least one OPEN vacancy  enforced inside the
+  //      modal, but we still load the picker payload here so the
+  //      button's first click is instant.
+  //
+  // Hide-not-disable: when the gate fails, no slot is emitted. The
+  // "Verification-Honesty Rule" extends to UI affordances  never
+  // advertise an action the viewer can't take.
+  // `PublicProfile` (the search-result shape) intentionally exposes
+  // `handle` only  the internal `profile.id` is the redacted-out
+  // identifier needed to call `bulkInviteToVacancy`. We resolve handle
+  //  id for the page-window result set in one extra query (cheap;
+  // handle has a UNIQUE index) ONLY when the viewer is an employer.
+  let inviteCtx: {
+    vacancies: OpenVacancyOption[];
+    /** Keyed by `handle` (the public identifier on the result row). */
+    profileIdByHandle: Map<string, string>;
+    /** Active invitations keyed by `profileId`. */
+    activeInvitations: Map<string, Set<string>>;
+  } | null = null;
+  const session = await getSessionUser();
+  if (session?.role === "employer" && result.profiles.length > 0) {
+    const db = getDb();
+    const orgRow = await db
+      .select({
+        verification: schemaDb.organizations.verification,
+      })
+      .from(schemaDb.organizationMembers)
+      .innerJoin(
+        schemaDb.organizations,
+        eq(schemaDb.organizationMembers.organizationId, schemaDb.organizations.id),
+      )
+      .where(
+        and(
+          eq(schemaDb.organizationMembers.userId, session.id),
+          isNull(schemaDb.organizationMembers.suspendedAt),
+        ),
+      )
+      .limit(1);
+    if (orgRow[0]?.verification === "verified") {
+      const vacancies = await listMyOrgOpenVacancies();
+      const handles = result.profiles.map((p) => p.handle);
+      const idRows = await db
+        .select({
+          id: schemaDb.profiles.id,
+          handle: schemaDb.profiles.handle,
+        })
+        .from(schemaDb.profiles)
+        .where(inArray(schemaDb.profiles.handle, handles));
+      const profileIdByHandle = new Map(
+        idRows.map((r) => [r.handle, r.id] as const),
+      );
+      const profileIds = idRows.map((r) => r.id);
+      const activeInvitations =
+        vacancies.length > 0 && profileIds.length > 0
+          ? await activeInvitationsByProfileForMyOrg(profileIds)
+          : new Map<string, Set<string>>();
+      inviteCtx = { vacancies, profileIdByHandle, activeInvitations };
+    }
+  }
 
   const province = findProvinceBySlug(filters.province ?? undefined);
   const city = findCityBySlug(filters.city ?? undefined);
@@ -234,6 +318,7 @@ export default async function SearchPage({ params, searchParams }: SearchPagePro
                               locale={locale}
                               highlightCitizen={filters.highlightCitizens}
                               verificationVisible={verificationVisible}
+                              trailingAction={renderInviteSlot(p.handle, p.displayName, inviteCtx)}
                             />
                           </li>
                         </Fragment>
@@ -267,5 +352,42 @@ export default async function SearchPage({ params, searchParams }: SearchPagePro
       </main>
       <SiteFooter />
     </>
+  );
+}
+
+/**
+ * Phase 13.8  decide whether to inject the per-row Invite button for
+ * the current result row. Returns the island when the viewer is an
+ * eligible employer (verified org) AND the row's profile id was
+ * resolved from the handle index; returns null otherwise.
+ *
+ * The verified-org gate already ran in the page body; this helper is
+ * just the per-row plumbing. A missing handle in the id map (only
+ * possible if profiles drift between the search read and the id
+ * lookup) silently degrades to "no button"  honest end-state, never
+ * a broken affordance.
+ */
+function renderInviteSlot(
+  handle: string,
+  displayName: string,
+  ctx: {
+    vacancies: OpenVacancyOption[];
+    profileIdByHandle: Map<string, string>;
+    activeInvitations: Map<string, Set<string>>;
+  } | null,
+) {
+  if (!ctx) return null;
+  const profileId = ctx.profileIdByHandle.get(handle);
+  if (!profileId) return null;
+  const alreadyInvitedVacancyIds = Array.from(
+    ctx.activeInvitations.get(profileId) ?? new Set<string>(),
+  );
+  return (
+    <InviteFromSearchButton
+      profileId={profileId}
+      profileDisplayName={displayName}
+      vacancies={ctx.vacancies.map((v) => ({ id: v.id, title: v.title }))}
+      alreadyInvitedVacancyIds={alreadyInvitedVacancyIds}
+    />
   );
 }

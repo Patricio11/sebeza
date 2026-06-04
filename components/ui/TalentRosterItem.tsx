@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
@@ -20,6 +21,15 @@ interface Props {
    * hidden. Defaults true so existing callers stay unchanged.
    */
   verificationVisible?: boolean;
+  /**
+   * Phase 13.8  optional action node rendered alongside the
+   * "View profile" CTA in the row footer. Used by /search to inject
+   * the employer-only "Invite to vacancy" client island. The slot is
+   * intentionally a generic ReactNode so the roster row stays free
+   * of any employer/seeker conditional rendering  the parent server
+   * page passes `null` (default) or a pre-rendered island.
+   */
+  trailingAction?: ReactNode;
   className?: string;
 }
 
@@ -35,6 +45,7 @@ export function TalentRosterItem({
   locale = "en",
   highlightCitizen = false,
   verificationVisible = true,
+  trailingAction = null,
   className,
 }: Props) {
   const t = useTranslations("search.rosterItem");
@@ -125,13 +136,19 @@ export function TalentRosterItem({
               variant="compact"
             />
           </div>
-          <Link
-            href={`/p/${profile.handle}`}
-            className="inline-flex items-center rounded-[var(--radius-pill)] border border-[color:var(--color-brand)] px-4 py-1.5 text-sm font-medium text-[color:var(--color-brand)] transition-colors hover:bg-[color:var(--color-brand-tint)]"
-          >
-            {t("viewProfile")}
-            <span className="sr-only">  {profile.displayName}</span>
-          </Link>
+          {/* Phase 13.8  CTA cluster. Mobile stacks the optional
+              trailing action UNDER View profile so each tap target
+              keeps its full width; md+ inlines them side-by-side. */}
+          <div className="flex w-full flex-col items-stretch gap-2 sm:w-auto sm:flex-row sm:items-center">
+            <Link
+              href={`/p/${profile.handle}`}
+              className="inline-flex items-center justify-center rounded-[var(--radius-pill)] border border-[color:var(--color-brand)] px-4 py-1.5 text-sm font-medium text-[color:var(--color-brand)] transition-colors hover:bg-[color:var(--color-brand-tint)]"
+            >
+              {t("viewProfile")}
+              <span className="sr-only">  {profile.displayName}</span>
+            </Link>
+            {trailingAction}
+          </div>
         </footer>
       </div>
     </article>
