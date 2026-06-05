@@ -29,7 +29,8 @@ import { DeclineReasonsCard } from "@/components/feature/analytics/DeclineReason
 import { declineReasonAggregateQuery } from "@/db/queries/decline-reasons";
 import { Plus, MapPin, Briefcase, Calendar, Copy } from "lucide-react";
 import { HelpLink } from "@/components/feature/help/HelpLink";
-import { PROVINCES, PROFESSIONS } from "@/lib/mock/taxonomy";
+import { PROFESSIONS } from "@/lib/mock/taxonomy";
+import { formatVacancyLocation } from "@/lib/employer/vacancies-display";
 
 export const revalidate = 0; // Always fresh  this is the employer's pipeline view.
 
@@ -161,9 +162,15 @@ function VacancyCard({
   const professionLabel =
     PROFESSIONS.find((p) => p.slug === vacancy.professionSlug)?.label ??
     vacancy.professionSlug;
-  const provinceLabel =
-    PROVINCES.find((p) => p.slug === vacancy.provinceSlug)?.label ??
-    vacancy.provinceSlug;
+  // Phase 13.9  single source of truth for the location string.
+  // Handles "Any province  Remote / Hybrid" for null-province
+  // (remote / hybrid) vacancies + the conventional "Cape Town,
+  // Western Cape" for province-scoped vacancies.
+  const provinceLabel = formatVacancyLocation({
+    provinceSlug: vacancy.provinceSlug,
+    citySlug: vacancy.citySlug,
+    workAvailability: vacancy.workAvailability,
+  });
   const dfmt = new Intl.DateTimeFormat("en-ZA", {
     year: "numeric",
     month: "short",

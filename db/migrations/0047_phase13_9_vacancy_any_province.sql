@@ -1,0 +1,32 @@
+-- Phase 13.9  drop NOT NULL on vacancies.province_slug so a remote
+-- (or hybrid) vacancy can be marked "Any province".
+--
+-- Closes the structural gap where a remote-Gauteng-based vacancy
+-- would exclude a perfect KZN candidate from the reverse-match list
+-- because the matcher composes a province filter from the column.
+--
+-- Semantics:
+--   province_slug = NULL    "Any province (remote / hybrid)". The
+--                            matcher skips the province filter.
+--   province_slug = <slug>   single-province scope (existing behaviour).
+--
+-- D1 in PHASE_13_9_PLAN.md: NULL is the chosen representation, not a
+-- sentinel value like 'any'. Reasons documented there.
+--
+-- D2 in the plan: the form / server validation gate "Any" to
+-- vacancies whose work_availability includes 'remote' OR 'hybrid'.
+-- The DB doesn't enforce that cross-column rule (a CHECK constraint
+-- would couple the column to the enum + would need an UPDATE
+-- trigger for the array case). Application-layer validation in
+-- lib/employer/vacancies.ts createVacancy / updateVacancy is the
+-- structural gate.
+--
+-- city_slug is already nullable from migration 0015; no change there.
+-- D3: when province_slug is NULL, city_slug must also be NULL.
+-- Enforced at the application layer for the same reason as D2.
+--
+-- D4: existing rows stay as they are. No backfill; this migration
+-- only relaxes the constraint for forward-going edits + creates.
+
+ALTER TABLE vacancies
+  ALTER COLUMN province_slug DROP NOT NULL;

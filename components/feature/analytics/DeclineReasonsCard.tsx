@@ -31,6 +31,10 @@ import {
   type DeclineReasonValue,
 } from "@/db/queries/decline-reasons";
 import { PROFESSIONS, PROVINCES } from "@/lib/mock/taxonomy";
+import {
+  isNationalRemoteBucket,
+  nationalRemoteBucketLabel,
+} from "@/lib/employer/vacancies-display";
 
 interface Props {
   data: DeclineReasonResult;
@@ -202,9 +206,15 @@ function CellHeader({
   const professionLabel =
     PROFESSIONS.find((p) => p.slug === cell.profession_slug)?.label ??
     cell.profession_slug;
-  const provinceLabel =
-    PROVINCES.find((p) => p.slug === cell.province_slug)?.label ??
-    cell.province_slug;
+  // Phase 13.9 D5  recognise the "national-remote" sentinel and
+  // render the friendly lane label; the SQL COALESCE in
+  // declineReasonAggregateQuery buckets null-province vacancies
+  // under it so they appear as a distinct cell, not as a missing
+  // row.
+  const provinceLabel = isNationalRemoteBucket(cell.province_slug)
+    ? nationalRemoteBucketLabel()
+    : PROVINCES.find((p) => p.slug === cell.province_slug)?.label ??
+      cell.province_slug;
 
   // The headline reason for this cell  the largest bar gets called
   // out in the cell header so the reader has the punchline at a

@@ -55,6 +55,15 @@ import { useLocale } from "next-intl";
 export type InviteFromSearchVacancy = {
   id: string;
   title: string;
+  /**
+   * Phase 13.9  pre-computed location label so the picker can
+   * disambiguate two same-titled vacancies on different lanes
+   * (e.g. "Senior dev  Cape Town, Western Cape" vs "Senior dev
+   * Any province  Remote"). Computed server-side via
+   * `formatVacancyLocation` so the editorial wording is consistent
+   * with the vacancy list / detail / snapshot card.
+   */
+  locationLabel: string;
 };
 
 interface Props {
@@ -235,7 +244,16 @@ function InviteDialog({
                           onChange={() => setSelectedId(v.id)}
                           className="size-4"
                         />
-                        <span className="flex-1 truncate">{v.title}</span>
+                        <span className="flex-1 min-w-0">
+                          <span className="block truncate">{v.title}</span>
+                          {/* Phase 13.9  location subtitle (incl.
+                              "Any province  Remote / Hybrid"). */}
+                          {v.locationLabel && (
+                            <span className="block truncate text-[0.7rem] text-[color:var(--color-ink-soft)]">
+                              {v.locationLabel}
+                            </span>
+                          )}
+                        </span>
                         {alreadyInvited && (
                           <span className="text-[0.65rem] uppercase tracking-[0.14em] text-[color:var(--color-ink-soft)]">
                             Already invited

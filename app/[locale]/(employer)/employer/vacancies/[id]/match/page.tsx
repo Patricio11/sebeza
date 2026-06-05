@@ -44,6 +44,7 @@ import { TalentRosterItem } from "@/components/ui/TalentRosterItem";
 import { VacancyStatusChip } from "@/components/feature/employer/vacancies/VacancyStatusChip";
 import { BulkInviteIsland } from "@/components/feature/employer/vacancies/BulkInviteIsland";
 import { PROVINCES, PROFESSIONS } from "@/lib/mock/taxonomy";
+import { formatVacancyLocation } from "@/lib/employer/vacancies-display";
 import { getSetting } from "@/lib/admin/settings";
 import { getDb } from "@/db/client";
 import * as schema from "@/db/schema";
@@ -100,9 +101,12 @@ export default async function VacancyMatchPage({
   const professionLabel =
     PROFESSIONS.find((p) => p.slug === vacancy.professionSlug)?.label ??
     vacancy.professionSlug;
-  const provinceLabel =
-    PROVINCES.find((p) => p.slug === vacancy.provinceSlug)?.label ??
-    vacancy.provinceSlug;
+  // Phase 13.9  single source of truth for location rendering.
+  const provinceLabel = formatVacancyLocation({
+    provinceSlug: vacancy.provinceSlug,
+    citySlug: vacancy.citySlug,
+    workAvailability: vacancy.workAvailability,
+  });
 
   // "Refine in search" jumps to the public /search with the same filters
   // pre-filled. The employer keeps the workflow context here on /match;

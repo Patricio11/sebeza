@@ -32,7 +32,7 @@ export const meta: HelpArticleMeta = {
     "duplicate-vacancy",
   ],
   surfaceLink: "/employer/vacancies/new",
-  updatedAt: "2026-05-29",
+  updatedAt: "2026-06-05",
 };
 
 export default function Article() {
@@ -62,6 +62,10 @@ export default function Article() {
         <li>
           <strong>Province</strong> &mdash; the province the role is in.
           The matcher uses this; the seeker sees it on the invitation.
+          For remote or hybrid roles, the picker shows an extra
+          option: <em>Any province (remote / hybrid)</em>. Picking it
+          drops the province filter entirely so the matcher reaches
+          candidates in every SA province  more on that below.
         </li>
         <li>
           <strong>Seniority</strong> &mdash; optional but useful: Junior
@@ -143,6 +147,44 @@ export default function Article() {
           invite ever; re-nudging is harassment.
         </li>
       </ul>
+
+      <h2>Posting a remote or hybrid role</h2>
+      <p>
+        When you tick <strong>remote</strong> or <strong>hybrid</strong>{" "}
+        in the work-mode chips, the province picker gains an extra
+        option: <em>Any province (remote / hybrid)</em>. Choosing it
+        tells the matcher the role is not constrained to one province
+         a perfect candidate in KwaZulu-Natal will surface for your
+        Gauteng-based remote dev role.
+      </p>
+      <ul>
+        <li>
+          The city field disables  &ldquo;Any city in Any
+          province&rdquo; is incoherent.
+        </li>
+        <li>
+          If you later untick remote AND hybrid, the picker
+          auto-resets the province back to <em>Select&hellip;</em>
+          so the form is never in an inconsistent state.
+        </li>
+        <li>
+          Skill / years / NQF requirements still apply  the only
+          axis dropped is location.
+        </li>
+        <li>
+          The vacancy renders as &ldquo;Any province &middot; Remote / Hybrid&rdquo;
+          on the invitation card so seekers see the posture
+          honestly.
+        </li>
+      </ul>
+      <Callout type="info" title="Sebenza is SA-bounded">
+        <p>
+          &ldquo;Any&rdquo; means any South African province  not any
+          country. The platform&rsquo;s talent pool is anchored to SA
+          residents; opening to non-SA-residents is out of scope by
+          design.
+        </p>
+      </Callout>
 
       <Steps>
         <Step number={1}>

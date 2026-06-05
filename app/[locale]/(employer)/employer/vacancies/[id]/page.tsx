@@ -46,6 +46,7 @@ import {
 import { getPlacementsForVacancy } from "@/lib/employer/placements";
 import { getProfessions } from "@/lib/taxonomy/query";
 import { PROVINCES, PROFESSIONS, SKILLS } from "@/lib/mock/taxonomy";
+import { formatVacancyLocation } from "@/lib/employer/vacancies-display";
 import { ChevronLeft, Lock, MapPin, Users } from "lucide-react";
 import type { WorkAvailabilityKind } from "@/lib/mock/types";
 import { HelpLink } from "@/components/feature/help/HelpLink";
@@ -95,9 +96,13 @@ export default async function VacancyDetailPage({
   const professionLabel =
     PROFESSIONS.find((p) => p.slug === vacancy.professionSlug)?.label ??
     vacancy.professionSlug;
-  const provinceLabel =
-    PROVINCES.find((p) => p.slug === vacancy.provinceSlug)?.label ??
-    vacancy.provinceSlug;
+  // Phase 13.9  single source of truth. Handles "Any province
+  // Remote / Hybrid" for null-province vacancies.
+  const provinceLabel = formatVacancyLocation({
+    provinceSlug: vacancy.provinceSlug,
+    citySlug: vacancy.citySlug,
+    workAvailability: vacancy.workAvailability,
+  });
 
   const NEXT_STATES: Record<VacancyStatus, VacancyStatus[]> = {
     draft: ["open", "closed"],

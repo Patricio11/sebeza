@@ -130,11 +130,20 @@ export async function declineReasonAggregateQuery(
     ? sql`AND v.organization_id = ${args.orgId}`
     : sql``;
 
+  // Phase 13.9 D5  COALESCE null-province (Any-province remote /
+  // hybrid) vacancies under the literal `'national-remote'` sentinel
+  // so the GROUP BY produces a distinct "national / remote" lane
+  // alongside the per-province cells. The render layer recognises
+  // the sentinel via `isNationalRemoteBucket` + surfaces the
+  // friendly label via `nationalRemoteBucketLabel`. Excluding the
+  // rows would lose real decline-pattern signal; double-counting
+  // would inflate the per-province counts; bucketing is the honest
+  // middle path.
   const rows = (
     (await db.execute(sql`
       SELECT
         v.profession_slug,
-        v.province_slug,
+        COALESCE(v.province_slug, 'national-remote') AS province_slug,
         COALESCE(vi.decline_reason::text, 'unspecified') AS reason,
         COUNT(*)::int AS count,
         COALESCE(
@@ -145,8 +154,8 @@ export async function declineReasonAggregateQuery(
       WHERE vi.state = 'declined'
         AND vi.responded_at IS NOT NULL
         ${orgFilter}
-      GROUP BY v.profession_slug, v.province_slug, reason
-      ORDER BY v.profession_slug, v.province_slug, count DESC
+      GROUP BY v.profession_slug, COALESCE(v.province_slug, 'national-remote'), reason
+      ORDER BY v.profession_slug, province_slug, count DESC
     `)) as unknown as {
       rows: Array<{
         profession_slug: string;

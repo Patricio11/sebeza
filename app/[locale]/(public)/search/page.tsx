@@ -33,6 +33,7 @@ import {
   activeInvitationsByProfileForMyOrg,
   type OpenVacancyOption,
 } from "@/lib/employer/vacancies";
+import { formatVacancyLocation } from "@/lib/employer/vacancies-display";
 import { InviteFromSearchButton } from "@/components/feature/employer/vacancies/InviteFromSearchButton";
 
 interface SearchPageProps {
@@ -386,7 +387,20 @@ function renderInviteSlot(
     <InviteFromSearchButton
       profileId={profileId}
       profileDisplayName={displayName}
-      vacancies={ctx.vacancies.map((v) => ({ id: v.id, title: v.title }))}
+      vacancies={ctx.vacancies.map((v) => ({
+        id: v.id,
+        title: v.title,
+        // Phase 13.9  pre-format the location label server-side so
+        // the picker shows "Any province  Remote / Hybrid" for
+        // null-province vacancies + the conventional province label
+        // for scoped ones. Empty string for city since /search
+        // doesn't ship city scope on the open-vacancy summary.
+        locationLabel: formatVacancyLocation({
+          provinceSlug: v.provinceSlug,
+          citySlug: null,
+          workAvailability: v.workAvailability,
+        }),
+      }))}
       alreadyInvitedVacancyIds={alreadyInvitedVacancyIds}
     />
   );

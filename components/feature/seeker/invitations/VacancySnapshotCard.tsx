@@ -14,7 +14,9 @@
 
 import { Briefcase, ClockArrowUp, Tag } from "lucide-react";
 import type { VacancySnapshot } from "@/lib/seeker/invitations-types";
-import { SKILLS, PROVINCES, PROFESSIONS } from "@/lib/mock/taxonomy";
+import type { WorkAvailabilityKind } from "@/lib/mock/types";
+import { SKILLS, PROFESSIONS } from "@/lib/mock/taxonomy";
+import { formatVacancyLocation } from "@/lib/employer/vacancies-display";
 
 interface Props {
   snapshot: VacancySnapshot | null;
@@ -61,11 +63,21 @@ export function VacancySnapshotCard({
     snapshot.professionSlug ??
     liveProfession ??
     snapshot.professionSlug;
+  // Phase 13.9  unified location formatter. When the snapshot
+  // carries a null provinceSlug (vacancy was created with the "Any
+  // province" option), render "Any province  Remote / Hybrid" etc.
+  // `workAvailability` is stored as string[] on the snapshot; the
+  // helper only checks for specific enum values so a passing string[]
+  // is safe even if the snapshot carries extra values.
   const provinceLabel =
-    PROVINCES.find((p) => p.slug === snapshot.provinceSlug)?.label ??
-    snapshot.provinceSlug ??
-    liveProvince ??
-    snapshot.provinceSlug;
+    formatVacancyLocation({
+      provinceSlug: snapshot.provinceSlug,
+      citySlug: snapshot.citySlug,
+      workAvailability:
+        snapshot.workAvailability as WorkAvailabilityKind[],
+    }) ||
+    liveProvince ||
+    "";
   const skillLabels = snapshot.skillSlugs
     .map((s) => SKILLS.find((sk) => sk.slug === s)?.label ?? s)
     .filter(Boolean);

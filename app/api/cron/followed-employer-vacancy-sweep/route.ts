@@ -63,6 +63,12 @@ export async function GET(request: Request) {
       // Find followers of this org whose (profession, province) matches.
       // Province + profession are stored as labels on profiles; slug
       // comparison happens at the seeker-profile JOIN via lower-case.
+      //
+      // Phase 13.9  when the vacancy is province-null (created with
+      // the "Any province" option for remote / hybrid roles), drop
+      // the province join entirely so EVERY follower of the org who
+      // matches on profession qualifies. That's the spirit of "Any":
+      // location doesn't constrain the match.
       const followers = await db
         .select({
           userId: schema.profiles.userId,
@@ -79,7 +85,9 @@ export async function GET(request: Request) {
             eq(schema.seekerFollowedEmployers.orgId, v.orgId),
             sql`${schema.profiles.deletedAt} IS NULL`,
             sql`LOWER(${schema.profiles.profession}) = LOWER(REPLACE(${v.professionSlug}, '-', ' '))`,
-            sql`LOWER(${schema.profiles.province}) = LOWER(REPLACE(${v.provinceSlug}, '-', ' '))`,
+            v.provinceSlug !== null
+              ? sql`LOWER(${schema.profiles.province}) = LOWER(REPLACE(${v.provinceSlug}, '-', ' '))`
+              : sql`TRUE`,
           ),
         );
 
@@ -92,7 +100,14 @@ export async function GET(request: Request) {
             kind: "employer.opened_vacancy.in_your_pool",
             title: `${v.orgName} opened a role in your pool`,
             body: `${v.title}  ${f.profession} · ${f.province}. You're following ${v.orgName}; this is the quiet ping you asked for.`,
-            link: `/search?q=${encodeURIComponent(v.orgName)}&province=${encodeURIComponent(v.provinceSlug)}`,
+            // Phase 13.9  when the vacancy is Any-province, deep-link
+            // to the unscoped search (no province filter) so the seeker
+            // lands on the broadest match set, consistent with the
+            // vacancy's own posture.
+            link:
+              v.provinceSlug !== null
+                ? `/search?q=${encodeURIComponent(v.orgName)}&province=${encodeURIComponent(v.provinceSlug)}`
+                : `/search?q=${encodeURIComponent(v.orgName)}`,
             // Per-org dedupe inside the catalog's 24h window so an
             // employer publishing a burst of vacancies doesn't flood
             // the same seeker multiple times in a day.

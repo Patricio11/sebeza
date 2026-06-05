@@ -12,7 +12,7 @@
  * updateVacancy). The component knows nothing about routing.
  */
 
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter } from "@/i18n/navigation";
 import {
   TextField,
@@ -36,7 +36,14 @@ import { useSessionDraft } from "@/lib/hooks/useSessionDraft";
 export interface VacancyFormValue {
   title: string;
   professionSlug: string;
-  provinceSlug: string;
+  /**
+   * Phase 13.9  NULL = "Any province (remote / hybrid)". Only legal
+   * when `workAvailability` includes `remote` or `hybrid`; server
+   * action validation refuses otherwise. The form's `province`
+   * picker auto-clears the "Any" choice when the user toggles off
+   * both remote AND hybrid (D6).
+   */
+  provinceSlug: string | null;
   citySlug?: string | null;
   skillSlugs: string[];
   seniority?: string | null;
@@ -133,6 +140,24 @@ const SENIORITY_OPTIONS = [
   "Senior",
   "Lead / Manager",
 ];
+
+/**
+ * Phase 13.9  the form's local representation of "Any province
+ * (remote / hybrid)". Translates to `null` on submit. The leading
+ * double-underscore makes it impossible for a real province slug to
+ * collide (slugs are kebab-case and never start with `_`).
+ */
+const PROVINCE_ANY_SENTINEL = "__any";
+
+/**
+ * Phase 13.9  is the current work-availability mix one that justifies
+ * the "Any province" picker option? D2 in the plan: remote OR hybrid.
+ */
+function workAvailabilityUnlocksAnyProvince(
+  set: Set<WorkAvailabilityKind>,
+): boolean {
+  return set.has("remote") || set.has("hybrid");
+}
 
 // Phase 9.19  the six work_availability_kind enum values, each with a
 // human-readable label for the chips. Order mirrors the seeker form
@@ -275,7 +300,18 @@ export function VacancyForm({
   const [profession, setProfession] = useState(
     initial?.professionSlug ?? "",
   );
-  const [province, setProvince] = useState(initial?.provinceSlug ?? "");
+  // Phase 13.9  the picker's local state uses three values:
+  //   ""        nothing picked yet
+  //   PROVINCE_ANY_SENTINEL ("__any")  "Any province (remote / hybrid)"
+  //   <slug>    a specific province
+  // We translate `__any`  null on submit so the action layer sees the
+  // canonical NULL representation (D1). The sentinel never leaves
+  // this component.
+  const initialProvinceState =
+    initial?.provinceSlug === null
+      ? PROVINCE_ANY_SENTINEL
+      : (initial?.provinceSlug ?? "");
+  const [province, setProvince] = useState(initialProvinceState);
   const [seniority, setSeniority] = useState(initial?.seniority ?? "");
   const [salaryBand, setSalaryBand] = useState(initial?.salaryBand ?? "");
   const [description, setDescription] = useState(
@@ -439,6 +475,22 @@ export function VacancyForm({
     });
   }
 
+  // Phase 13.9 D6  state convergence. When the user toggles off both
+  // `remote` AND `hybrid` while the picker is sitting on the "Any"
+  // sentinel, auto-clear the picker back to "Select…" so the form is
+  // never in an internally-inconsistent state. The convergence runs
+  // one-directionally (toggling remote/hybrid OFF clears Any);
+  // toggling remote/hybrid ON does NOT auto-pick Any  the employer
+  // must explicitly choose.
+  const anyProvinceUnlocked = workAvailabilityUnlocksAnyProvince(
+    workAvailabilitySet,
+  );
+  useEffect(() => {
+    if (!anyProvinceUnlocked && province === PROVINCE_ANY_SENTINEL) {
+      setProvince("");
+    }
+  }, [anyProvinceUnlocked, province]);
+
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
@@ -475,10 +527,27 @@ export function VacancyForm({
       return;
     }
 
+    // Phase 13.9  translate the "__any" sentinel into the canonical
+    // NULL representation the action layer expects. Belt-and-braces:
+    // also enforce that NULL province only escapes when remote/hybrid
+    // is set (the convergence effect prevents this combination from
+    // existing in steady state, but a fast submit during a toggle
+    // could race; the server-side gate is the structural backstop).
+    let submitProvince: string | null;
+    if (province === PROVINCE_ANY_SENTINEL) {
+      if (!anyProvinceUnlocked) {
+        setError("Pick remote or hybrid before choosing Any province.");
+        return;
+      }
+      submitProvince = null;
+    } else {
+      submitProvince = province;
+    }
+
     const value: VacancyFormValue = {
       title: title.trim(),
       professionSlug: profession,
-      provinceSlug: province,
+      provinceSlug: submitProvince,
       citySlug: null, // city refinement is Phase 9.8 vNext  province only for now
       skillSlugs: Array.from(skillSet),
       seniority: seniority || null,
@@ -558,22 +627,39 @@ export function VacancyForm({
             allowOther
             otherLabel="Suggest a new profession"
           />
-          <SelectField
-            id="province"
-            name="province"
-            label="Province"
-            required
-            value={province}
-            onChange={(e) => setProvince(e.target.value)}
-            disabled={pending}
-          >
-            <option value="">Select…</option>
-            {provinces.map((p) => (
-              <option key={p.slug} value={p.slug}>
-                {p.label}
-              </option>
-            ))}
-          </SelectField>
+          <div>
+            <SelectField
+              id="province"
+              name="province"
+              label="Province"
+              required
+              value={province}
+              onChange={(e) => setProvince(e.target.value)}
+              disabled={pending}
+            >
+              <option value="">Select…</option>
+              {/* Phase 13.9  "Any province" sentinel. Only listed
+                  when work_availability includes remote or hybrid
+                  (D2). Removed via state convergence (D6) when the
+                  user toggles those modes off. */}
+              {anyProvinceUnlocked && (
+                <option value={PROVINCE_ANY_SENTINEL}>
+                  Any province (remote / hybrid)
+                </option>
+              )}
+              {provinces.map((p) => (
+                <option key={p.slug} value={p.slug}>
+                  {p.label}
+                </option>
+              ))}
+            </SelectField>
+            {province === PROVINCE_ANY_SENTINEL && (
+              <p className="mt-1 text-xs italic text-[color:var(--color-ink-soft)]">
+                Candidates from every province match; the location
+                filter is off. City field is not used.
+              </p>
+            )}
+          </div>
         </div>
         <SelectField
           id="seniority"

@@ -46,6 +46,7 @@ import {
   PROFESSIONS as MOCK_PROFESSIONS,
   SKILLS as MOCK_SKILLS,
 } from "@/lib/mock/taxonomy";
+import { vacancyProvinceBucket } from "@/lib/employer/vacancies-display";
 import type {
   SearchFilters,
   SeasonalWindow,
@@ -95,7 +96,12 @@ export interface VacancyRow {
   createdByUserId: string;
   title: string;
   professionSlug: string;
-  provinceSlug: string;
+  /**
+   * Phase 13.9  nullable. NULL = "Any province (remote / hybrid)".
+   * Only valid when workAvailability includes 'remote' or 'hybrid';
+   * createVacancy + updateVacancy enforce the cross-column rule.
+   */
+  provinceSlug: string | null;
   citySlug: string | null;
   skillSlugs: string[];
   seniority: string | null;
@@ -133,7 +139,8 @@ function rowToVacancy(r: typeof schema.vacancies.$inferSelect): VacancyRow {
     createdByUserId: r.createdByUserId,
     title: r.title,
     professionSlug: r.professionSlug,
-    provinceSlug: r.provinceSlug,
+    // Phase 13.9  may be null = "Any province".
+    provinceSlug: r.provinceSlug ?? null,
     citySlug: r.citySlug ?? null,
     skillSlugs: r.skillSlugs ?? [],
     seniority: r.seniority ?? null,
@@ -210,7 +217,11 @@ export interface OpenVacancyOption {
   id: string;
   title: string;
   professionSlug: string;
-  provinceSlug: string;
+  /** Phase 13.9  may be null = "Any province (remote / hybrid)". */
+  provinceSlug: string | null;
+  /** Phase 13.9  picker subtitle needs work-mode awareness to render
+   *  "Any province · Remote / Hybrid" correctly. */
+  workAvailability: WorkAvailabilityKind[];
 }
 
 export async function listMyOrgOpenVacancies(): Promise<OpenVacancyOption[]> {
@@ -223,6 +234,7 @@ export async function listMyOrgOpenVacancies(): Promise<OpenVacancyOption[]> {
       title: schema.vacancies.title,
       professionSlug: schema.vacancies.professionSlug,
       provinceSlug: schema.vacancies.provinceSlug,
+      workAvailability: schema.vacancies.workAvailability,
     })
     .from(schema.vacancies)
     .where(
@@ -232,7 +244,13 @@ export async function listMyOrgOpenVacancies(): Promise<OpenVacancyOption[]> {
       ),
     )
     .orderBy(desc(schema.vacancies.createdAt));
-  return rows;
+  return rows.map((r) => ({
+    id: r.id,
+    title: r.title,
+    professionSlug: r.professionSlug,
+    provinceSlug: r.provinceSlug,
+    workAvailability: (r.workAvailability ?? []) as WorkAvailabilityKind[],
+  }));
 }
 
 /**
@@ -358,7 +376,14 @@ const WORK_AVAILABILITY_VALUES = [
 const vacancyInputSchema = z.object({
   title: z.string().trim().min(3).max(120),
   professionSlug: z.string().min(1),
-  provinceSlug: z.string().min(1),
+  /**
+   * Phase 13.9  nullable. NULL = "Any province (remote / hybrid)".
+   * The cross-column refine() below enforces:
+   *   (a) NULL province requires `remote` or `hybrid` in
+   *       `workAvailability` (D2).
+   *   (b) NULL province forces `citySlug` to also be NULL (D3).
+   */
+  provinceSlug: z.string().min(1).nullable(),
   citySlug: z.string().min(1).nullable().optional(),
   skillSlugs: z.array(z.string()).max(20).optional(),
   seniority: z.string().trim().max(40).nullable().optional(),
@@ -447,7 +472,8 @@ const vacancyInputSchema = z.object({
     .nullable()
     .optional(),
   seasonalWindowRecurringAnnually: z.boolean().nullable().optional(),
-}).refine(
+})
+.refine(
   (v) => {
     const start = v.seasonalWindowStartMonth ?? null;
     const end = v.seasonalWindowEndMonth ?? null;
@@ -459,6 +485,36 @@ const vacancyInputSchema = z.object({
     message:
       "Set both the start and end month of the seasonal window, or leave both blank.",
     path: ["seasonalWindowEndMonth"],
+  },
+)
+.refine(
+  (v) => {
+    // Phase 13.9 D2  NULL province (Any) requires the work-mode
+    // gate. The form's state-convergence + sentinel removal prevent
+    // this combination in steady state, but a client that bypasses
+    // the form (curl, scripted submit) must be refused server-side.
+    if (v.provinceSlug !== null) return true;
+    const wa = v.workAvailability ?? [];
+    return wa.includes("remote") || wa.includes("hybrid");
+  },
+  {
+    message:
+      "Any province is only allowed when the vacancy is remote or hybrid.",
+    path: ["provinceSlug"],
+  },
+)
+.refine(
+  (v) => {
+    // Phase 13.9 D3  Any province implies Any city. The form clears
+    // city on the picker; the server-side refuse covers the same
+    // bypass-the-form case.
+    if (v.provinceSlug !== null) return true;
+    return v.citySlug == null;
+  },
+  {
+    message:
+      "A vacancy with Any province cannot pin a specific city.",
+    path: ["citySlug"],
   },
 );
 
@@ -1229,11 +1285,17 @@ export async function markVacancyFilledAndLogHires(
 
     // Pull dominant decline reason for this (profession × province)
     // cell from the cross-market 9.8.7 aggregate. NULL when below k.
+    //
+    // Phase 13.9 D5  null-province vacancies are bucketed under the
+    // 'national-remote' sentinel by `declineReasonAggregateQuery`.
+    // Translate via `vacancyProvinceBucket` so the lookup hits the
+    // correct lane in both directions.
     const declineAgg = await declineReasonAggregateQuery();
+    const vacancyBucketKey = vacancyProvinceBucket(vacancy.provinceSlug);
     const cellRows = declineAgg.cells.filter(
       (c) =>
         c.profession_slug === vacancy.professionSlug &&
-        c.province_slug === vacancy.provinceSlug,
+        c.province_slug === vacancyBucketKey,
     );
     const dominantDeclineReason: DeclineReasonValue | null = cellRows.length
       ? cellRows.reduce((top, r) => (r.count > top.count ? r : top))

@@ -19,7 +19,9 @@ import { DashboardShell } from "@/components/layout/DashboardShell";
 import { SEEKER_NAV } from "@/components/layout/seekerNav";
 import { verifyRole } from "@/lib/auth/dal";
 import { listMyInvitations } from "@/lib/seeker/invitations";
-import { PROVINCES, PROFESSIONS } from "@/lib/mock/taxonomy";
+import { PROFESSIONS } from "@/lib/mock/taxonomy";
+import { formatVacancyLocation } from "@/lib/employer/vacancies-display";
+import type { WorkAvailabilityKind } from "@/lib/mock/types";
 import { ChevronRight, Inbox, MapPin } from "lucide-react";
 import { EmployerVerificationChip } from "@/components/feature/seeker/invitations/EmployerVerificationChip";
 import { HelpLink } from "@/components/feature/help/HelpLink";
@@ -224,9 +226,14 @@ function InvitationCard({
   const professionLabel =
     PROFESSIONS.find((p) => p.slug === inv.professionSlug)?.label ??
     inv.professionSlug;
-  const provinceLabel =
-    PROVINCES.find((p) => p.slug === inv.provinceSlug)?.label ??
-    inv.provinceSlug;
+  // Phase 13.9  unified location formatter; surfaces "Any province
+  // Remote / Hybrid" for null-province (remote / hybrid) vacancies.
+  const provinceLabel = formatVacancyLocation({
+    provinceSlug: inv.provinceSlug,
+    citySlug: inv.citySlug,
+    workAvailability:
+      (inv.workAvailability as WorkAvailabilityKind[]) ?? [],
+  });
   const urgency = urgencyChip(inv);
 
   const stateLabel = STATE_COPY[inv.state]?.label ?? inv.state;

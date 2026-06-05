@@ -1081,10 +1081,18 @@ export const vacancies = pgTable(
     professionSlug: text("profession_slug")
       .notNull()
       .references(() => professions.slug),
-    provinceSlug: text("province_slug")
-      .notNull()
-      .references(() => provinces.slug),
-    /** City refinement is optional  some vacancies are province-wide. */
+    /**
+     * Phase 13.9  nullable. NULL = "Any province (remote / hybrid)";
+     * the matcher drops the province filter when null. Gated at the
+     * application layer to vacancies whose work_availability includes
+     * `remote` or `hybrid` (createVacancy + updateVacancy refuse the
+     * combination otherwise). Existing rows are non-null by migration
+     * 0047's no-backfill posture. */
+    provinceSlug: text("province_slug").references(() => provinces.slug),
+    /**
+     * City refinement is optional  some vacancies are province-wide.
+     * Phase 13.9 invariant: when `provinceSlug` is NULL, `citySlug`
+     * must also be NULL ("Any city in Any province" is incoherent). */
     citySlug: text("city_slug").references(() => cities.slug),
     /** Free-form skill slugs from the controlled vocabulary. Stored as a
         Postgres text[] so filter-shape matches `SearchFilters.skills`. */

@@ -27,7 +27,9 @@ import { BlockEmployerControl } from "@/components/feature/seeker/BlockEmployerC
 import { ReportInvitationControl } from "@/components/feature/seeker/ReportInvitationControl";
 import { FollowEmployerButton } from "@/components/feature/seeker/FollowEmployerButton";
 import { isFollowingEmployer } from "@/lib/seeker/follows";
-import { PROVINCES, PROFESSIONS } from "@/lib/mock/taxonomy";
+import { PROFESSIONS } from "@/lib/mock/taxonomy";
+import { formatVacancyLocation } from "@/lib/employer/vacancies-display";
+import type { WorkAvailabilityKind } from "@/lib/mock/types";
 import { Building2, ChevronLeft, Clock, MapPin } from "lucide-react";
 
 export const revalidate = 0;
@@ -50,9 +52,13 @@ export default async function SeekerInvitationDetailPage({
   const professionLabel =
     PROFESSIONS.find((p) => p.slug === inv.professionSlug)?.label ??
     inv.professionSlug;
-  const provinceLabel =
-    PROVINCES.find((p) => p.slug === inv.provinceSlug)?.label ??
-    inv.provinceSlug;
+  // Phase 13.9  unified location formatter.
+  const provinceLabel = formatVacancyLocation({
+    provinceSlug: inv.provinceSlug,
+    citySlug: inv.citySlug,
+    workAvailability:
+      (inv.workAvailability as WorkAvailabilityKind[]) ?? [],
+  });
 
   const dfmt = new Intl.DateTimeFormat(locale, {
     year: "numeric",

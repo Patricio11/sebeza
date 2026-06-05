@@ -49,8 +49,21 @@ export interface SeekerInvitationRow {
   vacancyId: string;
   vacancyTitle: string;
   professionSlug: string;
-  provinceSlug: string;
+  /**
+   * Phase 13.9  nullable. NULL = "Any province (remote / hybrid)";
+   * render via `formatVacancyLocation`. Snapshots captured
+   * pre-Phase-13.9 are always non-null (column was NOT NULL then).
+   */
+  provinceSlug: string | null;
   citySlug: string | null;
+  /**
+   * Phase 13.9  drives the location formatter when provinceSlug is
+   * null ("Any province  Remote / Hybrid" etc.). Stored as the
+   * Postgres text[] column, surfaced here as unknown so the
+   * server-component renderers can cast to `WorkAvailabilityKind[]`
+   * if needed.
+   */
+  workAvailability: unknown;
   seniority: string | null;
   description: string | null;
   orgId: string;
@@ -88,7 +101,13 @@ export interface VacancySnapshot {
   title: string;
   description: string | null;
   professionSlug: string;
-  provinceSlug: string;
+  /**
+   * Phase 13.9  nullable. Snapshots captured pre-Phase-13.9 always
+   * have a non-null province (the column was NOT NULL then); newer
+   * snapshots may be null when the vacancy was created with the
+   * "Any province" option.
+   */
+  provinceSlug: string | null;
   citySlug: string | null;
   seniority: string | null;
   skillSlugs: string[];
@@ -106,7 +125,8 @@ export function isVacancySnapshot(v: unknown): v is VacancySnapshot {
   return (
     typeof r["title"] === "string" &&
     typeof r["professionSlug"] === "string" &&
-    typeof r["provinceSlug"] === "string" &&
+    // Phase 13.9  provinceSlug may be string OR null
+    (typeof r["provinceSlug"] === "string" || r["provinceSlug"] === null) &&
     Array.isArray(r["skillSlugs"]) &&
     typeof r["capturedAt"] === "string"
   );

@@ -103,6 +103,9 @@ export async function listMyInvitations(): Promise<SeekerInvitationRow[]> {
       professionSlug: schema.vacancies.professionSlug,
       provinceSlug: schema.vacancies.provinceSlug,
       citySlug: schema.vacancies.citySlug,
+      // Phase 13.9  drive the "Any province  Remote / Hybrid"
+      // label on the invitation card / detail when province is null.
+      workAvailability: schema.vacancies.workAvailability,
       seniority: schema.vacancies.seniority,
       description: schema.vacancies.description,
       orgId: schema.organizations.id,
@@ -159,6 +162,9 @@ export async function getMyInvitation(
       professionSlug: schema.vacancies.professionSlug,
       provinceSlug: schema.vacancies.provinceSlug,
       citySlug: schema.vacancies.citySlug,
+      // Phase 13.9  drive the "Any province  Remote / Hybrid"
+      // label on the invitation card / detail when province is null.
+      workAvailability: schema.vacancies.workAvailability,
       seniority: schema.vacancies.seniority,
       description: schema.vacancies.description,
       orgId: schema.organizations.id,
@@ -208,8 +214,11 @@ function toSeekerRow(r: {
   vacancyId: string;
   vacancyTitle: string;
   professionSlug: string;
-  provinceSlug: string;
+  /** Phase 13.9  may be null = "Any province". */
+  provinceSlug: string | null;
   citySlug: string | null;
+  /** Phase 13.9  drives the location formatter. */
+  workAvailability: unknown;
   seniority: string | null;
   description: string | null;
   orgId: string;
@@ -236,6 +245,7 @@ function toSeekerRow(r: {
     professionSlug: r.professionSlug,
     provinceSlug: r.provinceSlug,
     citySlug: r.citySlug,
+    workAvailability: r.workAvailability,
     seniority: r.seniority,
     description: r.description,
     orgId: r.orgId,
