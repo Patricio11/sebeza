@@ -117,13 +117,13 @@ async function Hero({
 
           {/* Headline  broken on purpose, last line italic in gold */}
           <h1 className="mt-7 font-display text-[color:var(--color-sa-charcoal)]">
-            <span className="anim-rise-soft anim-delay-2 block leading-[0.95] tracking-[-0.025em] text-[clamp(3rem,9vw,7.2rem)]">
+            <span className="anim-rise-soft anim-delay-2 block leading-[0.95] tracking-[-0.025em] text-[clamp(2.25rem,9vw,7.2rem)]">
               South Africa&apos;s
             </span>
-            <span className="anim-rise-soft anim-delay-3 block leading-[0.95] tracking-[-0.025em] text-[clamp(3rem,9vw,7.2rem)]">
+            <span className="anim-rise-soft anim-delay-3 block leading-[0.95] tracking-[-0.025em] text-[clamp(2.25rem,9vw,7.2rem)]">
               talent.
             </span>
-            <span className="anim-rise-soft anim-delay-4 block leading-[0.95] tracking-[-0.025em] text-[clamp(3rem,9vw,7.2rem)]">
+            <span className="anim-rise-soft anim-delay-4 block leading-[0.95] tracking-[-0.025em] text-[clamp(2.25rem,9vw,7.2rem)]">
               <span className="italic font-light text-[color:var(--color-sa-gold-deep)]">
                 Visible.
               </span>{" "}

@@ -89,10 +89,19 @@ export function SearchBar({
 
         <Divider isHero={isHero} />
 
+        {/* Phase 13.9 follow-up  the location cell wraps a CustomSelect
+            which renders a <button>. A <label> wrapping a <button> on
+            mobile fires a synthetic click on the button when the
+            label is tapped, colliding with the user's actual tap and
+            toggling the picker open/close in one gesture. The
+            `wrapAsDiv` prop keeps the visual eyebrow + label intact
+            but renders the wrapper as a <div>; the CustomSelect
+            carries its own aria-label for screen readers. */}
         <Field
           isHero={isHero}
           label={t("locationLabel")}
           eyebrow="02"
+          wrapAsDiv
         >
           <CustomSelect
             name="province"
@@ -130,22 +139,37 @@ function Field({
   label,
   eyebrow,
   children,
+  wrapAsDiv = false,
 }: {
   isHero: boolean;
   label: string;
   eyebrow: string;
   children: React.ReactNode;
+  /**
+   * Phase 13.9 follow-up  when the child is a `<button>` (e.g.
+   * `<CustomSelect>` for the location cell), pass `wrapAsDiv` to
+   * render the wrapper as a `<div>` instead of a `<label>`. A
+   * `<label>` wrapping a `<button>` on mobile fires a synthetic
+   * click on the button when the label is tapped, which collides
+   * with the user's actual tap and toggles the picker open/close
+   * in one gesture. The visible eyebrow + label text are preserved
+   * regardless; accessibility relies on the child's own aria-label.
+   * The `<input>`-bearing profession cell keeps the `<label>` for
+   * the native form-control + label association.
+   */
+  wrapAsDiv?: boolean;
 }) {
+  const Wrapper = (wrapAsDiv ? "div" : "label") as "div" | "label";
   if (!isHero) {
     return (
-      <label className="flex min-w-0 items-center gap-3 px-4 py-2">
+      <Wrapper className="flex min-w-0 items-center gap-3 px-4 py-2">
         <span className="sr-only">{label}</span>
         {children}
-      </label>
+      </Wrapper>
     );
   }
   return (
-    <label className="flex min-w-0 flex-col gap-1 px-6 py-4">
+    <Wrapper className="flex min-w-0 flex-col gap-1 px-6 py-4">
       <span className="flex items-baseline gap-2 text-[0.68rem] uppercase tracking-[0.22em] text-[color:var(--color-ink-soft)]">
         <span className="font-display text-[color:var(--color-accent)]">
           {eyebrow}
@@ -153,7 +177,7 @@ function Field({
         {label}
       </span>
       {children}
-    </label>
+    </Wrapper>
   );
 }
 

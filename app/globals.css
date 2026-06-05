@@ -84,6 +84,14 @@
   body {
     background: var(--color-paper);
     color: var(--color-ink);
+    /* Phase 13.9 follow-up  structural safety net against any
+       child that uses w-[>100%] (e.g. the SAChevron motif on the
+       landing hero with `w-[110%]`). `overflow-hidden` on the
+       parent section clips the visual but the page can still
+       horizontal-scroll without this rule. Scoped to body (not
+       html) so `position: sticky` continues to work on iOS  the
+       browser uses html as the scrolling-context root. */
+    overflow-x: hidden;
   }
 
   /* Visible keyboard focus everywhere (WCAG 2.2 AA) */
