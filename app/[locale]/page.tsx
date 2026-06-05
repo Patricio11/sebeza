@@ -102,7 +102,17 @@ async function Hero({
         </div>
       </div>
 
-      <div className="relative mx-auto grid max-w-[1320px] grid-cols-12 gap-8 px-5 md:px-10">
+      {/* Phase 13.9 follow-up  mobile horizontal overflow fix.
+          `gap-8` on `grid-cols-12` creates 11 × 32px = 352px of
+          horizontal gap track space, which exceeds the content
+          width on phones < ~400px. The `col-span-12` children then
+          compute wider than the container and overflow to the right
+          (the "search form shifted right" symptom).
+          Switching to `gap-y-12 gap-x-0` on mobile + `md:gap-8` on
+          desktop keeps the vertical rhythm between the headline
+          column + dossier aside while neutralising the horizontal
+          gap on the single-column mobile layout. */}
+      <div className="relative mx-auto grid max-w-[1320px] grid-cols-12 gap-y-12 gap-x-0 px-5 md:gap-8 md:px-10">
         {/* Content column */}
         <div className="col-span-12 md:col-span-7">
           {/* Eyebrow */}
