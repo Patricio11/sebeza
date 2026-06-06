@@ -111,6 +111,17 @@ export interface PublicProfile {
    */
   profilePhotoUrl?: string | null;
   profession: string;
+  /**
+   * Phase 13.10  additional profession lanes the seeker has worked
+   * in beyond the primary `profession` headline. Capped at 3 by the
+   * form + action layer. Each entry matches a canonical
+   * `PROFESSIONS.label`. Public per D1 in PHASE_13_10_PLAN.md  the
+   * /p/[handle] renderer surfaces them as a small "Also experienced
+   * in" chip row below the headline; `<TalentRosterItem>` does NOT
+   * (D5  roster stays scannable). Empty array = single-profession
+   * seeker (default, zero UI change).
+   */
+  secondaryProfessions?: string[];
   seniority: Seniority | null;
   city: string;
   province: string;
@@ -200,6 +211,15 @@ export const OPEN_TO_TAGS = [
   "freelance",
   "contract_gigs",
   "public_speaking",
+  // Phase 13.10  cross-industry / entry-level archetypes. The four
+  // tags above describe "experienced professional offering X as a
+  // side"; the two below describe "candidate willing to receive X."
+  // Two distinct tags (not one combined) because the archetypes
+  // genuinely diverge: a senior chef considering hospital-cafeteria
+  // management is `cross_industry` but NOT `open_to_training`; a
+  // Matric school-leaver willing to learn anything is the opposite.
+  "open_to_training",
+  "cross_industry",
 ] as const;
 
 export type OpenToTag = (typeof OPEN_TO_TAGS)[number];
@@ -209,6 +229,8 @@ export const OPEN_TO_TAG_LABEL: Record<OpenToTag, string> = {
   freelance: "Freelance",
   contract_gigs: "Contract gigs",
   public_speaking: "Public speaking",
+  open_to_training: "Open to training",
+  cross_industry: "Cross-industry",
 };
 
 export const OPEN_TO_TAG_HINT: Record<OpenToTag, string> = {
@@ -220,6 +242,10 @@ export const OPEN_TO_TAG_HINT: Record<OpenToTag, string> = {
     "Short-term contract gigs on weekends or between roles.",
   public_speaking:
     "Conference talks, panels, podcasts, internal company sessions.",
+  open_to_training:
+    "I'll take on a new role if the employer is willing to train me. Open to entry-level + skill-adjacent moves.",
+  cross_industry:
+    "Willing to bring my skills into a different industry than my primary profession. E.g. customer-service into retail, hospitality into office admin.",
 };
 
 export function isOpenToTag(v: string): v is OpenToTag {

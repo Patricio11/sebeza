@@ -207,6 +207,9 @@ export default async function ProfileEditorPage({
             initial={{
               displayName: me.displayName,
               profession: me.profession,
+              // Phase 13.10  secondary professions array (cap 3,
+              // labels not slugs). Empty array on legacy rows.
+              secondaryProfessions: me.secondaryProfessions ?? [],
               seniority: me.seniority,
               city: me.city,
               province: me.province,

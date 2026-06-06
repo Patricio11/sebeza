@@ -231,6 +231,19 @@ export default async function VacancyMatchPage({
               .map((p) => {
                 const profileId = handleToProfileId.get(p.handle);
                 if (!profileId) return null; // shouldn't happen; guard anyway
+                // Phase 13.10 D6  honest disclosure when the seeker
+                // surfaced via a secondary-profession match rather
+                // than her primary. Computed off the rendered roster
+                // row's profession + secondaryProfessions vs the
+                // vacancy's profession label  no extra query.
+                const vacancyProfessionLower = professionLabel.toLowerCase();
+                const primaryMatches =
+                  p.profession.toLowerCase() === vacancyProfessionLower;
+                const secondaryMatches =
+                  !primaryMatches &&
+                  (p.secondaryProfessions ?? []).some(
+                    (s) => s.toLowerCase() === vacancyProfessionLower,
+                  );
                 return {
                   profileId,
                   handle: p.handle,
@@ -253,6 +266,21 @@ export default async function VacancyMatchPage({
                         verificationVisible={verificationVisible}
                       />
                       <div className="-mt-2 mb-4 ml-16 flex flex-wrap items-center justify-end gap-3 text-xs">
+                        {/* Phase 13.10 D6  italic annotation that
+                            this candidate surfaced via a secondary
+                            profession, not her primary. Quiet (not a
+                            badge); positioned to the LEFT of the
+                            "Open dossier" CTA so the employer reads
+                            "why is this person here?" before clicking
+                            through. */}
+                        {secondaryMatches && (
+                          <span
+                            className="mr-auto italic text-[color:var(--color-ink-soft)]"
+                            title={`Matched via secondary profession: ${professionLabel}. Her headline is ${p.profession}.`}
+                          >
+                            matched via secondary profession: {professionLabel}
+                          </span>
+                        )}
                         <Link
                           href={`/employer/dossier/${p.handle}` as never}
                           className="inline-flex h-9 items-center gap-2 rounded-[var(--radius-pill)] border border-[color:var(--color-ink)] px-3 font-medium text-[color:var(--color-ink)] hover:bg-[color:var(--color-ink)] hover:text-[color:var(--color-paper)]"

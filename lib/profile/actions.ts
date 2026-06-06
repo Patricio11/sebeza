@@ -44,22 +44,63 @@ function fail(message: string): { ok: false; message: string } {
 // updateProfileBasics  identity + professional + location + bio in one save
 // ─────────────────────────────────────────────────────────────────────────────
 
-const basicsSchema = z.object({
-  displayName: z.string().min(2).max(120),
-  profession: z.string().min(2).max(80),
-  seniority: z
-    .enum(["junior", "intermediate", "senior"])
-    .nullable()
-    .optional(),
-  city: z.string().min(1).max(80),
-  province: z.string().min(1).max(80),
-  nationality: z.string().max(80).nullable().optional(),
-  isCitizen: z.boolean().optional().default(false),
-  bio: z.string().max(2000).optional().nullable(),
-  /** Phase 9.9  total years of experience. NULL = "rather not say."
-   *  Clamped 0..60 server-side; UI also clamps. */
-  yearsExperience: z.number().int().min(0).max(60).nullable().optional(),
-});
+/** Phase 13.10 D2  cap on secondary professions. Mirrors the form's
+ *  constant; kept in lockstep via the typecheck. */
+const SECONDARY_PROFESSIONS_MAX = 3;
+
+const basicsSchema = z
+  .object({
+    displayName: z.string().min(2).max(120),
+    profession: z.string().min(2).max(80),
+    /**
+     * Phase 13.10  additional profession lanes (cap 3, labels). The
+     * refine() below enforces canonical-only entries (no "Other" path
+     * per D3) by validating against the PROFESSIONS taxonomy.
+     */
+    secondaryProfessions: z
+      .array(z.string().min(2).max(80))
+      .max(SECONDARY_PROFESSIONS_MAX)
+      .optional()
+      .default([]),
+    seniority: z
+      .enum(["junior", "intermediate", "senior"])
+      .nullable()
+      .optional(),
+    city: z.string().min(1).max(80),
+    province: z.string().min(1).max(80),
+    nationality: z.string().max(80).nullable().optional(),
+    isCitizen: z.boolean().optional().default(false),
+    bio: z.string().max(2000).optional().nullable(),
+    /** Phase 9.9  total years of experience. NULL = "rather not say."
+     *  Clamped 0..60 server-side; UI also clamps. */
+    yearsExperience: z.number().int().min(0).max(60).nullable().optional(),
+  })
+  .refine(
+    (v) => {
+      // Phase 13.10 D3  secondary entries must be canonical PROFESSIONS
+      // labels. The form picker enforces this; the action layer is the
+      // structural backstop for bypassed-form payloads (curl, scripted).
+      const allowed = new Set(PROFESSIONS.map((p) => p.label));
+      return (v.secondaryProfessions ?? []).every((s) => allowed.has(s));
+    },
+    {
+      message:
+        "Secondary professions must come from the canonical taxonomy. New professions go through the admin suggestion queue first.",
+      path: ["secondaryProfessions"],
+    },
+  )
+  .refine(
+    (v) => {
+      // Phase 13.10  the secondaries are MEANT to be additive to the
+      // headline, not duplicate it. Refuse the primary appearing in
+      // the secondaries (the form filters this too).
+      return !(v.secondaryProfessions ?? []).includes(v.profession);
+    },
+    {
+      message: "Your primary profession can't also be a secondary.",
+      path: ["secondaryProfessions"],
+    },
+  );
 
 export async function updateProfileBasics(
   input: z.infer<typeof basicsSchema>,
@@ -97,6 +138,13 @@ export async function updateProfileBasics(
     .set({
       displayName: v.displayName,
       profession: v.profession,
+      // Phase 13.10  dedupe defensively. The form pre-cleans + the
+      // refine() already refused duplicates against the primary, but
+      // an array with two identical secondary entries would still
+      // pass the schema check  one cleanup line is cheap.
+      secondaryProfessions: Array.from(
+        new Set((v.secondaryProfessions ?? []).map((s) => s.trim())),
+      ).slice(0, SECONDARY_PROFESSIONS_MAX),
       seniority: v.seniority ?? null,
       city: v.city,
       province: v.province,

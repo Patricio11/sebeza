@@ -235,6 +235,10 @@ export async function loadProfileForUser(userId: string): Promise<MyProfile | nu
     displayName: p.displayName,
     profilePhotoUrl: p.profilePhotoUrl,
     profession: p.profession,
+    // Phase 13.10  additive lanes the seeker has worked in besides
+    // the primary `profession`. Empty array = single-profession
+    // seeker (the default for every pre-Phase-13.10 row).
+    secondaryProfessions: p.secondaryProfessions ?? [],
     seniority: (p.seniority as Seniority | null) ?? null,
     city: p.city,
     province: p.province,

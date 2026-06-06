@@ -365,6 +365,20 @@ export const profiles = pgTable("profiles", {
       server-issued signed URL with short TTL. */
   profilePhotoUrl: text("profile_photo_url"),
   profession: text("profession").notNull(),
+  /**
+   * Phase 13.10  additional recognised profession lanes beyond the
+   * single primary `profession`. Cap 3 (form + action validation;
+   * not enforced by the DB). Each entry must match a canonical
+   * `PROFESSIONS.label` from the taxonomy  the action layer refuses
+   * free-text on write. Empty array = single-profession seeker
+   * (default, zero UI change). The search + match read paths union
+   * primary OR secondary on profession-keyed queries with primary
+   * still ranked above secondary on the tiebreak.
+   */
+  secondaryProfessions: text("secondary_professions")
+    .array()
+    .notNull()
+    .default(sql`'{}'::text[]`),
   seniority: text("seniority"),
   city: text("city").notNull(),
   province: text("province").notNull(),

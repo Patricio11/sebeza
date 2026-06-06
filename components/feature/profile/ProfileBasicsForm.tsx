@@ -11,6 +11,7 @@ import { TextField, TextareaField, SelectField } from "@/components/ui/FormField
 import { Button } from "@/components/ui/Button";
 import { Checkbox } from "@/components/ui/Checkbox";
 import { ComboboxField } from "@/components/ui/ComboboxField";
+import { MultiSelectComboboxField } from "@/components/ui/MultiSelectComboboxField";
 import { ProfileCompleteness } from "@/components/ui/ProfileCompleteness";
 import { updateProfileBasics } from "@/lib/profile/actions";
 import { PROVINCES } from "@/lib/mock/taxonomy";
@@ -20,6 +21,13 @@ import { useSessionDraft } from "@/lib/hooks/useSessionDraft";
 interface InitialValues {
   displayName: string;
   profession: string;
+  /**
+   * Phase 13.10  additional profession lanes (cap 3). LABELS, not
+   * slugs  matches the storage convention of the primary `profession`
+   * field. Empty array on legacy rows; the editor opens to "no
+   * secondaries" by default.
+   */
+  secondaryProfessions: string[];
   seniority: Seniority | null;
   city: string;
   province: string;
@@ -31,6 +39,10 @@ interface InitialValues {
    *  not say." UI accepts blank or 0..60. */
   yearsExperience: number | null;
 }
+
+/** Phase 13.10 D2  cap on secondary professions. Set in one place so
+ *  the form, action validation, and tests stay in lockstep. */
+const SECONDARY_PROFESSIONS_MAX = 3;
 
 interface Props {
   initial: InitialValues;
@@ -73,6 +85,11 @@ export function ProfileBasicsForm({
 
   const [displayName, setDisplayName] = useState(initial.displayName);
   const [profession, setProfession] = useState(initial.profession);
+  // Phase 13.10  cap at SECONDARY_PROFESSIONS_MAX in onChange; the
+  // server action also caps independently (D2 invariant).
+  const [secondaryProfessions, setSecondaryProfessions] = useState<string[]>(
+    initial.secondaryProfessions ?? [],
+  );
   const [seniority, setSeniority] = useState<Seniority | null>(initial.seniority);
   const [province, setProvince] = useState(initial.province);
   const [city, setCity] = useState(initial.city);
@@ -95,6 +112,7 @@ export function ProfileBasicsForm({
     () => ({
       displayName,
       profession,
+      secondaryProfessions,
       seniority,
       province,
       city,
@@ -106,6 +124,7 @@ export function ProfileBasicsForm({
     [
       displayName,
       profession,
+      secondaryProfessions,
       seniority,
       province,
       city,
@@ -122,6 +141,10 @@ export function ProfileBasicsForm({
       onRestore: (draft) => {
         if (draft.displayName !== undefined) setDisplayName(draft.displayName);
         if (draft.profession !== undefined) setProfession(draft.profession);
+        if (Array.isArray(draft.secondaryProfessions))
+          setSecondaryProfessions(
+            draft.secondaryProfessions.slice(0, SECONDARY_PROFESSIONS_MAX),
+          );
         if (draft.seniority !== undefined) setSeniority(draft.seniority);
         if (draft.province !== undefined) setProvince(draft.province);
         if (draft.city !== undefined) setCity(draft.city);
@@ -146,6 +169,17 @@ export function ProfileBasicsForm({
       const r = await updateProfileBasics({
         displayName,
         profession,
+        // Phase 13.10  belt-and-braces filter: dedupe + drop the
+        // primary if a user added it as a secondary (the server
+        // action refuses this combination anyway). Cap is enforced
+        // again server-side for the curl / scripted-submit case.
+        secondaryProfessions: Array.from(
+          new Set(
+            secondaryProfessions
+              .map((s) => s.trim())
+              .filter((s) => s.length > 0 && s !== profession),
+          ),
+        ).slice(0, SECONDARY_PROFESSIONS_MAX),
         seniority: seniority ?? null,
         city,
         province,
@@ -254,6 +288,34 @@ export function ProfileBasicsForm({
             placeholder="Search professions…"
             allowOther
             otherLabel="My profession isn't listed"
+          />
+          {/* Phase 13.10  secondary profession lanes. Capped at 3
+              via the onChange + the server-side refine. Stores
+              LABELS (matches profiles.profession convention). No
+              allowOther path  D3 in PHASE_13_10_PLAN.md keeps the
+              matcher's signal clean. Sits in the same grid cell as
+              its sibling fields; spans both columns at md+ so the
+              chips have room to breathe. */}
+          <MultiSelectComboboxField
+            label="Also experienced in (optional)"
+            helpText={`Up to ${SECONDARY_PROFESSIONS_MAX} other professions you've worked in. Surfaces you to employers who search for those roles. Your headline stays the primary above.`}
+            values={secondaryProfessions}
+            onChange={(next) => {
+              const cleaned = Array.from(
+                new Set(next.filter((v) => v && v !== profession)),
+              ).slice(0, SECONDARY_PROFESSIONS_MAX);
+              setSecondaryProfessions(cleaned);
+            }}
+            options={professions.map((p) => ({
+              value: p.label,
+              label: p.label,
+            }))}
+            placeholder={
+              secondaryProfessions.length >= SECONDARY_PROFESSIONS_MAX
+                ? `${SECONDARY_PROFESSIONS_MAX} reached  remove one to add another`
+                : "Search professions…"
+            }
+            className="md:col-span-2"
           />
           <SelectField
             id="seniority"

@@ -26,7 +26,7 @@ export const meta: HelpArticleMeta = {
     "understanding-profile-completeness",
   ],
   surfaceLink: "/dashboard/experience",
-  updatedAt: "2026-05-29",
+  updatedAt: "2026-06-06",
 };
 
 export default function Article() {
@@ -88,6 +88,35 @@ export default function Article() {
         most careers. Don&rsquo;t invent rows to cover them; employers
         looking at your dossier see what you put there and that&rsquo;s
         all the inference they make.
+      </p>
+
+      <h2>You&rsquo;ve worked across several professions  use both lanes</h2>
+      <p>
+        Real careers don&rsquo;t always sit in one profession. If
+        you&rsquo;ve spent 7 years in customer service plus 2 years as
+        a barista plus 2 years caregiving, you don&rsquo;t have to pick
+        one and hide the rest. On the{" "}
+        <DashboardLink href="/dashboard/profile">
+          Profile editor
+        </DashboardLink>{" "}
+        the headline <strong>Profession</strong> field still picks one
+        primary  the lane with the most weight on your trajectory
+        but the <em>Also experienced in</em> field below lets you list
+        up to <strong>3 secondary professions</strong>. Employers
+        searching for those roles see you alongside seekers whose
+        primary matches  ranked just below, never invisible. The
+        platform tells the employer honestly when you surfaced via a
+        secondary lane.
+      </p>
+      <p>
+        If you&rsquo;re willing to learn a role you haven&rsquo;t done
+        before, tick <strong>Open to training</strong> in the
+        Open-To section of your profile. If you&rsquo;d move your
+        skills into a different industry (customer service into
+        retail, hospitality into office admin), tick{" "}
+        <strong>Cross-industry</strong>. Both are filter chips that
+        employers searching for entry-level or industry-pivot
+        candidates can use to find you.
       </p>
 
       <Callout type="info" title="The optional employment-verification flow">

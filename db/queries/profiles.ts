@@ -114,6 +114,21 @@ export async function searchProfilesQuery(
     ? sql`CASE WHEN p.is_citizen THEN 0 ELSE 1 END`
     : sql`0`;
 
+  // Phase 13.10 D7  primary-vs-secondary profession tiebreak. When
+  // the search filters on a profession, profiles whose PRIMARY
+  // `profession` matches rank above profiles where only a
+  // `secondary_professions` entry matched. Within each band the
+  // existing score (freshness × completeness × FTS-rank) decides.
+  //
+  // The CASE returns 0 for primary matches, 1 for secondary-only
+  // matches, and 0 for the no-profession-filter case (so the ORDER
+  // BY's `primary_match ASC` becomes a no-op when the filter is
+  // absent). Citizen-Visibility Rule still ranks above this
+  // the ORDER BY puts citizen_group first.
+  const primaryMatchKey = filters.profession
+    ? sql`CASE WHEN lower(p.profession) = lower(${filters.profession}) THEN 0 ELSE 1 END`
+    : sql`0`;
+
   // WHERE clauses  assembled conditionally so a missing filter doesn't
   // narrow the result set.
   const conditions = [sql`p.deleted_at IS NULL`];
@@ -146,11 +161,27 @@ export async function searchProfilesQuery(
     }
   }
   if (filters.profession) {
-    // Exact profession-label filter (case-insensitive). Used by the
-    // /insights heatmap deep-link; complementary to the FTS `query`
-    // path. Both can be active simultaneously  the heatmap link
-    // passes profession only, leaving free-text empty.
-    conditions.push(sql`lower(p.profession) = lower(${filters.profession})`);
+    // Profession filter (case-insensitive). Phase 13.10 widens the
+    // match: primary `profession` OR any `secondary_professions`
+    // entry. Used by the /insights heatmap deep-link; complementary
+    // to the FTS `query` path. Both can be active simultaneously
+    // the heatmap link passes profession only, leaving free-text
+    // empty.
+    //
+    // D7 in PHASE_13_10_PLAN.md  primary matches still rank above
+    // secondary matches on the same query. The ranking CASE lives
+    // in the ORDER BY further down; here we only widen the WHERE.
+    //
+    // The `unnest` over the array is the cheapest correct shape;
+    // the GIN index from migration 0048 covers the equality lookup
+    // even with the LOWER() wrapper because we hash on the
+    // canonical taxonomy LABELs (no case variants in the column).
+    conditions.push(sql`(
+      lower(p.profession) = lower(${filters.profession})
+      OR lower(${filters.profession}) = ANY(
+        SELECT lower(s) FROM unnest(p.secondary_professions) AS s
+      )
+    )`);
   }
   if (filters.city) {
     const label = filters.city.replace(/-/g, " ");
@@ -264,6 +295,11 @@ export async function searchProfilesQuery(
       p.display_name,
       p.profile_photo_url,
       p.profession,
+      -- Phase 13.10  surface the array so callers can render
+      -- the "matched via secondary" annotation on /vacancies/[id]/match
+      -- when the query's profession filter matched a secondary entry
+      -- rather than the primary.
+      p.secondary_professions,
       p.seniority,
       p.city,
       p.province,
@@ -288,11 +324,12 @@ export async function searchProfilesQuery(
         * sebenza_freshness_confidence(p.status_confirmed_at)
         * (0.5 + 0.5 * (p.completeness::numeric / 100))
       ) AS score,
-      ${citizenGroupKey} AS citizen_group
+      ${citizenGroupKey} AS citizen_group,
+      ${primaryMatchKey} AS primary_match
     FROM profiles p
     LEFT JOIN organizations orgs ON orgs.id = p.current_employer_org_id
     WHERE ${whereClause}
-    ORDER BY citizen_group ASC, score DESC NULLS LAST, p.completeness DESC
+    ORDER BY citizen_group ASC, primary_match ASC, score DESC NULLS LAST, p.completeness DESC
     LIMIT ${SEARCH_LIMIT}
   `);
   // Neon's raw `execute()` returns timestamp columns as ISO strings, not
@@ -307,6 +344,7 @@ export async function searchProfilesQuery(
     display_name: string;
     profile_photo_url: string | null;
     profession: string;
+    secondary_professions: string[] | string | null;
     seniority: string | null;
     city: string;
     province: string;
@@ -349,6 +387,10 @@ export async function searchProfilesQuery(
     displayName: r.display_name,
     profilePhotoUrl: r.profile_photo_url, // raw key; signed by dbProvider
     profession: r.profession,
+    // Phase 13.10  reuse the same pg-array parser used for
+    // workAvailability / openToTags so `{Barista,Caregiver}` and
+    // ["Barista", "Caregiver"] both normalise to a string[].
+    secondaryProfessions: parsePgEnumArray(r.secondary_professions),
     seniority: (r.seniority as Seniority | null) ?? null,
     city: r.city,
     province: r.province,
@@ -442,6 +484,19 @@ export async function countMatchesByCitizenship(
     const label = filters.city.replace(/-/g, " ");
     conditions.push(sql`lower(p.city) = lower(${label})`);
   }
+  // Phase 13.10  honest-supply mirror of the profession filter
+  // widened in searchProfilesQuery. Without this, the count
+  // overstates the matching pool when the caller filters by
+  // profession  the ranked list and the honest-supply line would
+  // disagree. Same widened shape: primary OR any secondary.
+  if (filters.profession) {
+    conditions.push(sql`(
+      lower(p.profession) = lower(${filters.profession})
+      OR lower(${filters.profession}) = ANY(
+        SELECT lower(s) FROM unnest(p.secondary_professions) AS s
+      )
+    )`);
+  }
   if (filters.status) {
     conditions.push(sql`p.status = ${filters.status}`);
   }
@@ -525,6 +580,10 @@ export async function findProfileByHandleQuery(
       displayName: schema.profiles.displayName,
       profilePhotoUrl: schema.profiles.profilePhotoUrl,
       profession: schema.profiles.profession,
+      // Phase 13.10  additional profession lanes (cap 3, labels).
+      // Public per D1; rendered on /p/<handle> as the "Also
+      // experienced in" chip row.
+      secondaryProfessions: schema.profiles.secondaryProfessions,
       seniority: schema.profiles.seniority,
       city: schema.profiles.city,
       province: schema.profiles.province,
@@ -580,6 +639,11 @@ export async function findProfileByHandleQuery(
     displayName: p.displayName,
     profilePhotoUrl: p.profilePhotoUrl, // raw key; dbProvider signs
     profession: p.profession,
+    // Phase 13.10  additive lanes alongside primary `profession`.
+    // Public per D1 in PHASE_13_10_PLAN.md  surfaces on /p/<handle>
+    // as the "Also experienced in" chip row. Empty array = single-
+    // profession seeker (the default for every pre-Phase-13.10 row).
+    secondaryProfessions: p.secondaryProfessions ?? [],
     seniority: (p.seniority as Seniority | null) ?? null,
     city: p.city,
     province: p.province,

@@ -325,6 +325,28 @@ async function ProfileHero({
                 </span>
               </p>
 
+              {/* Phase 13.10  "Also experienced in" chip row, only
+                  rendered when the seeker declared secondary
+                  professions. Civic-Editorial: italic eyebrow + small
+                  hairline-bordered chips. NOT clickable links per D5
+                  in PHASE_13_10_PLAN.md  the matcher widens
+                  automatically; a chip-as-link would imply a
+                  secondary-only filter that doesn't exist. */}
+              {profile.secondaryProfessions &&
+                profile.secondaryProfessions.length > 0 && (
+                  <p className="mt-2 flex flex-wrap items-center gap-2 text-xs text-[color:var(--color-ink-soft)]">
+                    <span className="italic">Also experienced in:</span>
+                    {profile.secondaryProfessions.map((s) => (
+                      <span
+                        key={s}
+                        className="inline-flex items-center rounded-[var(--radius-pill)] border border-[color:var(--color-hairline)] bg-[color:var(--color-paper)] px-2 py-0.5 text-[0.7rem] text-[color:var(--color-ink)]"
+                      >
+                        {s}
+                      </span>
+                    ))}
+                  </p>
+                )}
+
               {/* Honest redaction note  quiet, italic */}
               <p className="mt-2 text-[0.78rem] italic text-[color:var(--color-ink-soft)]">
                 {t("redacted")}
