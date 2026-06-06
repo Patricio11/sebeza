@@ -6,13 +6,17 @@ and location, and gives government an honest picture of the labour market.
 
 > The trustworthy, real-time layer for South African work.
 
-Built through **Phase 13.7** (2026-06-01  Phase 13 complete; Phase 11
-complete 2026-05-31; Phase 12 Testing & QA still pending). The product
-is launch-ready against the current Neon (EU) database; everything beyond is
-operational + commercial, not engineering. The AWS Cape Town migration is
-a documented one-day cutover
-(see [docs/AWS_MIGRATION_RUNBOOK.md](docs/AWS_MIGRATION_RUNBOOK.md)) deferred
-pending partnership confirmation.
+Built through **Phase 13.10** (2026-06-06  three Phase 13 side-phases
+shipped post-13.7 closing real-world UX gaps surfaced in demo +
+feedback: 13.8 Invite-from-search, 13.9 Any-province for remote /
+hybrid vacancies, 13.10 multi-archetype seeker support with secondary
+professions + cross-trainable Open-To tags. Phase 13 complete
+2026-06-01; Phase 11 complete 2026-05-31; Phase 12 Testing & QA still
+pending). The product is launch-ready against the current Neon (EU)
+database; everything beyond is operational + commercial, not
+engineering. The AWS Cape Town migration is a documented one-day
+cutover (see [docs/AWS_MIGRATION_RUNBOOK.md](docs/AWS_MIGRATION_RUNBOOK.md))
+deferred pending partnership confirmation.
 
 The pre-launch gov analytics chapter is now complete end-to-end:
 **demand → curriculum → learner → barrier → hire → outcome**. Phase 13 added
@@ -124,6 +128,9 @@ high-value accounts.
 | 11.5 | Profile depth + mobile / a11y polish (Open-to tags, CV backup, lazy load, 9 a11y fixes) | ✅ | [PHASE_11_5_COMPLETE](docs/completed/PHASE_11_5_COMPLETE.md) |
 | 12 | Testing & QA (renumbered from old Phase 11) | planned | Public-launch operator phase |
 | 13 | Student lane expansion + editorial-LLM curriculum pipeline (shipped ahead of 12) | ✅ | [PHASE_13_COMPLETE](docs/completed/PHASE_13_COMPLETE.md) · [CATALOGUE_GUIDE](docs/PHASE_13_CATALOGUE_GUIDE.md) |
+| 13.8 | Per-row "Invite to vacancy" CTA on `/search` (verified-org employers) | ✅ | [PHASE_13_8_COMPLETE](docs/completed/PHASE_13_8_COMPLETE.md) |
+| 13.9 | "Any province" option for remote / hybrid vacancies | ✅ | [PHASE_13_9_COMPLETE](docs/completed/PHASE_13_9_COMPLETE.md) |
+| 13.10 | Multi-archetype seeker support (secondary professions + cross-trainable Open-To tags) | ✅ | [PHASE_13_10_COMPLETE](docs/completed/PHASE_13_10_COMPLETE.md) |
 
 ---
 

@@ -898,6 +898,17 @@ Five sub-phases, ordered by ROI per LOC:
 - Wire the 18-month catalogue-review query into a monthly admin reminder.
 - Expand the `SKILLS` taxonomy to cover BSc Eng (mech / civil / industrial) + BA core modules so the catalogue can deepen on those programmes.
 
+### Task 13.8: Per-row "Invite to vacancy" CTA on `/search` ✅ *(shipped 2026-06-04)*
+- [x] Verified-org employer viewing `/search` gets a per-row Invite button. Desktop: hover-only via `group-hover`; mobile: always visible, stacked under "View profile". Modal mirrors `BulkInviteModal` (Phase 9.8.4): vacancy picker with disabled-when-already-invited rows, zero-vacancies degrades to "Create a vacancy" CTA. Hide-not-disable for unverified orgs. Reuses `bulkInviteToVacancy` with `profileIds: [oneId]`. New `<InviteFromSearchButton>` + 2 query helpers (`listMyOrgOpenVacancies`, `activeInvitationsByProfileForMyOrg`). 0 migrations, 0 new audit kinds. *See `docs/completed/PHASE_13_8_COMPLETE.md`.*
+
+### Task 13.9: "Any province" option for remote / hybrid vacancies ✅ *(shipped 2026-06-04)*
+- [x] `vacancies.province_slug` becomes nullable (migration 0047). NULL = "Any province (remote / hybrid)"; matcher drops the province filter entirely. Gated to `remote` or `hybrid` in `work_availability` (form picker option only visible when one of those modes is selected; server-side `.refine()` is the structural backstop). Form auto-clears the picker when both work modes toggle off (state convergence D6). City field force-NULLs when province is NULL. Gov-side `declineReasonAggregateQuery` COALESCEs null province under a `'national-remote'` sentinel so the GROUP BY produces a distinct "National / remote" lane (D5  never silently dropped, never double-counted). New `formatVacancyLocation` helper switches 8 render sites to a single source of truth. *See `docs/completed/PHASE_13_9_COMPLETE.md`.*
+
+### Task 13.10: Multi-archetype seeker support ✅ *(shipped 2026-06-06)*
+- [x] Two new Open-To tags (`open_to_training` + `cross_industry`) for the "I'll learn on the job" + cross-industry-pivot archetypes. New `profiles.secondary_professions text[]` column (migration 0048, cap 3, labels-not-slugs, GIN-indexed). Form picker via `MultiSelectComboboxField`; server action `.refine()` enforces canonical-only entries (no "Other" path  D3) and refuses the primary appearing as a secondary. `/p/<handle>` renders secondaries as a small "Also experienced in" chip row below the headline (D5 keeps `TalentRosterItem` scannable  no row-level chip). `searchProfilesQuery` widens the profession filter to **primary OR any secondary** with a new `primaryMatchKey` CASE ranking primary matches above secondary matches within each citizen-group tier (D7). `countMatchesByCitizenship` gets the same widened condition so the honest-supply line agrees with the ranked list. Vacancy match page surfaces secondary matches with an italic *"matched via secondary profession"* annotation (D6 honest disclosure). New seeker help article + chip on `/dashboard/profile`. Existing single-profession seekers see zero UI change. *See `docs/completed/PHASE_13_10_COMPLETE.md`.*
+
+> **🎉 Phase 13.x side-phases COMPLETE.** Three additional side-phases shipped post-13.7 closing real-world UX gaps surfaced during demo + feedback. *Next:* Phase 12 (Testing & QA) remains the next milestone before public ship.
+
 ---
 
 ## 🚀 DEPLOYMENT CHECKLIST
@@ -970,6 +981,6 @@ HR Practitioner · Electrician · Plumber · Accountant · Nurse · Driver · Bo
 
 ---
 
-*Last Updated: 2026-06-01*
-*Version: 2.0  Phase 13 (student lane expansion + editorial-LLM curriculum pipeline) shipped ahead of Phase 12 (Testing & QA) at founder direction. Seven tasks across capture, catalogue, admin pipeline, progression timeline, Tier-1 seed, gov panel, and POPIA wrap-up. See `docs/completed/PHASE_13_COMPLETE.md` for the full footprint. Phase 12 remains the next milestone before public ship.*
+*Last Updated: 2026-06-06*
+*Version: 2.1  Three additional Phase 13 side-phases shipped (13.8 Invite-from-search · 13.9 Any-province for remote/hybrid · 13.10 multi-archetype seeker support with secondary professions + cross-trainable Open-To tags) closing real-world UX gaps surfaced in demo + feedback. Plus a small homepage mobile-fixes pass (province dropdown + grid horizontal overflow). See the three new `docs/completed/PHASE_13_{8,9,10}_COMPLETE.md` docs. Phase 12 (Testing & QA) remains the next milestone before public ship.*
 *Working name: Sebenza  South African National Talent-Intelligence Platform.*

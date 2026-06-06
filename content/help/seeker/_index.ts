@@ -43,6 +43,8 @@ import * as achievements from "./profile/achievements";
 import * as studentModulesAndProject from "./profile/student-modules-and-project";
 //  Phase 13.4
 import * as studentProgressionTracker from "./profile/student-progression-tracker";
+//  Phase 13.10
+import * as secondaryProfessionsAndCrossTraining from "./profile/secondary-professions-and-cross-training";
 
 //  Vacancy invitations
 import * as vacancyInvitationsExplained from "./invitations/vacancy-invitations-explained";
@@ -121,6 +123,7 @@ export const SEEKER_HELP_ARTICLES: HelpArticle[] = [
   achievements,
   studentModulesAndProject,
   studentProgressionTracker,
+  secondaryProfessionsAndCrossTraining,
   vacancyInvitationsExplained,
   howToAcceptDeclineOrReconsider,
   declineReasonsAndWhatTheyMean,
