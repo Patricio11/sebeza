@@ -267,6 +267,83 @@
       "when": 1780900000000,
       "tag": "0037_phase9_23_employment_verifications",
       "breakpoints": false
+    },
+    {
+      "idx": 38,
+      "version": "7",
+      "when": 1781000000000,
+      "tag": "0038_phase11_1_seeker_badges",
+      "breakpoints": false
+    },
+    {
+      "idx": 39,
+      "version": "7",
+      "when": 1781100000000,
+      "tag": "0039_phase11_2_interested_state",
+      "breakpoints": false
+    },
+    {
+      "idx": 40,
+      "version": "7",
+      "when": 1781200000000,
+      "tag": "0040_phase11_3_seeker_control",
+      "breakpoints": false
+    },
+    {
+      "idx": 41,
+      "version": "7",
+      "when": 1781300000000,
+      "tag": "0041_phase11_4_distribution",
+      "breakpoints": false
+    },
+    {
+      "idx": 42,
+      "version": "7",
+      "when": 1781400000000,
+      "tag": "0042_phase11_5_profile_depth",
+      "breakpoints": false
+    },
+    {
+      "idx": 43,
+      "version": "7",
+      "when": 1781500000000,
+      "tag": "0043_phase13_student_modules",
+      "breakpoints": false
+    },
+    {
+      "idx": 44,
+      "version": "7",
+      "when": 1781600000000,
+      "tag": "0044_phase13_module_skills",
+      "breakpoints": false
+    },
+    {
+      "idx": 45,
+      "version": "7",
+      "when": 1781700000000,
+      "tag": "0045_phase13_llm_providers",
+      "breakpoints": false
+    },
+    {
+      "idx": 46,
+      "version": "7",
+      "when": 1781800000000,
+      "tag": "0046_phase13_student_milestones",
+      "breakpoints": false
+    },
+    {
+      "idx": 47,
+      "version": "7",
+      "when": 1781900000000,
+      "tag": "0047_phase13_9_vacancy_any_province",
+      "breakpoints": false
+    },
+    {
+      "idx": 48,
+      "version": "7",
+      "when": 1782000000000,
+      "tag": "0048_phase13_10_secondary_professions",
+      "breakpoints": false
     }
   ]
 }

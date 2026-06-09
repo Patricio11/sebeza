@@ -43,13 +43,21 @@
 --                   platform suggests the mapping to the editorial
 --                   pipeline. Not yet wired; the enum value is
 --                   reserved so we don't have to migrate later.
-CREATE TYPE module_skill_source AS ENUM (
-  'editorial',
-  'llm_suggested',
-  'student_signal'
-);
+-- IF-NOT-EXISTS guards added retroactively (see
+-- docs/MIGRATION_JOURNAL_RECOVERY_PLAN.md) so re-running this
+-- migration against a DB where the schema was already pushed via
+-- `drizzle-kit push` is a no-op.
+DO $$ BEGIN
+  CREATE TYPE module_skill_source AS ENUM (
+    'editorial',
+    'llm_suggested',
+    'student_signal'
+  );
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+END $$;
 
-CREATE TABLE module_skills (
+CREATE TABLE IF NOT EXISTS module_skills (
   id               text PRIMARY KEY,
   -- Lowercase slug + the original display label. Trigram match runs
   -- on `module_label`; the slug is the canonical key for the unique
@@ -78,22 +86,22 @@ CREATE TABLE module_skills (
 --
 --   * institution_slug IS NULL    -> unique on (module_slug, skill_slug)
 --   * institution_slug IS NOT NULL -> unique on (module_slug, skill_slug, institution_slug)
-CREATE UNIQUE INDEX module_skills_canonical_uq
+CREATE UNIQUE INDEX IF NOT EXISTS module_skills_canonical_uq
   ON module_skills(module_slug, skill_slug)
   WHERE institution_slug IS NULL;
 
-CREATE UNIQUE INDEX module_skills_institution_uq
+CREATE UNIQUE INDEX IF NOT EXISTS module_skills_institution_uq
   ON module_skills(module_slug, skill_slug, institution_slug)
   WHERE institution_slug IS NOT NULL;
 
 -- Lookup by module_slug (the canonical key used by the cached read
 -- path after the student's free-text input gets slug-normalised).
-CREATE INDEX idx_module_skills_by_module
+CREATE INDEX IF NOT EXISTS idx_module_skills_by_module
   ON module_skills(module_slug);
 
 -- Lookup by skill_slug (the gov-side analytics in Task 13.6 will
 -- aggregate by skill: "which modules teach SQL across SA?").
-CREATE INDEX idx_module_skills_by_skill
+CREATE INDEX IF NOT EXISTS idx_module_skills_by_skill
   ON module_skills(skill_slug);
 
 -- Trigram GIN index on module_label for the student-side fuzzy
@@ -106,5 +114,5 @@ CREATE INDEX idx_module_skills_by_skill
 -- table scan. Editorial catalogue volume will stay modest
 -- (thousands of rows) so the index is not strictly required, but
 -- it future-proofs the read path for Tier-2 expansion.
-CREATE INDEX idx_module_skills_label_trgm
+CREATE INDEX IF NOT EXISTS idx_module_skills_label_trgm
   ON module_skills USING GIN (module_label gin_trgm_ops);

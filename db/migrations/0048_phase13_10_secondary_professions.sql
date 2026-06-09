@@ -27,8 +27,11 @@
 -- existing rows get NOT NULL DEFAULT '{}' so single-profession
 -- seekers see zero change.
 
+-- IF NOT EXISTS guards so the migration is safe to re-run against
+-- a DB where the schema was already pushed via `drizzle-kit push`.
+-- See docs/MIGRATION_JOURNAL_RECOVERY_PLAN.md for context.
 ALTER TABLE profiles
-  ADD COLUMN secondary_professions text[] NOT NULL DEFAULT '{}';
+  ADD COLUMN IF NOT EXISTS secondary_professions text[] NOT NULL DEFAULT '{}';
 
 -- GIN index for the array-overlap read path in searchProfilesQuery
 -- (Task 13.10.5): the widened profession filter becomes
@@ -38,5 +41,5 @@ ALTER TABLE profiles
 -- scan on every search. Volume on this column is modest (cap 3 per
 -- row, ~3 distinct entries on average) so the GIN index is small +
 -- the index-vs-seqscan break-even is fast.
-CREATE INDEX idx_profiles_secondary_professions_gin
+CREATE INDEX IF NOT EXISTS idx_profiles_secondary_professions_gin
   ON profiles USING gin (secondary_professions);

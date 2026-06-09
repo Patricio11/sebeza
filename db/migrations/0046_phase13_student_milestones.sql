@@ -29,29 +29,21 @@
 --     "first_job_accepted" milestone does NOT flip placements to
 --     employer_confirmed. Only employer Mark-as-Hired does that.
 
-CREATE TYPE student_milestone_kind AS ENUM (
-  -- Submitted my dissertation / final-year project. Captured because
-  -- the academic side rarely surfaces this in time for the
-  -- platform to celebrate it auto-derivable.
-  'dissertation_submitted',
-  -- Graduation date confirmed by the institution. Different from
-  -- expectedGraduation (which is intent at sign-up); this is the
-  -- moment the date became real.
-  'graduation_confirmed',
-  -- First job offer accepted. Bridges the gap before an employer
-  -- Mark-as-Hired flows (which may or may not happen on Sebenza).
-  'first_job_accepted',
-  -- The student left the formal academic system without a
-  -- credential. Captured honestly because the alternative is the
-  -- profile staying "Year 3" forever; the platform doesn't pretend
-  -- the student is still in school.
-  'studies_paused',
-  -- Generic milestone for things the kind enum doesn't cover.
-  -- The note field carries the detail.
-  'other'
-);
+-- IF-NOT-EXISTS guards added retroactively
+-- (docs/MIGRATION_JOURNAL_RECOVERY_PLAN.md).
+DO $$ BEGIN
+  CREATE TYPE student_milestone_kind AS ENUM (
+    'dissertation_submitted',
+    'graduation_confirmed',
+    'first_job_accepted',
+    'studies_paused',
+    'other'
+  );
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+END $$;
 
-CREATE TABLE student_milestones (
+CREATE TABLE IF NOT EXISTS student_milestones (
   id          text PRIMARY KEY,
   profile_id  text NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
   kind        student_milestone_kind NOT NULL,
@@ -68,10 +60,10 @@ CREATE TABLE student_milestones (
 -- first_job_accepted, studies_paused). The 'other' kind can repeat.
 -- Partial unique index enforces the constraint without blocking
 -- the 'other' kind.
-CREATE UNIQUE INDEX student_milestones_one_shot_uq
+CREATE UNIQUE INDEX IF NOT EXISTS student_milestones_one_shot_uq
   ON student_milestones(profile_id, kind)
   WHERE kind <> 'other';
 
 -- Lookup by profile for the timeline read path.
-CREATE INDEX idx_student_milestones_by_profile
+CREATE INDEX IF NOT EXISTS idx_student_milestones_by_profile
   ON student_milestones(profile_id);

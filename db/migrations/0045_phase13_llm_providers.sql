@@ -30,7 +30,9 @@
 --      auditor sees who acknowledged + when. Self-hosted is the
 --      POPIA-clean recommended path.
 
-CREATE TABLE llm_providers (
+-- IF-NOT-EXISTS guards added retroactively
+-- (docs/MIGRATION_JOURNAL_RECOVERY_PLAN.md).
+CREATE TABLE IF NOT EXISTS llm_providers (
   -- Stable provider id, also the slug. Seeded with the 4 supported
   -- providers below; admins don't create new rows, they configure
   -- the existing rows.
@@ -63,7 +65,7 @@ CREATE TABLE llm_providers (
 -- At-most-one-active enforcement. Postgres treats `WHERE active = true`
 -- as a partial index; rows with active=false are not part of the index
 -- so any number of inactive rows coexist freely.
-CREATE UNIQUE INDEX llm_providers_one_active
+CREATE UNIQUE INDEX IF NOT EXISTS llm_providers_one_active
   ON llm_providers(active)
   WHERE active = true;
 
@@ -75,7 +77,8 @@ VALUES
   ('openai',      'OpenAI',                 false, 0),
   ('anthropic',   'Anthropic',              false, 0),
   ('mistral',     'Mistral',                false, 0),
-  ('self_hosted', 'Self-hosted (POPIA-clean)', false, 0);
+  ('self_hosted', 'Self-hosted (POPIA-clean)', false, 0)
+ON CONFLICT (id) DO NOTHING;
 
 -- Kill-switch above the DB-stored provider config. Setting OFF
 -- short-circuits the dispatch even if a provider is active +

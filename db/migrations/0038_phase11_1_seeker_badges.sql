@@ -8,7 +8,7 @@
 -- the existing app_user.suspendedAt path (suspended accounts get a
 -- conditional UI hide; the rows stay).
 
-CREATE TABLE "seeker_badges" (
+CREATE TABLE IF NOT EXISTS "seeker_badges" (
   "id"           text PRIMARY KEY,
   "profile_id"   text NOT NULL REFERENCES "profiles"("id") ON DELETE CASCADE,
   "slug"         text NOT NULL,
@@ -16,5 +16,5 @@ CREATE TABLE "seeker_badges" (
   UNIQUE("profile_id", "slug")
 );
 
-CREATE INDEX "idx_seeker_badges_by_profile"
+CREATE INDEX IF NOT EXISTS "idx_seeker_badges_by_profile"
   ON "seeker_badges" ("profile_id", "awarded_at" DESC);
