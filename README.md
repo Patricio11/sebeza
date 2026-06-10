@@ -112,8 +112,8 @@ high-value accounts.
 | 9.13 | Learning-loop intelligence (curriculum-vs-demand + stall reasons) | ✅ | [PHASE_9_13_COMPLETE](docs/completed/PHASE_9_13_COMPLETE.md) |
 | 9.14 | Seeker verification roll-up (auto-derived from qualifications) | ✅ | [PHASE_9_14_COMPLETE](docs/completed/PHASE_9_14_COMPLETE.md) |
 | 9.15 | "Other" free-text + admin taxonomy suggestion queue | ✅ | [PHASE_9_15_COMPLETE](docs/completed/PHASE_9_15_COMPLETE.md) |
-| 9.16 | DOB + nationality at sign-up + admin-mediated ID verification | ✅ | `docs/PHASE_9_16_PLAN.md` |
-| 9.17 | Employer-initiated seeker invitations (agent workflow) | ✅ | `docs/PHASE_9_17_PLAN.md` |
+| 9.16 | DOB + nationality at sign-up + admin-mediated ID verification | ✅ | `docs/completed/PHASE_9_16_PLAN.md` |
+| 9.17 | Employer-initiated seeker invitations (agent workflow) | ✅ | `docs/completed/PHASE_9_17_PLAN.md` |
 | 9.18 | Remote/Hybrid + SMTP collapse + draft persistence + domain rename | ✅ | ROADMAP §9.18 |
 | 9.19 | Years-experience floor + NQF floor + follow-up nudges + season window | ✅ | (folded into 9.21/9.22) |
 | 9.20 | Placement lifecycle ledger (status check-ins + departures) | ✅ | [PHASE_9_20_COMPLETE](docs/completed/PHASE_9_20_COMPLETE.md) |
@@ -168,8 +168,12 @@ cp .env.example .env.local
 
 # 3. Database
 npm run db:generate     # generate Drizzle migration (only if you changed schema)
-npm run db:migrate      # apply 0000 → 0021 to your Neon DB
+npm run db:migrate      # apply all migrations (0000 → 0048) to your Neon DB
 npm run db:seed         # idempotent seed (taxonomy + fixture cohort + lifecycle fixtures)
+# If migrate exits silently but the seed fails on a missing column, the
+# DB and the migration journal have drifted — run `npm run db:push` to
+# sync the schema directly, then re-seed. Recovery template:
+# docs/completed/MIGRATION_JOURNAL_RECOVERY_PLAN.md
 
 # 4. Dev
 npm run dev             # http://localhost:3000

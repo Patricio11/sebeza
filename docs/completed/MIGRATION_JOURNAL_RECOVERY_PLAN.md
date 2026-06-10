@@ -1,6 +1,19 @@
-# MIGRATION JOURNAL RECOVERY PLAN
+# MIGRATION JOURNAL RECOVERY PLAN ✅ COMPLETE
 
 *One-off fix surfaced when `npm run db:seed` failed with `column "secondary_professions" of relation "profiles" does not exist` after `npm run db:migrate` ran silently.*
+
+> **✅ RESOLVED 2026-06-09.** Journal + idempotency fixes shipped as `e3da3cb`. Recovery on the
+> dev DB went via `npm run db:push` (the tracking table's recorded hashes pre-dated the
+> idempotency edits, so `migrate` stayed silent — push syncs the schema directly). Verified by a
+> read-only information_schema probe: all 0038–0048 artifacts present (`secondary_professions`,
+> `llm_providers`, `student_milestones`, `module_skills`, `seeker_badges`, nullable
+> `vacancies.province_slug`, `academic_profiles.current_modules`), 24 profiles seeded, 51
+> catalogue rows. **One deviation found during verification:** the push path skips migration
+> INSERTs AND the seed's TRUNCATE CASCADE wipes `llm_providers` through its `configured_by`
+> FK — the 4 dormant provider rows were missing. Fixed by adding `seedLlmProviders()` to
+> `db/seed.ts` (idempotent, ON CONFLICT DO NOTHING). Task 3's workflow rule landed in
+> `docs/TO_START_EVERY_SESSION.md` (migration convention block) + a recovery pointer in the
+> README database section.
 
 > **Root cause:** `db/migrations/meta/_journal.json` stops at idx 37 (`0037_phase9_23_employment_verifications`). The 11 migrations added between Phase 11.1 and Phase 13.10 (`0038`-`0048`) shipped as raw SQL files but were never registered in the journal. `drizzle-kit migrate` reads the journal to know which migrations are available; missing entries are silently skipped. The seed runs against a DB that's still at the 0037 schema and fails on the first column from a missing migration.
 

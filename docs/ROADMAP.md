@@ -632,7 +632,7 @@ Three new compliance assertions on `/api/admin/outcomes-compliance` (now **29 as
 
 New `/employer/invites` dashboard route + `UserPlus` nav entry between Vacancies and Talent pools. New `/sign-up/invited/[token]` + `/sign-up/invited/[token]/decline` + `/report-invite/[token]` public routes (token-gated, no auth). New cron at `/api/cron/seeker-invite-expiry` (CRON_SECRET-guarded, same pattern as the Phase 9.8 vacancy-invite-expiry cron). `<SeekerSignUpForm>` extended with an `invitationContext` prop that pre-fills name + email + profession and locks the email field; submit branches to `acceptSeekerInvitation` instead of `signUpSeeker`. Recipient-facing email lives in `lib/email/templates/seeker-invite.ts`  reuses the shared `emailShell()` brand chrome.
 
-Seed extends with 3 demo invites on Discovery Bank (one pending / one accepted linked to a real cohort seeker / one declined with a polite reason inside the cooldown window) so `/employer/invites` renders real content immediately. **Discovery Bank flipped to `verified` in the seed** so the Phase 9.17 demo + the existing Phase 9.10 KYC fixtures (Acme `pending`, Globex `rejected`, Initech `unverified`) cover both happy-path + gate-testing dev workflows side-by-side. Companion docs: `docs/PHASE_9_17_PLAN.md` (13 locked decisions + 14 build tasks) + DPIA addendum R11 + Privacy Section 2 + PAIA Section 4 updates.
+Seed extends with 3 demo invites on Discovery Bank (one pending / one accepted linked to a real cohort seeker / one declined with a polite reason inside the cooldown window) so `/employer/invites` renders real content immediately. **Discovery Bank flipped to `verified` in the seed** so the Phase 9.17 demo + the existing Phase 9.10 KYC fixtures (Acme `pending`, Globex `rejected`, Initech `unverified`) cover both happy-path + gate-testing dev workflows side-by-side. Companion docs: `docs/completed/PHASE_9_17_PLAN.md` (13 locked decisions + 14 build tasks) + DPIA addendum R11 + Privacy Section 2 + PAIA Section 4 updates.
 
 ---
 
@@ -656,7 +656,7 @@ Audit + notifications: three new audit kinds (`kyc.document.upload`, `kyc.review
 
 22 Vitest fixtures for the validation helpers (`validateDob` boundary cases + `validateSaId` Luhn + DOB cross-check + whitespace handling + `validatePassport` regex + country lookup). Full suite at 44 passing.
 
-Companion docs: `docs/PHASE_9_16_PLAN.md` (12 locked decisions + 14 tasks + 2026-05-27 follow-up section) + DPIA addendum R10 (DOB linkability + ID-document at-rest exposure controls) + Privacy Section 2 (data categories) + PAIA Section 4 (records held).
+Companion docs: `docs/completed/PHASE_9_16_PLAN.md` (12 locked decisions + 14 tasks + 2026-05-27 follow-up section) + DPIA addendum R10 (DOB linkability + ID-document at-rest exposure controls) + Privacy Section 2 (data categories) + PAIA Section 4 (records held).
 
 ---
 

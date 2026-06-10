@@ -114,6 +114,33 @@ async function truncate() {
   `);
 }
 
+/**
+ * Phase 13.3  the four supported LLM providers, all dormant
+ * (active=false, no credentials, zero budget). Mirrors the INSERT in
+ * migration 0045 because TWO paths can leave the table empty:
+ *
+ *   1. `db:push` recovery  push syncs schema only and never runs the
+ *      migration's INSERT statements.
+ *   2. Every `db:seed`  the truncate() CASCADE reaches llm_providers
+ *      through its `configured_by  app_user` FK.
+ *
+ * ON CONFLICT (id) DO NOTHING keeps this idempotent either way. The
+ * dormant-by-default posture is the point: zero spend until an admin
+ * explicitly configures + activates a provider on /admin/llm.
+ */
+async function seedLlmProviders() {
+  console.log("🤖 LLM provider placeholders (dormant)…");
+  await db
+    .insert(schema.llmProviders)
+    .values([
+      { id: "openai", displayName: "OpenAI", active: false, monthlyBudgetZar: 0 },
+      { id: "anthropic", displayName: "Anthropic", active: false, monthlyBudgetZar: 0 },
+      { id: "mistral", displayName: "Mistral", active: false, monthlyBudgetZar: 0 },
+      { id: "self_hosted", displayName: "Self-hosted (POPIA-clean)", active: false, monthlyBudgetZar: 0 },
+    ])
+    .onConflictDoNothing();
+}
+
 async function seedTaxonomy() {
   console.log("🌍 Provinces + cities…");
   await db
@@ -2171,6 +2198,13 @@ async function main() {
   console.log("🌱 Sebenza seed  Phase 2 starting database\n");
 
   await truncate();
+  // Phase 13.3 follow-up  re-insert the 4 dormant LLM provider rows.
+  // Migration 0045 seeds them once, but the truncate above CASCADEs
+  // into llm_providers (it carries an FK to app_user via
+  // configured_by), wiping the rows on every re-seed. Without this,
+  // /admin/llm renders zero provider cards. ON CONFLICT keeps the
+  // insert idempotent for DBs where the rows survived.
+  await seedLlmProviders();
   await seedTaxonomy();
   await seedUsersAndProfiles();
   await seedProfileChildren();

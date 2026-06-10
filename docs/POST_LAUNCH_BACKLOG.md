@@ -104,6 +104,18 @@ Keep entries terse  this is a triage list, not a spec.
 
 ---
 
+## Phase 13.8–13.10 side-phase follow-ups
+
+> Three quick side-phases shipped 2026-06-04 → 2026-06-06 (see `docs/completed/PHASE_13_{8,9,10}_COMPLETE.md`). Deliberately-deferred polish from their out-of-scope sections:
+
+- **Suggest secondaries from declared experiences** _(13.10 out-of-scope)_  the platform can see a seeker worked 2 yrs as a barista in `experiences`; a quiet "add Barista as a secondary profession?" nudge on the profile editor would lift adoption. Deferred so the field stays seeker-controlled at v1; revisit once usage data shows under-adoption.
+- **Multi-profession vacancies** _(13.10 out-of-scope)_  "hiring a barista OR a kitchen porter" needs `professionSlugs: text[]` on vacancies. Skill-overlap matching covers most of this today; build only if employers ask.
+- **Profession slug migration** _(13.10 out-of-scope)_  `profiles.profession` + `secondary_professions` store labels, not slugs. A slug-everywhere migration touches every consumer; do it as its own hygiene phase if label-drift bugs appear.
+- **Cross-border remote vacancies** _(13.9 out-of-scope)_  "Any" means any SA province. Opening the pool to non-SA-residents is a different problem with different POPIA implications; needs its own governance-reviewed phase if ever.
+- **Migration journal discipline** _(2026-06-09 incident)_  journal drift recovered via `db:push`; convention now in `TO_START_EVERY_SESSION.md`. If the team grows, consider a CI check that fails when a `db/migrations/*.sql` file lands without a matching `_journal.json` entry.
+
+---
+
 ## Feature requests from users
 
 > Filled in as launch traffic + user feedback arrive.
