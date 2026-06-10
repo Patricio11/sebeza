@@ -846,7 +846,9 @@ Five sub-phases, ordered by ROI per LOC:
 ---
 
 ## 🧪 PHASE 12: TESTING & QA
-*Goal: Production-ready and trustworthy. **Renumbered 2026-05-30** to make room for Phase 11 (seeker retention). The substance is unchanged.*
+*Goal: Production-ready and trustworthy. **Renumbered 2026-05-30** to make room for Phase 11 (seeker retention).*
+
+> **REVISED 2026-06-10:** the four tasks below were scoped at ~Phase 6. The system now spans 49 migrations, ~59 server-action files, 18 crons and 29 runtime compliance assertions. The authoritative, full-system test plan is **`docs/PHASE_12_PLAN.md`** (12.0 infrastructure · 12.1 unit · 12.2 integration · 12.3 E2E · 12.4 compliance-in-CI · 12.5 carry-over fixes · 12.6 wrap-up). The tasks below remain as the historical summary.
 
 ### Task 12.1: Unit
 - [ ] Status-freshness/confidence logic. Search ranking. Encryption round-trip. Consent state machine.
