@@ -134,6 +134,7 @@ These exercise our Server Actions + queries against the real Postgres schema wit
 - [ ] **Modal focus-return sweep** — finish A11Y finding #8: the pre-11.5 modals (older dialogs predating `MarkAsFilledModal`-era patterns) get Esc-close + focus-return; covered by an E2E assertion on each.
 - [ ] **Populate `docs/PERF_BUDGET.md`** — run `ANALYZE=true npm run build` + `npx @lhci/cli autorun` (config already in `lighthouserc.json`) and fill the route table. Any route over the 160KB script budget gets a fix or a documented exception in this phase, not later.
 - [ ] **`/search` ILIKE → FTS flip decision** — while ranking tests are being written (12.2), decide and pin the final search path so tests target it once. If the flip lands, it lands here; if deferred, the deferral is recorded with the trigger condition.
+- [ ] **Clear the repo lint debt, then re-add `lint` to `test:all`** — discovered in Session A (2026-06-10): `npm run lint` fails on pre-existing `app/` page code (react-hooks/purity `Date.now()` in render on 3 admin pages, `react/no-unescaped-entities`, `@next/next/no-html-link-for-pages` on `/insights` export links + reset-password). All new Phase 12 files lint clean. `test:all` runs typecheck + vitest only until this lands, so the gate is green-by-construction from day one.
 
 ## Task 12.6: Wiring, verification, doc convention
 
