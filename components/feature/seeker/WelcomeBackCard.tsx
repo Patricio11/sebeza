@@ -11,7 +11,7 @@
  *   - Hidden when all the delta numbers are zero (nothing-changed
  *     is its own honest signal but doesn't need a card).
  *   - Hidden when the absence cookie suggests < 7 days  the helper
- *     `readAndSetLastSeen` returns null in that case.
+ *     `readLastSeen` returns null in that case.
  *
  * Civic-Editorial constraints: brand-tint background, ordinal-style
  * number display, no animation. Matches the existing

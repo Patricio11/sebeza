@@ -29,7 +29,8 @@ import { getSetting } from "@/lib/admin/settings";
 import { Inbox } from "lucide-react";
 import { HelpLink } from "@/components/feature/help/HelpLink";
 import { WelcomeBackCard } from "@/components/feature/seeker/WelcomeBackCard";
-import { readAndSetLastSeen } from "@/lib/cookies/welcome-back";
+import { readLastSeen } from "@/lib/cookies/welcome-back";
+import { DashboardSeenTracker } from "@/components/feature/seeker/DashboardSeenTracker";
 import { RecentAchievementsStrip } from "@/components/feature/seeker/RecentAchievementsStrip";
 import { listMyBadges } from "@/lib/seeker/badges";
 import { StudentLaneDiscoveryCallout } from "@/components/feature/seeker/learning/StudentLaneDiscoveryCallout";
@@ -45,9 +46,12 @@ export default async function SeekerOverviewPage({
   const me = await getMyProfile();
   if (!me) redirect("/sign-in?next=/dashboard");
 
-  // Phase 11.1.3  read-and-set the welcome-back cookie. Returns the
-  // absence days when >= 7, null otherwise.
-  const absenceDays = await readAndSetLastSeen();
+  // Phase 11.1.3  read the welcome-back cookie (absence days when
+  // >= 7, null otherwise). READ-ONLY here: cookie writes are illegal
+  // during RSC render (crashed this page in production  see
+  // docs/completed/DASHBOARD_COOKIE_CRASH_FIX_PLAN.md). The refresh
+  // write fires post-mount via <DashboardSeenTracker> below.
+  const absenceDays = await readLastSeen();
 
   const t = await getTranslations("seekerDash");
   const verificationVisible = await getSetting<boolean>(
@@ -152,6 +156,10 @@ export default async function SeekerOverviewPage({
         </Link>
       }
     >
+      {/* Refresh the welcome-back cookie after mount (Server Action).
+          Renders nothing. */}
+      <DashboardSeenTracker />
+
       {/* Phase 11.1.3  welcome-back delta card. Renders only when the
           seeker has been absent >= 7 days AND at least one delta number
           is positive. The card is suppressed silently when the absence
