@@ -41,3 +41,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Playwright artifacts (Phase 12 E2E)
+/test-results/
+/playwright-report/
+
