@@ -28,6 +28,8 @@ loadEnv({ path: ".env.local" });
 loadEnv();
 import { Pool, neonConfig } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-serverless";
+import { drizzle as drizzlePostgresJs } from "drizzle-orm/postgres-js";
+import postgres from "postgres";
 import { sql } from "drizzle-orm";
 import ws from "ws";
 
@@ -35,6 +37,8 @@ import ws from "ws";
 // same Pool-backed driver  the transactional inserts here (cohort
 // fixtures, vacancy lifecycle) would otherwise hit the same "no
 // transactions" error users saw on /sign-up/seeker.
+// `DATABASE_DRIVER=postgres-js` mirrors db/client.ts's driver seam
+// (Phase 12 test DB + AWS runbook) — see that file for the rationale.
 neonConfig.webSocketConstructor = ws;
 import { hashPassword } from "better-auth/crypto";
 
@@ -66,7 +70,12 @@ if (!url) {
   process.exit(1);
 }
 
-const db = drizzle(new Pool({ connectionString: url }), { schema });
+const db =
+  process.env.DATABASE_DRIVER === "postgres-js"
+    ? (drizzlePostgresJs(postgres(url, { max: 1 }), {
+        schema,
+      }) as unknown as ReturnType<typeof drizzle<typeof schema>>)
+    : drizzle(new Pool({ connectionString: url }), { schema });
 
 // Tiny helper for human-readable, deterministic IDs.
 const id = (prefix: string, slug: string) => `${prefix}_${slug}`;
@@ -2272,6 +2281,14 @@ async function main() {
   // invite backdated 7 days before sign-up), one declined with a
   // reason. Requires Discovery to be `verified` (seeded above).
   await seedPhase9_17SeekerInvitations();
+  // Phase 12 (2026-06-10)  converge profiles.verification to the Phase
+  // 9.14 roll-up rule after all fixtures land. The mock dataset carries
+  // per-profile verification values that pre-date 9.14 and can drift
+  // from what the profile's qualifications justify (the CI compliance
+  // suite's `profile-verification-matches-rollup` caught 3 drifting
+  // fixtures). Same SQL as migration 0022's backfill — the roll-up
+  // contract has ONE definition, and the seed must obey it too.
+  await convergeProfileVerificationRollup();
 
   const ms = Date.now() - started;
   console.log(
@@ -2355,7 +2372,40 @@ async function seedPhase9_17SeekerInvitations() {
   });
 }
 
-main().catch((err) => {
-  console.error("\n❌ Seed failed:", err);
-  process.exit(1);
-});
+/**
+ * Phase 12  re-derive `profiles.verification` from qualification state,
+ * mirroring migration 0022 / `recomputeProfileVerification()`:
+ *   verified ⇔ ≥1 verified qual · pending ⇔ none verified, ≥1 pending ·
+ *   unverified otherwise. `rejected` never auto-applies (Verification-
+ *   Honesty Rule  rejection is per-document, not per-seeker).
+ */
+async function convergeProfileVerificationRollup() {
+  console.log("🪪 Converging profile verification roll-up (Phase 9.14 rule)…");
+  await db.execute(sql`
+    UPDATE profiles p
+    SET verification = CASE
+      WHEN EXISTS (
+        SELECT 1 FROM qualifications q
+        WHERE q.profile_id = p.id AND q.verification = 'verified'
+      ) THEN 'verified'::verification_status
+      WHEN EXISTS (
+        SELECT 1 FROM qualifications q
+        WHERE q.profile_id = p.id AND q.verification = 'pending'
+      ) THEN 'pending'::verification_status
+      ELSE 'unverified'::verification_status
+    END
+    WHERE p.deleted_at IS NULL
+  `);
+}
+
+main()
+  .then(() => {
+    // Explicit success exit: the postgres-js driver path (Phase 12 test
+    // harness) holds its TCP connection open, which would otherwise keep
+    // the process alive forever after the seed completes.
+    process.exit(0);
+  })
+  .catch((err) => {
+    console.error("\n❌ Seed failed:", err);
+    process.exit(1);
+  });

@@ -40,8 +40,16 @@ ALTER TABLE "profiles"
   ADD COLUMN IF NOT EXISTS "id_document_rejection_reason" text;
 
 -- Admin queue uses this index to surface pending-review rows fast.
+--
+-- Phase 12 fix (2026-06-10): the original predicate also filtered on
+-- "kyc_verified_at" IS NULL, but that column lives on app_user (see
+-- db/schema.ts appUser.kycVerifiedAt), NOT on profiles — the statement
+-- only ever succeeded on databases where a zombie profiles column
+-- existed from an old `drizzle-kit push`. The Phase 12 migrate-from-zero
+-- harness surfaced the break. The verified-or-not filter is applied at
+-- query time via the app_user join; the index narrows to "has an
+-- uploaded document + not deleted", which is the hot path.
 CREATE INDEX IF NOT EXISTS "profiles_id_doc_pending_idx"
   ON "profiles" ("id_document_uploaded_at")
   WHERE "id_document_storage_key" IS NOT NULL
-    AND "kyc_verified_at" IS NULL
     AND "deleted_at" IS NULL;
