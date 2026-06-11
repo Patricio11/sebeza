@@ -53,6 +53,23 @@ const PURPOSE_ONBOARDING_EXPLAINER: Partial<Record<ConsentPurpose, string>> = {
     "When you grant this, verified employers can flag you for a specific role they're trying to fill  a chef position at a particular restaurant, a developer role at a particular bank. You'll get a notification with the role + employer named, and you can accept, decline, or decline with a reason. Declining is free. You can revoke this consent any time from your privacy centre, and declining a single invite doesn't hurt your visibility in search.",
 };
 
+/**
+ * Phase 11.4.4 follow-up  the two messaging-channel purposes are
+ * deliberately EXCLUDED from sign-up. Per D2 the seeker grants them
+ * from /dashboard/account alongside phone verification  asking for
+ * SMS/WhatsApp consent before a phone number even exists on file is
+ * premature, and the dispatch layer multi-gates on verified phone +
+ * allowlist anyway. The consents state map still carries all 8 keys
+ * (the two excluded ones simply stay false and no row is written).
+ * This filter is also what keeps the step-2 render inside the
+ * `auth.seekerSignUp.step2.purposes` en.json catalog  the messaging
+ * purposes have no sign-up label by design (their consent copy lives
+ * on the privacy centre + PhoneChannelPanel where it has context).
+ */
+const SIGN_UP_CONSENT_PURPOSES = CONSENT_PURPOSES.filter(
+  (p) => p !== "messaging_channel_sms" && p !== "messaging_channel_whatsapp",
+);
+
 interface AcademicState {
   isStudent: boolean;
   institutionSlug: string;
@@ -586,7 +603,7 @@ export function SeekerSignUpForm({
       {state.step === 2 && (
         <div className="flex flex-col gap-6">
           <ul className="space-y-3">
-            {CONSENT_PURPOSES.map((purpose) => {
+            {SIGN_UP_CONSENT_PURPOSES.map((purpose) => {
               const required = REQUIRED_FOR_SEARCHABILITY.includes(purpose);
               // Per-purpose onboarding explainer (D8 source text for
               // vacancy_matching). Whitelist  not every purpose gets a
