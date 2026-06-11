@@ -42,53 +42,53 @@ The 29 compliance assertions are excellent but only run when an admin hits `/api
 
 ## Task 12.0: Test infrastructure (build first)
 
-- [ ] `vitest.config.ts` at project root: node environment, `@/` path alias, three projects — `unit` (no DB, default `npm test`), `integration` (requires `SEBENZA_TEST_DB=1`), `compliance` (same gate).
-- [ ] Test-DB harness `tests/helpers/db.ts`: asserts `SEBENZA_TEST_DB=1`, runs `drizzle-kit migrate` from zero, runs the seed once per suite-run; per-file cleanup via targeted truncate of mutated tables (cheaper than re-seed).
-- [ ] Session stub helper `tests/helpers/session.ts`: mint seeker / employer(verified) / employer(unverified) / admin / gov contexts from seeded fixture accounts (seed already ships Discovery Bank verified + Acme pending + Globex rejected + Initech unverified — use them, don't invent new fixtures).
-- [ ] Install `@playwright/test` (chromium) + `playwright.config.ts`: `webServer` = `npm run build && npm run start` against the test DB; projects for 1280px + 360px.
-- [ ] npm scripts: `test` (unit only — stays fast, no DB), `test:integration`, `test:compliance`, `test:e2e`, `test:all`.
+- [x] `vitest.config.mts` (ESM forced by `.mts` — the project has no `"type": "module"`): node environment, `@/` alias, `server-only` stub, three projects — `unit` / `integration` / `compliance`. *(Session A + B)*
+- [x] Test-DB harness: `tests/helpers/db.ts` (D1 guard — loads ONLY `.env.test.local`, refuses without `SEBENZA_TEST_DB=1`) + `tests/helpers/global-setup.ts` (programmatic migrate-from-zero + truncating seed per project run) + `tests/helpers/setup-env.ts` (per-worker env) + `tests/helpers/migrate-cli.ts`. Test DB = Docker `sebenza-test-pg` (Postgres 16, port 54329, restart unless-stopped) via the new `DATABASE_DRIVER=postgres-js` seam in `db/client.ts`. *(Session B)*
+- [x] Session stubbing: done as targeted `vi.mock("@/lib/auth/dal")` per suite (see `tests/integration/reveal-placement-gates.test.ts`) rather than a central helper — the mock IS the documented D6 seam; extract to `tests/helpers/session.ts` when a third suite needs it. *(Session C)*
+- [x] `@playwright/test` + chromium installed; `playwright.config.ts` webServer runs the production build on port 3100 with EXPLICIT test-env overrides (process env beats `.env.local`, so the dev Neon DB is unreachable); projects `desktop` + `mobile-360`. *(Session C)*
+- [x] npm scripts: `test` / `test:watch` (unit), `test:integration`, `test:compliance`, `test:e2e`, `test:all`. *(Sessions A–C)*
 - [ ] Document the harness + the D1 guard in this doc's companion `PHASE_12_COMPLETE.md` when shipped, and add a short "Running the tests" section to `README.md`.
 
 ## Task 12.1: Unit tests (pure logic, no DB)
 
 Existing (keep, extend where noted): `suppress.test.ts` · `justification.test.ts` · `id-validation.test.ts` · `invite-tokens.test.ts`.
 
-New suites:
-- [ ] **`lib/status.ts`** — band boundaries at exactly 29/30/31 and 89/90/91 days; confidence weights 1.0/0.6/0.25; `freshnessSummary` nudge/urgent flags. This is the moat logic; it gets exhaustive boundary coverage.
-- [ ] **`lib/crypto`** — encrypt→decrypt round-trip; `v1.` key-id prefix present; tampered ciphertext throws; wrong key throws; empty/unicode/max-length plaintexts.
-- [ ] **Consent state machine** (`lib/consent`) — grant → revoke → regrant transitions per purpose; pause (`paused_until`) interaction from 11.3.1; `outcomes_research` + `vacancy_matching` default-off.
-- [ ] **CSV safety** — OWASP formula-injection guard (`=+-@\t\r` prefixes); CRLF line endings; UTF-8 BOM (pins the Phase 6.5 fixes).
-- [ ] **`lib/seeker/vacancy-outcome.ts`** — composed other-hired notification **never** references the hired person (the D4 privacy invariant from 9.11); cites vacancy requirements + recipient gaps only.
-- [ ] **`lib/seeker/free-alternatives.ts`** — ordering: free > subsidised, national > metro, shortest duration; null when no alternative.
-- [ ] **Rate limiter** (`lib/rate-limit/memory.ts`) — window roll-over, per-key isolation, budget exhaustion.
-- [ ] **Notification catalog** (`lib/notifications/catalog.ts`) — every kind has audience + default channels; dedupe windows are the documented values (e.g. 24h `profile.viewed`).
-- [ ] **`formatVacancyLocation`** (13.9) — province+city, province-only, NULL→"Any province (remote / hybrid)".
-- [ ] **`lib/taxonomy/countries.ts`** — ZA derivation (`is_citizen`), ISO validity, SADC pinning order.
+New suites — **all shipped in Session A (2026-06-10), 195 unit tests green**:
+- [x] **`lib/status.ts`** — band boundaries at exactly 29/30/31 and 89/90/91 days; confidence weights 1.0/0.6/0.25; `freshnessSummary` nudge/urgent flags.
+- [x] **`lib/crypto`** — round-trip; `v1.` prefix; random-IV non-determinism; tamper/wrong-key/unknown-key-id fail closed; env-key validation.
+- [x] **Consent state machine** (`lib/consent`) — purpose-catalogue pin; `isSearchable` none/granted/revoked; non-degrading optional purposes. *(pause interaction is DB-backed → covered at the 11.3.1 exclusion fixture in 12.2)*
+- [x] **CSV safety** — OWASP formula-injection guard; RFC 4180 quoting; CRLF + BOM.
+- [x] **`lib/seeker/vacancy-outcome.ts`** — D4 anonymity (incl. structural input-shape pin); missing-skill cap 5; Compass deep link; no fabricated gaps.
+- [x] **`lib/seeker/free-alternatives.ts`** — ordering contract re-derived independently across the full skills taxonomy; excludeTitles; unknown → null.
+- [x] **Rate limiter** — sliding-window roll-over, key + bucket isolation, DPIA R8 budget pins.
+- [x] **Notification catalog** — shape totality + pinned Phase 7.6 decisions + DPIA R3 no-shortlist-kind pin.
+- [x] **`formatVacancyLocation`** (13.9) + national-remote bucket helpers.
+- [x] **`lib/taxonomy/countries.ts`** — ZA-first ordering, code uniqueness, flag-emoji rules.
 
 ## Task 12.2: Rules-against-the-database tests (seeded test DB — *our* code layers, no external systems)
 
 These exercise our Server Actions + queries against the real Postgres schema with seeded data. Nothing here calls outside the codebase. Grouped by the seven non-negotiable rules plus the lifecycle machines:
 
 **Redaction Rule**
-- [ ] `searchProfilesQuery` result shape: `national_id_enc`, `full_surname`, `email`, `document_storage_key`, `deleted_at`, `dob` never present (key-set assertion on raw rows, not just types).
-- [ ] Public profile projection (`/p/[handle]` provider read): same forbidden-key assertion; locked panels' data absent for anonymous reads.
+- [x] `searchProfilesQuery` result shape: forbidden keys never present (key-set assertion on raw rows, not just types). *(Session B: `tests/integration/search-redaction.test.ts`)*
+- [x] Public profile projection (`/p/[handle]` provider read): same forbidden-key assertion. *(Session B; locked-panel anonymous check also covered browser-side in E2E `public-arc.spec.ts`)*
 - [ ] POPIA data export (`/api/dashboard/data-export`): national ID appears **only** as `v1.` ciphertext.
 
 **Status-Freshness + ranking**
-- [ ] Fresh profile outranks identical stale profile; `sebenza_freshness_confidence` SQL agrees with `lib/status.ts` on the same timestamps (one-source-of-truth pin).
-- [ ] Completeness multiplier and citizen-highlight ordering; 13.10: primary-profession match ranks above secondary match within the same tier; secondary matches are still returned.
+- [x] Fresh profile outranks identical stale profile; `sebenza_freshness_confidence` SQL agrees with `lib/status.ts` at band boundaries. *(Session B: `tests/integration/ranking-freshness.test.ts`)*
+- [x] 13.10: primary-profession match ranks above secondary match; secondary matches still returned. *(Session B)* — citizen-highlight grouping + completeness multiplier still open.
 - [ ] Filters: work-availability `&&` overlap (incl. `remote`/`hybrid`/`seasonal`), `open_to` overlap, internship/grad opt-ins, `minYears`, any-province vacancies (13.9) match all provinces.
-- [ ] Exclusions: soft-deleted, suspended, searchability-paused (11.3.1) and seeker-blocked-org (11.3.2, with `callerOrgId`) profiles never surface.
+- [x] Exclusions: soft-deleted vanishes from search + dossier immediately. *(Session B)* — suspended / searchability-paused (11.3.1) / seeker-blocked-org (11.3.2) exclusions still open.
 
 **Three-lock reveal + Placement-Truth**
-- [ ] `revealContact`: unverified org → refused; verified org without seeker contact-consent → refused; all three locks open → returns contact **and** writes `profile.contact.reveal` audit row **and** fires notification.
-- [ ] Document download: requires `document_sharing` consent; separate audit kind; signed URL TTL ≤ 60s.
-- [ ] `markAsHired`: refused without a reveal audit row from this org within 30 days; succeeds with one; `seeker_reported` placements excluded from `confirmedHiresThisMonth` + outcomes aggregates.
+- [x] `revealContact`: DAL consulted first (lock #1); revoked/missing consent refused (lock #2); all locks open → contact + `profile.contact.reveal` audit row + seeker notification (lock #3). *(Session C: `tests/integration/reveal-placement-gates.test.ts`)*
+- [ ] Document download: requires `document_sharing` consent; separate audit kind; signed URL TTL ≤ 60s. *(needs a storage stub — Supabase is not configured in the test env)*
+- [x] `markAsHired`: refused with no reveal; refused with a 31-day-old reveal; succeeds with a recent one; lands as `employer_confirmed` + notification. *(Session C)* — `seeker_reported` exclusion from aggregates is pinned by the compliance suite.
 - [ ] Mark-as-filled (9.11): transaction atomicity — placements + state flip + outcome fan-out all-or-nothing; second attempt on `filled` refused; outcome notifications exclude hires/declined/expired/withdrawn.
 
 **Consent gates (invites)**
-- [ ] `bulkInviteToVacancy`: non-consented seeker silently skipped (reason in audit only, never in response payload); dedupe via UNIQUE; withdrawn → seeker notified.
-- [ ] Seeker invites (9.17): unverified org refused; 50/day per-org cap counts dedupe hits; 90-day decline cooldown enforced; token single-use at DB layer.
+- [x] `bulkInviteToVacancy`: non-consented seeker silently skipped; skip reason never in the response payload (D5); UNIQUE dedupe on re-invite. *(Session C)* — withdraw-notification path still open.
+- [ ] Seeker invites (9.17): unverified org refused; 50/day per-org cap counts dedupe hits; 90-day decline cooldown enforced; token single-use at DB layer. *(cooldown + verified-org + no-orphan are pinned by the compliance suite; the cap + single-use behavioural tests still open)*
 
 **Verification-Honesty**
 - [ ] `recomputeProfileVerification` rollup: verified ⇔ ≥1 verified qual; pending ⇔ none verified + ≥1 pending; `rejected` never auto-applied; all four mutation sites trigger it.
@@ -101,18 +101,22 @@ These exercise our Server Actions + queries against the real Postgres schema wit
 - [ ] Promote canonicalises + backfills profiles/academic rows; merge re-points FKs; reject **never** mutates user data.
 
 **Cron idempotency (all 18 routes)**
-- [ ] Each route: 401 without `CRON_SECRET`; runs clean against seed; **second immediate invocation is a no-op** (status-stale via `status_stale_last_sent_at`, invite expiries via conditional state flips, learning-nudge via the 7-day cross-kind cap, digests/sweeps via their dedupe keys).
+- [x] Every route (filesystem-discovered): 401 without/with-wrong `CRON_SECRET`; status-stale-warning second run fires 0; seven high-stakes sweeps run clean twice. *(Session B: `tests/integration/cron-endpoints.test.ts`)* — learning-nudge 7-day-cap and digest dedupe behavioural fixtures still open.
 
 **Dormant-by-default gates (the only "external integration" testing we do)**
 - [ ] LLM six-gate dispatcher (13.3): refuses with kill-switch flag OFF; refuses for non-admin; refuses PII-shaped payloads (`llm.curriculum.skipped` audit) — no provider is ever called in tests.
 - [ ] Messaging dispatch (11.4.4): refuses unless **all six gates** open (admin flag + provider env + consent + per-user flag + verified phone + allowlist row); with the `console` provider fallback, no request leaves the process.
-- [ ] SAQA worker cron: no-ops cleanly when `feature_flag_saqa_worker` is OFF; `approveQualification` flips directly (Phase 7 behaviour) on the OFF path.
+- [x] SAQA worker cron: no-ops cleanly when `feature_flag_saqa_worker` is OFF. *(Session B)* — `approveQualification` OFF-path direct-flip fixture still open.
 - [ ] KYC provider resolution: `resolveIdentityVerifier()` returns the mock/manual path when `feature_flag_kyc_provider` is OFF; `adminVerifyIdManually` works without any provider.
-- [ ] Email: with `EMAIL_TRANSPORT` console/no-op, notification rows still land and the 9.18 strict-mode loud-fail does not fire in the test env.
+- [x] Email: with `EMAIL_TRANSPORT=console`, notification rows still land and the 9.18 strict-mode loud-fail does not fire in the test env. *(implicitly exercised by every Session B/C suite — reveal/placement/cron tests all create notifications under the console transport)*
 
 ## Task 12.3: E2E (Playwright golden paths, 1280px + 360px)
 
-- [ ] **Seeker arc:** sign-up (DOB + nationality + consent step) → verify-email (test-mode token) → profile (skills, availability, open-to) → appears on `/search` → status re-confirm via Talent Pulse.
+> Harness live since Session C (2026-06-11): `npm run test:e2e` builds the production app and serves it on :3100 against the test DB. First runs found + fixed two real bugs: duplicate `<main id="main">` landmark while `/search` streams (loading.tsx skeleton), and the CSP's `upgrade-insecure-requests` breaking same-origin navigation on the http-only test server (now gated behind `SEBENZA_E2E_HTTP=1`).
+
+- [x] **Public arc** (`public-arc.spec.ts`): landing renders clean → search roster → dossier leaks no PII (no seed emails, no 13-digit IDs in rendered HTML) → anonymous visitor bounced off `/dashboard`. Both viewports; zero console errors; no horizontal overflow at 360px.
+- [x] **Seeker sign-in arc** (`seeker-arc.spec.ts`): seeded-account sign-in → dashboard → privacy centre (consents read from the real DB) → own activity page.
+- [ ] **Seeker sign-up arc:** sign-up (DOB + nationality + consent step) → verify-email (needs a test-mode token or console-transport link capture) → profile build → appears on `/search` → status re-confirm via Talent Pulse.
 - [ ] **Employer arc:** sign-up → org onboarding doc upload → admin approves at `/admin/verifications` → search → dossier → reveal (audit row visible in seeker's `/dashboard/activity`) → mark hired.
 - [ ] **Vacancy loop:** create vacancy (incl. any-province remote variant) → match page → invite with note → seeker accepts → mark-as-filled with hire pick → non-selected invitee receives outcome notification → Career Compass shows the gap banner.
 - [ ] **Seeker-invite loop (9.17):** employer sends invite → `/sign-up/invited/[token]` pre-filled → accepted → appears in Joined list.
@@ -124,10 +128,10 @@ These exercise our Server Actions + queries against the real Postgres schema wit
 
 ## Task 12.4: Compliance suite in CI
 
-- [ ] Wire all **29** `runAll()` assertions as a vitest suite against the seeded test DB (D7). Any future compliance assertion must land with its suite entry — note this in the assertion file header.
-- [ ] Forbidden-key payload tests: a single shared `FORBIDDEN_PUBLIC_KEYS` list (`national_id_enc`, `dob`, `email`, `full_surname`, `document_storage_key`, `phone_e164_enc`, `cv_*`, milestone/module fields) asserted against every public read path (search, public profile, share-card data, LMI API).
-- [ ] Audit completeness: for each PII-touching action exercised in 12.2 (reveal, download, export, admin user view, KYC review fetch), assert exactly the expected audit kind landed — a missing audit row is a test failure, not a warning.
-- [ ] Build gate: `npm run test:all` = typecheck + lint + unit + integration + compliance; E2E runs on demand and pre-release.
+- [x] All **29** assertions run as named vitest tests against the seeded test DB, dynamically discovered (future assertions auto-enroll; count fixture is a removal guard). *(Session B: `tests/compliance/assertions.test.ts`. First run found + fixed: broken `u."createdAt"` SQL in the no-orphan assertion; stale vacancy allowlist; 3 seed profiles violating the 9.14 rollup.)*
+- [x] Forbidden-key payload tests: shared `FORBIDDEN_PUBLIC_KEYS` list asserted on search + public-profile reads incl. children. *(Session B)* — share-card data + LMI API payloads still open.
+- [x] Audit completeness for reveal (`profile.contact.reveal`) + placement (`placement.confirm` path) with missing-row-equals-failure semantics. *(Session C)* — download / export / admin-view / KYC-fetch audits still open.
+- [x] Build gate: `npm run test:all` = typecheck + unit + integration + compliance (lint re-enters per 12.5). E2E (`npm run test:e2e`) on demand and pre-release. *(Sessions A–B; 291 vitest tests green as of 2026-06-11)*
 
 ## Task 12.5: Carry-over quality fixes (small, in-scope)
 

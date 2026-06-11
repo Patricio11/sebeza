@@ -6,8 +6,12 @@ export default function SearchLoading() {
   return (
     <>
       <SiteHeader />
-      <main
-        id="main"
+      {/* Deliberately NOT <main id="main">: while the search page streams,
+          this skeleton can coexist in the DOM with the page's own
+          <main id="main">, producing a duplicate landmark + duplicate id
+          (caught by the Phase 12 E2E suite, 2026-06-11). The transient
+          absence of a main landmark during load is the lesser harm. */}
+      <div
         className="relative mx-auto max-w-[1320px] overflow-hidden px-5 py-12 md:px-10 md:py-16"
       >
         <SAChevron
@@ -24,7 +28,7 @@ export default function SearchLoading() {
             <RosterSkeleton rows={5} />
           </div>
         </div>
-      </main>
+      </div>
     </>
   );
 }

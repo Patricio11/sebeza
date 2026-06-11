@@ -81,7 +81,15 @@ function securityHeaders(): Record<string, string> {
     "form-action 'self'",
     "base-uri 'self'",
     "object-src 'none'",
-    "upgrade-insecure-requests",
+    // `upgrade-insecure-requests` is correct in production (always
+    // https) but breaks the Phase 12 E2E server, which runs the
+    // production build over plain http on localhost — Chromium upgrades
+    // same-origin navigations to https:// and fails with
+    // ERR_SSL_PROTOCOL_ERROR. SEBENZA_E2E_HTTP=1 is set ONLY by
+    // playwright.config.ts; it must never be set in a real deployment.
+    ...(process.env.SEBENZA_E2E_HTTP === "1"
+      ? []
+      : ["upgrade-insecure-requests"]),
   ].join("; ");
 
   return {
