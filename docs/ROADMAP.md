@@ -845,25 +845,24 @@ Five sub-phases, ordered by ROI per LOC:
 
 ---
 
-## 🧪 PHASE 12: TESTING & QA
-*Goal: Production-ready and trustworthy. **Renumbered 2026-05-30** to make room for Phase 11 (seeker retention).*
+## 🧪 PHASE 12: TESTING & QA ✅ *(shipped 2026-06-10 → 2026-06-12)*
+*Goal: Production-ready and trustworthy. **Renumbered 2026-05-30** to make room for Phase 11 (seeker retention). **Revised 2026-06-10** to cover the full system (49 migrations · ~59 server-action files · 18 crons · 29 compliance assertions); the authoritative plan is `docs/completed/PHASE_12_PLAN.md`, the wrap-up `docs/completed/PHASE_12_COMPLETE.md`.*
 
-> **REVISED 2026-06-10:** the four tasks below were scoped at ~Phase 6. The system now spans 49 migrations, ~59 server-action files, 18 crons and 29 runtime compliance assertions. The authoritative, full-system test plan is **`docs/PHASE_12_PLAN.md`** (12.0 infrastructure · 12.1 unit · 12.2 integration · 12.3 E2E · 12.4 compliance-in-CI · 12.5 carry-over fixes · 12.6 wrap-up). The tasks below remain as the historical summary.
+**Shipped:** a four-layer quality gate against a real disposable Postgres (Docker + new `DATABASE_DRIVER=postgres-js` seam — the AWS Cape Town driver swap, now continuously exercised). `npm run test:all` = typecheck + lint + **309 vitest tests** (195 unit · 84 integration · 30 compliance); `npm run test:e2e` = **32 Playwright tests** on the production build at 1280px + 360px, including the No-Flash JS budget as an automated wire-bytes gate. Migrate-from-zero + truncating seed run inside every DB-suite invocation behind the `SEBENZA_TEST_DB=1` guard. **First runs found + fixed 9 real bugs** (broken migrations 0028/0032, drift migration `0049`, a since-shipping-broken compliance assertion, stale vacancy allowlist, seed rollup drift, duplicate `<main>` landmark, CSP-vs-http-test-server, and suspended accounts remaining publicly visible in search + dossier). Lint debt cleared (lint back in the gate); Esc-close completed on all 20 dialogs; two measured budget violations pinned as ratchet ceilings. Deferrals with reasons live in `POST_LAUNCH_BACKLOG.md`.
 
-### Task 12.1: Unit
-- [ ] Status-freshness/confidence logic. Search ranking. Encryption round-trip. Consent state machine.
+### Task 12.1: Unit ✅
+- [x] Status-freshness/confidence logic. Search ranking helpers. Encryption round-trip. Consent state machine. *(+ CSV guards, outcome-composer anonymity, rate limiter, catalogues — 195 tests)*
 
-### Task 12.2: Integration
-- [ ] Sign-up → consent → searchable. Employer reveal → audit-log written. Placement → analytics update.
+### Task 12.2: Integration ✅
+- [x] Redaction key-sets, ranking + SQL-parity, three-lock reveal → audit row, Placement-Truth 30-day window, invite consent gates, filters/exclusions (incl. the new suspended-account exclusion), POPIA export ciphertext, taxonomy lifecycle, mark-as-filled fan-out, all 18 crons, dormant gates. *(84 tests)*
 
-### Task 12.3: E2E (Playwright)
-- [ ] Seeker: sign up → build profile → appear in search.
-- [ ] Employer: verify org → search → shortlist → contact → log hire.
-- [ ] Privacy: request export; request erasure; verify redaction.
+### Task 12.3: E2E (Playwright) ✅
+- [x] Public arc (search → dossier, PII-free HTML) · seeker sign-in arc · admin · employer (incl. unverified-org bounce) · student lane · analytics surface · No-Flash budget gate — both viewports. *(32 tests; four click-through walks deferred to backlog with integration coverage in place)*
 
-### Task 12.4: Compliance Tests
-- [ ] Assert no PII (ID/docs/contact) ever appears in public/search responses.
-- [ ] Assert every PII access writes an audit-log row.
+### Task 12.4: Compliance Tests ✅
+- [x] No PII in public/search payloads (shared forbidden-key list, browser + query layer).
+- [x] PII access writes audit rows (reveal, placement, export — missing row = failing test).
+- [x] All 29 runtime compliance assertions run as named CI tests, dynamically discovered.
 
 ---
 
@@ -909,7 +908,7 @@ Five sub-phases, ordered by ROI per LOC:
 ### Task 13.10: Multi-archetype seeker support ✅ *(shipped 2026-06-06)*
 - [x] Two new Open-To tags (`open_to_training` + `cross_industry`) for the "I'll learn on the job" + cross-industry-pivot archetypes. New `profiles.secondary_professions text[]` column (migration 0048, cap 3, labels-not-slugs, GIN-indexed). Form picker via `MultiSelectComboboxField`; server action `.refine()` enforces canonical-only entries (no "Other" path  D3) and refuses the primary appearing as a secondary. `/p/<handle>` renders secondaries as a small "Also experienced in" chip row below the headline (D5 keeps `TalentRosterItem` scannable  no row-level chip). `searchProfilesQuery` widens the profession filter to **primary OR any secondary** with a new `primaryMatchKey` CASE ranking primary matches above secondary matches within each citizen-group tier (D7). `countMatchesByCitizenship` gets the same widened condition so the honest-supply line agrees with the ranked list. Vacancy match page surfaces secondary matches with an italic *"matched via secondary profession"* annotation (D6 honest disclosure). New seeker help article + chip on `/dashboard/profile`. Existing single-profession seekers see zero UI change. *See `docs/completed/PHASE_13_10_COMPLETE.md`.*
 
-> **🎉 Phase 13.x side-phases COMPLETE.** Three additional side-phases shipped post-13.7 closing real-world UX gaps surfaced during demo + feedback. *Next:* Phase 12 (Testing & QA) remains the next milestone before public ship.
+> **🎉 Phase 13.x side-phases COMPLETE.** Three additional side-phases shipped post-13.7 closing real-world UX gaps surfaced during demo + feedback. *(Phase 12 Testing & QA subsequently shipped 2026-06-10 → 2026-06-12 — see the Phase 12 section above.)*
 
 ---
 
@@ -983,6 +982,6 @@ HR Practitioner · Electrician · Plumber · Accountant · Nurse · Driver · Bo
 
 ---
 
-*Last Updated: 2026-06-06*
-*Version: 2.1  Three additional Phase 13 side-phases shipped (13.8 Invite-from-search · 13.9 Any-province for remote/hybrid · 13.10 multi-archetype seeker support with secondary professions + cross-trainable Open-To tags) closing real-world UX gaps surfaced in demo + feedback. Plus a small homepage mobile-fixes pass (province dropdown + grid horizontal overflow). See the three new `docs/completed/PHASE_13_{8,9,10}_COMPLETE.md` docs. Phase 12 (Testing & QA) remains the next milestone before public ship.*
+*Last Updated: 2026-06-12*
+*Version: 2.2  Phase 12 (Testing & QA) COMPLETE: 309 vitest + 32 Playwright tests on a real-Postgres harness; 9 real bugs found + fixed by the suite's first runs; lint back in the gate; No-Flash budget automated. See `docs/completed/PHASE_12_COMPLETE.md`. The next milestone before public ship is Phase 10 Arc B (operator tasks 10.5–10.11: screen-reader passes, Lighthouse runs, Tier-1 professional translation, credentials flip, soak) plus the pre-commercial gates (Information Officer designation, pen-test, nonce CSP).*
 *Working name: Sebenza  South African National Talent-Intelligence Platform.*

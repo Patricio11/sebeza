@@ -150,6 +150,9 @@ export function DepartureIsland({
           onClick={(e) => {
             if (e.target === e.currentTarget && !pending) onClose();
           }}
+          onKeyDown={(e) => {
+            if (e.key === "Escape" && !pending) onClose();
+          }}
         >
           <div className="w-full max-w-md rounded-t-[var(--radius-md)] border-2 border-[color:var(--color-ink)] bg-[color:var(--color-paper)] p-5 shadow-xl md:rounded-[var(--radius-md)] md:p-7">
             <div className="mb-3 flex items-start justify-between gap-3">

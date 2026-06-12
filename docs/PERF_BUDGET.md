@@ -19,13 +19,24 @@ Three measurements, in this order:
 ## Route-level budget
 
 > Fill in measured values as runs complete. Empty cells = not yet measured.
+>
+> **JS bundle column measured 2026-06-12 (Phase 12)** via the automated
+> gate `tests/e2e/perf-budget.spec.ts` — script WIRE bytes (encoded
+> transfer via `Request.sizes()`, deterministic across runs) for the
+> document's own `<script src>` set on the production build, asserted on
+> every `npm run test:e2e` run with zero-third-party enforcement.
+> **Finding: the shared App Router baseline puts every key route ~35–50 KB
+> over the 160 KB No-Flash target.** Ceilings in the gate are tight
+> ratchets (measured +3 KB) so routes can only improve; the backlog
+> "No-Flash bundle pass" walks them down to target. Lighthouse score
+> columns remain operator-hands (full Chrome + the LHCI publish step).
 
 | Route | Perf score | A11y score | LCP (Slow 3G) | TBT | CLS | JS bundle | Notes |
 |---|---|---|---|---|---|---|---|
-| `/` | _ | _ | _ | _ | _ | _ | Homepage; hero + waitlist. No charts, no Recharts. |
-| `/search` | _ | _ | _ | _ | _ | _ | Public search; results paginated client-side. |
-| `/p/[handle]` | _ | _ | _ | _ | _ | _ | Public profile; signed photo URL only. |
-| `/sign-in` | _ | _ | _ | _ | _ | _ | Better Auth form; client-side validation. |
+| `/` | _ | _ | _ | _ | _ | ⚠️ **194.2 KB** (2026-06-12) | Over target — shared baseline. Ratchet 198 KB. |
+| `/search` | _ | _ | _ | _ | _ | ⚠️ **210.2 KB** (2026-06-12) | Heaviest public route (filters + roster islands). Ratchet 214 KB. |
+| `/p/[handle]` | _ | _ | _ | _ | _ | ⚠️ **195.5 KB** (2026-06-12) | Over target — shared baseline. Ratchet 199 KB. |
+| `/sign-in` | _ | _ | _ | _ | _ | ⚠️ **196.8 KB** (2026-06-12) | Better Auth form. Ratchet 200 KB. |
 | `/sign-up/seeker` | _ | _ | _ | _ | _ | _ | 3-step wizard; ComboboxField + ConsentRow. |
 | `/sign-up/employer` | _ | _ | _ | _ | _ | _ | KYC form. |
 | `/dashboard` | _ | _ | _ | _ | _ | _ | Seeker overview; rank-in-pool, freshness. |
@@ -38,7 +49,7 @@ Three measurements, in this order:
 | `/admin/audit-log` | _ | _ | _ | _ | _ | _ | Filterable table; check filter-form cost. |
 | `/gov` | _ | _ | _ | _ | _ | _ | LMI hero; Recharts is mount-gated. |
 | `/gov/curriculum` | _ | _ | _ | _ | _ | _ | Heatmaps; Recharts heavy. Verify the mount-gate. |
-| `/insights` | _ | _ | _ | _ | _ | _ | Recharts. Confirm mount-gating. |
+| `/insights` | _ | _ | _ | _ | _ | ⚠️ **291.7 KB** (2026-06-12) | **Recharts adds ~95 KB on top of the shared baseline — it ships in the route bundle; mount-gating defers EXECUTION, not TRANSFER.** Ratchet 296 KB. Fix (dynamic-import the chart islands) is the backlog No-Flash bundle pass. |
 | `/privacy` | _ | _ | _ | _ | _ | _ | Mostly static prose. Should LCP < 1.5s. |
 | `/paia` | _ | _ | _ | _ | _ | _ | Mostly static prose. |
 

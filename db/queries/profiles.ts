@@ -283,6 +283,20 @@ export async function searchProfilesQuery(
     );
   }
 
+  // Phase 12 fix (2026-06-12)  suspended-account exclusion. Phase 7
+  // moderation suspends set `app_user.suspended_at` and bounce sign-in,
+  // but nothing removed the profile from public search  a profile
+  // suspended via the moderation queue (e.g. fake_identity report)
+  // stayed fully visible and contactable nationally. The Phase 12
+  // exclusion fixtures surfaced the gap. Restore lifts it instantly.
+  conditions.push(
+    sql`NOT EXISTS (
+      SELECT 1 FROM app_user au
+      WHERE au.id = p.user_id
+        AND au.suspended_at IS NOT NULL
+    )`,
+  );
+
   const whereClause = sql.join(conditions, sql` AND `);
 
   // Single query: enumerated columns (redaction!), composed score, ordered.
@@ -612,7 +626,19 @@ export async function findProfileByHandleQuery(
       schema.organizations,
       eq(schema.organizations.id, schema.profiles.currentEmployerOrgId),
     )
-    .where(and(eq(schema.profiles.handle, handle), isNull(schema.profiles.deletedAt)))
+    .where(
+      and(
+        eq(schema.profiles.handle, handle),
+        isNull(schema.profiles.deletedAt),
+        // Phase 12 fix (2026-06-12)  suspended accounts' public dossiers
+        // go dark alongside their search rows (see searchProfilesQuery).
+        sql`NOT EXISTS (
+          SELECT 1 FROM app_user au
+          WHERE au.id = ${schema.profiles.userId}
+            AND au.suspended_at IS NOT NULL
+        )`,
+      ),
+    )
     .limit(1);
 
   const p = rows[0];

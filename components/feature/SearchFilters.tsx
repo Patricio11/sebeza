@@ -211,6 +211,9 @@ export function SearchFilters({ defaultFilters, query }: Props) {
           aria-modal="true"
           aria-label={t("title")}
           className="fixed inset-0 z-50 flex items-end md:hidden"
+          onKeyDown={(e) => {
+            if (e.key === "Escape") setOpen(false);
+          }}
         >
           <button
             type="button"

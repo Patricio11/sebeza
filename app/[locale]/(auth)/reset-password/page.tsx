@@ -1,4 +1,5 @@
 import { setRequestLocale } from "next-intl/server";
+import { Link } from "@/i18n/navigation";
 import { AuthShell } from "@/components/layout/AuthShell";
 import { ResetPasswordForm } from "@/components/feature/auth/ResetPasswordForm";
 
@@ -36,12 +37,15 @@ export default async function ResetPasswordPage({
           </code>
           . If you arrived here without one, the link may have expired or been
           stripped. Try again from{" "}
-          <a
+          {/* Phase 12 lint triage: was a plain <a>, which dropped the
+              active locale on navigation (bounced through the default-
+              locale redirect). The i18n-aware Link preserves it. */}
+          <Link
             href="/forgot-password"
             className="text-[color:var(--color-brand)] hover:underline"
           >
             Forgot password
-          </a>
+          </Link>
           .
         </p>
       </AuthShell>
