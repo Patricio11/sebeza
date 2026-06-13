@@ -496,7 +496,9 @@ async function seedPhase7_5OutcomesCohort() {
       handle,
       displayName: `BSc CS Cohort ${handle.slice(-2)}`,
       profession: "Software Developer",
-      seniority: null,
+      // New graduates  junior. (Was null, which also made them
+      // invisible to any seniority-scoped vacancy match.)
+      seniority: "junior" as const,
       city: "Johannesburg",
       province: "Gauteng",
       nationality: "South African",
@@ -506,11 +508,36 @@ async function seedPhase7_5OutcomesCohort() {
         | "employed"
         | "open_to_work",
       statusConfirmedAt: new Date("2026-05-10"),
-      workAvailability: [],
+      // Open to full-time + remote so the cohort surfaces on the
+      // remote-friendly "near you / or remote" demo too.
+      workAvailability: ["full_time", "remote"] as (
+        | "full_time"
+        | "remote"
+      )[],
       verification: "unverified" as const,
-      completeness: 30,
+      // Realistic for a profile with academic + skills but no bio/photo/
+      // experience yet.
+      completeness: 55,
       memberSince,
     })),
+  );
+
+  // Phase 16 follow-up  give the synthetic cohort a realistic BSc CS
+  // skill set so they (a) carry a populated search_vector via the
+  // profile_skills trigger, (b) actually surface in /search + vacancy
+  // matching, and (c) match the seeded software-developer vacancies
+  // (typescript + postgres). Proficiency varies deterministically by
+  // index; new grads carry no per-skill years.
+  const cohortSkillSlugs = ["python", "sql", "postgres", "typescript", "react"];
+  await db.insert(schema.profileSkills).values(
+    cohortHandles.flatMap((handle, i) =>
+      cohortSkillSlugs.map((slug, j) => ({
+        profileId: id("prof", handle),
+        skillSlug: slug,
+        proficiency: ((i + j) % 3) + 2, // 2..4
+        yearsOfExperience: null,
+      })),
+    ),
   );
 
   // academic_profiles

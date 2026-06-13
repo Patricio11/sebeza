@@ -90,6 +90,32 @@ is labelled truthfully ("see who you're matched against"), never "opportunities.
 `app/[locale]/(seeker)/dashboard/{page,invitations/page}.tsx` · `messages/en.json` ·
 `tests/e2e/seeker-arc.spec.ts`.
 
+## Follow-up hardening (2026-06-13, same day)
+
+A self-audit found three E2E holes + two infra items; all closed:
+
+- **🐛 BUG FOUND + FIXED  skill-less profiles were invisible in national search.** Investigating why the
+  synthetic cohort never surfaced in vacancy-matching revealed a latent Phase-4 bug: the profiles
+  search-vector trigger fired `BEFORE INSERT` and computed the vector via
+  `sebenza_profile_tsvector(NEW.id)`, which `SELECT`s the row by id  but on `BEFORE INSERT` the row doesn't
+  exist yet, so it returned NULL. A profile's vector was therefore only ever populated as a side effect of
+  the `profile_skills` AFTER trigger  meaning **any seeker with zero skills had a NULL `search_vector` and
+  never matched `@@ websearch_to_tsquery(...)`: absent from search + vacancy-matching entirely, even by
+  profession.** Fix: migration `0051` rebuilds the trigger function from `NEW.*` (available in BEFORE INSERT)
+  + backfills every NULL vector. Weights unchanged → ranking identical for profiles that already had a vector.
+  Verified: 0 NULL vectors post-migration; the cohort is now findable by profession.
+- **Demand index** (`0050`): `search_events(at)` btree  every demand read (compass engine, `getNearYouDemand`,
+  skills-gap) prunes by a trailing time window; the table carried only its pkey.
+- **Seed enrichment:** the 12-person Wits BSc CS cohort now carries a realistic skill set
+  (python · sql · postgres · typescript · react), `junior` seniority, and `full_time`+`remote` availability 
+  so they surface in `/search` + match skill-based vacancies (richer demo; previously empty profiles).
+- **E2E coverage closed** (`tests/e2e/locality.spec.ts`): the "Prepare for this role" card (15.3.1), the
+  "Same city" chip on the invitations list (16.2.2), and the "Same city" chip on the vacancy match page
+  (16.2.1)  one controlled, restored DB setup, both viewports.
+- **Re-verified:** typecheck + lint + **318 vitest** (incl. 30 compliance  the seed/trigger changes don't
+  break any assertion) + **44 E2E** at desktop + 360px + migrate-from-zero (0050/0051) + journal integrity
+  (52 entries, contiguous, no drift).
+
 ## Out of scope / follow-ups (recorded for the backlog)
 
 - City-level demand numbers once municipal analytics clear the k-floor (deepens 16.1's demand line).

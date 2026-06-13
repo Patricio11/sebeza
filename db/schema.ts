@@ -1425,14 +1425,25 @@ export const shortlistMembers = pgTable(
 
 // ---------- Search analytics (skills-gap signal) ----------
 
-export const searchEvents = pgTable("search_events", {
-  id: text("id").primaryKey(),
-  terms: text("terms"),
-  filters: jsonb("filters"),
-  resultCount: integer("result_count").notNull(),
-  actorOrgId: text("actor_org_id"),
-  at: timestamp("at").notNull().defaultNow(),
-});
+export const searchEvents = pgTable(
+  "search_events",
+  {
+    id: text("id").primaryKey(),
+    terms: text("terms"),
+    filters: jsonb("filters"),
+    resultCount: integer("result_count").notNull(),
+    actorOrgId: text("actor_org_id"),
+    at: timestamp("at").notNull().defaultNow(),
+  },
+  (t) => ({
+    // Phase 16  every demand read (career-compass demand engine,
+    // getNearYouDemand, skills-gap analytics) prunes by a trailing
+    // time window (`at >= now() - interval`). A btree on `at` turns
+    // those full scans into range scans  cheap insurance at national
+    // search volume.
+    atIdx: index("search_events_at_idx").on(t.at),
+  }),
+);
 
 // ---------- POPIA: consents + audit log ----------
 
