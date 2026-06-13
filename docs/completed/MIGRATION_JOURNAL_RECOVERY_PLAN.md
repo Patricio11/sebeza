@@ -15,6 +15,20 @@
 > `docs/TO_START_EVERY_SESSION.md` (migration convention block) + a recovery pointer in the
 > README database section.
 
+> **↪ FOLLOW-UP 2026-06-13 — the second-order effect, fully resolved.** The `db:push` recovery
+> above synced the schema but never touched drizzle's tracking table, so
+> `drizzle.__drizzle_migrations` stayed frozen at migration **0027** (28 rows, 11 of them stale
+> hashes from the idempotency edits to 0001–0011). `db:migrate` therefore couldn't reconcile and
+> silently applied **nothing** — which is why the Phase-16 search-vector fix (`0051`) never landed
+> until `scripts/heal-search-vectors.mts` ran it by hand. Permanently fixed with a **bookkeeping-only**
+> reconcile (`scripts/reconcile-migrations.mts`, committed `e3fb6b4`): TRUNCATE + rebuild the tracking
+> table to mirror the journal exactly (hash = sha256 of each `.sql`, `created_at` = journal `when`);
+> transactional, guarded to abort unless the schema is at head, does **not** re-run migration SQL
+> (several like 0028's `CREATE TYPE` aren't idempotent). Outcome on the dev DB: **28 → 52 rows,
+> head = 0051**, and `npm run db:migrate` is now a verified clean no-op. Read-only diagnostic:
+> `scripts/diagnose-migrations.mts`. The lesson + both scripts are recorded in the migration
+> convention block of `docs/TO_START_EVERY_SESSION.md` (bookkeeping-drift corollary).
+
 > **Root cause:** `db/migrations/meta/_journal.json` stops at idx 37 (`0037_phase9_23_employment_verifications`). The 11 migrations added between Phase 11.1 and Phase 13.10 (`0038`-`0048`) shipped as raw SQL files but were never registered in the journal. `drizzle-kit migrate` reads the journal to know which migrations are available; missing entries are silently skipped. The seed runs against a DB that's still at the 0037 schema and fails on the first column from a missing migration.
 
 ---

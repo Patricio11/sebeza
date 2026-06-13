@@ -50,6 +50,17 @@ When I give you a Phase: pull design/screen detail from `UX_UI_SPEC.md` and task
 > `docs/completed/MIGRATION_JOURNAL_RECOVERY_PLAN.md`. Data seeded inside a migration (e.g. the
 > 0045 llm_providers placeholder rows) must ALSO be seeded in `db/seed.ts` — `db:push` recovery
 > skips migration INSERTs, and the seed's TRUNCATE CASCADE can wipe them.
+>
+> **Bookkeeping-drift corollary (2026-06-13):** recovering a dev DB with `db:push` fixes the
+> *schema* but leaves drizzle's tracking table (`drizzle.__drizzle_migrations`) stuck at the old
+> head — so `db:migrate` then silently skips every later migration (this is exactly how the 0051
+> search-vector fix went unapplied until run by hand). Cure is **bookkeeping-only**, never re-run
+> the SQL: `npx tsx scripts/reconcile-migrations.mts` rebuilds the tracking table to mirror the
+> journal (hash = sha256 of each `.sql`, `created_at` = journal `when`); it's transactional and
+> aborts unless the schema is already at head. Diagnose first with
+> `npx tsx scripts/diagnose-migrations.mts` (read-only). After reconcile, `db:migrate` is a clean
+> no-op and future migrations apply normally. **Prevention:** prefer `db:generate` → `db:migrate`
+> over `db:push` on a DB that's behind; mixing the two is what drifts the tracking table.
 
 ---
 

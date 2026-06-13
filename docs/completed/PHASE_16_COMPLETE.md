@@ -115,6 +115,18 @@ A self-audit found three E2E holes + two infra items; all closed:
 - **Re-verified:** typecheck + lint + **318 vitest** (incl. 30 compliance  the seed/trigger changes don't
   break any assertion) + **44 E2E** at desktop + 360px + migrate-from-zero (0050/0051) + journal integrity
   (52 entries, contiguous, no drift).
+- **🔧 Dev-DB `db:migrate` permanently fixed (2026-06-13).** Surfaced while shipping 0051: on the dev DB,
+  `db:migrate` was silently applying nothing, so the search-vector fix only landed because
+  `scripts/heal-search-vectors.mts` ran it by hand. Root cause was a second-order effect of the 2026-06-09
+  journal recovery — `db:push` had synced the schema but left drizzle's tracking table
+  (`drizzle.__drizzle_migrations`) frozen at migration 0027 (28 rows, 11 stale hashes), so `db:migrate`
+  couldn't reconcile. Fixed with a **bookkeeping-only** reconcile (`scripts/reconcile-migrations.mts`,
+  committed `e3fb6b4`): it rebuilds the tracking table to mirror the journal (hash = sha256 of each `.sql`,
+  `created_at` = journal `when`) — transactional, guarded to abort unless the schema is at head, never
+  re-runs migration SQL. Result: **28 → 52 rows, head = 0051**, `db:migrate` is a verified clean no-op, and
+  future migrations apply normally. Read-only diagnostic: `scripts/diagnose-migrations.mts`. Full write-up +
+  prevention rule in `docs/completed/MIGRATION_JOURNAL_RECOVERY_PLAN.md` and the migration convention block
+  of `docs/TO_START_EVERY_SESSION.md`.
 
 ## Out of scope / follow-ups (recorded for the backlog)
 

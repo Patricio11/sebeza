@@ -168,12 +168,18 @@ cp .env.example .env.local
 
 # 3. Database
 npm run db:generate     # generate Drizzle migration (only if you changed schema)
-npm run db:migrate      # apply all migrations (0000 → 0048) to your Neon DB
+npm run db:migrate      # apply all migrations (0000 → 0051) to your Neon DB
 npm run db:seed         # idempotent seed (taxonomy + fixture cohort + lifecycle fixtures)
 # If migrate exits silently but the seed fails on a missing column, the
 # DB and the migration journal have drifted — run `npm run db:push` to
-# sync the schema directly, then re-seed. Recovery template:
-# docs/completed/MIGRATION_JOURNAL_RECOVERY_PLAN.md
+# sync the schema directly, then re-seed.
+# IMPORTANT: db:push fixes the *schema* but leaves the drizzle tracking
+# table (drizzle.__drizzle_migrations) stuck at the old head, so later
+# `db:migrate` runs silently skip everything. After a push recovery, run
+#   npx tsx scripts/reconcile-migrations.mts   # re-align tracking table
+# (bookkeeping-only, transactional, guarded). Then db:migrate is a clean
+# no-op again. Diagnose first: npx tsx scripts/diagnose-migrations.mts
+# Recovery template: docs/completed/MIGRATION_JOURNAL_RECOVERY_PLAN.md
 
 # 4. Dev
 npm run dev             # http://localhost:3000
