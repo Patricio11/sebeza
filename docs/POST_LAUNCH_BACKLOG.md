@@ -1,130 +1,202 @@
-# Post-launch backlog
+# POST-LAUNCH BACKLOG
+*Opened 2026-06-10. Feature work deferred out of the pre-launch phases per the Phase 10 rule
+("no new features in Phase 10 — requests collect here for Phase 11+").*
 
-*Opened during Phase 10 (PHASE_10_LAUNCH_PLAN.md). The "things we deliberately did not build before public launch" collection.*
-
-> **The fence**: Phase 10 is polish + audit + go-live. Feature requests that arrive during Phase 10 land here, not in main. Phase 11+ pulls from this list  in particular, items here that fit Phase 11's seeker-retention or skill-growth-conversion thesis may be promoted into one of the `PHASE_11_{1,2,3,4,5}_PLAN.md` sub-phases. **Phase 13** (student lane expansion + editorial-LLM curriculum pipeline) shipped 2026-05-31  2026-06-01 *ahead* of Phase 12 at founder direction; Phase 13 follow-ups are listed below in their own section.
-
----
-
-## How to add an item
-
-Pick the right section. Each item gets:
-
-```
-- **Title**  one-line description. _(Origin: who asked, where, when. Optional)_
-  Details if needed (1-3 sentences). Link to plan / decision doc if applicable.
-```
-
-Keep entries terse  this is a triage list, not a spec.
+> **Sequencing note (honest):** the next milestone before public ship is still **Phase 12 — Testing & QA**
+> (`ROADMAP.md` §Phase 12), which remains outstanding and has been leap-frogged by 11.x and 13.x. These
+> backlog phases are **post-launch** and should not jump the QA gate. Numbered **14 / 15 / 16** to sit
+> after the shipped Phase 13.x cluster (`ROADMAP.md` Phase 13.8–13.10).
+>
+> **Origin:** all three came out of the SAYouth competitive analysis
+> (`COMPETITIVE_ANALYSIS_SAYOUTH.md` §5). They are, in priority order: the one strategic moat to *chase*
+> (zero-rating), and two *buildable* seeker-side wins (readiness content, near-me framing).
+>
+> **Companion docs:** `ROADMAP.md` · `COMPETITIVE_ANALYSIS_SAYOUTH.md` · `TO_START_EVERY_SESSION.md` ·
+> `UX_UI_SPEC.md` · `docs/SECURITY.md` · `docs/popia/`.
 
 ---
 
-## Quick wins (small, high-leverage)
+# PHASE 14 — ZERO-RATING (STRATEGIC / PARTNERSHIP, NOT CODE)
+*Priority 1. The single highest-impact thing to chase. **Mostly a commercial + institutional effort, not
+an engineering one.** Founder to research; build work is small and comes last.*
 
-> Sub-half-day items that could ship as a small point release between Phase 10 close and a Phase 11 sub-phase starting.
+> **📋 Detailed plan: `docs/PHASE_14_PLAN.md`** (2026-06-13). Partnership-gated, not for implementation now;
+> the plan firms up the route research, eligibility/backing gating, and the small flag-gated eng-readiness.
 
-- _empty for now  add as they arrive_
+> **Why this is Priority 1 and yet not a sprint:** zero-rating is SAYouth's real moat
+> (`COMPETITIVE_ANALYSIS_SAYOUTH.md` §2). Their site is data-free on MTN / Vodacom / Cell C / Telkom /
+> Rain, so their exact-same target user — low-income, metered data, cheap Android — pays nothing to use
+> it. Sebenza's No-Flash / low-data philosophy (`TO_START_EVERY_SESSION.md` Rule 1) narrows the gap but
+> **"low-data" ≠ "zero-data."** Closing it is high-impact. But it is reached through *deals and backing*,
+> not commits — and **honestly, it is probably only reachable with government or institutional backing**,
+> which is another reason the Department partnership matters. Do not block product work on it; pursue it
+> in parallel as a strategic objective.
 
----
+## Task 14.1 — Research the two technical routes (founder research)
+- [ ] **Route A — Direct telco zero-rating.** Each network (MTN, Vodacom, Cell C, Telkom, Rain) runs its
+      own zero-rating programme. Map: who to contact, eligibility (usually requires a registered entity +
+      a public-benefit / employment angle), the technical onboarding (dedicated domain/subdomain, IP
+      ranges, traffic allow-listing), and cost/revenue terms.
+- [ ] **Route B — `datafree.co` / biNu-style infrastructure** (the rails SAYouth uses via
+      `sayouth.datafree.co`). A third party operates the zero-rated bridge across networks; you integrate
+      once instead of negotiating five telco deals. Map: provider(s), onboarding, cost model, and what
+      app-architecture constraints they impose (asset weight, domain structure, redirect handling).
+- [ ] Output: a one-page comparison (cost · effort · time-to-live · dependency on backing) so the route
+      decision is informed, mirroring the `AWS_DATABASE_OPTIONS.md` decision-doc pattern.
 
-## Accessibility automation
+## Task 14.2 — Map the eligibility + backing prerequisites (honest gating)
+- [ ] Confirm what each route requires that Sebenza **does not yet have**: a registered company; a
+      public-benefit / government-endorsement angle; possibly a signed institutional partner. Record these
+      as explicit prerequisites — zero-rating is unlikely to be grantable to a solo, pre-company applicant.
+- [ ] Tie this to the partnership track: a Department / PYEI-ecosystem endorsement is plausibly the
+      unlock for telco goodwill. Note the dependency explicitly in the pitch prep.
 
-> The Phase 10.5 audit (`A11Y_AUDIT.md`) ships with static scan + manual screen-reader passes; the automated runtime layer is deferred for capacity reasons.
+## Task 14.3 — Engineering prep so the app is "zero-rating-ready" (small, do early, cheap)
+*None of this needs a telco deal in hand — it makes Sebenza a clean candidate when the deal comes.*
+- [ ] **Asset-weight budget audit.** Zero-rating providers cap/scrutinise payload. Confirm the seeker
+      surfaces already meet the Phase 10 / Lighthouse budget (`ROADMAP.md` Phase 10.6, `lighthouse-budgets.json`)
+      and document the data-cost per key seeker journey (landing → sign-up → search → profile).
+- [ ] **Domain/subdomain strategy.** Zero-rating attaches to specific hosts. Decide whether a dedicated
+      low-asset host (e.g. `m.sebenzasa.com` or a `datafree` subdomain) is the zero-rated surface, and
+      confirm the seeker flows work fully within one allow-listed host (no off-host asset CDNs that would
+      break zero-rating or silently bill the user).
+- [ ] **External-link honesty pattern.** SAYouth warns users before any link leaves the zero-rated zone
+      and bills data. If Sebenza zero-rates, replicate this: an interstitial "this link uses data" notice
+      on every outbound link (learning-path URLs from 11.2.1, employer external sites, etc.). Reuse the
+      existing outbound-CTA island from 11.2.1 as the hook point.
+- [ ] **Data-saver synergy.** The `app_user.data_saver_mode` from Phase 11.4.3 + the `Save-Data` header
+      floor already exist — make the zero-rated host default to data-saver semantics (transform-narrowed
+      images, deferred below-fold) so a zero-rated session is as light as possible.
 
-- **Playwright + `@axe-core/playwright` a11y suite**  one spec per route group (`public`, `seeker`, `employer`, `admin`, `gov`); per-test pattern is `new AxeBuilder({ page }).analyze()`, asserting zero serious / critical violations. **Phase 12 (2026-06-12) removed most of the setup cost**: `@playwright/test` + chromium are installed, `playwright.config.ts` already serves the production build against the test DB, and `tests/e2e/` has the spec layout to extend — remaining work is `npm i -D @axe-core/playwright` + the per-route-group specs.
-- **E2E follow-up arcs** _(Origin: Phase 12 close, 2026-06-12)_  four browser walks deferred from Task 12.3; the underlying behaviours are integration-covered, only the click-throughs remain: (1) full seeker sign-up with email-token capture (read the Better Auth `verification` row from the test DB inside the spec — the harness can query it directly); (2) the vacancy loop (create → match → invite → accept → mark-as-filled); (3) the 9.17 `/sign-up/invited/[token]` landing (mint a token with `signInviteToken` inside the spec); (4) the privacy export download click-through. The harness (`playwright.config.ts` + seeded accounts) makes each a focused half-day.
-- **Modal focus-return hook** _(Origin: Phase 12 modal sweep, 2026-06-12)_  none of the 20 `role="dialog"` components restores focus to the trigger element on close (browser drops focus to `<body>`). Esc-close is now universal (Phase 12 patched the last 4: `BulkInviteIsland`, `DepartureIsland`, `ConfirmStatusIsland`, mobile `SearchFilters`). Right shape: one `useModalFocus(ref, open)` hook capturing `document.activeElement` on open + restoring on close, applied across all 20 — a mechanical but wide change best done as one focused pass with an E2E assertion per modal.
-
----
-
-## Trust + safety follow-ups
-
-> POPIA, moderation, audit  things that ladder up to the trust posture.
-
-- **Skill suggestion auto-notify**  when admin promotes a skill, fire a `taxonomy.promoted` notification to the user who originally submitted it so they can re-add it to their profile / vacancy. _(Phase 10 ship: skill suggestions land but submitters aren't notified on promotion; they discover it via the picker next time they edit.)_
-- **Pending-skill backfill**  decide whether non-canonical "Other" skill submissions should persist to `profile_skills` / `vacancy.skill_slugs` with an `is_pending` flag (vs the current filter-at-save model). Tradeoff: simpler data model now (current) vs auto-recovery after admin promotion.
-
----
-
-## Performance + scale
-
-> Things to revisit if traffic patterns surprise us at launch.
-
-- ~~**Server-side full-text search**~~ **RESOLVED — entry was stale (Phase 12 verification, 2026-06-12).** `searchProfilesQuery` contains zero ILIKE: free-text search has run `websearch_to_tsquery` + `ts_rank_cd` over the GIN-indexed `search_vector` since Phase 4. The Phase 12 ranking fixtures (`tests/integration/ranking-freshness.test.ts`) pin the path.
-- **No-Flash bundle pass** _(Origin: Phase 12 perf gate, 2026-06-12)_  the automated script-budget gate (`tests/e2e/perf-budget.spec.ts`, deterministic encoded wire bytes on the production build) found the **shared App Router baseline puts every key route over the 160 KB target**: `/` 194.2 · `/search` 210.2 · `/p/[handle]` 195.5 · `/sign-in` 196.8 · `/insights` 291.7 KB (Recharts adds ~95 KB — it ships in the route bundle; mount-gating defers execution, not transfer). All five pinned with tight ratchet ceilings (measured +3 KB) so they can only improve. The pass: `ANALYZE=true npm run build`, read the shared-chunk treemap for the ~40 KB of baseline trim (likely suspects: next-intl message payloads, Better Auth client on non-auth routes, icon imports), and dynamic-import the `/insights` chart islands (`next/dynamic`, ssr:false). Lower the spec ceilings as each lands; target state is 160 everywhere.
-- **CDN edge config**  static assets cache fine via Next defaults; revisit if image-heavy public profiles see traffic spikes.
-
----
-
-## Localisation expansion
-
-> Phase 10.7 scaffolded Tier-2 / Tier-3 catalogs (`messages/{nso,tn,st,ts,ve,ss,nr,pt,fr,sw}.json`) with `__notice` markers. As professional human translations arrive, each crossing the readiness threshold (per `lib/i18n/config.ts:PENDING_LOCALES`) gets enabled in `i18n/routing.ts`.
-
-- **Tier 2 rollout**  Sepedi, Setswana, Sesotho, Xitsonga, Tshivenda, siSwati, isiNdebele.
-- **Tier 3 rollout**  Portuguese, French, Swahili.
-- **RTL readiness**  not currently needed (none of the planned locales are RTL), but if Arabic / Persian ever join the roadmap, the `<html dir>` attribute logic in `app/[locale]/layout.tsx` becomes load-bearing.
-
----
-
-## Help center expansion
-
-> Phase 10.1-10.4 shipped four role-specific help centers (employer, seeker, admin, gov). The launch tasks live in Phase 10.5-10.11 (`PHASE_10_LAUNCH_PLAN.md`). Follow-ups:
-
-- **Translation**  help articles are English-only at v1. Once Tier-2 / Tier-3 catalogs cross readiness, key articles (orientation, consent, POPIA rights) translate first.
-- **Help-search analytics**  D8 in PHASE_10_1_COMPLETE.md deferred this. If support load patterns suggest the search isn't surfacing the right articles, add minimal anonymised search-query logging (with a privacy story).
-- **"What's new"**  D7 in PHASE_10_1_COMPLETE.md deferred a changelog feed. Revisit if users start asking "what changed?".
-
----
-
-## Operator / admin tooling
-
-> Things that would make Sebenza staff's daily work smoother but don't ship at launch.
-
-- **Skill suggestion bulk-promote**  if the skill-suggestion queue grows past 50 pending, a bulk-promote (or bulk-reject) action saves operator time vs the current per-row UI.
-- **Audit log saved views**  saved filter combinations (e.g. "gov-employer-lookups this week") for repeat investigations.
+## Out of scope / explicit
+- ❌ Building any zero-rating "feature" before a route + backing exist. 14.3 is *readiness*, not delivery.
+- ❌ Promising users zero-rated access in copy before a deal is signed (Verification-Honesty Rule applies
+      to product claims too).
 
 ---
 
-## Data + analytics surface
+# PHASE 15 — WORK-READINESS CONTENT (SEEKER GROWTH, BUILDABLE)
+*Priority 2. Lightweight, high seeker value, deepens the learning-loop "we help you grow" story
+(`ROADMAP.md` Phase 11.2 + Phase 13). Cheap to add, strong retention. **Implement smooth + beautiful.**)*
 
-> Gov + employer analytics surfaces ship at launch. Follow-ups:
+> **📋 Detailed, implementation-ready plan: `docs/PHASE_15_PLAN.md`** (2026-06-13). Reuses the help-centre
+> architecture for a `work-ready` article collection, the print-CSS pattern for a profile→CV generator, and
+> contextual "prepare for this" cards. Decisions D1–D5 + responsive (360px) + compliance/wiring locked.
 
-- **Municipal-level analytics**  `/gov/municipalities` ships dormant in Phase 10; flips on once cell-counts cross the k-anonymity floor across most municipalities. See `content/help/gov/provincial-briefs/cities-coming-soon.tsx`.
-- **Quarterly retention report**  the cron job that snapshots placement retention runs but the gov-facing artefact is not yet generated. Pending operator-side review of which timeframes to publish.
+> **Why it fits Sebenza specifically:** SAYouth wraps matching in support — free CV templates, interview
+> prep, mock interviews, job-readiness training (`COMPETITIVE_ANALYSIS_SAYOUTH.md` §2). Sebenza already
+> has the *spine* for this: the Career Compass + Learning Loop (11.2) + Student lane (13). Readiness
+> content is the missing **"get ready for the work," not just "find the work"** layer — and it slots into
+> surfaces that already exist rather than needing a new section.
+
+## Task 15.1 — Readiness content model (reuse the help-centre pattern, don't reinvent)
+- [ ] Phase 10 already shipped **108 hand-written help articles across four role centres** with
+      `<HelpLink>` chips (`ROADMAP.md` Phase 10.1–10.4). **Reuse that exact content architecture** for a
+      new seeker-facing **"Get work-ready"** collection — same authoring model, same rendering, same chip
+      mechanism. No new CMS, no new infra.
+- [ ] Content set (v1, hand-written, plain-language, mobile-first, i18n-ready strings):
+      *Build your CV* · *Prepare for an interview* · *What to expect on your first day* · *How to talk
+      about skills you're still learning* · *Workplace rights basics* · *Spotting job scams*.
+- [ ] Each article ends with a relevant in-platform action (deep-link to profile completeness, to the
+      Learning Loop, to search) so content drives the loop rather than dead-ending.
+
+## Task 15.2 — CV templates (honest, free, low-friction)
+- [ ] A small set of clean, ATS-friendly CV templates as **printable HTML** (reuse the `/insights/print`
+      print-CSS approach from Phase 9 / the share-card `next/og` route from 11.4.1 — pick the lighter fit).
+- [ ] **Pre-fill from the seeker's own profile** where consented — name, profession, skills (with the
+      self-attested honesty marker preserved), experience-in-years (9.9), qualifications. The seeker's
+      data already models a CV; this is a render, not a new data capture.
+- [ ] Download as PDF; never silently share or expose to employers (consistent with the 11.5.2 CV-backup
+      privacy rule — seeker-controlled, not an employer surface).
+- [ ] **Verification-Honesty Rule:** a self-attested skill renders on the CV as the seeker's own claim,
+      never stamped "verified," matching how it shows on `/p/<handle>`.
+
+## Task 15.3 — Interview-prep + job-readiness surfacing (smooth, contextual)
+- [ ] Surface readiness content **contextually**, not as a buried library: when a seeker **accepts a
+      vacancy invitation** (Phase 9.8) or **gets an interview**, show a calm inline "Prepare for this"
+      card linking to the interview article + a role-relevant checklist. Right moment, not a nag.
+- [ ] A single **"Get work-ready"** entry on the seeker dashboard + `/dashboard/grow`, styled in the
+      Mzansi National system (`UX_UI_SPEC.md`) — beautiful, calm, not a content dump. Progressive: show
+      2–3 most relevant cards, "see all" for the rest.
+- [ ] **No-Flash Rule:** all readiness content is text-first, low-asset, works on a cheap phone — and is
+      therefore zero-rating-friendly (feeds Phase 14.3).
+
+## Out of scope / explicit
+- ❌ Becoming an LMS / hosting video courses (same guardrail as the Learning Loop, `ROADMAP.md` Phase 11.2).
+      Readiness content is short articles + templates that point onward, not coursework.
+- ❌ Any "guaranteed interview / job" framing. Readiness improves preparation, not outcomes.
+- ❌ Capturing new PII to build a CV — render from data already held, under existing consent.
+
+## Compliance / wiring
+- [ ] All copy in `messages/en.json` (zu/xh/af deepMerge fallback until pro translation — Phase 10.7).
+- [ ] Reuse existing audit kinds where possible; if a CV download warrants one, add `seeker.cv.download`.
+- [ ] Doc convention on ship: `docs/completed/PHASE_15_COMPLETE.md` + tick in `ROADMAP.md`.
 
 ---
 
-## Phase 13 editorial + operational follow-ups
+# PHASE 16 — "NEAR ME" FRAMING (REFRAME WHAT ALREADY EXISTS)
+*Priority 3. **Mostly a UX-framing + copy change, not new matching logic** — the location capability is
+already deeply built. **Implement smooth + beautiful.**)*
 
-> Shipped 2026-06-01 (see `docs/completed/PHASE_13_COMPLETE.md`). Code is complete; these are operational gaps that don't block the existing surface but should land before the catalogue surface is publicly promoted.
+> **📋 Detailed, implementation-ready plan: `docs/PHASE_16_PLAN.md`** (2026-06-13). **⚠️ Contains one decision
+> to confirm first (plan §D1):** the outline's "run `/search` for opportunities near me" doesn't fit the
+> model — `/search` returns *talent* (the seeker's competitive pool), and Sebenza deliberately has no
+> seeker vacancy-browse surface (reverse-matching, not a job board). The plan resolves "near you" honestly in
+> reverse-matching terms: **demand near you + be-found-near-you + locality-legible invitations/employers** —
+> the transport-cost win without converging toward the incumbent's post-and-apply model.
 
-- **Tier-1 catalogue expansion** (49  ~750 rows)  the demo seed in `db/seed.ts → seedPhase13_2ModuleSkills` covers BSc CS, BCom Accounting, BCom Management Studies, BEd, BA, BSc Eng Electrical at skeleton density. Editorial work to reach the Tier-1 launch target (5 programmes × ~30 modules × ~5 skills) runs through `/admin/curriculum`. Process documented in `docs/PHASE_13_CATALOGUE_GUIDE.md` (Tier-1 operational checklist).
-- **Information Officer designation**  DPIA §4 is unsigned; the engineering team owns open risks until a named IO takes the role. Land this with the launch checklist.
-- **18-month catalogue-review automation**  the review query exists in `PHASE_13_CATALOGUE_GUIDE.md` (Monthly review §). Currently surfaces via a calendar reminder; an admin-dashboard panel showing the flagged rows would close the manual gap.
-- **SKILLS taxonomy expansion for BSc Eng + BA core**  the SKILLS taxonomy is presently job-skills-shaped; engineering foundations (thermodynamics, fluid mechanics, structural analysis, CAD) + humanities core (literary criticism, historical methods, philosophical reasoning) need slugs before `module_skills` rows make sense for those programmes. Goes through the existing Phase 9.15 admin suggestion queue.
-- **Per-row catalogue version strings**  deliberately deferred per Task 13.7 in favour of the monthly-review process. Revisit only if the gov-facing surface starts citing "catalogue v2026.10" attributions in policy briefs and needs the version string at row granularity.
-- **Cross-encryption-rotation script**  per `ENCRYPTION_INVENTORY.md → Open items`: extend the planned rotation script to walk `app_user.phone_e164_enc` (Phase 11.4.4) AND `llm_providers.credentials_enc` (Phase 13.3) alongside `profiles.national_id_enc`. All three share `SEBENZA_ENCRYPTION_KEY` so they must rotate together.
+> **Honest scoping note (important):** Sebenza is **not** missing location matching. It already has
+> province→city search (`ROADMAP.md` Task 1.2 line 83), location on every profile + `<TalentRosterItem>`,
+> the province×profession supply heatmap with `/search?q=…&province=…` drill-downs (Phase 6 / 6.5), and
+> any-province handling for remote/hybrid (Phase 13.9). **This phase foregrounds and reframes that — it
+> does not rebuild it.** SAYouth's edge here is purely *framing*: they lead with "opportunities close to
+> where you live" and productise the transport-cost barrier. We have the engine; we under-sell it.
+
+## Task 16.1 — Foreground "near me" in the seeker entry point
+- [ ] On the seeker landing / dashboard, lead with a **"Work near you"** framing: detect/confirm the
+      seeker's city (already on the profile) and surface a one-tap **"Show opportunities near me"** that
+      runs the existing province/city-scoped search — no new query, the `/search?province=…` path already
+      exists (Phase 6.5 drill-down).
+- [ ] Honest empty state when nothing is near: "Nothing in {city} yet — see {province}" widening to the
+      existing province scope, reusing the honest end-state pattern (Phase 7 / 10).
+
+## Task 16.2 — Make distance/locality legible on results (the transport-cost barrier)
+- [ ] On `<TalentRosterItem>` (employer side) and on the seeker's opportunity views, make **locality
+      prominent and human** — "Same city" / "{city}, {province}" — so the transport-cost reality SAYouth
+      addresses is visible at a glance. Uses data already on the row; presentation only.
+- [ ] **No new heavy map libs** (No-Flash Rule — consistent with the deliberate "no heavy map" choice on
+      the Phase 6 heatmap). Text + the existing lightweight visual idiom only.
+
+## Task 16.3 — Carry "near me" through the loop
+- [ ] Vacancy match view (Phase 9.8) + Career Compass city-demand rows (11.2.6, already `/search` links)
+      pick up the same "near you" framing so it's consistent end-to-end, not a one-screen gimmick.
+- [ ] Respect remote/hybrid (Phase 13.9): a remote-available seeker/role isn't penalised by a strict
+      "near me" filter — "near me **or** remote" is the honest default.
+
+## Out of scope / explicit
+- ❌ New geolocation capture / GPS / device-location permissions — use the city already on the profile.
+      (Avoids a new PII/consent surface for a framing win.)
+- ❌ Rebuilding the search/ranking engine — this is presentation + entry-point framing over the existing
+      Phase 4 ranking + Phase 6 location scope.
+- ❌ Distance-in-km precision — "same city / province" granularity matches the data and the No-Flash Rule.
+
+## Compliance / wiring
+- [ ] All new copy in `messages/en.json` (zu/xh/af fallback). Styled in the Mzansi National system.
+- [ ] No new migration expected (reads existing `city`/`province`). Confirm in the plan's pre-flight.
+- [ ] Doc convention on ship: `docs/completed/PHASE_16_COMPLETE.md` + tick in `ROADMAP.md`.
 
 ---
 
-## Phase 13.8–13.10 side-phase follow-ups
+## SUMMARY TABLE
 
-> Three quick side-phases shipped 2026-06-04 → 2026-06-06 (see `docs/completed/PHASE_13_{8,9,10}_COMPLETE.md`). Deliberately-deferred polish from their out-of-scope sections:
+| Phase | What | Type | Effort | Blocking dependency |
+|---|---|---|---|---|
+| **14** | Zero-rating | Commercial / partnership (research now, small eng-prep) | Mostly non-code; needs company + backing | Registered company + likely gov/institutional backing |
+| **15** | Work-readiness content | Seeker-side build (reuses help-centre + print/CV infra) | Light–medium | None (buildable now, post-QA) |
+| **16** | "Near me" framing | UX reframe of existing location engine | Light | None (buildable now, post-QA) |
 
-- **Suggest secondaries from declared experiences** _(13.10 out-of-scope)_  the platform can see a seeker worked 2 yrs as a barista in `experiences`; a quiet "add Barista as a secondary profession?" nudge on the profile editor would lift adoption. Deferred so the field stays seeker-controlled at v1; revisit once usage data shows under-adoption.
-- **Multi-profession vacancies** _(13.10 out-of-scope)_  "hiring a barista OR a kitchen porter" needs `professionSlugs: text[]` on vacancies. Skill-overlap matching covers most of this today; build only if employers ask.
-- **Profession slug migration** _(13.10 out-of-scope)_  `profiles.profession` + `secondary_professions` store labels, not slugs. A slug-everywhere migration touches every consumer; do it as its own hygiene phase if label-drift bugs appear.
-- **Cross-border remote vacancies** _(13.9 out-of-scope)_  "Any" means any SA province. Opening the pool to non-SA-residents is a different problem with different POPIA implications; needs its own governance-reviewed phase if ever.
-- **Migration journal discipline** _(2026-06-09 incident)_  journal drift recovered via `db:push`; convention now in `TO_START_EVERY_SESSION.md`. If the team grows, consider a CI check that fails when a `db/migrations/*.sql` file lands without a matching `_journal.json` entry.
+**Recommended order of action:** research **14** in parallel (it's slow and external); build **15** then
+**16** after **Phase 12 (Testing & QA)** clears, since both touch seeker surfaces that the QA pass should
+cover. Neither 15 nor 16 should jump the QA gate — `ROADMAP.md` Phase 12 stays the next milestone.
 
----
-
-## Feature requests from users
-
-> Filled in as launch traffic + user feedback arrive.
-
-- _empty for now  add as they arrive_
-
----
-
-*Maintainer note: keep this file short. Each section is one screen of triage; if a section grows past that, it's a sign the item deserves a real plan doc, not a backlog row.*
+*Opened 2026-06-10. Source: `COMPETITIVE_ANALYSIS_SAYOUTH.md` §5. Sequenced against `ROADMAP.md` v2.1.*
