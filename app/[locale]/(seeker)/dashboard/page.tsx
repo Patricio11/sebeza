@@ -35,6 +35,7 @@ import { RecentAchievementsStrip } from "@/components/feature/seeker/RecentAchie
 import { listMyBadges } from "@/lib/seeker/badges";
 import { StudentLaneDiscoveryCallout } from "@/components/feature/seeker/learning/StudentLaneDiscoveryCallout";
 import { GetWorkReadyCard } from "@/components/feature/seeker/GetWorkReadyCard";
+import { WorkNearYouCard } from "@/components/feature/seeker/WorkNearYouCard";
 
 export default async function SeekerOverviewPage({
   params,
@@ -370,6 +371,19 @@ export default async function SeekerOverviewPage({
           )}
         </section>
 
+        {/* Phase 16.1  Work near you: location-framed, reverse-matching
+            entry (be-found + honest demand + truthful pool link). Sits
+            above the compass  "near you" then "grow". */}
+        <div className="md:col-span-3">
+          <WorkNearYouCard
+            profession={me.profession}
+            province={me.province}
+            city={me.city}
+            completeness={me.completeness}
+            workAvailability={me.workAvailability}
+          />
+        </div>
+
         {/* Career compass  strategic glance, drills into /dashboard/grow */}
         <section
           aria-labelledby="compass-h"
@@ -445,14 +459,16 @@ export default async function SeekerOverviewPage({
 
         {/* Phase 15.3.2  Get work-ready: readiness guides + CV builder,
             surfaced by profile state. Pairs with the compass above. */}
-        <GetWorkReadyCard
-          variant="full"
-          context={{
-            hasPendingInvites: pendingInvites.length > 0,
-            isStudent: !!me.academic,
-            skillCount: me.topSkills.length,
-          }}
-        />
+        <div className="md:col-span-3">
+          <GetWorkReadyCard
+            variant="full"
+            context={{
+              hasPendingInvites: pendingInvites.length > 0,
+              isStudent: !!me.academic,
+              skillCount: me.topSkills.length,
+            }}
+          />
+        </div>
 
         {/* Next steps  derived from real profile state */}
         <section

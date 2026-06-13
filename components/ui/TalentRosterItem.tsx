@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
+import { MapPin } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { PublicProfile } from "@/lib/mock/types";
 import { StatusChip } from "./StatusChip";
@@ -30,6 +31,15 @@ interface Props {
    * page passes `null` (default) or a pre-rendered island.
    */
   trailingAction?: ReactNode;
+  /**
+   * Phase 16.2.1  "near you" legibility. When the viewer has a city in
+   * context (an employer's vacancy city on the match page), pass it here:
+   * a quiet "Same city" chip lights up for candidates in that city so the
+   * transport-cost reality is glanceable. Purely presentational over the
+   * row's existing city  no new query, no matching change. Omitted on
+   * surfaces with no viewer-city context (e.g. public /search).
+   */
+  viewerCity?: string | null;
   className?: string;
 }
 
@@ -46,10 +56,16 @@ export function TalentRosterItem({
   highlightCitizen = false,
   verificationVisible = true,
   trailingAction = null,
+  viewerCity = null,
   className,
 }: Props) {
   const t = useTranslations("search.rosterItem");
   const showCitizenHighlight = highlightCitizen && profile.isCitizen;
+  // Phase 16.2.1  same-city legibility (presentation only).
+  const sameCity =
+    !!viewerCity &&
+    !!profile.city &&
+    viewerCity.trim().toLowerCase() === profile.city.trim().toLowerCase();
 
   return (
     <article
@@ -100,7 +116,12 @@ export function TalentRosterItem({
             </>
           )}
           <span aria-hidden="true"> · </span>
-          <span>{profile.city}</span>
+          {/* Phase 16.2.1  province made legible alongside the city so
+              the locality reads at a glance ("Cape Town, Western Cape"). */}
+          <span>
+            {profile.city}
+            {profile.province ? `, ${profile.province}` : ""}
+          </span>
           {profile.nationality && (
             <>
               <span aria-hidden="true"> · </span>
@@ -135,6 +156,12 @@ export function TalentRosterItem({
               values={profile.workAvailability}
               variant="compact"
             />
+            {sameCity && (
+              <span className="inline-flex items-center gap-1 rounded-[var(--radius-pill)] border border-[color:var(--color-brand)] bg-[color:var(--color-brand-tint)] px-2 py-0.5 text-[0.7rem] font-medium text-[color:var(--color-brand-strong)]">
+                <MapPin className="size-3" aria-hidden="true" />
+                {t("sameCity")}
+              </span>
+            )}
           </div>
           {/* Phase 13.8  CTA cluster. Mobile stacks the optional
               trailing action UNDER View profile so each tap target

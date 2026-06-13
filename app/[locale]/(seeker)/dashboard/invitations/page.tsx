@@ -19,7 +19,7 @@ import { DashboardShell } from "@/components/layout/DashboardShell";
 import { SEEKER_NAV } from "@/components/layout/seekerNav";
 import { verifyRole } from "@/lib/auth/dal";
 import { listMyInvitations } from "@/lib/seeker/invitations";
-import { PROFESSIONS } from "@/lib/mock/taxonomy";
+import { PROFESSIONS, findCityBySlug } from "@/lib/mock/taxonomy";
 import { formatVacancyLocation } from "@/lib/employer/vacancies-display";
 import type { WorkAvailabilityKind } from "@/lib/mock/types";
 import { ChevronRight, Inbox, MapPin } from "lucide-react";
@@ -52,6 +52,11 @@ export default async function SeekerInvitationsPage({
   const all = await listMyInvitations();
   const active = all.filter((i) => ACTIVE_STATES.has(i.state));
   const terminal = all.filter((i) => !ACTIVE_STATES.has(i.state));
+
+  // Phase 16.2.2  the seeker's own city is the viewer-context for a
+  // "Same city" chip on each invitation (transport-cost legibility).
+  const me = await getMyProfile();
+  const viewerCity = me?.city ?? null;
 
   const dfmt = new Intl.DateTimeFormat(locale, {
     year: "numeric",
@@ -100,7 +105,12 @@ export default async function SeekerInvitationsPage({
               <ul className="space-y-3">
                 {active.map((inv) => (
                   <li key={inv.id}>
-                    <InvitationCard inv={inv} dfmt={dfmt} active />
+                    <InvitationCard
+                      inv={inv}
+                      dfmt={dfmt}
+                      viewerCity={viewerCity}
+                      active
+                    />
                   </li>
                 ))}
               </ul>
@@ -117,7 +127,12 @@ export default async function SeekerInvitationsPage({
               <ul className="space-y-3">
                 {terminal.map((inv) => (
                   <li key={inv.id}>
-                    <InvitationCard inv={inv} dfmt={dfmt} active={false} />
+                    <InvitationCard
+                      inv={inv}
+                      dfmt={dfmt}
+                      viewerCity={viewerCity}
+                      active={false}
+                    />
                   </li>
                 ))}
               </ul>
@@ -216,10 +231,13 @@ function urgencyChip(
 function InvitationCard({
   inv,
   dfmt,
+  viewerCity,
   active,
 }: {
   inv: Awaited<ReturnType<typeof listMyInvitations>>[number];
   dfmt: Intl.DateTimeFormat;
+  /** Phase 16.2.2  the seeker's own city, for the "Same city" chip. */
+  viewerCity: string | null;
   active: boolean;
 }) {
   const stateMeta = STATE_COPY[inv.state] ?? STATE_COPY.invited!;
@@ -234,6 +252,14 @@ function InvitationCard({
     workAvailability:
       (inv.workAvailability as WorkAvailabilityKind[]) ?? [],
   });
+  // Phase 16.2.2  same-city legibility (presentation only).
+  const invCityLabel = inv.citySlug
+    ? (findCityBySlug(inv.citySlug)?.label ?? null)
+    : null;
+  const sameCity =
+    !!viewerCity &&
+    !!invCityLabel &&
+    viewerCity.trim().toLowerCase() === invCityLabel.trim().toLowerCase();
   const urgency = urgencyChip(inv);
 
   const stateLabel = STATE_COPY[inv.state]?.label ?? inv.state;
@@ -274,6 +300,14 @@ function InvitationCard({
             >
               {stateMeta.label}
             </span>
+            {/* Phase 16.2.2  "Same city": the transport-cost reality at
+                a glance when the role is in the seeker's own city. */}
+            {sameCity && (
+              <span className="inline-flex items-center gap-1 rounded-[var(--radius-pill)] border border-[color:var(--color-brand)] bg-[color:var(--color-brand-tint)] px-2 py-0.5 text-[0.65rem] uppercase tracking-[0.18em] text-[color:var(--color-brand-strong)]">
+                <MapPin className="size-3" aria-hidden="true" />
+                Same city
+              </span>
+            )}
             {/* Phase 11.1.5  urgency chip when responds-by is approaching. */}
             {urgency && (
               <span

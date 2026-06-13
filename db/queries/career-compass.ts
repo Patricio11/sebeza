@@ -24,7 +24,7 @@
 import "server-only";
 import { sql } from "drizzle-orm";
 import { getDb } from "@/db/client";
-import { SKILLS, PROFESSIONS } from "@/lib/mock/taxonomy";
+import { SKILLS, PROFESSIONS, PROVINCES } from "@/lib/mock/taxonomy";
 import {
   MOCK_COMPASS,
   type CompassSnapshot,
@@ -370,6 +370,65 @@ function titleCase(s: string): string {
     .split(/\s+/)
     .map((w) => (w.length === 0 ? w : w[0]!.toUpperCase() + w.slice(1)))
     .join(" ");
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Phase 16.1  "Demand near you".
+//
+// The honest, reverse-matching answer to "work near me": how much EMPLOYER
+// demand there is for the seeker's profession in their province (and across
+// SA, for the remote line). Reads the SAME `search_events` table + the SAME
+// 90-day window the compass demand engine above uses (D5: reuse the engine,
+// don't build a parallel one). This is demand-side activity (employer
+// searches), never a seeker cohort  so there is no k-anonymity exposure;
+// it stays PROVINCE-level by default (D2), never a cross-seeker city
+// aggregate.
+// ─────────────────────────────────────────────────────────────────────────────
+
+export interface NearYouDemand {
+  /** Province label, echoed for the card copy. */
+  province: string;
+  /** Window the counts cover (days). */
+  windowDays: number;
+  /** Employer searches for this profession scoped to the seeker's province. */
+  localSearches: number;
+  /** Employer searches for this profession across all of SA (superset). */
+  nationalSearches: number;
+}
+
+export async function getNearYouDemand(
+  profession: string,
+  provinceLabel: string,
+): Promise<NearYouDemand> {
+  const db = getDb();
+  // `search_events.filters->>'province'` is the slug the /search page wrote
+  // (e.g. "western-cape"); convert the profile's province LABEL to match.
+  const provinceSlug =
+    PROVINCES.find(
+      (p) => p.label.toLowerCase() === provinceLabel.trim().toLowerCase(),
+    )?.slug ?? provinceLabel.trim().toLowerCase().replace(/\s+/g, "-");
+
+  const rows = unwrap<{ local: number; national: number }>(
+    await db.execute(sql`
+      SELECT
+        COUNT(*) FILTER (WHERE filters->>'province' = ${provinceSlug})::int AS local,
+        COUNT(*)::int AS national
+      FROM search_events
+      WHERE at >= now() - (${DEMAND_WINDOW_DAYS} || ' days')::interval
+        AND (
+          LOWER(COALESCE(terms, '')) LIKE '%' || LOWER(${profession}) || '%'
+          OR LOWER(COALESCE(filters->>'query', '')) LIKE '%' || LOWER(${profession}) || '%'
+          OR LOWER(COALESCE(filters->>'profession', '')) = LOWER(${profession})
+        )
+    `),
+  );
+  const r = rows[0] ?? { local: 0, national: 0 };
+  return {
+    province: provinceLabel,
+    windowDays: DEMAND_WINDOW_DAYS,
+    localSearches: r.local,
+    nationalSearches: r.national,
+  };
 }
 
 // Re-export the type so consumers don't import from two places.

@@ -226,7 +226,8 @@
     "rosterItem": {
       "viewProfile": "View profile",
       "completeness": "Profile completeness",
-      "topSkills": "Top skills"
+      "topSkills": "Top skills",
+      "sameCity": "Same city"
     }
   },
   "status": {
@@ -437,8 +438,8 @@
       "adjacentSub": "Roles your current skills overlap with  usually one or two skills away.",
       "overlap": "{percent}% skill overlap",
       "missing": "Missing",
-      "cityDemandTitle": "What employers are looking for in your province",
-      "cityDemandSub": "The gap column is the policy lever  and the seeker's opportunity.",
+      "cityDemandTitle": "What employers are searching for in your province",
+      "cityDemandSub": "Where the gap is widest, demand outstrips supply  the skills that make you stand out near you. Tap a skill to see who else is listed for it in your province.",
       "cityDemandColSkill": "Skill",
       "cityDemandColSearches": "Searches",
       "cityDemandColMatches": "Matches",
@@ -520,6 +521,19 @@
       "prepareInterview": "How to prepare for the interview",
       "prepareCv": "Build your CV",
       "prepareScams": "Spot a job scam"
+    },
+    "nearYou": {
+      "eyebrow": "Work near you",
+      "beFoundTitle": "Be found for {profession} work near {city}",
+      "beFoundBody": "On Sebenza, employers come to you. The fresher and more complete your profile, the more easily they find you near {city}.",
+      "completeness": "{percent}% complete",
+      "completeProfile": "Complete your profile",
+      "demandHeading": "Demand for {profession}",
+      "demand": "{count, plural, =0 {No searches yet} one {# search} other {# searches}} in {province} in the last {days} days",
+      "demandEmpty": "Quiet in {province} right now  keep your status fresh so you're first when it picks up.",
+      "remote": "You're open to remote too  {count, plural, one {# search} other {# searches}} for {profession} across South Africa.",
+      "poolLink": "See who you're matched against in {province}",
+      "notHere": "Not in {city}? Update your location"
     }
   },
   "employerDash": {

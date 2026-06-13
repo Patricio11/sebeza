@@ -98,3 +98,23 @@ test("Phase 15: dashboard surfaces the Get work-ready entry", async ({
     page.getByRole("heading", { name: /get ready for the work/i }),
   ).toBeVisible();
 });
+
+test("Phase 16: dashboard surfaces 'Work near you' with truthful pool label, no overflow", async ({
+  page,
+}) => {
+  await signInSeeker(page);
+
+  // The "Work near you" card renders (reverse-matching framing).
+  await expect(
+    page.getByRole("heading", { name: /be found for .* near/i }),
+  ).toBeVisible();
+
+  // 16.1.3 / D1: the pool link is labelled truthfully ("matched against"),
+  // and the surface never frames the talent pool as "opportunities".
+  await expect(
+    page.getByRole("link", { name: /who you're matched against/i }),
+  ).toBeVisible();
+  await expect(page.locator("body")).not.toContainText(/opportunities near/i);
+
+  await expectNoHorizontalOverflow(page);
+});

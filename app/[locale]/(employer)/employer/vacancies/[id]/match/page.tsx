@@ -43,7 +43,7 @@ import {
 import { TalentRosterItem } from "@/components/ui/TalentRosterItem";
 import { VacancyStatusChip } from "@/components/feature/employer/vacancies/VacancyStatusChip";
 import { BulkInviteIsland } from "@/components/feature/employer/vacancies/BulkInviteIsland";
-import { PROVINCES, PROFESSIONS } from "@/lib/mock/taxonomy";
+import { PROVINCES, PROFESSIONS, findCityBySlug } from "@/lib/mock/taxonomy";
 import { formatVacancyLocation } from "@/lib/employer/vacancies-display";
 import { getSetting } from "@/lib/admin/settings";
 import { getDb } from "@/db/client";
@@ -107,6 +107,12 @@ export default async function VacancyMatchPage({
     citySlug: vacancy.citySlug,
     workAvailability: vacancy.workAvailability,
   });
+  // Phase 16.2.1/16.3.2  the vacancy's city is the viewer-context for
+  // "Same city" legibility on each candidate row (transport-cost reality
+  // at a glance). NULL for any-province / city-less vacancies  no chip.
+  const vacancyCityLabel = vacancy.citySlug
+    ? (findCityBySlug(vacancy.citySlug)?.label ?? null)
+    : null;
 
   // "Refine in search" jumps to the public /search with the same filters
   // pre-filled. The employer keeps the workflow context here on /match;
@@ -264,6 +270,7 @@ export default async function VacancyMatchPage({
                         locale={locale}
                         highlightCitizen
                         verificationVisible={verificationVisible}
+                        viewerCity={vacancyCityLabel}
                       />
                       <div className="-mt-2 mb-4 ml-16 flex flex-wrap items-center justify-end gap-3 text-xs">
                         {/* Phase 13.10 D6  italic annotation that

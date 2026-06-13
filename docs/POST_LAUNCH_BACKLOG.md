@@ -135,16 +135,16 @@ an engineering one.** Founder to research; build work is small and comes last.*
 
 ---
 
-# PHASE 16 — "NEAR ME" FRAMING (REFRAME WHAT ALREADY EXISTS)
-*Priority 3. **Mostly a UX-framing + copy change, not new matching logic** — the location capability is
-already deeply built. **Implement smooth + beautiful.**)*
+# PHASE 16 — "NEAR ME" FRAMING (REFRAME WHAT ALREADY EXISTS) ✅ SHIPPED 2026-06-13
+*Priority 3. **Mostly a UX-framing + copy change, not new matching logic** — the location capability was
+already deeply built.*
 
-> **📋 Detailed, implementation-ready plan: `docs/PHASE_16_PLAN.md`** (2026-06-13). **⚠️ Contains one decision
-> to confirm first (plan §D1):** the outline's "run `/search` for opportunities near me" doesn't fit the
-> model — `/search` returns *talent* (the seeker's competitive pool), and Sebenza deliberately has no
-> seeker vacancy-browse surface (reverse-matching, not a job board). The plan resolves "near you" honestly in
-> reverse-matching terms: **demand near you + be-found-near-you + locality-legible invitations/employers** —
-> the transport-cost win without converging toward the incumbent's post-and-apply model.
+> **✅ SHIPPED 2026-06-13.** §D1 confirmed by founder: "near you" expressed in **reverse-matching** terms
+> (Sebenza is not a job board). Built: a **`<WorkNearYouCard>`** on the dashboard (be-found + honest
+> province-level demand via `getNearYouDemand` reusing the existing engine + truthful "who you're matched
+> against" pool link + "or remote"); **locality legibility** ("{city}, {province}" + "Same city" chip on
+> `<TalentRosterItem>` / vacancy match / invitations); Career-Compass copy tightened. Full gate green;
+> E2E at 360px. See `docs/completed/PHASE_16_COMPLETE.md` + `docs/completed/PHASE_16_PLAN.md`.
 
 > **Honest scoping note (important):** Sebenza is **not** missing location matching. It already has
 > province→city search (`ROADMAP.md` Task 1.2 line 83), location on every profile + `<TalentRosterItem>`,
