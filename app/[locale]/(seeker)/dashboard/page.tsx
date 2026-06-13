@@ -34,6 +34,7 @@ import { DashboardSeenTracker } from "@/components/feature/seeker/DashboardSeenT
 import { RecentAchievementsStrip } from "@/components/feature/seeker/RecentAchievementsStrip";
 import { listMyBadges } from "@/lib/seeker/badges";
 import { StudentLaneDiscoveryCallout } from "@/components/feature/seeker/learning/StudentLaneDiscoveryCallout";
+import { GetWorkReadyCard } from "@/components/feature/seeker/GetWorkReadyCard";
 
 export default async function SeekerOverviewPage({
   params,
@@ -441,6 +442,17 @@ export default async function SeekerOverviewPage({
             </Link>
           </div>
         </section>
+
+        {/* Phase 15.3.2  Get work-ready: readiness guides + CV builder,
+            surfaced by profile state. Pairs with the compass above. */}
+        <GetWorkReadyCard
+          variant="full"
+          context={{
+            hasPendingInvites: pendingInvites.length > 0,
+            isStudent: !!me.academic,
+            skillCount: me.topSkills.length,
+          }}
+        />
 
         {/* Next steps  derived from real profile state */}
         <section

@@ -982,6 +982,6 @@ HR Practitioner · Electrician · Plumber · Accountant · Nurse · Driver · Bo
 
 ---
 
-*Last Updated: 2026-06-12*
-*Version: 2.2  Phase 12 (Testing & QA) COMPLETE: 309 vitest + 32 Playwright tests on a real-Postgres harness; 9 real bugs found + fixed by the suite's first runs; lint back in the gate; No-Flash budget automated. See `docs/completed/PHASE_12_COMPLETE.md`. The next milestone before public ship is Phase 10 Arc B (operator tasks 10.5–10.11: screen-reader passes, Lighthouse runs, Tier-1 professional translation, credentials flip, soak) plus the pre-commercial gates (Information Officer designation, pen-test, nonce CSP).*
+*Last Updated: 2026-06-13*
+*Version: 2.3  Phase 15 (Work-readiness content) COMPLETE: `work_ready` help collection (6 articles) + profile→CV generator (`/dashboard/cv`, print-CSS, 2 ATS templates) + contextual surfacing; 318 vitest + 10/10 seeker E2E at 360px. See `docs/completed/PHASE_15_COMPLETE.md`. Post-launch phases 14/15/16 derive from `docs/COMPETITIVE_ANALYSIS_SAYOUTH.md`; 14 (zero-rating) is partnership-gated, 16 ("Near You") is planned (`docs/PHASE_16_PLAN.md`, one founder decision pending). v2.2  Phase 12 (Testing & QA) COMPLETE: 309 vitest + 32 Playwright on a real-Postgres harness; 9 real bugs found + fixed. The next milestone before public ship is Phase 10 Arc B (operator tasks 10.5–10.11) plus the pre-commercial gates (Information Officer designation, pen-test, nonce CSP).*
 *Working name: Sebenza  South African National Talent-Intelligence Platform.*

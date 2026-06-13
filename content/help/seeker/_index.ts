@@ -68,6 +68,14 @@ import * as switchingProfession from "./growth/switching-profession";
 import * as discoveringEmployers from "./growth/discovering-employers";
 import * as followingEmployers from "./growth/following-employers";
 
+//  Phase 15  Get work-ready
+import * as buildYourCv from "./work-ready/build-your-cv";
+import * as prepareForAnInterview from "./work-ready/prepare-for-an-interview";
+import * as yourFirstDay from "./work-ready/your-first-day";
+import * as skillsYoureStillLearning from "./work-ready/skills-youre-still-learning";
+import * as workplaceRightsBasics from "./work-ready/workplace-rights-basics";
+import * as spottingJobScams from "./work-ready/spotting-job-scams";
+
 //  Consent & privacy
 import * as whatConsentPurposesMean from "./privacy/what-consent-purposes-mean";
 import * as contactRevealHowItWorks from "./privacy/contact-reveal-how-it-works";
@@ -140,6 +148,12 @@ export const SEEKER_HELP_ARTICLES: HelpArticle[] = [
   switchingProfession,
   discoveringEmployers,
   followingEmployers,
+  buildYourCv,
+  prepareForAnInterview,
+  yourFirstDay,
+  skillsYoureStillLearning,
+  workplaceRightsBasics,
+  spottingJobScams,
   whatConsentPurposesMean,
   contactRevealHowItWorks,
   documentSharingAndEmployerAccess,

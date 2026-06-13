@@ -19,6 +19,7 @@ import { OpenLearningPathButton } from "@/components/feature/seeker/learning/Ope
 import { AdjacentProfessionSwitch } from "@/components/feature/seeker/learning/AdjacentProfessionSwitch";
 import { StudentLaneDiscoveryCallout } from "@/components/feature/seeker/learning/StudentLaneDiscoveryCallout";
 import { RecommendedEmployersCard } from "@/components/feature/seeker/RecommendedEmployersCard";
+import { GetWorkReadyCard } from "@/components/feature/seeker/GetWorkReadyCard";
 import { topEmployersByProfessionProvince } from "@/db/queries/employer-leaderboard";
 import { listMyFollows } from "@/lib/seeker/follows";
 import { LazySection } from "@/components/ui/LazySection";
@@ -336,6 +337,20 @@ export default async function CareerCompassPage({
 
       {/* ───────────── My Learning (Phase 9.12 + 11.2.4/.5) ───────────── */}
       <MyLearningSection items={myLearning} locale={locale} />
+
+      {/* Phase 15.3.2/.3  Get work-ready (compact), beside the learning
+          loop. Student lane gets the first-day + still-learning guides;
+          everyone gets a one-tap CV. */}
+      <div className="mt-8">
+        <GetWorkReadyCard
+          variant="compact"
+          context={{
+            hasPendingInvites: false,
+            isStudent: !!me.academic,
+            skillCount: me.topSkills.length,
+          }}
+        />
+      </div>
 
       {/* ───────────── Recommendations ───────────── */}
       <section aria-labelledby="rec-h" className="mt-12">

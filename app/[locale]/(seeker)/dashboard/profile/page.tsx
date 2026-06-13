@@ -109,6 +109,7 @@ export default async function ProfileEditorPage({
         <HelpLink role="seeker" slug="open-to-tags" label="Open-to tags" />
         <HelpLink role="seeker" slug="secondary-professions-and-cross-training" label="Secondary professions" />
         <HelpLink role="seeker" slug="cv-backup" label="CV backup" />
+        <HelpLink role="seeker" slug="build-your-cv" label="Build your CV" />
         <HelpLink role="seeker" slug="sharing-your-profile" label="Sharing your profile" />
         <HelpLink role="seeker" slug="achievements" label="Achievement badges" />
       </div>

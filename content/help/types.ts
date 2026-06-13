@@ -43,6 +43,7 @@ export type SeekerHelpCategory =
   | "profile"
   | "invitations"
   | "growth"
+  | "work_ready" // Phase 15 — "get ready for the work," not just "find the work"
   | "privacy"
   | "activity"
   | "account";
@@ -262,6 +263,12 @@ export const SEEKER_HELP_CATEGORIES: ReadonlyArray<{
     label: "Skills & learning",
     description:
       "Your career compass: skill recommendations ranked by local demand, learning paths, and how to move into adjacent roles.",
+  },
+  {
+    value: "work_ready",
+    label: "Get work-ready",
+    description:
+      "Get ready for the work, not just find it: build a CV from your profile, prepare for an interview, know what to expect on day one, and spot job scams.",
   },
   {
     value: "privacy",

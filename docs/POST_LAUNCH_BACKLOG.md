@@ -75,13 +75,14 @@ an engineering one.** Founder to research; build work is small and comes last.*
 
 ---
 
-# PHASE 15 — WORK-READINESS CONTENT (SEEKER GROWTH, BUILDABLE)
+# PHASE 15 — WORK-READINESS CONTENT (SEEKER GROWTH, BUILDABLE) ✅ SHIPPED 2026-06-13
 *Priority 2. Lightweight, high seeker value, deepens the learning-loop "we help you grow" story
-(`ROADMAP.md` Phase 11.2 + Phase 13). Cheap to add, strong retention. **Implement smooth + beautiful.**)*
+(`ROADMAP.md` Phase 11.2 + Phase 13). Cheap to add, strong retention.*
 
-> **📋 Detailed, implementation-ready plan: `docs/PHASE_15_PLAN.md`** (2026-06-13). Reuses the help-centre
-> architecture for a `work-ready` article collection, the print-CSS pattern for a profile→CV generator, and
-> contextual "prepare for this" cards. Decisions D1–D5 + responsive (360px) + compliance/wiring locked.
+> **✅ SHIPPED 2026-06-13.** 6 `work_ready` help articles + a profile→CV generator (`/dashboard/cv`,
+> print-CSS, 2 ATS templates, self-attested honesty) + contextual surfacing (`<GetWorkReadyCard>` on
+> dashboard + grow; "Prepare for this role" on invitation detail). Full gate green; E2E at 360px.
+> See `docs/completed/PHASE_15_COMPLETE.md` + `docs/completed/PHASE_15_PLAN.md`.
 
 > **Why it fits Sebenza specifically:** SAYouth wraps matching in support — free CV templates, interview
 > prep, mock interviews, job-readiness training (`COMPETITIVE_ANALYSIS_SAYOUTH.md` §2). Sebenza already

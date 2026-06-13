@@ -160,6 +160,7 @@ function dashboardLabelFor(surface: string): string {
   if (surface === "/dashboard/qualifications") return "Qualifications";
   if (surface === "/dashboard/invitations") return "Vacancy invites";
   if (surface === "/dashboard/grow") return "Career compass";
+  if (surface === "/dashboard/cv") return "CV builder";
   if (surface === "/dashboard/activity") return "Activity";
   if (surface === "/dashboard/notifications") return "Notifications";
   if (surface === "/dashboard/privacy") return "Privacy & consent";

@@ -12,7 +12,7 @@
  * stays a thin server shell.
  */
 
-import { setRequestLocale } from "next-intl/server";
+import { setRequestLocale, getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { Link } from "@/i18n/navigation";
 
@@ -30,7 +30,16 @@ import { isFollowingEmployer } from "@/lib/seeker/follows";
 import { PROFESSIONS } from "@/lib/mock/taxonomy";
 import { formatVacancyLocation } from "@/lib/employer/vacancies-display";
 import type { WorkAvailabilityKind } from "@/lib/mock/types";
-import { Building2, ChevronLeft, Clock, MapPin } from "lucide-react";
+import {
+  Building2,
+  ChevronLeft,
+  Clock,
+  MapPin,
+  BookOpen,
+  FileText,
+  ShieldAlert,
+  ArrowUpRight,
+} from "lucide-react";
 
 export const revalidate = 0;
 
@@ -45,6 +54,14 @@ export default async function SeekerInvitationDetailPage({
 
   const inv = await getMyInvitation(id);
   if (!inv) notFound();
+
+  // Phase 15.3.1  readiness surfaces only while the invitation is live
+  // or accepted; never on a decline / expiry / withdrawal (D4: right
+  // moment, no nag).
+  const tReady = await getTranslations("seekerDash.workReady");
+  const showPrepare = (
+    ["invited", "reconsidering", "accepted", "accepted_with_notice"] as const
+  ).includes(inv.state as never);
 
   // Phase 11.4.2  follow-state read for the heart button.
   const following = await isFollowingEmployer(inv.orgId);
@@ -193,6 +210,46 @@ export default async function SeekerInvitationDetailPage({
         declineNote={inv.declineNote}
       />
 
+      {/* Phase 15.3.1  "Prepare for this role": calm, contextual
+          readiness at the right moment. Reuses the Phase 15.1 guides +
+          the CV builder. Hidden once the invitation is closed. */}
+      {showPrepare && (
+        <section
+          aria-labelledby="prepare-h"
+          className="mt-6 rounded-[var(--radius-md)] border-l-4 border-[color:var(--color-brand-strong)] bg-[color:var(--color-brand-tint)] p-5 md:p-6"
+        >
+          <p className="text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--color-brand-strong)]">
+            {tReady("eyebrow")}
+          </p>
+          <h2
+            id="prepare-h"
+            className="mt-1 font-display text-lg text-[color:var(--color-ink)]"
+          >
+            {tReady("prepareTitle")}
+          </h2>
+          <p className="mt-1 text-sm text-[color:var(--color-ink-soft)]">
+            {tReady("prepareLead")}
+          </p>
+          <ul className="mt-3 grid gap-2 sm:grid-cols-3">
+            <PrepareLink
+              href="/dashboard/help/prepare-for-an-interview"
+              icon={<BookOpen className="size-4" aria-hidden="true" />}
+              label={tReady("prepareInterview")}
+            />
+            <PrepareLink
+              href="/dashboard/cv"
+              icon={<FileText className="size-4" aria-hidden="true" />}
+              label={tReady("prepareCv")}
+            />
+            <PrepareLink
+              href="/dashboard/help/spotting-job-scams"
+              icon={<ShieldAlert className="size-4" aria-hidden="true" />}
+              label={tReady("prepareScams")}
+            />
+          </ul>
+        </section>
+      )}
+
       {/* Phase 11.3.2 + 11.3.3 + 11.4.2  agency controls. Report
           fires a moderation row; block silences this org platform-
           wide for this seeker; follow saves the org to your private
@@ -222,6 +279,38 @@ export default async function SeekerInvitationDetailPage({
         page.
       </p>
     </DashboardShell>
+  );
+}
+
+/**
+ * Phase 15.3.1  one readiness link in the "Prepare for this role"
+ * card. White chip, ≥44px tap target, wraps to one column on a phone.
+ */
+function PrepareLink({
+  href,
+  icon,
+  label,
+}: {
+  href: string;
+  icon: React.ReactNode;
+  label: string;
+}) {
+  return (
+    <li>
+      <Link
+        href={href as never}
+        className="group flex min-h-[44px] items-center justify-between gap-2 rounded-[var(--radius-sm)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] px-3 py-2 text-sm text-[color:var(--color-ink)] no-underline transition-colors hover:border-[color:var(--color-ink)]"
+      >
+        <span className="inline-flex items-center gap-2">
+          <span className="text-[color:var(--color-brand-strong)]">{icon}</span>
+          {label}
+        </span>
+        <ArrowUpRight
+          className="size-3.5 shrink-0 text-[color:var(--color-ink-soft)] transition-transform group-hover:translate-x-0.5"
+          aria-hidden="true"
+        />
+      </Link>
+    </li>
   );
 }
 
