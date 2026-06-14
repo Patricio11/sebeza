@@ -131,6 +131,100 @@ export async function listUsersQuery(
   }));
 }
 
+/** The directory row plus the detail-only fields the `/admin/users/[id]` page shows. */
+export interface AdminUserDetail extends AdminUserRow {
+  twoFactorEnabled: boolean;
+  updatedAt: string;
+  suspendedAt: string | null;
+  /** Resolved display name of the admin who suspended the account, if any. */
+  suspendedByName: string | null;
+  deletedAt: string | null;
+}
+
+/**
+ * Single-user loader for the in-shell admin detail page (`/admin/users/[id]`).
+ * Same joins/shape as `listUsersQuery`, filtered to one id, plus a few
+ * detail-only columns (2FA state, suspension when/by, timestamps). Returns
+ * `null` when there's no such user so the page can `notFound()`.
+ *
+ * No new audit kind is logged for the *view* — it surfaces the same account
+ * data the directory list already shows, and the directory list doesn't log
+ * reads either; the moderation actions (suspend/restore/erase/2FA-reset) keep
+ * logging via their own kinds in `lib/admin/moderation.ts`.
+ */
+export async function getAdminUserDetail(
+  userId: string,
+): Promise<AdminUserDetail | null> {
+  await verifyAdmin();
+  const db = getDb();
+
+  const rows = await db
+    .select({
+      id: schema.appUser.id,
+      email: schema.appUser.email,
+      name: schema.appUser.name,
+      role: schema.appUser.role,
+      emailVerified: schema.appUser.emailVerified,
+      twoFactorEnabled: schema.appUser.twoFactorEnabled,
+      createdAt: schema.appUser.createdAt,
+      updatedAt: schema.appUser.updatedAt,
+      suspendedAt: schema.appUser.suspendedAt,
+      suspendedReason: schema.appUser.suspendedReason,
+      suspendedByUserId: schema.appUser.suspendedByUserId,
+      deletedAt: schema.appUser.deletedAt,
+      handle: schema.profiles.handle,
+      profession: schema.profiles.profession,
+      city: schema.profiles.city,
+      organisation: schema.organizations.name,
+    })
+    .from(schema.appUser)
+    .leftJoin(schema.profiles, eq(schema.profiles.userId, schema.appUser.id))
+    .leftJoin(
+      schema.organizationMembers,
+      eq(schema.organizationMembers.userId, schema.appUser.id),
+    )
+    .leftJoin(
+      schema.organizations,
+      eq(schema.organizations.id, schema.organizationMembers.organizationId),
+    )
+    .where(eq(schema.appUser.id, userId))
+    .limit(1);
+
+  const r = rows[0];
+  if (!r) return null;
+
+  // Resolve the suspending admin's name (cheap, only when suspended).
+  let suspendedByName: string | null = null;
+  if (r.suspendedByUserId) {
+    const actor = await db
+      .select({ name: schema.appUser.name })
+      .from(schema.appUser)
+      .where(eq(schema.appUser.id, r.suspendedByUserId))
+      .limit(1);
+    suspendedByName = actor[0]?.name ?? null;
+  }
+
+  return {
+    id: r.id,
+    email: r.email,
+    name: r.name,
+    role: r.role as UserRole,
+    emailVerified: r.emailVerified,
+    twoFactorEnabled: r.twoFactorEnabled,
+    createdAt: r.createdAt.toISOString(),
+    updatedAt: r.updatedAt.toISOString(),
+    handle: r.handle,
+    profession: r.profession,
+    city: r.city,
+    organisation: r.organisation,
+    status: r.deletedAt ? "deleted" : r.suspendedAt ? "suspended" : "active",
+    suspendedReason: r.suspendedReason,
+    suspendedAt: r.suspendedAt ? r.suspendedAt.toISOString() : null,
+    suspendedByName,
+    deletedAt: r.deletedAt ? r.deletedAt.toISOString() : null,
+  };
+}
+
 /**
  * Returns the small set of admin-dashboard headline counts. Cheap;
  * called from /admin overview.

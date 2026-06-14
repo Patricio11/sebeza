@@ -34,14 +34,15 @@ Keep entries terse  this is a triage list, not a spec.
 - **Persistent dashboard sidebar**  hoist the sidebar into a route-group `layout.tsx` so only the
   content column reloads on navigation (it was remounting the whole screen + flashing a skeleton).
   **Part A admin = done** (shipped 2026-06-14); seeker / employer / gov rollout + `DashboardShell`
-  retirement tracked in the plan.
-- **In-shell admin user detail** (`/admin/users/[id]`)  stop bouncing admins to the public
-  `/p/[handle]`; give them a detail view inside the admin frame with a back button + the existing
-  moderation actions.
-- **Public profile loading-hang** _(open question)_  `/p/[handle]` was seen stuck on its loading
-  skeleton on the dev server; independent of the layout change (prod build compiles it fine).
-  Probe + fix tracked in the plan (Part C) — higher priority than the in-shell page if it's a real
-  server-side stall, since it hits public + employer profile views too.
+  retirement still tracked in the plan.
+- **In-shell admin user detail** (`/admin/users/[id]`) — ✅ **done 2026-06-14.** Admins no longer
+  bounce to the public `/p/[handle]`; the directory opens a detail view inside the admin frame
+  (back button + the existing suspend/restore/2FA-reset/erase actions; public profile is a
+  secondary link).
+- **Public profile loading-hang** — ✅ **resolved (not a bug) 2026-06-14.** Probed: the page
+  renders fully server-side (HTTP 200, 179 KB); the "stuck skeleton" was first-hit dev Turbopack
+  compilation, not a stall, and prod has no per-request compile. Restart `npm run dev` if it
+  recurs after a large change.
 
 ---
 

@@ -50,6 +50,38 @@ test("admin arc: overview KPIs + verification queue render from the real DB", as
   await expect(page.locator("main")).toBeVisible();
 });
 
+test("admin user detail opens in-shell (no bounce to the public profile)", async ({
+  page,
+}) => {
+  await signIn(page, "admin@sebenzasa.com");
+  await page.waitForURL(/\/admin/, { timeout: 30_000 });
+
+  await page.goto("/en/admin/users");
+  await expect(page.locator("main")).toBeVisible();
+
+  // Click a user in the directory — must open /admin/users/[id] INSIDE the
+  // admin shell, not bounce out to the public /p/[handle].
+  const firstUserLink = page
+    .locator('a[href*="/admin/users/"]')
+    .filter({ visible: true })
+    .first();
+  await firstUserLink.click();
+
+  await expect(page).toHaveURL(/\/admin\/users\/[^/]+$/);
+  await expect(page).not.toHaveURL(/\/p\//);
+  await expect(page.locator("main")).toBeVisible();
+  // Still in the admin frame: sidebar/nav present + a back affordance.
+  await expect(page.getByRole("navigation").first()).toBeVisible();
+  const backLink = page.getByRole("link", { name: /back to user directory/i });
+  await expect(backLink).toBeVisible();
+  // Moderation actions are reachable from the detail page.
+  await expect(page.getByText("Actions", { exact: true })).toBeVisible();
+
+  // Back returns to the directory.
+  await backLink.click();
+  await expect(page).toHaveURL(/\/admin\/users$/);
+});
+
 test("employer arc: workspace + a seeker dossier render for the verified org", async ({
   page,
 }) => {

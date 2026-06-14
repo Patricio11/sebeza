@@ -137,16 +137,12 @@ export default async function UsersPage({
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
-                    {u.handle ? (
-                      <Link
-                        href={`/p/${u.handle}`}
-                        className="font-display text-lg leading-tight hover:underline"
-                      >
-                        {u.name}
-                      </Link>
-                    ) : (
-                      <span className="font-display text-lg leading-tight">{u.name}</span>
-                    )}
+                    <Link
+                      href={`/admin/users/${u.id}`}
+                      className="font-display text-lg leading-tight hover:underline"
+                    >
+                      {u.name}
+                    </Link>
                     <div className="truncate text-xs text-[color:var(--color-ink-soft)]">
                       {u.handle ? `@${u.handle} · ` : ""}
                       {u.email}
@@ -202,16 +198,12 @@ function UserRow({
   return (
     <tr className="border-t border-[color:var(--color-hairline)] align-top">
       <td className="px-5 py-2.5">
-        {user.handle ? (
-          <Link
-            href={`/p/${user.handle}`}
-            className="font-display text-base hover:underline"
-          >
-            {user.name}
-          </Link>
-        ) : (
-          <span className="font-display text-base">{user.name}</span>
-        )}
+        <Link
+          href={`/admin/users/${user.id}`}
+          className="font-display text-base hover:underline"
+        >
+          {user.name}
+        </Link>
         <div className="text-xs text-[color:var(--color-ink-soft)]">
           {user.handle ? `@${user.handle}` : user.organisation ?? ""}
         </div>

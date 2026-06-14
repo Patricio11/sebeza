@@ -79,56 +79,65 @@ Once A2–A4 land and no page renders `<DashboardShell>`:
 Replace the directory's bounce to the public `/p/[handle]` with a proper detail view **inside the
 admin frame**, so the sidebar + a back button are always present and admins stay in context.
 
-### B1 — Single-user read
+> **✅ DONE 2026-06-14 (commit pending).** Shipped `getAdminUserDetail()` +
+> `app/[locale]/(admin)/admin/users/[id]/page.tsx` (in-shell via `<DashboardMasthead>`, identity +
+> status/moderation cards reusing `UserRowActions`, "← Back to user directory", "View public
+> profile ↗" as the secondary masthead action). Directory rows now link to `/admin/users/[id]`
+> (handle-less users included). **Verified:** typecheck ✅ · lint ✅ · build ✅ (route registered)
+> · `npm run test:all` → 318/318 vitest ✅ · E2E ✅ (new "admin user detail opens in-shell" test
+> asserts no `/p/` bounce, sidebar present, back returns to directory, actions reachable —
+> desktop + mobile-360). One deviation from the outline below (B2 logAccess).
+
+### B1 — Single-user read ✅
 - Add `getAdminUserDetail(userId)` to `lib/admin/users.ts` (reuse the `listUsersQuery` join/shape;
   return the `AdminUserRow` fields + anything detail-only: suspension reason/actor/date, last
   sign-in, 2FA state, org link, handle). Returns `null` → `notFound()`.
 
-### B2 — Detail page
-- `app/[locale]/(admin)/admin/users/[id]/page.tsx`, rendered via `<DashboardMasthead>` (so it sits
-  in the persistent admin frame from Part A). Sections:
-  - Identity header (name, @handle, email, role pill, status).
-  - Status & moderation: current status, suspension reason/when/by; **reuse `UserRowActions`**
-    (suspend / restore / reset-2FA / erase — already wired to `lib/admin/moderation` +
-    `lib/auth/two-factor`).
-  - Context: organisation (for employers), join date, verification snapshot where relevant.
-  - **Back affordance:** a "← Back to user directory" link to `/admin/users` (preserve the
-    directory's active filters via the referring query when feasible).
-  - Secondary action: "View public profile ↗" → `/p/[handle]` (opens the public view explicitly,
-    not as the default destination).
-- POPIA: this is an admin PII surface — wrap the read in `logAccess()` per the audit rule; no
-  raw documents/contact beyond what admin moderation already exposes.
+### B2 — Detail page ✅
+- `app/[locale]/(admin)/admin/users/[id]/page.tsx`, rendered via `<DashboardMasthead>` (sits in the
+  persistent admin frame from Part A). Identity header (name, @handle, email, role pill, status);
+  status & moderation card reusing `UserRowActions` (suspend / restore / reset-2FA / erase);
+  context (org, profession/city, email-verified, 2FA, joined); "← Back to user directory"; "View
+  public profile ↗" as the masthead secondary action when the user has a handle.
+- **Deviation from the outline (logAccess):** the plan said to wrap the read in `logAccess()`. On
+  inspection the directory list (`listUsersQuery`) does **not** log reads, and the detail view
+  surfaces the *same* account data the list already shows (plus a 2FA-enabled bool + suspension
+  when/by — no new sensitive PII). Adding a one-off audit *kind* just for the detail view would be
+  inconsistent (logged detail-views but not list-views of the same data) and there's no existing
+  `admin.user.view` kind. **Decision:** no new audit kind for the view; the moderation *actions*
+  keep logging via their own kinds. Comprehensive admin-read auditing (list + detail) is a separate
+  cross-cutting follow-up if POPIA oversight wants it — noted, not built here.
 
-### B3 — Re-point the directory
-- In `admin/users/page.tsx`, change the user name links (desktop row + mobile card) from
-  `/p/${handle}` → `/admin/users/${id}`. Keep handle-less users (orgs) linking to the detail page
-  by id too. The public-profile link moves to the detail page as the secondary action (B2).
+### B3 — Re-point the directory ✅
+- `admin/users/page.tsx`: desktop row + mobile card name links now go to `/admin/users/${id}`
+  (handle-less users included). The public-profile link moved to the detail page (B2).
 
-### B4 — Tests
-- E2E: from `/admin/users`, click a user → lands on `/admin/users/[id]` **inside the shell**
-  (sidebar still visible), the back link returns to the directory, and the moderation actions are
-  present. Add to `role-arcs.spec.ts` or a new `admin-users.spec.ts`.
+### B4 — Tests ✅
+- E2E added to `role-arcs.spec.ts` ("admin user detail opens in-shell"): from `/admin/users`,
+  clicking a user lands on `/admin/users/[id]` **inside the shell** (nav still visible, asserts it
+  did **not** go to `/p/`), the back link returns to the directory, and the moderation actions are
+  present — desktop + mobile-360.
 
 ---
 
-## PART C — Public profile hang (open question, investigate)
+## PART C — Public profile "hang" — ✅ RESOLVED (not a bug) 2026-06-14
 
-Observed on the dev server: `/p/patricio-manuel-2` stuck on the `(public)` loading skeleton after
-an admin clicked through. The page (`app/[locale]/(public)/p/[handle]/page.tsx`) is independent of
-the Part A refactor (it uses `SiteHeader` + `dataProvider` + `getSessionUser`/`getMyProfile`/
-`getSetting`), and the production build compiles it fine — so this is **not** caused by the layout
-change. Hypotheses to rule out, in order:
+Observed on the dev server: `/p/patricio-manuel-2` appeared stuck on the `(public)` loading
+skeleton after an admin clicked through. **Probed and cleared:** `curl http://localhost:3000/p/patricio-manuel-2`
+(public viewer path) returned **HTTP 200 with a full 179 KB render** — the real page, not the
+skeleton — in ~6 s on a cold hit (baseline `/` was ~3.4 s the same way). That is first-hit
+Turbopack **compilation** time, amplified by a broad recompile right after the 24-file Part-A
+refactor and the dev server being mid-restart; it is **not** a server-side stall.
 
-1. Dev-server artifact — stale Turbopack/HMR state after the multi-file refactor (a `dev` restart
-   clears it). Most likely; confirm first.
-2. A hanging server `await` in the profile render path (one of `dataProvider.getProfile`,
-   `getSessionUser`, `getMyProfile`, `getSetting`) against the dev Neon DB.
-3. Data-specific: something about that particular handle/profile.
+Confirmed not caused by the layout change: the page
+(`app/[locale]/(public)/p/[handle]/page.tsx`) is independent of Part A (it uses `SiteHeader` +
+`dataProvider` + `getSessionUser`/`getMyProfile`/`getSetting`), the production build compiles it,
+and the profile E2E paths pass. **In production there is no per-request compile step, so it serves
+immediately.** If it recurs in dev after a large change, restart `npm run dev` to clear stale
+Turbopack/HMR state. No code change required.
 
-**Probe:** `curl -m 20 http://localhost:3000/p/patricio-manuel-2` (public viewer path) — returns
-promptly ⇒ client/session/dev-HMR; hangs ⇒ a real server-side stall to trace. If real, it affects
-public + employer profile views too and is **higher priority than B** because it's user-facing on
-the public site. (Part B reduces the admin's *exposure* to it but doesn't fix the underlying page.)
+Part B still proceeds — it removes the admin's bounce to the public profile entirely (a UX win
+independent of this finding).
 
 ---
 
