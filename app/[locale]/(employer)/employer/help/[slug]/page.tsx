@@ -16,7 +16,7 @@
 import { setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { Link } from "@/i18n/navigation";
-import { DashboardShell } from "@/components/layout/DashboardShell";
+import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
 import { EMPLOYER_NAV, MOCK_EMPLOYER } from "@/components/layout/employerNav";
 import { verifyEmployer } from "@/lib/auth/dal";
 import {
@@ -56,7 +56,7 @@ export default async function EmployerHelpArticlePage({
   const Body = article.Article;
 
   return (
-    <DashboardShell
+    <DashboardMasthead
       role="employer"
       workspaceLabel={session.orgName ?? "Your organisation"}
       workspaceEyebrow="Employer · workspace"
@@ -136,6 +136,6 @@ export default async function EmployerHelpArticlePage({
         </section>
         )}
       </div>
-    </DashboardShell>
+    </DashboardMasthead>
   );
 }

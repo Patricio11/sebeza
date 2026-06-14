@@ -1,5 +1,5 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
-import { DashboardShell } from "@/components/layout/DashboardShell";
+import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
 import { EMPLOYER_NAV } from "@/components/layout/employerNav";
 import { OrgVerificationBanner } from "@/components/layout/OrgVerificationBanner";
 import { Button } from "@/components/ui/Button";
@@ -37,7 +37,7 @@ export default async function TeamPage({
   const tOuter = await getTranslations("employerDash");
 
   return (
-    <DashboardShell
+    <DashboardMasthead
       role="employer"
       workspaceLabel={session.orgName ?? "Your organisation"}
       workspaceEyebrow="Employer · workspace"
@@ -173,6 +173,6 @@ export default async function TeamPage({
         Every member&apos;s access to candidate PII is audit-logged separately.
         Suspend a member to immediately revoke their reveal capabilities.
       </p>
-    </DashboardShell>
+    </DashboardMasthead>
   );
 }

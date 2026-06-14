@@ -1,6 +1,6 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { eq, and } from "drizzle-orm";
-import { DashboardShell } from "@/components/layout/DashboardShell";
+import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
 import { EMPLOYER_NAV } from "@/components/layout/employerNav";
 import { OrgVerificationBanner } from "@/components/layout/OrgVerificationBanner";
 import { TextField } from "@/components/ui/FormField";
@@ -58,7 +58,7 @@ export default async function EmployerAccountPage({
   ];
 
   return (
-    <DashboardShell
+    <DashboardMasthead
       role="employer"
       workspaceLabel={session.orgName ?? "Your organisation"}
       workspaceEyebrow="Employer · workspace"
@@ -149,6 +149,6 @@ export default async function EmployerAccountPage({
           </ul>
         </section>
       </div>
-    </DashboardShell>
+    </DashboardMasthead>
   );
 }

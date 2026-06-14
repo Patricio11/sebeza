@@ -16,7 +16,7 @@
 import { setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { Link } from "@/i18n/navigation";
-import { DashboardShell } from "@/components/layout/DashboardShell";
+import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
 import { EMPLOYER_NAV, MOCK_EMPLOYER } from "@/components/layout/employerNav";
 import { Avatar } from "@/components/ui/Avatar";
 import { verifyEmployer } from "@/lib/auth/dal";
@@ -78,7 +78,7 @@ export default async function EmployeeDetailPage({
   const canEdit = canEditVacancies(role);
 
   return (
-    <DashboardShell
+    <DashboardMasthead
       role="employer"
       workspaceLabel={session.orgName ?? "Your organisation"}
       workspaceEyebrow="Employer · workspace"
@@ -152,7 +152,7 @@ export default async function EmployeeDetailPage({
         thresholded at k ≥ 10, the same disclosure floor every other
         national surface respects.
       </p>
-    </DashboardShell>
+    </DashboardMasthead>
   );
 }
 

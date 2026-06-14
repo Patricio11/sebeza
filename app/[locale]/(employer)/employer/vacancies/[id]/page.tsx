@@ -19,7 +19,7 @@
 import { setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { Link } from "@/i18n/navigation";
-import { DashboardShell } from "@/components/layout/DashboardShell";
+import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
 import { EMPLOYER_NAV, MOCK_EMPLOYER } from "@/components/layout/employerNav";
 import { Button } from "@/components/ui/Button";
 import { verifyEmployer } from "@/lib/auth/dal";
@@ -118,7 +118,7 @@ export default async function VacancyDetailPage({
   };
 
   return (
-    <DashboardShell
+    <DashboardMasthead
       role="employer"
       workspaceLabel={session.orgName ?? "Your organisation"}
       workspaceEyebrow="Employer · workspace"
@@ -324,7 +324,7 @@ export default async function VacancyDetailPage({
         <strong>decline-with-reason</strong> response live on the same vacancy
         in 9.8.2 + 9.8.4 + 9.8.5. Coming next.
       </p>
-    </DashboardShell>
+    </DashboardMasthead>
   );
 }
 

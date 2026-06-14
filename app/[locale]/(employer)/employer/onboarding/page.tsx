@@ -28,7 +28,7 @@
 import { setRequestLocale } from "next-intl/server";
 import { redirect } from "next/navigation";
 import { Link } from "@/i18n/navigation";
-import { DashboardShell } from "@/components/layout/DashboardShell";
+import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
 import { EMPLOYER_NAV } from "@/components/layout/employerNav";
 import { verifyRole } from "@/lib/auth/dal";
 import { getMyOrgVettingState } from "@/lib/employer/vetting";
@@ -327,7 +327,7 @@ function Shell({
   children: React.ReactNode;
 }) {
   return (
-    <DashboardShell
+    <DashboardMasthead
       role="employer"
       workspaceLabel={orgName ?? "Your organisation"}
       workspaceEyebrow="Employer · workspace"
@@ -346,6 +346,6 @@ function Shell({
          everything you upload is server-side stored, audit-logged, and
         visible only to the Sebenza admin team during review.
       </p>
-    </DashboardShell>
+    </DashboardMasthead>
   );
 }

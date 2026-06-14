@@ -14,7 +14,7 @@
 
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
-import { DashboardShell } from "@/components/layout/DashboardShell";
+import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
 import { EMPLOYER_NAV } from "@/components/layout/employerNav";
 import { OrgVerificationBanner } from "@/components/layout/OrgVerificationBanner";
 import { Button } from "@/components/ui/Button";
@@ -43,7 +43,7 @@ export default async function OrganisationPage({
   const isVerified = verification === "verified";
 
   return (
-    <DashboardShell
+    <DashboardMasthead
       role="employer"
       workspaceLabel={orgName}
       workspaceEyebrow="Employer · workspace"
@@ -142,7 +142,7 @@ export default async function OrganisationPage({
           </div>
         </aside>
       </div>
-    </DashboardShell>
+    </DashboardMasthead>
   );
 }
 

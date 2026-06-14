@@ -1,7 +1,7 @@
 import { setRequestLocale } from "next-intl/server";
 import { redirect, notFound } from "next/navigation";
 import { and, eq, sql, desc } from "drizzle-orm";
-import { DashboardShell } from "@/components/layout/DashboardShell";
+import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
 import {
   EMPLOYER_NAV,
   MOCK_EMPLOYER,
@@ -205,7 +205,7 @@ export default async function EmployerDossierPage({
   // ── Render ───────────────────────────────────────────────────────────────
 
   return (
-    <DashboardShell
+    <DashboardMasthead
       role="employer"
       workspaceLabel={session.orgName ?? "Your organisation"}
       workspaceEyebrow="Employer · workspace"
@@ -491,6 +491,6 @@ export default async function EmployerDossierPage({
           </div>
         </aside>
       </div>
-    </DashboardShell>
+    </DashboardMasthead>
   );
 }

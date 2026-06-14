@@ -1,5 +1,5 @@
 import { setRequestLocale } from "next-intl/server";
-import { DashboardShell } from "@/components/layout/DashboardShell";
+import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
 import { EMPLOYER_NAV } from "@/components/layout/employerNav";
 import { verifyEmployer } from "@/lib/auth/dal";
 import { listForUser } from "@/lib/notifications/query";
@@ -23,7 +23,7 @@ export default async function EmployerNotificationsPage({
   const items = hasMore ? probe.slice(0, PAGE) : probe;
 
   return (
-    <DashboardShell
+    <DashboardMasthead
       role="employer"
       workspaceLabel={session.orgName ?? "Your organisation"}
       workspaceEyebrow="Employer · workspace"
@@ -43,6 +43,6 @@ export default async function EmployerNotificationsPage({
           ctaLabel: "Search talent",
         }}
       />
-    </DashboardShell>
+    </DashboardMasthead>
   );
 }

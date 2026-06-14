@@ -25,7 +25,7 @@ import { setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { Link } from "@/i18n/navigation";
 import { inArray } from "drizzle-orm";
-import { DashboardShell } from "@/components/layout/DashboardShell";
+import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
 import { EMPLOYER_NAV, MOCK_EMPLOYER } from "@/components/layout/employerNav";
 import { verifyEmployer } from "@/lib/auth/dal";
 import {
@@ -127,7 +127,7 @@ export default async function VacancyMatchPage({
   const nfmt = new Intl.NumberFormat(locale);
 
   return (
-    <DashboardShell
+    <DashboardMasthead
       role="employer"
       workspaceLabel={session.orgName ?? "Your organisation"}
       workspaceEyebrow="Employer · workspace"
@@ -322,7 +322,7 @@ export default async function VacancyMatchPage({
       {/* Hidden session ref to silence the unused-var lint when this
           page later wires per-action audit-log calls. */}
       <span className="sr-only">Vacancy match · {session.id}</span>
-    </DashboardShell>
+    </DashboardMasthead>
   );
 }
 

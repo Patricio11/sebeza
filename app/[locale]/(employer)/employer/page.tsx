@@ -1,7 +1,7 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { and, desc, eq, sql } from "drizzle-orm";
 import { Link } from "@/i18n/navigation";
-import { DashboardShell } from "@/components/layout/DashboardShell";
+import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
 import { EMPLOYER_NAV, MOCK_EMPLOYER } from "@/components/layout/employerNav";
 import { OrgVerificationBanner } from "@/components/layout/OrgVerificationBanner";
 import { TalentRosterItem } from "@/components/ui/TalentRosterItem";
@@ -115,7 +115,7 @@ export default async function EmployerOverviewPage({
     : [];
 
   return (
-    <DashboardShell
+    <DashboardMasthead
       role="employer"
       workspaceLabel={session.orgName ?? "Your organisation"}
       workspaceEyebrow="Employer · workspace"
@@ -289,7 +289,7 @@ export default async function EmployerOverviewPage({
           body="Submit for verification to unlock contact reveal."
         />
       </section>
-    </DashboardShell>
+    </DashboardMasthead>
   );
 }
 

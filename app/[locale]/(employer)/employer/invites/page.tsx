@@ -17,7 +17,7 @@
 
 import { setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
-import { DashboardShell } from "@/components/layout/DashboardShell";
+import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
 import { EMPLOYER_NAV, MOCK_EMPLOYER } from "@/components/layout/employerNav";
 import { verifyOrgVerified } from "@/lib/auth/dal";
 import { listOrgInvitations, type InviteListRow } from "@/lib/employer/seeker-invitations";
@@ -63,7 +63,7 @@ export default async function EmployerInvitesPage({
   }
 
   return (
-    <DashboardShell
+    <DashboardMasthead
       role="employer"
       workspaceLabel={session.orgName ?? MOCK_EMPLOYER.orgName}
       workspaceEyebrow={session.orgIndustry ?? MOCK_EMPLOYER.industry}
@@ -130,7 +130,7 @@ export default async function EmployerInvitesPage({
           </Section>
         )}
       </div>
-    </DashboardShell>
+    </DashboardMasthead>
   );
 }
 

@@ -19,7 +19,7 @@
  */
 
 import { setRequestLocale } from "next-intl/server";
-import { DashboardShell } from "@/components/layout/DashboardShell";
+import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
 import { EMPLOYER_NAV, MOCK_EMPLOYER } from "@/components/layout/employerNav";
 import { OrgVerificationBanner } from "@/components/layout/OrgVerificationBanner";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -102,7 +102,7 @@ export default async function EmployeesListPage({
   const dueCount = rows.filter((r) => r.checkInDue).length;
 
   return (
-    <DashboardShell
+    <DashboardMasthead
       role="employer"
       workspaceLabel={session.orgName ?? "Your organisation"}
       workspaceEyebrow="Employer · workspace"
@@ -240,7 +240,7 @@ export default async function EmployeesListPage({
         {" "}once Tier 3 of this phase ships  the per-employee detail
         never leaves your workspace.
       </p>
-    </DashboardShell>
+    </DashboardMasthead>
   );
 }
 

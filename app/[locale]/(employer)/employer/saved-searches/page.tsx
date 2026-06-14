@@ -1,5 +1,5 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
-import { DashboardShell } from "@/components/layout/DashboardShell";
+import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
 import { EMPLOYER_NAV, MOCK_EMPLOYER } from "@/components/layout/employerNav";
 import { OrgVerificationBanner } from "@/components/layout/OrgVerificationBanner";
 import { verifyEmployer } from "@/lib/auth/dal";
@@ -20,7 +20,7 @@ export default async function SavedSearchesPage({
   const initial = await loadSavedSearches();
 
   return (
-    <DashboardShell
+    <DashboardMasthead
       role="employer"
       workspaceLabel={session.orgName ?? "Your organisation"}
       workspaceEyebrow="Employer · workspace"
@@ -39,6 +39,6 @@ export default async function SavedSearchesPage({
       }
     >
       <SavedSearchesManager initial={initial} locale={locale} />
-    </DashboardShell>
+    </DashboardMasthead>
   );
 }
