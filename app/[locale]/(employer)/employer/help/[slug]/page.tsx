@@ -17,7 +17,6 @@ import { setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { Link } from "@/i18n/navigation";
 import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
-import { EMPLOYER_NAV, MOCK_EMPLOYER } from "@/components/layout/employerNav";
 import { verifyEmployer } from "@/lib/auth/dal";
 import {
   findArticleBySlug,
@@ -35,7 +34,7 @@ export default async function EmployerHelpArticlePage({
 }) {
   const { locale, slug } = await params;
   setRequestLocale(locale);
-  const session = await verifyEmployer();
+  await verifyEmployer();
 
   const article = findArticleBySlug(slug);
   if (!article) notFound();
@@ -58,10 +57,6 @@ export default async function EmployerHelpArticlePage({
   return (
     <DashboardMasthead
       role="employer"
-      workspaceLabel={session.orgName ?? "Your organisation"}
-      workspaceEyebrow="Employer · workspace"
-      nav={EMPLOYER_NAV}
-      activeKey="help"
       pageEyebrow={categoryLabel}
       pageTitle={article.meta.title}
       pageSubtitle={article.meta.shortDescription}

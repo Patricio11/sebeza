@@ -1,7 +1,6 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
-import { SEEKER_NAV } from "@/components/layout/seekerNav";
 import { ConsentRow } from "@/components/feature/auth/ConsentRow";
 import { getMyProfile } from "@/lib/profile/me";
 import { CONSENT_PURPOSES, type ConsentState } from "@/lib/consent";
@@ -116,10 +115,6 @@ export default async function PrivacyPage({
   return (
     <DashboardMasthead
       role="seeker"
-      workspaceLabel={me.displayName}
-      workspaceEyebrow="Job seeker · workspace"
-      nav={SEEKER_NAV}
-      activeKey="privacy"
       pageEyebrow="POPIA"
       pageTitle={t("title")}
       pageSubtitle={t("subtitle")}

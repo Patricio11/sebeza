@@ -17,7 +17,6 @@ import { notFound } from "next/navigation";
 import { Link } from "@/i18n/navigation";
 
 import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
-import { SEEKER_NAV } from "@/components/layout/seekerNav";
 import { verifyRole } from "@/lib/auth/dal";
 import { getMyInvitation } from "@/lib/seeker/invitations";
 import { InvitationResponseIsland } from "@/components/feature/seeker/invitations/InvitationResponseIsland";
@@ -50,7 +49,7 @@ export default async function SeekerInvitationDetailPage({
 }) {
   const { locale, id } = await params;
   setRequestLocale(locale);
-  const user = await verifyRole("seeker");
+  await verifyRole("seeker");
 
   const inv = await getMyInvitation(id);
   if (!inv) notFound();
@@ -86,10 +85,6 @@ export default async function SeekerInvitationDetailPage({
   return (
     <DashboardMasthead
       role="seeker"
-      workspaceLabel={user.name}
-      workspaceEyebrow="Job seeker · workspace"
-      nav={SEEKER_NAV}
-      activeKey="invitations"
       pageEyebrow="Invitation"
       pageTitle={inv.vacancyTitle}
       pageSubtitle={`${inv.orgName}  ${professionLabel}${inv.seniority ? `, ${inv.seniority}` : ""}  ${provinceLabel}`}

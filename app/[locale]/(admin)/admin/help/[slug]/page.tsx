@@ -16,7 +16,6 @@ import { setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { Link } from "@/i18n/navigation";
 import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
-import { ADMIN_NAV } from "@/components/layout/adminNav";
 import { verifyAdmin } from "@/lib/auth/dal";
 import {
   findArticleBySlug,
@@ -34,7 +33,7 @@ export default async function AdminHelpArticlePage({
 }) {
   const { locale, slug } = await params;
   setRequestLocale(locale);
-  const session = await verifyAdmin();
+  await verifyAdmin();
 
   const article = findArticleBySlug(slug);
   if (!article) notFound();
@@ -53,10 +52,6 @@ export default async function AdminHelpArticlePage({
   return (
     <DashboardMasthead
       role="admin"
-      workspaceLabel={session.name ?? "Admin"}
-      workspaceEyebrow="Administrator · 2FA required"
-      nav={ADMIN_NAV}
-      activeKey="help"
       pageEyebrow={categoryLabel}
       pageTitle={article.meta.title}
       pageSubtitle={article.meta.shortDescription}

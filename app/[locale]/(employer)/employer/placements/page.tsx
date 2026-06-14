@@ -20,7 +20,6 @@
 
 import { setRequestLocale } from "next-intl/server";
 import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
-import { EMPLOYER_NAV, MOCK_EMPLOYER } from "@/components/layout/employerNav";
 import { OrgVerificationBanner } from "@/components/layout/OrgVerificationBanner";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Avatar } from "@/components/ui/Avatar";
@@ -104,10 +103,6 @@ export default async function EmployeesListPage({
   return (
     <DashboardMasthead
       role="employer"
-      workspaceLabel={session.orgName ?? "Your organisation"}
-      workspaceEyebrow="Employer · workspace"
-      nav={EMPLOYER_NAV}
-      activeKey="placements"
       pageEyebrow="Outcomes"
       pageTitle="Employees"
       pageSubtitle="Every Sebenza-confirmed hire your organisation has made, and how that placement is tracking over time. Lifecycle data feeds the platform's retention signal  the harder figure to find anywhere else."

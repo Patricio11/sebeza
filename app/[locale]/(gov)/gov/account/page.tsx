@@ -1,6 +1,5 @@
 import { setRequestLocale } from "next-intl/server";
 import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
-import { GOV_NAV } from "@/components/layout/govNav";
 import { SignOutButton } from "@/components/feature/auth/SignOutButton";
 import { TwoFactorAccountPanel } from "@/components/feature/auth/TwoFactorAccountPanel";
 import { verifyGov } from "@/lib/auth/dal";
@@ -20,10 +19,6 @@ export default async function GovAccountPage({
   return (
     <DashboardMasthead
       role="gov"
-      workspaceLabel={me.name}
-      workspaceEyebrow="Government / policy workspace"
-      nav={GOV_NAV}
-      activeKey="account"
       pageEyebrow="Your account"
       pageTitle="Account"
       pageSubtitle="Government / policy workspace session + 2FA. POPIA-grade accounts always use 2FA."

@@ -11,7 +11,6 @@
 import { setRequestLocale } from "next-intl/server";
 import { redirect } from "next/navigation";
 import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
-import { SEEKER_NAV } from "@/components/layout/seekerNav";
 import { getMyProfile } from "@/lib/profile/me";
 import { listMyFollows } from "@/lib/seeker/follows";
 import { FollowEmployerButton } from "@/components/feature/seeker/FollowEmployerButton";
@@ -42,10 +41,6 @@ export default async function FollowingPage({
   return (
     <DashboardMasthead
       role="seeker"
-      workspaceLabel={me.displayName}
-      workspaceEyebrow="Job seeker · workspace"
-      nav={SEEKER_NAV}
-      activeKey="following"
       pageEyebrow="Following"
       pageTitle="Employers you follow"
       pageSubtitle="Private warm-intent list. The employer isn't told. You'll get a quiet bell ping when a followed employer opens a role in your profession + province."

@@ -2,7 +2,6 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 import { eq, desc } from "drizzle-orm";
 import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
-import { SEEKER_NAV } from "@/components/layout/seekerNav";
 import { getMyProfile } from "@/lib/profile/me";
 import { getDb } from "@/db/client";
 import { experiences } from "@/db/schema";
@@ -46,10 +45,6 @@ export default async function ExperiencePage({
   return (
     <DashboardMasthead
       role="seeker"
-      workspaceLabel={me.displayName}
-      workspaceEyebrow="Job seeker · workspace"
-      nav={SEEKER_NAV}
-      activeKey="experience"
       pageEyebrow="Track record"
       pageTitle={t("title")}
       pageSubtitle={t("subtitle")}

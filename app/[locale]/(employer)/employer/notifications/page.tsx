@@ -1,6 +1,5 @@
 import { setRequestLocale } from "next-intl/server";
 import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
-import { EMPLOYER_NAV } from "@/components/layout/employerNav";
 import { verifyEmployer } from "@/lib/auth/dal";
 import { listForUser } from "@/lib/notifications/query";
 import { NotificationsList } from "@/components/feature/notifications/NotificationsList";
@@ -16,7 +15,7 @@ export default async function EmployerNotificationsPage({
   // context for the workspaceLabel. verifyRole gave us the user but
   // no org name; the dashboard shell needs the real org's name from
   // the DB, not the static MOCK_EMPLOYER fallback.
-  const session = await verifyEmployer();
+  await verifyEmployer();
   const PAGE = 20;
   const probe = await listForUser({ limit: PAGE + 1 });
   const hasMore = probe.length > PAGE;
@@ -25,10 +24,6 @@ export default async function EmployerNotificationsPage({
   return (
     <DashboardMasthead
       role="employer"
-      workspaceLabel={session.orgName ?? "Your organisation"}
-      workspaceEyebrow="Employer · workspace"
-      nav={EMPLOYER_NAV}
-      activeKey="notifications"
       pageEyebrow="Inbox"
       pageTitle="Notifications"
       pageSubtitle="Verification decisions, new matches on saved searches, and org-wide events for every member."

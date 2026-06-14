@@ -16,7 +16,6 @@
 import { setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
-import { ADMIN_NAV } from "@/components/layout/adminNav";
 import { verifyAdmin } from "@/lib/auth/dal";
 import {
   ADMIN_HELP_ARTICLES,
@@ -37,17 +36,13 @@ export default async function AdminHelpIndexPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const session = await verifyAdmin();
+  await verifyAdmin();
   const { q } = await searchParams;
   const initialQuery = q?.trim() ?? "";
 
   return (
     <DashboardMasthead
       role="admin"
-      workspaceLabel={session.name ?? "Admin"}
-      workspaceEyebrow="Administrator · 2FA required"
-      nav={ADMIN_NAV}
-      activeKey="help"
       pageEyebrow="Documentation"
       pageTitle="Admin help center"
       pageSubtitle="Everything an admin can do on the platform  laid out by category, searchable, with deep-links back to the console surfaces they cover. Internal-only; never reachable from public routes."

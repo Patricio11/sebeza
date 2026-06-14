@@ -1,7 +1,6 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
-import { ADMIN_NAV } from "@/components/layout/adminNav";
 import { verifyAdmin } from "@/lib/auth/dal";
 import { listUsersQuery, type AdminUserRow } from "@/lib/admin/users";
 import { CustomSelect } from "@/components/ui/CustomSelect";
@@ -18,7 +17,7 @@ export default async function UsersPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const session = await verifyAdmin();
+  await verifyAdmin();
   const t = await getTranslations("adminDash.users");
 
   const sp = await searchParams;
@@ -37,10 +36,6 @@ export default async function UsersPage({
   return (
     <DashboardMasthead
       role="admin"
-      workspaceLabel={session.name ?? "Admin"}
-      workspaceEyebrow="Administrator · 2FA required"
-      nav={ADMIN_NAV}
-      activeKey="users"
       pageEyebrow="Account directory"
       pageTitle={t("title")}
       pageSubtitle={t("subtitle")}

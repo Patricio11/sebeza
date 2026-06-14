@@ -14,17 +14,6 @@ interface Props {
   /** Optional persistent banner above the masthead (e.g. org-unverified). */
   banner?: React.ReactNode;
   children: React.ReactNode;
-
-  // ── Compatibility shims (accepted but ignored) ───────────────────────────
-  // These now live on the persistent <DashboardFrame> (route-group layout).
-  // Kept here so the page migration off the old all-in-one shell was a rename
-  // only — every migrated page still passes them harmlessly. Stripping them
-  // from each page + this interface is optional cosmetic cleanup (see
-  // docs/ADMIN_SHELL_UX_PLAN.md, Part A5).
-  workspaceLabel?: string;
-  workspaceEyebrow?: string;
-  nav?: unknown;
-  activeKey?: string;
 }
 
 /**

@@ -31,7 +31,6 @@
 import { setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
-import { GOV_NAV } from "@/components/layout/govNav";
 import { verifyGov } from "@/lib/auth/dal";
 import { justificationIndexQuery } from "@/db/queries/justification";
 import { PROVINCES } from "@/lib/mock/taxonomy";
@@ -55,7 +54,7 @@ export default async function GovShortagePage({
   const { locale } = await params;
   const { province: provinceFilterParam } = await searchParams;
   setRequestLocale(locale);
-  const me = await verifyGov();
+  await verifyGov();
 
   // Validate the province param against the taxonomy  no free-text in.
   const provinceFilter = PROVINCES.find(
@@ -78,10 +77,6 @@ export default async function GovShortagePage({
   return (
     <DashboardMasthead
       role="gov"
-      workspaceLabel={me.name}
-      workspaceEyebrow="Government / policy workspace"
-      nav={GOV_NAV}
-      activeKey="shortage"
       pageEyebrow="Policy intelligence"
       pageTitle="Skills-Shortage Justification Index"
       pageSubtitle="One row per profession × province cell. Honest classifier  shortages are training-investment signals; local-supply-available cells are where local-hiring incentive policy can land cleanly. Never a foreigners-vs-locals scoreboard."

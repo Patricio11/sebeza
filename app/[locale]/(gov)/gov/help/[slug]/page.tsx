@@ -16,7 +16,6 @@ import { setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { Link } from "@/i18n/navigation";
 import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
-import { GOV_NAV } from "@/components/layout/govNav";
 import { verifyGov } from "@/lib/auth/dal";
 import {
   findArticleBySlug,
@@ -34,7 +33,7 @@ export default async function GovHelpArticlePage({
 }) {
   const { locale, slug } = await params;
   setRequestLocale(locale);
-  const session = await verifyGov();
+  await verifyGov();
 
   const article = findArticleBySlug(slug);
   if (!article) notFound();
@@ -53,10 +52,6 @@ export default async function GovHelpArticlePage({
   return (
     <DashboardMasthead
       role="gov"
-      workspaceLabel={session.name ?? "Government workspace"}
-      workspaceEyebrow="Government · analyst access"
-      nav={GOV_NAV}
-      activeKey="help"
       pageEyebrow={categoryLabel}
       pageTitle={article.meta.title}
       pageSubtitle={article.meta.shortDescription}

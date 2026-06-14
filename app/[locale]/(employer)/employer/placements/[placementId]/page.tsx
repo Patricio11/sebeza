@@ -17,7 +17,6 @@ import { setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { Link } from "@/i18n/navigation";
 import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
-import { EMPLOYER_NAV, MOCK_EMPLOYER } from "@/components/layout/employerNav";
 import { Avatar } from "@/components/ui/Avatar";
 import { verifyEmployer } from "@/lib/auth/dal";
 import {
@@ -64,7 +63,7 @@ export default async function EmployeeDetailPage({
 }) {
   const { locale, placementId } = await params;
   setRequestLocale(locale);
-  const session = await verifyEmployer();
+  await verifyEmployer();
 
   const employee = await getEmployee(placementId);
   if (!employee) notFound();
@@ -80,10 +79,6 @@ export default async function EmployeeDetailPage({
   return (
     <DashboardMasthead
       role="employer"
-      workspaceLabel={session.orgName ?? "Your organisation"}
-      workspaceEyebrow="Employer · workspace"
-      nav={EMPLOYER_NAV}
-      activeKey="placements"
       pageEyebrow="Employee"
       pageTitle={employee.displayName}
       pageSubtitle={`${employee.role} · ${employee.city}`}

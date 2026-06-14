@@ -2,10 +2,6 @@ import { setRequestLocale } from "next-intl/server";
 import { redirect, notFound } from "next/navigation";
 import { and, eq, sql, desc } from "drizzle-orm";
 import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
-import {
-  EMPLOYER_NAV,
-  MOCK_EMPLOYER,
-} from "@/components/layout/employerNav";
 import { OrgVerificationBanner } from "@/components/layout/OrgVerificationBanner";
 import { Avatar } from "@/components/ui/Avatar";
 import { StatusChip } from "@/components/ui/StatusChip";
@@ -207,10 +203,6 @@ export default async function EmployerDossierPage({
   return (
     <DashboardMasthead
       role="employer"
-      workspaceLabel={session.orgName ?? "Your organisation"}
-      workspaceEyebrow="Employer · workspace"
-      nav={EMPLOYER_NAV}
-      activeKey="search"
       pageEyebrow="Candidate dossier"
       pageTitle={profile.displayName}
       pageSubtitle={`${profile.profession} · ${profile.city}, ${profile.province}`}

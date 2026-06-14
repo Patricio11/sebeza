@@ -24,7 +24,6 @@ import { setRequestLocale } from "next-intl/server";
 import { notFound, redirect } from "next/navigation";
 import { Link } from "@/i18n/navigation";
 import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
-import { SEEKER_NAV } from "@/components/layout/seekerNav";
 import { verifyRole } from "@/lib/auth/dal";
 import { getMyProfile } from "@/lib/profile/me";
 import {
@@ -81,10 +80,6 @@ export default async function SeekerHelpArticlePage({
   return (
     <DashboardMasthead
       role="seeker"
-      workspaceLabel={me.displayName ?? "Your profile"}
-      workspaceEyebrow="Seeker · workspace"
-      nav={SEEKER_NAV}
-      activeKey="help"
       pageEyebrow={categoryLabel}
       pageTitle={article.meta.title}
       pageSubtitle={article.meta.shortDescription}

@@ -16,7 +16,6 @@
 import { setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
-import { GOV_NAV } from "@/components/layout/govNav";
 import { verifyGov } from "@/lib/auth/dal";
 import { getSetting } from "@/lib/admin/settings";
 import { EmployerLookupForm } from "@/components/feature/gov/EmployerLookupForm";
@@ -32,7 +31,7 @@ export default async function GovEmployerLookupPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const me = await verifyGov();
+  await verifyGov();
 
   const flagOn = await getSetting<boolean>(
     "feature_flag_employer_mix_lookup",
@@ -42,10 +41,6 @@ export default async function GovEmployerLookupPage({
   return (
     <DashboardMasthead
       role="gov"
-      workspaceLabel={me.name}
-      workspaceEyebrow="Government / policy workspace"
-      nav={GOV_NAV}
-      activeKey="employer-lookup"
       pageEyebrow="Regulated · single-employer query"
       pageTitle="Per-employer mix lookup"
       pageSubtitle="One employer at a time. Exact-match input only  no autocomplete, no browse, no leaderboard. Every lookup writes an audit row carrying the stated reason; the oversight log makes the trail itself reviewable."

@@ -9,7 +9,6 @@
 import { setRequestLocale } from "next-intl/server";
 import { redirect } from "next/navigation";
 import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
-import { EMPLOYER_NAV, MOCK_EMPLOYER } from "@/components/layout/employerNav";
 import { verifyEmployer } from "@/lib/auth/dal";
 import {
   createVacancy,
@@ -93,10 +92,6 @@ export default async function NewVacancyPage({
   return (
     <DashboardMasthead
       role="employer"
-      workspaceLabel={session.orgName ?? "Your organisation"}
-      workspaceEyebrow="Employer · workspace"
-      nav={EMPLOYER_NAV}
-      activeKey="vacancies"
       pageEyebrow={session.name ?? "Employer workspace"}
       pageTitle={initial ? "Duplicate vacancy" : "New vacancy"}
       pageSubtitle={pageSubtitle}

@@ -26,7 +26,6 @@ import { notFound } from "next/navigation";
 import { Link } from "@/i18n/navigation";
 import { inArray } from "drizzle-orm";
 import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
-import { EMPLOYER_NAV, MOCK_EMPLOYER } from "@/components/layout/employerNav";
 import { verifyEmployer } from "@/lib/auth/dal";
 import {
   getMyOrgRole,
@@ -129,10 +128,6 @@ export default async function VacancyMatchPage({
   return (
     <DashboardMasthead
       role="employer"
-      workspaceLabel={session.orgName ?? "Your organisation"}
-      workspaceEyebrow="Employer · workspace"
-      nav={EMPLOYER_NAV}
-      activeKey="vacancies"
       pageEyebrow="Find matches"
       pageTitle={vacancy.title}
       pageSubtitle={`${professionLabel}${vacancy.seniority ? ` · ${vacancy.seniority}` : ""} · ${provinceLabel}`}

@@ -18,7 +18,6 @@
 import { setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
-import { EMPLOYER_NAV, MOCK_EMPLOYER } from "@/components/layout/employerNav";
 import { verifyOrgVerified } from "@/lib/auth/dal";
 import { listOrgInvitations, type InviteListRow } from "@/lib/employer/seeker-invitations";
 import { getProfessions } from "@/lib/taxonomy/query";
@@ -43,7 +42,7 @@ export default async function EmployerInvitesPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const session = await verifyOrgVerified();
+  await verifyOrgVerified();
 
   const [groups, professions] = await Promise.all([
     listOrgInvitations(),
@@ -65,10 +64,6 @@ export default async function EmployerInvitesPage({
   return (
     <DashboardMasthead
       role="employer"
-      workspaceLabel={session.orgName ?? MOCK_EMPLOYER.orgName}
-      workspaceEyebrow={session.orgIndustry ?? MOCK_EMPLOYER.industry}
-      nav={EMPLOYER_NAV}
-      activeKey="invites"
       pageEyebrow="Roster building"
       pageTitle="Invites"
       pageSubtitle="Bring known candidates onto Sebenza, one email at a time. They control the signup; you get a clean audit trail."

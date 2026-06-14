@@ -1,6 +1,5 @@
 import { setRequestLocale } from "next-intl/server";
 import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
-import { ADMIN_NAV } from "@/components/layout/adminNav";
 import { verifyAdmin } from "@/lib/auth/dal";
 import { listForUser } from "@/lib/notifications/query";
 import { NotificationsList } from "@/components/feature/notifications/NotificationsList";
@@ -12,7 +11,7 @@ export default async function AdminNotificationsPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const session = await verifyAdmin();
+  await verifyAdmin();
   const PAGE = 20;
   const probe = await listForUser({ limit: PAGE + 1 });
   const hasMore = probe.length > PAGE;
@@ -21,10 +20,6 @@ export default async function AdminNotificationsPage({
   return (
     <DashboardMasthead
       role="admin"
-      workspaceLabel={session.name ?? "Admin"}
-      workspaceEyebrow="Administrator · 2FA required"
-      nav={ADMIN_NAV}
-      activeKey="notifications"
       pageEyebrow="Inbox"
       pageTitle="Notifications"
       pageSubtitle="Profile reports, verification submissions, and other moderation signals."

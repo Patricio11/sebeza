@@ -1,6 +1,5 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
-import { EMPLOYER_NAV, MOCK_EMPLOYER } from "@/components/layout/employerNav";
 import { OrgVerificationBanner } from "@/components/layout/OrgVerificationBanner";
 import { verifyEmployer } from "@/lib/auth/dal";
 import { loadPools } from "@/lib/employer/shortlists";
@@ -22,10 +21,6 @@ export default async function ShortlistsPage({
   return (
     <DashboardMasthead
       role="employer"
-      workspaceLabel={session.orgName ?? "Your organisation"}
-      workspaceEyebrow="Employer · workspace"
-      nav={EMPLOYER_NAV}
-      activeKey="shortlists"
       pageEyebrow="Curated"
       pageTitle={t("title")}
       pageSubtitle={t("subtitle")}

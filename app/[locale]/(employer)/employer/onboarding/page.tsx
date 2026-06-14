@@ -29,7 +29,6 @@ import { setRequestLocale } from "next-intl/server";
 import { redirect } from "next/navigation";
 import { Link } from "@/i18n/navigation";
 import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
-import { EMPLOYER_NAV } from "@/components/layout/employerNav";
 import { verifyRole } from "@/lib/auth/dal";
 import { getMyOrgVettingState } from "@/lib/employer/vetting";
 import { OrgOnboardingForm } from "@/components/feature/employer/OrgOnboardingForm";
@@ -329,10 +328,6 @@ function Shell({
   return (
     <DashboardMasthead
       role="employer"
-      workspaceLabel={orgName ?? "Your organisation"}
-      workspaceEyebrow="Employer · workspace"
-      nav={EMPLOYER_NAV}
-      activeKey="organisation"
       pageEyebrow="Verification"
       pageTitle={title}
       pageSubtitle="Your organisation needs to clear KYC before you can reveal seeker contact details, download documents, or send vacancy invites."

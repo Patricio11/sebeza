@@ -1,7 +1,6 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
-import { SEEKER_NAV } from "@/components/layout/seekerNav";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { getMyProfile } from "@/lib/profile/me";
 import { getSeekerActivity } from "@/lib/profile/activity";
@@ -33,10 +32,6 @@ export default async function ActivityPage({
   return (
     <DashboardMasthead
       role="seeker"
-      workspaceLabel={me.displayName}
-      workspaceEyebrow="Job seeker · workspace"
-      nav={SEEKER_NAV}
-      activeKey="activity"
       pageEyebrow="Audit ledger · your view"
       pageTitle={t("title")}
       pageSubtitle={t("subtitle")}

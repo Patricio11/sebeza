@@ -11,7 +11,6 @@
 import { setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
-import { EMPLOYER_NAV, MOCK_EMPLOYER } from "@/components/layout/employerNav";
 import { verifyEmployer } from "@/lib/auth/dal";
 import {
   EMPLOYER_HELP_ARTICLES,
@@ -32,17 +31,13 @@ export default async function EmployerHelpIndexPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const session = await verifyEmployer();
+  await verifyEmployer();
   const { q } = await searchParams;
   const initialQuery = q?.trim() ?? "";
 
   return (
     <DashboardMasthead
       role="employer"
-      workspaceLabel={session.orgName ?? "Your organisation"}
-      workspaceEyebrow="Employer · workspace"
-      nav={EMPLOYER_NAV}
-      activeKey="help"
       pageEyebrow="Documentation"
       pageTitle="Help center"
       pageSubtitle="Everything you can do as an employer on Sebenza  laid out by category, searchable, with deep-links back to the dashboard surfaces they cover. English only at v1; translations follow."

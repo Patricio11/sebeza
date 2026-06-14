@@ -17,7 +17,6 @@
 
 import { setRequestLocale } from "next-intl/server";
 import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
-import { ADMIN_NAV } from "@/components/layout/adminNav";
 import { Button } from "@/components/ui/Button";
 import { verifyAdmin } from "@/lib/auth/dal";
 import { oversightLogQuery } from "@/lib/gov/oversight-query";
@@ -42,7 +41,7 @@ export default async function OversightPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const session = await verifyAdmin();
+  await verifyAdmin();
 
   const sp = await searchParams;
   const actor = (sp.actor ?? "").slice(0, 200);
@@ -72,10 +71,6 @@ export default async function OversightPage({
   return (
     <DashboardMasthead
       role="admin"
-      workspaceLabel={session.name ?? "Admin"}
-      workspaceEyebrow="Administrator · 2FA required"
-      nav={ADMIN_NAV}
-      activeKey="oversight"
       pageEyebrow="Watch the watchers · regulator-of-the-regulator"
       pageTitle="Sensitive-query oversight log"
       pageSubtitle="Every gov per-employer lookup and every nationality-split analytics export. The audit trail itself is the trust mechanism that makes the gov lens defensible."

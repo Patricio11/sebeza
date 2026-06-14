@@ -1,7 +1,6 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { eq, and } from "drizzle-orm";
 import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
-import { EMPLOYER_NAV } from "@/components/layout/employerNav";
 import { OrgVerificationBanner } from "@/components/layout/OrgVerificationBanner";
 import { TextField } from "@/components/ui/FormField";
 import { Button } from "@/components/ui/Button";
@@ -60,10 +59,6 @@ export default async function EmployerAccountPage({
   return (
     <DashboardMasthead
       role="employer"
-      workspaceLabel={session.orgName ?? "Your organisation"}
-      workspaceEyebrow="Employer · workspace"
-      nav={EMPLOYER_NAV}
-      activeKey="account"
       pageEyebrow="Your account"
       pageTitle={t("title")}
       pageSubtitle={t("subtitle")}

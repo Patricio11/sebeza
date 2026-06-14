@@ -18,7 +18,6 @@
 import { setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
-import { GOV_NAV } from "@/components/layout/govNav";
 import { verifyGov } from "@/lib/auth/dal";
 import { justificationIndexQuery } from "@/db/queries/justification";
 import { PROVINCES } from "@/lib/mock/taxonomy";
@@ -38,7 +37,7 @@ export default async function GovOpportunityPage({
   const { locale } = await params;
   const { province: provinceParam } = await searchParams;
   setRequestLocale(locale);
-  const me = await verifyGov();
+  await verifyGov();
 
   const provinceFilter = PROVINCES.find(
     (p) => p.label === provinceParam || p.slug === provinceParam,
@@ -61,10 +60,6 @@ export default async function GovOpportunityPage({
   return (
     <DashboardMasthead
       role="gov"
-      workspaceLabel={me.name}
-      workspaceEyebrow="Government / policy workspace"
-      nav={GOV_NAV}
-      activeKey="opportunity"
       pageEyebrow="Policy intelligence"
       pageTitle="Local-Hiring Opportunity Map"
       pageSubtitle="Where SA-citizen talent can plausibly meet employer demand. The cells highlighted here are the ones where local-hiring incentive policy lands without harming employers who genuinely can't find local talent."

@@ -14,7 +14,6 @@
 import { setRequestLocale } from "next-intl/server";
 import { asc } from "drizzle-orm";
 import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
-import { ADMIN_NAV } from "@/components/layout/adminNav";
 import { verifyAdmin } from "@/lib/auth/dal";
 import { getDb } from "@/db/client";
 import * as schema from "@/db/schema";
@@ -30,7 +29,7 @@ export default async function AdminLlmPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const session = await verifyAdmin();
+  await verifyAdmin();
 
   const db = getDb();
   const [providers, killSwitchOn] = await Promise.all([
@@ -74,10 +73,6 @@ export default async function AdminLlmPage({
   return (
     <DashboardMasthead
       role="admin"
-      workspaceLabel={session.name ?? "Admin"}
-      workspaceEyebrow="Administrator · 2FA required"
-      nav={ADMIN_NAV}
-      activeKey="llm"
       pageEyebrow="Editorial pipeline"
       pageTitle="LLM providers"
       pageSubtitle={

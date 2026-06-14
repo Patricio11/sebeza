@@ -15,7 +15,6 @@
 import { setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
-import { GOV_NAV } from "@/components/layout/govNav";
 import { verifyGov } from "@/lib/auth/dal";
 import {
   demandVsCurriculumQuery,
@@ -39,7 +38,7 @@ export default async function GovCurriculumPage({
   const { locale } = await params;
   const { province: provinceParam } = await searchParams;
   setRequestLocale(locale);
-  const me = await verifyGov();
+  await verifyGov();
 
   const provinceFilter = PROVINCES.find(
     (p) => p.slug === provinceParam || p.label === provinceParam,
@@ -60,10 +59,6 @@ export default async function GovCurriculumPage({
   return (
     <DashboardMasthead
       role="gov"
-      workspaceLabel={me.name}
-      workspaceEyebrow="Government / policy workspace"
-      nav={GOV_NAV}
-      activeKey="curriculum"
       pageEyebrow="Policy intelligence"
       pageTitle="Curriculum vs demand"
       pageSubtitle="What are SA programmes producing vs what the labour market is actually searching for? Suppressed at k = 10. Reads alongside the Justification Index + the stall-reasons card."

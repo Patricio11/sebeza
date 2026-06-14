@@ -13,7 +13,6 @@
 import { setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
-import { EMPLOYER_NAV, MOCK_EMPLOYER } from "@/components/layout/employerNav";
 import { verifyEmployer } from "@/lib/auth/dal";
 import {
   listMyVacancies,
@@ -61,10 +60,6 @@ export default async function VacanciesListPage({
   return (
     <DashboardMasthead
       role="employer"
-      workspaceLabel={session.orgName ?? "Your organisation"}
-      workspaceEyebrow="Employer · workspace"
-      nav={EMPLOYER_NAV}
-      activeKey="vacancies"
       pageEyebrow={session.name ?? "Employer workspace"}
       pageTitle="Vacancies"
       pageSubtitle="Private to your organisation. Vacancies are reverse-matching specifications  invite specific people, capture their accept / decline-with-reason, log the placement when filled. Never a public posting."

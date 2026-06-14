@@ -1,7 +1,6 @@
 import { setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
-import { GOV_NAV } from "@/components/layout/govNav";
 import { verifyGov } from "@/lib/auth/dal";
 import { lmiWithTrend } from "@/lib/analytics/lmi";
 import { skillsGapQuery, freshnessBreakdownQuery } from "@/db/queries/analytics";
@@ -24,7 +23,7 @@ export default async function GovOverviewPage({
   const { locale } = await params;
   const { split } = await searchParams;
   setRequestLocale(locale);
-  const me = await verifyGov();
+  await verifyGov();
 
   const showNationalitySplit = split === "nationality";
 
@@ -52,10 +51,6 @@ export default async function GovOverviewPage({
   return (
     <DashboardMasthead
       role="gov"
-      workspaceLabel={me.name}
-      workspaceEyebrow="Government / policy workspace"
-      nav={GOV_NAV}
-      activeKey="overview"
       pageEyebrow="National signal"
       pageTitle="Sebenza Labour Market Index"
       pageSubtitle="One number, three components. Updated nightly. Not an official Stats SA statistic  opinionated index, formula published."

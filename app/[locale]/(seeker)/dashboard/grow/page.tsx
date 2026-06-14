@@ -2,7 +2,6 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 import { Link } from "@/i18n/navigation";
 import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
-import { SEEKER_NAV } from "@/components/layout/seekerNav";
 import { Button } from "@/components/ui/Button";
 import { getMyProfile } from "@/lib/profile/me";
 import { getCompassForProfile } from "@/db/queries/career-compass";
@@ -189,10 +188,6 @@ export default async function CareerCompassPage({
   return (
     <DashboardMasthead
       role="seeker"
-      workspaceLabel={me.displayName}
-      workspaceEyebrow="Job seeker · workspace"
-      nav={SEEKER_NAV}
-      activeKey="grow"
       pageEyebrow={t("eyebrow")}
       pageTitle={t("title")}
       pageSubtitle={t("subtitle")}

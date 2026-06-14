@@ -15,7 +15,6 @@
 import { setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
-import { GOV_NAV } from "@/components/layout/govNav";
 import { verifyGov } from "@/lib/auth/dal";
 import {
   GOV_HELP_ARTICLES,
@@ -36,17 +35,13 @@ export default async function GovHelpIndexPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const session = await verifyGov();
+  await verifyGov();
   const { q } = await searchParams;
   const initialQuery = q?.trim() ?? "";
 
   return (
     <DashboardMasthead
       role="gov"
-      workspaceLabel={session.name ?? "Government workspace"}
-      workspaceEyebrow="Government · analyst access"
-      nav={GOV_NAV}
-      activeKey="help"
       pageEyebrow="Documentation"
       pageTitle="Government help center"
       pageSubtitle="Everything a gov user can do on Sebenza  laid out by category, searchable, with deep-links back to the analytics surfaces they cover. Aggregate-only data; no individual seeker PII anywhere on this platform for gov users."

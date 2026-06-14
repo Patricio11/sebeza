@@ -2,7 +2,6 @@ import { setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { Link } from "@/i18n/navigation";
 import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
-import { GOV_NAV } from "@/components/layout/govNav";
 import { verifyGov } from "@/lib/auth/dal";
 import { PROVINCES } from "@/lib/mock/taxonomy";
 import { skillsGapQuery, supplyHeatmapQuery } from "@/db/queries/analytics";
@@ -21,7 +20,7 @@ export default async function GovProvinceDeepDive({
   const { locale, slug } = await params;
   const { split } = await searchParams;
   setRequestLocale(locale);
-  const me = await verifyGov();
+  await verifyGov();
 
   const province = PROVINCES.find((p) => p.slug === slug);
   if (!province) notFound();
@@ -48,10 +47,6 @@ export default async function GovProvinceDeepDive({
   return (
     <DashboardMasthead
       role="gov"
-      workspaceLabel={me.name}
-      workspaceEyebrow="Government / policy workspace"
-      nav={GOV_NAV}
-      activeKey="provinces"
       pageEyebrow="Province deep dive"
       pageTitle={province.label}
       pageSubtitle="Top unfilled-demand skills + local supply by profession. Sourced from Sebenza's controlled-vocabulary search events."

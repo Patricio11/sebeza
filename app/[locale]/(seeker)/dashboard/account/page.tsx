@@ -1,7 +1,6 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
-import { SEEKER_NAV } from "@/components/layout/seekerNav";
 import { TextField } from "@/components/ui/FormField";
 import { Button } from "@/components/ui/Button";
 import { Link } from "@/i18n/navigation";
@@ -80,10 +79,6 @@ export default async function AccountPage({
   return (
     <DashboardMasthead
       role="seeker"
-      workspaceLabel={me.displayName}
-      workspaceEyebrow="Job seeker · workspace"
-      nav={SEEKER_NAV}
-      activeKey="account"
       pageEyebrow="Account"
       pageTitle={t("title")}
       pageSubtitle={t("subtitle")}

@@ -15,7 +15,6 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
-import { EMPLOYER_NAV } from "@/components/layout/employerNav";
 import { OrgVerificationBanner } from "@/components/layout/OrgVerificationBanner";
 import { Button } from "@/components/ui/Button";
 import { VerificationBadge } from "@/components/ui/VerificationBadge";
@@ -45,10 +44,6 @@ export default async function OrganisationPage({
   return (
     <DashboardMasthead
       role="employer"
-      workspaceLabel={orgName}
-      workspaceEyebrow="Employer · workspace"
-      nav={EMPLOYER_NAV}
-      activeKey="organisation"
       pageEyebrow="Trust"
       pageTitle={t("title")}
       pageSubtitle={t("subtitle")}

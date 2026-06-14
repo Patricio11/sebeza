@@ -1,7 +1,6 @@
 import { setRequestLocale } from "next-intl/server";
 import Link from "next/link";
 import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
-import { GOV_NAV } from "@/components/layout/govNav";
 import { verifyGov } from "@/lib/auth/dal";
 import { Download } from "lucide-react";
 import { HelpLink } from "@/components/feature/help/HelpLink";
@@ -13,15 +12,11 @@ export default async function GovExportsPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const me = await verifyGov();
+  await verifyGov();
 
   return (
     <DashboardMasthead
       role="gov"
-      workspaceLabel={me.name}
-      workspaceEyebrow="Government / policy workspace"
-      nav={GOV_NAV}
-      activeKey="exports"
       pageEyebrow="Bulk downloads"
       pageTitle="Exports"
       pageSubtitle="Hardened CSV exports of the publishable aggregates. Every download is audit-logged as analytics.export."

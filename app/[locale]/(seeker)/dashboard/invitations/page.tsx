@@ -16,7 +16,6 @@
 import { setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
-import { SEEKER_NAV } from "@/components/layout/seekerNav";
 import { verifyRole } from "@/lib/auth/dal";
 import { listMyInvitations } from "@/lib/seeker/invitations";
 import { PROFESSIONS, findCityBySlug } from "@/lib/mock/taxonomy";
@@ -67,10 +66,6 @@ export default async function SeekerInvitationsPage({
   return (
     <DashboardMasthead
       role="seeker"
-      workspaceLabel={user.name}
-      workspaceEyebrow="Job seeker · workspace"
-      nav={SEEKER_NAV}
-      activeKey="invitations"
       pageEyebrow="Inbox"
       pageTitle="Vacancy invites"
       pageSubtitle="Verified employers can flag you for a specific role. Accept, decline (with or without a reason), or accept with notice. Declining is free and never affects your visibility in search."

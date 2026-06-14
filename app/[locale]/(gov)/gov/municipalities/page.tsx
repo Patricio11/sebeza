@@ -1,6 +1,5 @@
 import { setRequestLocale } from "next-intl/server";
 import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
-import { GOV_NAV } from "@/components/layout/govNav";
 import { verifyGov } from "@/lib/auth/dal";
 
 export default async function GovMunicipalitiesPage({
@@ -10,15 +9,11 @@ export default async function GovMunicipalitiesPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const me = await verifyGov();
+  await verifyGov();
 
   return (
     <DashboardMasthead
       role="gov"
-      workspaceLabel={me.name}
-      workspaceEyebrow="Government / policy workspace"
-      nav={GOV_NAV}
-      activeKey="municipalities"
       pageEyebrow="Geography"
       pageTitle="Municipalities"
       pageSubtitle="City-level supply + demand breakdown. Unlocks once Sebenza has enough city-grained search activity to clear the same suppression floor we use for outcomes (k = 10 distinct profiles per cell)."

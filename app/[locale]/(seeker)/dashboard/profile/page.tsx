@@ -1,7 +1,6 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
-import { SEEKER_NAV } from "@/components/layout/seekerNav";
 import { ProfileCompleteness } from "@/components/ui/ProfileCompleteness";
 import { VerificationBadge } from "@/components/ui/VerificationBadge";
 import { getMyProfile } from "@/lib/profile/me";
@@ -88,10 +87,6 @@ export default async function ProfileEditorPage({
   return (
     <DashboardMasthead
       role="seeker"
-      workspaceLabel={me.displayName}
-      workspaceEyebrow="Job seeker · workspace"
-      nav={SEEKER_NAV}
-      activeKey="profile"
       pageEyebrow="Profile editor"
       pageTitle={t("title")}
       pageSubtitle={t("subtitle")}

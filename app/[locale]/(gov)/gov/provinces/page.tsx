@@ -1,7 +1,6 @@
 import { setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
-import { GOV_NAV } from "@/components/layout/govNav";
 import { verifyGov } from "@/lib/auth/dal";
 import { PROVINCES } from "@/lib/mock/taxonomy";
 import { ArrowRight } from "lucide-react";
@@ -16,15 +15,11 @@ export default async function GovProvincesIndexPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const me = await verifyGov();
+  await verifyGov();
 
   return (
     <DashboardMasthead
       role="gov"
-      workspaceLabel={me.name}
-      workspaceEyebrow="Government / policy workspace"
-      nav={GOV_NAV}
-      activeKey="provinces"
       pageEyebrow="Geography"
       pageTitle="Provinces"
       pageSubtitle="Per-province deep dives  supply, top local gaps, freshness, monthly trend."

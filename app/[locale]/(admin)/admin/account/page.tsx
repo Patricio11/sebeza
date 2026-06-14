@@ -1,6 +1,5 @@
 import { setRequestLocale } from "next-intl/server";
 import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
-import { ADMIN_NAV } from "@/components/layout/adminNav";
 import { SignOutButton } from "@/components/feature/auth/SignOutButton";
 import { TwoFactorAccountPanel } from "@/components/feature/auth/TwoFactorAccountPanel";
 import { NotificationPrefsPanel } from "@/components/feature/notifications/NotificationPrefsPanel";
@@ -30,10 +29,6 @@ export default async function AdminAccountPage({
   return (
     <DashboardMasthead
       role="admin"
-      workspaceLabel={me.name ?? "Admin"}
-      workspaceEyebrow="Administrator · 2FA required"
-      nav={ADMIN_NAV}
-      activeKey="account"
       pageEyebrow="Your account"
       pageTitle="Account"
       pageSubtitle="Your administrator session and notification preferences."

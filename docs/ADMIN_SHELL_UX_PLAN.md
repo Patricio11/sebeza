@@ -74,15 +74,17 @@ Each followed the admin template: a `(<group>)/<root>/layout.tsx` rendering `<Da
 - Gov's one-off "Government · analyst access" eyebrow was standardised to "Government / policy
   workspace" (sidebar eyebrow only; cosmetic).
 
-### 🧹 A5 — Cleanup — DONE (partial; prop-strip deferred) 2026-06-14
+### 🧹 A5 — Cleanup — ✅ DONE 2026-06-14
 - ✅ Repointed the 4 nav configs' `import type { DashboardNavItem }` to `./dashboardChrome`.
 - ✅ **Deleted `components/layout/DashboardShell.tsx`** — every page is migrated; nothing imports it.
-- ⏳ **Deferred (optional cosmetic):** the migrated pages still pass the compatibility-shim props
-  (`workspaceLabel` / `workspaceEyebrow` / `nav` / `activeKey`) that `DashboardMasthead` ignores.
-  Stripping them from ~60 page call-sites (plus the now-unused `*_NAV` / `activeKey` imports + any
-  vars computed only for the label) is high-churn / low-value and risks cascading unused-symbol
-  lint errors, so it's left as a follow-up. The shims are documented as intentional in
-  `DashboardMasthead`.
+- ✅ **Stripped the compatibility-shim props** from all 60 migrated `<DashboardMasthead>` call-sites
+  (`workspaceLabel` / `workspaceEyebrow` / `nav` / `activeKey`) + removed them from the
+  `DashboardMasthead` interface, so it now accepts only real masthead props. Also removed the
+  now-unused `*_NAV` / `MOCK_*` page imports and dropped the orphaned guard assignments
+  (`const session = await verifyX()` → `await verifyX()`, keeping the guard). This also retired the
+  last runtime `MOCK_EMPLOYER` page imports — the mock constants now feed only the seed (DB-first).
+  Verified: build ✅ · typecheck ✅ · no new lint warnings (a few stray pre-existing `MOCK_*`
+  imports cleaned as a side benefit) · E2E 24/24 (role + seeker arcs).
 
 **Verified (whole A rollout):** build ✅ · typecheck ✅ · lint ✅ (0 err) · `vitest` 318/318 ✅ ·
 **E2E 46/46** at desktop + mobile-360 (admin/seeker/employer/student/analytics/public/locality/

@@ -2,7 +2,6 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 import { Link } from "@/i18n/navigation";
 import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
-import { SEEKER_NAV } from "@/components/layout/seekerNav";
 import { ProfileCompleteness } from "@/components/ui/ProfileCompleteness";
 import { VerificationBadge } from "@/components/ui/VerificationBadge";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -142,10 +141,6 @@ export default async function SeekerOverviewPage({
   return (
     <DashboardMasthead
       role="seeker"
-      workspaceLabel={me.displayName}
-      workspaceEyebrow="Job seeker · workspace"
-      nav={SEEKER_NAV}
-      activeKey="overview"
       pageEyebrow={t("overview.greeting", { name: me.displayName.split(" ")[0] ?? "" })}
       pageTitle={t("title")}
       pageSubtitle={`${me.profession} · ${me.city}, ${me.province}`}

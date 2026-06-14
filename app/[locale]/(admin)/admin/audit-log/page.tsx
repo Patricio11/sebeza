@@ -1,6 +1,5 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
-import { ADMIN_NAV } from "@/components/layout/adminNav";
 import { Button } from "@/components/ui/Button";
 import { recentAuditEventsFromDb, type AuditKind } from "@/lib/audit";
 import { verifyAdmin } from "@/lib/auth/dal";
@@ -53,7 +52,7 @@ export default async function AuditLogPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const session = await verifyAdmin();
+  await verifyAdmin();
   const t = await getTranslations("adminDash.auditLog");
 
   const sp = await searchParams;
@@ -77,10 +76,6 @@ export default async function AuditLogPage({
   return (
     <DashboardMasthead
       role="admin"
-      workspaceLabel={session.name ?? "Admin"}
-      workspaceEyebrow="Administrator · 2FA required"
-      nav={ADMIN_NAV}
-      activeKey="auditLog"
       pageEyebrow="PII access ledger"
       pageTitle={t("title")}
       pageSubtitle={t("subtitle")}

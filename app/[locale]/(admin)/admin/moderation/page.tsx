@@ -1,7 +1,6 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
-import { ADMIN_NAV } from "@/components/layout/adminNav";
 import { verifyAdmin } from "@/lib/auth/dal";
 import { listOpenReports } from "@/lib/admin/moderation-query";
 import { ReportActions } from "@/components/feature/admin/ReportActions";
@@ -38,7 +37,7 @@ export default async function ModerationPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const session = await verifyAdmin();
+  await verifyAdmin();
   const t = await getTranslations("adminDash.moderation");
   const reports = await listOpenReports();
 
@@ -55,10 +54,6 @@ export default async function ModerationPage({
   return (
     <DashboardMasthead
       role="admin"
-      workspaceLabel={session.name ?? "Admin"}
-      workspaceEyebrow="Administrator · 2FA required"
-      nav={ADMIN_NAV}
-      activeKey="moderation"
       pageEyebrow="Queue"
       pageTitle={t("title")}
       pageSubtitle={t("subtitle")}

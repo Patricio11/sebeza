@@ -20,7 +20,6 @@ import { setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { Link } from "@/i18n/navigation";
 import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
-import { EMPLOYER_NAV, MOCK_EMPLOYER } from "@/components/layout/employerNav";
 import { Button } from "@/components/ui/Button";
 import { verifyEmployer } from "@/lib/auth/dal";
 import {
@@ -77,7 +76,7 @@ export default async function VacancyDetailPage({
 }) {
   const { locale, id } = await params;
   setRequestLocale(locale);
-  const session = await verifyEmployer();
+  await verifyEmployer();
 
   const [role, vacancy] = await Promise.all([
     getMyOrgRole(),
@@ -120,10 +119,6 @@ export default async function VacancyDetailPage({
   return (
     <DashboardMasthead
       role="employer"
-      workspaceLabel={session.orgName ?? "Your organisation"}
-      workspaceEyebrow="Employer · workspace"
-      nav={EMPLOYER_NAV}
-      activeKey="vacancies"
       pageEyebrow="Vacancy detail"
       pageTitle={vacancy.title}
       pageSubtitle={`${professionLabel}${vacancy.seniority ? ` · ${vacancy.seniority}` : ""} · ${provinceLabel}`}

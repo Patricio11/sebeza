@@ -19,7 +19,6 @@ import { setRequestLocale } from "next-intl/server";
 import { redirect } from "next/navigation";
 import { Link } from "@/i18n/navigation";
 import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
-import { SEEKER_NAV } from "@/components/layout/seekerNav";
 import { verifyRole } from "@/lib/auth/dal";
 import { getMyProfile } from "@/lib/profile/me";
 import {
@@ -62,10 +61,6 @@ export default async function SeekerHelpIndexPage({
   return (
     <DashboardMasthead
       role="seeker"
-      workspaceLabel={me.displayName ?? "Your profile"}
-      workspaceEyebrow="Seeker · workspace"
-      nav={SEEKER_NAV}
-      activeKey="help"
       pageEyebrow="Documentation"
       pageTitle="Help center"
       pageSubtitle="Everything you can do as a job seeker on Sebenza  laid out by category, searchable, with deep-links back to the dashboard surfaces they cover. English only at v1; translations follow."
