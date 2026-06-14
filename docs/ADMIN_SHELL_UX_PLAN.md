@@ -230,9 +230,14 @@ and every action they can take, surfaced in one well-designed surface (sidebar s
 - **Actions (D3):** new `AccountAdminActions` — prominent suspend/restore, reset-2FA, and a
   separated danger-zone erase, with confirm-with-reason flows; role-aware guards (self / admin
   targets explained, not shown as failing buttons); `router.refresh()` on success.
-- **Doc-review (D4):** state surfaced inline + "Open queue"/"Manage elsewhere" deep-links to
-  `/admin/verifications?tab=seeker-ids|qualifications|organisations` (where the doc viewer lives).
-  Inlining those decision actions with a signed-URL doc link remains the recorded follow-up.
+- **Doc-review (D4):** ✅ **now inlined (2026-06-14).** The verification + organisation sections
+  render the real **decision actions on the page**, reusing the existing components/server actions:
+  `KycReviewActions` (approve / request-changes / reject the ID doc), `VerificationActions`
+  (per-qualification approve/reject + SAQA-aware, and org approve/reject), each beside a
+  **signed-URL "View" link** to the actual document in Supabase Storage. New DB loaders
+  `getSeekerReviewBundle(profileId)` (ID doc + qualifications **with ids** + signed URLs) and
+  `getOrgDocuments(orgId)` back them. The less-common org actions (request-changes / resend email /
+  mark-verified) stay one click away in the vetting queue (linked). All DB/storage — no mock.
 - **Verified:** typecheck ✅ · lint ✅ (0 err) · build ✅ · `npm run test:all` 318/318 ✅ ·
   E2E ✅ (detail test now asserts the management sections + live Suspend / Reset-2FA controls on an
   active seeker, no `/p/` bounce, back returns to directory — desktop + mobile-360).

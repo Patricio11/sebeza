@@ -44,9 +44,11 @@ Keep entries terse  this is a triage list, not a spec.
   recent activity, and a redesigned account-actions panel (suspend/restore, reset-2FA, danger-zone
   erase — role-aware). Document-dependent reviews (KYC ID / qualifications / org vetting) surface
   state inline + deep-link to the verification queues that hold the doc viewer.
-  - _Follow-up:_ inline the KYC / qualification / org **decision actions** (approve/reject/
-    request-changes) on the user page with a signed-URL doc link beside them, if on-page review is
-    wanted (currently deep-linked to the queues).
+  - ✅ _Follow-up done (2026-06-14):_ the KYC / qualification / org **decision actions** are now
+    inlined on the user page (reusing `KycReviewActions` + `VerificationActions`) with a signed-URL
+    "View" link beside each document. Backed by `getSeekerReviewBundle` + `getOrgDocuments`
+    (DB + Supabase Storage; no mock). The rarer org actions (request-changes / resend / mark-email)
+    stay in the vetting queue.
 - **Public profile loading-hang** — ✅ **resolved (not a bug) 2026-06-14.** Probed: the page
   renders fully server-side (HTTP 200, 179 KB); the "stuck skeleton" was first-hit dev Turbopack
   compilation, not a stall, and prod has no per-request compile. Restart `npm run dev` if it

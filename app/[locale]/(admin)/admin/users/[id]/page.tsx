@@ -27,11 +27,15 @@ import {
   getAdminUserDetail,
   listConsentsForUser,
   getEmployerContextForUser,
+  getSeekerReviewBundle,
+  getOrgDocuments,
   type AdminConsentRow,
 } from "@/lib/admin/users";
 import { loadProfileForUser } from "@/lib/profile/me";
 import { recentAuditEventsFromDb } from "@/lib/audit";
 import { AccountAdminActions } from "@/components/feature/admin/AccountAdminActions";
+import { KycReviewActions } from "@/components/feature/admin/KycReviewActions";
+import { VerificationActions } from "@/components/feature/admin/VerificationActions";
 import { formatRelativeTime } from "@/lib/utils";
 import type { UserRole } from "@/lib/mock/types";
 
@@ -58,6 +62,12 @@ export default async function AdminUserDetailPage({
     listConsentsForUser(user.id),
     recentAuditEventsFromDb({ actor: user.id, limit: 20 }),
   ]);
+
+  // Review docs (signed URLs) — depend on the ids resolved above.
+  const reviewBundle = profile
+    ? await getSeekerReviewBundle(profile.profileId)
+    : null;
+  const orgDocs = employer ? await getOrgDocuments(employer.organizationId) : [];
 
   const dateLong = (iso: string) =>
     new Date(iso).toLocaleDateString(locale, {
@@ -256,40 +266,73 @@ export default async function AdminUserDetailPage({
                     ID rejection note: {profile.idDocumentRejectionReason}
                   </p>
                 )}
-                {profile.qualifications && profile.qualifications.length > 0 && (
+
+                {/* Inline ID-document review (doc link + decision actions). */}
+                {reviewBundle?.idDoc && (
+                  <div className="mt-4 rounded-[var(--radius-sm)] border border-[color:var(--color-hairline)] p-3">
+                    <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
+                      <span>
+                        <span className="font-medium">
+                          {reviewBundle.idDoc.kind === "passport" ? "Passport" : "SA ID"} document
+                        </span>
+                        {reviewBundle.idDoc.uploadedAt && (
+                          <span className="text-[color:var(--color-ink-soft)]">
+                            {" "}
+                            · uploaded {dateLong(reviewBundle.idDoc.uploadedAt)}
+                          </span>
+                        )}
+                      </span>
+                      {reviewBundle.idDoc.signedUrl && (
+                        <DocLink href={reviewBundle.idDoc.signedUrl} label="View ID" />
+                      )}
+                    </div>
+                    {!user.kycVerifiedAt && (
+                      <div className="mt-3">
+                        <KycReviewActions profileId={profile.profileId} />
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {reviewBundle && reviewBundle.qualifications.length > 0 && (
                   <div className="mt-4 border-t border-dashed border-[color:var(--color-hairline)] pt-4">
                     <p className="mb-2 flex items-center gap-1.5 text-[0.68rem] uppercase tracking-[0.16em] text-[color:var(--color-ink-soft)]">
                       <GraduationCap className="size-3.5" aria-hidden="true" />
                       Qualifications
                     </p>
-                    <ul className="space-y-2">
-                      {profile.qualifications.map((q, i) => (
+                    <ul className="space-y-3">
+                      {reviewBundle.qualifications.map((q) => (
                         <li
-                          key={`${q.title}-${i}`}
-                          className="flex flex-wrap items-center justify-between gap-2 text-sm"
+                          key={q.id}
+                          className="rounded-[var(--radius-sm)] border border-[color:var(--color-hairline)] p-3"
                         >
-                          <span className="min-w-0">
-                            <span className="font-medium">{q.title}</span>
-                            <span className="text-[color:var(--color-ink-soft)]">
-                              {" "}
-                              · {q.institution}
-                              {q.awardedYear ? ` · ${q.awardedYear}` : ""}
+                          <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
+                            <span className="min-w-0">
+                              <span className="font-medium">{q.title}</span>
+                              <span className="text-[color:var(--color-ink-soft)]">
+                                {" "}
+                                · {q.institution}
+                                {q.awardedYear ? ` · ${q.awardedYear}` : ""}
+                              </span>
                             </span>
-                          </span>
-                          <VerifTag status={q.verification} />
+                            <div className="flex items-center gap-2">
+                              {q.signedUrl && <DocLink href={q.signedUrl} label="View" />}
+                              <VerifTag status={q.verification} />
+                            </div>
+                          </div>
+                          {(q.verification === "pending" || q.verification === "unverified") && (
+                            <div className="mt-2">
+                              <VerificationActions
+                                id={q.id}
+                                kind="qualification"
+                                approveLabel="Approve"
+                                rejectLabel="Reject"
+                              />
+                            </div>
+                          )}
                         </li>
                       ))}
                     </ul>
-                    <p className="mt-3 text-xs text-[color:var(--color-ink-soft)]">
-                      Approve / reject qualifications + ID documents (with the document viewer) in
-                      the{" "}
-                      <ReviewLink
-                        href="/admin/verifications?tab=seeker-ids"
-                        label="verification queue"
-                        inline
-                      />
-                      .
-                    </p>
                   </div>
                 )}
               </Card>
@@ -335,10 +378,45 @@ export default async function AdminUserDetailPage({
                       Admin note: {employer.adminNote}
                     </p>
                   )}
-                  <p className="mt-3 text-xs text-[color:var(--color-ink-soft)]">
-                    Approve / reject / request changes, resend the verification email, or view org
-                    documents in the vetting queue.
-                  </p>
+
+                  {/* Uploaded vetting documents. */}
+                  {orgDocs.length > 0 && (
+                    <div className="mt-4 border-t border-dashed border-[color:var(--color-hairline)] pt-4">
+                      <p className="mb-2 text-[0.68rem] uppercase tracking-[0.16em] text-[color:var(--color-ink-soft)]">
+                        Documents
+                      </p>
+                      <ul className="space-y-1.5">
+                        {orgDocs.map((d) => (
+                          <li
+                            key={d.id}
+                            className="flex flex-wrap items-center justify-between gap-2 text-sm"
+                          >
+                            <span className="min-w-0">
+                              <span className="font-medium">{humanize(d.kind)}</span>
+                              <span className="text-[color:var(--color-ink-soft)]">
+                                {" "}
+                                · {d.originalName}
+                              </span>
+                            </span>
+                            {d.signedUrl && <DocLink href={d.signedUrl} label="View" />}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {/* Inline approve / reject. Request-changes, resend email + mark-verified
+                      live in the full vetting queue (linked above). */}
+                  {employer.verification !== "verified" && (
+                    <div className="mt-4 border-t border-dashed border-[color:var(--color-hairline)] pt-4">
+                      <VerificationActions
+                        id={employer.organizationId}
+                        kind="organisation"
+                        approveLabel="Approve organisation"
+                        rejectLabel="Reject"
+                      />
+                    </div>
+                  )}
                 </>
               ) : (
                 <p className="text-sm text-[color:var(--color-ink-soft)]">
@@ -452,6 +530,21 @@ export default async function AdminUserDetailPage({
 
 function humanize(s: string) {
   return s.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+/** A signed-URL link to a stored document — opens in a new tab. */
+function DocLink({ href, label }: { href: string; label: string }) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="inline-flex items-center gap-1 rounded-[var(--radius-pill)] border border-[color:var(--color-hairline)] px-2.5 py-1 text-xs text-[color:var(--color-brand-strong)] hover:border-[color:var(--color-brand)]"
+    >
+      {label}
+      <ExternalLink className="size-3" aria-hidden="true" />
+    </a>
+  );
 }
 
 function Card({

@@ -18,6 +18,7 @@ import { getDb } from "@/db/client";
 import * as schema from "@/db/schema";
 import { and, desc, eq, ilike, isNull, isNotNull, or, sql } from "drizzle-orm";
 import { verifyAdmin } from "@/lib/auth/dal";
+import { signedDocumentUrl } from "@/lib/storage/signed";
 import type { UserRole } from "@/lib/mock/types";
 
 export interface AdminUserRow {
@@ -297,6 +298,118 @@ export async function listConsentsForUser(
     revokedAt: r.revokedAt ? r.revokedAt.toISOString() : null,
     pausedUntil: r.pausedUntil ? r.pausedUntil.toISOString() : null,
   }));
+}
+
+/** Seeker review bundle: the ID document + qualifications (with ids + signed
+ *  document URLs) the admin needs to make verification decisions on the user
+ *  detail page. All reads from the DB + Supabase Storage. */
+export interface SeekerReviewBundle {
+  idDoc: {
+    signedUrl: string | null;
+    kind: string | null;
+    uploadedAt: string | null;
+    rejectionReason: string | null;
+  } | null;
+  qualifications: Array<{
+    id: string;
+    title: string;
+    institution: string;
+    awardedYear: number | null;
+    verification: "unverified" | "pending" | "verified" | "rejected";
+    signedUrl: string | null;
+  }>;
+}
+
+export async function getSeekerReviewBundle(
+  profileId: string,
+): Promise<SeekerReviewBundle> {
+  await verifyAdmin();
+  const db = getDb();
+
+  const [p] = await db
+    .select({
+      idDocumentStorageKey: schema.profiles.idDocumentStorageKey,
+      idDocumentKind: schema.profiles.idDocumentKind,
+      idDocumentUploadedAt: schema.profiles.idDocumentUploadedAt,
+      idDocumentRejectionReason: schema.profiles.idDocumentRejectionReason,
+    })
+    .from(schema.profiles)
+    .where(eq(schema.profiles.id, profileId))
+    .limit(1);
+
+  const quals = await db
+    .select({
+      id: schema.qualifications.id,
+      title: schema.qualifications.title,
+      institution: schema.qualifications.institution,
+      awardedYear: schema.qualifications.awardedYear,
+      verification: schema.qualifications.verification,
+      documentStorageKey: schema.qualifications.documentStorageKey,
+    })
+    .from(schema.qualifications)
+    .where(eq(schema.qualifications.profileId, profileId))
+    .orderBy(desc(schema.qualifications.awardedYear));
+
+  const idDoc = p?.idDocumentStorageKey
+    ? {
+        signedUrl: await signedDocumentUrl(p.idDocumentStorageKey),
+        kind: p.idDocumentKind,
+        uploadedAt: p.idDocumentUploadedAt
+          ? p.idDocumentUploadedAt.toISOString()
+          : null,
+        rejectionReason: p.idDocumentRejectionReason,
+      }
+    : null;
+
+  const qualifications = await Promise.all(
+    quals.map(async (q) => ({
+      id: q.id,
+      title: q.title,
+      institution: q.institution,
+      awardedYear: q.awardedYear,
+      verification: q.verification as SeekerReviewBundle["qualifications"][number]["verification"],
+      signedUrl: q.documentStorageKey
+        ? await signedDocumentUrl(q.documentStorageKey)
+        : null,
+    })),
+  );
+
+  return { idDoc, qualifications };
+}
+
+/** One uploaded organisation document with a signed view URL. */
+export interface AdminOrgDocument {
+  id: string;
+  kind: string;
+  originalName: string;
+  signedUrl: string | null;
+}
+
+/** Vetting documents an org uploaded, with signed view URLs (admin only). */
+export async function getOrgDocuments(
+  organizationId: string,
+): Promise<AdminOrgDocument[]> {
+  await verifyAdmin();
+  const db = getDb();
+  const docs = await db
+    .select({
+      id: schema.organizationDocuments.id,
+      kind: schema.organizationDocuments.kind,
+      originalName: schema.organizationDocuments.originalName,
+      storageKey: schema.organizationDocuments.storageKey,
+    })
+    .from(schema.organizationDocuments)
+    .where(eq(schema.organizationDocuments.organizationId, organizationId))
+    .orderBy(desc(schema.organizationDocuments.uploadedAt));
+
+  return Promise.all(
+    docs.map(async (d) => ({
+      id: d.id,
+      kind: d.kind,
+      originalName: d.originalName,
+      signedUrl: await signedDocumentUrl(d.storageKey),
+    })),
+  );
 }
 
 /** An employer's organisation membership + the org's vetting state. */
