@@ -1,9 +1,9 @@
 import { Link } from "@/i18n/navigation";
 
 /**
- * Phase 9.10 cleanup  the banner used to short-circuit on the static
- * `MOCK_EMPLOYER.orgVerified` flag, which made it lie when the live
- * DB state diverged. The page-level conditional (e.g.
+ * Phase 9.10 cleanup  the banner used to short-circuit on a static
+ * org-verified flag, which made it lie when the live DB state
+ * diverged. The page-level conditional (e.g.
  * `session.verification !== "verified"` on /employer) is the canonical
  * filter; this component just renders whatever the caller decided to
  * show. No more static-data branches.

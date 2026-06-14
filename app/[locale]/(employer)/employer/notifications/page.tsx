@@ -11,10 +11,9 @@ export default async function EmployerNotificationsPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  // Phase 9.10  use verifyEmployer (permissive) to get the live org
-  // context for the workspaceLabel. verifyRole gave us the user but
-  // no org name; the dashboard shell needs the real org's name from
-  // the DB, not the static MOCK_EMPLOYER fallback.
+  // Employer guard (permissive). The sidebar's live org name comes from
+  // the DB via the route-group layout (DashboardFrame); this call keeps the
+  // page guarded independently.
   await verifyEmployer();
   const PAGE = 20;
   const probe = await listForUser({ limit: PAGE + 1 });

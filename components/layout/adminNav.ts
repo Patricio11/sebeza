@@ -46,9 +46,3 @@ export const ADMIN_NAV: DashboardNavItem[] = [
   { key: "settings", label: "Platform settings", href: "/admin/settings", icon: SlidersHorizontal },
   { key: "account", label: "My account", href: "/admin/account", icon: UserCog },
 ];
-
-export const MOCK_ADMIN = {
-  fullName: "Sebenza · Admin",
-  role: "Compliance & Trust",
-  email: "admin@sebenzasa.com",
-};

@@ -50,8 +50,7 @@ import {
   INSTITUTIONS,
 } from "@/lib/mock/taxonomy";
 import { mockProfiles } from "@/lib/mock/profiles";
-import { MOCK_EMPLOYER } from "@/components/layout/employerNav";
-import { MOCK_ADMIN } from "@/components/layout/adminNav";
+import { SEED_ADMIN, SEED_DISCOVERY_EMPLOYER } from "@/db/fixtures";
 import { CONSENT_PURPOSES } from "@/lib/consent";
 
 // Every seeded account uses the same dev password. NEVER deploy this to prod.
@@ -191,15 +190,15 @@ async function seedUsersAndProfiles() {
   const userRows = [
     {
       id: id("user", "sebenza-admin"),
-      name: MOCK_ADMIN.fullName,
-      email: MOCK_ADMIN.email,
+      name: SEED_ADMIN.fullName,
+      email: SEED_ADMIN.email,
       emailVerified: true,
       role: "admin" as const,
     },
     {
       id: id("user", "naledi-k"),
-      name: MOCK_EMPLOYER.user.fullName,
-      email: MOCK_EMPLOYER.user.email,
+      name: SEED_DISCOVERY_EMPLOYER.user.fullName,
+      email: SEED_DISCOVERY_EMPLOYER.user.email,
       emailVerified: true,
       role: "employer" as const,
     },
@@ -353,12 +352,12 @@ async function seedOrgsAndPlacements() {
   const orgId = id("org", "discovery-bank");
   await db.insert(schema.organizations).values({
     id: orgId,
-    name: MOCK_EMPLOYER.orgName,
-    registrationNumber: MOCK_EMPLOYER.registration,
-    industry: MOCK_EMPLOYER.industry,
-    sizeBand: MOCK_EMPLOYER.size,
-    city: MOCK_EMPLOYER.city,
-    country: MOCK_EMPLOYER.country,
+    name: SEED_DISCOVERY_EMPLOYER.orgName,
+    registrationNumber: SEED_DISCOVERY_EMPLOYER.registration,
+    industry: SEED_DISCOVERY_EMPLOYER.industry,
+    sizeBand: SEED_DISCOVERY_EMPLOYER.size,
+    city: SEED_DISCOVERY_EMPLOYER.city,
+    country: SEED_DISCOVERY_EMPLOYER.country,
     // Phase 9.17  Discovery Bank is the seed's "happy path" verified
     // employer so the demo invite + vacancy + KYC flows all light up
     // out of the box. To test the verifyOrgVerified gate against an
@@ -1154,8 +1153,8 @@ async function seedPhase9_8Vacancies() {
  *   - Initech  UNVERIFIED + emailVerified (draft state; admin
  *     queue's secondary "Drafts" group; Owner can resubmit)
  *
- * Discovery Bank (the original MOCK_EMPLOYER) stays seeded with
- * verification driven by `MOCK_EMPLOYER.orgVerified` (currently
+ * Discovery Bank (the original SEED_DISCOVERY_EMPLOYER) stays seeded with
+ * verification driven by `SEED_DISCOVERY_EMPLOYER.orgVerified` (currently
  * false  i.e. unverified). Don't break the existing demo flow.
  *
  * Document storage keys are placeholders. The admin OrgReviewModal

@@ -22,7 +22,7 @@ export default async function EmployerAccountPage({
   const { locale } = await params;
   setRequestLocale(locale);
   // Phase 9.10  switched from verifyRole to verifyEmployer so the
-  // dashboard shell gets the live org name (no more MOCK_EMPLOYER
+  // dashboard shell gets the live org name from the DB (no static
   // fallback). Also fetch the org-member role for the "Your role at
   // the organisation" field so it reflects DB state.
   const session = await verifyEmployer();

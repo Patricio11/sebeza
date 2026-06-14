@@ -6,7 +6,7 @@
  * live org state via `getMyOrgVettingState()` (the same Phase 9.10
  * query) and renders organisation details + the live verification
  * badge. The "Save" form on this page used to be cosmetic + hard-
- * coded against MOCK_EMPLOYER  removed in the 9.13 audit sweep
+ * coded against a static fixture  removed in the 9.13 audit sweep
  * (no mock data in production paths). Every edit goes through
  * `/employer/onboarding`, which has the proper Server Action +
  * audit trail.

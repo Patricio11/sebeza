@@ -41,33 +41,3 @@ export const EMPLOYER_NAV: DashboardNavItem[] = [
   { key: "help", label: "Help", href: "/employer/help", icon: HelpCircle },
   { key: "account", label: "Account", href: "/employer/account", icon: Settings },
 ];
-
-export interface MockEmployer {
-  orgName: string;
-  orgVerified: boolean;
-  industry: string;
-  size: string;
-  registration: string;
-  city: string;
-  country: string;
-  user: {
-    fullName: string;
-    role: string;
-    email: string;
-  };
-}
-
-export const MOCK_EMPLOYER: MockEmployer = {
-  orgName: "Discovery Bank",
-  orgVerified: false,
-  industry: "Financial services",
-  size: "1 001+",
-  registration: "1996/004593/06",
-  city: "Sandton",
-  country: "South Africa",
-  user: {
-    fullName: "Naledi Khumalo",
-    role: "Head of Talent Acquisition",
-    email: "naledi.khumalo@discovery.co.za",
-  },
-};

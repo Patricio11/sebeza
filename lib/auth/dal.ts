@@ -62,8 +62,8 @@ export interface OrgContext {
   /** organizations.verification  `"verified"` lets PII flows through */
   verification: "unverified" | "pending" | "verified" | "rejected";
   /** Phase 9.10  display fields read from the live org row so pages
-   *  don't fall back to the static MOCK_EMPLOYER. NULLable because
-   *  some legacy columns are optional. */
+   *  don't fall back to any static fixture. NULLable because some
+   *  legacy columns are optional. */
   orgName: string;
   orgIndustry: string | null;
   orgCountry: string | null;
