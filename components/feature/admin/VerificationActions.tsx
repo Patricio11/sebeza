@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import {
   approveQualification,
@@ -29,11 +30,20 @@ export function VerificationActions({
   rejectLabel,
   showSaqaOverride = false,
 }: Props) {
+  const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [mode, setMode] = useState<"idle" | "rejecting">("idle");
   const [reason, setReason] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState<"approved" | "queued" | "rejected" | null>(null);
+
+  // Redraw the surface that invoked this (queue or user-detail page) so the
+  // fresh verification state shows immediately, on top of the action's own
+  // `revalidatePath`.
+  const finish = (state: "approved" | "queued" | "rejected") => {
+    setDone(state);
+    router.refresh();
+  };
 
   if (done) {
     return (
@@ -60,7 +70,7 @@ export function VerificationActions({
                 ? await rejectQualification({ qualificationId: id, reason })
                 : await rejectOrganisation({ orgId: id, reason });
             if (!res.ok) setError(res.message);
-            else setDone("rejected");
+            else finish("rejected");
           });
         }}
       >
@@ -109,11 +119,11 @@ export function VerificationActions({
             if (kind === "qualification") {
               const res = await approveQualification({ qualificationId: id });
               if (!res.ok) setError(res.message);
-              else setDone(res.queued ? "queued" : "approved");
+              else finish(res.queued ? "queued" : "approved");
             } else {
               const res = await approveOrganisation({ orgId: id });
               if (!res.ok) setError(res.message);
-              else setDone("approved");
+              else finish("approved");
             }
           });
         }}
@@ -140,7 +150,7 @@ export function VerificationActions({
                 forceApprove: true,
               });
               if (!res.ok) setError(res.message);
-              else setDone("approved");
+              else finish("approved");
             });
           }}
         >

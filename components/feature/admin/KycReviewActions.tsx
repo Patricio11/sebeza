@@ -20,6 +20,7 @@
  */
 
 import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { CheckCircle2, MessageSquareWarning, XCircle } from "lucide-react";
 import {
   approveSeekerId,
@@ -36,16 +37,21 @@ interface Props {
 }
 
 export function KycReviewActions({ profileId, readOnly }: Props) {
+  const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
   if (readOnly) return null;
 
+  // `revalidatePath` in the action refreshes the queue; `router.refresh()`
+  // also redraws whatever surface invoked it (e.g. the user-detail page),
+  // so the new verification state shows immediately everywhere.
   function approve() {
     setError(null);
     startTransition(async () => {
       const res = await approveSeekerId({ profileId });
       if (!res.ok) setError(res.message);
+      else router.refresh();
     });
   }
 
@@ -58,6 +64,7 @@ export function KycReviewActions({ profileId, readOnly }: Props) {
     startTransition(async () => {
       const res = await requestChangesOnSeekerId({ profileId, note });
       if (!res.ok) setError(res.message);
+      else router.refresh();
     });
   }
 
@@ -70,6 +77,7 @@ export function KycReviewActions({ profileId, readOnly }: Props) {
     startTransition(async () => {
       const res = await rejectSeekerId({ profileId, reason });
       if (!res.ok) setError(res.message);
+      else router.refresh();
     });
   }
 
