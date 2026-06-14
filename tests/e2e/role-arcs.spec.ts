@@ -26,6 +26,23 @@ test("admin arc: overview KPIs + verification queue render from the real DB", as
   await page.waitForURL(/\/admin/, { timeout: 30_000 });
   await expect(page.locator("main")).toBeVisible();
 
+  // Persistent-sidebar nav (admin route-group layout): a *client-side* click
+  // on the sidebar must route without unmounting the sidebar, and the active
+  // item is derived from the pathname (aria-current), not a per-page prop.
+  const visibleNavLink = (name: string) =>
+    page
+      .getByRole("navigation")
+      .getByRole("link", { name, exact: true })
+      .filter({ visible: true })
+      .first();
+
+  await visibleNavLink("Users").click();
+  await expect(page).toHaveURL(/\/admin\/users(\/|$|\?)/);
+  await expect(page.locator("main")).toBeVisible();
+  // Sidebar survived the navigation and now marks Users active.
+  await expect(visibleNavLink("Users")).toHaveAttribute("aria-current", "page");
+  await expect(visibleNavLink("Overview")).not.toHaveAttribute("aria-current", "page");
+
   await page.goto("/en/admin/verifications");
   await expect(page.locator("main")).toBeVisible();
 

@@ -1,5 +1,5 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
-import { DashboardShell } from "@/components/layout/DashboardShell";
+import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
 import { ADMIN_NAV } from "@/components/layout/adminNav";
 import { verifyAdmin } from "@/lib/auth/dal";
 import { getAllSettings } from "@/lib/admin/settings";
@@ -19,7 +19,7 @@ export default async function SettingsPage({
   const values = await getAllSettings();
 
   return (
-    <DashboardShell
+    <DashboardMasthead
       role="admin"
       workspaceLabel={session.name ?? "Admin"}
       workspaceEyebrow="Administrator · 2FA required"
@@ -43,6 +43,6 @@ export default async function SettingsPage({
       <div className="mt-10">
         <EmailTestPanel defaultRecipient={session.email} />
       </div>
-    </DashboardShell>
+    </DashboardMasthead>
   );
 }

@@ -1,5 +1,5 @@
 import { setRequestLocale } from "next-intl/server";
-import { DashboardShell } from "@/components/layout/DashboardShell";
+import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
 import { ADMIN_NAV } from "@/components/layout/adminNav";
 import { SignOutButton } from "@/components/feature/auth/SignOutButton";
 import { TwoFactorAccountPanel } from "@/components/feature/auth/TwoFactorAccountPanel";
@@ -28,7 +28,7 @@ export default async function AdminAccountPage({
   const prefs = await getMyNotificationPrefs();
 
   return (
-    <DashboardShell
+    <DashboardMasthead
       role="admin"
       workspaceLabel={me.name ?? "Admin"}
       workspaceEyebrow="Administrator · 2FA required"
@@ -98,6 +98,6 @@ export default async function AdminAccountPage({
           />
         </section>
       </div>
-    </DashboardShell>
+    </DashboardMasthead>
   );
 }

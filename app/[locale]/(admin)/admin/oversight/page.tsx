@@ -16,7 +16,7 @@
  */
 
 import { setRequestLocale } from "next-intl/server";
-import { DashboardShell } from "@/components/layout/DashboardShell";
+import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
 import { ADMIN_NAV } from "@/components/layout/adminNav";
 import { Button } from "@/components/ui/Button";
 import { verifyAdmin } from "@/lib/auth/dal";
@@ -70,7 +70,7 @@ export default async function OversightPage({
   }`;
 
   return (
-    <DashboardShell
+    <DashboardMasthead
       role="admin"
       workspaceLabel={session.name ?? "Admin"}
       workspaceEyebrow="Administrator · 2FA required"
@@ -245,7 +245,7 @@ export default async function OversightPage({
           </section>
         )
       )}
-    </DashboardShell>
+    </DashboardMasthead>
   );
 }
 

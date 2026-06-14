@@ -27,6 +27,24 @@ Keep entries terse  this is a triage list, not a spec.
 
 ---
 
+## Dashboard shell UX hardening — _(Origin: founder, clicking through /admin, 2026-06-14)_
+
+> Active plan: **`docs/ADMIN_SHELL_UX_PLAN.md`**.
+
+- **Persistent dashboard sidebar**  hoist the sidebar into a route-group `layout.tsx` so only the
+  content column reloads on navigation (it was remounting the whole screen + flashing a skeleton).
+  **Part A admin = done** (shipped 2026-06-14); seeker / employer / gov rollout + `DashboardShell`
+  retirement tracked in the plan.
+- **In-shell admin user detail** (`/admin/users/[id]`)  stop bouncing admins to the public
+  `/p/[handle]`; give them a detail view inside the admin frame with a back button + the existing
+  moderation actions.
+- **Public profile loading-hang** _(open question)_  `/p/[handle]` was seen stuck on its loading
+  skeleton on the dev server; independent of the layout change (prod build compiles it fine).
+  Probe + fix tracked in the plan (Part C) — higher priority than the in-shell page if it's a real
+  server-side stall, since it hits public + employer profile views too.
+
+---
+
 ## Accessibility automation
 
 > The Phase 10.5 audit (`A11Y_AUDIT.md`) ships with static scan + manual screen-reader passes; the automated runtime layer is deferred for capacity reasons.

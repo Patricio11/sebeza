@@ -15,7 +15,7 @@
 import { setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { Link } from "@/i18n/navigation";
-import { DashboardShell } from "@/components/layout/DashboardShell";
+import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
 import { ADMIN_NAV } from "@/components/layout/adminNav";
 import { verifyAdmin } from "@/lib/auth/dal";
 import {
@@ -51,7 +51,7 @@ export default async function AdminHelpArticlePage({
   const Body = article.Article;
 
   return (
-    <DashboardShell
+    <DashboardMasthead
       role="admin"
       workspaceLabel={session.name ?? "Admin"}
       workspaceEyebrow="Administrator · 2FA required"
@@ -125,6 +125,6 @@ export default async function AdminHelpArticlePage({
           </section>
         )}
       </div>
-    </DashboardShell>
+    </DashboardMasthead>
   );
 }

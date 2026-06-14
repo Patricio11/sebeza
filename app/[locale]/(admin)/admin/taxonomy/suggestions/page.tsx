@@ -10,7 +10,7 @@
 import { setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { asc, eq, isNull, and, sql } from "drizzle-orm";
-import { DashboardShell } from "@/components/layout/DashboardShell";
+import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
 import { ADMIN_NAV } from "@/components/layout/adminNav";
 import { verifyAdmin } from "@/lib/auth/dal";
 import { listPendingSuggestions } from "@/lib/taxonomy/suggestions";
@@ -90,7 +90,7 @@ export default async function TaxonomySuggestionsPage({
     skillSuggestions.length;
 
   return (
-    <DashboardShell
+    <DashboardMasthead
       role="admin"
       workspaceLabel={session.name ?? "Admin"}
       workspaceEyebrow="Administrator · 2FA required"
@@ -158,6 +158,6 @@ export default async function TaxonomySuggestionsPage({
           </li>
         </ul>
       </aside>
-    </DashboardShell>
+    </DashboardMasthead>
   );
 }

@@ -1,6 +1,5 @@
 import { Link } from "@/i18n/navigation";
 import { LocaleSwitcher } from "@/components/feature/LocaleSwitcher";
-import { SAChevron } from "@/components/ui/SAChevron";
 import { SebenzaLogo } from "@/components/ui/SebenzaLogo";
 import { SignOutButton } from "@/components/feature/auth/SignOutButton";
 import { cn } from "@/lib/utils";
@@ -10,56 +9,38 @@ import {
   type DashboardNavItem,
   type DashboardRole,
 } from "./dashboardChrome";
-
-// Re-exported so the nav config files (adminNav/seekerNav/employerNav/govNav)
-// keep importing these types from "./DashboardShell" unchanged. Canonical
-// definitions now live in ./dashboardChrome.
-export type { DashboardRole, DashboardNavItem };
+import { DashboardNavLink } from "./DashboardNavLink";
 
 interface Props {
   role: DashboardRole;
-  /** Display name for the wordmark / workspace label. */
+  /** Display name for the workspace label. */
   workspaceLabel: string;
   /** A short eyebrow above the workspace name (e.g. "Job seeker · workspace"). */
   workspaceEyebrow: string;
   nav: DashboardNavItem[];
-  activeKey: string;
-  /** Page-level title rendered in the editorial masthead. */
-  pageTitle: string;
-  pageEyebrow?: string;
-  /** Optional subtitle / explanation line under the page title. */
-  pageSubtitle?: string;
-  /** Optional right-aligned actions in the masthead. */
-  pageActions?: React.ReactNode;
-  /** Optional persistent banner above the content (e.g. org-unverified). */
-  banner?: React.ReactNode;
+  /** The page content — masthead + main, rendered into the main column. */
   children: React.ReactNode;
 }
 
 /**
- * Civic Editorial dashboard shell. Sidebar on desktop, top tab strip on mobile.
- * Role accent strip down the left edge of the sidebar makes the workspace
- * unmistakeably one of the user types — no generic SaaS sidebar.
+ * Persistent Civic Editorial dashboard frame: the sidebar (desktop) + top tab
+ * strip (mobile) that stay mounted across navigation. Rendered from the route
+ * group's `layout.tsx`, NOT from each page — so navigating between pages only
+ * swaps the `{children}` (the masthead + main), and the sidebar never
+ * unmounts or flashes a skeleton.
  *
- * NOTE: the admin route group has migrated to the persistent
- * <DashboardFrame> (in `layout.tsx`) + per-page <DashboardMasthead> so the
- * sidebar no longer unmounts on navigation. This all-in-one shell remains for
- * seeker / employer / gov until they migrate the same way.
+ * The active nav item is derived from the pathname by `DashboardNavLink`
+ * (the section root matches exactly; deeper routes match by prefix).
  */
-export function DashboardShell({
+export function DashboardFrame({
   role,
   workspaceLabel,
   workspaceEyebrow,
   nav,
-  activeKey,
-  pageTitle,
-  pageEyebrow,
-  pageSubtitle,
-  pageActions,
-  banner,
   children,
 }: Props) {
   const roleAccent = ROLE_ACCENT[role];
+  const rootHref = nav[0]?.href;
 
   return (
     <div className="min-h-screen bg-[color:var(--color-paper)]">
@@ -88,11 +69,7 @@ export function DashboardShell({
               aria-hidden="true"
               className={cn("absolute inset-y-0 left-0 w-1", roleAccent.strip)}
             />
-            <Link
-              href="/"
-              aria-label="Sebenza — home"
-              className="flex items-center"
-            >
+            <Link href="/" aria-label="Sebenza — home" className="flex items-center">
               <SebenzaLogo width={120} />
             </Link>
           </div>
@@ -108,30 +85,19 @@ export function DashboardShell({
             <ul className="space-y-0.5">
               {nav.map((item) => {
                 const Icon = item.icon;
-                const isActive = item.key === activeKey;
                 return (
                   <li key={item.key}>
-                    <Link
+                    <DashboardNavLink
                       href={item.href}
-                      aria-current={isActive ? "page" : undefined}
-                      className={cn(
-                        "group flex items-center gap-3 rounded-[var(--radius-sm)] px-3 py-2 text-sm transition-colors",
-                        isActive
-                          ? "bg-[color:var(--color-ink)] text-[color:var(--color-paper)]"
-                          : "text-[color:var(--color-ink)] hover:bg-[color:var(--color-surface-sunk)]",
-                      )}
+                      exact={item.href === rootHref}
+                      className="group flex items-center gap-3 rounded-[var(--radius-sm)] px-3 py-2 text-sm text-[color:var(--color-ink)] transition-colors hover:bg-[color:var(--color-surface-sunk)] aria-[current=page]:bg-[color:var(--color-ink)] aria-[current=page]:text-[color:var(--color-paper)]"
                     >
                       <Icon
-                        className={cn(
-                          "size-4",
-                          isActive
-                            ? ""
-                            : "text-[color:var(--color-ink-soft)] group-hover:text-[color:var(--color-ink)]",
-                        )}
+                        className="size-4 text-[color:var(--color-ink-soft)] group-hover:text-[color:var(--color-ink)] group-aria-[current=page]:text-[color:var(--color-paper)]"
                         aria-hidden="true"
                       />
                       <span>{item.label}</span>
-                    </Link>
+                    </DashboardNavLink>
                   </li>
                 );
               })}
@@ -163,11 +129,7 @@ export function DashboardShell({
               <div className="flex-[1] bg-[color:var(--color-danger)]" />
             </div>
             <div className="flex items-center justify-between gap-3 px-5 py-3">
-              <Link
-                href="/"
-                aria-label="Sebenza — home"
-                className="flex items-center"
-              >
+              <Link href="/" aria-label="Sebenza — home" className="flex items-center">
                 <SebenzaLogo width={110} />
               </Link>
               <div className="flex items-center gap-2">
@@ -189,25 +151,17 @@ export function DashboardShell({
               className="relative overflow-x-auto border-t border-[color:var(--color-hairline)]"
             >
               <ul className="flex min-w-max">
-                {nav.map((item) => {
-                  const isActive = item.key === activeKey;
-                  return (
-                    <li key={item.key}>
-                      <Link
-                        href={item.href}
-                        aria-current={isActive ? "page" : undefined}
-                        className={cn(
-                          "block min-h-11 whitespace-nowrap px-4 py-3 text-xs uppercase tracking-[0.18em]",
-                          isActive
-                            ? "border-b-2 border-[color:var(--color-ink)] text-[color:var(--color-ink)]"
-                            : "border-b-2 border-transparent text-[color:var(--color-ink-soft)]",
-                        )}
-                      >
-                        {item.label}
-                      </Link>
-                    </li>
-                  );
-                })}
+                {nav.map((item) => (
+                  <li key={item.key}>
+                    <DashboardNavLink
+                      href={item.href}
+                      exact={item.href === rootHref}
+                      className="block min-h-11 whitespace-nowrap border-b-2 border-transparent px-4 py-3 text-xs uppercase tracking-[0.18em] text-[color:var(--color-ink-soft)] aria-[current=page]:border-[color:var(--color-ink)] aria-[current=page]:text-[color:var(--color-ink)]"
+                    >
+                      {item.label}
+                    </DashboardNavLink>
+                  </li>
+                ))}
               </ul>
               {/* Fade-edge cue — signals there's more to scroll */}
               <div
@@ -217,50 +171,7 @@ export function DashboardShell({
             </nav>
           </div>
 
-          {banner}
-
-          {/* Masthead */}
-          <header className="relative overflow-hidden border-b-2 border-[color:var(--color-ink)] bg-[color:var(--color-paper)]">
-            {/* Faint chevron motif in the top-right of every dashboard masthead */}
-            <SAChevron
-              variant="signature"
-              className="pointer-events-none absolute -right-24 -top-12 size-[360px] opacity-[0.05]"
-            />
-            <div className="relative flex flex-col gap-4 px-5 py-8 md:flex-row md:items-end md:justify-between md:px-12 md:py-10">
-              <div>
-                {pageEyebrow && (
-                  <div
-                    className={cn(
-                      "flex items-center gap-2 text-[0.72rem] uppercase tracking-[0.24em]",
-                      roleAccent.text,
-                    )}
-                  >
-                    <SAChevron variant="mark" className="size-3" />
-                    {pageEyebrow}
-                  </div>
-                )}
-                <h1 className="mt-2 font-display text-3xl leading-tight md:text-5xl">
-                  {pageTitle}
-                </h1>
-                {pageSubtitle && (
-                  <p className="mt-2 max-w-2xl text-[color:var(--color-ink-soft)]">
-                    {pageSubtitle}
-                  </p>
-                )}
-              </div>
-              <div className="flex flex-wrap items-center gap-3">
-                {/* Desktop-only bell — mobile uses the top strip placement above. */}
-                <div className="hidden md:block">
-                  <BellSlot role={role} />
-                </div>
-                {pageActions}
-              </div>
-            </div>
-          </header>
-
-          <main id="main" className="flex-1 px-5 py-8 md:px-12 md:py-10">
-            {children}
-          </main>
+          {children}
         </div>
       </div>
     </div>

@@ -13,7 +13,7 @@
 
 import { setRequestLocale } from "next-intl/server";
 import { asc } from "drizzle-orm";
-import { DashboardShell } from "@/components/layout/DashboardShell";
+import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
 import { ADMIN_NAV } from "@/components/layout/adminNav";
 import { verifyAdmin } from "@/lib/auth/dal";
 import { getDb } from "@/db/client";
@@ -72,7 +72,7 @@ export default async function AdminLlmPage({
   const activeProvider = view.find((p) => p.active) ?? null;
 
   return (
-    <DashboardShell
+    <DashboardMasthead
       role="admin"
       workspaceLabel={session.name ?? "Admin"}
       workspaceEyebrow="Administrator · 2FA required"
@@ -113,7 +113,7 @@ export default async function AdminLlmPage({
           in the row and the audit ledger.
         </p>
       </aside>
-    </DashboardShell>
+    </DashboardMasthead>
   );
 }
 

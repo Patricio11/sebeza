@@ -1,5 +1,5 @@
 import { setRequestLocale } from "next-intl/server";
-import { DashboardShell } from "@/components/layout/DashboardShell";
+import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
 import { ADMIN_NAV } from "@/components/layout/adminNav";
 import { verifyAdmin } from "@/lib/auth/dal";
 import { listForUser } from "@/lib/notifications/query";
@@ -19,7 +19,7 @@ export default async function AdminNotificationsPage({
   const items = hasMore ? probe.slice(0, PAGE) : probe;
 
   return (
-    <DashboardShell
+    <DashboardMasthead
       role="admin"
       workspaceLabel={session.name ?? "Admin"}
       workspaceEyebrow="Administrator · 2FA required"
@@ -39,6 +39,6 @@ export default async function AdminNotificationsPage({
           ctaLabel: "Back to overview",
         }}
       />
-    </DashboardShell>
+    </DashboardMasthead>
   );
 }

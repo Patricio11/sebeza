@@ -1,6 +1,6 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
-import { DashboardShell } from "@/components/layout/DashboardShell";
+import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
 import { ADMIN_NAV } from "@/components/layout/adminNav";
 import { verifyAdmin } from "@/lib/auth/dal";
 import { listUsersQuery, type AdminUserRow } from "@/lib/admin/users";
@@ -35,7 +35,7 @@ export default async function UsersPage({
   const rows = await listUsersQuery({ search: q, role, status, limit: 200 });
 
   return (
-    <DashboardShell
+    <DashboardMasthead
       role="admin"
       workspaceLabel={session.name ?? "Admin"}
       workspaceEyebrow="Administrator · 2FA required"
@@ -186,7 +186,7 @@ export default async function UsersPage({
           </ul>
         </>
       )}
-    </DashboardShell>
+    </DashboardMasthead>
   );
 }
 

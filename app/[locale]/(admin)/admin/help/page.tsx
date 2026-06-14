@@ -15,7 +15,7 @@
 
 import { setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
-import { DashboardShell } from "@/components/layout/DashboardShell";
+import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
 import { ADMIN_NAV } from "@/components/layout/adminNav";
 import { verifyAdmin } from "@/lib/auth/dal";
 import {
@@ -42,7 +42,7 @@ export default async function AdminHelpIndexPage({
   const initialQuery = q?.trim() ?? "";
 
   return (
-    <DashboardShell
+    <DashboardMasthead
       role="admin"
       workspaceLabel={session.name ?? "Admin"}
       workspaceEyebrow="Administrator · 2FA required"
@@ -121,7 +121,7 @@ export default async function AdminHelpIndexPage({
         admin docs  the console is English-only for trained staff,
         and POPIA / consent copy is human-translated only.
       </p>
-    </DashboardShell>
+    </DashboardMasthead>
   );
 }
 

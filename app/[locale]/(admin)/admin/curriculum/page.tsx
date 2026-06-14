@@ -13,7 +13,7 @@ import { setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { asc, desc, eq } from "drizzle-orm";
 import { ChevronLeft } from "lucide-react";
-import { DashboardShell } from "@/components/layout/DashboardShell";
+import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
 import { ADMIN_NAV } from "@/components/layout/adminNav";
 import { verifyAdmin } from "@/lib/auth/dal";
 import { getDb } from "@/db/client";
@@ -108,7 +108,7 @@ export default async function AdminCurriculumPage({
       : "No active LLM provider. Visit /admin/llm to configure + activate one.";
 
   return (
-    <DashboardShell
+    <DashboardMasthead
       role="admin"
       workspaceLabel={session.name ?? "Admin"}
       workspaceEyebrow="Administrator · 2FA required"
@@ -143,6 +143,6 @@ export default async function AdminCurriculumPage({
         killSwitchOn={killSwitchOn}
         hasActiveProvider={Boolean(activeProvider[0])}
       />
-    </DashboardShell>
+    </DashboardMasthead>
   );
 }
