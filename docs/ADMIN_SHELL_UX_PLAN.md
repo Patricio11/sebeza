@@ -141,6 +141,86 @@ independent of this finding).
 
 ---
 
+## PART D — Full admin user-management surface  _(Origin: founder, 2026-06-14)_
+
+> "The user profile must be a full one with **all the actions** an admin can do, **all user
+> info**, and improved UX/UI." The Part-B page was info-only + minimal actions.
+
+Turn `/admin/users/[id]` into a real management console: everything an admin can see about a user,
+and every action they can take, surfaced in one well-designed surface (sidebar stays from Part A).
+
+### Inventory (what exists to surface — confirmed by codebase sweep)
+- **Account actions** (account-level, document-free): `suspendUser` / `restoreUser` /
+  `eraseUser` (`lib/admin/moderation.ts`), `reset2faForUser` (`lib/auth/two-factor.ts`).
+  Guards: can't suspend/erase self or other admins; can't reset own 2FA. `reset2faForUser` DOES
+  work on another admin.
+- **Seeker verification** (document-dependent): `approveSeekerId` / `rejectSeekerId` /
+  `requestChangesOnSeekerId` (`lib/admin/kyc-review.ts`); `approveQualification` /
+  `rejectQualification` (`lib/admin/verifications.ts`).
+- **Employer vetting** (document-dependent): `approveOrg` / `rejectOrg` / `requestChangesOnOrg` /
+  `resendOrgVerificationEmail` / `markOrgEmailVerified` (`lib/admin/org-vetting.ts`).
+- **Data:** `app_user` (incl. image, kyc, phone-verified, channels, 2FA, suspension), `session`
+  (last sign-in + active devices), seeker profile via `loadProfileForUser` (profession, status,
+  completeness, verification roll-up, skills, qualifications-with-state, experience, academic),
+  org membership + verification, `consents` (POPIA), `audit_log` via `recentAuditEventsFromDb`.
+
+### D1 — Rich loader
+- Extend `getAdminUserDetail` with the missing account fields (image, `kycVerifiedAt`,
+  `phoneVerifiedAt`, sms/whatsapp channels) + `lastSignInAt` + `activeSessions` (from `session`).
+- Add small reads: `listConsentsForUser(userId)`, `getEmployerContextForUser(userId)`
+  (org id/name/role/verification via `organization_members` → `organizations`).
+- Page composes those + `loadProfileForUser(userId)` (seekers) +
+  `recentAuditEventsFromDb({ actor: userId })`.
+
+### D2 — Redesigned page (UX/UI)
+- **Header:** avatar (`Avatar`), name, @handle, email, role pill, status badge, key facts
+  (joined, last active), copy-able account id.
+- **Sections:** Security & access (email-verified, 2FA, phone, channels, sessions) · **Account
+  actions** (prominent, see D3) · Seeker profile + verification (state + deep-links) · Employer
+  organisation (state + deep-link) · Consents · Recent activity (audit). Role-aware: seeker vs
+  employer vs admin sections render conditionally.
+
+### D3 — Account actions, inline + redesigned
+- New `AccountAdminActions` client component (replaces the tiny list-row `UserRowActions` on this
+  page; the directory list keeps `UserRowActions`). Reuses the existing server actions. Prominent
+  buttons + confirm-with-reason flows + a clearly separated **danger zone** (suspend/erase).
+  **Role-aware:** for an admin target, show 2FA-reset (allowed) and explain that suspend/erase are
+  guarded ("ops procedure required") rather than showing buttons that the server will refuse.
+
+### D4 — Document-dependent reviews (scope decision)
+- KYC ID review, qualification verification, and org vetting need the **document viewer** that
+  already lives in the dedicated queues (`/admin/verifications`, KYC review). Also `QualificationItem`
+  carries no id in the profile projection. **Decision for D:** surface the full *state* of each
+  inline (verified/pending/rejected, reasons, dates) + a prominent **"Review in queue →"** deep
+  link, rather than duplicate the doc-viewer here. The admin sees everything and is one click from
+  acting. _(Follow-up option: inline the decision actions — approve/reject/request-changes — with a
+  signed-URL doc link beside them, if on-page review is wanted. Tracked here.)_
+
+### D5 — Tests + verify ✅
+- Extend the E2E to assert the management sections render + the account-action controls are present
+  for a non-admin target. `npm run test:all` + build + E2E green, desktop + mobile-360.
+
+**Status:** ✅ DONE 2026-06-14 (commit pending). What shipped:
+- **Loader (D1):** `getAdminUserDetail` extended (image, `kycVerifiedAt`, `phoneVerifiedAt`, sms/
+  whatsapp channels, `lastSignInAt` + `activeSessions` from `session`); added `listConsentsForUser`
+  + `getEmployerContextForUser`. Page composes those + `loadProfileForUser` (seekers) +
+  `recentAuditEventsFromDb`.
+- **Page (D2):** full redesign — identity header (avatar + role/status/key facts), and cards for
+  Security & access, Seeker profile, Verification (roll-up + KYC + qualifications), Employer
+  organisation, Consents (POPIA), Recent activity; right rail with Account actions + "Manage
+  elsewhere" deep-links. Role-aware, 360px-first.
+- **Actions (D3):** new `AccountAdminActions` — prominent suspend/restore, reset-2FA, and a
+  separated danger-zone erase, with confirm-with-reason flows; role-aware guards (self / admin
+  targets explained, not shown as failing buttons); `router.refresh()` on success.
+- **Doc-review (D4):** state surfaced inline + "Open queue"/"Manage elsewhere" deep-links to
+  `/admin/verifications?tab=seeker-ids|qualifications|organisations` (where the doc viewer lives).
+  Inlining those decision actions with a signed-URL doc link remains the recorded follow-up.
+- **Verified:** typecheck ✅ · lint ✅ (0 err) · build ✅ · `npm run test:all` 318/318 ✅ ·
+  E2E ✅ (detail test now asserts the management sections + live Suspend / Reset-2FA controls on an
+  active seeker, no `/p/` bounce, back returns to directory — desktop + mobile-360).
+
+---
+
 ## 🧪 VERIFICATION (whole plan)
 
 - `npm run test:all` (typecheck + lint + vitest) green.

@@ -56,7 +56,9 @@ test("admin user detail opens in-shell (no bounce to the public profile)", async
   await signIn(page, "admin@sebenzasa.com");
   await page.waitForURL(/\/admin/, { timeout: 30_000 });
 
-  await page.goto("/en/admin/users");
+  // Filter to active seekers so the clicked target is a known, non-admin,
+  // non-self account — its account-action controls must be live.
+  await page.goto("/en/admin/users?role=seeker&status=active");
   await expect(page.locator("main")).toBeVisible();
 
   // Click a user in the directory — must open /admin/users/[id] INSIDE the
@@ -74,8 +76,14 @@ test("admin user detail opens in-shell (no bounce to the public profile)", async
   await expect(page.getByRole("navigation").first()).toBeVisible();
   const backLink = page.getByRole("link", { name: /back to user directory/i });
   await expect(backLink).toBeVisible();
-  // Moderation actions are reachable from the detail page.
-  await expect(page.getByText("Actions", { exact: true })).toBeVisible();
+
+  // Full management surface: the info sections + live account actions.
+  await expect(page.getByRole("heading", { name: /security & access/i })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /account actions/i })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /seeker profile/i })).toBeVisible();
+  // Active non-admin target → real action controls (not just info).
+  await expect(page.getByRole("button", { name: /suspend account/i })).toBeVisible();
+  await expect(page.getByRole("button", { name: /reset two-factor auth/i })).toBeVisible();
 
   // Back returns to the directory.
   await backLink.click();

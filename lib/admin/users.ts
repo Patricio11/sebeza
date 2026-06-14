@@ -139,6 +139,18 @@ export interface AdminUserDetail extends AdminUserRow {
   /** Resolved display name of the admin who suspended the account, if any. */
   suspendedByName: string | null;
   deletedAt: string | null;
+  /** Avatar URL (Better Auth `image`); null → initials block. */
+  image: string | null;
+  /** Phase 8 — admin/Home-Affairs KYC verification timestamp (ISO). */
+  kycVerifiedAt: string | null;
+  /** Phase 11.4.4 — phone trust + per-channel opt-in. */
+  phoneVerifiedAt: string | null;
+  smsChannelEnabled: boolean;
+  whatsappChannelEnabled: boolean;
+  /** Most recent session createdAt (ISO) — a proxy for last sign-in. */
+  lastSignInAt: string | null;
+  /** Count of non-expired sessions (active devices). */
+  activeSessions: number;
 }
 
 /**
@@ -166,6 +178,11 @@ export async function getAdminUserDetail(
       role: schema.appUser.role,
       emailVerified: schema.appUser.emailVerified,
       twoFactorEnabled: schema.appUser.twoFactorEnabled,
+      image: schema.appUser.image,
+      kycVerifiedAt: schema.appUser.kycVerifiedAt,
+      phoneVerifiedAt: schema.appUser.phoneVerifiedAt,
+      smsChannelEnabled: schema.appUser.smsChannelEnabled,
+      whatsappChannelEnabled: schema.appUser.whatsappChannelEnabled,
       createdAt: schema.appUser.createdAt,
       updatedAt: schema.appUser.updatedAt,
       suspendedAt: schema.appUser.suspendedAt,
@@ -204,6 +221,21 @@ export async function getAdminUserDetail(
     suspendedByName = actor[0]?.name ?? null;
   }
 
+  // Sessions → last sign-in proxy + active-device count.
+  const now = new Date();
+  const sessions = await db
+    .select({
+      createdAt: schema.session.createdAt,
+      expiresAt: schema.session.expiresAt,
+    })
+    .from(schema.session)
+    .where(eq(schema.session.userId, userId))
+    .orderBy(desc(schema.session.createdAt));
+  const lastSignInAt = sessions[0]?.createdAt
+    ? sessions[0].createdAt.toISOString()
+    : null;
+  const activeSessions = sessions.filter((s) => s.expiresAt > now).length;
+
   return {
     id: r.id,
     email: r.email,
@@ -211,6 +243,11 @@ export async function getAdminUserDetail(
     role: r.role as UserRole,
     emailVerified: r.emailVerified,
     twoFactorEnabled: r.twoFactorEnabled,
+    image: r.image,
+    kycVerifiedAt: r.kycVerifiedAt ? r.kycVerifiedAt.toISOString() : null,
+    phoneVerifiedAt: r.phoneVerifiedAt ? r.phoneVerifiedAt.toISOString() : null,
+    smsChannelEnabled: r.smsChannelEnabled,
+    whatsappChannelEnabled: r.whatsappChannelEnabled,
     createdAt: r.createdAt.toISOString(),
     updatedAt: r.updatedAt.toISOString(),
     handle: r.handle,
@@ -222,6 +259,93 @@ export async function getAdminUserDetail(
     suspendedAt: r.suspendedAt ? r.suspendedAt.toISOString() : null,
     suspendedByName,
     deletedAt: r.deletedAt ? r.deletedAt.toISOString() : null,
+    lastSignInAt,
+    activeSessions,
+  };
+}
+
+/** One POPIA consent purpose + its current state, for the detail page. */
+export interface AdminConsentRow {
+  purpose: string;
+  state: "none" | "granted" | "revoked";
+  grantedAt: string | null;
+  revokedAt: string | null;
+  pausedUntil: string | null;
+}
+
+/** Every consent row on file for a user (POPIA transparency on the detail page). */
+export async function listConsentsForUser(
+  userId: string,
+): Promise<AdminConsentRow[]> {
+  await verifyAdmin();
+  const db = getDb();
+  const rows = await db
+    .select({
+      purpose: schema.consents.purpose,
+      state: schema.consents.state,
+      grantedAt: schema.consents.grantedAt,
+      revokedAt: schema.consents.revokedAt,
+      pausedUntil: schema.consents.pausedUntil,
+    })
+    .from(schema.consents)
+    .where(eq(schema.consents.userId, userId))
+    .orderBy(schema.consents.purpose);
+  return rows.map((r) => ({
+    purpose: r.purpose,
+    state: r.state as "none" | "granted" | "revoked",
+    grantedAt: r.grantedAt ? r.grantedAt.toISOString() : null,
+    revokedAt: r.revokedAt ? r.revokedAt.toISOString() : null,
+    pausedUntil: r.pausedUntil ? r.pausedUntil.toISOString() : null,
+  }));
+}
+
+/** An employer's organisation membership + the org's vetting state. */
+export interface AdminEmployerContext {
+  organizationId: string;
+  organizationName: string;
+  role: string;
+  verification: "unverified" | "pending" | "verified" | "rejected";
+  verifiedAt: string | null;
+  rejectionReason: string | null;
+  adminNote: string | null;
+  joinedAt: string | null;
+}
+
+/** The org an employer belongs to + its vetting state (null for non-employers). */
+export async function getEmployerContextForUser(
+  userId: string,
+): Promise<AdminEmployerContext | null> {
+  await verifyAdmin();
+  const db = getDb();
+  const rows = await db
+    .select({
+      organizationId: schema.organizations.id,
+      organizationName: schema.organizations.name,
+      role: schema.organizationMembers.role,
+      verification: schema.organizations.verification,
+      verifiedAt: schema.organizations.verifiedAt,
+      rejectionReason: schema.organizations.rejectionReason,
+      adminNote: schema.organizations.adminNote,
+      joinedAt: schema.organizationMembers.joinedAt,
+    })
+    .from(schema.organizationMembers)
+    .innerJoin(
+      schema.organizations,
+      eq(schema.organizations.id, schema.organizationMembers.organizationId),
+    )
+    .where(eq(schema.organizationMembers.userId, userId))
+    .limit(1);
+  const r = rows[0];
+  if (!r) return null;
+  return {
+    organizationId: r.organizationId,
+    organizationName: r.organizationName,
+    role: r.role,
+    verification: r.verification as AdminEmployerContext["verification"],
+    verifiedAt: r.verifiedAt ? r.verifiedAt.toISOString() : null,
+    rejectionReason: r.rejectionReason,
+    adminNote: r.adminNote,
+    joinedAt: r.joinedAt ? r.joinedAt.toISOString() : null,
   };
 }
 

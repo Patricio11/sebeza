@@ -35,10 +35,15 @@ Keep entries terse  this is a triage list, not a spec.
   content column reloads on navigation (it was remounting the whole screen + flashing a skeleton).
   **Part A admin = done** (shipped 2026-06-14); seeker / employer / gov rollout + `DashboardShell`
   retirement still tracked in the plan.
-- **In-shell admin user detail** (`/admin/users/[id]`) — ✅ **done 2026-06-14.** Admins no longer
-  bounce to the public `/p/[handle]`; the directory opens a detail view inside the admin frame
-  (back button + the existing suspend/restore/2FA-reset/erase actions; public profile is a
-  secondary link).
+- **In-shell admin user-management** (`/admin/users/[id]`) — ✅ **done 2026-06-14** (Part D).
+  Full management console inside the admin frame: identity header, Security & access, seeker
+  profile + verification (roll-up/KYC/qualifications), employer organisation, POPIA consents,
+  recent activity, and a redesigned account-actions panel (suspend/restore, reset-2FA, danger-zone
+  erase — role-aware). Document-dependent reviews (KYC ID / qualifications / org vetting) surface
+  state inline + deep-link to the verification queues that hold the doc viewer.
+  - _Follow-up:_ inline the KYC / qualification / org **decision actions** (approve/reject/
+    request-changes) on the user page with a signed-URL doc link beside them, if on-page review is
+    wanted (currently deep-linked to the queues).
 - **Public profile loading-hang** — ✅ **resolved (not a bug) 2026-06-14.** Probed: the page
   renders fully server-side (HTTP 200, 179 KB); the "stuck skeleton" was first-hit dev Turbopack
   compilation, not a stall, and prod has no per-request compile. Restart `npm run dev` if it
