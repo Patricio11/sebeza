@@ -54,23 +54,39 @@ and only `{children}` shows the fallback.
   strengthened to click a sidebar link client-side and assert the sidebar survives + marks the
   new page active; 10/10 across desktop + mobile-360).
 
-### ⏳ A2 — Seeker (`/dashboard`) — TODO
-### ⏳ A3 — Employer (`/employer`) — TODO
-### ⏳ A4 — Gov (`/gov`) — TODO
+### ✅ A2 — Seeker (`/dashboard`) — DONE 2026-06-14
+### ✅ A3 — Employer (`/employer`) — DONE 2026-06-14
+### ✅ A4 — Gov (`/gov`) — DONE 2026-06-14
 
-Each follows the admin template: add `(<group>)/<root>/layout.tsx` rendering `<DashboardFrame>`
-(workspace label from that role's session/DAL, its `*_NAV`), switch the group's pages to
-`<DashboardMasthead>`, and slim its `loading.tsx` to a content skeleton. Watch for per-page
-`banner`s (e.g. employer org-unverified) and any group-specific masthead actions — those stay on
-the page via `DashboardMasthead`.
+Each followed the admin template: a `(<group>)/<root>/layout.tsx` rendering `<DashboardFrame>`
+(workspace label from the role's DAL: seeker `getMyProfile().displayName`, employer
+`verifyEmployer().orgName`, gov `verifyGov().name`; its `*_NAV`), pages switched to
+`<DashboardMasthead>`, and `loading.tsx` slimmed to a content skeleton.
+- **Guards:** seeker `verifyRole("seeker")` (2FA not forced for seekers); employer
+  `verifyEmployer()` — the WEAK guard so `/employer/onboarding` doesn't loop; gov `verifyGov()`.
+- **Print-CSS pages (the wrinkle):** `/dashboard/cv` and `/gov/brief` are standalone full-page
+  print documents that don't use the shell. A group layout wraps them too — so `<DashboardFrame>`
+  chrome is now `print:hidden` and its grid is `print:block`, so those pages still **print** as
+  clean, full-width, chrome-less documents. The only change: on **screen** they now show the
+  workspace sidebar (consistent with the rest of the dashboard; both are max-width-constrained so
+  they render fine in the content column). E2E confirms the CV builder still renders with no 360px
+  overflow.
+- Gov's one-off "Government · analyst access" eyebrow was standardised to "Government / policy
+  workspace" (sidebar eyebrow only; cosmetic).
 
-### 🧹 A5 — Cleanup after rollout — TODO
-Once A2–A4 land and no page renders `<DashboardShell>`:
-- Delete `components/layout/DashboardShell.tsx`.
-- Remove the **transitional ignored props** from `DashboardMasthead` (`workspaceLabel`,
-  `workspaceEyebrow`, `nav`, `activeKey`) and drop them from every page's `<DashboardMasthead>`
-  call + the now-unused `*_NAV` / `activeKey` imports on pages.
-- Point the nav config files' `import type { DashboardNavItem }` at `./dashboardChrome` directly.
+### 🧹 A5 — Cleanup — DONE (partial; prop-strip deferred) 2026-06-14
+- ✅ Repointed the 4 nav configs' `import type { DashboardNavItem }` to `./dashboardChrome`.
+- ✅ **Deleted `components/layout/DashboardShell.tsx`** — every page is migrated; nothing imports it.
+- ⏳ **Deferred (optional cosmetic):** the migrated pages still pass the compatibility-shim props
+  (`workspaceLabel` / `workspaceEyebrow` / `nav` / `activeKey`) that `DashboardMasthead` ignores.
+  Stripping them from ~60 page call-sites (plus the now-unused `*_NAV` / `activeKey` imports + any
+  vars computed only for the label) is high-churn / low-value and risks cascading unused-symbol
+  lint errors, so it's left as a follow-up. The shims are documented as intentional in
+  `DashboardMasthead`.
+
+**Verified (whole A rollout):** build ✅ · typecheck ✅ · lint ✅ (0 err) · `vitest` 318/318 ✅ ·
+**E2E 46/46** at desktop + mobile-360 (admin/seeker/employer/student/analytics/public/locality/
+perf-budget arcs, incl. the CV print page inside the frame).
 
 ---
 

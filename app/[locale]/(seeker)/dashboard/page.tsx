@@ -1,7 +1,7 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 import { Link } from "@/i18n/navigation";
-import { DashboardShell } from "@/components/layout/DashboardShell";
+import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
 import { SEEKER_NAV } from "@/components/layout/seekerNav";
 import { ProfileCompleteness } from "@/components/ui/ProfileCompleteness";
 import { VerificationBadge } from "@/components/ui/VerificationBadge";
@@ -140,7 +140,7 @@ export default async function SeekerOverviewPage({
   const recentBadges = await listMyBadges(me.profileId, 3);
 
   return (
-    <DashboardShell
+    <DashboardMasthead
       role="seeker"
       workspaceLabel={me.displayName}
       workspaceEyebrow="Job seeker · workspace"
@@ -541,7 +541,7 @@ export default async function SeekerOverviewPage({
             seeker has none  no badges is honest, not a scolding. */}
         <RecentAchievementsStrip badges={recentBadges} locale={locale} />
       </div>
-    </DashboardShell>
+    </DashboardMasthead>
   );
 }
 

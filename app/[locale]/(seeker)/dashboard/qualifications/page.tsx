@@ -1,7 +1,7 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 import { eq, asc } from "drizzle-orm";
-import { DashboardShell } from "@/components/layout/DashboardShell";
+import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
 import { SEEKER_NAV } from "@/components/layout/seekerNav";
 import { getMyProfile } from "@/lib/profile/me";
 import { getDb } from "@/db/client";
@@ -51,7 +51,7 @@ export default async function QualificationsPage({
   }));
 
   return (
-    <DashboardShell
+    <DashboardMasthead
       role="seeker"
       workspaceLabel={me.displayName}
       workspaceEyebrow="Job seeker · workspace"
@@ -124,6 +124,6 @@ export default async function QualificationsPage({
           />
         </div>
       </div>
-    </DashboardShell>
+    </DashboardMasthead>
   );
 }

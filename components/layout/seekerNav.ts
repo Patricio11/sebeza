@@ -12,7 +12,7 @@ import {
   Settings,
   HelpCircle,
 } from "lucide-react";
-import type { DashboardNavItem } from "./DashboardShell";
+import type { DashboardNavItem } from "./dashboardChrome";
 
 export const SEEKER_NAV: DashboardNavItem[] = [
   { key: "overview", label: "Overview", href: "/dashboard", icon: LayoutDashboard },

@@ -31,10 +31,13 @@ Keep entries terse  this is a triage list, not a spec.
 
 > Active plan: **`docs/ADMIN_SHELL_UX_PLAN.md`**.
 
-- **Persistent dashboard sidebar**  hoist the sidebar into a route-group `layout.tsx` so only the
-  content column reloads on navigation (it was remounting the whole screen + flashing a skeleton).
-  **Part A admin = done** (shipped 2026-06-14); seeker / employer / gov rollout + `DashboardShell`
-  retirement still tracked in the plan.
+- **Persistent dashboard sidebar** — ✅ **done 2026-06-14** (Part A, all four groups). The sidebar
+  is hoisted into a route-group `layout.tsx` per group (`<DashboardFrame>`), so navigation only
+  reloads the content column. `DashboardShell` is retired. Standalone print pages (`/dashboard/cv`,
+  `/gov/brief`) print chrome-less via `print:hidden`/`print:block` on the frame.
+  - _Deferred (optional cosmetic):_ strip the now-ignored compatibility-shim props
+    (`workspaceLabel`/`workspaceEyebrow`/`nav`/`activeKey`) from the ~60 migrated `<DashboardMasthead>`
+    call-sites.
 - **In-shell admin user-management** (`/admin/users/[id]`) — ✅ **done 2026-06-14** (Part D).
   Full management console inside the admin frame: identity header, Security & access, seeker
   profile + verification (roll-up/KYC/qualifications), employer organisation, POPIA consents,

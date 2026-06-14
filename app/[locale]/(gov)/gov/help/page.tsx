@@ -14,7 +14,7 @@
 
 import { setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
-import { DashboardShell } from "@/components/layout/DashboardShell";
+import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
 import { GOV_NAV } from "@/components/layout/govNav";
 import { verifyGov } from "@/lib/auth/dal";
 import {
@@ -41,7 +41,7 @@ export default async function GovHelpIndexPage({
   const initialQuery = q?.trim() ?? "";
 
   return (
-    <DashboardShell
+    <DashboardMasthead
       role="gov"
       workspaceLabel={session.name ?? "Government workspace"}
       workspaceEyebrow="Government · analyst access"
@@ -120,7 +120,7 @@ export default async function GovHelpIndexPage({
         workspace is English-only in v1, and POPIA-grade copy is
         human-translated only.
       </p>
-    </DashboardShell>
+    </DashboardMasthead>
   );
 }
 

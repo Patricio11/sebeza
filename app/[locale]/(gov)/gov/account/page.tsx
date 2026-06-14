@@ -1,5 +1,5 @@
 import { setRequestLocale } from "next-intl/server";
-import { DashboardShell } from "@/components/layout/DashboardShell";
+import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
 import { GOV_NAV } from "@/components/layout/govNav";
 import { SignOutButton } from "@/components/feature/auth/SignOutButton";
 import { TwoFactorAccountPanel } from "@/components/feature/auth/TwoFactorAccountPanel";
@@ -18,7 +18,7 @@ export default async function GovAccountPage({
   const enforced = await getSetting<boolean>("feature_flag_2fa_enforced");
 
   return (
-    <DashboardShell
+    <DashboardMasthead
       role="gov"
       workspaceLabel={me.name}
       workspaceEyebrow="Government / policy workspace"
@@ -72,6 +72,6 @@ export default async function GovAccountPage({
           />
         </section>
       </div>
-    </DashboardShell>
+    </DashboardMasthead>
   );
 }

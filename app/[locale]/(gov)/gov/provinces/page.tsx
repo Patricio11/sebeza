@@ -1,6 +1,6 @@
 import { setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
-import { DashboardShell } from "@/components/layout/DashboardShell";
+import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
 import { GOV_NAV } from "@/components/layout/govNav";
 import { verifyGov } from "@/lib/auth/dal";
 import { PROVINCES } from "@/lib/mock/taxonomy";
@@ -19,7 +19,7 @@ export default async function GovProvincesIndexPage({
   const me = await verifyGov();
 
   return (
-    <DashboardShell
+    <DashboardMasthead
       role="gov"
       workspaceLabel={me.name}
       workspaceEyebrow="Government / policy workspace"
@@ -54,6 +54,6 @@ export default async function GovProvincesIndexPage({
           </li>
         ))}
       </ul>
-    </DashboardShell>
+    </DashboardMasthead>
   );
 }

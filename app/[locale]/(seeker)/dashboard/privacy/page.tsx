@@ -1,6 +1,6 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
-import { DashboardShell } from "@/components/layout/DashboardShell";
+import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
 import { SEEKER_NAV } from "@/components/layout/seekerNav";
 import { ConsentRow } from "@/components/feature/auth/ConsentRow";
 import { getMyProfile } from "@/lib/profile/me";
@@ -114,7 +114,7 @@ export default async function PrivacyPage({
   const blocks = await listMyBlocks();
 
   return (
-    <DashboardShell
+    <DashboardMasthead
       role="seeker"
       workspaceLabel={me.displayName}
       workspaceEyebrow="Job seeker · workspace"
@@ -234,7 +234,7 @@ export default async function PrivacyPage({
           </div>
         </div>
       </section>
-    </DashboardShell>
+    </DashboardMasthead>
   );
 }
 

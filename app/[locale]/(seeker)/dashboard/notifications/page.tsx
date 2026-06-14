@@ -1,5 +1,5 @@
 import { setRequestLocale } from "next-intl/server";
-import { DashboardShell } from "@/components/layout/DashboardShell";
+import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
 import { SEEKER_NAV } from "@/components/layout/seekerNav";
 import { verifyRole } from "@/lib/auth/dal";
 import { listForUser } from "@/lib/notifications/query";
@@ -20,7 +20,7 @@ export default async function SeekerNotificationsPage({
   const items = hasMore ? probe.slice(0, PAGE) : probe;
 
   return (
-    <DashboardShell
+    <DashboardMasthead
       role="seeker"
       workspaceLabel={user.name}
       workspaceEyebrow="Job seeker · workspace"
@@ -40,6 +40,6 @@ export default async function SeekerNotificationsPage({
           ctaLabel: "See your activity timeline",
         }}
       />
-    </DashboardShell>
+    </DashboardMasthead>
   );
 }

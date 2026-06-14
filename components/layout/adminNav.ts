@@ -13,7 +13,7 @@ import {
   BookOpen,
   Sparkles,
 } from "lucide-react";
-import type { DashboardNavItem } from "./DashboardShell";
+import type { DashboardNavItem } from "./dashboardChrome";
 
 export const ADMIN_NAV: DashboardNavItem[] = [
   { key: "overview", label: "Overview", href: "/admin", icon: LayoutDashboard },

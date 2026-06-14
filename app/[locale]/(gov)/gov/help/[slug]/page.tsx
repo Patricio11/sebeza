@@ -15,7 +15,7 @@
 import { setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { Link } from "@/i18n/navigation";
-import { DashboardShell } from "@/components/layout/DashboardShell";
+import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
 import { GOV_NAV } from "@/components/layout/govNav";
 import { verifyGov } from "@/lib/auth/dal";
 import {
@@ -51,7 +51,7 @@ export default async function GovHelpArticlePage({
   const Body = article.Article;
 
   return (
-    <DashboardShell
+    <DashboardMasthead
       role="gov"
       workspaceLabel={session.name ?? "Government workspace"}
       workspaceEyebrow="Government · analyst access"
@@ -125,6 +125,6 @@ export default async function GovHelpArticlePage({
           </section>
         )}
       </div>
-    </DashboardShell>
+    </DashboardMasthead>
   );
 }

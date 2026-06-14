@@ -1,6 +1,6 @@
 import { setRequestLocale } from "next-intl/server";
 import Link from "next/link";
-import { DashboardShell } from "@/components/layout/DashboardShell";
+import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
 import { GOV_NAV } from "@/components/layout/govNav";
 import { verifyGov } from "@/lib/auth/dal";
 import { Download } from "lucide-react";
@@ -16,7 +16,7 @@ export default async function GovExportsPage({
   const me = await verifyGov();
 
   return (
-    <DashboardShell
+    <DashboardMasthead
       role="gov"
       workspaceLabel={me.name}
       workspaceEyebrow="Government / policy workspace"
@@ -65,7 +65,7 @@ export default async function GovExportsPage({
           desc="Per (profession × province) cell: classification + demand_score + local_supply_ratio + foreign_fill_share + placement counts. Same suppression + threshold rules as /gov/shortage AND /gov/opportunity. Filter to opportunities in your spreadsheet by classification = supply_available. Add ?province=Gauteng for a province slice."
         />
       </ul>
-    </DashboardShell>
+    </DashboardMasthead>
   );
 }
 

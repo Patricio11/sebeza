@@ -15,7 +15,7 @@
 
 import { setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
-import { DashboardShell } from "@/components/layout/DashboardShell";
+import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
 import { GOV_NAV } from "@/components/layout/govNav";
 import { verifyGov } from "@/lib/auth/dal";
 import { getSetting } from "@/lib/admin/settings";
@@ -40,7 +40,7 @@ export default async function GovEmployerLookupPage({
   const floor = await getSetting<number>("employer_mix_min_placements");
 
   return (
-    <DashboardShell
+    <DashboardMasthead
       role="gov"
       workspaceLabel={me.name}
       workspaceEyebrow="Government / policy workspace"
@@ -102,7 +102,7 @@ export default async function GovEmployerLookupPage({
           <EmployerLookupForm />
         </section>
       )}
-    </DashboardShell>
+    </DashboardMasthead>
   );
 }
 

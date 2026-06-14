@@ -1,6 +1,6 @@
 import { setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
-import { DashboardShell } from "@/components/layout/DashboardShell";
+import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
 import { GOV_NAV } from "@/components/layout/govNav";
 import { verifyGov } from "@/lib/auth/dal";
 import { lmiWithTrend } from "@/lib/analytics/lmi";
@@ -50,7 +50,7 @@ export default async function GovOverviewPage({
     : null;
 
   return (
-    <DashboardShell
+    <DashboardMasthead
       role="gov"
       workspaceLabel={me.name}
       workspaceEyebrow="Government / policy workspace"
@@ -244,7 +244,7 @@ export default async function GovOverviewPage({
           .
         </p>
       </section>
-    </DashboardShell>
+    </DashboardMasthead>
   );
 }
 

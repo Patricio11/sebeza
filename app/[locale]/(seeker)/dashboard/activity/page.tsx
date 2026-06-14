@@ -1,6 +1,6 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
-import { DashboardShell } from "@/components/layout/DashboardShell";
+import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
 import { SEEKER_NAV } from "@/components/layout/seekerNav";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { getMyProfile } from "@/lib/profile/me";
@@ -31,7 +31,7 @@ export default async function ActivityPage({
   const { kpis, feed } = await getSeekerActivity(me);
 
   return (
-    <DashboardShell
+    <DashboardMasthead
       role="seeker"
       workspaceLabel={me.displayName}
       workspaceEyebrow="Job seeker · workspace"
@@ -98,7 +98,7 @@ export default async function ActivityPage({
         </a>
         .
       </p>
-    </DashboardShell>
+    </DashboardMasthead>
   );
 }
 

@@ -11,7 +11,7 @@ import {
   GraduationCap,
   HelpCircle,
 } from "lucide-react";
-import type { DashboardNavItem } from "./DashboardShell";
+import type { DashboardNavItem } from "./dashboardChrome";
 
 export const GOV_NAV: DashboardNavItem[] = [
   { key: "overview", label: "Overview", href: "/gov", icon: LayoutDashboard },

@@ -1,19 +1,28 @@
 import { Skeleton } from "@/components/ui/Skeleton";
 
+/**
+ * Loading fallback for the seeker segment. The sidebar lives in the route-group
+ * `layout.tsx` (outside this Suspense boundary), so this skeleton fills only
+ * the main column — the sidebar stays put. Echoes the masthead + content.
+ */
 export default function DashboardLoading() {
   return (
-    <div className="min-h-screen bg-[color:var(--color-paper)] p-6 md:p-12">
-      <div className="max-w-[1200px] space-y-6">
-        <Skeleton className="h-6 w-32" />
-        <Skeleton className="h-10 w-3/4 max-w-2xl" />
-        <Skeleton className="h-4 w-full max-w-md" />
-        <div className="grid gap-4 md:grid-cols-3">
-          <Skeleton className="h-32 w-full" />
-          <Skeleton className="h-32 w-full" />
-          <Skeleton className="h-32 w-full" />
-        </div>
-        <Skeleton className="h-64 w-full" />
+    <>
+      <div className="border-b-2 border-[color:var(--color-ink)] bg-[color:var(--color-paper)] px-5 py-8 md:px-12 md:py-10">
+        <Skeleton className="h-3 w-32" />
+        <Skeleton className="mt-3 h-10 w-3/4 max-w-2xl" />
+        <Skeleton className="mt-3 h-4 w-1/2 max-w-md" />
       </div>
-    </div>
+      <div className="px-5 py-8 md:px-12 md:py-10">
+        <div className="max-w-[1200px] space-y-6">
+          <div className="grid gap-4 md:grid-cols-3">
+            <Skeleton className="h-32 w-full" />
+            <Skeleton className="h-32 w-full" />
+            <Skeleton className="h-32 w-full" />
+          </div>
+          <Skeleton className="h-64 w-full" />
+        </div>
+      </div>
+    </>
   );
 }

@@ -23,7 +23,7 @@
 import { setRequestLocale } from "next-intl/server";
 import { notFound, redirect } from "next/navigation";
 import { Link } from "@/i18n/navigation";
-import { DashboardShell } from "@/components/layout/DashboardShell";
+import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
 import { SEEKER_NAV } from "@/components/layout/seekerNav";
 import { verifyRole } from "@/lib/auth/dal";
 import { getMyProfile } from "@/lib/profile/me";
@@ -79,7 +79,7 @@ export default async function SeekerHelpArticlePage({
   const Body = article.Article;
 
   return (
-    <DashboardShell
+    <DashboardMasthead
       role="seeker"
       workspaceLabel={me.displayName ?? "Your profile"}
       workspaceEyebrow="Seeker · workspace"
@@ -153,6 +153,6 @@ export default async function SeekerHelpArticlePage({
           </section>
         )}
       </div>
-    </DashboardShell>
+    </DashboardMasthead>
   );
 }

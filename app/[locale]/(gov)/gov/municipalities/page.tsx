@@ -1,5 +1,5 @@
 import { setRequestLocale } from "next-intl/server";
-import { DashboardShell } from "@/components/layout/DashboardShell";
+import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
 import { GOV_NAV } from "@/components/layout/govNav";
 import { verifyGov } from "@/lib/auth/dal";
 
@@ -13,7 +13,7 @@ export default async function GovMunicipalitiesPage({
   const me = await verifyGov();
 
   return (
-    <DashboardShell
+    <DashboardMasthead
       role="gov"
       workspaceLabel={me.name}
       workspaceEyebrow="Government / policy workspace"
@@ -34,6 +34,6 @@ export default async function GovMunicipalitiesPage({
           cell with fewer than 10 distinct profiles, by policy.
         </p>
       </div>
-    </DashboardShell>
+    </DashboardMasthead>
   );
 }

@@ -51,11 +51,13 @@ export function DashboardFrame({
         Skip to main content
       </a>
 
-      <div className="md:grid md:grid-cols-[272px_1fr]">
+      {/* `print:block` drops the sidebar column so print-CSS pages (e.g. the
+          seeker CV builder, the gov brief) print full-width with no chrome. */}
+      <div className="md:grid md:grid-cols-[272px_1fr] print:block">
         {/* Sidebar (desktop) — sticky to viewport; only the main column scrolls */}
         <aside
           aria-label={`${workspaceLabel} navigation`}
-          className="hidden border-r border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] md:sticky md:top-0 md:flex md:h-screen md:flex-col md:overflow-y-auto"
+          className="hidden border-r border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] md:sticky md:top-0 md:flex md:h-screen md:flex-col md:overflow-y-auto print:hidden"
         >
           {/* Top flag band over the sidebar */}
           <div aria-hidden="true" className="flex h-[3px] w-full">
@@ -122,7 +124,7 @@ export function DashboardFrame({
         {/* Main column */}
         <div className="flex min-h-screen flex-col">
           {/* Mobile top strip */}
-          <div className="border-b border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] md:hidden">
+          <div className="border-b border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] md:hidden print:hidden">
             <div aria-hidden="true" className="flex h-[3px] w-full">
               <div className="flex-[3] bg-[color:var(--color-brand)]" />
               <div className="flex-[2] bg-[color:var(--color-accent)]" />

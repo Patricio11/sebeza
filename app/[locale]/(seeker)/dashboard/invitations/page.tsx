@@ -15,7 +15,7 @@
 
 import { setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
-import { DashboardShell } from "@/components/layout/DashboardShell";
+import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
 import { SEEKER_NAV } from "@/components/layout/seekerNav";
 import { verifyRole } from "@/lib/auth/dal";
 import { listMyInvitations } from "@/lib/seeker/invitations";
@@ -65,7 +65,7 @@ export default async function SeekerInvitationsPage({
   });
 
   return (
-    <DashboardShell
+    <DashboardMasthead
       role="seeker"
       workspaceLabel={user.name}
       workspaceEyebrow="Job seeker · workspace"
@@ -140,7 +140,7 @@ export default async function SeekerInvitationsPage({
           )}
         </div>
       )}
-    </DashboardShell>
+    </DashboardMasthead>
   );
 }
 

@@ -30,7 +30,7 @@
 
 import { setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
-import { DashboardShell } from "@/components/layout/DashboardShell";
+import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
 import { GOV_NAV } from "@/components/layout/govNav";
 import { verifyGov } from "@/lib/auth/dal";
 import { justificationIndexQuery } from "@/db/queries/justification";
@@ -76,7 +76,7 @@ export default async function GovShortagePage({
   ]);
 
   return (
-    <DashboardShell
+    <DashboardMasthead
       role="gov"
       workspaceLabel={me.name}
       workspaceEyebrow="Government / policy workspace"
@@ -247,7 +247,7 @@ export default async function GovShortagePage({
           exportHref="/api/gov/stall-reasons/export"
         />
       </section>
-    </DashboardShell>
+    </DashboardMasthead>
   );
 }
 
