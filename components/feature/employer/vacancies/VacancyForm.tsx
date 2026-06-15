@@ -696,6 +696,7 @@ export function VacancyForm({
           disabled={pending}
           allowOther
           otherLabel="Skill not listed?"
+          splitOtherOnComma
         />
 
         <TextareaField

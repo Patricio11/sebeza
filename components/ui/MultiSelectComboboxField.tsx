@@ -83,6 +83,12 @@ interface Props {
    *  suggestion. The typed text is also added to `values` as a
    *  literal chip. */
   onOtherSubmit?: (text: string) => void;
+  /** Split a comma-separated "Other" entry into several values, so typing
+   *  "a, b, c" then choosing Suggest adds three chips (one per item) instead
+   *  of one. OFF by default — some free-text values legitimately contain
+   *  commas (e.g. a company name "Smith, Jones & Co."). Enable on multi-value
+   *  free-text fields like skills. */
+  splitOtherOnComma?: boolean;
   /** Optional className for the outer wrapper. */
   className?: string;
 }
@@ -110,6 +116,7 @@ export function MultiSelectComboboxField({
   allowOther,
   otherLabel = "Suggest a new entry",
   onOtherSubmit,
+  splitOtherOnComma,
   className,
 }: Props) {
   const reactId = useId();
@@ -173,6 +180,18 @@ export function MultiSelectComboboxField({
     qTrim.length >= 2 &&
     !options.some((o) => o.label.toLowerCase() === qTrim.toLowerCase());
 
+  // The free-text entries the "Suggest" footer will add. With
+  // `splitOtherOnComma`, "a, b, c" → ["a","b","c"] (one chip each); otherwise
+  // the whole query is a single entry.
+  const otherParts = useMemo(() => {
+    if (!qTrim) return [];
+    if (!splitOtherOnComma) return [qTrim];
+    return qTrim
+      .split(",")
+      .map((p) => p.trim())
+      .filter((p) => p.length >= 1);
+  }, [qTrim, splitOtherOnComma]);
+
   // Length of the navigable list including the "Other" row.
   const navLen = flat.length + (showOther ? 1 : 0);
 
@@ -222,18 +241,27 @@ export function MultiSelectComboboxField({
   );
 
   const pickOther = useCallback(() => {
-    const text = qTrim;
-    if (text.length < 2) return;
-    // Adds the typed text as a literal chip. The form's submit path
-    // sees a value that isn't in `options.value`  it's the parent's
-    // responsibility to dispatch a server-side suggestion submission
-    // (we also fire onOtherSubmit here as a parent hook).
-    addValue(text);
-    onOtherSubmit?.(text);
+    if (qTrim.length < 2 || otherParts.length === 0) return;
+    // Add each part as its own value. A part that matches a catalogue option
+    // (by label, case-insensitive) is added as the canonical value; the rest
+    // are free-text "Other" suggestions — the form's submit path sees a value
+    // that isn't in `options.value`, and `onOtherSubmit` fires per new part so
+    // the parent can record each suggestion.
+    const additions: string[] = [];
+    for (const part of otherParts) {
+      const match = options.find(
+        (o) => o.label.toLowerCase() === part.toLowerCase(),
+      );
+      const value = match ? match.value : part;
+      if (selectedSet.has(value) || additions.includes(value)) continue;
+      additions.push(value);
+      if (!match) onOtherSubmit?.(part);
+    }
+    if (additions.length > 0) onChange([...values, ...additions]);
     setQuery("");
     setActiveIdx(0);
     inputRef.current?.focus();
-  }, [qTrim, addValue, onOtherSubmit]);
+  }, [qTrim, otherParts, options, selectedSet, values, onChange, onOtherSubmit]);
 
   function onInputKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
     if (disabled) return;
@@ -448,8 +476,24 @@ export function MultiSelectComboboxField({
                     : "text-[color:var(--color-ink)] hover:bg-[color:var(--color-surface-sunk)]")
                 }
               >
-                <Plus className="size-3.5" aria-hidden="true" />
-                Suggest <strong className="font-semibold">{qTrim}</strong> for admin review
+                <Plus className="size-3.5 shrink-0" aria-hidden="true" />
+                {otherParts.length > 1 ? (
+                  <span>
+                    Suggest{" "}
+                    <strong className="font-semibold">
+                      {otherParts.length} entries
+                    </strong>{" "}
+                    for admin review
+                    <span className="mt-0.5 block text-[0.7rem] font-normal text-[color:var(--color-ink-soft)]">
+                      {otherParts.join(" · ")}
+                    </span>
+                  </span>
+                ) : (
+                  <span>
+                    Suggest <strong className="font-semibold">{qTrim}</strong> for
+                    admin review
+                  </span>
+                )}
               </button>
             </>
           )}

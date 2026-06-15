@@ -213,6 +213,7 @@ export function SkillsEditor({ initial, professionSlug }: Props) {
           placeholder="Type to search skills…"
           allowOther
           otherLabel="Skill not listed?"
+          splitOtherOnComma
         />
         <div className="mt-3 flex justify-end">
           <Button
