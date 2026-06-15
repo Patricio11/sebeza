@@ -57,6 +57,10 @@ test("seeker's own activity page renders (audit transparency surface)", async ({
   await signInSeeker(page);
   await page.goto("/en/dashboard/activity");
   await expect(page.locator("main")).toBeVisible();
+  // "Who's viewed you" resolves the viewer to the org name (not a raw id /
+  // "anonymous"): Andile's seeded dossier views are by Discovery Bank.
+  await expect(page.locator("main")).toContainText("Discovery Bank");
+  await expect(page.locator("main")).not.toContainText("anonymous");
 });
 
 test("Phase 15: CV builder renders from profile data, switches template, no overflow", async ({

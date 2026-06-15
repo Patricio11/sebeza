@@ -1139,6 +1139,36 @@ async function seedPhase9_8Vacancies() {
       at: new Date(now - 7 * day),
     },
   ]);
+
+  // "Who's viewed you" signal — Discovery Bank's recruiter (Naledi) opened a
+  // few cohort dossiers at varied times. Mirrors exactly what the live dossier
+  // view writes (actor = recruiter user id, subject = profile id, meta.orgId),
+  // so each seeker's dashboard "Who's viewed you" + viewers-this-week KPI shows
+  // real, per-seeker, org-attributed data (the feed resolves meta.orgId → org
+  // name). The cohort matches Discovery Bank's seeded software roles.
+  const HOUR = 60 * 60 * 1000;
+  await db.insert(schema.auditLog).values(
+    (
+      [
+        { handle: "andile-z", hoursAgo: 15 },
+        { handle: "andile-z", hoursAgo: 41 },
+        { handle: "andile-z", hoursAgo: 67 },
+        { handle: "wits-bsc-cs-2026-04", hoursAgo: 19 },
+        { handle: "wits-bsc-cs-2026-04", hoursAgo: 44 },
+        { handle: "wits-bsc-cs-2026-05", hoursAgo: 18 },
+        { handle: "wits-bsc-cs-2026-05", hoursAgo: 73 },
+        { handle: "wits-bsc-cs-2026-06", hoursAgo: 62 },
+        { handle: "wits-bsc-cs-2026-07", hoursAgo: 96 },
+      ] as const
+    ).map((v, i) => ({
+      id: id("aud", `pv-${v.handle}-${i}`),
+      kind: "profile.view" as const,
+      actor: recruiterUserId,
+      subject: id("prof", v.handle),
+      meta: { orgId, surface: "dossier", handle: v.handle },
+      at: new Date(now - v.hoursAgo * HOUR),
+    })),
+  );
 }
 
 /**

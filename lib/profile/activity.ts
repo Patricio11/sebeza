@@ -16,7 +16,7 @@
 import "server-only";
 import { sql, and, eq, gte, inArray } from "drizzle-orm";
 import { getDb } from "@/db/client";
-import { auditLog } from "@/db/schema";
+import { auditLog, organizations } from "@/db/schema";
 import type { MyProfile } from "@/lib/profile/me";
 
 /** Event kinds the seeker activity ledger surfaces. */
@@ -143,12 +143,40 @@ export async function getSeekerActivity(
     .orderBy(sql`${auditLog.at} DESC`)
     .limit(limit);
 
-  const feed: SeekerActivityItem[] = rows.map((r) => ({
-    at: r.at.toISOString(),
-    kind: r.kind as SeekerVisibleKind,
-    actor: r.actor,
-    detail: describeEvent(r.kind as SeekerVisibleKind, r.meta),
-  }));
+  // Resolve actors to human labels. Real employer views (dossier / reveal /
+  // download / contact) carry `meta.orgId` → show the org name, matching the
+  // "<Org> viewed your profile" notification. Anonymous/public views show a
+  // neutral label — never a raw user/org id.
+  const orgIds = [
+    ...new Set(
+      rows
+        .map((r) => (r.meta as { orgId?: string } | null)?.orgId)
+        .filter((x): x is string => typeof x === "string" && x.length > 0),
+    ),
+  ];
+  const orgNameById = new Map<string, string>();
+  if (orgIds.length > 0) {
+    const orgs = await db
+      .select({ id: organizations.id, name: organizations.name })
+      .from(organizations)
+      .where(inArray(organizations.id, orgIds));
+    for (const o of orgs) orgNameById.set(o.id, o.name);
+  }
+
+  const feed: SeekerActivityItem[] = rows.map((r) => {
+    const orgId = (r.meta as { orgId?: string } | null)?.orgId ?? null;
+    const actor = orgId
+      ? orgNameById.get(orgId) ?? "An employer"
+      : !r.actor || r.actor === "anonymous"
+        ? "Anonymous visitor"
+        : "An employer";
+    return {
+      at: r.at.toISOString(),
+      kind: r.kind as SeekerVisibleKind,
+      actor,
+      detail: describeEvent(r.kind as SeekerVisibleKind, r.meta),
+    };
+  });
 
   return {
     kpis: {

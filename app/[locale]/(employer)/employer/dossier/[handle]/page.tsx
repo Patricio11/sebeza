@@ -165,9 +165,10 @@ export default async function EmployerDossierPage({
     .from(schema.qualifications)
     .where(eq(schema.qualifications.profileId, profileRow.id));
 
-  // Audit: every dossier render counts as a profile.view (server-side).
-  // dataProvider already wrote one; we add a context tag here so the
-  // seeker can see which org viewed them.
+  // Audit: every dossier render counts as a profile.view (server-side). This
+  // is the authoritative "who viewed you" signal on the DB provider (the
+  // public /p/[handle] path does NOT log a view). `meta.orgId` lets the
+  // seeker's activity feed resolve the viewer to the org name.
   await logAccess({
     kind: "profile.view",
     actor: session.id,
