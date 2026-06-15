@@ -101,7 +101,7 @@ export function NotificationBell({
         {unread > 0 && (
           <span
             aria-hidden="true"
-            className="absolute -right-1 -top-1 inline-flex min-w-[18px] items-center justify-center rounded-full bg-[color:var(--color-danger)] px-1 py-0.5 text-[0.62rem] font-medium leading-none text-white"
+            className="absolute -right-1 -top-1 inline-flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-[color:var(--color-danger)] px-1 text-[0.62rem] font-medium leading-none text-white"
           >
             {badge}
           </span>

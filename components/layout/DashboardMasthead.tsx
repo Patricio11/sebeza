@@ -38,12 +38,16 @@ export function DashboardMasthead({
       {banner}
 
       {/* Masthead */}
-      <header className="relative overflow-hidden border-b-2 border-[color:var(--color-ink)] bg-[color:var(--color-paper)]">
-        {/* Faint chevron motif in the top-right of every dashboard masthead */}
-        <SAChevron
-          variant="signature"
-          className="pointer-events-none absolute -right-24 -top-12 size-[360px] opacity-[0.05]"
-        />
+      <header className="relative border-b-2 border-[color:var(--color-ink)] bg-[color:var(--color-paper)]">
+        {/* Faint chevron motif — clipped to the masthead by its OWN wrapper so
+            the header can stay overflow-visible and not clip descendant
+            popovers (e.g. the notifications dropdown). */}
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+          <SAChevron
+            variant="signature"
+            className="absolute -right-24 -top-12 size-[360px] opacity-[0.05]"
+          />
+        </div>
         <div className="relative flex flex-col gap-4 px-5 py-8 md:flex-row md:items-end md:justify-between md:px-12 md:py-10">
           <div>
             {pageEyebrow && (
