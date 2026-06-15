@@ -74,16 +74,26 @@ export function StudentContextEditor({
   const moduleLimitReached = modules.length >= STUDENT_MODULES_MAX;
 
   function addModuleFromDraft() {
-    const next = moduleDraft.trim();
-    if (!next) return;
-    if (moduleLimitReached) return;
-    if (modules.includes(next)) {
-      setModuleDraft("");
-      return;
+    // Split on commas so a pasted/typed list ("Calculus, Stats, OS") becomes
+    // separate module chips, not one. (Typing a comma also triggers this via
+    // the keydown handler below.)
+    const parts = moduleDraft
+      .split(",")
+      .map((p) => p.trim())
+      .filter((p) => p.length > 0);
+    if (parts.length === 0) return;
+    const next = [...modules];
+    for (const part of parts) {
+      if (next.length >= STUDENT_MODULES_MAX) break;
+      const clean = part.slice(0, 80);
+      if (next.includes(clean)) continue;
+      next.push(clean);
     }
-    setModules([...modules, next.slice(0, 80)]);
+    if (next.length !== modules.length) {
+      setModules(next);
+      setSaved(false);
+    }
     setModuleDraft("");
-    setSaved(false);
   }
 
   function onSave() {
@@ -175,7 +185,8 @@ export function StudentContextEditor({
           </button>
         </div>
         <p className="mt-1 text-xs text-[color:var(--color-ink-soft)]">
-          Press Enter or comma to add. Backspace removes the last one.
+          Press Enter or comma to add — or paste a comma-separated list.
+          Backspace removes the last one.
         </p>
       </div>
 
