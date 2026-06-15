@@ -191,10 +191,10 @@ export default async function SeekerOverviewPage({
           away by default, but most seekers never discovered the
           activity ledger. Only renders when viewersDelta > 0 (something
           actually happened this week) to avoid an empty boast. */}
-      {(activity.kpis.viewersDelta ?? 0) > 0 && (
+      {activity.kpis.distinctEmployersThisWeek > 0 && (
         <Link
           href="/dashboard/activity"
-          aria-label={`${activity.kpis.viewersDelta} employers viewed your profile this week. Open activity ledger to see who.`}
+          aria-label={`${activity.kpis.distinctEmployersThisWeek} employer${activity.kpis.distinctEmployersThisWeek === 1 ? "" : "s"} viewed your profile this week. Open activity ledger to see who.`}
           className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-[var(--radius-md)] border border-[color:var(--color-accent)] bg-[color:var(--color-accent)]/5 p-3 transition-colors hover:bg-[color:var(--color-accent)]/10 md:p-4"
         >
           <div className="flex items-start gap-3">
@@ -204,8 +204,8 @@ export default async function SeekerOverviewPage({
             />
             <div>
               <p className="text-sm text-[color:var(--color-ink)]">
-                <strong>{activity.kpis.viewersDelta}</strong> employer
-                {activity.kpis.viewersDelta === 1 ? "" : "s"} viewed your
+                <strong>{activity.kpis.distinctEmployersThisWeek}</strong> employer
+                {activity.kpis.distinctEmployersThisWeek === 1 ? "" : "s"} viewed your
                 profile this week.
               </p>
               <p className="mt-0.5 text-xs text-[color:var(--color-ink-soft)]">
@@ -426,21 +426,48 @@ export default async function SeekerOverviewPage({
 
           <div className="flex flex-col items-stretch justify-center gap-2 border-t border-[color:var(--color-hairline)] bg-[color:var(--color-surface-sunk)] p-6 md:border-l md:border-t-0">
             <div className="text-center">
-              <div className="text-[0.62rem] uppercase tracking-[0.22em] text-[color:var(--color-ink-soft)]">
-                Add {compass.headline.skillsNeeded} →
-              </div>
-              <div className="flex items-baseline justify-center gap-2">
-                <span className="font-display tabular text-base text-[color:var(--color-ink-soft)] line-through">
-                  #{compass.headline.currentRank}
-                </span>
-                <ArrowUpRight className="size-4 text-[color:var(--color-brand)]" aria-hidden="true" />
-                <span className="font-display tabular text-3xl text-[color:var(--color-brand-strong)]">
-                  #{compass.headline.projectedRank}
-                </span>
-              </div>
-              <div className="mt-0.5 text-[0.62rem] text-[color:var(--color-ink-soft)]">
-                in your local pool
-              </div>
+              {/* Real pool rank (getCompassForProfile returns 0/0 placeholders;
+                  the page already computes the live rank for the search card). */}
+              {rank && rank.projectedRank < rank.rank ? (
+                <>
+                  <div className="text-[0.62rem] uppercase tracking-[0.22em] text-[color:var(--color-ink-soft)]">
+                    Add {compass.headline.skillsNeeded} →
+                  </div>
+                  <div className="flex items-baseline justify-center gap-2">
+                    <span className="font-display tabular text-base text-[color:var(--color-ink-soft)] line-through">
+                      #{rank.rank}
+                    </span>
+                    <ArrowUpRight className="size-4 text-[color:var(--color-brand)]" aria-hidden="true" />
+                    <span className="font-display tabular text-3xl text-[color:var(--color-brand-strong)]">
+                      #{rank.projectedRank}
+                    </span>
+                  </div>
+                  <div className="mt-0.5 text-[0.62rem] text-[color:var(--color-ink-soft)]">
+                    in your local pool
+                  </div>
+                </>
+              ) : rank ? (
+                <>
+                  <div className="text-[0.62rem] uppercase tracking-[0.22em] text-[color:var(--color-ink-soft)]">
+                    Your rank
+                  </div>
+                  <div className="font-display tabular text-3xl text-[color:var(--color-brand-strong)]">
+                    #{rank.rank}
+                  </div>
+                  <div className="mt-0.5 text-[0.62rem] text-[color:var(--color-ink-soft)]">
+                    of {rank.poolTotal} · already maxed here
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="text-[0.62rem] uppercase tracking-[0.22em] text-[color:var(--color-ink-soft)]">
+                    Not ranked yet
+                  </div>
+                  <div className="mt-1 text-sm text-[color:var(--color-ink-soft)]">
+                    Confirm your status to enter the pool.
+                  </div>
+                </>
+              )}
             </div>
             <Link
               href="/dashboard/grow"

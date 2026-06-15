@@ -36,6 +36,11 @@ export interface SeekerActivityKpis {
   /** "+N this week" deltas  null when the bucket didn't change. */
   viewersDelta: number | null;
   contactsDelta: number | null;
+  /** Profile views in the last 7 days (a count, not a delta). */
+  viewersThisWeek: number;
+  /** Distinct employers (orgs) that viewed this seeker in the last 7 days. The
+   *  honest "N employers viewed you this week" number  3 views by 1 org = 1. */
+  distinctEmployersThisWeek: number;
 }
 
 export interface SeekerActivityItem {
@@ -125,6 +130,23 @@ export async function getSeekerActivity(
       ? null
       : viewersThisWeek - priorViewers;
 
+  // Distinct employers (orgs) that viewed this seeker in the last 7 days — the
+  // honest "N employers viewed you" count (multiple views by one org = 1).
+  const distinctEmployers = await db
+    .select({
+      n: sql<number>`COUNT(DISTINCT ${auditLog.meta} ->> 'orgId')::int`,
+    })
+    .from(auditLog)
+    .where(
+      and(
+        inArray(auditLog.subject, subjects),
+        eq(auditLog.kind, "profile.view"),
+        gte(auditLog.at, sinceLastWeek),
+        sql`${auditLog.meta} ->> 'orgId' IS NOT NULL`,
+      ),
+    );
+  const distinctEmployersThisWeek = distinctEmployers[0]?.n ?? 0;
+
   const contactsThisWeek =
     (recentByKind.get("profile.contact.request") ?? 0) +
     (recentByKind.get("profile.contact.reveal") ?? 0);
@@ -188,6 +210,8 @@ export async function getSeekerActivity(
       downloads: totalByKind.get("profile.document.download") ?? 0,
       viewersDelta,
       contactsDelta,
+      viewersThisWeek,
+      distinctEmployersThisWeek,
     },
     feed,
   };

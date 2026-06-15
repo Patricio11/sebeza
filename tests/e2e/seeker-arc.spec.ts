@@ -33,6 +33,8 @@ test("seeker signs in and lands on the dashboard", async ({ page }) => {
 
   await page.waitForURL(/\/dashboard/, { timeout: 30_000 });
   await expect(page.locator("main")).toBeVisible();
+  // The Career Compass shows a real pool rank, never the "#0 → #0" stub.
+  await expect(page.locator("main")).not.toContainText("#0");
 });
 
 test("privacy centre lists consents with revoke affordances", async ({
