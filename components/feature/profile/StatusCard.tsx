@@ -122,12 +122,15 @@ export function StatusCard({
           </ul>
         </fieldset>
       ) : (
-        <div className="mt-5 flex flex-col gap-2 md:flex-row">
+        <div className="mt-5 flex flex-col gap-2">
+          {/* Stacked, full-width pills. The card is a 1/3-width column, so a
+              side-by-side row squeezes the long "different situation" button
+              against the primary one (turning it into a cramped circle). */}
           <button
             type="button"
             onClick={handleReconfirm}
             disabled={pending}
-            className="flex-1 rounded-[var(--radius-pill)] bg-[color:var(--color-ink)] py-3 text-sm font-medium text-[color:var(--color-paper)] disabled:opacity-60"
+            className="w-full rounded-[var(--radius-pill)] bg-[color:var(--color-ink)] px-4 py-3 text-center text-sm font-medium text-[color:var(--color-paper)] disabled:opacity-60"
           >
             {pending ? "Saving…" : "Yes, still " + humanise(status)}
           </button>
@@ -135,7 +138,7 @@ export function StatusCard({
             type="button"
             onClick={() => setPickerOpen(true)}
             disabled={pending}
-            className="rounded-[var(--radius-pill)] border border-[color:var(--color-ink)] px-4 py-3 text-sm font-medium text-[color:var(--color-ink)] hover:bg-[color:var(--color-surface-sunk)] disabled:opacity-60"
+            className="w-full rounded-[var(--radius-pill)] border border-[color:var(--color-ink)] px-4 py-3 text-center text-sm font-medium text-[color:var(--color-ink)] hover:bg-[color:var(--color-surface-sunk)] disabled:opacity-60"
           >
             I&rsquo;m in a different situation now
           </button>
