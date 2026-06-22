@@ -55,14 +55,6 @@ export async function LandingHeader() {
           >
             {t("insights")}
           </Link>
-          {!viewer && (
-            <Link
-              href="/dashboard"
-              className="rounded-sm transition-colors hover:text-[color:var(--color-sa-green)]"
-            >
-              {t("createProfile")}
-            </Link>
-          )}
         </nav>
 
         <div className="flex items-center gap-2 md:gap-3">

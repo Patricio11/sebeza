@@ -153,13 +153,6 @@ export function MobileNav({
                   label={t("insights")}
                   hint="National employment bulletin"
                 />
-                {!session && (
-                  <DrawerLink
-                    href="/dashboard"
-                    label={t("createProfile")}
-                    hint="Get found for the work you do"
-                  />
-                )}
               </ul>
             </nav>
 
