@@ -1,5 +1,5 @@
 /**
- * Phase 12 (Task 12.3) — admin / employer / student / analytics golden
+ * Phase 12 (Task 12.3)  admin / employer / student / analytics golden
  * paths against the seeded production build.
  *
  * Note: the seed ships no gov-role account (the /gov portal is
@@ -57,11 +57,11 @@ test("admin user detail opens in-shell (no bounce to the public profile)", async
   await page.waitForURL(/\/admin/, { timeout: 30_000 });
 
   // Filter to active seekers so the clicked target is a known, non-admin,
-  // non-self account — its account-action controls must be live.
+  // non-self account  its account-action controls must be live.
   await page.goto("/en/admin/users?role=seeker&status=active");
   await expect(page.locator("main")).toBeVisible();
 
-  // Click a user in the directory — must open /admin/users/[id] INSIDE the
+  // Click a user in the directory  must open /admin/users/[id] INSIDE the
   // admin shell, not bounce out to the public /p/[handle].
   const firstUserLink = page
     .locator('a[href*="/admin/users/"]')
@@ -100,7 +100,7 @@ test("employer arc: workspace + a seeker dossier render for the verified org", a
   await page.goto("/en/employer/vacancies");
   await expect(page.locator("main")).toBeVisible();
 
-  // The dossier is the PII-gated surface — it must render for a
+  // The dossier is the PII-gated surface  it must render for a
   // verified org's member (reveal itself is integration-tested).
   await page.goto("/en/employer/dossier/andile-z");
   await expect(page.locator("main")).toBeVisible();
@@ -112,7 +112,7 @@ test("unverified-org employer is kept off the dossier", async ({ page }) => {
   await page.waitForURL(/\/(employer|onboarding)/, { timeout: 30_000 });
 
   await page.goto("/en/employer/dossier/andile-z");
-  // verifyOrgVerified() redirects unverified orgs to onboarding — the
+  // verifyOrgVerified() redirects unverified orgs to onboarding  the
   // dossier content must never render for them.
   await page.waitForURL((url) => !url.pathname.includes("/dossier/"), {
     timeout: 15_000,
@@ -128,7 +128,7 @@ test("student arc: Career Compass student lane renders for a cohort member", asy
   await page.goto("/en/dashboard/grow");
   await expect(page.locator("main")).toBeVisible();
   // The student lane anchors on the academic record (BSc Computer
-  // Science @ Wits in the seed) — programme name proves the lane is up.
+  // Science @ Wits in the seed)  programme name proves the lane is up.
   await expect(page.locator("main")).toContainText(/computer science/i);
 });
 

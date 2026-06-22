@@ -1,5 +1,5 @@
 /**
- * Phase 10.3 — admin help center index.
+ * Phase 10.3  admin help center index.
  *
  * Mirrors the employer + seeker help indexes for the (admin) route
  * group. Auth-gated by `verifyAdmin()`. Hero search bar (client

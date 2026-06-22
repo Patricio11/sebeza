@@ -1,11 +1,11 @@
-# PHASE 10.3 COMPLETE — ADMIN HELP CENTER
+# PHASE 10.3 COMPLETE  ADMIN HELP CENTER
 *Shipped 2026-05-29. Cloned the Phase 10.1 / 10.2 scaffold for admin staff (Sebenza employees running KYC review, qualification verification, moderation, POPIA compliance, oversight). 28 hand-written articles across 7 categories, 8 in-context HelpLink chips on the highest-traffic admin console surfaces.*
 
-> **One-line summary**: A browseable + searchable help center at `/admin/help` covering every major admin surface — orientation, KYC & verification, moderation, POPIA compliance, taxonomy & settings, reports & oversight, operations. Plus tiny "How does this work?" deep-link chips on 8 admin console pages. Internal-only; English-only; content as TypeScript modules.
+> **One-line summary**: A browseable + searchable help center at `/admin/help` covering every major admin surface  orientation, KYC & verification, moderation, POPIA compliance, taxonomy & settings, reports & oversight, operations. Plus tiny "How does this work?" deep-link chips on 8 admin console pages. Internal-only; English-only; content as TypeScript modules.
 
 Commits:
 
-- (this commit) — Phase 10.3 ship: AdminHelpCategory types + 28 articles + 9 deep-link surfaces
+- (this commit)  Phase 10.3 ship: AdminHelpCategory types + 28 articles + 9 deep-link surfaces
 
 Read **`PHASE_10_1_COMPLETE.md` → "Post-ship fixes + lessons"** first if you're cloning this scaffold for gov (10.4). The same three patterns apply; they are baked in here from the start.
 
@@ -13,76 +13,76 @@ Read **`PHASE_10_1_COMPLETE.md` → "Post-ship fixes + lessons"** first if you'r
 
 ## 🎯 WHAT SHIPPED
 
-### A — Type extension (`content/help/types.ts`)
+### A  Type extension (`content/help/types.ts`)
 
 - New `AdminHelpCategory` string-enum (`getting_started`, `kyc_verification`, `moderation`, `popia_compliance`, `taxonomy_settings`, `reports_oversight`, `operations`).
-- `HelpCategory` union widened to include it. The seeker + employer types continue to work unchanged — same loose union pattern Phase 10.2 introduced.
+- `HelpCategory` union widened to include it. The seeker + employer types continue to work unchanged  same loose union pattern Phase 10.2 introduced.
 - New `ADMIN_HELP_CATEGORIES` constant: label + description + display order. IA reads top-down by frequency of daily work (orientation → queue → moderation → POPIA → settings → reports → operations).
 
-### B — Reused infrastructure (Phase 10.2 refactor)
+### B  Reused infrastructure (Phase 10.2 refactor)
 
 - `HelpLink` got a third role: `"admin"` (basePath `/admin/help`). Default stays `"employer"`.
-- `HelpSearchIsland` already role-agnostic (props: `basePath`, `categoryLabels`, `placeholder`) — no further changes needed.
+- `HelpSearchIsland` already role-agnostic (props: `basePath`, `categoryLabels`, `placeholder`)  no further changes needed.
 - `HelpProse` reused verbatim.
 
-### C — Admin pages
+### C  Admin pages
 
-- **Index** `/admin/help` — hero search bar + 7 category sections with article cards. When `?q=` is present, the search island takes over with ranked results.
-- **Article** `/admin/help/[slug]` — breadcrumb back to index/category + article body inside a centered `max-w-3xl` reading column + "Related" strip in 2 columns. No `meta.updatedAt` rendered.
+- **Index** `/admin/help`  hero search bar + 7 category sections with article cards. When `?q=` is present, the search island takes over with ranked results.
+- **Article** `/admin/help/[slug]`  breadcrumb back to index/category + article body inside a centered `max-w-3xl` reading column + "Related" strip in 2 columns. No `meta.updatedAt` rendered.
 
 Both auth-gated by `verifyAdmin()`. Admin role gating already enforces 2FA + admin-tier session.
 
-### D — Nav entry (`components/layout/adminNav.ts`)
+### D  Nav entry (`components/layout/adminNav.ts`)
 
 New `{ key: "help", label: "Help", href: "/admin/help", icon: HelpCircle }` inserted between Notifications and Platform settings.
 
-### E — 28 articles (across 7 categories)
+### E  28 articles (across 7 categories)
 
 **Getting started (4)**
-- `what-sebenza-is-for-admins` — four operating principles for the admin posture (audit-everything; defaults err for user; minimal PII; no scale-thumbing)
-- `first-login-and-2fa-setup` — invite link, password, mandatory TOTP, backup codes
-- `admin-dashboard-tour` — every nav entry top-to-bottom; what's in queue work vs reference
-- `team-roles-and-permissions` — Reviewer / Operator / Lead; what each can and can't do; how to escalate
+- `what-sebenza-is-for-admins`  four operating principles for the admin posture (audit-everything; defaults err for user; minimal PII; no scale-thumbing)
+- `first-login-and-2fa-setup`  invite link, password, mandatory TOTP, backup codes
+- `admin-dashboard-tour`  every nav entry top-to-bottom; what's in queue work vs reference
+- `team-roles-and-permissions`  Reviewer / Operator / Lead; what each can and can't do; how to escalate
 
 **KYC & verification (5)**
-- `reviewing-seeker-id-submissions` — the four checks; three dispositions; what audit logs on each
-- `qualification-review-and-saqa-workflow` — standard-institution vs non-standard path; SAQA referral
-- `organisation-kyc-verification` — four documents; three badge tiers; the substitution pattern to watch for
-- `approval-rejection-and-appeals` — writing rejections users can act on; the appeal queue; reversing your own decision
-- `manual-verification-path` — when standard + SAQA don't apply; the Evidence panel; the audit posture
+- `reviewing-seeker-id-submissions`  the four checks; three dispositions; what audit logs on each
+- `qualification-review-and-saqa-workflow`  standard-institution vs non-standard path; SAQA referral
+- `organisation-kyc-verification`  four documents; three badge tiers; the substitution pattern to watch for
+- `approval-rejection-and-appeals`  writing rejections users can act on; the appeal queue; reversing your own decision
+- `manual-verification-path`  when standard + SAQA don't apply; the Evidence panel; the audit posture
 
 **Moderation (5)**
-- `reading-profile-reports` — six reason categories; three aggregate-count patterns; triage by priority
-- `when-to-suspend-an-account` — three tiers (warn / restrict / full suspend); bright-line behaviours
-- `suspension-appeals-and-restoration` — appeal queue contents; the two-key reversal rule
-- `decline-reason-oversight-and-patterns` — aggregate decline-reason oversight; four patterns to escalate
-- `flagging-suspicious-activity` — eight behavioural patterns the audit log surfaces
+- `reading-profile-reports`  six reason categories; three aggregate-count patterns; triage by priority
+- `when-to-suspend-an-account`  three tiers (warn / restrict / full suspend); bright-line behaviours
+- `suspension-appeals-and-restoration`  appeal queue contents; the two-key reversal rule
+- `decline-reason-oversight-and-patterns`  aggregate decline-reason oversight; four patterns to escalate
+- `flagging-suspicious-activity`  eight behavioural patterns the audit log surfaces
 
 **POPIA & compliance (4)**
-- `handling-data-subject-requests` — five DSR rights; the workflow; the statutory deadline
-- `processing-export-requests` — self-serve vs the two extension paths; what stays redacted
-- `deletion-requests-right-to-erasure` — soft-delete / hard-delete; when immediate hard-delete applies
-- `incident-response-via-audit-log` — four-step response; the Information Regulator notification trigger
+- `handling-data-subject-requests`  five DSR rights; the workflow; the statutory deadline
+- `processing-export-requests`  self-serve vs the two extension paths; what stays redacted
+- `deletion-requests-right-to-erasure`  soft-delete / hard-delete; when immediate hard-delete applies
+- `incident-response-via-audit-log`  four-step response; the Information Regulator notification trigger
 
 **Taxonomy & settings (4)**
-- `managing-skills-and-professions` — add, retire, merge; mandatory audit
-- `suggestion-workflow-user-other-entries` — promote, merge, reject; triage by count
-- `feature-flags-and-rollouts` — four rollout postures; why you read the description first
-- `platform-settings-and-audit-trail` — settings beyond flags; per-setting audit-history view
+- `managing-skills-and-professions`  add, retire, merge; mandatory audit
+- `suggestion-workflow-user-other-entries`  promote, merge, reject; triage by count
+- `feature-flags-and-rollouts`  four rollout postures; why you read the description first
+- `platform-settings-and-audit-trail`  settings beyond flags; per-setting audit-history view
 
 **Reports & oversight (3)**
-- `decline-reasons-aggregate-stats` — platform-level decline distribution; what they're used for
-- `cohort-retention-and-outcomes` — how Placement-Truth measurement works; the 3/6/12/24 cron
-- `monitoring-gov-lookups-for-patterns` — Oversight log; four fishing patterns; the gov-relationship posture
+- `decline-reasons-aggregate-stats`  platform-level decline distribution; what they're used for
+- `cohort-retention-and-outcomes`  how Placement-Truth measurement works; the 3/6/12/24 cron
+- `monitoring-gov-lookups-for-patterns`  Oversight log; four fishing patterns; the gov-relationship posture
 
 **Operations (3)**
-- `understanding-the-audit-log-structure` — schema; filters; hashed vs plaintext
-- `notification-settings-for-admins` — why only two kinds; the mandatory kinds
-- `troubleshooting-common-issues` — eight common problems + documented response
+- `understanding-the-audit-log-structure`  schema; filters; hashed vs plaintext
+- `notification-settings-for-admins`  why only two kinds; the mandatory kinds
+- `troubleshooting-common-issues`  eight common problems + documented response
 
 Total **28 articles**.
 
-### F — 9 HelpLink deep-link surfaces
+### F  9 HelpLink deep-link surfaces
 
 | Surface | Chips |
 |---|---|
@@ -122,10 +122,10 @@ The Phase 10.1 / 10.2 quick-reference checklist passes on first commit.
 - `docs/completed/PHASE_10_3_COMPLETE.md` (this doc)
 
 **Edited (11 files)**
-- `content/help/types.ts` — added `AdminHelpCategory`, `ADMIN_HELP_CATEGORIES`; widened `HelpCategory` union
-- `components/feature/help/HelpLink.tsx` — added `"admin"` to the role union + base-path map
-- `components/layout/adminNav.ts` — Help nav entry between Notifications and Platform settings
-- 9 admin console pages — `<HelpLink>` chips wired (overview, verifications, moderation, audit-log, users, settings, taxonomy, oversight, account)
+- `content/help/types.ts`  added `AdminHelpCategory`, `ADMIN_HELP_CATEGORIES`; widened `HelpCategory` union
+- `components/feature/help/HelpLink.tsx`  added `"admin"` to the role union + base-path map
+- `components/layout/adminNav.ts`  Help nav entry between Notifications and Platform settings
+- 9 admin console pages  `<HelpLink>` chips wired (overview, verifications, moderation, audit-log, users, settings, taxonomy, oversight, account)
 
 **Verification**
 - `tsc --noEmit` clean
@@ -149,10 +149,10 @@ The Phase 10.1 / 10.2 quick-reference checklist passes on first commit.
 
 ## 🧭 IMPACT ON OTHER SURFACES
 
-- **Admin nav** — gains the Help entry between Notifications and Platform settings.
-- **9 admin console pages** — gain unobtrusive `<HelpLink>` chips near the page header.
+- **Admin nav**  gains the Help entry between Notifications and Platform settings.
+- **9 admin console pages**  gain unobtrusive `<HelpLink>` chips near the page header.
 - **Two new routes registered** in the production build (`/[locale]/admin/help` + `/[locale]/admin/help/[slug]`).
-- **Employer + seeker help centres** — unchanged behaviour; the role-agnostic refactor done in Phase 10.2 means adding admin required only a new BASE_PATH entry and a new role tag on the type union.
+- **Employer + seeker help centres**  unchanged behaviour; the role-agnostic refactor done in Phase 10.2 means adding admin required only a new BASE_PATH entry and a new role tag on the type union.
 - **No new tables, audit kinds, notification kinds, or external deps.**
 
 ---
@@ -185,9 +185,9 @@ The Phase 10.1 / 10.2 quick-reference checklist passes on first commit.
    - "Try it now →" CTA when `surfaceLink` is set
    - Related strip at the bottom in 2 columns (broken / self-references silently dropped)
 6. Visit `/admin/help/totally-bogus-slug`. Expect: Next.js notFound page.
-7. Visit `/admin`, `/admin/verifications`, `/admin/moderation`, `/admin/audit-log`, `/admin/users`, `/admin/settings`, `/admin/taxonomy`, `/admin/oversight`, `/admin/account` — each should carry one or more `<HelpLink>` chips near the page header. Clicking any chip should land on the correct article.
+7. Visit `/admin`, `/admin/verifications`, `/admin/moderation`, `/admin/audit-log`, `/admin/users`, `/admin/settings`, `/admin/taxonomy`, `/admin/oversight`, `/admin/account`  each should carry one or more `<HelpLink>` chips near the page header. Clicking any chip should land on the correct article.
 8. Open the employer + seeker help centres signed in as the relevant role. Verify they still work end-to-end (Phase 10.3 added a new role to the HelpLink union but did not change existing employer/seeker behaviour).
 
 ---
 
-*Phase 10.3 closes the admin side of the discoverability gap. The 28 articles document not just what the console does but the editorial posture behind every action — why we audit-everything, why defaults err on the user's side, why we don't put the operator's thumb on the scale. Same trust posture as Phases 10.1 / 10.2: civic-editorial tone, honest about what the platform deliberately doesn't do, internal-only and English-only by design. Gov (Phase 10.4) is the last one and plugs into exactly the same infrastructure — types union, HelpLink role tag, page scaffold, role-agnostic search island.*
+*Phase 10.3 closes the admin side of the discoverability gap. The 28 articles document not just what the console does but the editorial posture behind every action  why we audit-everything, why defaults err on the user's side, why we don't put the operator's thumb on the scale. Same trust posture as Phases 10.1 / 10.2: civic-editorial tone, honest about what the platform deliberately doesn't do, internal-only and English-only by design. Gov (Phase 10.4) is the last one and plugs into exactly the same infrastructure  types union, HelpLink role tag, page scaffold, role-agnostic search island.*

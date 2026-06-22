@@ -107,7 +107,7 @@ migrations table state is honest. The `pg_restore` above carries the
 source DB's `drizzle.__drizzle_migrations` table verbatim, so this is a
 clean no-op when the source bookkeeping is honest. If `db:migrate`
 instead tries to re-apply (or silently skips) migrations, the source
-table had drifted — diagnose with `npx tsx scripts/diagnose-migrations.mts`
+table had drifted  diagnose with `npx tsx scripts/diagnose-migrations.mts`
 and re-align with `npx tsx scripts/reconcile-migrations.mts` (bookkeeping
 only; see `docs/completed/MIGRATION_JOURNAL_RECOVERY_PLAN.md`).
 

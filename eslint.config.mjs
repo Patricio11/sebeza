@@ -14,13 +14,13 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
   ]),
   {
-    // Phase 12 lint-debt triage (2026-06-12) — `npm run lint` is back in
+    // Phase 12 lint-debt triage (2026-06-12)  `npm run lint` is back in
     // the quality gate (`test:all`); these adjustments are the documented
     // reasoning, not a mute button:
     rules: {
       // This rule guards the legacy `pages/` directory, which this
       // project has never had (App Router from commit one). Every one of
-      // its 98 hits was a false positive — deliberate <a> elements to
+      // its 98 hits was a false positive  deliberate <a> elements to
       // API download endpoints (CSV/JSON exports must be plain anchors)
       // or locale-prefixed app routes the rule cannot resolve.
       "@next/next/no-html-link-for-pages": "off",

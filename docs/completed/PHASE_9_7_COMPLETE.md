@@ -10,10 +10,10 @@ Companion docs: `PHASE_9_7_PLAN.md` (this `/docs/completed/` directory), `docs/p
 
 Same dataset, two truths, in the language government acts on:
 
-- **`/gov/shortage`** — where the local pool isn't there to fill, so ESA §8 enforcement would be cruel; policy response is training investment.
-- **`/gov/opportunity`** — where SA-citizen supply can plausibly meet demand; ESA §8 has practical force here.
+- **`/gov/shortage`**  where the local pool isn't there to fill, so ESA §8 enforcement would be cruel; policy response is training investment.
+- **`/gov/opportunity`**  where SA-citizen supply can plausibly meet demand; ESA §8 has practical force here.
 
-Both views run on **one** classifier (`classifyJustification`, pure function, 11 vitest fixtures encoding the rule). The rule itself is published verbatim on `/gov/shortage` so government can argue with the thresholds rather than the model — every threshold is tunable from `/admin/settings`.
+Both views run on **one** classifier (`classifyJustification`, pure function, 11 vitest fixtures encoding the rule). The rule itself is published verbatim on `/gov/shortage` so government can argue with the thresholds rather than the model  every threshold is tunable from `/admin/settings`.
 
 ---
 
@@ -29,28 +29,28 @@ The naive build is "filter and rank employers by how many foreigners they hire."
 | **Dormant-by-default flag on per-employer lookup** | `feature_flag_employer_mix_lookup` (default OFF) | Activation paired with a real DEL §8 partnership |
 | **Oversight log** | `/admin/oversight` + `gov.employer_mix.lookup` audit kind | "couldn't this be abused?" → "every use is logged and reviewable" |
 
-Compliance assertion (a) "no nationality cell below k" + (e) "no raw country in any aggregate response" enforce two of these structurally at runtime — they fail loudly the moment a regression sneaks past code review.
+Compliance assertion (a) "no nationality cell below k" + (e) "no raw country in any aggregate response" enforce two of these structurally at runtime  they fail loudly the moment a regression sneaks past code review.
 
 ---
 
 ## What shipped
 
 ### 9.7.1  Reusable suppression utility ✅
-- `lib/analytics/suppress.ts` — generic `suppress(rows, { countKey, k, axes })` with k-floor + per-axis complementary suppression.
+- `lib/analytics/suppress.ts`  generic `suppress(rows, { countKey, k, axes })` with k-floor + per-axis complementary suppression.
 - 11 unit fixtures in `lib/analytics/suppress.test.ts` codifying the contract (boundary conditions + multi-survivor non-derivable + lone-survivor + group independence + row+col-pass independence).
 - vitest added as devDep + `npm test` / `npm run test:watch` scripts (Phase 11.4 will formalise the runner).
 - `outcomesQuery()` refactored to declare its two axes and call `suppress()` once. ~50 lines of dead helpers removed. Zero behaviour change.
 
 ### 9.7.2  Nationality dimension on market analytics ✅
-- `db/queries/nationality.ts` — `supplyByNationalityQuery({ province? })` + `statusMixByNationalityQuery()`. Both routed through `suppress()` with appropriate complementary axes.
+- `db/queries/nationality.ts`  `supplyByNationalityQuery({ province? })` + `statusMixByNationalityQuery()`. Both routed through `suppress()` with appropriate complementary axes.
 - Toggle on `/gov` overview (status mix) + `/gov/provinces/[slug]` (supply heatmap) via `?split=nationality`.
 - `/api/gov/nationality-mix/export?dim=supply|status&province?=` CSV with suppression-inside-the-query (URL bypass impossible).
-- Shared CSV helper extracted to `lib/analytics/csv.ts` (`safeCell`, `csvFromRows`, `csvDisposition`) — audit-log + outcomes + nationality routes all share one encoder.
+- Shared CSV helper extracted to `lib/analytics/csv.ts` (`safeCell`, `csvFromRows`, `csvDisposition`)  audit-log + outcomes + nationality routes all share one encoder.
 - Compliance assertion (a) `assertNoNationalityCellBelowFloor()` wired into `/api/admin/outcomes-compliance`.
 
 ### 9.7.3  Skills-Shortage Justification Index ✅
-- Pure `classifyJustification()` classifier (lib/analytics/justification.ts) — three inputs, four thresholds, three labels per D1. 11 vitest fixtures.
-- `justificationIndexQuery({ province? })` — demand from `COUNT(DISTINCT actor_org_id)` on search_events (anti-inflation), freshness-weighted SA supply, employer_confirmed placement split.
+- Pure `classifyJustification()` classifier (lib/analytics/justification.ts)  three inputs, four thresholds, three labels per D1. 11 vitest fixtures.
+- `justificationIndexQuery({ province? })`  demand from `COUNT(DISTINCT actor_org_id)` on search_events (anti-inflation), freshness-weighted SA supply, employer_confirmed placement split.
 - `/gov/shortage` page with the formula published verbatim at the top, province filter chips, classified table with per-cell tooltip carrying the three component values + raw counts, drill-down to `/search`.
 - Four new `platform_settings` knobs (migration `0012`): `lmi_demand_floor (1.0)`, `lmi_local_supply_threshold (0.5)`, `lmi_foreign_fill_floor (0.5)`, `employer_mix_min_placements (5)`. All tunable in `/admin/settings`. Zod bounds prevent silly values.
 - `/api/gov/justification-index/export?province?=` CSV.
@@ -58,18 +58,18 @@ Compliance assertion (a) "no nationality cell below k" + (e) "no raw country in 
 
 ### 9.7.4  Local-Hiring Opportunity Map ✅
 - `/gov/opportunity` reuses `justificationIndexQuery()` (no new query) and filters to `supply_available` cells.
-- `<OpportunityHeatmap>` — CSS Grid + brand colour, no map libraries (No-Flash Rule). Grouped by province; bars normalised across provinces.
+- `<OpportunityHeatmap>`  CSS Grid + brand colour, no map libraries (No-Flash Rule). Grouped by province; bars normalised across provinces.
 - ESA §8 framing strip names the Act explicitly; cross-references `/gov/shortage` for the complement.
 - New nav entry "Local-hiring opportunity" (Sprout icon).
 
 ### 9.7.5  Employer self-view ✅
-- `employerOwnMixQuery(orgId)` — strictly scoped to the caller's own org. Three CTEs for total/byRole/byCity, joins to profiles for `is_citizen`. No k-floor on self-data.
+- `employerOwnMixQuery(orgId)`  strictly scoped to the caller's own org. Three CTEs for total/byRole/byCity, joins to profiles for `is_citizen`. No k-floor on self-data.
 - `<EmployerHiringMixCard>` on `/employer` overview: headline tiles, single-bar split, role + city breakdown.
-- EEA §1 + ESA §8 framing copy + EEA-1 disclaimer one-liner. **Visible DRAFT banner** until counsel sign-off on DPIA R9 — single-line removal in `<DraftBanner />` when that lands.
+- EEA §1 + ESA §8 framing copy + EEA-1 disclaimer one-liner. **Visible DRAFT banner** until counsel sign-off on DPIA R9  single-line removal in `<DraftBanner />` when that lands.
 - New audit kind `employer.own_mix.view` logged on every render.
 
 ### 9.7.6  Per-employer governed lookup ✅ (SHIPS DORMANT)
-- `lib/gov/employer-lookup.ts` Server Action — double-gated (`verifyGov` + `feature_flag_employer_mix_lookup`), exact-match input only (org name OR CIPC reg number, mutually exclusive), purpose-bound (reason enum + free-text note for "other"), small-numbers guard via `employer_mix_min_placements`.
+- `lib/gov/employer-lookup.ts` Server Action  double-gated (`verifyGov` + `feature_flag_employer_mix_lookup`), exact-match input only (org name OR CIPC reg number, mutually exclusive), purpose-bound (reason enum + free-text note for "other"), small-numbers guard via `employer_mix_min_placements`.
 - Every call writes `gov.employer_mix.lookup` audit row with reason + count + above-floor flag.
 - `/gov/employer-lookup` page renders an informative dormant notice when off, the form + result panel when on.
 - ESA §8 framing strip ("what this is / what it isn't") + DPIA R9 caveat.
@@ -127,7 +127,7 @@ Compliance assertion (a) "no nationality cell below k" + (e) "no raw country in 
   5. `no-nationality-cell-below-floor`
   6. `no-raw-country-in-analytics`
 - **Migrations 0012 + 0013 + 0014 applied** to Neon.
-- **Seed re-applied** — fresh `npm run db:seed` populates the demo dataset.
+- **Seed re-applied**  fresh `npm run db:seed` populates the demo dataset.
 
 ---
 
@@ -198,28 +198,28 @@ Compliance assertion (a) "no nationality cell below k" + (e) "no raw country in 
 - `components/layout/adminNav.ts` (1 new entry)
 
 **Migrations** (all applied to Neon)
-- `0012_phase9_7_lmi_thresholds.sql` — 4 Justification Index threshold seeds
-- `0013_phase9_7_employer_mix_lookup_flag.sql` — dormant flag seed
-- `0014_phase9_7_audit_log_indices.sql` — `(at DESC)` + `(kind, at DESC)` indices
+- `0012_phase9_7_lmi_thresholds.sql`  4 Justification Index threshold seeds
+- `0013_phase9_7_employer_mix_lookup_flag.sql`  dormant flag seed
+- `0014_phase9_7_audit_log_indices.sql`  `(at DESC)` + `(kind, at DESC)` indices
 
 **Seed**
-- `db/seed.ts` — `seedPhase9_7NationalityDemo()` (4 foreign profiles + 2 mixed placements + 12 demand-signal search events)
+- `db/seed.ts`  `seedPhase9_7NationalityDemo()` (4 foreign profiles + 2 mixed placements + 12 demand-signal search events)
 
 **Docs**
-- `docs/popia/DPIA.md` — R9 (legal-framing claims pending counsel review)
+- `docs/popia/DPIA.md`  R9 (legal-framing claims pending counsel review)
 - `docs/PHASE_9_7_PLAN.md` → moved to `docs/completed/`
 - `docs/completed/PHASE_9_7_COMPLETE.md` (this file)
-- `docs/ROADMAP.md` — 9.7 ticked
-- `docs/TO_START_EVERY_SESSION.md` — Current State refreshed
+- `docs/ROADMAP.md`  9.7 ticked
+- `docs/TO_START_EVERY_SESSION.md`  Current State refreshed
 
 ---
 
-## Reframing decision — 2026-05-24 (post-operator review)
+## Reframing decision  2026-05-24 (post-operator review)
 
 The first draft framed the employer self-view + the gov per-employer
 lookup + the opportunity / shortage / brief pages around two specific
 South African statutes: **Employment Equity Act §1** (designated-group
-qualification — uses the term "Black people") and **Employment Services
+qualification  uses the term "Black people") and **Employment Services
 Act §8** (reasonable-efforts to recruit South African citizens, enforced
 by the Department of Employment & Labour).
 
@@ -241,7 +241,7 @@ policy-intelligence + employer-records language **on the same day Phase
 9.7 closed**. The DRAFT banner on `<EmployerHiringMixCard>` came off
 (removed entirely; not needed). The reason-enum on the per-employer
 lookup dropped `esa_s8_compliance` in favour of `compliance_check`.
-DPIA R9 was revised to record the reframing as the mitigation — the
+DPIA R9 was revised to record the reframing as the mitigation  the
 legal-claims-unverified risk is now formally addressed by the *absence*
 of those claims in the platform's copy.
 
@@ -263,16 +263,16 @@ record of what was considered.
 
 ## Outstanding (not in Phase 9.7's scope)
 
-1. **`feature_flag_employer_mix_lookup` activation** — pairs with a
+1. **`feature_flag_employer_mix_lookup` activation**  pairs with a
    concrete operational need rather than a hypothetical partnership.
    Engine + UI built and tested; flag-flip in `/admin/settings` is the
    activation step. The dormant page itself renders an informative
    notice so users handed the URL after activation get the right
    context.
-2. **9.7.8 cron + email distribution** — recurring monthly brief
+2. **9.7.8 cron + email distribution**  recurring monthly brief
    delivery. The page is the artefact today; the LMI nightly cron is
    the template when scheduling lands.
-3. **Genuine "Local shortage" classifications** — require more diverse
+3. **Genuine "Local shortage" classifications**  require more diverse
    employer-confirmed placement data than is reasonable to seed
    synthetically. Will emerge organically as more employers log hires
    across more (profession × province) cells. The seed currently lights

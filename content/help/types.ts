@@ -31,7 +31,7 @@ export type EmployerHelpCategory =
   | "privacy";
 
 /**
- * Phase 10.2 — seeker categories. Parallel to the employer set but
+ * Phase 10.2  seeker categories. Parallel to the employer set but
  * the user journey is different: seekers don't post vacancies and
  * don't manage a team, but they DO need to understand profile
  * visibility, invitations from the receiving end, career growth,
@@ -43,13 +43,13 @@ export type SeekerHelpCategory =
   | "profile"
   | "invitations"
   | "growth"
-  | "work_ready" // Phase 15 — "get ready for the work," not just "find the work"
+  | "work_ready" // Phase 15  "get ready for the work," not just "find the work"
   | "privacy"
   | "activity"
   | "account";
 
 /**
- * Phase 10.3 — admin categories. Admin staff are platform operators
+ * Phase 10.3  admin categories. Admin staff are platform operators
  * (Sebenza employees) running KYC review, qualification verification,
  * moderation, POPIA compliance, and oversight. The categories carry
  * the daily-work shape: verification queues first, then moderation,
@@ -65,7 +65,7 @@ export type AdminHelpCategory =
   | "operations";
 
 /**
- * Phase 10.4 — gov categories. Gov users (labour-market analysts,
+ * Phase 10.4  gov categories. Gov users (labour-market analysts,
  * treasury, DHET, provinces, municipalities) see aggregated data
  * only; the categories follow their actual surfaces: orient yourself
  * → read provincial briefs → understand shortage + opportunity →
@@ -83,7 +83,7 @@ export type GovHelpCategory =
 
 /**
  * Discriminated union of every role's category. `meta.category` is
- * just a string at the wire level — the category label lookup happens
+ * just a string at the wire level  the category label lookup happens
  * against whichever role's CATEGORIES constant is in scope on the
  * page rendering the article. Keeping the union loose here means the
  * seeker / admin / gov help centres in Phase 10.2 / 10.3 / 10.4 don't
@@ -230,7 +230,7 @@ export const EMPLOYER_HELP_CATEGORIES: ReadonlyArray<{
 ];
 
 /**
- * Phase 10.2 — seeker category labels + display order. Top-down by
+ * Phase 10.2  seeker category labels + display order. Top-down by
  * user journey: get oriented → tune your profile → respond to
  * vacancies → grow your skills → read your audit trail → manage your
  * account + privacy controls.
@@ -280,7 +280,7 @@ export const SEEKER_HELP_CATEGORIES: ReadonlyArray<{
     value: "activity",
     label: "Activity & audit",
     description:
-      "Who viewed your profile, who requested contact, what was downloaded — every PII-touching action recorded.",
+      "Who viewed your profile, who requested contact, what was downloaded  every PII-touching action recorded.",
   },
   {
     value: "account",
@@ -291,7 +291,7 @@ export const SEEKER_HELP_CATEGORIES: ReadonlyArray<{
 ];
 
 /**
- * Phase 10.3 — admin category labels + display order. The IA reads
+ * Phase 10.3  admin category labels + display order. The IA reads
  * top-down by frequency of daily work: get oriented → review the
  * verification queue → moderate accounts → process POPIA / DSR work
  * → curate taxonomy + settings → read aggregate reports → operate
@@ -347,7 +347,7 @@ export const ADMIN_HELP_CATEGORIES: ReadonlyArray<{
 ];
 
 /**
- * Phase 10.4 — gov category labels + display order. IA follows the
+ * Phase 10.4  gov category labels + display order. IA follows the
  * actual gov user journey: orient → read provincial briefs →
  * shortage + opportunity → curriculum + outcomes → employer lookup
  * (regulated, audit-logged) → exports → account + oversight.

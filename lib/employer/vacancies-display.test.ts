@@ -1,5 +1,5 @@
 /**
- * Phase 12 (Task 12.1) — vacancy-location display fixtures (Phase 13.9).
+ * Phase 12 (Task 12.1)  vacancy-location display fixtures (Phase 13.9).
  *
  * `formatVacancyLocation` is the single source of truth for eight render
  * sites; the gov-side bucket helpers keep null-province vacancies in their
@@ -18,7 +18,7 @@ import {
   vacancyProvinceBucket,
 } from "./vacancies-display";
 
-describe("formatVacancyLocation — located vacancies", () => {
+describe("formatVacancyLocation  located vacancies", () => {
   test("city + province renders 'City, Province'", () => {
     expect(
       formatVacancyLocation({
@@ -50,7 +50,7 @@ describe("formatVacancyLocation — located vacancies", () => {
   });
 });
 
-describe("formatVacancyLocation — any-province (null) vacancies", () => {
+describe("formatVacancyLocation  any-province (null) vacancies", () => {
   test("remote-only: 'Any province … Remote'", () => {
     const s = formatVacancyLocation({
       provinceSlug: null,
@@ -82,7 +82,7 @@ describe("formatVacancyLocation — any-province (null) vacancies", () => {
     expect(s).toContain("Remote / Hybrid");
   });
 
-  test("neither mode (shouldn't happen — server validation gates it): honest fallback", () => {
+  test("neither mode (shouldn't happen  server validation gates it): honest fallback", () => {
     expect(
       formatVacancyLocation({
         provinceSlug: null,
@@ -92,7 +92,7 @@ describe("formatVacancyLocation — any-province (null) vacancies", () => {
     ).toBe("Any province");
   });
 
-  test("never says 'anywhere' — the platform is SA-bounded (D7)", () => {
+  test("never says 'anywhere'  the platform is SA-bounded (D7)", () => {
     const s = formatVacancyLocation({
       provinceSlug: null,
       citySlug: null,

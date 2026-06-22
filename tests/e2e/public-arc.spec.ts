@@ -1,5 +1,5 @@
 /**
- * Phase 12 (Task 12.3) — public golden path:
+ * Phase 12 (Task 12.3)  public golden path:
  * landing → search roster → public dossier, at both viewports.
  *
  * Asserts the Redaction Rule from the BROWSER side: the rendered dossier

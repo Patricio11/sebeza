@@ -3,7 +3,7 @@ import { Skeleton } from "@/components/ui/Skeleton";
 /**
  * Loading fallback for the employer segment. The sidebar lives in the
  * route-group `layout.tsx` (outside this Suspense boundary), so this skeleton
- * fills only the main column — the sidebar stays put. Echoes the masthead +
+ * fills only the main column  the sidebar stays put. Echoes the masthead +
  * content so the swap reads as the page loading, not the whole screen.
  */
 export default function EmployerLoading() {

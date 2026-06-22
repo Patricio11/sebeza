@@ -18,14 +18,14 @@ interface Props {
   /** A short eyebrow above the workspace name (e.g. "Job seeker · workspace"). */
   workspaceEyebrow: string;
   nav: DashboardNavItem[];
-  /** The page content — masthead + main, rendered into the main column. */
+  /** The page content  masthead + main, rendered into the main column. */
   children: React.ReactNode;
 }
 
 /**
  * Persistent Civic Editorial dashboard frame: the sidebar (desktop) + top tab
  * strip (mobile) that stay mounted across navigation. Rendered from the route
- * group's `layout.tsx`, NOT from each page — so navigating between pages only
+ * group's `layout.tsx`, NOT from each page  so navigating between pages only
  * swaps the `{children}` (the masthead + main), and the sidebar never
  * unmounts or flashes a skeleton.
  *
@@ -54,7 +54,7 @@ export function DashboardFrame({
       {/* `print:block` drops the sidebar column so print-CSS pages (e.g. the
           seeker CV builder, the gov brief) print full-width with no chrome. */}
       <div className="md:grid md:grid-cols-[272px_1fr] print:block">
-        {/* Sidebar (desktop) — sticky to viewport; only the main column scrolls */}
+        {/* Sidebar (desktop)  sticky to viewport; only the main column scrolls */}
         <aside
           aria-label={`${workspaceLabel} navigation`}
           className="hidden border-r border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] md:sticky md:top-0 md:flex md:h-screen md:flex-col md:overflow-y-auto print:hidden"
@@ -71,7 +71,7 @@ export function DashboardFrame({
               aria-hidden="true"
               className={cn("absolute inset-y-0 left-0 w-1", roleAccent.strip)}
             />
-            <Link href="/" aria-label="Sebenza — home" className="flex items-center">
+            <Link href="/" aria-label="Sebenza  home" className="flex items-center">
               <SebenzaLogo width={120} />
             </Link>
           </div>
@@ -131,7 +131,7 @@ export function DashboardFrame({
               <div className="flex-[1] bg-[color:var(--color-danger)]" />
             </div>
             <div className="flex items-center justify-between gap-3 px-5 py-3">
-              <Link href="/" aria-label="Sebenza — home" className="flex items-center">
+              <Link href="/" aria-label="Sebenza  home" className="flex items-center">
                 <SebenzaLogo width={110} />
               </Link>
               <div className="flex items-center gap-2">
@@ -165,7 +165,7 @@ export function DashboardFrame({
                   </li>
                 ))}
               </ul>
-              {/* Fade-edge cue — signals there's more to scroll */}
+              {/* Fade-edge cue  signals there's more to scroll */}
               <div
                 aria-hidden="true"
                 className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-[color:var(--color-surface)] to-transparent"

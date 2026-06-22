@@ -305,29 +305,29 @@ export async function assertNoVacancyFieldOnPublicSurfaces(): Promise<AssertResu
     // 9.8.8 and never updated as later phases legitimately touched the
     // table; the CI compliance suite surfaced the stale entries. Each
     // addition below is an org-private or aggregate-only read:
-    // Phase 9.19.3.3 — employer-opt-in follow-up reminder cron (org-scoped).
+    // Phase 9.19.3.3  employer-opt-in follow-up reminder cron (org-scoped).
     "app\\api\\cron\\vacancy-follow-up-nudges",
     "app/api/cron/vacancy-follow-up-nudges",
-    // Phase 11.4.2 — followed-employer vacancy sweep cron. Notifies a
-    // seeker that a followed org opened a matching vacancy — deliberate,
+    // Phase 11.4.2  followed-employer vacancy sweep cron. Notifies a
+    // seeker that a followed org opened a matching vacancy  deliberate,
     // consented surface (the follow is the opt-in).
     "app\\api\\cron\\followed-employer-vacancy-sweep",
     "app/api/cron/followed-employer-vacancy-sweep",
-    // Phase 13.8 — per-row "Invite to vacancy" on /search. The page lists
+    // Phase 13.8  per-row "Invite to vacancy" on /search. The page lists
     // the signed-in VERIFIED org's OWN open vacancies for the modal
     // picker; anonymous/seeker visitors never receive vacancy data.
     "app\\[locale]\\(public)\\search",
     "app/[locale]/(public)/search",
-    // Phase 9.8 — audit-kind catalogue only (vacancy.* kind strings +
+    // Phase 9.8  audit-kind catalogue only (vacancy.* kind strings +
     // schema import for the audit_log table; no vacancy field reads).
     "lib\\audit",
     "lib/audit",
-    // Phase 11.4.5 — recommended-employers leaderboard: k=10-floored
+    // Phase 11.4.5  recommended-employers leaderboard: k=10-floored
     // aggregates over employer-confirmed placements; no vacancy fields
     // reach the seeker beyond suppressed counts.
     "db\\queries\\employer-leaderboard",
     "db/queries/employer-leaderboard",
-    // Phase 9.19 D2 — searchProfilesQuery applies a vacancy's min-years /
+    // Phase 9.19 D2  searchProfilesQuery applies a vacancy's min-years /
     // min-NQF constraints for the employer match view (vacancy is the
     // filter input, never the output payload).
     "db\\queries\\profiles",
@@ -1209,7 +1209,7 @@ export async function assertSeekerInviteNoOrphanWhenUserExists(): Promise<Assert
   // have refused the insert.
   // Phase 12 fix (2026-06-10): the column is "created_at" (snake_case,
   // per db/schema.ts appUser.createdAt → timestamp("created_at")); the
-  // original `u."createdAt"` made this assertion throw on every run —
+  // original `u."createdAt"` made this assertion throw on every run 
   // the CI suite surfaced it the first time it executed for real.
   const rows = await db.execute(sql`
     SELECT si.id AS invite_id, lower(si.email) AS email, u.id AS user_id

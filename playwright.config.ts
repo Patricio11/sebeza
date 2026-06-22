@@ -1,5 +1,5 @@
 /**
- * Phase 12 (Task 12.3) — Playwright E2E configuration.
+ * Phase 12 (Task 12.3)  Playwright E2E configuration.
  *
  * Runs the PRODUCTION build (`next build` + `next start`) against the
  * DISPOSABLE test database from `.env.test.local`. Every env var the app
@@ -8,12 +8,12 @@
  * Neon database.
  *
  * Two projects per D2 (docs/PHASE_12_PLAN.md): desktop 1280px and
- * mobile 360px — the No-Flash Rule's reference width.
+ * mobile 360px  the No-Flash Rule's reference width.
  *
  * Prereqs (same as the integration suite):
  *   - Docker Postgres up (`docker start sebenza-test-pg`)
  *   - `.env.test.local` present (D1 guard values)
- *   - DB migrated + seeded — run `npm run test:integration` once, or any
+ *   - DB migrated + seeded  run `npm run test:integration` once, or any
  *     DB suite, before `npm run test:e2e` on a fresh container.
  */
 import { defineConfig, devices } from "@playwright/test";
@@ -32,7 +32,7 @@ const PORT = 3100;
 
 export default defineConfig({
   testDir: "tests/e2e",
-  fullyParallel: false, // shared seeded DB — same reasoning as vitest integration
+  fullyParallel: false, // shared seeded DB  same reasoning as vitest integration
   workers: 1,
   retries: 0,
   timeout: 60_000,
@@ -72,7 +72,7 @@ export default defineConfig({
       CRON_SECRET: process.env.CRON_SECRET!,
       EMAIL_TRANSPORT: "console",
       EMAIL_TRANSPORT_STRICT: "false",
-      // Drops `upgrade-insecure-requests` from the CSP (proxy.ts) — the
+      // Drops `upgrade-insecure-requests` from the CSP (proxy.ts)  the
       // E2E server speaks plain http on localhost. Never set in prod.
       SEBENZA_E2E_HTTP: "1",
     },

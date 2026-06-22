@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * Phase 10.1 / 10.2 — client-side fuzzy search for the help index
+ * Phase 10.1 / 10.2  client-side fuzzy search for the help index
  * page.
  *
  * Rank-and-filter per D4:
@@ -14,7 +14,7 @@
  *   6. Category label substring     rank 5
  *   7. Multi-token match            rank 6
  *
- * No fuzzy-distance scoring — prefix + substring covers ~95% of
+ * No fuzzy-distance scoring  prefix + substring covers ~95% of
  * intent. With ~30 articles the loop is trivial; renders in well
  * under 5ms even on a low-end Android over 3G.
  *
@@ -37,7 +37,7 @@ import { Search, X, ChevronRight } from "lucide-react";
 
 interface Props {
   /** Flattened article-metadata list, no React components needed for
-   *  the index page — the link target is just the slug. */
+   *  the index page  the link target is just the slug. */
   articles: HelpArticleMeta[];
   /** Initial query from URL (server-rendered into the input). */
   initialQuery: string;

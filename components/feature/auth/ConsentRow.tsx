@@ -68,7 +68,7 @@ export function ConsentRow({
         <p className="mt-1 text-sm text-[color:var(--color-ink-soft)]">{body}</p>
         {explainer && (
           // Mobile-first: tap-to-expand on phones (compact list), always
-          // visible on md+. Pure-CSS — no JS for viewport detection.
+          // visible on md+. Pure-CSS  no JS for viewport detection.
           // Renders the explainer twice in the DOM by design; visibility
           // is gated by Tailwind's `md:hidden` + `hidden md:block`. The
           // duplication is intentional + cheap (text-only, no images).

@@ -1,4 +1,4 @@
-# PHASE 10 LAUNCH PLAN — PUBLIC LAUNCH (Tasks 10.5  10.11)
+# PHASE 10 LAUNCH PLAN  PUBLIC LAUNCH (Tasks 10.5  10.11)
 *Opens 2026-05-24. Companion docs: `TO_START_EVERY_SESSION.md` · `ROADMAP.md` · `UX_UI_SPEC.md` · `docs/SECURITY.md` · `docs/popia/`.*
 
 > **Renamed 2026-05-30.** Phase 10 ended up with two arcs: **10.1  10.4** = role-specific help centres (shipped first  see `docs/completed/PHASE_10_{1,2,3,4}_COMPLETE.md`), then **10.5  10.11** below = the actual public-launch tasks. Task numbers in this doc start at 10.5 to keep the help-centre numbering intact.
@@ -11,7 +11,7 @@
 
 ## 🎯 GOAL
 
-Get Sebenza in front of South African users — seekers, employers, government — with the dignity the platform has been building toward since Phase 0. Three pillars:
+Get Sebenza in front of South African users  seekers, employers, government  with the dignity the platform has been building toward since Phase 0. Three pillars:
 
 1. **Accessibility (WCAG 2.2 AA)**: contrast, keyboard, screen reader, focus order, prefers-reduced-motion. Everyone uses Sebenza, including users on assistive tech.
 2. **Performance budget on throttled 3G**: confirm the No-Flash Rule against measurement, not aspiration. JS budget validated on every key route, with a Lighthouse score floor in CI.
@@ -48,7 +48,7 @@ This is **not** a feature phase. Feature work is done. Phase 10 is the polish + 
 
 ### Task 10.7: Tier-1 + Tier-2 + Tier-3 localisation rollout
 - [ ] **Tier-1**: `zu` / `xh` / `af` catalogs filled in via professional human translation. The `__notice` stubs in `messages/{zu,xh,af}.json` get replaced. Consent + POPIA copy (D8 vacancy invites + the 9.7 reframed nationality-mix copy + the seeker sign-up step 2) is the high-stakes block.
-- [ ] **Tier-2**: `nso` (Sepedi), `tn` (Setswana), `st` (Sesotho), `ts` (Xitsonga), `ve` (Tshivenda), `ss` (siSwati), `nr` (isiNdebele) — the remaining seven official SA languages. Translation per Tier-1.
+- [ ] **Tier-2**: `nso` (Sepedi), `tn` (Setswana), `st` (Sesotho), `ts` (Xitsonga), `ve` (Tshivenda), `ss` (siSwati), `nr` (isiNdebele)  the remaining seven official SA languages. Translation per Tier-1.
 - [ ] **Tier-3**: `pt` (Portuguese), `fr` (French), `sw` (Swahili). For SADC users + the foreign-national community already in SA. Optional at launch; queued for the first month post-launch unless partnership timing forces.
 - [ ] Each tier adds its locales to `i18n/routing.ts` once the catalog crosses readiness (consent copy 100 % done; UI copy ≥ 80 % done with English deepMerge for the rest).
 - [ ] **Never machine-translate** consent / POPIA / legal copy. The rule from Phase 1 still holds.

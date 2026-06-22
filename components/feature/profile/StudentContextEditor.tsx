@@ -185,7 +185,7 @@ export function StudentContextEditor({
           </button>
         </div>
         <p className="mt-1 text-xs text-[color:var(--color-ink-soft)]">
-          Press Enter or comma to add — or paste a comma-separated list.
+          Press Enter or comma to add  or paste a comma-separated list.
           Backspace removes the last one.
         </p>
       </div>

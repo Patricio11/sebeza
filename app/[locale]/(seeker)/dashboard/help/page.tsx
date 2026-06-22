@@ -1,5 +1,5 @@
 /**
- * Phase 10.2 — seeker help center index.
+ * Phase 10.2  seeker help center index.
  *
  * Mirrors the employer help index (`/employer/help`) but for the
  * (seeker) route group. Auth-gated by `verifyRole("seeker")`. Hero
@@ -143,7 +143,7 @@ export default async function SeekerHelpIndexPage({
 }
 
 /**
- * Phase 10.2 — short label for the "Try it" chip on each article
+ * Phase 10.2  short label for the "Try it" chip on each article
  * card. Maps the most-common seeker surfaces to human labels. Unknown
  * paths fall back to the path itself (shouldn't happen in normal
  * authoring).

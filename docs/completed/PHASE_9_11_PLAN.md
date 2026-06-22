@@ -1,4 +1,4 @@
-# PHASE 9.11 PLAN — VACANCY-OUTCOME LOOP + GROWTH NOTIFICATIONS
+# PHASE 9.11 PLAN  VACANCY-OUTCOME LOOP + GROWTH NOTIFICATIONS
 *Side-phase between Phase 9.10 and Phase 10. Opened 2026-05-25 from a system-review handoff: when a vacancy is marked filled, the system should (a) capture WHO was hired so a placement row + seeker-status update happens automatically, and (b) tell the candidates who weren't selected what the role wanted so the rejection is a learning event, not silence.*
 *Companion docs: `TO_START_EVERY_SESSION.md` · `ROADMAP.md` · `UX_UI_SPEC.md` · `docs/PHASE_10_PLAN.md` · `docs/completed/PHASE_9_8_PLAN.md` (vacancies + invitations) · `docs/completed/PHASE_9_10_PLAN.md` (KYC gate).*
 

@@ -1,5 +1,5 @@
 /**
- * Phase 10.3 — admin help article view.
+ * Phase 10.3  admin help article view.
  *
  * Renders one admin article's body inside the DashboardShell.
  * Auth-gated by `verifyAdmin()`. 404 on unknown slug.
@@ -8,7 +8,7 @@
  *   - Reading column wrapped in `mx-auto max-w-3xl` at the page
  *     level (HelpProse itself is width-agnostic).
  *   - Related strip is 2 columns at this width.
- *   - No `meta.updatedAt` rendered — kept in meta for editorial
+ *   - No `meta.updatedAt` rendered  kept in meta for editorial
  *     discipline only.
  */
 

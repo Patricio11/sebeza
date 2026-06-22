@@ -1,4 +1,4 @@
-# PHASE 9.8 PLAN — VACANCIES & DEMAND-DRIVEN MATCHING
+# PHASE 9.8 PLAN  VACANCIES & DEMAND-DRIVEN MATCHING
 *Side-phase between Phase 9.7 and Phase 10, mirroring the 6.5 / 7.5 / 9.7 pattern. Opened 2026-05-24. Open questions closed same day.*
 *Companion docs: `TO_START_EVERY_SESSION.md` · `ROADMAP.md` · `UX_UI_SPEC.md` · `docs/SECURITY.md` · `docs/popia/`.*
 
@@ -16,7 +16,7 @@
 ## 🎯 GOAL
 
 Let an employer create a **private vacancy specification**, reverse-match it against the talent database,
-**invite** specific seekers, and capture their **accept / decline-with-reason** response — turning Sebenza
+**invite** specific seekers, and capture their **accept / decline-with-reason** response  turning Sebenza
 from ad-hoc search-and-contact into a structured, demand-driven matching system.
 
 This is **not** a job board. The distinction is the whole point:
@@ -26,11 +26,11 @@ This is **not** a job board. The distinction is the whole point:
 | Employer posts publicly | Vacancy is **private** to the employer org |
 | Seekers browse + apply (broadcast) | Employer reverse-matches + invites specific people (intent) |
 | Inbox fills with applications | Pipeline of invited candidates with explicit responses |
-| Nationality often invisible | Citizens **highlighted** honestly, gap made visible — never gated |
+| Nationality often invisible | Citizens **highlighted** honestly, gap made visible  never gated |
 
 **Why it's on-axis:** it systematises the Phase 5 search→shortlist→contact→placement flow, gives employers
 a reason to log *structured* hiring specs (→ better demand data for `/insights` + `/gov`), and the
-decline-with-reason captures *why roles go unfilled* — labour-market intelligence no job board has.
+decline-with-reason captures *why roles go unfilled*  labour-market intelligence no job board has.
 
 **Bonus: this is also the data that unblocks the "Local shortage" classifications from 9.7.** The 9.7
 COMPLETE doc flagged that genuine `shortage` cells need more diverse employer-confirmed placement data than
@@ -42,7 +42,7 @@ cells, not just seeded ones.
 
 ## 🧱 WHAT ALREADY EXISTS (build on, don't rebuild)
 
-- **Saved searches + shortlists** (Phase 5, per-org CRUD). A vacancy is *spec-like* a saved search — but
+- **Saved searches + shortlists** (Phase 5, per-org CRUD). A vacancy is *spec-like* a saved search  but
   note the key difference: saved searches store **count + `lastRunAt` only, never the result set**
   (`searchSnapshot ≠ result-set`). A vacancy is the opposite: it needs a **persistent candidate pipeline**.
   So this is a new table + relationship, not a renamed saved search.
@@ -53,17 +53,17 @@ cells, not just seeded ones.
 - **Placement-Truth + `placements`** (Phase 5 / 7.5.5: `placement_source`, salary band private). A filled
   vacancy links to a placement.
 - **Audit log** + action-naming convention. Every invite/response is audit-logged like any PII interaction.
-- **`citizen_boost` ranking + Citizen-Visibility Rule** (Phase 4) — already does "highlight citizens" the
+- **`citizen_boost` ranking + Citizen-Visibility Rule** (Phase 4)  already does "highlight citizens" the
   right way. The vacancy match view **reuses this**; it does not add a stricter gate (see §CRITICAL).
 
 ---
 
-## 🚨 CRITICAL DESIGN CORRECTION — nationality is HIGHLIGHT, not GATE
+## 🚨 CRITICAL DESIGN CORRECTION  nationality is HIGHLIGHT, not GATE
 
 The originating voice-chat proposed a per-vacancy **"South African only"** toggle that gates who can be
 invited. **We are not building that**, and the reason is the spine of the whole platform:
 
-- **Rule 2 (Location-Not-Nationality):** nationality is "a displayed, optionally-filterable attribute —
+- **Rule 2 (Location-Not-Nationality):** nationality is "a displayed, optionally-filterable attribute 
   **never a barrier**." A hard "nationals only" invite gate makes it a barrier. Direct violation.
 - **Rule 3 (Citizen-Visibility):** "match talent, never exclude foreigners." A nationals-only switch is
   exactly the exclusion this rule forbids.
@@ -74,10 +74,10 @@ invited. **We are not building that**, and the reason is the spine of the whole 
 **What we build instead (the honest version the platform already implies):**
 - The vacancy match view **highlights and ranks SA citizens first** (reuse `citizen_boost`), and shows the
   **honest supply picture**: *"4 SA citizens match · 9 if you broaden to all eligible candidates."* That is
-  the Skills-Shortage Justification Index (9.7) **at hiring time** — evidence, not exclusion.
+  the Skills-Shortage Justification Index (9.7) **at hiring time**  evidence, not exclusion.
 - Employers can **filter/sort** by nationality_class as a *view preference* (same as search today), but
   there is **no switch that prevents inviting** a matched person based on nationality.
-- **Legal-restriction exception — deferred entirely** (operator decision, 2026-05-24): some roles do carry
+- **Legal-restriction exception  deferred entirely** (operator decision, 2026-05-24): some roles do carry
   genuine statutory citizenship/clearance requirements (security clearance, specific licensure). **9.8 does
   not build or scaffold any `legal_eligibility_note` field.** Reasoning: scaffolding an exclusion field
   is exactly how "well, since the column exists…" stories start. If a concrete legal case ever appears,
@@ -91,12 +91,12 @@ invited. **We are not building that**, and the reason is the spine of the whole 
 Pre-flight resolved. The four open questions from the original draft + the senior-review push-back items
 are settled. Load-bearing for the build; don't relitigate without re-opening here first.
 
-### D1 — `interested_but_notice` shape (was Q1)
+### D1  `interested_but_notice` shape (was Q1)
 **A flag on `accepted`, not a third top-level state.** Stored as `state = "accepted_with_notice"` (new enum
 value) with `notice_period_months` (int, nullable). Counts as a yes everywhere except the "available now"
 filter; **never** as a decline. Protects every downstream stat from the "role X was rejected" lie.
 
-### D2 — Invite expiry (was Q2)
+### D2  Invite expiry (was Q2)
 **Per-vacancy, employer-set.** Each vacancy carries `invite_expiry_days` (int, nullable for "no expiry").
 Each `vacancy_invitations` row gets `expires_at` computed at send time. A nightly cron transitions any
 `state = "invited" AND expires_at < now()` to `state = "expired"` (new enum value) and fires two
@@ -105,17 +105,17 @@ employer, useful). Both surfaces honour the in-app + email channel pipeline (Res
 Phase 8; in-app always works). Audit-logged as `vacancy.invite.expire`. Cron reuses the Phase 8 cron infra
 + `CRON_SECRET` guard.
 
-### D3 — Decline-note + POPIA (was Q3)
+### D3  Decline-note + POPIA (was Q3)
 **Soft truncate + plain-language hint.** Decline-note free-text field capped at 200 chars. Visible
-reminder under the input: *"Work-related reasons only — don't include personal info like health, family
+reminder under the input: *"Work-related reasons only  don't include personal info like health, family
 status, or religion."* In CSV exports + audit-log meta the note is included but flagged
-`seeker-authored free text — treat as PII.`
+`seeker-authored free text  treat as PII.`
 
-### D4 — `legal_eligibility_note` (was Q4)
+### D4  `legal_eligibility_note` (was Q4)
 **Defer entirely.** No column, no flag, no scaffolding. If a concrete legal case ever appears, that's a
 separate, counsel-reviewed change at that point. See §CRITICAL above.
 
-### D5 — Bulk invite + consent state (was push-back item)
+### D5  Bulk invite + consent state (was push-back item)
 **Skip cleanly with soft user-facing message; record the actual reason in the audit log.** When an employer
 multi-selects N seekers and clicks "Invite to opportunity," the action splits into eligible (consent
 granted) and skipped (consent not granted, or already invited, or otherwise ineligible). The employer
@@ -124,21 +124,21 @@ per-seeker reason is **not** exposed in the UI (it would leak consent state). Ev
 audit-log row with the actual reason (`consent_not_granted`, `already_invited`, `profile_deleted`, etc.)
 for admin oversight.
 
-### D6 — Honest-supply line wording (was push-back item)
+### D6  Honest-supply line wording (was push-back item)
 **"N SA citizens · M candidates match this vacancy."** Avoid "eligible" (loaded language that could read
-as *legally* eligible) — use **"candidates"** or **"matched"**. Same number, cleaner framing.
+as *legally* eligible)  use **"candidates"** or **"matched"**. Same number, cleaner framing.
 
-### D7 — Workspace-role taxonomy (was pre-flight item)
+### D7  Workspace-role taxonomy (was pre-flight item)
 **Already exists.** The `orgMemberRole` pgEnum in `db/schema.ts:85` carries `owner`, `recruiter`,
 `viewer`. 9.8 reads from it; no new role-permissions layer to build. Convention: Owner + Recruiter create
 vacancies + send invites; Viewer is read-only. Enforced via `organization_members.role` check on every
 Server Action.
 
-### D8 — `vacancy_matching` consent text (was push-back item)
+### D8  `vacancy_matching` consent text (was push-back item)
 **Drafted inline here** as a stable English source for the Tier-1 human translation:
 
 > **Vacancy invites.** When you grant this, verified employers can flag you for a *specific role* they're
-> trying to fill — a chef position at a particular restaurant, a developer role at a particular bank.
+> trying to fill  a chef position at a particular restaurant, a developer role at a particular bank.
 > You'll get a notification with the role + employer named, and you can accept, decline, or decline with
 > a reason. Declining is free. You can revoke this consent any time from your privacy centre, and
 > declining a single invite doesn't hurt your visibility in search.
@@ -164,23 +164,23 @@ Server Action.
 - [x] **`placements` columns + linkage point** confirmed: table at `db/schema.ts:415` with
       `id` / `profileId` / `organizationId` / `actorUserId` / `role` / `city` / `hiredAt` / `salaryBand` /
       `source` (placementSource enum, defaults to `employer_confirmed`). **`vacancy_id` does NOT exist
-      today** — 9.8.1 adds it as `text("vacancy_id").references(() => vacancies.id)` nullable, in the
+      today**  9.8.1 adds it as `text("vacancy_id").references(() => vacancies.id)` nullable, in the
       same migration that creates the `vacancies` table. Cardinality preserved (1 vacancy : 0..N
       placements; 1 placement : 0..1 vacancy).
 - [x] **Search query + ranking entrypoint** confirmed: `searchProfilesQuery` at
       `db/queries/profiles.ts:80` is the single source of truth. The ranking blend
       (`ts_rank_cd × sebenza_freshness_confidence × completeness × citizen_boost`) is encoded in raw SQL
       inside that function. "Find matches" on a vacancy calls this with the vacancy's filters mapped to
-      `SearchFilters` — no parallel matcher.
+      `SearchFilters`  no parallel matcher.
 - [x] **`searchSnapshot ≠ result-set` rule** confirmed: explicit at `db/schema.ts:441` 
-      *"Stored filters get re-run by `runSavedSearch` to update `newMatchesCount` — we don't snapshot
+      *"Stored filters get re-run by `runSavedSearch` to update `newMatchesCount`  we don't snapshot
       result rows."* Saved searches store `filters` JSONB + `lastRunAt` + `newMatchesCount` + a SHA-1
       hash for diffing (`db/schema.ts:460`), never the result set. The vacancy pipeline is the opposite:
       a *persistent candidate list* with explicit accept/decline state per (vacancy × seeker). New table
       (`vacancy_invitations`) with explicit membership rows, not a stored search blob.
 - [x] **Audit naming + hardened CSV path** confirmed: `AuditKind` union at `lib/audit/index.ts:24`
       (dot-separated `category.action` or `category.sub.action`; see Phase 5 / 7 / 9.7 patterns).
-      Shared CSV helpers at `lib/analytics/csv.ts` (`safeCell`, `csvFromRows`, `csvDisposition` — OWASP
+      Shared CSV helpers at `lib/analytics/csv.ts` (`safeCell`, `csvFromRows`, `csvDisposition`  OWASP
       injection guard + UTF-8 BOM + CRLF + RFC 4180). 9.8 reuses both unchanged.
 - [x] **Phase 8 cron infra + `CRON_SECRET`** confirmed: `isAuthorizedCron(request)` at
       `lib/cron/auth.ts:15`. Convention: `const auth = isAuthorizedCron(request); if (!auth.ok) return
@@ -232,19 +232,19 @@ Server Action.
 ### Task 9.8.2: Reverse-matching ("Find matches") ✅ 2026-05-24
 - [x] `matchVacancyCandidates(vacancy)` in `lib/employer/vacancies.ts` composes the match view by mapping
       vacancy → `SearchFilters` (private helper `vacancyToSearchFilters`) and calling the existing
-      `searchProfilesQuery` (Phase 4 ranking SQL). **One ranking source of truth** — no parallel matcher,
+      `searchProfilesQuery` (Phase 4 ranking SQL). **One ranking source of truth**  no parallel matcher,
       no shadow SQL. Profession label + skill labels are concatenated into the FTS `query`; province slug
       passes through; seniority is normalised to the canonical lowercase only when it matches the search
       enum (`junior` / `intermediate` / `senior`).
 - [x] Match view at `app/[locale]/(employer)/employer/vacancies/[id]/match/page.tsx` reuses
       `<TalentRosterItem profile={p} locale={locale} highlightCitizen />`  same component the public
       `/search` uses, same redaction. Citizen highlighting comes from the existing `citizen_boost` already
-      baked into `searchProfilesQuery` ranking (NOT a new gate — §CRITICAL respected).
+      baked into `searchProfilesQuery` ranking (NOT a new gate  §CRITICAL respected).
 - [x] **Honest-supply line** at the top of the match view: ***"N SA citizens · M candidates match this
-      vacancy"*** (D6 wording — "candidates," not "eligible"). Sourced from `countMatchesByCitizenship` —
+      vacancy"*** (D6 wording  "candidates," not "eligible"). Sourced from `countMatchesByCitizenship` 
       a new query in `db/queries/profiles.ts` that mirrors `searchProfilesQuery`'s WHERE-clause assembly
       exactly and emits `COUNT(*) FILTER (...)` buckets. **No `LIMIT`** on this query, so the figure is
-      the true total across the platform — independent of the `SEARCH_LIMIT=50` cap on the ranked list
+      the true total across the platform  independent of the `SEARCH_LIMIT=50` cap on the ranked list
       below. When the ranked view fills, a small notice explains the cap and points at "Refine in search."
 - [x] Respects all existing redaction by construction: rows render through `<TalentRosterItem>`, the same
       cells the public `/search` exposes. No ID number, no documents, no raw contact in the match list.
@@ -255,10 +255,10 @@ Server Action.
       candidates on a phone. "Refine in search" CTA + "Open dossier" CTA both render as ≥ 36px-tall pills
       (tap-target generous; primary actions stay thumb-reachable). The page renders cleanly at 360px wide.
 - [x] **Find-matches CTA** on the vacancy detail page (`app/[locale]/(employer)/employer/vacancies/[id]/
-      page.tsx`) is visible to **all roles** — reverse-matching is a redacted read of the public talent
+      page.tsx`) is visible to **all roles**  reverse-matching is a redacted read of the public talent
       pool, so Viewers can browse matches even though they can't edit the vacancy itself. The CTA sits
       directly under the back-link / status-chip strip with an explainer about ranked + redacted + SA-
-      citizens-highlighted-first — sets honest expectations before the click.
+      citizens-highlighted-first  sets honest expectations before the click.
 - [x] Verified: `npm test` 22/22 green · `npm run typecheck` clean · `npm run build` clean (route
       `/[locale]/employer/vacancies/[id]/match` listed in the build output).
 
@@ -570,37 +570,37 @@ Server Action.
 All four original open questions are resolved (see **DECISIONS CLOSED** at the top of this doc).
 What remains is the standard operational follow-up that lands on real data, not at plan-time:
 
-1. **`invite_expiry_days` UX default** — the field is per-vacancy and employer-set. The create-vacancy
+1. **`invite_expiry_days` UX default**  the field is per-vacancy and employer-set. The create-vacancy
    form needs a sensible *default* in the input (so most employers don't have to think about it). Suggest
    14 days. Confirm on first real-traffic feedback.
-2. **Decline-reason taxonomy completeness** — the six reasons in 9.8.5 cover the common cases. Real
+2. **Decline-reason taxonomy completeness**  the six reasons in 9.8.5 cover the common cases. Real
    responses may surface a seventh ("commute / transport") or eighth ("hours don't suit") that we'd add
    via migration. Re-assess at every Phase boundary based on `other`-reason note volume.
 
 ## 🚫 OUT OF SCOPE FOR 9.8 (explicit guardrails)
 - ❌ **Any public vacancy listing, "apply" button, or seeker-side vacancy browsing.** Vacancies are
   org-private specification + matching tools. If it lets a seeker browse/apply to postings, it's a job
-  board — don't build it.
+  board  don't build it.
 - ❌ **Nationality-as-gate on invites** (the "SA only" switch). Highlight + honest supply figure only.
   No endpoint may block an invite based on `nationality_class`.
-- ❌ **Any `legal_eligibility_note` field** — not even scaffolded. See D4. If a concrete legal case
+- ❌ **Any `legal_eligibility_note` field**  not even scaffolded. See D4. If a concrete legal case
   appears, that's a separate, counsel-reviewed change at that point.
-- ❌ Salary band on any seeker-facing surface — stays private (Phase 5 rule).
-- ❌ In-app interview scheduling / messaging build-out — reuse the existing dossier/contact flow; a full
+- ❌ Salary band on any seeker-facing surface  stays private (Phase 5 rule).
+- ❌ In-app interview scheduling / messaging build-out  reuse the existing dossier/contact flow; a full
   comms suite is its own future phase, not 9.8.
-- ❌ Changing search-side behaviour — the public/employer search is unchanged; 9.8 *reuses* it.
-- ❌ Exposing the per-seeker skip reason on the bulk-invite UX (see D5) — the audit log records it;
+- ❌ Changing search-side behaviour  the public/employer search is unchanged; 9.8 *reuses* it.
+- ❌ Exposing the per-seeker skip reason on the bulk-invite UX (see D5)  the audit log records it;
   the employer-facing summary is intentionally soft to avoid leaking consent state.
 
 ---
 
 ## 🧭 WHY THIS IS THE SEBENZA VERSION
 The voice-chat got the shape right (private reverse-matching, consent-gated invites, decline-with-reason as
-market signal) and two specifics wrong: it reused a dead phase number and — more importantly — endorsed a
+market signal) and two specifics wrong: it reused a dead phase number and  more importantly  endorsed a
 per-vacancy "South African only" gate that contradicts Rule 2, Rule 3, and the DPIA R9 mitigation shipped
 six days earlier in 9.7. This plan keeps every genuinely strong idea (the pipeline, the typed consent reusing
 existing machinery, the reason taxonomy + the notice-period catch + the change-of-mind path, the
-"why-unfilled" analytics) and corrects the nationality piece to **highlight-not-gate** — the honest version
+"why-unfilled" analytics) and corrects the nationality piece to **highlight-not-gate**  the honest version
 the platform already implements everywhere else. Vacancies make Sebenza's demand data richer and its
 matching active, without ever becoming the job board, or the exclusion tool, it was built not to be.
 

@@ -6,7 +6,7 @@ import { getMyProfile } from "@/lib/profile/me";
 
 /**
  * Seeker route-group layout. Renders the persistent <DashboardFrame> once, so
- * navigation only swaps the content column — the sidebar stays mounted
+ * navigation only swaps the content column  the sidebar stays mounted
  * (Part A pattern). `verifyRole("seeker")` guards (session + email-verified;
  * admins allowed; 2FA NOT forced for seekers); the workspace label uses the
  * profile display name, falling back to the account name.

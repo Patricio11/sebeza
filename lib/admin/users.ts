@@ -142,13 +142,13 @@ export interface AdminUserDetail extends AdminUserRow {
   deletedAt: string | null;
   /** Avatar URL (Better Auth `image`); null → initials block. */
   image: string | null;
-  /** Phase 8 — admin/Home-Affairs KYC verification timestamp (ISO). */
+  /** Phase 8  admin/Home-Affairs KYC verification timestamp (ISO). */
   kycVerifiedAt: string | null;
-  /** Phase 11.4.4 — phone trust + per-channel opt-in. */
+  /** Phase 11.4.4  phone trust + per-channel opt-in. */
   phoneVerifiedAt: string | null;
   smsChannelEnabled: boolean;
   whatsappChannelEnabled: boolean;
-  /** Most recent session createdAt (ISO) — a proxy for last sign-in. */
+  /** Most recent session createdAt (ISO)  a proxy for last sign-in. */
   lastSignInAt: string | null;
   /** Count of non-expired sessions (active devices). */
   activeSessions: number;
@@ -160,7 +160,7 @@ export interface AdminUserDetail extends AdminUserRow {
  * detail-only columns (2FA state, suspension when/by, timestamps). Returns
  * `null` when there's no such user so the page can `notFound()`.
  *
- * No new audit kind is logged for the *view* — it surfaces the same account
+ * No new audit kind is logged for the *view*  it surfaces the same account
  * data the directory list already shows, and the directory list doesn't log
  * reads either; the moderation actions (suspend/restore/erase/2FA-reset) keep
  * logging via their own kinds in `lib/admin/moderation.ts`.

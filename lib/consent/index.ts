@@ -27,7 +27,7 @@ export const CONSENT_PURPOSES = [
   // action checks `hasVacancyMatchingConsent(userId)` at the action
   // boundary; bulk-invite skips non-consented seekers with a soft UX
   // summary ("3 not eligible right now"), recording the actual reason
-  // in the audit log only (per D5 — never in UI, to avoid leaking
+  // in the audit log only (per D5  never in UI, to avoid leaking
   // consent state).
   "vacancy_matching",
   // Phase 11.4.4 D2  per-channel opt-in for SMS + WhatsApp critical

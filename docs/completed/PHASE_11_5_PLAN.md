@@ -1,4 +1,4 @@
-# PHASE 11.5 PLAN — PROFILE DEPTH + MOBILE / A11Y POLISH
+# PHASE 11.5 PLAN  PROFILE DEPTH + MOBILE / A11Y POLISH
 *Opens after Phase 11.4. Companion docs: `PHASE_11_PLAN.md` · `docs/A11Y_AUDIT.md` · `docs/PERF_BUDGET.md` · `UX_UI_SPEC.md`.*
 
 > **Thesis:** Phase 11.1–11.4 added retention, conversion, control, and distribution surfaces. Phase 11.5 polishes the surface the seeker already touches every day  the profile editor, the mobile views, the accessibility floor. None of these are dramatic; together they are the difference between *"this product feels considered"* and *"this product feels rough."*
@@ -19,11 +19,11 @@ Together: ~15 small tasks. None are urgent in isolation; together they are the W
 
 ## 🧱 WHAT ALREADY EXISTS (build on, don't rebuild)
 
-- **Profile editor** — `app/[locale]/(seeker)/dashboard/profile/page.tsx`. Seven-section vertical layout with a sticky desktop sidebar nav.
-- **Sticky-section pattern** — used on `/employer/vacancies/new`, `/admin/audit-log` and others. Mobile fall-back is a linear scroll.
-- **Existing components needing polish** — `<MultiSelectComboboxField>`, `<MonthYearPicker>`, `<Avatar>`, the city-demand table on `/dashboard/grow`.
-- **A11y audit findings** — `docs/A11Y_AUDIT.md`. The findings table is the input to the a11y tasks below.
-- **Civic-Editorial typography + Hanken + Fraunces** — already loaded; no new font work.
+- **Profile editor**  `app/[locale]/(seeker)/dashboard/profile/page.tsx`. Seven-section vertical layout with a sticky desktop sidebar nav.
+- **Sticky-section pattern**  used on `/employer/vacancies/new`, `/admin/audit-log` and others. Mobile fall-back is a linear scroll.
+- **Existing components needing polish**  `<MultiSelectComboboxField>`, `<MonthYearPicker>`, `<Avatar>`, the city-demand table on `/dashboard/grow`.
+- **A11y audit findings**  `docs/A11Y_AUDIT.md`. The findings table is the input to the a11y tasks below.
+- **Civic-Editorial typography + Hanken + Fraunces**  already loaded; no new font work.
 
 ---
 
@@ -33,9 +33,9 @@ Together: ~15 small tasks. None are urgent in isolation; together they are the W
 
 **Scope.** A new profile field: optional, multi-select, four canonical tags `mentorship`, `freelance`, `contract_gigs`, `public_speaking`. Independent of employment status; a fully-employed senior dev can be "Open to mentorship" without changing their primary status.
 
-Tags appear on the public profile (`/p/{handle}`) as small chips below the location. They are searchable (employers can filter `/search` by tag). They are voluntary — empty by default.
+Tags appear on the public profile (`/p/{handle}`) as small chips below the location. They are searchable (employers can filter `/search` by tag). They are voluntary  empty by default.
 
-**Why now.** Today the platform represents a seeker as "available / looking / employed / dormant" — a four-state employment posture. That doesn't capture the secondary intent that a lot of SA professionals actually have: *"I'm employed, but I'll mentor juniors", "I'm employed, but I'll take a contract gig on weekends", "I'm available for conference talks"*. The tag system surfaces it cleanly without confusing the primary status.
+**Why now.** Today the platform represents a seeker as "available / looking / employed / dormant"  a four-state employment posture. That doesn't capture the secondary intent that a lot of SA professionals actually have: *"I'm employed, but I'll mentor juniors", "I'm employed, but I'll take a contract gig on weekends", "I'm available for conference talks"*. The tag system surfaces it cleanly without confusing the primary status.
 
 **Data shape.**
 
@@ -61,7 +61,7 @@ type OpenToTag = (typeof OPEN_TO_TAGS)[number];
 
 **Matcher behaviour.** Tags **do not** change the seeker's appearance in the primary matcher (profession + skill + province). They surface only when an employer explicitly filters by them in `/search`.
 
-**UI.** New section on `/dashboard/profile` "Open to" with four toggleable chips. Each chip carries a one-line explainer on focus / hover ("Mentor a junior in your field once a month — usually unpaid").
+**UI.** New section on `/dashboard/profile` "Open to" with four toggleable chips. Each chip carries a one-line explainer on focus / hover ("Mentor a junior in your field once a month  usually unpaid").
 
 **Public surface.** Tags render as small Civic-Editorial chips on `/p/{handle}`, with deliberately quiet styling (they're a secondary signal, not the primary one).
 
@@ -76,9 +76,9 @@ type OpenToTag = (typeof OPEN_TO_TAGS)[number];
 
 ### Task 11.5.2: CV upload as personal backup
 
-**Scope.** A seeker can upload one CV file (PDF, max 5 MB) to their profile. The file is **not** shown to employers, **not** indexed for search, **not** surfaced anywhere except the seeker's own profile editor. It's a personal backup copy — the seeker can re-download it whenever they need it.
+**Scope.** A seeker can upload one CV file (PDF, max 5 MB) to their profile. The file is **not** shown to employers, **not** indexed for search, **not** surfaced anywhere except the seeker's own profile editor. It's a personal backup copy  the seeker can re-download it whenever they need it.
 
-**Why now.** Two reasons. First, low-tech seekers often have a CV file ready and feel friction in retyping the data into structured form fields. The CV upload is psychological permission — *"the platform has my CV; the structured fields can come later"*. Second, the upload itself produces a useful side-effect: the file is now backed up on the platform, so the seeker doesn't lose it when their phone dies.
+**Why now.** Two reasons. First, low-tech seekers often have a CV file ready and feel friction in retyping the data into structured form fields. The CV upload is psychological permission  *"the platform has my CV; the structured fields can come later"*. Second, the upload itself produces a useful side-effect: the file is now backed up on the platform, so the seeker doesn't lose it when their phone dies.
 
 **Data shape.** New column on `profiles`:
 
@@ -93,7 +93,7 @@ The file is stored in Supabase Storage under a private bucket; only the seeker (
 
 **Privacy invariant.** The CV is **not exposed to employers** under any flow. Not on `/p/{handle}`, not in `/search`, not in invitations. The audit log records the upload + any re-download; admin access requires the existing data-export flow.
 
-**UI.** New section at the bottom of `/dashboard/profile`: "Personal CV backup". Empty state: "Upload a PDF of your CV. It stays private to you — we don't share it with employers. It's your backup copy." With-file state: "{filename} · uploaded 2026-05-30 · Download · Replace · Delete".
+**UI.** New section at the bottom of `/dashboard/profile`: "Personal CV backup". Empty state: "Upload a PDF of your CV. It stays private to you  we don't share it with employers. It's your backup copy." With-file state: "{filename} · uploaded 2026-05-30 · Download · Replace · Delete".
 
 **POPIA touch.** CVs often contain PII the structured profile doesn't expose (home address, ID, etc.). The seeker is uploading deliberately; the platform treats the file as the seeker's own document, not as platform-processed content. DPIA row clarifies.
 
@@ -102,7 +102,7 @@ The file is stored in Supabase Storage under a private bucket; only the seeker (
 - [ ] New `<CvBackupEditor>` component on `/dashboard/profile`.
 - [ ] Server actions: `uploadCv`, `downloadCv`, `deleteCv`, `replaceCv` (each writes an audit row).
 - [ ] One help article: `content/help/seeker/profile/cv-backup.md`.
-- [ ] DPIA row + Retention Policy line (CV is part of the data subject's own holdings — erasure removes it).
+- [ ] DPIA row + Retention Policy line (CV is part of the data subject's own holdings  erasure removes it).
 
 ---
 
@@ -201,9 +201,9 @@ This task wraps each section in `role="group"` with an `aria-label` matching the
 
 ---
 
-### Task 11.5.10: Career Compass ordinal numerals — screen-reader correction
+### Task 11.5.10: Career Compass ordinal numerals  screen-reader correction
 
-**Scope.** Recommendation cards on `/dashboard/grow` render the ordinal as a styled `<span>`: `01`, `02`, `03`. Screen readers announce *"zero one"* — confusing.
+**Scope.** Recommendation cards on `/dashboard/grow` render the ordinal as a styled `<span>`: `01`, `02`, `03`. Screen readers announce *"zero one"*  confusing.
 
 This task wraps the ordinal in `aria-label="Recommendation 1:"` (or similar localised string). Visual unchanged.
 
@@ -214,7 +214,7 @@ This task wraps the ordinal in `aria-label="Recommendation 1:"` (or similar loca
 
 ### Task 11.5.11: City-demand bar visually-hidden text
 
-**Scope.** The gap bar in the city-demand table is `aria-hidden="true"` (correct — it's a visual aid). But the percentage encoded by the bar is not duplicated as text for screen readers.
+**Scope.** The gap bar in the city-demand table is `aria-hidden="true"` (correct  it's a visual aid). But the percentage encoded by the bar is not duplicated as text for screen readers.
 
 This task adds a visually-hidden span with the percentage to the table cell.
 
@@ -255,7 +255,7 @@ This task adds a `decorative` prop (default `true` for backward-compat); when `f
 
 ### Task 11.5.14: Status confirmation copy clarity
 
-**Scope.** Today the status card on `/dashboard` says "Confirm your status" with a button. The verb is wrong — does that change my status or just affirm it? Friction.
+**Scope.** Today the status card on `/dashboard` says "Confirm your status" with a button. The verb is wrong  does that change my status or just affirm it? Friction.
 
 This task changes the copy + UX:
 

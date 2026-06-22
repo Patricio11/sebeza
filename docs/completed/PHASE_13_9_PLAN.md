@@ -1,4 +1,4 @@
-# PHASE 13.9 PLAN — "ANY PROVINCE" OPTION FOR REMOTE / HYBRID VACANCIES
+# PHASE 13.9 PLAN  "ANY PROVINCE" OPTION FOR REMOTE / HYBRID VACANCIES
 
 *Side-phase between Phase 13.8 (Invite-from-search) and Phase 12 (Testing & QA). Companion docs: `TO_START_EVERY_SESSION.md` · `ROADMAP.md` · `docs/completed/PHASE_9_8_COMPLETE.md` (the vacancies + reverse-match engine this builds on).*
 
@@ -14,7 +14,7 @@ After Phase 13.9 ships, an employer creating a vacancy:
 - Picking "Any" sets `province_slug = NULL` AND `city_slug = NULL` on the row.
 - The reverse-match query (`matchVacancyCandidates`) skips the province filter when `vacancy.provinceSlug` is null; skill / years / NQF / work-availability filters still apply.
 - The vacancy card + detail render "Remote · Any province" / "Hybrid · Any province" depending on the work-availability mix.
-- Gov-side demand-by-province aggregates bucket null-province vacancies as a separate **"national / remote"** lane — never silently dropped, never double-counted.
+- Gov-side demand-by-province aggregates bucket null-province vacancies as a separate **"national / remote"** lane  never silently dropped, never double-counted.
 
 Built honest: removing the location gate doesn't remove honest disclosure that the role is national / remote-only.
 
@@ -22,18 +22,18 @@ Built honest: removing the location gate doesn't remove honest disclosure that t
 
 ## 🧱 WHAT ALREADY EXISTS (build on, don't rebuild)
 
-- **`vacancies` table** (Phase 9.8.1) — `province_slug text NOT NULL` + `city_slug text NULL`. Migration `0015`.
-- **`work_availability` array on vacancies** (Phase 9.18) — currently includes `remote` and `hybrid` as valid kinds.
-- **`matchVacancyCandidates()`** (Phase 9.8.2) — the reverse-match composer that currently filters by `vacancy.provinceSlug` to scope the search.
-- **`VacancyForm` component** — owns the province + city picker. Already wires `MultiSelectComboboxField` for work-availability.
-- **`createVacancy` / `updateVacancy` server actions** in `lib/employer/vacancies.ts` — Zod-validated entry points.
-- **Gov-side `demandVsCurriculumQuery`** + `demandVsCurriculumByModule` (Phase 9.13.3 + 13.6) — aggregate against `institutions.province_slug` (not vacancies); the change here doesn't break them directly but the **followed-employer vacancy-sweep cron** + the **Phase 13.8 Invite-from-search** modal need province-display awareness.
+- **`vacancies` table** (Phase 9.8.1)  `province_slug text NOT NULL` + `city_slug text NULL`. Migration `0015`.
+- **`work_availability` array on vacancies** (Phase 9.18)  currently includes `remote` and `hybrid` as valid kinds.
+- **`matchVacancyCandidates()`** (Phase 9.8.2)  the reverse-match composer that currently filters by `vacancy.provinceSlug` to scope the search.
+- **`VacancyForm` component**  owns the province + city picker. Already wires `MultiSelectComboboxField` for work-availability.
+- **`createVacancy` / `updateVacancy` server actions** in `lib/employer/vacancies.ts`  Zod-validated entry points.
+- **Gov-side `demandVsCurriculumQuery`** + `demandVsCurriculumByModule` (Phase 9.13.3 + 13.6)  aggregate against `institutions.province_slug` (not vacancies); the change here doesn't break them directly but the **followed-employer vacancy-sweep cron** + the **Phase 13.8 Invite-from-search** modal need province-display awareness.
 
 ---
 
 ## 📋 TASKS
 
-### Task 13.9.1: Schema — drop NOT NULL on `vacancies.province_slug`
+### Task 13.9.1: Schema  drop NOT NULL on `vacancies.province_slug`
 
 **Migration `0047_phase13_9_vacancy_any_province.sql`** (additive, no data backfill):
 
@@ -42,25 +42,25 @@ ALTER TABLE vacancies
   ALTER COLUMN province_slug DROP NOT NULL;
 ```
 
-`city_slug` is already nullable — no change there.
+`city_slug` is already nullable  no change there.
 
-**Schema (`db/schema.ts`)** — `provinceSlug: text("province_slug").notNull()` → `provinceSlug: text("province_slug")`.
+**Schema (`db/schema.ts`)**  `provinceSlug: text("province_slug").notNull()` → `provinceSlug: text("province_slug")`.
 
-**Types** — `VacancyRow.provinceSlug: string` → `string | null`. Every consumer that destructures `provinceSlug` gets a typecheck failure until handled. Drives the rest of the work.
+**Types**  `VacancyRow.provinceSlug: string` → `string | null`. Every consumer that destructures `provinceSlug` gets a typecheck failure until handled. Drives the rest of the work.
 
 - [ ] Migration + schema column + `VacancyRow` interface update.
 
 ---
 
-### Task 13.9.2: Form UX — conditional "Any" province option
+### Task 13.9.2: Form UX  conditional "Any" province option
 
-**`VacancyForm.tsx`** — the province `<select>` (or `ComboboxField`) gains an "Any province (remote / hybrid)" option **only when** the form's current `work_availability` selection includes `remote` OR `hybrid`. Implementation:
+**`VacancyForm.tsx`**  the province `<select>` (or `ComboboxField`) gains an "Any province (remote / hybrid)" option **only when** the form's current `work_availability` selection includes `remote` OR `hybrid`. Implementation:
 
 - When `workAvailability` toggles off remote AND hybrid while province is set to "Any", the form auto-clears the picker back to "Select a province" (state convergence, not silent acceptance of a now-invalid combination).
-- Picking "Any" disables / hides the city field — there's no "Any city in Any province".
+- Picking "Any" disables / hides the city field  there's no "Any city in Any province".
 - The picker's "Any" row carries a small hint chip explaining the implication: *Candidates from every province match; location filter is off.*
 
-**Server actions** — `createVacancy` + `updateVacancy` Zod schemas accept `provinceSlug: string | null`. Server-side validation cross-checks: when `provinceSlug === null`, `workAvailability` MUST contain at least one of `remote` or `hybrid`. Refuse otherwise with a clear error message. The form should never let this state escape, but the server is the structural gate.
+**Server actions**  `createVacancy` + `updateVacancy` Zod schemas accept `provinceSlug: string | null`. Server-side validation cross-checks: when `provinceSlug === null`, `workAvailability` MUST contain at least one of `remote` or `hybrid`. Refuse otherwise with a clear error message. The form should never let this state escape, but the server is the structural gate.
 
 - [ ] Form-side conditional option + auto-clear on work-availability change.
 - [ ] Server-side cross-validation in createVacancy / updateVacancy.
@@ -68,18 +68,18 @@ ALTER TABLE vacancies
 
 ---
 
-### Task 13.9.3: Matcher — skip province filter when null
+### Task 13.9.3: Matcher  skip province filter when null
 
 **`matchVacancyCandidates(vacancy)`** (Phase 9.8.2) currently composes search filters from vacancy fields. When `vacancy.provinceSlug` is null, drop the province filter entirely from the candidate query. Skill / years / NQF / work-availability filters still apply.
 
-**`countMatchesByCitizenship`** (Phase 9.8.2's honest-supply line) — same fix; skip the province narrowing when null.
+**`countMatchesByCitizenship`** (Phase 9.8.2's honest-supply line)  same fix; skip the province narrowing when null.
 
 - [ ] `matchVacancyCandidates` honours null province.
 - [ ] `countMatchesByCitizenship` honours null province.
 
 ---
 
-### Task 13.9.4: Display — "Any province" rendering
+### Task 13.9.4: Display  "Any province" rendering
 
 Every surface that renders a vacancy's location string needs to handle null. The string is composed in a handful of places:
 
@@ -87,9 +87,9 @@ Every surface that renders a vacancy's location string needs to handle null. The
 - `<VacancyInvitationsPanel>` row label (employer side).
 - Seeker-side invitation card (`<InvitationCard>` on `/dashboard/invitations`).
 - `<VacancySnapshotCard>` (Phase 11.3.4, the snapshotted vacancy on the invitation detail).
-- Phase 13.8's `<InviteFromSearchButton>` modal picker — adds "Remote · Any" / "Hybrid · Any" / "Cape Town" subtitle under each vacancy title so the employer disambiguates two same-titled vacancies on different lanes.
+- Phase 13.8's `<InviteFromSearchButton>` modal picker  adds "Remote · Any" / "Hybrid · Any" / "Cape Town" subtitle under each vacancy title so the employer disambiguates two same-titled vacancies on different lanes.
 
-**Helper** — new `formatVacancyLocation(v: { provinceSlug, citySlug, workAvailability })` in `lib/employer/vacancies-display.ts` (server-friendly, no React deps) returns:
+**Helper**  new `formatVacancyLocation(v: { provinceSlug, citySlug, workAvailability })` in `lib/employer/vacancies-display.ts` (server-friendly, no React deps) returns:
 
 - `"Any province · Remote"` when `provinceSlug` is null AND `workAvailability` includes `remote` only.
 - `"Any province · Hybrid"` when `provinceSlug` is null AND `workAvailability` includes `hybrid` only.
@@ -103,14 +103,14 @@ Single source of truth so the eight render sites stop drifting.
 
 ---
 
-### Task 13.9.5: Gov-side — "national / remote" lane on demand cuts
+### Task 13.9.5: Gov-side  "national / remote" lane on demand cuts
 
 The demand-vs-curriculum surfaces (`/gov/curriculum`, the module-grain card, the CSV exports) aggregate by province dimension. Null-province vacancies need handling:
 
 **Option taken (D5):** bucket them as a separate **"national / remote"** lane. NEVER:
 - silently exclude (loses real demand signal),
 - double-count across every province (overstates demand by 9×),
-- attribute to the employer's HQ province (dishonest — the role doesn't constrain location).
+- attribute to the employer's HQ province (dishonest  the role doesn't constrain location).
 
 **Implementation:**
 
@@ -120,7 +120,7 @@ The demand-vs-curriculum surfaces (`/gov/curriculum`, the module-grain card, the
 
 **UI:** when a gov-side surface shows a province breakdown, the "national / remote" row renders with a small italic label so the analyst knows it's the catch-all lane.
 
-- [ ] Audit every vacancy-grouped-by-province query. (Likely small — survey suggested none today; verify in implementation.)
+- [ ] Audit every vacancy-grouped-by-province query. (Likely small  survey suggested none today; verify in implementation.)
 - [ ] Helper `vacancyProvinceBucket`.
 - [ ] Render the "national / remote" lane on any surface that surfaces vacancy province cuts.
 
@@ -128,7 +128,7 @@ The demand-vs-curriculum surfaces (`/gov/curriculum`, the module-grain card, the
 
 ### Task 13.9.6: Followed-employer vacancy-sweep cron
 
-The Phase 11.4.2 cron fires `employer.opened_vacancy.in_your_pool` per (followed-org × matching new vacancy) — currently keyed off vacancy.provinceSlug matching seeker.provinceSlug. A null-province vacancy should match every seeker who follows the org regardless of their province (since the role doesn't constrain location).
+The Phase 11.4.2 cron fires `employer.opened_vacancy.in_your_pool` per (followed-org × matching new vacancy)  currently keyed off vacancy.provinceSlug matching seeker.provinceSlug. A null-province vacancy should match every seeker who follows the org regardless of their province (since the role doesn't constrain location).
 
 - [ ] Cron query: when `vacancy.provinceSlug IS NULL`, drop the province join from the seeker-follower match.
 
@@ -140,7 +140,7 @@ One small editorial pass to keep help honest:
 
 - `content/help/employer/vacancies/creating-a-vacancy.tsx` (or whichever existing employer help article covers vacancy creation): add a one-paragraph block "Posting a remote or hybrid role" explaining the "Any province" option + the exact gating (remote / hybrid required).
 
-No new article — the existing creating-a-vacancy article is the right home.
+No new article  the existing creating-a-vacancy article is the right home.
 
 - [ ] One help article paragraph + meta `updatedAt` bump.
 
@@ -148,12 +148,12 @@ No new article — the existing creating-a-vacancy article is the right home.
 
 ## 🚫 OUT OF SCOPE FOR PHASE 13.9 (explicit guardrails)
 
-- ❌ **"Any country"** — Sebenza is SA-focused. "Any" means any SA province, not cross-border. The Location-Not-Nationality Rule + the platform's national-system thesis don't change.
-- ❌ **Cross-border remote vacancies** (e.g. SA company hiring globally) — separate phase if ever. The current schema (`profiles.province_slug`) anchors candidates to SA provinces only; opening the talent pool to non-SA-residents is a different problem with different POPIA implications.
-- ❌ **A new "national" employer-side workspace surface** — the existing vacancy detail page handles the rendering; no new page.
-- ❌ **Retroactive backfill** — existing vacancies stay as they are. The form only exposes "Any" for fresh creates / edits.
-- ❌ **Per-city Any** — there's no "Any city in Western Cape" option. Province + city is the right grain.
-- ❌ **Schema sentinel value `'any'`** — explicitly rejected per D2 in favour of nullable column.
+- ❌ **"Any country"**  Sebenza is SA-focused. "Any" means any SA province, not cross-border. The Location-Not-Nationality Rule + the platform's national-system thesis don't change.
+- ❌ **Cross-border remote vacancies** (e.g. SA company hiring globally)  separate phase if ever. The current schema (`profiles.province_slug`) anchors candidates to SA provinces only; opening the talent pool to non-SA-residents is a different problem with different POPIA implications.
+- ❌ **A new "national" employer-side workspace surface**  the existing vacancy detail page handles the rendering; no new page.
+- ❌ **Retroactive backfill**  existing vacancies stay as they are. The form only exposes "Any" for fresh creates / edits.
+- ❌ **Per-city Any**  there's no "Any city in Western Cape" option. Province + city is the right grain.
+- ❌ **Schema sentinel value `'any'`**  explicitly rejected per D2 in favour of nullable column.
 
 ---
 
@@ -182,7 +182,7 @@ No new article — the existing creating-a-vacancy article is the right home.
 6. On `/employer/vacancies/[id]/match` for the null-province vacancy, confirm the candidate list includes seekers from every province (province filter dropped). Skill / years / NQF still narrow.
 7. On `/employer/vacancies` list + detail, confirm the location string reads "Any province · Remote" (or "/ Hybrid" when both).
 8. On the seeker's `/dashboard/invitations` for an invitation to a null-province vacancy, confirm the snapshot card + the invitation row both render "Any province · Remote" honestly.
-9. On `/gov/curriculum`, confirm null-province vacancies surface in a "national / remote" row on whichever surface aggregates by province (likely none break today — the existing queries don't read `vacancies.province_slug`; the new `vacancyProvinceBucket` helper is there for the next gov surface that does).
+9. On `/gov/curriculum`, confirm null-province vacancies surface in a "national / remote" row on whichever surface aggregates by province (likely none break today  the existing queries don't read `vacancies.province_slug`; the new `vacancyProvinceBucket` helper is there for the next gov surface that does).
 10. Phase 13.8 Invite-from-search modal: confirm each vacancy in the picker shows its location string under the title, including "Any province · Remote" for the null-province ones.
 
 ---
@@ -196,7 +196,7 @@ Rough order-of-magnitude estimate:
 - 1 type change cascading through ~8 files via typecheck.
 - 1 form change (conditional "Any" option + state convergence).
 - 2 server-action validation extensions (createVacancy + updateVacancy).
-- 2 query changes (matchVacancyCandidates + countMatchesByCitizenship — drop province filter when null).
+- 2 query changes (matchVacancyCandidates + countMatchesByCitizenship  drop province filter when null).
 - 1 cron change (followed-employer vacancy-sweep).
 - 1 new helper (`formatVacancyLocation`) + 1 new helper (`vacancyProvinceBucket`).
 - 8 render-site switches to `formatVacancyLocation`.
@@ -205,8 +205,8 @@ Rough order-of-magnitude estimate:
 - 0 new notification kinds.
 - 0 new platform flags.
 
-Comparable to Phase 11.5 polish tasks — a contained schema-shape change with a clean cascading typecheck driving the rest.
+Comparable to Phase 11.5 polish tasks  a contained schema-shape change with a clean cascading typecheck driving the rest.
 
 ---
 
-*Plan opens for Phase 13.9. Target: end-to-end ship within one working session. POPIA implications: none (work-mode + location are non-special-category fields). Trust posture: strengthened — the platform stops silently filtering candidates out of legitimately-remote vacancies.*
+*Plan opens for Phase 13.9. Target: end-to-end ship within one working session. POPIA implications: none (work-mode + location are non-special-category fields). Trust posture: strengthened  the platform stops silently filtering candidates out of legitimately-remote vacancies.*

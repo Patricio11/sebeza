@@ -1,12 +1,12 @@
-# PHASE 15 COMPLETE — Work-Readiness Content (2026-06-13)
+# PHASE 15 COMPLETE  Work-Readiness Content (2026-06-13)
 
 **Status:** ✅ shipped. Plan: `docs/completed/PHASE_15_PLAN.md`.
-**One line:** added the **"get ready for the work," not just "find the work"** layer — readiness articles, a
-profile→CV generator, and contextual surfacing — entirely on infrastructure that already existed.
+**One line:** added the **"get ready for the work," not just "find the work"** layer  readiness articles, a
+profile→CV generator, and contextual surfacing  entirely on infrastructure that already existed.
 
 Built off the SAYouth competitive analysis (`docs/COMPETITIVE_ANALYSIS_SAYOUTH.md` §5.2): SAYouth wraps
 matching in support (CV templates, interview prep); Sebenza had the spine (Career Compass + Learning Loop +
-Student lane) but not the readiness layer. Phase 15 adds it — and because every piece reuses an existing
+Student lane) but not the readiness layer. Phase 15 adds it  and because every piece reuses an existing
 surface (the help-centre, the print route, the profile data, the dashboard cards), it slotted in rather than
 bolting on.
 
@@ -14,8 +14,8 @@ bolting on.
 
 ## What shipped
 
-### 15.1 — "Get work-ready" article collection (reused the Phase-10 help-centre architecture)
-- New `work_ready` seeker help category (`content/help/types.ts`) — placed after `growth`, auto-renders in
+### 15.1  "Get work-ready" article collection (reused the Phase-10 help-centre architecture)
+- New `work_ready` seeker help category (`content/help/types.ts`)  placed after `growth`, auto-renders in
   the help index + search + breadcrumbs (both iterate the constants/registry; **zero page changes**).
 - **6 hand-written articles** (`content/help/seeker/work-ready/`), plain-language, SA-context, each ending
   in an in-platform action: `build-your-cv` · `prepare-for-an-interview` · `your-first-day` ·
@@ -24,31 +24,31 @@ bolting on.
   existing articles (e.g. `build-your-cv` ↔ `cv-backup`). `/dashboard/cv` added to the help index's
   surface-label map.
 
-### 15.2 — CV generator (`/dashboard/cv`) — the marquee piece
+### 15.2  CV generator (`/dashboard/cv`)  the marquee piece
 - New seeker-only route renders a clean, printable CV **from the seeker's own profile** (`getMyProfile()`):
   name, profession (+ secondary professions), location, contact, bio, skills, experience, qualifications,
   studies. Renders only the sections the seeker has (honest end-states; an empty-profile state nudges to the
   profile editor).
-- **Print-CSS pattern** (D2 — reused `/insights/print`): a `<CvPrintButton>` client island fires
-  `window.print()` → browser "Save as PDF". **No server-side PDF dependency** — lightest path for a low-data
+- **Print-CSS pattern** (D2  reused `/insights/print`): a `<CvPrintButton>` client island fires
+  `window.print()` → browser "Save as PDF". **No server-side PDF dependency**  lightest path for a low-data
   audience.
 - **Two ATS-friendly templates** via `?template=` (D2): `classic` (single column, default) and `compact`
   (two-column at `md+` and in print, single column on a phone). In-page segmented toggle, no round-trip cost.
 - **Verification-Honesty (D-honesty / 15.2.4):** skills show the seeker's own rating ordered strongest-first
-  with a plain "self-rated" footnote — **never** stamped "verified"; qualifications show their **real**
+  with a plain "self-rated" footnote  **never** stamped "verified"; qualifications show their **real**
   verification state (Verified / Pending / Self-listed). The CV tells the same story as `/p/<handle>`.
 - **Privacy (D3):** seeker-only, never an employer surface, never indexed, never auto-shared (same rule as
-  the 11.5.2 CV backup). A "save as my CV backup" bridge links to the existing `<CvBackupEditor>` — no new
+  the 11.5.2 CV backup). A "save as my CV backup" bridge links to the existing `<CvBackupEditor>`  no new
   storage model. No new audit kind (viewing/printing one's own data is not a disclosure; §23 export already
   covers the fields).
 
-### 15.3 — Contextual surfacing (D4 — right moment, never a nag)
-- **`<GetWorkReadyCard>`** (full + compact) — surfaces the 2–3 most-relevant guides by deterministic profile
+### 15.3  Contextual surfacing (D4  right moment, never a nag)
+- **`<GetWorkReadyCard>`** (full + compact)  surfaces the 2–3 most-relevant guides by deterministic profile
   context (pending invites → interview + scams; student → first-day + still-learning; thin profile →
   still-learning; else → interview + rights), always leading with a one-tap CV. Resolves titles from the
   help registry (one source of truth). Wired into `/dashboard` (full) + `/dashboard/grow` (compact, beside
   the Student lane / learning loop).
-- **"Prepare for this role"** card on the invitation detail page (`/dashboard/invitations/[id]`) — shown only
+- **"Prepare for this role"** card on the invitation detail page (`/dashboard/invitations/[id]`)  shown only
   while the invitation is live or accepted (`invited` / `reconsidering` / `accepted` / `accepted_with_notice`),
   never on decline/expiry/withdrawal. Links to the interview guide, the CV builder, and the scams guide.
 - **HelpLink chip** `build-your-cv` added to the profile editor's chip row beside `cv-backup`.
@@ -59,7 +59,7 @@ bolting on.
 
 - **Fully responsive, 360px-first:** every new surface built mobile-first; the CV is a mobile-readable
   on-screen view + a clean A4 print layout (not a shrunk desktop table). E2E asserts **zero horizontal
-  overflow at 360px** on `/dashboard/cv` and that the dashboard work-ready card surfaces — passing on the
+  overflow at 360px** on `/dashboard/cv` and that the dashboard work-ready card surfaces  passing on the
   `mobile-360` project.
 - **No-Flash:** text + the existing token palette + system fonts; no new heavy deps, no video, no map libs.
   The CV route is text-only over the shared baseline (no chart/island weight).
@@ -87,11 +87,11 @@ bolting on.
 
 ## Out of scope / follow-ups (recorded for the backlog)
 
-- One-click "save generated CV to my backup" (needs client→server PDF capture or a server-PDF render — weighed
+- One-click "save generated CV to my backup" (needs client→server PDF capture or a server-PDF render  weighed
   against the No-Flash cost; deferred per D2).
 - Readiness-article translation (rides the Phase 10.7 Tier-2/Tier-3 rollout).
 - More templates / a cover-letter generator (only if usage shows demand).
 - City-level demand framing for the work-ready cards (lands naturally with Phase 16).
 
-**Next:** Phase 16 — "Near You" (reframe the existing location engine). Its plan flags one founder decision
+**Next:** Phase 16  "Near You" (reframe the existing location engine). Its plan flags one founder decision
 (§D1, the reverse-matching framing) to confirm before building.

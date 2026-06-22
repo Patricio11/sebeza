@@ -43,7 +43,7 @@ ALTER TABLE "profiles"
 --
 -- Phase 12 fix (2026-06-10): the original predicate also filtered on
 -- "kyc_verified_at" IS NULL, but that column lives on app_user (see
--- db/schema.ts appUser.kycVerifiedAt), NOT on profiles — the statement
+-- db/schema.ts appUser.kycVerifiedAt), NOT on profiles  the statement
 -- only ever succeeded on databases where a zombie profiles column
 -- existed from an old `drizzle-kit push`. The Phase 12 migrate-from-zero
 -- harness surfaced the break. The verified-or-not filter is applied at

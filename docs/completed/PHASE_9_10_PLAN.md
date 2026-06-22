@@ -1,4 +1,4 @@
-# PHASE 9.10 PLAN — EMPLOYER KYC / ORG-VETTING FLOW
+# PHASE 9.10 PLAN  EMPLOYER KYC / ORG-VETTING FLOW
 *Side-phase between Phase 9.9 and Phase 10. Opened 2026-05-24 from a system-review handoff: KYC partnership isn't ready, so we ship the manual-vetted equivalent (employer onboarding form  admin review queue  approval gate on `/employer/*`). Distilled from `docs/ONBOARDING_KYC_BLUEPRINT.md` and trimmed to fit Sebenza's existing primitives.*
 *Companion docs: `TO_START_EVERY_SESSION.md` · `ROADMAP.md` · `UX_UI_SPEC.md` · `docs/ONBOARDING_KYC_BLUEPRINT.md` · `docs/PHASE_10_PLAN.md`.*
 

@@ -6,7 +6,7 @@ import { verifyAdmin } from "@/lib/auth/dal";
 /**
  * Admin route-group layout. Renders the persistent <DashboardFrame> (sidebar +
  * mobile nav) ONCE, around every admin page, so navigating between pages only
- * swaps the page content (the masthead + main) — the sidebar stays mounted and
+ * swaps the page content (the masthead + main)  the sidebar stays mounted and
  * never flashes a full-page skeleton. `loading.tsx` in this segment therefore
  * fills only the main column, not the whole screen.
  *

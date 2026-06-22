@@ -45,7 +45,7 @@ let _pool: Pool | null = null;
  *   - Phase 12 integration/compliance tests against a local Docker
  *     Postgres (the Neon WebSocket driver can't reach plain Postgres).
  *   - The AWS Cape Town `af-south-1` migration (`docs/AWS_MIGRATION_RUNBOOK.md`)
- *     plans exactly this swap for RDS/Aurora — flipping the env var is
+ *     plans exactly this swap for RDS/Aurora  flipping the env var is
  *     the cutover, no code change.
  *
  * The two drizzle instances expose the same query/transaction API; the
@@ -81,7 +81,7 @@ function createDb(url: string): Db {
     // Result-shape shim: the Neon driver's `db.execute()` resolves to
     // `{ rows: [...] }`; postgres-js resolves to the row array itself.
     // Call sites across the codebase read `.rows`, so alias the array
-    // onto itself — both access patterns work, no call site changes.
+    // onto itself  both access patterns work, no call site changes.
     const originalExecute = db.execute.bind(db);
     (db as unknown as { execute: (q: unknown) => Promise<unknown> }).execute =
       async (q: unknown) => {

@@ -183,7 +183,7 @@ Special-category PII is encrypted at rest with **AES-256-GCM** before being writ
 - Three columns currently use this path:
   - `profiles.national_id_enc` (Phase 0)
   - `app_user.phone_e164_enc` (Phase 11.4.4)
-  - `llm_providers.credentials_enc` (Phase 13.3) — AES-256-GCM over a JSON blob `{ apiKey, modelId, endpointUrl?, extraHeaders? }`. Decrypted in-memory only inside the dispatcher in `lib/llm/curriculum.ts`. The admin UI shows the SHA-256 fingerprint's first 8 hex chars only, never plaintext.
+  - `llm_providers.credentials_enc` (Phase 13.3)  AES-256-GCM over a JSON blob `{ apiKey, modelId, endpointUrl?, extraHeaders? }`. Decrypted in-memory only inside the dispatcher in `lib/llm/curriculum.ts`. The admin UI shows the SHA-256 fingerprint's first 8 hex chars only, never plaintext.
 - IDs are **never** echoed back to the client  not even a last-4 hint. The "ID on file · encrypted" UI is the most we expose for national IDs; for LLM credentials, only the fingerprint surfaces and only in the audit row, never on screen.
 
 ---

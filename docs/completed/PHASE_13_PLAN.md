@@ -1,4 +1,4 @@
-# PHASE 13 PLAN — STUDENT LANE EXPANSION + EDITORIAL-LLM CURRICULUM PIPELINE
+# PHASE 13 PLAN  STUDENT LANE EXPANSION + EDITORIAL-LLM CURRICULUM PIPELINE
 *Opens after Phase 12 (Testing & QA) ships. Companion docs: `TO_START_EVERY_SESSION.md` · `ROADMAP.md` · `UX_UI_SPEC.md` · `docs/popia/DPIA.md` · `docs/completed/PHASE_9_13_COMPLETE.md` (the Phase 9.13 curriculum-vs-market work this phase builds on).*
 
 > **Thesis:** Sebenza's strongest civic-trust surface is the student lane on `/dashboard/grow`  curriculum vs market demand, programme cohort outcomes, the privacy-floor methodology. Phase 13 expands the lane in two directions: capture the granular signal that programme + field alone don&rsquo;t carry (modules, project topic, elective choices), and scale the curated programme catalogue across SA&rsquo;s actual institution landscape via an editorial LLM pipeline that puts no AI in front of the student. Adds a student-progression tracker so the platform keeps students engaged through their academic journey, not just at sign-up. National-system thinking from commit one.

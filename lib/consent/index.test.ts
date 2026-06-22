@@ -1,12 +1,12 @@
 /**
- * Phase 12 (Task 12.1) — consent state-machine fixtures (POPIA-First Rule).
+ * Phase 12 (Task 12.1)  consent state-machine fixtures (POPIA-First Rule).
  *
  * Pins two contracts:
  *
  *   1. The purpose catalogue. Server actions, the privacy page, and three
  *      compliance assertions key on these exact strings; adding/renaming a
  *      purpose must be a deliberate act (this fixture forces the diff).
- *   2. `isSearchable` — a profile is searchable ONLY while `searchability`
+ *   2. `isSearchable`  a profile is searchable ONLY while `searchability`
  *      is in state `granted`. Revoked ≠ none ≠ granted; every other purpose
  *      is non-degrading and must have no effect on searchability.
  */

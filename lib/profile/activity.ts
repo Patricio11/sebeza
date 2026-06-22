@@ -130,7 +130,7 @@ export async function getSeekerActivity(
       ? null
       : viewersThisWeek - priorViewers;
 
-  // Distinct employers (orgs) that viewed this seeker in the last 7 days — the
+  // Distinct employers (orgs) that viewed this seeker in the last 7 days  the
   // honest "N employers viewed you" count (multiple views by one org = 1).
   const distinctEmployers = await db
     .select({
@@ -168,7 +168,7 @@ export async function getSeekerActivity(
   // Resolve actors to human labels. Real employer views (dossier / reveal /
   // download / contact) carry `meta.orgId` → show the org name, matching the
   // "<Org> viewed your profile" notification. Anonymous/public views show a
-  // neutral label — never a raw user/org id.
+  // neutral label  never a raw user/org id.
   const orgIds = [
     ...new Set(
       rows

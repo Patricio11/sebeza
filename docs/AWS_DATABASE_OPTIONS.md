@@ -1,4 +1,4 @@
-# Sebenza on AWS Cape Town — database options
+# Sebenza on AWS Cape Town  database options
 
 > **Region**: `af-south-1` (Cape Town). **Decision point**: when the partnership confirms, you need to choose between two paths to host Sebenza's PostgreSQL in-country.
 >
@@ -8,14 +8,14 @@
 
 ## Table of contents
 
-- [Option 1 — EC2 + Docker + self-hosted PostgreSQL](#option-1--ec2--docker--self-hosted-postgresql)
-- [Option 2 — Managed database (Aurora / RDS)](#option-2--managed-database-aurora--rds)
+- [Option 1  EC2 + Docker + self-hosted PostgreSQL](#option-1--ec2--docker--self-hosted-postgresql)
+- [Option 2  Managed database (Aurora / RDS)](#option-2--managed-database-aurora--rds)
 - [Side-by-side comparison](#side-by-side-comparison)
 - [Recommendation](#recommendation)
 
 ---
 
-# Option 1 — EC2 + Docker + self-hosted PostgreSQL
+# Option 1  EC2 + Docker + self-hosted PostgreSQL
 
 You operate a single EC2 instance running PostgreSQL 16 inside a Docker container, with data on a separate EBS volume.
 
@@ -104,15 +104,15 @@ These are the surrounding tools you need to make the self-hosted setup productio
 
 - ✅ **Cheapest by far** at every scale tier
 - ✅ Full Postgres feature set (no vendor restrictions, no Aurora-specific quirks)
-- ✅ Single-tenant — your DB isn't sharing infrastructure with anyone
+- ✅ Single-tenant  your DB isn't sharing infrastructure with anyone
 - ✅ Trivial to add extensions, change `postgresql.conf`, tune to your exact workload
 - ✅ Snapshot-based DR is solid for Sebenza's data volume (small)
-- ✅ Lock-in proof — `pg_dump`/`pg_restore` portable to any Postgres anywhere
+- ✅ Lock-in proof  `pg_dump`/`pg_restore` portable to any Postgres anywhere
 
 ## Cons
 
 - ❌ **You are the DBA.** No managed failover, no managed patching, no automated minor-version upgrades
-- ❌ **Single-AZ by default** — an AZ outage takes you offline until you manually fail over to the standby (if you've built one)
+- ❌ **Single-AZ by default**  an AZ outage takes you offline until you manually fail over to the standby (if you've built one)
 - ❌ Multi-AZ HA is a multi-day project you have to build (streaming replication + failover automation)
 - ❌ Restoration from `pg_dump` of a multi-GB DB takes 5-30 minutes vs RDS PITR's seconds-to-minutes
 - ❌ Operating-system maintenance (kernel patches, fail2ban updates, Docker upgrades) is on you
@@ -136,12 +136,12 @@ Topics covered: AWS account + IAM, VPC + security groups, EC2 launch, OS hardeni
 
 ---
 
-# Option 2 — Managed database (Aurora / RDS)
+# Option 2  Managed database (Aurora / RDS)
 
 You let AWS run the Postgres for you. Two sub-options:
 
-- **Aurora Postgres-Compatible** (recommended) — AWS's purpose-built database with 6-way replicated storage across 3 AZs, sub-30s failover, near-free read replicas
-- **RDS Postgres** — classic managed Postgres, Multi-AZ tickbox gives you ~60-120s failover, cheaper base cost
+- **Aurora Postgres-Compatible** (recommended)  AWS's purpose-built database with 6-way replicated storage across 3 AZs, sub-30s failover, near-free read replicas
+- **RDS Postgres**  classic managed Postgres, Multi-AZ tickbox gives you ~60-120s failover, cheaper base cost
 
 ## Architecture
 
@@ -177,7 +177,7 @@ You let AWS run the Postgres for you. Two sub-options:
                                 └──────────────────────────────────────────┘
 ```
 
-## Cost breakdown — Aurora
+## Cost breakdown  Aurora
 
 ### Aurora Serverless v2 (scale-to-zero, since 2024)
 
@@ -190,8 +190,8 @@ The smartest pilot choice. Pays per ACU-second. 1 ACU ≈ 2 GB RAM + proportiona
 | 1-32 ACU range, no scale-to-zero | ~$95 idle | **~$150-600** | Steady-traffic launch |
 
 Plus:
-- Storage: $0.115/GB-month — Sebenza ~5-20 GB → ~$1-3/mo
-- I/O: $0.22 per million requests — ~$2-10/mo at launch scale
+- Storage: $0.115/GB-month  Sebenza ~5-20 GB → ~$1-3/mo
+- I/O: $0.22 per million requests  ~$2-10/mo at launch scale
 - Backups: free up to your DB size
 
 ### Aurora Provisioned (fixed instance, predictable cost)
@@ -204,7 +204,7 @@ Plus:
 | `db.r6g.large` + 1 reader | 16 GB ea | **~$468** | National scale |
 | `db.r6g.xlarge` + 1 reader | 32 GB ea | **~$934** | 100K+ active users |
 
-Multi-AZ failover is built in by default — no separate cost.
+Multi-AZ failover is built in by default  no separate cost.
 
 ### RDS Postgres (cheaper than Aurora, less HA)
 
@@ -235,26 +235,26 @@ The managed-DB path needs less surrounding work than self-hosted, but the produc
 
 ## Pros
 
-- ✅ **Multi-AZ failover built in** (Aurora: ~30s; RDS Multi-AZ: ~60-120s) — no operator action required
+- ✅ **Multi-AZ failover built in** (Aurora: ~30s; RDS Multi-AZ: ~60-120s)  no operator action required
 - ✅ **Automated patching** of minor + security versions during your declared maintenance window
-- ✅ **PITR** (point-in-time recovery) to any second within retention window — far better than `pg_dump`
-- ✅ **Storage auto-grows** (Aurora) — no manual EBS resizing
+- ✅ **PITR** (point-in-time recovery) to any second within retention window  far better than `pg_dump`
+- ✅ **Storage auto-grows** (Aurora)  no manual EBS resizing
 - ✅ **Performance Insights** + Enhanced Monitoring give DB-specific observability you'd otherwise build by hand
 - ✅ **Aurora Serverless v2 with scale-to-zero** makes the pilot bill close to nothing during idle hours
 - ✅ Read replicas in minutes (Aurora) for analytics offload
-- ✅ **You're not the DBA** — AWS handles backups, failover, patching, monitoring
+- ✅ **You're not the DBA**  AWS handles backups, failover, patching, monitoring
 
 ## Cons
 
 - ❌ **3-4× more expensive** than self-hosted at equivalent capacity
-- ❌ Some Postgres extensions are restricted (e.g. anything that needs filesystem access). Sebenza only uses `pg_trgm` + `pg_stat_statements` — both supported, no problem.
+- ❌ Some Postgres extensions are restricted (e.g. anything that needs filesystem access). Sebenza only uses `pg_trgm` + `pg_stat_statements`  both supported, no problem.
 - ❌ **Aurora-specific lock-in** if you use Aurora-only features like Global Database. Sebenza doesn't use any; portability preserved.
-- ❌ Less control over `postgresql.conf` — most tuning knobs are via "parameter groups" which lag the raw config
+- ❌ Less control over `postgresql.conf`  most tuning knobs are via "parameter groups" which lag the raw config
 - ❌ Cold-start latency on Aurora Serverless v2 scale-to-zero resume (~15s first query of the morning)
 
 ## Setup walkthrough (Aurora-specific)
 
-Step-by-step for Aurora Postgres in `af-south-1`. The pre-cutover work (sections 1-2 of the EC2 guide — AWS account, VPC, security groups) is identical.
+Step-by-step for Aurora Postgres in `af-south-1`. The pre-cutover work (sections 1-2 of the EC2 guide  AWS account, VPC, security groups) is identical.
 
 ### 1. Pre-requisites (same as EC2 guide)
 
@@ -274,7 +274,7 @@ Complete sections 1-2 of [`AWS_EC2_DOCKER_POSTGRES_GUIDE.md`](AWS_EC2_DOCKER_POS
    - **Launch**: pick **Provisioned** for predictable cost
 7. DB cluster identifier: `sebenza-prod`.
 8. Master username: `postgres`.
-9. Master password: generate a 32-char password (`openssl rand -base64 32`) — save in your password manager.
+9. Master password: generate a 32-char password (`openssl rand -base64 32`)  save in your password manager.
 10. **Instance configuration**:
     - Serverless v2: min ACU `0.5`, max ACU `4` (pilot) or `16` (launch)
     - Tick **Scale to zero** if available (newer regions; rolling out)
@@ -304,7 +304,7 @@ You need Vercel (and your operator laptop, temporarily) to reach the cluster end
 1. **EC2 console** → Security Groups → `sebenza-db-sg`.
 2. Inbound rules → **Add rule**:
    - Type: **PostgreSQL** (port 5432)
-   - Source: **My IP** (your laptop, for migration setup — remove after cutover)
+   - Source: **My IP** (your laptop, for migration setup  remove after cutover)
 3. Save.
 
 For Vercel: if you have Vercel Secure Compute, add Vercel's static-IP CIDRs as additional rules. Without Secure Compute, the pilot-acceptable approach is to allow 0.0.0.0/0 on 5432 + rely on SSL + strong password + non-default user. Lock down to Secure Compute IPs before public launch.
@@ -482,13 +482,13 @@ Same 9-step verification as in the EC2 guide section 13:
 |---|---|---|
 | **Failover** | You build streaming replication + automation (multi-day project) | Built in. Aurora: ~30s. RDS Multi-AZ: ~60-120s |
 | **Patching** | Manual `apt upgrade` + `docker compose pull` weekly | Automatic during your declared maintenance window |
-| **Backups** | `pg_dump` cron + EBS snapshots — you wire it | Continuous incremental + PITR + 35-day default retention |
+| **Backups** | `pg_dump` cron + EBS snapshots  you wire it | Continuous incremental + PITR + 35-day default retention |
 | **Monitoring** | CloudWatch Agent on EC2 + custom dashboards | Performance Insights + Enhanced Monitoring built in |
 | **Disk growth** | Manually resize EBS volume + `resize2fs` | Aurora storage auto-grows; RDS has storage auto-scaling tickbox |
-| **OS maintenance** | Kernel patches, fail2ban, Docker upgrades — yours | AWS handles |
+| **OS maintenance** | Kernel patches, fail2ban, Docker upgrades  yours | AWS handles |
 | **Restore from backup** | Restore a `pg_dump` file (5-30 min depending on size) | PITR to any second in retention window (minutes) |
 | **Connection pooling** | Postgres-native at low scale, pgBouncer past ~50K conn/day | Aurora's cluster endpoint handles pooling; RDS Proxy add-on if needed |
-| **Tuning** | Direct `postgresql.conf` edit + restart | "Parameter group" — slightly less direct but covers 95% of knobs |
+| **Tuning** | Direct `postgresql.conf` edit + restart | "Parameter group"  slightly less direct but covers 95% of knobs |
 
 ## Feature parity
 
@@ -531,7 +531,7 @@ Are you live with confirmed paying users?
          └─ NO  → Is at least one teammate comfortable with Linux/Docker/Postgres?
                   ├─ YES → EC2 self-hosted ($28-50/mo) ✅ ← BEST VALUE
                   │
-                  └─ NO  → RDS Multi-AZ ($120/mo) — managed, cheaper than Aurora
+                  └─ NO  → RDS Multi-AZ ($120/mo)  managed, cheaper than Aurora
 ```
 
 ## Phase-by-phase recommendation for Sebenza
@@ -558,12 +558,12 @@ For Sebenza specifically, the cost difference is ~$50-100/month vs Aurora Server
 
 ## The smartest move you can make right now
 
-1. **Apply for AWS Activate** today — <https://aws.amazon.com/activate/>. Sebenza's POPIA + gov story + Phase 9.13 compliance suite is a strong application. Expect $1K-$5K in credits for the Founders tier, up to $100K if you're accepted by a Portfolio partner.
+1. **Apply for AWS Activate** today  <https://aws.amazon.com/activate/>. Sebenza's POPIA + gov story + Phase 9.13 compliance suite is a strong application. Expect $1K-$5K in credits for the Founders tier, up to $100K if you're accepted by a Portfolio partner.
 -Already registed just need to do the application when register the company: https://aws.amazon.com/startups/dashboard
 
 2. **Stay on Neon** until a partner confirms. Don't burn money on infrastructure waiting for users.
 
-3. **When the partner confirms, go straight to Aurora Serverless v2** — skip the EC2 self-hosted intermediate step. The migration runbook is shorter, the cutover is cleaner, and you never have to do a "migrate from self-hosted to managed" second migration.
+3. **When the partner confirms, go straight to Aurora Serverless v2**  skip the EC2 self-hosted intermediate step. The migration runbook is shorter, the cutover is cleaner, and you never have to do a "migrate from self-hosted to managed" second migration.
 
 4. **Pin to PostgreSQL 16** (Sebenza's local dev version) on Aurora so version-parity is exact. Aurora's auto-upgrade can be locked to minor versions only.
 
@@ -571,7 +571,7 @@ For Sebenza specifically, the cost difference is ~$50-100/month vs Aurora Server
 
 | You are... | Pick |
 |---|---|
-| Pre-partner, still pitching | **Neon Launch** — don't migrate yet |
+| Pre-partner, still pitching | **Neon Launch**  don't migrate yet |
 | Partner signed, pilot scale, want speed + managed | **Aurora Serverless v2** |
 | Partner signed, pilot scale, every dollar matters | **EC2 self-hosted** (your guide) |
 | Past 50K active users, want predictable cost | **Aurora Provisioned** |

@@ -23,7 +23,7 @@
 -- ── Vacancy shortlists ────────────────────────────────────────────────
 
 -- Phase 12 fix (2026-06-10): added_by_user_id originally referenced
--- "users"("id") — a table that does not exist in this schema (the auth
+-- "users"("id")  a table that does not exist in this schema (the auth
 -- table is "app_user"; see db/schema.ts vacancyShortlists.addedByUserId
 -- → appUser.id). Migrate-from-zero in the Phase 12 test harness
 -- surfaced the break; databases that ran this file historically carried

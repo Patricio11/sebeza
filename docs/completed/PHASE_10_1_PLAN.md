@@ -1,4 +1,4 @@
-# PHASE 10.1 PLAN — Employer help center
+# PHASE 10.1 PLAN  Employer help center
 
 *Plan opened 2026-05-29. Companion: `docs/ROADMAP.md` (Phase 10 = launch). Targets sign-off before code lands.*
 
@@ -69,20 +69,20 @@ A small set of typography components (`<HelpProse>`, `<Callout>`, `<Steps>`, `<H
 
 Editorial IA below. Article counts are estimates; final list lives in the article tree.
 
-1. **Getting started** (3) — first-time org admin orientation.
-2. **Vacancies** (6) — create, statuses, find matches, shortlist, duplicate, seasonal window.
-3. **Invitations** (5) — bulk invite, personal note, follow-up nudges, accept-rate, expiry.
-4. **Employees & placements** (5) — mark-as-filled, lifecycle view, status check-ins, departures + re-engage, internal notes.
-5. **Talent search & dossiers** (5) — search filters, dossier reveal gate, saved searches, talent pools.
-6. **Organisation & team** (4) — KYC, verification status, team roles, 2FA.
-7. **Privacy & POPIA** (2) — what we hold, audit log access.
+1. **Getting started** (3)  first-time org admin orientation.
+2. **Vacancies** (6)  create, statuses, find matches, shortlist, duplicate, seasonal window.
+3. **Invitations** (5)  bulk invite, personal note, follow-up nudges, accept-rate, expiry.
+4. **Employees & placements** (5)  mark-as-filled, lifecycle view, status check-ins, departures + re-engage, internal notes.
+5. **Talent search & dossiers** (5)  search filters, dossier reveal gate, saved searches, talent pools.
+6. **Organisation & team** (4)  KYC, verification status, team roles, 2FA.
+7. **Privacy & POPIA** (2)  what we hold, audit log access.
 
 Total: ~30 articles. Each article 250–600 words. Honest about what the platform does and doesn't do (Verification-Honesty Rule applies to copy too).
 
 ### D3  Two pages: index + per-article
 
-- `/employer/help` — index page with hero search bar + 7 category sections + article cards.
-- `/employer/help/[slug]` — article view with breadcrumb back to index + the article body + a "Related" strip + a "Try it now →" deep-link when `surfaceLink` is set.
+- `/employer/help`  index page with hero search bar + 7 category sections + article cards.
+- `/employer/help/[slug]`  article view with breadcrumb back to index + the article body + a "Related" strip + a "Try it now →" deep-link when `surfaceLink` is set.
 
 Both auth-gated by `verifyEmployer()`. The help center is in-product, not public marketing; URL routing is auth-required.
 
@@ -131,7 +131,7 @@ Privacy-first. We could log "user searched for X" to surface gaps in our coverag
 
 ### D9  Articles deliberately tell the user what the platform **doesn't** do
 
-Verification-Honesty Rule applies to help copy too. Articles say things like *"Sebenza never sends the employer a generic mass mailshot — every invite is attributed to a real role and a real recruiter"* not just to brag, but because the user might be searching for a generic-blast feature that we deliberately don't ship. Honest *"this isn't what we do"* moments build trust + save support load.
+Verification-Honesty Rule applies to help copy too. Articles say things like *"Sebenza never sends the employer a generic mass mailshot  every invite is attributed to a real role and a real recruiter"* not just to brag, but because the user might be searching for a generic-blast feature that we deliberately don't ship. Honest *"this isn't what we do"* moments build trust + save support load.
 
 ### D10  Mobile-first, civic-editorial typography
 
@@ -154,14 +154,14 @@ Same aesthetic bar as every other Sebenza surface: Fraunces titles, Hanken Grote
 
 ## 📦 TASK LIST
 
-- **10.1.1 Content infrastructure** — `content/help/` directory + `HelpArticleMeta` type + `getEmployerArticles()` + `findArticleBySlug()` + `CATEGORY_LABELS` constant. Tiny module, all type-safe.
-- **10.1.2 Typography components** — `<HelpProse>` wrapper + `<Callout>` + `<Steps>` + `<DashboardLink>` + `<HelpKey>`. Lives at `components/feature/help/`.
-- **10.1.3 Help index page** — `/employer/help` with hero search bar (client island) + category sections + article cards. State is in URL (`?q=`) so deep-links survive refresh.
-- **10.1.4 Article page** — `/employer/help/[slug]` with breadcrumb + article body + "Try it now →" CTA when `surfaceLink` is set + related-articles strip.
-- **10.1.5 Search island** — `HelpSearchIsland` (client component) wraps the article list with the rank-and-filter logic per D4.
-- **10.1.6 Nav entry** — `EMPLOYER_NAV` extended with the Help item per D5.
-- **10.1.7 `<HelpLink>` component** — small icon + text + arrow chip. Reusable across the ~8 deep-link surfaces per D6.
-- **10.1.8 Write ~30 articles** — across the 7 categories per D2. Each 250–600 words. PR-reviewable; consistent voice.
+- **10.1.1 Content infrastructure**  `content/help/` directory + `HelpArticleMeta` type + `getEmployerArticles()` + `findArticleBySlug()` + `CATEGORY_LABELS` constant. Tiny module, all type-safe.
+- **10.1.2 Typography components**  `<HelpProse>` wrapper + `<Callout>` + `<Steps>` + `<DashboardLink>` + `<HelpKey>`. Lives at `components/feature/help/`.
+- **10.1.3 Help index page**  `/employer/help` with hero search bar (client island) + category sections + article cards. State is in URL (`?q=`) so deep-links survive refresh.
+- **10.1.4 Article page**  `/employer/help/[slug]` with breadcrumb + article body + "Try it now →" CTA when `surfaceLink` is set + related-articles strip.
+- **10.1.5 Search island**  `HelpSearchIsland` (client component) wraps the article list with the rank-and-filter logic per D4.
+- **10.1.6 Nav entry**  `EMPLOYER_NAV` extended with the Help item per D5.
+- **10.1.7 `<HelpLink>` component**  small icon + text + arrow chip. Reusable across the ~8 deep-link surfaces per D6.
+- **10.1.8 Write ~30 articles**  across the 7 categories per D2. Each 250–600 words. PR-reviewable; consistent voice.
 - **10.1.9 Wire `<HelpLink>` into the 8 surfaces** per D6.
 - **10.1.10 Typecheck + tests + build + commit**.
 - **10.1.11 PHASE_10_1_COMPLETE.md + move plan** to `docs/completed/`.

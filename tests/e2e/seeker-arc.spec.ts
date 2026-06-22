@@ -1,5 +1,5 @@
 /**
- * Phase 12 (Task 12.3) — seeker golden path:
+ * Phase 12 (Task 12.3)  seeker golden path:
  * sign in (seeded account) → dashboard → privacy centre.
  *
  * Uses the dev-seed credentials from db/seed.ts (every seeded account is
@@ -49,7 +49,7 @@ test("privacy centre lists consents with revoke affordances", async ({
   await page.goto("/en/dashboard/privacy");
   await expect(page.locator("main")).toBeVisible();
   // The searchability consent (granted for every seeded seeker) must be
-  // visible — the page proves consent state is read from the real DB.
+  // visible  the page proves consent state is read from the real DB.
   await expect(page.locator("main")).toContainText(/consent/i);
 });
 

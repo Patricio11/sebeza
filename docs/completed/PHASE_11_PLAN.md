@@ -1,4 +1,4 @@
-# PHASE 11 PLAN — SEEKER RETENTION & SKILL-GROWTH CONVERSION
+# PHASE 11 PLAN  SEEKER RETENTION & SKILL-GROWTH CONVERSION
 *Opens after Phase 10 (Public launch) ships. Companion docs: `TO_START_EVERY_SESSION.md` · `ROADMAP.md` · `UX_UI_SPEC.md` · `PHASE_11_{1,2,3,4,5}_PLAN.md`.*
 
 > **Stop signal:** the surface is in front of real seekers. Every change here is measured against one question: *"does this make seekers come back next week?"* Risk-bias is conservative; nothing destabilises the consent / audit / status-freshness invariants from Phases 9.x.
@@ -13,15 +13,15 @@ Sebenza's seeker side is **architecturally sound**. Career Compass is a genuinel
 
 **The gap is engagement velocity.** A seeker signs up, sees their rank, reads a recommendation, and then nothing tells them their effort matters. Week 2 they're still #7, no invites, no emails reminding them why. They stop checking.
 
-Phase 11 closes that gap. The thesis is: **most fixes are surfacing problems, not missing-feature problems** — the data exists, the cron jobs run, the audit log records the events. We just don't tell the seeker. Phase 11 makes existing effort visible and felt; it also closes the conversion gap on the Learning Loop (Phase 9.12) so skill growth actually produces credentials, not just intent.
+Phase 11 closes that gap. The thesis is: **most fixes are surfacing problems, not missing-feature problems**  the data exists, the cron jobs run, the audit log records the events. We just don't tell the seeker. Phase 11 makes existing effort visible and felt; it also closes the conversion gap on the Learning Loop (Phase 9.12) so skill growth actually produces credentials, not just intent.
 
 Five sub-phases, ordered by ROI per LOC:
 
-1. **Phase 11.1 — Engagement velocity** *(retention surfacing)*
-2. **Phase 11.2 — Learning loop completion** *(skill-growth conversion)*
-3. **Phase 11.3 — Seeker control + trust posture** *(safety + agency)*
-4. **Phase 11.4 — SA distribution surface** *(WhatsApp / SMS / share-card)*
-5. **Phase 11.5 — Profile depth + mobile polish** *(form ergonomics + a11y)*
+1. **Phase 11.1  Engagement velocity** *(retention surfacing)*
+2. **Phase 11.2  Learning loop completion** *(skill-growth conversion)*
+3. **Phase 11.3  Seeker control + trust posture** *(safety + agency)*
+4. **Phase 11.4  SA distribution surface** *(WhatsApp / SMS / share-card)*
+5. **Phase 11.5  Profile depth + mobile polish** *(form ergonomics + a11y)*
 
 The umbrella priority is **11.1 first, then 11.2**. Together they're the single biggest retention lift available: ~5–7 days of work, near-zero risk, surface-level mostly. The remaining three sub-phases can ship in any order based on operator capacity.
 
@@ -44,16 +44,16 @@ These invariants land once at the top of the phase and are inherited everywhere 
 
 The Phase 9.x + 10 work shipped the substrate Phase 11 is going to lean on. Each sub-phase plan references the specific surfaces; the umbrella highlights:
 
-- **Career Compass** (`/dashboard/grow`) — Phase 9.12 / 9.13. Recommendations + learning paths + adjacent professions + city demand + student lane.
-- **Learning Loop** (`lib/seeker/learning.ts`) — Phase 9.12. `acceptRecommendation` → `startLearningItem` → `completeLearningItem` (+ provenance upgrade) / `abandonLearningItem` (+ structured reason).
-- **Activity Ledger** (`/dashboard/activity`) — Phase 7. Audit-log-backed PII-event view + four KPIs (viewers / contacts / reveals / downloads).
-- **Notification Catalog** (`lib/notifications/catalog.ts`) — Phase 7. Nine kinds, dedupe windows, in-app + email channels. Defaults conservative (`defaultEmail: false`).
-- **Consent Surface** (`/dashboard/privacy`) — Phase 2 / 9.x. Six purposes, default-off on the consequential ones, version-tracked.
-- **Status Freshness** — Phase 6. 90-day stale band + nightly cron + dashboard nudge banner.
-- **Audit log infra** (`lib/audit/`) — Phase 0. Every PII-touching path writes a row.
-- **Email transport** — Phase 8 / 9.18. SMTP (Resend / Sendgrid / Postmark / AWS SES) abstracted behind `SMTP_*` env vars; loud-fail when misconfigured.
-- **Help centres** (`/dashboard/help`) — Phase 10.2. Article links from product surfaces; deep-link chips (`HelpLink`).
-- **Multi-select skill picker** — recent post-Phase-10 commit (`b710428`). `MultiSelectComboboxField` with profession-scoped suggestions, "Other" path with admin promotion.
+- **Career Compass** (`/dashboard/grow`)  Phase 9.12 / 9.13. Recommendations + learning paths + adjacent professions + city demand + student lane.
+- **Learning Loop** (`lib/seeker/learning.ts`)  Phase 9.12. `acceptRecommendation` → `startLearningItem` → `completeLearningItem` (+ provenance upgrade) / `abandonLearningItem` (+ structured reason).
+- **Activity Ledger** (`/dashboard/activity`)  Phase 7. Audit-log-backed PII-event view + four KPIs (viewers / contacts / reveals / downloads).
+- **Notification Catalog** (`lib/notifications/catalog.ts`)  Phase 7. Nine kinds, dedupe windows, in-app + email channels. Defaults conservative (`defaultEmail: false`).
+- **Consent Surface** (`/dashboard/privacy`)  Phase 2 / 9.x. Six purposes, default-off on the consequential ones, version-tracked.
+- **Status Freshness**  Phase 6. 90-day stale band + nightly cron + dashboard nudge banner.
+- **Audit log infra** (`lib/audit/`)  Phase 0. Every PII-touching path writes a row.
+- **Email transport**  Phase 8 / 9.18. SMTP (Resend / Sendgrid / Postmark / AWS SES) abstracted behind `SMTP_*` env vars; loud-fail when misconfigured.
+- **Help centres** (`/dashboard/help`)  Phase 10.2. Article links from product surfaces; deep-link chips (`HelpLink`).
+- **Multi-select skill picker**  recent post-Phase-10 commit (`b710428`). `MultiSelectComboboxField` with profession-scoped suggestions, "Other" path with admin promotion.
 
 ---
 
@@ -73,9 +73,9 @@ The Phase 9.x + 10 work shipped the substrate Phase 11 is going to lean on. Each
 
 If you have **3 days**: ship **Phase 11.1** alone. The weekly digest email + "Why no invites?" diagnostic + welcome-back delta + LearningPath `url` (the one task from 11.2 that fits this window) together change the engagement curve more than anything else on this list. Near-zero risk; mostly surfacing existing data.
 
-If you have **2 weeks**: ship **Phase 11.1 + 11.2 + the trust trio from 11.3** (pause searchability, block employer, report invite). This is the platform's quality-bar moment — retention surfacing + skill-growth conversion + seeker agency over their own visibility. Together they answer the three biggest questions a thoughtful seeker asks in week 4: *"Is this working? Can I see why? Do I have control?"*
+If you have **2 weeks**: ship **Phase 11.1 + 11.2 + the trust trio from 11.3** (pause searchability, block employer, report invite). This is the platform's quality-bar moment  retention surfacing + skill-growth conversion + seeker agency over their own visibility. Together they answer the three biggest questions a thoughtful seeker asks in week 4: *"Is this working? Can I see why? Do I have control?"*
 
-If you have **6 weeks**: full Phase 11. The SA distribution work in 11.4 (profile share card + WhatsApp deep-link) is the one feature most likely to drive organic growth from your friends' networks — but it's also the riskiest because it touches a public surface (the share image is rendered server-side and indexed). Treat 11.4 as the gated rollout.
+If you have **6 weeks**: full Phase 11. The SA distribution work in 11.4 (profile share card + WhatsApp deep-link) is the one feature most likely to drive organic growth from your friends' networks  but it's also the riskiest because it touches a public surface (the share image is rendered server-side and indexed). Treat 11.4 as the gated rollout.
 
 The mobile polish in 11.5 is **always do** but not always urgent. Bundle it with whichever sub-phase happens to touch the relevant surfaces.
 
@@ -96,11 +96,11 @@ The mobile polish in 11.5 is **always do** but not always urgent. Bundle it with
 
 ## 🧪 HOW WE'LL KNOW PHASE 11 WORKED
 
-Three measurable signals at +30 days post-ship. We don't need an analytics stack to read them — the audit log + the activity table + Sentry / Resend logs give us all of this.
+Three measurable signals at +30 days post-ship. We don't need an analytics stack to read them  the audit log + the activity table + Sentry / Resend logs give us all of this.
 
-1. **Week-4 retention** — share of seekers who sign up and have at least one dashboard-view event in the 22–28 day window after sign-up. Pre-Phase-11 baseline: estimate ≤30% (we don't have the data yet because we don't have the seekers yet). Post-Phase-11 target: **≥55%**.
-2. **Weekly digest open rate** — Resend / Sendgrid / Postmark log the opens. Target: **≥35%** of digests open + at least one link click. Anything below 20% means the digest copy is wrong.
-3. **Learning-item completion rate** — `learning_items` rows in `completed` state divided by rows ever in `planned` state. Pre-Phase-11 baseline: estimate <10% (the conversion gap is the whole point). Post-Phase-11 target: **≥35%**.
+1. **Week-4 retention**  share of seekers who sign up and have at least one dashboard-view event in the 22–28 day window after sign-up. Pre-Phase-11 baseline: estimate ≤30% (we don't have the data yet because we don't have the seekers yet). Post-Phase-11 target: **≥55%**.
+2. **Weekly digest open rate**  Resend / Sendgrid / Postmark log the opens. Target: **≥35%** of digests open + at least one link click. Anything below 20% means the digest copy is wrong.
+3. **Learning-item completion rate**  `learning_items` rows in `completed` state divided by rows ever in `planned` state. Pre-Phase-11 baseline: estimate <10% (the conversion gap is the whole point). Post-Phase-11 target: **≥35%**.
 
 The numbers are honest estimates. The point is the direction.
 
@@ -112,7 +112,7 @@ The numbers are honest estimates. The point is the direction.
 - **Phase 11.4** adds a share-card route that's public (no auth) so it can be opened from a WhatsApp link. Subject to the same redaction / consent rules as `/p/[handle]`.
 - **Phase 11.5** touches several shared form components (`MultiSelectComboboxField`, `MonthYearPicker`). Verify employer + admin + gov surfaces still render correctly after the changes.
 - **POPIA documents** (`/privacy`, `/paia`) updated where Phase 11 adds new processing (SMS channel) or new third-party sub-processors (Twilio / AWS SNS / image-gen service).
-- **Help articles** — Phase 11 adds new surfaces (digest email link, share card, pause toggle, block list). Each new surface gets at least one help article in `/dashboard/help`.
+- **Help articles**  Phase 11 adds new surfaces (digest email link, share card, pause toggle, block list). Each new surface gets at least one help article in `/dashboard/help`.
 
 ---
 

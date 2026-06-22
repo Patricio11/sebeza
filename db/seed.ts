@@ -38,7 +38,7 @@ import ws from "ws";
 // fixtures, vacancy lifecycle) would otherwise hit the same "no
 // transactions" error users saw on /sign-up/seeker.
 // `DATABASE_DRIVER=postgres-js` mirrors db/client.ts's driver seam
-// (Phase 12 test DB + AWS runbook) — see that file for the rationale.
+// (Phase 12 test DB + AWS runbook)  see that file for the rationale.
 neonConfig.webSocketConstructor = ws;
 import { hashPassword } from "better-auth/crypto";
 
@@ -1140,7 +1140,7 @@ async function seedPhase9_8Vacancies() {
     },
   ]);
 
-  // "Who's viewed you" signal — Discovery Bank's recruiter (Naledi) opened a
+  // "Who's viewed you" signal  Discovery Bank's recruiter (Naledi) opened a
   // few cohort dossiers at varied times. Mirrors exactly what the live dossier
   // view writes (actor = recruiter user id, subject = profile id, meta.orgId),
   // so each seeker's dashboard "Who's viewed you" + viewers-this-week KPI shows
@@ -2342,7 +2342,7 @@ async function main() {
   // per-profile verification values that pre-date 9.14 and can drift
   // from what the profile's qualifications justify (the CI compliance
   // suite's `profile-verification-matches-rollup` caught 3 drifting
-  // fixtures). Same SQL as migration 0022's backfill — the roll-up
+  // fixtures). Same SQL as migration 0022's backfill  the roll-up
   // contract has ONE definition, and the seed must obey it too.
   await convergeProfileVerificationRollup();
 

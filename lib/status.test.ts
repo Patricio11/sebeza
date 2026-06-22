@@ -1,5 +1,5 @@
 /**
- * Phase 12 (Task 12.1) — Status-Freshness Rule fixtures.
+ * Phase 12 (Task 12.1)  Status-Freshness Rule fixtures.
  *
  * `lib/status.ts` is the platform's differentiator: its bands drive search
  * ranking, analytics confidence weighting, and the dashboard nudge. The

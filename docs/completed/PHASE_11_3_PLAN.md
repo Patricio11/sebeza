@@ -1,4 +1,4 @@
-# PHASE 11.3 PLAN — SEEKER CONTROL + TRUST POSTURE
+# PHASE 11.3 PLAN  SEEKER CONTROL + TRUST POSTURE
 *Opens after Phase 11.2. Companion docs: `PHASE_11_PLAN.md` · `docs/popia/DPIA.md` · `docs/popia/RETENTION_POLICY.md` · `UX_UI_SPEC.md`.*
 
 > **Thesis:** Sebenza's seeker product has strong consent surfaces + audit-log honesty. What it lacks is **agency**  the small daily-life controls that let seekers say *"not from this employer", "pause me for a quarter", "I want to see the actual vacancy before I respond"*. Phase 11.3 adds those controls without weakening the consent contract.
@@ -66,7 +66,7 @@ When `paused_until > now()` on the seeker's `searchability` consent row, the see
 - **Paused**: toggle stays on; below it, a chip "Paused until 2026-09-30 · Unpause →"
 - **Off**: toggle off; pause control hidden (you'd revoke, not pause).
 
-**Notification.** New kind `consent.searchability.paused` (in-app default on, email default off). Also fires the existing `status.stale.warning` cron with a paused-aware exemption — paused seekers don't get stale warnings.
+**Notification.** New kind `consent.searchability.paused` (in-app default on, email default off). Also fires the existing `status.stale.warning` cron with a paused-aware exemption  paused seekers don't get stale warnings.
 
 **Audit posture.** Every pause / unpause / auto-expire writes one `consent.searchability.paused` / `consent.searchability.unpaused` / `consent.searchability.pause_expired` audit row.
 
@@ -165,9 +165,9 @@ The new column is queryable but optional  the existing `subject_org_id` stays th
 - `harassment` (existing)
 - `spam` (existing)
 - `inappropriate` (existing)
-- `irrelevant_role` (new — the role doesn't match what was advertised)
-- `bad_faith_company` (new — MLM, scam, "pay to apply" patterns)
-- `off_platform_contact_request` (new — employer asked to take it to WhatsApp / personal email)
+- `irrelevant_role` (new  the role doesn't match what was advertised)
+- `bad_faith_company` (new  MLM, scam, "pay to apply" patterns)
+- `off_platform_contact_request` (new  employer asked to take it to WhatsApp / personal email)
 - `other` (existing)
 
 **UI.** Three-dot menu on the invitation card opens a popover; "Report this invite" lands on a modal with the reason radio group + the optional free-text. Submit → server action → row in `moderation_reports` → admin notification fires. Page revalidates to show "Reported" state on the card.
@@ -219,9 +219,9 @@ ALTER TABLE vacancy_invitations
 
 This task surfaces the existing employer verification badge directly on the invitation card. The badge mirrors the badge on `/p/{org-handle}`:
 
-- **Sebenza-verified** (KYC + admin review) — `verified` tier
-- **Self-registered** (account exists but no KYC) — `unverified` tier
-- **Pending verification** — `pending` tier (visible chip)
+- **Sebenza-verified** (KYC + admin review)  `verified` tier
+- **Self-registered** (account exists but no KYC)  `unverified` tier
+- **Pending verification**  `pending` tier (visible chip)
 
 **Why now.** Trust + safety. Cheap surfacing of data that already exists.
 
@@ -239,7 +239,7 @@ This task surfaces the existing employer verification badge directly on the invi
 
 This task adds a "Verified by Sebenza admin · 2026-05-28 · Reference: EV-2026-08291" line under the employment-verification chip on `/dashboard/profile`. Tap reveals the small read-only audit chain (resolved date, admin handle anonymised as "Sebenza admin", reference number from `employment_verifications.id`).
 
-**Why now.** Trust. Today the chip transitions from `pending` to `resolved` silently. The seeker doesn't see when, why, or by whom — undermining the verification's own credibility.
+**Why now.** Trust. Today the chip transitions from `pending` to `resolved` silently. The seeker doesn't see when, why, or by whom  undermining the verification's own credibility.
 
 - [ ] Update `<EmploymentVerificationPanel>` to render the audit chain when state is `resolved`.
 - [ ] One help article update: `content/help/seeker/profile/employment-history-entry.md` mentions the audit trail.
@@ -253,7 +253,7 @@ This task adds a "Verified by Sebenza admin · 2026-05-28 · Reference: EV-2026-
 - ❌ **Auto-reporting on threshold patterns.** If an org's block count crosses a threshold, **no** auto-moderation triggers. Admin review is the only path. Pattern-detection is in scope for the existing admin moderation surface, not this phase.
 - ❌ **Notifying the employer when blocked.** Privacy invariant: blocks are silent. The employer sees the seeker disappear from their search results + bulk invites silently skip; same UX as a consent revoke.
 - ❌ **Allowing employers to "appeal" a block.** Same invariant.
-- ❌ **Sharing vacancy snapshots publicly.** The snapshot is private to the invitation. If the employer wants a public posting, that's a different feature (Sebenza deliberately doesn't have public postings — see PHASE_10_1 employer help).
+- ❌ **Sharing vacancy snapshots publicly.** The snapshot is private to the invitation. If the employer wants a public posting, that's a different feature (Sebenza deliberately doesn't have public postings  see PHASE_10_1 employer help).
 
 ---
 
@@ -261,7 +261,7 @@ This task adds a "Verified by Sebenza admin · 2026-05-28 · Reference: EV-2026-
 
 | # | Decision | Why |
 |---|---|---|
-| D1 | Pause is a state on existing consent, not a new consent purpose. | Avoids consent proliferation. Pause is a temporal modifier on `searchability` — semantically clean. |
+| D1 | Pause is a state on existing consent, not a new consent purpose. | Avoids consent proliferation. Pause is a temporal modifier on `searchability`  semantically clean. |
 | D2 | Blocks are private + employer-invisible. | Trust invariant: a seeker's no must be honestly silent. Telling the employer "you've been blocked by N seekers" creates a perverse incentive + invites retaliation off-platform. |
 | D3 | Reporting does not auto-decline. | Two decisions. Decoupling them keeps the seeker honest about their preferences. |
 | D4 | Vacancy snapshot is frozen at invitation-send, not live. | Snapshot integrity. The seeker is evaluating the spec the employer **sent**, not the spec the employer subsequently edited. Matches the integrity contract used on KYC document snapshots. |
@@ -272,13 +272,13 @@ This task adds a "Verified by Sebenza admin · 2026-05-28 · Reference: EV-2026-
 
 ## 🧪 HOW TO VERIFY
 
-1. On `/dashboard/privacy`, toggle searchability pause for 3 months. Confirm the pause chip renders + auto-expiry is scheduled. As an employer, run a `/search` for the seeker's profession + province — confirm the seeker is excluded.
+1. On `/dashboard/privacy`, toggle searchability pause for 3 months. Confirm the pause chip renders + auto-expiry is scheduled. As an employer, run a `/search` for the seeker's profession + province  confirm the seeker is excluded.
 2. As the same seeker, run the auto-unpause cron with system-time fake-forwarded to past the expiry. Confirm the seeker returns to search results.
-3. As a seeker, block an employer org. Confirm an audit row writes. As the employer, search for the seeker — confirm exclusion. Attempt bulk-invite including the seeker — confirm silent skip.
+3. As a seeker, block an employer org. Confirm an audit row writes. As the employer, search for the seeker  confirm exclusion. Attempt bulk-invite including the seeker  confirm silent skip.
 4. Receive an invitation. Use the three-dot menu → "Report this invite" → reason `off_platform_contact_request`. Confirm row in `moderation_reports` with the invitation reference + the seeker is admin-queue-visible.
 5. Open the invitation detail; confirm the `<VacancySnapshotCard>` renders with the full spec snapshot.
 6. As a seeker, receive an invitation from an `unverified` org. Confirm the verification chip + the honest-signal line render.
-7. After Phase 9.23 verification resolves, view `/dashboard/profile` — confirm the audit chain line renders below the employment chip.
+7. After Phase 9.23 verification resolves, view `/dashboard/profile`  confirm the audit chain line renders below the employment chip.
 
 ---
 

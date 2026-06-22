@@ -612,7 +612,7 @@ export function SeekerSignUpForm({
               // had not previously asked seekers for invite-channel
               // consent and a one-line label can't carry the lawful
               // basis. Renders as a tap-to-expand `<details>` on
-              // mobile, always visible on md+ — same pattern as the
+              // mobile, always visible on md+  same pattern as the
               // /dashboard/privacy explainer.
               const explainer = PURPOSE_ONBOARDING_EXPLAINER[purpose];
               return (

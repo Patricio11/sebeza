@@ -1,9 +1,9 @@
-# PHASE 16 COMPLETE — "Near You" (2026-06-13)
+# PHASE 16 COMPLETE  "Near You" (2026-06-13)
 
 **Status:** ✅ shipped. Plan: `docs/completed/PHASE_16_PLAN.md`.
-**One line:** foregrounded the location dimension Sebenza already has — expressed in **reverse-matching**
+**One line:** foregrounded the location dimension Sebenza already has  expressed in **reverse-matching**
 terms (demand near you + be-found-near-you + locality-legible invitations/employers), **not** a job-board
-feed — so the transport-cost barrier is addressed without converging toward the incumbent's post-and-apply
+feed  so the transport-cost barrier is addressed without converging toward the incumbent's post-and-apply
 model.
 
 Built off the SAYouth competitive analysis (`docs/COMPETITIVE_ANALYSIS_SAYOUTH.md` §5.3). SAYouth's only
@@ -11,7 +11,7 @@ edge here is framing ("opportunities close to where you live"); Sebenza already 
 (province→city search, location on every profile, the demand/heatmap layer) and under-sold it.
 
 ## ✅ The §D1 decision (founder-confirmed 2026-06-13)
-The outline's "run `/search` for opportunities near me" doesn't fit the model — `/search` returns **talent**
+The outline's "run `/search` for opportunities near me" doesn't fit the model  `/search` returns **talent**
 (the seeker's competitive pool), and Sebenza deliberately has **no seeker vacancy-browse surface**
 (reverse-matching, not a job board). **Confirmed resolution, built here:** express "near you" as
 **(1) demand near you + (2) be-found-near-you + (3) locality-legible invitations/employers.** The pool link
@@ -21,35 +21,35 @@ is labelled truthfully ("see who you're matched against"), never "opportunities.
 
 ## What shipped
 
-### 16.1 — "Work near you" dashboard card (the marquee)
-- New **`<WorkNearYouCard>`** on `/dashboard` (full-width, above the Career Compass — "near you" then "grow").
+### 16.1  "Work near you" dashboard card (the marquee)
+- New **`<WorkNearYouCard>`** on `/dashboard` (full-width, above the Career Compass  "near you" then "grow").
 - **Leads with agency (be-found):** "Be found for {profession} work near {city}" + a completeness bar +
-  "Complete your profile" CTA — the part the seeker controls on a reverse-matching platform.
+  "Complete your profile" CTA  the part the seeker controls on a reverse-matching platform.
 - **Honest demand context:** "{N} searches for {profession} in {province} · last 90 days" with an honest
   empty state when quiet. Backed by a new `getNearYouDemand()` in `db/queries/career-compass.ts` that reads
-  the **same `search_events` table + 90-day window** the compass demand engine already uses (D5 — reuse the
+  the **same `search_events` table + 90-day window** the compass demand engine already uses (D5  reuse the
   engine, don't build a parallel one). It counts demand-side employer-search activity (`search_events` are
   not attributed to orgs and are never a seeker cohort), so it stays **province-level** with **no
   k-anonymity exposure** (D2).
-- **"Near you OR remote" (D3):** a remote/hybrid-available seeker also sees the SA-wide demand line — never
+- **"Near you OR remote" (D3):** a remote/hybrid-available seeker also sees the SA-wide demand line  never
   penalised by a strict local lens.
 - **Truthful pool link (16.1.3 / D1):** "See who you're matched against in {province}" → the existing
   `/search?q={profession}&province={slug}` (the rank-in-pool view), plus a "Not in {city}? Update your
   location" affordance (no GPS, reads the city already on the profile).
 
-### 16.2 — Locality made legible (presentational, D4)
+### 16.2  Locality made legible (presentational, D4)
 - **`<TalentRosterItem>`** now shows **"{city}, {province}"** (province made legible) and accepts an optional
   `viewerCity` prop that lights up a quiet **"Same city"** chip when a candidate is in the viewer's city.
   Wired on the **vacancy match page** (`viewerCity` = the vacancy's city) so an employer sees local
-  candidates at a glance — the transport-cost reality, for free, over existing row data. No new query.
+  candidates at a glance  the transport-cost reality, for free, over existing row data. No new query.
 - **Invitations list** (`/dashboard/invitations`) gains the same **"Same city"** chip when the role is in the
   seeker's own city (the seeker's city is the viewer-context).
 - **`<RecommendedEmployersCard>`** was already province-scoped ("Employers hiring {profession}s in
-  {province}") — consistent, no change needed.
+  {province}")  consistent, no change needed.
 
-### 16.3 — Carried through the loop
+### 16.3  Carried through the loop
 - **Career Compass city-demand table** (`/dashboard/grow`): copy tightened to the honest near-you framing
-  ("What employers are searching for in your province" + "tap a skill to see who else is listed for it") —
+  ("What employers are searching for in your province" + "tap a skill to see who else is listed for it") 
   truthful pool labelling, never "opportunities."
 - **Vacancy match view:** the `viewerCity` "Same city" treatment (16.2.1).
 - **Remote consistency (D3):** `formatVacancyLocation` (Phase 13.9) remains the single source for the
@@ -118,11 +118,11 @@ A self-audit found three E2E holes + two infra items; all closed:
 - **🔧 Dev-DB `db:migrate` permanently fixed (2026-06-13).** Surfaced while shipping 0051: on the dev DB,
   `db:migrate` was silently applying nothing, so the search-vector fix only landed because
   `scripts/heal-search-vectors.mts` ran it by hand. Root cause was a second-order effect of the 2026-06-09
-  journal recovery — `db:push` had synced the schema but left drizzle's tracking table
+  journal recovery  `db:push` had synced the schema but left drizzle's tracking table
   (`drizzle.__drizzle_migrations`) frozen at migration 0027 (28 rows, 11 stale hashes), so `db:migrate`
   couldn't reconcile. Fixed with a **bookkeeping-only** reconcile (`scripts/reconcile-migrations.mts`,
   committed `e3fb6b4`): it rebuilds the tracking table to mirror the journal (hash = sha256 of each `.sql`,
-  `created_at` = journal `when`) — transactional, guarded to abort unless the schema is at head, never
+  `created_at` = journal `when`)  transactional, guarded to abort unless the schema is at head, never
   re-runs migration SQL. Result: **28 → 52 rows, head = 0051**, `db:migrate` is a verified clean no-op, and
   future migrations apply normally. Read-only diagnostic: `scripts/diagnose-migrations.mts`. Full write-up +
   prevention rule in `docs/completed/MIGRATION_JOURNAL_RECOVERY_PLAN.md` and the migration convention block

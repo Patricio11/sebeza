@@ -1,4 +1,4 @@
--- Phase 12 — schema-drift capture (2026-06-10).
+-- Phase 12  schema-drift capture (2026-06-10).
 --
 -- The Phase 12 migrate-from-zero test harness compared a journal-built
 -- database against `db/schema.ts` (via drizzle-kit push on a disposable
@@ -8,11 +8,11 @@
 -- (fresh dev environments, the test harness, the future AWS cutover
 -- restore-check) were missing them:
 --
---   1. `taxonomy_suggestion_kind` enum value 'skill' — the skill
+--   1. `taxonomy_suggestion_kind` enum value 'skill'  the skill
 --      "Other" path on the profile editor + vacancy form submits
 --      suggestions with kind='skill' into the admin queue.
 --
---   2. `vacancies.seasonal_window_start_year` / `_end_year` — optional
+--   2. `vacancies.seasonal_window_start_year` / `_end_year`  optional
 --      anchor years for the Phase 9.21 seasonal window (a Dec→Feb
 --      harvest window needs the year pair to disambiguate the wrap).
 --

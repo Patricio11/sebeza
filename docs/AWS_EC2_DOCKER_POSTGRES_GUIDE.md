@@ -1,8 +1,8 @@
-# Sebenza on AWS Cape Town — EC2 + Docker + PostgreSQL step-by-step
+# Sebenza on AWS Cape Town  EC2 + Docker + PostgreSQL step-by-step
 
 > **Region**: `af-south-1` (Cape Town). **Stack**: EC2 (Ubuntu 24.04 LTS) + Docker + PostgreSQL 16 self-hosted in a container. **Goal**: a working Sebenza on AWS in one focused day.
 
-> **Companion**: [AWS_MIGRATION_RUNBOOK.md](AWS_MIGRATION_RUNBOOK.md) covers the managed-RDS path. This guide is the **self-hosted EC2** path — cheaper for a pilot, more operator work day-to-day. Pick whichever fits your team. Both end with the same Sebenza running against an `af-south-1` Postgres.
+> **Companion**: [AWS_MIGRATION_RUNBOOK.md](AWS_MIGRATION_RUNBOOK.md) covers the managed-RDS path. This guide is the **self-hosted EC2** path  cheaper for a pilot, more operator work day-to-day. Pick whichever fits your team. Both end with the same Sebenza running against an `af-south-1` Postgres.
 
 > **Audience**: someone who has used a terminal but may not have used AWS before. Every step has a concrete command. No "click around the AWS console and figure it out" hand-waving.
 
@@ -43,7 +43,7 @@ For launch scale, bump to `t4g.medium` (~$30/mo) + 100 GB data volume (~$10/mo).
 
 ### 1.1 Pick the right region in the console
 
-Top-right of the AWS console: switch to **Africa (Cape Town) — af-south-1**. Some accounts have to *enable* this region first:
+Top-right of the AWS console: switch to **Africa (Cape Town)  af-south-1**. Some accounts have to *enable* this region first:
 
 1. Top-right account menu → **Account**.
 2. Scroll to "AWS Regions" → find Africa (Cape Town) → click **Enable**.
@@ -58,7 +58,7 @@ Root credentials should only be used for billing. Make an IAM user for everythin
 3. **Provide user access to the AWS Management Console** → tick. Set a strong password.
 4. **Attach policies directly** → for the pilot, attach `AmazonEC2FullAccess` + `AmazonVPCFullAccess` + `CloudWatchFullAccess` + `IAMReadOnlyAccess`. (Tighten later; these are pilot-day permissions.)
 5. Create user.
-6. After creation: **Security credentials** tab → **Create access key** → choose "Command Line Interface (CLI)" → download the CSV. **Save it somewhere safe — you can't see the secret key again.**
+6. After creation: **Security credentials** tab → **Create access key** → choose "Command Line Interface (CLI)" → download the CSV. **Save it somewhere safe  you can't see the secret key again.**
 
 ### 1.3 Enable MFA on the operator user
 
@@ -105,13 +105,13 @@ You can use the default VPC if you want speed; for a pilot that's acceptable. Th
 
 ### 2.2 Create two security groups
 
-#### SG 1 — `sebenza-db-sg` (the database)
+#### SG 1  `sebenza-db-sg` (the database)
 
 1. **EC2 console** → Security Groups → **Create security group**.
 2. Name: `sebenza-db-sg`.
 3. Description: `Sebenza Postgres + SSH access`.
 4. VPC: `sebenza-vpc`.
-5. **Inbound rules — leave empty for now.** We'll add specific rules after we know our operator's public IP and Vercel's egress IPs.
+5. **Inbound rules  leave empty for now.** We'll add specific rules after we know our operator's public IP and Vercel's egress IPs.
 6. **Outbound rules**: keep the default (all traffic allowed out).
 7. Create.
 
@@ -129,7 +129,7 @@ The EC2 instance gets a public IP that changes if you stop/start. An Elastic IP 
 1. **EC2 console** → Elastic IPs → **Allocate Elastic IP address**.
 2. Network border group: `af-south-1`.
 3. Allocate.
-4. Note the IPv4 address — this is your future `DATABASE_URL` host. Call it `EIP` for the rest of this guide.
+4. Note the IPv4 address  this is your future `DATABASE_URL` host. Call it `EIP` for the rest of this guide.
 
 ---
 
@@ -152,7 +152,7 @@ The EC2 instance gets a public IP that changes if you stop/start. An Elastic IP 
 
 1. **EC2 console** → Instances → **Launch instance**.
 2. Name: `sebenza-db-01`.
-3. **Application and OS Images**: **Ubuntu** → **Ubuntu Server 24.04 LTS (HVM) — ARM** (the t4g instance types are ARM-based and cheaper than x86).
+3. **Application and OS Images**: **Ubuntu** → **Ubuntu Server 24.04 LTS (HVM)  ARM** (the t4g instance types are ARM-based and cheaper than x86).
 4. **Instance type**: `t4g.small` (2 vCPU, 2 GB RAM, ~$15/mo). For launch upgrade to `t4g.medium`.
 5. **Key pair**: `sebenza-ec2-keypair`.
 6. **Network settings** → **Edit**:
@@ -197,7 +197,7 @@ ssh -i ~/.ssh/sebenza-ec2-keypair.pem ubuntu@<EIP>
 
 (Replace `<EIP>` with your Elastic IP. The default user on Ubuntu AMIs is `ubuntu`.)
 
-First connection asks you to accept the host fingerprint — type `yes`.
+First connection asks you to accept the host fingerprint  type `yes`.
 
 ### 4.2 Update the OS
 
@@ -290,7 +290,7 @@ docker run --rm hello-world # should print a success message
 
 ---
 
-## 6. EBS data volume — mount it at the Postgres data path
+## 6. EBS data volume  mount it at the Postgres data path
 
 The 50 GB volume you attached in 3.2 step 7 is sitting unmounted. Postgres data lives in a directory; if we put that directory on the data volume, we can snapshot/resize/replace it independently of the OS.
 
@@ -629,7 +629,7 @@ const db = drizzle(new Pool({
 }), { schema });
 ```
 
-> Don't `npm uninstall @neondatabase/serverless ws` yet — keep them until cutover is fully verified, so rollback is one env-var change.
+> Don't `npm uninstall @neondatabase/serverless ws` yet  keep them until cutover is fully verified, so rollback is one env-var change.
 
 ### 8.2 Point local env at AWS + migrate
 
@@ -706,10 +706,10 @@ Numbers should match the Neon source (or match the seed counts if you started fr
    ```
    postgresql://sebenza:<SEBENZA_DB_PASSWORD>@<EIP>:5432/sebenza?sslmode=require
    ```
-   (note: `sslmode=require`, not `disable` — Vercel egress is open internet, never bare TCP)
+   (note: `sslmode=require`, not `disable`  Vercel egress is open internet, never bare TCP)
 3. Save.
 
-> Don't delete the old Neon URL yet — keep it as a backup.
+> Don't delete the old Neon URL yet  keep it as a backup.
 
 ### 9.2 Add Vercel egress IPs to the security group
 
@@ -721,10 +721,10 @@ In `sebenza-db-sg`:
   - Source: **Custom** → paste the Vercel CIDR (e.g. `76.76.21.0/24`)
   - Description: `Vercel egress  <region>`
 
-Or, for the pilot, use a single `0.0.0.0/0` rule — Postgres-on-public-internet is safe ONLY if you have:
-- SSL required (you do — `sslmode=require`)
-- Strong password (you do — 32-char random)
-- Non-default user (you do — `sebenza`, not `postgres`)
+Or, for the pilot, use a single `0.0.0.0/0` rule  Postgres-on-public-internet is safe ONLY if you have:
+- SSL required (you do  `sslmode=require`)
+- Strong password (you do  32-char random)
+- Non-default user (you do  `sebenza`, not `postgres`)
 - A modern Postgres + `scram-sha-256` auth (you do)
 
 For production, upgrade to Vercel Secure Compute (static-IP egress) and lock the SG to those IPs only.
@@ -734,8 +734,8 @@ For production, upgrade to Vercel Secure Compute (static-IP egress) and lock the
 1. In Vercel, trigger a redeploy (Deployments → latest → Redeploy with cleared cache).
 2. Open the production URL.
 3. Sign in.
-4. Hit `/api/admin/outcomes-compliance` (as admin) — confirm all 18 assertions return `ok: true`.
-5. Hit `/insights` — confirm numbers render.
+4. Hit `/api/admin/outcomes-compliance` (as admin)  confirm all 18 assertions return `ok: true`.
+5. Hit `/insights`  confirm numbers render.
 6. Try the cell-click path → `/search` → confirm results appear.
 
 ### 9.4 If everything works, remove the legacy Neon URL
@@ -870,7 +870,7 @@ These capture the entire data volume at a point in time. Faster restore than pg_
 2. Policy type: **EBS snapshot policy**.
 3. Description: `Sebenza DB volume daily snapshots`.
 4. Target resource type: **Volume**.
-5. Target tag: pick a tag you've set on the data volume (you can tag it now if you haven't — go to EC2 → Volumes → select the 50GB data volume → Tags → add `Backup=true`).
+5. Target tag: pick a tag you've set on the data volume (you can tag it now if you haven't  go to EC2 → Volumes → select the 50GB data volume → Tags → add `Backup=true`).
 6. Schedule:
    - Frequency: Daily
    - Time: 03:00 UTC (= 05:00 SAST, after pg_dump runs)
@@ -879,7 +879,7 @@ These capture the entire data volume at a point in time. Faster restore than pg_
 
 ---
 
-## 11. TLS — Postgres over SSL
+## 11. TLS  Postgres over SSL
 
 Currently we're running with `sslmode=disable`. Production must use SSL.
 
@@ -1012,7 +1012,7 @@ CloudWatch console → Alarms → Create alarm. Repeat four times:
 | `sebenza-db-mem-high` | `mem_used_percent` (CWAgent) | > 90% | 15 min |
 | `sebenza-db-status-fail` | `StatusCheckFailed` (EC2) | >= 1 | 5 min |
 
-Each alarm sends to an SNS topic — create one called `sebenza-ops` first and subscribe your operator email to it.
+Each alarm sends to an SNS topic  create one called `sebenza-ops` first and subscribe your operator email to it.
 
 ---
 
@@ -1021,18 +1021,18 @@ Each alarm sends to an SNS topic — create one called `sebenza-ops` first and s
 From the Vercel production URL, walk through this list. Each must pass.
 
 1. **Sign in** as admin (`admin@sebenzasa.com`, password from seed).
-2. **`/admin/outcomes-compliance`** — open the JSON endpoint directly, confirm `"ok": true` for all 18 assertions.
-3. **`/insights`** — verify LMI value, freshness band, supply heatmap (no duplicate columns now if you re-seeded).
-4. **`/search`** — try a query, confirm results appear. Try clicking a heatmap cell from `/insights` — should land here with rows.
-5. **`/employer/onboarding`** as a fresh employer — submit a test KYC application; confirm it lands in `/admin/verifications`.
-6. **`/dashboard/grow`** as a seeker — confirm the Career Compass + My Learning section render.
+2. **`/admin/outcomes-compliance`**  open the JSON endpoint directly, confirm `"ok": true` for all 18 assertions.
+3. **`/insights`**  verify LMI value, freshness band, supply heatmap (no duplicate columns now if you re-seeded).
+4. **`/search`**  try a query, confirm results appear. Try clicking a heatmap cell from `/insights`  should land here with rows.
+5. **`/employer/onboarding`** as a fresh employer  submit a test KYC application; confirm it lands in `/admin/verifications`.
+6. **`/dashboard/grow`** as a seeker  confirm the Career Compass + My Learning section render.
 7. **Trigger a cron** manually:
    ```bash
    curl -H "Authorization: Bearer $CRON_SECRET" https://your-app.vercel.app/api/cron/status-stale-warning
    ```
    Confirm `{ok:true}` response.
-8. **Email send** — flip `feature_flag_email_notifications` ON in `/admin/settings`, trigger any action that creates a notification, confirm Resend dashboard shows the send.
-9. **Audit log** — open `/admin/audit-log`, confirm rows are landing from your test actions.
+8. **Email send**  flip `feature_flag_email_notifications` ON in `/admin/settings`, trigger any action that creates a notification, confirm Resend dashboard shows the send.
+9. **Audit log**  open `/admin/audit-log`, confirm rows are landing from your test actions.
 
 If all 9 pass, the migration is functionally complete.
 
@@ -1043,9 +1043,9 @@ If all 9 pass, the migration is functionally complete.
 - [ ] Remove the operator's SSH IP from the SG (keep only Vercel egress + your bastion if you have one).
 - [ ] Remove the `My IP` Postgres rule on port 5432 (operator should always tunnel through SSH for psql access).
 - [ ] Tag the commit: `git tag aws-cape-town-cutover-YYYY-MM-DD && git push --tags`.
-- [ ] Update `docs/popia/RETENTION_POLICY.md` — Neon row removed, AWS RDS row added.
-- [ ] Update `/privacy` Section 7 — change "before commercial launch we migrate" to "we host on AWS Cape Town (`af-south-1`)".
-- [ ] Update `/paia` Section 6 sub-processors — swap Neon for AWS.
+- [ ] Update `docs/popia/RETENTION_POLICY.md`  Neon row removed, AWS RDS row added.
+- [ ] Update `/privacy` Section 7  change "before commercial launch we migrate" to "we host on AWS Cape Town (`af-south-1`)".
+- [ ] Update `/paia` Section 6 sub-processors  swap Neon for AWS.
 - [ ] Keep Neon snapshot/access for 30 days as rollback insurance.
 
 ---
@@ -1058,7 +1058,7 @@ If anything goes wrong inside the first 30 days:
 2. **In code**: revert `db/client.ts` to import from `@neondatabase/serverless` + `drizzle-orm/neon-serverless`. (Tag `aws-cape-town-cutover-YYYY-MM-DD` makes this a one-line `git revert`.)
 3. **Reinstall**: `npm install @neondatabase/serverless ws @types/ws`.
 4. **Redeploy** in Vercel.
-5. **Re-run idempotent crons** that fired during the AWS window: `skill-gap-snapshot`, `outcome-snapshots`, `lmi-snapshot` are all append-only — safe to re-run.
+5. **Re-run idempotent crons** that fired during the AWS window: `skill-gap-snapshot`, `outcome-snapshots`, `lmi-snapshot` are all append-only  safe to re-run.
 6. **For audit/notification rows that landed on AWS during the window**: `pg_dump --data-only --table=audit_log --table=notifications` from AWS, `pg_restore` into Neon.
 
 The 30-day Neon retention is the rollback budget.
@@ -1067,17 +1067,17 @@ The 30-day Neon retention is the rollback budget.
 
 ## 16. Day-to-day operator runbook
 
-### Daily (first month — automate later)
+### Daily (first month  automate later)
 
 - Check the SNS topic for any overnight alarms.
-- Glance at `cat /var/log/sebenza-backup.log` (SSH in) — most recent line should be from last night.
+- Glance at `cat /var/log/sebenza-backup.log` (SSH in)  most recent line should be from last night.
 - Verify the latest snapshot in `aws s3 ls s3://sebenza-db-backups-af-south-1/ --recursive | tail -1`.
 
 ### Weekly
 
 - `docker compose pull && docker compose up -d` to pull the latest Postgres 16.x patch release.
 - Review CloudTrail for unexpected console activity.
-- Review the audit-log row count growth — anomalous spikes mean either a feature got busier OR something's wrong.
+- Review the audit-log row count growth  anomalous spikes mean either a feature got busier OR something's wrong.
 
 ### Monthly
 
@@ -1108,7 +1108,7 @@ ls -lh /var/backups/postgres/
 # OR pull from S3:
 aws s3 cp s3://sebenza-db-backups-af-south-1/sebenza-YYYYMMDD-HHMMSS.dump ./
 
-# Restore (THIS WIPES THE EXISTING DB — be sure)
+# Restore (THIS WIPES THE EXISTING DB  be sure)
 docker exec -i sebenza-postgres pg_restore \
   -U sebenza --clean --if-exists \
   -d sebenza < sebenza-YYYYMMDD-HHMMSS.dump
@@ -1127,7 +1127,7 @@ Postgres doesn't need a restart.
 
 ---
 
-## Appendix A — Multi-AZ pattern (when you outgrow the pilot)
+## Appendix A  Multi-AZ pattern (when you outgrow the pilot)
 
 For HA, the right pattern is **streaming replication** between a primary + standby in two AZs. Outline:
 
@@ -1140,7 +1140,7 @@ This is genuinely more work than RDS Multi-AZ ($30/mo) does for you in one tickb
 
 ---
 
-## Appendix B — DNS (use a friendly hostname)
+## Appendix B  DNS (use a friendly hostname)
 
 Once the pilot is stable, replace `<EIP>` with a hostname. Two options:
 
@@ -1154,16 +1154,16 @@ Once the pilot is stable, replace `<EIP>` with a hostname. Two options:
      # Update docker-compose volume mounts to point at /etc/letsencrypt/live/db.sebenzasa.com/
      ```
 
-2. **External DNS** (Cloudflare etc.) — same idea, A record pointing at the EIP.
+2. **External DNS** (Cloudflare etc.)  same idea, A record pointing at the EIP.
 
 ---
 
-## Appendix C — POPIA compliance notes
+## Appendix C  POPIA compliance notes
 
 Nothing in the Sebenza POPIA posture changes with this migration. Restated:
 
 - **Data residency**: PII never leaves `af-south-1`. The Sebenza application encrypts national ID numbers with AES-256-GCM application-side before they hit the database; backups inherit that encryption. EBS volumes + S3 backups are encrypted at rest with an AWS KMS key in `af-south-1`.
-- **Sub-processor change**: Neon is removed from `docs/popia/RETENTION_POLICY.md`, AWS Cape Town added. Re-version `/privacy` Section 7 — the cookie-banner machinery already handles consent re-prompts on Privacy Policy updates.
+- **Sub-processor change**: Neon is removed from `docs/popia/RETENTION_POLICY.md`, AWS Cape Town added. Re-version `/privacy` Section 7  the cookie-banner machinery already handles consent re-prompts on Privacy Policy updates.
 - **Audit log**: every PII access still wraps in `logAccess()`. The DB hosting the audit log changed; the contract did not.
 - **DPA**: confirm AWS DPA + sub-processor agreement for `af-south-1` is on file before cutover day. Standard AWS terms cover this; the only step is *confirming* you have it.
 

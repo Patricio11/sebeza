@@ -1,10 +1,10 @@
 /**
- * Phase 12 (Task 12.2) — Status-Freshness Rule against the real database.
+ * Phase 12 (Task 12.2)  Status-Freshness Rule against the real database.
  *
  * Two contracts:
  *
  *   1. ONE-SOURCE-OF-TRUTH PARITY: the SQL function
- *      `sebenza_freshness_confidence(timestamp)` (Phase 4 — used by search
+ *      `sebenza_freshness_confidence(timestamp)` (Phase 4  used by search
  *      ranking + every gov analytics query) must agree with
  *      `lib/status.ts` for the same ages, including at the 30/90-day band
  *      boundaries. If these drift, search ranking and the dashboard nudge
@@ -47,7 +47,7 @@ describe("ranking behaviour on seeded data", () => {
     profession: string;
     statusConfirmedAt: Date;
     completeness: number;
-    /** Postgres text-literal form (e.g. `{Chef}`) or null — round-trips
+    /** Postgres text-literal form (e.g. `{Chef}`) or null  round-trips
      *  through `::text[]` casts without array-parameter binding issues. */
     secondaryProfessionsText: string | null;
   }> = [];

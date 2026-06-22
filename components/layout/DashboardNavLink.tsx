@@ -5,7 +5,7 @@ import { Link, usePathname } from "@/i18n/navigation";
 /**
  * Active-aware navigation link for the persistent dashboard sidebar. Because
  * the sidebar now lives in a `layout.tsx` (so it survives navigation), the
- * active item can no longer be passed as an `activeKey` prop from each page —
+ * active item can no longer be passed as an `activeKey` prop from each page 
  * it's derived from the current pathname instead.
  *
  * Sets `aria-current="page"` when active; all visual styling is driven from

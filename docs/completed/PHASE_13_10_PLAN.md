@@ -1,8 +1,8 @@
-# PHASE 13.10 PLAN — MULTI-ARCHETYPE SEEKER SUPPORT
+# PHASE 13.10 PLAN  MULTI-ARCHETYPE SEEKER SUPPORT
 
 *Side-phase between Phase 13.9 (Any province) and Phase 12 (Testing & QA). Companion docs: `TO_START_EVERY_SESSION.md` · `ROADMAP.md` · `docs/completed/PHASE_11_5_COMPLETE.md` (the Open-To tags + `secondaryProfessions`-shaped `currentModules` schema pattern this builds on).*
 
-> **Thesis:** Sebenza was scaffolded around the canonical *one seeker, one profession* pattern. Real SA talent — particularly across hospitality, caregiving, customer-service, and trades — often carries a multi-stint, cross-industry, *willing-to-be-trained* archetype. A seeker who has 7 years customer service + 2 years caregiving + 2 years barista + 2 years kitchen assistant + Matric + Computer Literacy + Home Based Care today must:
+> **Thesis:** Sebenza was scaffolded around the canonical *one seeker, one profession* pattern. Real SA talent  particularly across hospitality, caregiving, customer-service, and trades  often carries a multi-stint, cross-industry, *willing-to-be-trained* archetype. A seeker who has 7 years customer service + 2 years caregiving + 2 years barista + 2 years kitchen assistant + Matric + Computer Literacy + Home Based Care today must:
 >
 > 1. Pick ONE primary profession (the headline rule).
 > 2. Try to express her cross-industry flexibility via Open-To tags that don't fit (`mentorship` / `freelance` / `contract_gigs` / `public_speaking` are all *experienced professional offering side work*).
@@ -18,7 +18,7 @@ After Phase 13.10 ships:
 
 - A seeker can tick **Open to training** and/or **Cross-industry** in the `/dashboard/profile` Open-To section so employers searching for entry-level + cross-industry-flexible candidates can find them via the existing Phase 11.5.1 `/search?open_to=` filter.
 - A seeker can declare up to **3 secondary professions** that the search profession filter + the Phase 9.8.2 vacancy reverse-matcher honour as equivalent to her primary.
-- The public profile `/p/[handle]` renders secondary professions as a small chip row below the primary headline ("Also experienced in: Barista · Kitchen Porter · Caregiver") — never as a list-of-equals.
+- The public profile `/p/[handle]` renders secondary professions as a small chip row below the primary headline ("Also experienced in: Barista · Kitchen Porter · Caregiver")  never as a list-of-equals.
 - Existing single-profession seekers see zero UI change. The whole shape is opt-in.
 
 Built honest: the headline still picks one primary profession; secondaries are *additional* recognised lanes, not co-equals. The matcher widens; the editorial framing stays single-headlined.
@@ -31,8 +31,8 @@ Built honest: the headline still picks one primary profession; secondaries are *
 - **`/search?open_to=` filter** via `&&` array overlap on the column. No change to the search query; just new values land naturally.
 - **`profiles.profession` single text field** (since Phase 4). Stays the headline. We add a sibling array column for secondaries.
 - **`PROFESSIONS` taxonomy** in `lib/mock/taxonomy.ts` (~75 entries). The same source the primary profession picker reads.
-- **`<MultiSelectComboboxField>`** — the picker pattern reused for skills since the Phase 9.18 "hiring UX polish" pass. Mirrors the same pattern for secondary professions.
-- **Phase 9.8.2 `matchVacancyCandidates()`** uses `searchProfilesQuery` under the hood — widening the search profession filter automatically widens the reverse-matcher.
+- **`<MultiSelectComboboxField>`**  the picker pattern reused for skills since the Phase 9.18 "hiring UX polish" pass. Mirrors the same pattern for secondary professions.
+- **Phase 9.8.2 `matchVacancyCandidates()`** uses `searchProfilesQuery` under the hood  widening the search profession filter automatically widens the reverse-matcher.
 
 ---
 
@@ -79,7 +79,7 @@ Hints:
 
 ---
 
-### Task 13.10.2: Schema — `secondary_professions` column
+### Task 13.10.2: Schema  `secondary_professions` column
 
 **Migration `0048_phase13_10_secondary_professions.sql`:**
 
@@ -104,13 +104,13 @@ secondaryProfessions: text("secondary_professions")
 
 **Types.** `MyProfile.secondaryProfessions: string[]` + `PublicProfile.secondaryProfessions?: string[]` (public exposure decided in D1).
 
-**Storage convention.** Stores profession **labels** matching the existing `profiles.profession` string convention, not slugs. Yes, slug would be cleaner — but `profiles.profession` is already text-label, and an in-phase migration to slug-everywhere is out of scope. The action layer validates each label against the canonical `PROFESSIONS` taxonomy on write; no free-text escapes.
+**Storage convention.** Stores profession **labels** matching the existing `profiles.profession` string convention, not slugs. Yes, slug would be cleaner  but `profiles.profession` is already text-label, and an in-phase migration to slug-everywhere is out of scope. The action layer validates each label against the canonical `PROFESSIONS` taxonomy on write; no free-text escapes.
 
 - [ ] Migration + schema column + MyProfile/PublicProfile types.
 
 ---
 
-### Task 13.10.3: Profile editor — secondary professions picker
+### Task 13.10.3: Profile editor  secondary professions picker
 
 **`/dashboard/profile` → `<ProfileBasicsForm>` extension.** Below the existing primary `<ComboboxField>` for profession, add a multi-select picker:
 
@@ -130,7 +130,7 @@ secondaryProfessions: text("secondary_professions")
 - Each entry must be a canonical `PROFESSIONS.label`.
 - Cap at 3 (server-side refuse on overflow).
 - Cannot duplicate the primary profession.
-- **No "Other" path** (D3) — keep data clean. Users add new professions via the Phase 9.15 admin suggestion queue, then they appear in the picker.
+- **No "Other" path** (D3)  keep data clean. Users add new professions via the Phase 9.15 admin suggestion queue, then they appear in the picker.
 
 - [ ] Form field.
 - [ ] Server action validation extending `updateProfileBasics`.
@@ -155,9 +155,9 @@ Phase 13.10 adds a chip row below when `secondaryProfessions.length > 0`:
           Also experienced in: Barista · Kitchen Porter · Caregiver
 ```
 
-Civic-Editorial typography: ALL-CAPS eyebrow "ALSO EXPERIENCED IN" if rendered on the dossier, or italic-lowercase inline on the public profile. Chips are NOT clickable links — the matcher widens automatically, but a chip-as-link would let employers think they're filtering by secondary only (and a generic `/search?profession=barista` already exists for that intent).
+Civic-Editorial typography: ALL-CAPS eyebrow "ALSO EXPERIENCED IN" if rendered on the dossier, or italic-lowercase inline on the public profile. Chips are NOT clickable links  the matcher widens automatically, but a chip-as-link would let employers think they're filtering by secondary only (and a generic `/search?profession=barista` already exists for that intent).
 
-**Search-result row (`<TalentRosterItem>`).** Does NOT render secondary professions — keeps the roster row scannable. The widened search filter does the heavy lifting; the row stays single-headline.
+**Search-result row (`<TalentRosterItem>`).** Does NOT render secondary professions  keeps the roster row scannable. The widened search filter does the heavy lifting; the row stays single-headline.
 
 - [ ] `/p/[handle]` chip row.
 - [ ] No change to `<TalentRosterItem>` (D5  roster row stays scannable).
@@ -189,7 +189,7 @@ ORDER BY
   <existing freshness × completeness × citizen-group rank>
 ```
 
-Seekers whose primary matches sort above seekers whose secondary matches, within each citizen-group tier. The Citizen-Visibility Rule (D3 from 9.7) still holds — primary-matching SA citizens still rank above primary-matching non-citizens, and the secondary-matching block also splits the same way.
+Seekers whose primary matches sort above seekers whose secondary matches, within each citizen-group tier. The Citizen-Visibility Rule (D3 from 9.7) still holds  primary-matching SA citizens still rank above primary-matching non-citizens, and the secondary-matching block also splits the same way.
 
 - [ ] SQL update in `searchProfilesQuery`.
 - [ ] CASE-based rank tiebreak.
@@ -199,7 +199,7 @@ Seekers whose primary matches sort above seekers whose secondary matches, within
 
 ### Task 13.10.6: Vacancy reverse-matcher widening (free via 13.10.5)
 
-**`matchVacancyCandidates(vacancy)` in `lib/employer/vacancies.ts`.** Already composes a `SearchFilters` carrying the vacancy's profession label. Once `searchProfilesQuery` widens (Task 13.10.5), the reverse-matcher widens automatically — the seeker whose `secondaryProfessions` includes "Barista" surfaces for a vacancy targeting `barista`.
+**`matchVacancyCandidates(vacancy)` in `lib/employer/vacancies.ts`.** Already composes a `SearchFilters` carrying the vacancy's profession label. Once `searchProfilesQuery` widens (Task 13.10.5), the reverse-matcher widens automatically  the seeker whose `secondaryProfessions` includes "Barista" surfaces for a vacancy targeting `barista`.
 
 **Honest disclosure on the match page.** Below each matched candidate, a small annotation when the match came via secondary: *"matched via secondary profession: Barista"*. The employer sees how the platform reached this candidate so the honest-supply line stays honest.
 
@@ -216,7 +216,7 @@ Add a one-paragraph block to `content/help/seeker/profile/employment-history-ent
 - Add up to 3 secondaries to surface to employers searching for those roles.
 - The two new Open-To tags (`open_to_training`, `cross_industry`) cover entry-level + industry-shift archetypes.
 
-No new article — this is a paragraph + bump `updatedAt`.
+No new article  this is a paragraph + bump `updatedAt`.
 
 - [ ] One paragraph + `updatedAt` bump.
 
@@ -241,7 +241,7 @@ No new article — this is a paragraph + bump `updatedAt`.
 | D3 | **No "Other" submission path** on the picker. | Keep data clean for matching; Phase 9.15 admin queue is the supported route for new professions. Adds editorial discipline. |
 | D4 | Primary profession stays a **single text label**. | No schema disruption to /search, /p/[handle], `<TalentRosterItem>`. Secondaries are additive, not transformative. |
 | D5 | Search-result row (`<TalentRosterItem>`) does **NOT** render secondaries. | Keep the roster scannable; the widening happens at the WHERE clause, not at the per-row UI. The public profile page is where the full claim lives. |
-| D6 | Vacancy reverse-match surfaces secondary matches with a **"matched via secondary"** annotation. | Honest disclosure — the employer sees why this candidate is in the list. No silent expansion. |
+| D6 | Vacancy reverse-match surfaces secondary matches with a **"matched via secondary"** annotation. | Honest disclosure  the employer sees why this candidate is in the list. No silent expansion. |
 | D7 | Primary profession matches **rank above** secondary matches on the same profession query. | The headline is still the headline; a barista-by-trade ranks above a customer-service-rep-also-barista when an employer searches for "Barista". Within each rank tier, the existing freshness × completeness × Citizen-Visibility ranking applies unchanged. |
 | D8 | Two distinct new Open-To tags (`open_to_training` + `cross_industry`), not one combined. | The two archetypes are genuinely distinct (D8 doc above). Combining would dilute editorial framing + force seekers to over-claim. |
 | D9 | No new audit kinds. | The existing `profile.update` audit row's meta carries the changed-field names; that's enough. Adding `secondary_professions.add` would be over-instrumentation for a low-sensitivity field. |
@@ -281,8 +281,8 @@ No new article — this is a paragraph + bump `updatedAt`.
 - 0 new platform flags.
 - 2 new Open-To enum values (no migration; the column is text[]).
 
-Comparable to Phase 13.9 in scope — a contained additive change with a clean type cascade driving the rest.
+Comparable to Phase 13.9 in scope  a contained additive change with a clean type cascade driving the rest.
 
 ---
 
-*Plan opens for Phase 13.10. Target: end-to-end ship within one working session. POPIA implications: none (profession-history is non-special-category). Trust posture: strengthened — the platform stops being editorially-monogamous about profession when the seeker's real history isn't.*
+*Plan opens for Phase 13.10. Target: end-to-end ship within one working session. POPIA implications: none (profession-history is non-special-category). Trust posture: strengthened  the platform stops being editorially-monogamous about profession when the seeker's real history isn't.*

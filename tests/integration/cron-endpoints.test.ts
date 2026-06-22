@@ -1,9 +1,9 @@
 /**
- * Phase 12 (Task 12.2) — cron route contracts.
+ * Phase 12 (Task 12.2)  cron route contracts.
  *
  * All 18 `/api/cron/*` routes share the `isAuthorizedCron` guard
  * (`Authorization: Bearer ${CRON_SECRET}`). Generic fixtures assert every
- * route refuses unauthenticated + wrong-secret requests — fail-closed.
+ * route refuses unauthenticated + wrong-secret requests  fail-closed.
  *
  * Targeted fixtures then run the high-stakes crons for real against the
  * seeded DB and invoke them TWICE: the second run must be a no-op
@@ -86,7 +86,7 @@ describe("idempotency: status-stale-warning", () => {
 
 describe("idempotency + fail-closed on the remaining high-stakes crons", () => {
   // Each runs twice with auth; both runs must report ok (the underlying
-  // anchors make run 2 a no-op — these crons crashing or double-firing
+  // anchors make run 2 a no-op  these crons crashing or double-firing
   // would mean duplicate notifications or premature hard-deletes).
   const HIGH_STAKES = [
     "hard-delete-erased",

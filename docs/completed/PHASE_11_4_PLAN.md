@@ -1,4 +1,4 @@
-# PHASE 11.4 PLAN — SA DISTRIBUTION (PROFILE-SHARE + WHATSAPP + SMS)
+# PHASE 11.4 PLAN  SA DISTRIBUTION (PROFILE-SHARE + WHATSAPP + SMS)
 *Opens after Phase 11.3. Companion docs: `PHASE_11_PLAN.md` · `docs/popia/DPIA.md` · `docs/SECURITY.md` · `UX_UI_SPEC.md`.*
 
 > **Thesis:** Sebenza's seeker product is a quiet web app. South Africans don't discover work on the open web; they discover it via WhatsApp groups, SMS, and word of mouth between friends. Phase 11.4 builds the **distribution surface** for that real-world behaviour: a shareable profile card (PNG) with a WhatsApp deep-link, a follow-employer save-list to capture warm intent, optional data-saver mode for low-bandwidth users, and  carefully  an SMS / WhatsApp notification channel for critical invites that can't wait for the next time the seeker opens the app.
@@ -22,12 +22,12 @@ A fifth task surfaces the related "recommended employers" view to drive organic 
 
 ## 🧱 WHAT ALREADY EXISTS (build on, don't rebuild)
 
-- **Public profile route** — `/p/{handle}`. Already serves redacted, consent-gated profile data to public viewers.
-- **Notification infrastructure** — `lib/notifications/server.ts` + `lib/notifications/catalog.ts`. Pluggable channel abstraction; SMS / WhatsApp slot in as new channels.
-- **Email transport** — `lib/email/send.ts`. SMTP-based, provider-agnostic. The same abstraction shape works for SMS.
-- **Audit log** — every PII-touching outbound message writes a row.
-- **Consent surface** — `/dashboard/privacy`. New channels become new consent purposes (or attach to existing service-communication consent — see decision D2).
-- **Helper for signed Supabase URLs** — `lib/storage/signed.ts`. The share-card image renders from a Supabase-stored canonical PNG.
+- **Public profile route**  `/p/{handle}`. Already serves redacted, consent-gated profile data to public viewers.
+- **Notification infrastructure**  `lib/notifications/server.ts` + `lib/notifications/catalog.ts`. Pluggable channel abstraction; SMS / WhatsApp slot in as new channels.
+- **Email transport**  `lib/email/send.ts`. SMTP-based, provider-agnostic. The same abstraction shape works for SMS.
+- **Audit log**  every PII-touching outbound message writes a row.
+- **Consent surface**  `/dashboard/privacy`. New channels become new consent purposes (or attach to existing service-communication consent  see decision D2).
+- **Helper for signed Supabase URLs**  `lib/storage/signed.ts`. The share-card image renders from a Supabase-stored canonical PNG.
 
 ---
 
@@ -53,7 +53,7 @@ export const revalidate = 60 * 60 * 24 * 7; // 7 days
 
 Cache key includes the profile's `updated_at` timestamp; mutations bust automatically via Next's revalidation.
 
-**POPIA touch.** Same data as `/p/{handle}` — no new data category. The card route is subject to the same `searchability` consent gate; revoked-searchability profiles return a generic "Profile not available" image.
+**POPIA touch.** Same data as `/p/{handle}`  no new data category. The card route is subject to the same `searchability` consent gate; revoked-searchability profiles return a generic "Profile not available" image.
 
 **Anti-pattern guards.**
 - No QR code on the card (visual noise; people share the link, not the image).
@@ -147,7 +147,7 @@ ALTER TABLE app_user ADD COLUMN data_saver_mode boolean NOT NULL DEFAULT false;
 
 ### Task 11.4.4: SMS + WhatsApp notification channel (gated rollout)
 
-**Scope.** Two new notification channels: SMS (via Twilio or AWS SNS — operator choice) and WhatsApp Business (via Twilio or Meta WhatsApp Business API directly). Opt-in only; gated rollout (operator-configurable seeker allowlist before public availability). Limited to two critical notification kinds at launch: `vacancy.invite.received` and `contact.reveal.requested`.
+**Scope.** Two new notification channels: SMS (via Twilio or AWS SNS  operator choice) and WhatsApp Business (via Twilio or Meta WhatsApp Business API directly). Opt-in only; gated rollout (operator-configurable seeker allowlist before public availability). Limited to two critical notification kinds at launch: `vacancy.invite.received` and `contact.reveal.requested`.
 
 **Why now.** SMS / WhatsApp reach seekers who don't reliably get email (no smartphone email setup, hostile mobile data plan, spam-filter eaten the email). For critical invites with response windows, that reach matters.
 
@@ -254,7 +254,7 @@ The k=10 floor mirrors the gov suppression policy  no employer appears on the li
 - ❌ **Paid sponsored placement on `/search` or the recommended-employers card.** Sebenza has no advertising tier. The recommended-employer ranking is data-driven (confirmed placements) only.
 - ❌ **Auto-share-on-completion.** Completing a learning item does not auto-post to social. The share is always manual.
 - ❌ **SMS for non-critical events.** Only the two kinds documented. Adding kinds is a deliberate phase activity, not a config tweak.
-- ❌ **Public OpenGraph image on `/p/{handle}` itself.** `/p/{handle}/card` is a separate route the seeker explicitly shares. The main public profile page does not bake the image into its `<meta og:image>` (privacy invariant — the seeker chooses when to share).
+- ❌ **Public OpenGraph image on `/p/{handle}` itself.** `/p/{handle}/card` is a separate route the seeker explicitly shares. The main public profile page does not bake the image into its `<meta og:image>` (privacy invariant  the seeker chooses when to share).
 
 ---
 

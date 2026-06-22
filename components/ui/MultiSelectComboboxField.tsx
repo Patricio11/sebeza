@@ -85,7 +85,7 @@ interface Props {
   onOtherSubmit?: (text: string) => void;
   /** Split a comma-separated "Other" entry into several values, so typing
    *  "a, b, c" then choosing Suggest adds three chips (one per item) instead
-   *  of one. OFF by default — some free-text values legitimately contain
+   *  of one. OFF by default  some free-text values legitimately contain
    *  commas (e.g. a company name "Smith, Jones & Co."). Enable on multi-value
    *  free-text fields like skills. */
   splitOtherOnComma?: boolean;
@@ -244,7 +244,7 @@ export function MultiSelectComboboxField({
     if (qTrim.length < 2 || otherParts.length === 0) return;
     // Add each part as its own value. A part that matches a catalogue option
     // (by label, case-insensitive) is added as the canonical value; the rest
-    // are free-text "Other" suggestions — the form's submit path sees a value
+    // are free-text "Other" suggestions  the form's submit path sees a value
     // that isn't in `options.value`, and `onOtherSubmit` fires per new part so
     // the parent can record each suggestion.
     const additions: string[] = [];

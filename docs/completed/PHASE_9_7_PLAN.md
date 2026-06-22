@@ -1,4 +1,4 @@
-# PHASE 9.7 PLAN — NATIONALITY ANALYTICS & LOCAL-HIRING INTELLIGENCE
+# PHASE 9.7 PLAN  NATIONALITY ANALYTICS & LOCAL-HIRING INTELLIGENCE
 *Side-phase between Phase 9 and Phase 10. Opened 2026-05-23. Open questions closed 2026-05-24.*
 *Companion docs: `TO_START_EVERY_SESSION.md` · `ROADMAP.md` · `UX_UI_SPEC.md` · `docs/SECURITY.md` · `docs/popia/` (incl. **R9**, added with this phase).*
 *Naming note: this is **Phase 9.7** to avoid colliding with `Task 9.5` (AWS migration, deferred) and `Task 9.6` (launch-scale deferrals) already used inside Phase 9. Different things, different namespaces.*
@@ -22,14 +22,14 @@ investment, not blame). Same dataset, both truths, in the language government ac
 Everything in this phase is **`gov` / `admin`-gated**, **suppression-floored**, and **audit-logged**.
 Nothing public-facing changes.
 
-### The access model (the spine of this phase — read first)
+### The access model (the spine of this phase  read first)
 | Tier | Capability | Who | Verdict |
 |------|-----------|-----|---------|
 | Market | Aggregate nationality breakdowns by skill × province × status | `gov`, `admin` | ✅ build (inherits k=10) |
 | Market | Skills-Shortage Justification Index + Local-Hiring Opportunity Map | `gov`, `admin` | ✅ build (the centerpiece) |
 | Self | An employer sees **their own** confirmed-placement nationality mix | that `employer` | ✅ build (their own data, low risk) |
 | Regulated | `gov` looks up **a specific employer's** mix as an ESA §8 evidence aid | `gov` only, purpose-bound, **dormant by default** | ⚠️ build with small-numbers guard + audit + reason + `feature_flag_employer_mix_lookup` gate; **never ranked, never browsable as a leaderboard** |
-| — | Public / cross-employer "who hires the most foreigners" league table | nobody | 🚫 **explicit out of scope** (§ guardrails) |
+|  | Public / cross-employer "who hires the most foreigners" league table | nobody | 🚫 **explicit out of scope** (§ guardrails) |
 
 ---
 
@@ -38,7 +38,7 @@ Nothing public-facing changes.
 The four open questions from the original draft are resolved. The recommendations below are now
 load-bearing for the implementation; do not relitigate during build without re-opening here first.
 
-### D1 — Justification Index thresholds (was Q2)
+### D1  Justification Index thresholds (was Q2)
 The classifier ships with three knobs, **all explicit, all tunable from `/admin/settings`**, all
 explainable to a non-technical government user. No ML, no opaque scoring.
 
@@ -60,7 +60,7 @@ Indeterminate / low priority:
 Definitions:
 - **`demand_score`** = `COUNT(DISTINCT actor_org_id)` on `search_events` for the (profession × province)
   cell in the trailing 30 days, divided by 10. So `demand_score = 1.0` means *ten different employers*
-  searched for this cell. (Per-org distinct, not raw event count — closes the demand-inflation vector
+  searched for this cell. (Per-org distinct, not raw event count  closes the demand-inflation vector
   where one motivated employer hammers a search 40 times.)
 - **`local_supply_ratio`** = `(count of SA-citizen profiles in that cell, freshness-weighted via
   sebenza_freshness_confidence(), with available_for set OR status = 'open_to_work') ÷ (demand_score × 10)`.
@@ -79,17 +79,17 @@ New `platform_settings` keys added by 9.7:
 - `lmi_foreign_fill_floor` (default `0.5`)
 - `employer_mix_min_placements` (default `5`, **reused** by both 9.7.3 and 9.7.6  one floor, not two)
 
-### D2 — Legal framing (was Q3)
+### D2  Legal framing (was Q3)
 The naive "Sebenza helps with your EEA report" framing is wrong. The accurate framing rests on **two
 distinct statutes**, both currently in force in South Africa:
 
-- **Employment Equity Act 55 of 1998, §1** — the definition of "Black people" (the largest designated
+- **Employment Equity Act 55 of 1998, §1**  the definition of "Black people" (the largest designated
   group) applies *only to South African citizens* (plus a narrow pre-1994 naturalised + by-birth
   qualification). Foreign-national Black hires don't count toward an employer's designated-group
   representation. So the citizen / foreign-national split *does* matter for EEA, but as a structural
   qualifier on the existing race fields, not as a separately-reported nationality field.
 
-- **Employment Services Act 4 of 2014, §8** — requires employers to prove they made *reasonable
+- **Employment Services Act 4 of 2014, §8**  requires employers to prove they made *reasonable
   efforts to recruit South African citizens or permanent residents* before hiring a foreign national.
   The Department of Employment & Labour (DEL) can request that evidence. They currently have almost
   no data to triangulate against. **This is the lever 9.7.6 actually serves.**
@@ -103,13 +103,13 @@ Framing applied across the three surfaces:
   > your Department of Home Affairs documentation."
 
 - **9.7.3 / 9.7.4 (Justification Index + Opportunity Map)** legend:
-  > "*Local supply available* cells are where ESA §8 has practical force — government can credibly
+  > "*Local supply available* cells are where ESA §8 has practical force  government can credibly
   > ask 'could this role have been filled locally?' *Genuine local shortage* cells are where §8
   > enforcement is harder because the actual supply isn't there; the policy response is training
   > investment, not blame."
 
 - **9.7.6 (per-employer gov lookup)** framing: an **ESA §8 evidence aid** for DEL during a specific
-  inquiry — bounded by one employer + one stated reason, never a fishing expedition. Confirmed-
+  inquiry  bounded by one employer + one stated reason, never a fishing expedition. Confirmed-
   placement mix is *one input* to that inquiry, alongside the employer's own recruitment records.
 
 **Caveat that must follow this everywhere it appears:** this is the engineering team's reading of
@@ -118,15 +118,15 @@ material, public-facing copy, or PAIA documentation, run it past a labour-law pr
 works with EEA / ESA filings. The legal claim is sturdy enough to build against; the *exact
 wording* should come from counsel. Tracked as **DPIA R9**.
 
-### D3 — `gov` per-employer lookup ships dormant (was Q4)
+### D3  `gov` per-employer lookup ships dormant (was Q4)
 9.7.6 ships behind **`feature_flag_employer_mix_lookup`, default OFF**, mirroring the dormant-by-
 default posture of KYC and SAQA. The engine is built and tested; the switch is flipped only when a
 real DEL §8 partnership workflow exists. Activation pairs with the formal regulatory protections
 (purpose limitation, retention windows, named operators) becoming concrete.
 
-### D4 — `employer_mix_min_placements` default (was Q1)
+### D4  `employer_mix_min_placements` default (was Q1)
 Default **5**, tunable from `/admin/settings`. Re-assess at every Phase boundary based on actual
-placement volume — raise the floor if median per-employer placement count climbs significantly.
+placement volume  raise the floor if median per-employer placement count climbs significantly.
 
 ---
 
@@ -136,16 +136,16 @@ placement volume — raise the floor if median per-employer placement count clim
       Phase 4 ranking SQL reads from it. 9.7 **reads** these; the search filter itself is **unchanged**.
 - [ ] Confirm `outcomesQuery()` + the suppression helpers (`outcomes_min_cohort_size`, complementary
       suppression across row+column groups) are exportable/reusable as a generic
-      `suppress(rows, dims, k)` — 9.7 reuses this verbatim. If it's currently inlined to outcomes, the
+      `suppress(rows, dims, k)`  9.7 reuses this verbatim. If it's currently inlined to outcomes, the
       first task is to extract it (no behaviour change).
 - [ ] Confirm `placements` columns + `placement_source` (`employer_confirmed` / `seeker_reported`) and
       that only `employer_confirmed` feeds official aggregates (the 7.5.5 honesty rule). 9.7 inherits this.
 - [ ] Confirm `verifyGov()` DAL guard + `gov` role + `/gov` route group + proxy entries from 9.4.
-- [ ] Confirm `platform_settings` key/value pattern (used for `outcomes_min_cohort_size`) — 9.7 adds
+- [ ] Confirm `platform_settings` key/value pattern (used for `outcomes_min_cohort_size`)  9.7 adds
       `employer_mix_min_placements`, `lmi_demand_floor`, `lmi_local_supply_threshold`, `lmi_foreign_fill_floor`.
 - [ ] Confirm the audit-log write helper + action-naming convention (e.g. `placement.self_report`).
       9.7 adds new audited actions (below).
-- [ ] Confirm the hardened CSV export path (injection guard + CRLF + row cap) — all 9.7 exports reuse it.
+- [ ] Confirm the hardened CSV export path (injection guard + CRLF + row cap)  all 9.7 exports reuse it.
 - [ ] Confirm `is_citizen` provenance is **self-declared at sign-up** today (no Home Affairs verification
       wired); D2 caveat language reflects this honestly.
 
@@ -157,7 +157,7 @@ The honesty of every number here rests on **employer-confirmed placements** (7.5
 only meaningful if hires are logged. Lever C (the day-≥21 dossier nudge) is shipped; **Lever A** (analytics
 value-exchange via the employer hiring funnel) is still deferred to Phase 9 and remains the main lever for
 volume. 9.7 does not depend on Lever A landing, but the richness of 9.7.4/9.7.5 scales with placement
-logging — note the coupling, don't block on it.
+logging  note the coupling, don't block on it.
 
 **Realistic data density at launch:** with current placement-logging volume, k=10 + the employer-mix
 floor will leave most of the Opportunity Map blank initially. That's honest, not a bug. Better to
@@ -166,10 +166,10 @@ should acknowledge this so the launch pitch doesn't fall flat.
 
 **Recommended order:** 9.7.1 (extract/confirm suppression util, *test-first*) → 9.7.2 (market nationality
 dimension) → 9.7.3 (Justification Index) → 9.7.4 (Opportunity Map) → 9.7.5 (employer self-view) → 9.7.6
-(governed per-employer lookup, last — highest sensitivity, ships dormant) → 9.7.7 (oversight log) →
+(governed per-employer lookup, last  highest sensitivity, ships dormant) → 9.7.7 (oversight log) →
 9.7.8 (scheduled brief, in scope) → 9.7.9 (wiring/verification).
 
-If counsel review of D2's framing takes time, **9.7.1 through 9.7.4 can ship without waiting** — those
+If counsel review of D2's framing takes time, **9.7.1 through 9.7.4 can ship without waiting**  those
 carry no per-employer surface and no public-facing legal-claim copy.
 
 ---
@@ -283,7 +283,7 @@ carry no per-employer surface and no public-facing legal-claim copy.
 - [x] Verified: `npm test` 22/22 green · `npm run typecheck` clean · `npm run build` clean.
       Commit `<TBD>`.
 
-### Task 9.7.5: Employer self-view — "Your hiring on Sebenza" ✅ 2026-05-24 (engine + UI; final copy gated on DPIA R9)
+### Task 9.7.5: Employer self-view  "Your hiring on Sebenza" ✅ 2026-05-24 (engine + UI; final copy gated on DPIA R9)
 - [x] Card on `/employer` overview slotted between the KPI grid and "Recent matches". Shows total
       employer-confirmed placements, SA-citizen + foreign-national splits with % + single-bar
       stacked split, per-role breakdown (top 10) and per-city breakdown (top 10). Date range
@@ -478,33 +478,33 @@ the legal-claim caveat explicit. Once counsel signs off, remove the `<DraftBanne
 Most of the original open questions are resolved (see **DECISIONS CLOSED** above). One operational
 question remains, and one external dependency:
 
-1. **D4 default value review** — `employer_mix_min_placements = 5` is the start. Re-assess at every
+1. **D4 default value review**  `employer_mix_min_placements = 5` is the start. Re-assess at every
    Phase boundary based on actual placement volume. Raise the floor if median per-employer placement
    count climbs significantly.
-2. **D2 counsel sign-off (DPIA R9)** — the EEA §1 / ESA §8 framing is the engineering team's reading.
+2. **D2 counsel sign-off (DPIA R9)**  the EEA §1 / ESA §8 framing is the engineering team's reading.
    Counsel review must close before any 9.7.5 or 9.7.6 public-facing copy ships. 9.7.1–9.7.4 are
    unaffected and can proceed in parallel.
 
-## 🚫 OUT OF SCOPE FOR 9.7 (explicit guardrails — do not build)
+## 🚫 OUT OF SCOPE FOR 9.7 (explicit guardrails  do not build)
 - ❌ **Any public or cross-employer "nationality league table"** or endpoint that ranks/sorts employers by
   foreign-national count. This is the xenophobia-weapon artifact; it does not exist in the codebase.
-- ❌ **Country-level nationality analytics** — analytics use the 2-class `sa_citizen` / `foreign_national`
+- ❌ **Country-level nationality analytics**  analytics use the 2-class `sa_citizen` / `foreign_national`
   split only; raw country stays on the redacted individual profile. Structurally enforced by compliance
   assertion (e) above.
-- ❌ **Per-employer mix below the small-numbers floor** — no exceptions, including for `gov`/`admin`.
-- ❌ Changing the **search-side nationality filter** — it is shipped and correct; this phase does not touch it.
+- ❌ **Per-employer mix below the small-numbers floor**  no exceptions, including for `gov`/`admin`.
+- ❌ Changing the **search-side nationality filter**  it is shipped and correct; this phase does not touch it.
 - ❌ Surfacing nationality analytics on any **seeker/employer/public** surface (gov/admin only).
-- ❌ **Partial-match / autocomplete / browse** on the 9.7.6 employer lookup — exact-match string only.
-- SAQA / Home Affairs nationality verification — stays with the dormant Phase 8 adapters. The
+- ❌ **Partial-match / autocomplete / browse** on the 9.7.6 employer lookup  exact-match string only.
+- SAQA / Home Affairs nationality verification  stays with the dormant Phase 8 adapters. The
   `is_citizen` field's verification quality is what it is (self-declared); the DPIA reflects that.
 
 ---
 
 ## 🧭 WHY THIS IS THE SEBENZA VERSION
 The naive build is "filter and rank employers by how many foreigners they hire." That's a targeting tool.
-This phase keeps the genuine value the operator asked for — local-hiring intelligence, the shortage
+This phase keeps the genuine value the operator asked for  local-hiring intelligence, the shortage
 justification that *defends* both local hiring and necessary foreign hiring with evidence, and an
-employer's legitimate view of their own mix — while structurally preventing the weaponised version through
+employer's legitimate view of their own mix  while structurally preventing the weaponised version through
 **five** mechanisms: the **2-class split** (no country-level targeting, structurally asserted), the
 **inherited k=10 + complementary suppression** (no individual re-identification), the **small-numbers
 floor at employer granularity** (the sharp edge the market views don't have), the **dormant-by-default

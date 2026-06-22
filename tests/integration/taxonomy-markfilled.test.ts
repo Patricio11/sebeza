@@ -1,11 +1,11 @@
 /**
- * Phase 12 (Task 12.2) — taxonomy suggestion lifecycle (9.15) + the
+ * Phase 12 (Task 12.2)  taxonomy suggestion lifecycle (9.15) + the
  * mark-as-filled vacancy-outcome loop (9.11), against the real database.
  *
  * Taxonomy contracts:
  *   - submit (seeker) → pending row + admin notification
  *   - reject NEVER mutates the submitting user's data (Verification-
- *     Honesty / D4 — the row flips state, nothing else changes)
+ *     Honesty / D4  the row flips state, nothing else changes)
  *   - promote canonicalises into the controlled vocabulary
  *
  * Mark-as-filled contracts:

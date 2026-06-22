@@ -21,7 +21,7 @@ type Stage = "idle" | "suspend" | "reset2fa" | "erase";
  * Full account-management controls for the admin user-detail page. Reuses the
  * existing server actions (moderation + two-factor) but presents them as a
  * prominent, role-aware panel with confirm-with-reason flows and a separated
- * danger zone — replacing the compact list-row `<UserRowActions>` on this page.
+ * danger zone  replacing the compact list-row `<UserRowActions>` on this page.
  *
  * Guards mirror the server: an admin can't suspend/erase themselves or another
  * admin (those need an ops procedure), and can't reset their own 2FA. Rather
@@ -82,7 +82,7 @@ export function AccountAdminActions({ userId, status, targetRole, isSelf }: Prop
             <ReasonForm
               label="Suspend"
               tone="danger"
-              placeholder="Reason (10+ chars) — shown in the audit log…"
+              placeholder="Reason (10+ chars)  shown in the audit log…"
               minLength={10}
               reason={reason}
               setReason={setReason}
@@ -107,7 +107,7 @@ export function AccountAdminActions({ userId, status, targetRole, isSelf }: Prop
           <GuardNote>
             {isSelf
               ? "You can’t suspend your own account."
-              : "Admin accounts can’t be suspended here — use the ops procedure."}
+              : "Admin accounts can’t be suspended here  use the ops procedure."}
           </GuardNote>
         )}
 

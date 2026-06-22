@@ -1,5 +1,5 @@
 /**
- * Phase 12 (Task 12.1) — free-alternative lookup fixtures (Phase 11.2.2).
+ * Phase 12 (Task 12.1)  free-alternative lookup fixtures (Phase 11.2.2).
  *
  * The ordering rules are codified in the module header: free beats
  * subsidised, national beats metro-only, shorter beats longer. Rather than

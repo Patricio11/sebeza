@@ -1,5 +1,5 @@
 /**
- * Phase 12 (Task 12.1) — ISO 3166-1 country catalogue fixtures (Phase 9.16).
+ * Phase 12 (Task 12.1)  ISO 3166-1 country catalogue fixtures (Phase 9.16).
  *
  * The catalogue backs the passport-country picker, the
  * `passport-country-when-passport` compliance assertion, and the

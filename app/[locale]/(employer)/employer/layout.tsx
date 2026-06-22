@@ -5,10 +5,10 @@ import { verifyEmployer } from "@/lib/auth/dal";
 
 /**
  * Employer route-group layout. Renders the persistent <DashboardFrame> once,
- * around every employer page, so navigation only swaps the content column —
+ * around every employer page, so navigation only swaps the content column 
  * the sidebar stays mounted (Part A pattern, mirrors the admin layout).
  *
- * Guards with `verifyEmployer()` — the WEAK employer guard (role + session +
+ * Guards with `verifyEmployer()`  the WEAK employer guard (role + session +
  * 2FA), which provides `orgName` but does NOT redirect unverified orgs to
  * onboarding. That's deliberate: onboarding lives under `/employer`, so a
  * stronger `verifyOrgVerified()` here would loop. Pages that need a verified

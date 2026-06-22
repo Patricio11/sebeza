@@ -1,9 +1,9 @@
 /**
- * Phase 12 (Task 12.2) — Redaction Rule against the real database.
+ * Phase 12 (Task 12.2)  Redaction Rule against the real database.
  *
  * `searchProfilesQuery` and `findProfileByHandleQuery` are THE canonical
  * public read paths. These fixtures assert, on real seeded rows, that no
- * forbidden field ever appears in a returned payload — as a KEY-SET check
+ * forbidden field ever appears in a returned payload  as a KEY-SET check
  * on the actual objects, not a type-level promise (types erase; key sets
  * don't lie).
  *
@@ -21,7 +21,7 @@ import {
 } from "@/db/queries/profiles";
 
 /**
- * One shared forbidden-key list (docs/PHASE_12_PLAN.md Task 12.4) — both
+ * One shared forbidden-key list (docs/PHASE_12_PLAN.md Task 12.4)  both
  * camelCase (drizzle mapping) and snake_case (raw SQL) spellings, so a
  * refactor that switches the read to `db.execute()` can't sneak a column
  * back in under its SQL name.

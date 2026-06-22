@@ -63,7 +63,7 @@ export default async function AdminUserDetailPage({
     recentAuditEventsFromDb({ actor: user.id, limit: 20 }),
   ]);
 
-  // Review docs (signed URLs) — depend on the ids resolved above.
+  // Review docs (signed URLs)  depend on the ids resolved above.
   const reviewBundle = profile
     ? await getSeekerReviewBundle(profile.profileId)
     : null;
@@ -94,7 +94,7 @@ export default async function AdminUserDetailPage({
         ) : undefined
       }
     >
-      {/* Back to the directory — keeps the admin in-shell. */}
+      {/* Back to the directory  keeps the admin in-shell. */}
       <div className="-mt-2 mb-6">
         <Link
           href="/admin/users"
@@ -133,7 +133,7 @@ export default async function AdminUserDetailPage({
         <dl className="grid shrink-0 grid-cols-2 gap-x-6 gap-y-2 text-sm sm:text-right">
           <KeyFact label="Joined">{dateLong(user.createdAt)}</KeyFact>
           <KeyFact label="Last active">
-            {user.lastSignInAt ? formatRelativeTime(user.lastSignInAt) : "—"}
+            {user.lastSignInAt ? formatRelativeTime(user.lastSignInAt) : ""}
           </KeyFact>
           <KeyFact label="Account ID" full>
             <code className="break-all text-xs text-[color:var(--color-ink-soft)]">
@@ -169,7 +169,7 @@ export default async function AdminUserDetailPage({
                 {user.activeSessions} device{user.activeSessions === 1 ? "" : "s"}
               </Field>
               <Field icon={Clock} label="Last sign-in">
-                {user.lastSignInAt ? dateLong(user.lastSignInAt) : "—"}
+                {user.lastSignInAt ? dateLong(user.lastSignInAt) : ""}
               </Field>
               {(user.smsChannelEnabled || user.whatsappChannelEnabled) && (
                 <Field icon={Smartphone} label="Messaging channels" wide>
@@ -532,7 +532,7 @@ function humanize(s: string) {
   return s.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
-/** A signed-URL link to a stored document — opens in a new tab. */
+/** A signed-URL link to a stored document  opens in a new tab. */
 function DocLink({ href, label }: { href: string; label: string }) {
   return (
     <a

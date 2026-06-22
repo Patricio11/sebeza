@@ -1,6 +1,6 @@
 # Sebenza
 
-South Africa's national talent-intelligence platform — a fast, accessible,
+South Africa's national talent-intelligence platform  a fast, accessible,
 POPIA-first search and analytics surface that matches people to work by skill
 and location, and gives government an honest picture of the labour market.
 
@@ -38,7 +38,7 @@ with zero paid credentials. Each integration has one obvious activation path.
 |---|---|---|---|
 | **Sentry** | `SENTRY_DSN` unset | No-op `initSentry()`; nothing leaves the box | Add DSN + install `@sentry/nextjs` |
 | **Resend** transactional email | `feature_flag_email_notifications` (default OFF) | Templates exist; dispatch is skipped; in-app notifications still fire | Admin flips the flag once Resend domain auth is verified |
-| **KYC SaaS** partnership path | `feature_flag_kyc_provider` (default OFF) | **Superseded in 9.10** by admin-mediated org vetting at `/employer/onboarding` — admins now review 4 SA-standard KYC docs themselves. Provider path stays available for future partnership. | Drop a provider in `lib/kyc/providers/*`, flip flag |
+| **KYC SaaS** partnership path | `feature_flag_kyc_provider` (default OFF) | **Superseded in 9.10** by admin-mediated org vetting at `/employer/onboarding`  admins now review 4 SA-standard KYC docs themselves. Provider path stays available for future partnership. | Drop a provider in `lib/kyc/providers/*`, flip flag |
 | **SAQA NLRD worker** | `feature_flag_saqa_worker` (default OFF) | `approveQualification` flips directly; cron is a no-op | Admin flips the flag once the SAQA agreement is signed |
 | **Per-employer mix lookup** (gov) | `feature_flag_employer_mix_lookup` (default OFF) | `/gov/employer-lookup` renders informative dormant notice; query refuses | Admin flips the flag once the partnership + oversight protocol is in place |
 | **2FA enforcement** | `feature_flag_2fa_enforced` (default OFF for seekers) | Admins must enrol; seekers + employers are encouraged but not forced | Admin flips the flag when the roll-out is communicated |
@@ -56,7 +56,7 @@ sized from real traffic, not guessed. Decision recorded in
 `signIn` + `revealContact`.
 
 Why no sign-in rate limit? A per-email limit creates a denial-of-service
-vector — an attacker who knows your email can submit bad passwords and lock
+vector  an attacker who knows your email can submit bad passwords and lock
 the legitimate user out. Better Auth's scrypt hashing (~100–200ms per attempt)
 is the real brute-force mitigation; TOTP 2FA is the second factor for
 high-value accounts.
@@ -74,7 +74,7 @@ high-value accounts.
   Town `af-south-1` migration deferred). 22 migrations through 0021.
 - **Better Auth 1.6.11** with `nextCookies()` + `twoFactor` plugins
   (TOTP + backup codes).
-- **next-intl 4.12** — Tier-1 locales `en` / `zu` / `xh` / `af`; deep-merge
+- **next-intl 4.12**  Tier-1 locales `en` / `zu` / `xh` / `af`; deep-merge
   fallback to English. Tier-2 / Tier-3 + professional translation land in
   Phase 10.
 - **Supabase Storage** for private documents (CVs, certificates, KYC docs,
@@ -138,7 +138,7 @@ high-value accounts.
 
 | Role | Home | Highlights |
 |---|---|---|
-| **seeker** | `/dashboard` | Talent Pulse confirm, profile editor with years-of-experience (9.9), self-reported placement, KYC panel, §23 data export, §24 self-erase, TOTP 2FA, **vacancy invitations** with accept/decline-with-reason (9.8), **learning loop** on `/dashboard/grow` — accept → start → complete → skill lands on profile honestly as `self_attested_learning` (9.12), **honest closure** when a vacancy is filled with someone else + curriculum-vs-market view for students (9.11 + 9.13), **module/elective/project capture** + skills inferred from current studies (13.1 + 13.2), **private progression timeline** with auto-derived events + self-declared milestones (13.4) |
+| **seeker** | `/dashboard` | Talent Pulse confirm, profile editor with years-of-experience (9.9), self-reported placement, KYC panel, §23 data export, §24 self-erase, TOTP 2FA, **vacancy invitations** with accept/decline-with-reason (9.8), **learning loop** on `/dashboard/grow`  accept → start → complete → skill lands on profile honestly as `self_attested_learning` (9.12), **honest closure** when a vacancy is filled with someone else + curriculum-vs-market view for students (9.11 + 9.13), **module/elective/project capture** + skills inferred from current studies (13.1 + 13.2), **private progression timeline** with auto-derived events + self-declared milestones (13.4) |
 | **employer** | `/employer` | Saved searches, candidate reveals (30-day window, audit-logged), **vacancies** (create / reverse-match / invite / withdraw / mark-as-filled in one action) (9.8 + 9.11), **admin-mediated KYC** at `/employer/onboarding` with 4 SA-standard docs (9.10), placement nudge banner, hire confirmation |
 | **admin** | `/admin` | Moderation queue, settings, feature flags, audit log + CSV export, **18 compliance assertions** on `/api/admin/outcomes-compliance`, **organisation review** queue with signed-URL inline document access (9.10), **`/admin/llm`** provider configuration with at-most-one-active partial unique index + cross-border s.72 acknowledgement (13.3), **`/admin/curriculum`** editorial curation queue + bulk-import + provenance ledger (13.3) |
 | **gov** | `/gov` | Sebenza LMI hero, province deep-dives, **Skills-Shortage Justification Index** (9.7), **Local-Hiring Opportunity Map** (9.7), **Why roles go unfilled** (9.8.7) + **Why learners stall** (9.13) on `/gov/shortage`, **Curriculum vs demand** at `/gov/curriculum` (9.13) with module-grain gap panel (13.6), per-employer lookup dormant behind flag (9.7.6), printable policy brief, exports surface, 2FA panel |
@@ -147,7 +147,7 @@ The proxy + DAL + Server Action layers each enforce the role gate
 (defence-in-depth). `verifyGov()` allows admins through for ops override.
 
 PII-touching actions (contact reveal, document download, mark-as-hired,
-outside-pipeline search) require `verifyOrgVerified()` — the employer's org
+outside-pipeline search) require `verifyOrgVerified()`  the employer's org
 must be `verification = 'verified'`. Non-PII reads use the permissive
 `verifyEmployer()`.
 
@@ -164,14 +164,14 @@ cp .env.example .env.local
 # Fill DATABASE_URL (Neon), SEBENZA_ENCRYPTION_KEY, BETTER_AUTH_SECRET.
 # Generate the two secrets locally:
 #   node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
-# Every other key in .env.example can stay empty — the system runs dormant.
+# Every other key in .env.example can stay empty  the system runs dormant.
 
 # 3. Database
 npm run db:generate     # generate Drizzle migration (only if you changed schema)
 npm run db:migrate      # apply all migrations (0000 → 0051) to your Neon DB
 npm run db:seed         # idempotent seed (taxonomy + fixture cohort + lifecycle fixtures)
 # If migrate exits silently but the seed fails on a missing column, the
-# DB and the migration journal have drifted — run `npm run db:push` to
+# DB and the migration journal have drifted  run `npm run db:push` to
 # sync the schema directly, then re-seed.
 # IMPORTANT: db:push fixes the *schema* but leaves the drizzle tracking
 # table (drizzle.__drizzle_migrations) stuck at the old head, so later
@@ -189,7 +189,7 @@ npm run lint
 npm test                # vitest run (suppression engine + outcomes-query fixtures)
 ```
 
-### Seed credentials (dev only — never deploy)
+### Seed credentials (dev only  never deploy)
 
 Password for every seeded account: `sebenza-dev-2026`
 
@@ -213,32 +213,32 @@ for the 9.12 My Learning section; 10 abandoned learning items on
 ## Routes (current surface)
 
 ### Public
-- `/` — landing, Civic-Editorial hero + national pulse + LMI badge
-- `/search` — talent search (FTS + freshness down-rank + years-of-experience surfacing)
-- `/p/[handle]` — public profile (redacted; never IDs / documents / raw contact)
-- `/insights` — analytics + skills-gap; **`/insights/print`** for the PDF export
-- `/privacy` — POPIA Privacy Policy (12 sections)
-- `/paia` — PAIA manual (Section 51 of Act 2 of 2000)
+- `/`  landing, Civic-Editorial hero + national pulse + LMI badge
+- `/search`  talent search (FTS + freshness down-rank + years-of-experience surfacing)
+- `/p/[handle]`  public profile (redacted; never IDs / documents / raw contact)
+- `/insights`  analytics + skills-gap; **`/insights/print`** for the PDF export
+- `/privacy`  POPIA Privacy Policy (12 sections)
+- `/paia`  PAIA manual (Section 51 of Act 2 of 2000)
 
 ### Authed
-- `/dashboard/*` — seeker workspace (profile, privacy, notifications, **invitations**, **grow** with the learning loop)
-- `/employer/*` — employer workspace (search, dossier, saved searches, **vacancies/[id]/match**, **onboarding** KYC, organisation summary, placements, account)
-- `/admin/*` — admin moderation + settings + audit log + **verifications** (qualifications + organisations) + oversight + taxonomy + users
-- `/gov/*` — government workspace (overview, provinces, **shortage** Justification Index + decline reasons + stall reasons, **opportunity**, **curriculum** vs demand, employer-lookup, brief, exports, account)
+- `/dashboard/*`  seeker workspace (profile, privacy, notifications, **invitations**, **grow** with the learning loop)
+- `/employer/*`  employer workspace (search, dossier, saved searches, **vacancies/[id]/match**, **onboarding** KYC, organisation summary, placements, account)
+- `/admin/*`  admin moderation + settings + audit log + **verifications** (qualifications + organisations) + oversight + taxonomy + users
+- `/gov/*`  government workspace (overview, provinces, **shortage** Justification Index + decline reasons + stall reasons, **opportunity**, **curriculum** vs demand, employer-lookup, brief, exports, account)
 
 ### APIs
-- `GET /api/lmi` — Sebenza Labour Market Index, formula published in response
-- `GET /api/admin/audit-log/export` — CSV (hard-capped 10 000 rows)
-- `GET /api/admin/outcomes-compliance` — runs **18 compliance assertions** live (outcomes + nationality + vacancy + learning + curriculum + stall)
-- `GET /api/admin/oversight/export` — CSV of the per-employer-lookup oversight log (9.7.7)
-- `GET /api/insights/outcomes/export` — outcomes dataset CSV (k-anonymity floor applies)
-- `GET /api/dashboard/data-export` — POPIA §23 personal data export
-- `GET /api/gov/justification-index/export` — Skills-Shortage Justification Index CSV (suppressed)
-- `GET /api/gov/nationality-mix/export` — nationality-class mix CSV (suppressed)
-- `GET /api/gov/decline-reasons/export` — "why roles go unfilled" CSV (suppressed)
-- `GET /api/gov/stall-reasons/export` — "why learners stall" CSV (suppressed + `outcomes_research`-gated)
-- `GET /api/gov/curriculum/export` — curriculum-vs-demand CSV (suppressed)
-- `GET /api/cron/*` — 18 Vercel Cron entry points (CRON_SECRET-gated; fail-closed; schedules in `vercel.json`, staggered 02:00–06:00 UTC = 04:00–08:00 SAST):
+- `GET /api/lmi`  Sebenza Labour Market Index, formula published in response
+- `GET /api/admin/audit-log/export`  CSV (hard-capped 10 000 rows)
+- `GET /api/admin/outcomes-compliance`  runs **18 compliance assertions** live (outcomes + nationality + vacancy + learning + curriculum + stall)
+- `GET /api/admin/oversight/export`  CSV of the per-employer-lookup oversight log (9.7.7)
+- `GET /api/insights/outcomes/export`  outcomes dataset CSV (k-anonymity floor applies)
+- `GET /api/dashboard/data-export`  POPIA §23 personal data export
+- `GET /api/gov/justification-index/export`  Skills-Shortage Justification Index CSV (suppressed)
+- `GET /api/gov/nationality-mix/export`  nationality-class mix CSV (suppressed)
+- `GET /api/gov/decline-reasons/export`  "why roles go unfilled" CSV (suppressed)
+- `GET /api/gov/stall-reasons/export`  "why learners stall" CSV (suppressed + `outcomes_research`-gated)
+- `GET /api/gov/curriculum/export`  curriculum-vs-demand CSV (suppressed)
+- `GET /api/cron/*`  18 Vercel Cron entry points (CRON_SECRET-gated; fail-closed; schedules in `vercel.json`, staggered 02:00–06:00 UTC = 04:00–08:00 SAST):
   `hard-delete-erased`, `status-stale-warning`, `saved-search-matches`,
   `skill-gap-snapshot`, `outcome-snapshots`, `lmi-snapshot`, `saqa-worker`,
   `vacancy-invite-expiry`, `seeker-invite-expiry`, `seeker-weekly-digest` (Mondays only),
@@ -254,11 +254,11 @@ All authed routes localised at `/[locale]/...` for `en`, `zu`, `xh`, `af`.
 
 Sebenza is built POPIA-first. Compliance is documented end-to-end:
 
-- [docs/popia/INFORMATION_OFFICER.md](docs/popia/INFORMATION_OFFICER.md) — designation placeholder + working contact (`popia@sebenzasa.com`)
-- [docs/popia/DPIA.md](docs/popia/DPIA.md) — risks + mitigations (R8 = rate-limit decision; R9 = 9.7 reframing of nationality analytics as policy intelligence, not regulatory enforcement)
-- [docs/popia/BREACH_RESPONSE.md](docs/popia/BREACH_RESPONSE.md) — containment / assessment / notification stages, Section-22 template
-- [docs/popia/RETENTION_POLICY.md](docs/popia/RETENTION_POLICY.md) — per-category retention windows + enforcement mechanism
-- [docs/popia/ENCRYPTION_INVENTORY.md](docs/popia/ENCRYPTION_INVENTORY.md) — at-rest / in-transit / application-level + rotation runbook
+- [docs/popia/INFORMATION_OFFICER.md](docs/popia/INFORMATION_OFFICER.md)  designation placeholder + working contact (`popia@sebenzasa.com`)
+- [docs/popia/DPIA.md](docs/popia/DPIA.md)  risks + mitigations (R8 = rate-limit decision; R9 = 9.7 reframing of nationality analytics as policy intelligence, not regulatory enforcement)
+- [docs/popia/BREACH_RESPONSE.md](docs/popia/BREACH_RESPONSE.md)  containment / assessment / notification stages, Section-22 template
+- [docs/popia/RETENTION_POLICY.md](docs/popia/RETENTION_POLICY.md)  per-category retention windows + enforcement mechanism
+- [docs/popia/ENCRYPTION_INVENTORY.md](docs/popia/ENCRYPTION_INVENTORY.md)  at-rest / in-transit / application-level + rotation runbook
 
 Built-in mechanisms:
 
@@ -278,15 +278,15 @@ Built-in mechanisms:
   learning intelligence (3). Each assertion is a structural pin against regressions.
 - **Provenance honesty contract** (9.12 D1): a `profile_skills` row only
   renders as "Verified" when `provenance='verified_provider'` AND
-  `verified_at IS NOT NULL`. Self-attested rows — including completion-driven
-  ones — always read with explicit provenance ("Self-attested · via learning").
+  `verified_at IS NOT NULL`. Self-attested rows  including completion-driven
+  ones  always read with explicit provenance ("Self-attested · via learning").
 - **§23** data export and **§24** self-erase wired into the seeker dashboard.
-- **Cookie banner** — essential always-on, analytics opt-in (default OFF);
+- **Cookie banner**  essential always-on, analytics opt-in (default OFF);
   one first-party cookie, server-resolved so it doesn't flash.
-- **Security headers** — CSP, HSTS, Permissions-Policy, X-Frame-Options DENY,
+- **Security headers**  CSP, HSTS, Permissions-Policy, X-Frame-Options DENY,
   COOP same-origin, Referrer-Policy strict-origin-when-cross-origin, applied
   via `proxy.ts` on every response.
-- **Redaction at the type level** — `PublicProfile` cannot carry IDs /
+- **Redaction at the type level**  `PublicProfile` cannot carry IDs /
   documents / raw contact; the type is the gate.
 
 ---
@@ -295,35 +295,35 @@ Built-in mechanisms:
 
 When it's time to activate a deferred service, the runbook is already written:
 
-- **AWS Cape Town `af-south-1` migration** — [docs/AWS_MIGRATION_RUNBOOK.md](docs/AWS_MIGRATION_RUNBOOK.md) (~4 hours, zero remaining POPIA work).
-- **KYC / SAQA / Resend activation** — [docs/completed/PHASE_8_COMPLETE.md](docs/completed/PHASE_8_COMPLETE.md) "Activation" section.
-- **Cron + CRON_SECRET wiring** — schedules in `vercel.json` (16 jobs, staggered 02:00–05:30 UTC). Background in [docs/completed/PHASE_8_COMPLETE.md](docs/completed/PHASE_8_COMPLETE.md).
-- **Per-employer mix lookup activation** — [docs/completed/PHASE_9_7_COMPLETE.md](docs/completed/PHASE_9_7_COMPLETE.md) "Dormant-by-default" section + oversight log protocol.
-- **Outcomes-dataset compliance** — `GET /api/admin/outcomes-compliance` runs the 18 assertions live; CI hookup is the Phase 10 polish.
+- **AWS Cape Town `af-south-1` migration**  [docs/AWS_MIGRATION_RUNBOOK.md](docs/AWS_MIGRATION_RUNBOOK.md) (~4 hours, zero remaining POPIA work).
+- **KYC / SAQA / Resend activation**  [docs/completed/PHASE_8_COMPLETE.md](docs/completed/PHASE_8_COMPLETE.md) "Activation" section.
+- **Cron + CRON_SECRET wiring**  schedules in `vercel.json` (16 jobs, staggered 02:00–05:30 UTC). Background in [docs/completed/PHASE_8_COMPLETE.md](docs/completed/PHASE_8_COMPLETE.md).
+- **Per-employer mix lookup activation**  [docs/completed/PHASE_9_7_COMPLETE.md](docs/completed/PHASE_9_7_COMPLETE.md) "Dormant-by-default" section + oversight log protocol.
+- **Outcomes-dataset compliance**  `GET /api/admin/outcomes-compliance` runs the 18 assertions live; CI hookup is the Phase 10 polish.
 
 ---
 
 ## Architecture seams to know
 
-- **`lib/data/provider.ts`** — the typed mock-↔-DB seam. Pages never branch
+- **`lib/data/provider.ts`**  the typed mock-↔-DB seam. Pages never branch
   on which provider is active. Production uses `dbProvider`; mock stays for
   isolated demos.
-- **`lib/audit/logAccess()`** — every PII-touching code path wraps in this.
+- **`lib/audit/logAccess()`**  every PII-touching code path wraps in this.
   `AuditKind` union is the canonical catalogue (currently ~60 kinds).
-- **`lib/auth/dal.ts`** — `verifySession()`, `verifyRole(role)`, `verifyAdmin()`,
+- **`lib/auth/dal.ts`**  `verifySession()`, `verifyRole(role)`, `verifyAdmin()`,
   `verifyGov()`, `verifyEmployer()` (permissive), `verifyOrgVerified()` (strict
   PII gate). Three-layer enforcement: proxy → DAL → Server Action.
-- **`lib/crypto/`** — AES-256-GCM with key-id prefix; env-based today, KMS-ready.
-- **`lib/notifications/server.ts`** — `createNotification` is per-kind
+- **`lib/crypto/`**  AES-256-GCM with key-id prefix; env-based today, KMS-ready.
+- **`lib/notifications/server.ts`**  `createNotification` is per-kind
   catalog + idempotency-aware; fan-out helpers (`notifyOrgMembers`,
   `notifyAllAdmins`) are revalidate-driven, no polling.
-- **`lib/analytics/suppress.ts`** — k-anonymity + complementary suppression
+- **`lib/analytics/suppress.ts`**  k-anonymity + complementary suppression
   engine, pure function. Single source of truth for every gov-facing
   aggregate's privacy floor.
-- **`lib/analytics/lmi.ts`** — composite formula
+- **`lib/analytics/lmi.ts`**  composite formula
   `0.4 × freshness + 0.4 × (1 − gap) + 0.2 × placement_velocity`; published
   publicly on `/privacy` and in the API response so the index is honest.
-- **`lib/analytics/outcomes-compliance.ts`** — 18 runnable assertions covering
+- **`lib/analytics/outcomes-compliance.ts`**  18 runnable assertions covering
   every aggregate surface's structural privacy contract.
 - **`db/schema.ts`** mirrors `lib/mock/types.ts`. Keep them aligned.
 
@@ -334,16 +334,16 @@ When it's time to activate a deferred service, the runbook is already written:
 Each link in the SA education-to-work pipeline now has a suppression-floored,
 freshness-weighted, consent-gated-where-appropriate analytic surface:
 
-1. **Demand** — `/gov/shortage` Justification Index (9.7.3) + Sebenza LMI
-2. **Supply (nationality mix)** — `/gov/provinces` + employer self-view (9.7)
-3. **Curriculum coverage** — `/gov/curriculum` (9.13.3)
-4. **Learning barriers** — `/gov/shortage` "Why learners stall" (9.13.4)
-5. **Vacancy outcomes** — `/gov/shortage` "Why roles go unfilled" (9.8.7)
-6. **Hires + outcomes** — `/insights` longitudinal cohort dataset (7.5)
-7. **Local-hiring opportunity** — `/gov/opportunity` Map (9.7)
-8. **Per-employer lookup** — `/gov/employer-lookup` (9.7.6, dormant behind
+1. **Demand**  `/gov/shortage` Justification Index (9.7.3) + Sebenza LMI
+2. **Supply (nationality mix)**  `/gov/provinces` + employer self-view (9.7)
+3. **Curriculum coverage**  `/gov/curriculum` (9.13.3)
+4. **Learning barriers**  `/gov/shortage` "Why learners stall" (9.13.4)
+5. **Vacancy outcomes**  `/gov/shortage` "Why roles go unfilled" (9.8.7)
+6. **Hires + outcomes**  `/insights` longitudinal cohort dataset (7.5)
+7. **Local-hiring opportunity**  `/gov/opportunity` Map (9.7)
+8. **Per-employer lookup**  `/gov/employer-lookup` (9.7.6, dormant behind
    `feature_flag_employer_mix_lookup` + oversight log)
-9. **Printable brief** — `/gov/brief` (PDF-ready)
+9. **Printable brief**  `/gov/brief` (PDF-ready)
 
 Every aggregate above is exported as CSV through a `/api/gov/*/export` route
 that preserves the suppression floor. Every read + every export lands an
@@ -355,9 +355,9 @@ that preserves the suppression floor. Every read + every export lands an
 
 The three documents in `docs/` are load-bearing and read together every session:
 
-1. [docs/TO_START_EVERY_SESSION.md](docs/TO_START_EVERY_SESSION.md) — non-negotiable rules + Current State block.
-2. [docs/ROADMAP.md](docs/ROADMAP.md) — phased build plan (Phase 0 → 13).
-3. [docs/UX_UI_SPEC.md](docs/UX_UI_SPEC.md) — design system + screen-by-screen UX.
+1. [docs/TO_START_EVERY_SESSION.md](docs/TO_START_EVERY_SESSION.md)  non-negotiable rules + Current State block.
+2. [docs/ROADMAP.md](docs/ROADMAP.md)  phased build plan (Phase 0 → 13).
+3. [docs/UX_UI_SPEC.md](docs/UX_UI_SPEC.md)  design system + screen-by-screen UX.
 
 See also [CLAUDE.md](CLAUDE.md) for a per-session agent brief and
 [docs/SECURITY.md](docs/SECURITY.md) for the security posture summary.
@@ -379,6 +379,6 @@ commercial:
 3. **On partnership confirmation**: flip the relevant platform flags
    (KYC, SAQA, Resend, employer-mix lookup, 2FA enforcement), follow the AWS
    migration runbook, designate providers.
-4. **Phase 10** — accessibility audit (WCAG 2.2 AA), performance budget on
+4. **Phase 10**  accessibility audit (WCAG 2.2 AA), performance budget on
    throttled 3G, full Tier-1 + Tier-2 + Tier-3 localisation rollout, the
    compliance assertions wired into CI as a build gate.

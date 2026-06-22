@@ -1,5 +1,5 @@
 /**
- * Phase 12 — run the journal migrations against a target database.
+ * Phase 12  run the journal migrations against a target database.
  *
  *   npx tsx tests/helpers/migrate-cli.ts <database-url>
  *

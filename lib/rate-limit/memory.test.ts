@@ -1,13 +1,13 @@
 /**
- * Phase 12 (Task 12.1) — in-memory sliding-window rate limiter fixtures.
+ * Phase 12 (Task 12.1)  in-memory sliding-window rate limiter fixtures.
  *
- * The limiter is DORMANT in production today (DPIA R8 trade-off — no call
+ * The limiter is DORMANT in production today (DPIA R8 trade-off  no call
  * sites wired), but Phase 12 tests it anyway: when abuse is observed
  * post-launch the operator flips it on, and it must be correct on day one,
  * not debugged mid-incident. Covers: budget exhaustion, window roll-over,
  * per-key + per-bucket isolation, and the result-shape contract.
  *
- * Uses fake timers — the window logic runs on Date.now().
+ * Uses fake timers  the window logic runs on Date.now().
  */
 
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";

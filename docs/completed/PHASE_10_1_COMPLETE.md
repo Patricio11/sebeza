@@ -1,14 +1,14 @@
-# PHASE 10.1 COMPLETE — EMPLOYER HELP CENTER
-*Shipped 2026-05-29. Plan: [`docs/completed/PHASE_10_1_PLAN.md`](./PHASE_10_1_PLAN.md). Closes the discoverability gap that's grown with every Phase 9.x ship — ~23 phases of employer functionality, no in-product surface that tells the user what they can do or how to do it.*
+# PHASE 10.1 COMPLETE  EMPLOYER HELP CENTER
+*Shipped 2026-05-29. Plan: [`docs/completed/PHASE_10_1_PLAN.md`](./PHASE_10_1_PLAN.md). Closes the discoverability gap that's grown with every Phase 9.x ship  ~23 phases of employer functionality, no in-product surface that tells the user what they can do or how to do it.*
 
 > **One-line summary**: A browseable + searchable help center at `/employer/help` with 30 hand-written articles across 7 categories covering every major employer surface (vacancies, invites, employees, talent search, KYC, roles, privacy/POPIA), plus tiny "How does this work?" deep-link chips on 8 high-traffic dashboard surfaces so help arrives in-context. English-only at v1; content as TypeScript modules (no MDX pipeline, no new deps).
 
 Commits:
 
-- **`0c6cbdb`** — infrastructure + 30 articles + 8 deep-link surfaces (initial ship)
-- **`f5735be`** — fix: article-page aggregator maps `default` export to `Article` field (runtime bug)
-- **`cbc5029`** — fix: article reading column centered at `max-w-3xl`; removed double width constraint
-- **`22381db`** — remove "Last updated" footer from article view
+- **`0c6cbdb`**  infrastructure + 30 articles + 8 deep-link surfaces (initial ship)
+- **`f5735be`**  fix: article-page aggregator maps `default` export to `Article` field (runtime bug)
+- **`cbc5029`**  fix: article reading column centered at `max-w-3xl`; removed double width constraint
+- **`22381db`**  remove "Last updated" footer from article view
 
 Read **"Post-ship fixes + lessons"** at the bottom of this doc *before* starting Phases 10.2 / 10.3 / 10.4 so the same bugs don't reappear.
 
@@ -16,10 +16,10 @@ Read **"Post-ship fixes + lessons"** at the bottom of this doc *before* starting
 
 ## 🎯 WHAT SHIPPED
 
-### A — Content infrastructure (`content/help/`)
+### A  Content infrastructure (`content/help/`)
 
-- `content/help/types.ts` — `HelpArticleMeta`, `HelpArticle`, `EmployerHelpCategory` types + `EMPLOYER_HELP_CATEGORIES` constant with the 7 categories' labels + descriptions + display order.
-- `content/help/employer/_index.ts` — aggregator that imports every article module + exposes `EMPLOYER_HELP_ARTICLES`, `findArticleBySlug`, `articlesByCategory`. Adding a new article = one import + one append.
+- `content/help/types.ts`  `HelpArticleMeta`, `HelpArticle`, `EmployerHelpCategory` types + `EMPLOYER_HELP_CATEGORIES` constant with the 7 categories' labels + descriptions + display order.
+- `content/help/employer/_index.ts`  aggregator that imports every article module + exposes `EMPLOYER_HELP_ARTICLES`, `findArticleBySlug`, `articlesByCategory`. Adding a new article = one import + one append.
 
 Each article is a `.tsx` file exporting:
 
@@ -28,19 +28,19 @@ export const meta: HelpArticleMeta = { ... };
 export default function Article() { return <HelpProse>...</HelpProse>; }
 ```
 
-Type-safe metadata; PR-reviewable like any code change. **Important:** the aggregator MUST map each imported module to `{ meta: mod.meta, Article: mod.default }` — `import * as` yields a Module Namespace Object where the component lives at `.default`, not `.Article`. Skipping this map gives a typecheck-clean runtime `<Body />` of `undefined`. See post-ship fix #1.
+Type-safe metadata; PR-reviewable like any code change. **Important:** the aggregator MUST map each imported module to `{ meta: mod.meta, Article: mod.default }`  `import * as` yields a Module Namespace Object where the component lives at `.default`, not `.Article`. Skipping this map gives a typecheck-clean runtime `<Body />` of `undefined`. See post-ship fix #1.
 
-### B — Typography components (`components/feature/help/HelpProse.tsx`)
+### B  Typography components (`components/feature/help/HelpProse.tsx`)
 
 Five shared components keep voice + visual consistency across all 30 articles:
 
-- `<HelpProse>` — body wrapper that styles `<p>`, `<h2>`, `<h3>`, `<ul>`, `<ol>` etc. with civic-editorial typography (Fraunces headings, Hanken body). **Important:** no max-width on `HelpProse` itself — the reading-column width belongs at the page level (the article element wraps the prose in `max-w-3xl mx-auto`). Double-constraining leaves an ugly right gutter inside a full-width card. See post-ship fix #2.
-- `<Callout type="info|warning|tip" title?>` — emphasis blocks with tone-distinct treatment.
-- `<Steps>` + `<Step number={N}>` — numbered procedures with deliberate explicit numbering.
-- `<HelpKey>` — inline keyboard-shortcut chip.
-- `<DashboardLink href>` — "Try it now →" CTA pointing into the app.
+- `<HelpProse>`  body wrapper that styles `<p>`, `<h2>`, `<h3>`, `<ul>`, `<ol>` etc. with civic-editorial typography (Fraunces headings, Hanken body). **Important:** no max-width on `HelpProse` itself  the reading-column width belongs at the page level (the article element wraps the prose in `max-w-3xl mx-auto`). Double-constraining leaves an ugly right gutter inside a full-width card. See post-ship fix #2.
+- `<Callout type="info|warning|tip" title?>`  emphasis blocks with tone-distinct treatment.
+- `<Steps>` + `<Step number={N}>`  numbered procedures with deliberate explicit numbering.
+- `<HelpKey>`  inline keyboard-shortcut chip.
+- `<DashboardLink href>`  "Try it now →" CTA pointing into the app.
 
-### C — Search island (`components/feature/help/HelpSearchIsland.tsx`)
+### C  Search island (`components/feature/help/HelpSearchIsland.tsx`)
 
 Client-side fuzzy search. Rank-and-filter logic per D4:
 
@@ -54,72 +54,72 @@ Client-side fuzzy search. Rank-and-filter logic per D4:
 
 Under 50 LOC, no new deps. URL-synced (`?q=`) so deep-links / refresh / share-link preserve the search.
 
-### D — `<HelpLink>` chip component (`components/feature/help/HelpLink.tsx`)
+### D  `<HelpLink>` chip component (`components/feature/help/HelpLink.tsx`)
 
 Small dashed-border chip for in-context deep-linking from dashboard surfaces. Defaults to *"How does this work?"* label but accepts an override for surface-specific wording.
 
-### E — Pages
+### E  Pages
 
-- **Index** `/employer/help` — hero search bar + 7 category sections with article cards. When `?q=` is present, the search island takes over with ranked results.
-- **Article** `/employer/help/[slug]` — breadcrumb back to index/category + article body (centered `max-w-3xl` reading column) + "Related" strip in 2 columns (resolves slug references; silently drops broken ones; silently drops self-references).
+- **Index** `/employer/help`  hero search bar + 7 category sections with article cards. When `?q=` is present, the search island takes over with ranked results.
+- **Article** `/employer/help/[slug]`  breadcrumb back to index/category + article body (centered `max-w-3xl` reading column) + "Related" strip in 2 columns (resolves slug references; silently drops broken ones; silently drops self-references).
 
 Both auth-gated by `verifyEmployer()`.
 
-### F — Nav entry (`components/layout/employerNav.ts`)
+### F  Nav entry (`components/layout/employerNav.ts`)
 
 New entry `{ key: "help", label: "Help", href: "/employer/help", icon: HelpCircle }` inserted between Notifications and Account. Reachable in one scroll on a 360px viewport; most-used surfaces stay above the fold.
 
-### G — 30 articles (across 7 categories)
+### G  30 articles (across 7 categories)
 
 **Getting started (4)**
-- `what-sebenza-is` — outcomes platform, not job board; the three founding principles
-- `setting-up-organisation` — KYC walk-through, four documents, what unlocks on verify
-- `dashboard-tour` — every nav entry explained, top-to-bottom
-- `team-roles` — Owner / Recruiter / Viewer; who can do what
+- `what-sebenza-is`  outcomes platform, not job board; the three founding principles
+- `setting-up-organisation`  KYC walk-through, four documents, what unlocks on verify
+- `dashboard-tour`  every nav entry explained, top-to-bottom
+- `team-roles`  Owner / Recruiter / Viewer; who can do what
 
 **Vacancies (6)**
-- `creating-a-vacancy` — every field on the new-vacancy form
-- `match-requirements` — work availability, min years, min NQF, and why blank means no constraint
-- `seasonal-vacancies` — seasonal vs casual vs contract; the optional season window
-- `vacancy-lifecycle` — Draft → Open → Closed → Filled
-- `duplicate-vacancy` — when and why to duplicate from existing
-- `follow-up-nudges` — opt-in 7-day reminder; one-nudge-per-invite cap
+- `creating-a-vacancy`  every field on the new-vacancy form
+- `match-requirements`  work availability, min years, min NQF, and why blank means no constraint
+- `seasonal-vacancies`  seasonal vs casual vs contract; the optional season window
+- `vacancy-lifecycle`  Draft → Open → Closed → Filled
+- `duplicate-vacancy`  when and why to duplicate from existing
+- `follow-up-nudges`  opt-in 7-day reminder; one-nudge-per-invite cap
 
 **Invitations & matching (5)**
-- `finding-matches` — match page chips + sort + shortlist tab; honest-supply line
-- `bulk-invite` — selection, 200-char personal note, what the seeker sees, skip behaviour
-- `invitation-lifecycle` — Invited → Accepted / Declined / Reconsidering / Expired / Withdrawn
-- `shortlist-vs-pools` — when to use per-vacancy shortlist vs cross-vacancy Talent pool
-- `accept-rate-strip` — five buckets, acceptance math, reading the signal
+- `finding-matches`  match page chips + sort + shortlist tab; honest-supply line
+- `bulk-invite`  selection, 200-char personal note, what the seeker sees, skip behaviour
+- `invitation-lifecycle`  Invited → Accepted / Declined / Reconsidering / Expired / Withdrawn
+- `shortlist-vs-pools`  when to use per-vacancy shortlist vs cross-vacancy Talent pool
+- `accept-rate-strip`  five buckets, acceptance math, reading the signal
 
 **Employees & placements (5)**
-- `logging-a-placement` — 30-day reveal gate, batch hire modal, fan-out notifications
-- `lifecycle-view` — Active / Departed / All tabs, tenure, check-in-due pill, sort options
-- `check-ins` — 3/6/12-month-then-annual cadence, nightly cron, the inline-confirm UX
-- `departures-reengage` — 7 SA labour-relations categories, no reason recorded, re-engage modal
-- `internal-notes` — 1000-char durable context, org-private, PII-flagged, what it's NOT for
+- `logging-a-placement`  30-day reveal gate, batch hire modal, fan-out notifications
+- `lifecycle-view`  Active / Departed / All tabs, tenure, check-in-due pill, sort options
+- `check-ins`  3/6/12-month-then-annual cadence, nightly cron, the inline-confirm UX
+- `departures-reengage`  7 SA labour-relations categories, no reason recorded, re-engage modal
+- `internal-notes`  1000-char durable context, org-private, PII-flagged, what it's NOT for
 
 **Talent search & dossiers (5)**
-- `searching` — every filter; ranking; honest-supply line
-- `saved-searches` — persisted filter sets + hash-diff new-match cron
-- `dossier-reveal` — public vs reveal-gated fields; 30-day window for Mark-as-Hired
-- `talent-pools` — cross-vacancy bookmarks; how they differ from per-vacancy shortlists
-- `listed-by-seekers-badge` — Sebenza employer / Verified employer / Employer-verified pills
+- `searching`  every filter; ranking; honest-supply line
+- `saved-searches`  persisted filter sets + hash-diff new-match cron
+- `dossier-reveal`  public vs reveal-gated fields; 30-day window for Mark-as-Hired
+- `talent-pools`  cross-vacancy bookmarks; how they differ from per-vacancy shortlists
+- `listed-by-seekers-badge`  Sebenza employer / Verified employer / Employer-verified pills
 
 **Organisation & team (3)**
-- `kyc` — four documents; review timing; rejection + resubmission; team-invites primer
-- `inviting-team` — the email-based team invite flow + dual-account handling
-- `two-factor` — TOTP setup, backup codes, recovery paths
+- `kyc`  four documents; review timing; rejection + resubmission; team-invites primer
+- `inviting-team`  the email-based team invite flow + dual-account handling
+- `two-factor`  TOTP setup, backup codes, recovery paths
 
 **Privacy & POPIA (2)**
-- `what-we-hold` — POPIA-§16 canonical statement of every data category
-- `audit-log` — every PII-touching action recorded; how to access your org's trail
+- `what-we-hold`  POPIA-§16 canonical statement of every data category
+- `audit-log`  every PII-touching action recorded; how to access your org's trail
 
 Total **30 articles**. (Plan estimated 25–30; final count 30; the inviting-team article ended up standalone in Organisation rather than folded into KYC.)
 
-### H — `<HelpLink>` deep-links on 8 surfaces
+### H  `<HelpLink>` deep-links on 8 surfaces
 
-Per D6 — in-context discovery on high-traffic pages:
+Per D6  in-context discovery on high-traffic pages:
 
 | Surface | Chips |
 |---|---|
@@ -170,8 +170,8 @@ Per D6 — in-context discovery on high-traffic pages:
 - `docs/completed/PHASE_10_1_COMPLETE.md` (this doc)
 
 **Edited (9 files)**
-- `components/layout/employerNav.ts` — Help nav entry
-- 8 employer dashboard pages — `<HelpLink>` chips wired
+- `components/layout/employerNav.ts`  Help nav entry
+- 8 employer dashboard pages  `<HelpLink>` chips wired
 
 **Verification**
 - `tsc --noEmit` clean
@@ -204,11 +204,11 @@ Per D6 — in-context discovery on high-traffic pages:
 
 ## 🧭 IMPACT ON OTHER SURFACES
 
-- **Employer nav** — gains the Help entry between Notifications and Account.
-- **8 employer dashboard pages** — gain unobtrusive `<HelpLink>` chips near the page header.
+- **Employer nav**  gains the Help entry between Notifications and Account.
+- **8 employer dashboard pages**  gain unobtrusive `<HelpLink>` chips near the page header.
 - **Two new routes registered** in the production build (`/employer/help` + `/employer/help/[slug]`).
-- **Notification preferences** — no new kinds; the help center is a static surface with no notifications of its own.
-- **Audit log** — no new kinds; viewing help articles is not a PII-touching action and doesn't need an audit row.
+- **Notification preferences**  no new kinds; the help center is a static surface with no notifications of its own.
+- **Audit log**  no new kinds; viewing help articles is not a PII-touching action and doesn't need an audit row.
 
 ---
 
@@ -241,15 +241,15 @@ Per D6 — in-context discovery on high-traffic pages:
    - "Try it now →" CTA when `surfaceLink` is set
    - Related strip at the bottom in 2 columns (filtered down by valid slugs; self-references silently dropped)
 6. Visit `/employer/help/totally-bogus-slug`. Expect: Next.js notFound page.
-7. Visit `/employer/vacancies/new`, `/employer/vacancies/[id]`, `/employer/vacancies/[id]/match`, `/employer/placements`, `/employer/placements/[placementId]`, `/employer/invites`, `/employer/organisation`, `/employer/vacancies` — each should carry one or more `<HelpLink>` chips near the page header. Clicking any chip should land on the correct article.
+7. Visit `/employer/vacancies/new`, `/employer/vacancies/[id]`, `/employer/vacancies/[id]/match`, `/employer/placements`, `/employer/placements/[placementId]`, `/employer/invites`, `/employer/organisation`, `/employer/vacancies`  each should carry one or more `<HelpLink>` chips near the page header. Clicking any chip should land on the correct article.
 
 ---
 
 ## 🔧 POST-SHIP FIXES + LESSONS FOR 10.2 / 10.3 / 10.4
 
-These three issues showed up *after* the initial `0c6cbdb` ship and were fixed in follow-up commits. They are NOT one-offs — every follow-up role help center (seeker 10.2, admin 10.3, gov 10.4) will hit the same shapes unless these patterns are copied verbatim. Read this section before starting any of those phases.
+These three issues showed up *after* the initial `0c6cbdb` ship and were fixed in follow-up commits. They are NOT one-offs  every follow-up role help center (seeker 10.2, admin 10.3, gov 10.4) will hit the same shapes unless these patterns are copied verbatim. Read this section before starting any of those phases.
 
-### Fix #1 — Aggregator must map `default` export to `Article` field
+### Fix #1  Aggregator must map `default` export to `Article` field
 
 **Commit:** `f5735be`. **Symptom:** clicking any article rendered with a runtime error: *"Element type is invalid: expected a string or class/function but got: undefined. ... Check the render method of `EmployerHelpArticlePage`."* Typecheck was clean; build was clean; only at request time did `<Body />` resolve to `undefined`.
 
@@ -260,7 +260,7 @@ export const meta: HelpArticleMeta = { ... };
 export default function Article() { ... }
 ```
 
-The aggregator imported them as `import * as foo from "./foo"`, which yields a **Module Namespace Object** — `{ meta, default }`, NOT `{ meta, Article }`. We were casting that array directly with `as unknown as HelpArticle[]`, which silenced TypeScript but left `article.Article` as `undefined` at runtime.
+The aggregator imported them as `import * as foo from "./foo"`, which yields a **Module Namespace Object**  `{ meta, default }`, NOT `{ meta, Article }`. We were casting that array directly with `as unknown as HelpArticle[]`, which silenced TypeScript but left `article.Article` as `undefined` at runtime.
 
 **Fix pattern (copy into every role's `_index.ts`):**
 
@@ -282,15 +282,15 @@ export const SEEKER_HELP_ARTICLES: HelpArticle[] = [
 
 **Lesson:** never use `as unknown as T` to coerce module-namespace arrays into your domain shape. The cast hides a real shape mismatch the type system would otherwise catch with `as ArticleModule`.
 
-### Fix #2 — Reading-column width belongs at the page level, not on `HelpProse`
+### Fix #2  Reading-column width belongs at the page level, not on `HelpProse`
 
 **Commit:** `cbc5029`. **Symptom:** the article body rendered with text crammed to the left and ~30% empty space on the right of the article card. The card itself was full-width (good), but the prose inside it was capped at `max-w-[65ch]` AND left-aligned, leaving the right side of the card empty.
 
-**Root cause:** `HelpProse` had `max-w-[65ch]` on its own wrapper. The page also rendered the article inside a full-width card. With the cap on `HelpProse`, the prose became a narrow left-aligned column inside a wide card — double-constrained.
+**Root cause:** `HelpProse` had `max-w-[65ch]` on its own wrapper. The page also rendered the article inside a full-width card. With the cap on `HelpProse`, the prose became a narrow left-aligned column inside a wide card  double-constrained.
 
 **Fix pattern:**
 
-1. **Remove all max-width from the typography component.** `HelpProse` should be width-agnostic — only typography rules, no layout.
+1. **Remove all max-width from the typography component.** `HelpProse` should be width-agnostic  only typography rules, no layout.
 2. **Wrap the article card AND the related strip in a single centered reading column at the page level:**
 
 ```tsx
@@ -309,13 +309,13 @@ export const SEEKER_HELP_ARTICLES: HelpArticle[] = [
 
 `max-w-3xl` (~768px) holds ~60–65 chars of Hanken Grotesk at our body size, which is the editorial reading-column target. The related strip drops to **2 columns** at this width (3 columns crush the cards into postage stamps).
 
-**Lesson:** width is a layout concern, not a typography concern. Put it at one level (the page) and the typography component stays reusable everywhere — articles, modals, drawers — without surprising right gutters.
+**Lesson:** width is a layout concern, not a typography concern. Put it at one level (the page) and the typography component stays reusable everywhere  articles, modals, drawers  without surprising right gutters.
 
-### Fix #3 — No "Last updated" footer in the article view
+### Fix #3  No "Last updated" footer in the article view
 
 **Commit:** `22381db`. **Symptom:** every article ended with a small "Last updated 29 May 2026." line, which looked stale-by-default the moment the date rolled over.
 
-**Fix:** drop the `<p>` that renders `article.meta.updatedAt`. Keep the `updatedAt` field in the meta schema for editorial discipline (so authors think about freshness when they touch a file) — just don't surface it to readers.
+**Fix:** drop the `<p>` that renders `article.meta.updatedAt`. Keep the `updatedAt` field in the meta schema for editorial discipline (so authors think about freshness when they touch a file)  just don't surface it to readers.
 
 **Lesson:** displaying `updatedAt` on a static article without a separate `lastReviewedAt` review process tells users almost nothing useful and makes the article look stale every time the calendar moves. Either run a real quarterly-review process and surface that, or don't surface a date at all.
 
@@ -323,13 +323,13 @@ export const SEEKER_HELP_ARTICLES: HelpArticle[] = [
 
 When cloning this scaffold for the seeker / admin / gov help centers:
 
-- [ ] `_index.ts` uses the `toArticle(mod as ArticleModule)` mapping — **no** `as unknown as HelpArticle[]` shortcut.
+- [ ] `_index.ts` uses the `toArticle(mod as ArticleModule)` mapping  **no** `as unknown as HelpArticle[]` shortcut.
 - [ ] `HelpProse` is reused as-is (no max-width on it).
 - [ ] Article page wraps `<article>` + Related in `<div className="mx-auto max-w-3xl">`.
 - [ ] Related strip is `md:grid-cols-2`, not `md:grid-cols-3`.
 - [ ] Article view does **not** render `meta.updatedAt`.
-- [ ] Click-through smoke test of at least 3 articles before declaring the phase shipped (not just typecheck + build — those passed for fix #1).
+- [ ] Click-through smoke test of at least 3 articles before declaring the phase shipped (not just typecheck + build  those passed for fix #1).
 
 ---
 
-*Phase 10.1 closes the discoverability gap that's grown organically with every Phase 9.x feature shipped. The 30 articles are the editorial bar; the system is small enough to clone for seeker / admin / gov in Phases 10.2 / 10.3 / 10.4 without architectural changes. Mobile-first, English-only, civic-editorial tone, honest about what the platform deliberately doesn't do — the trust posture the rest of the platform demands, now extended to its own documentation.*
+*Phase 10.1 closes the discoverability gap that's grown organically with every Phase 9.x feature shipped. The 30 articles are the editorial bar; the system is small enough to clone for seeker / admin / gov in Phases 10.2 / 10.3 / 10.4 without architectural changes. Mobile-first, English-only, civic-editorial tone, honest about what the platform deliberately doesn't do  the trust posture the rest of the platform demands, now extended to its own documentation.*

@@ -4,22 +4,22 @@
 
 > **✅ RESOLVED 2026-06-09.** Journal + idempotency fixes shipped as `e3da3cb`. Recovery on the
 > dev DB went via `npm run db:push` (the tracking table's recorded hashes pre-dated the
-> idempotency edits, so `migrate` stayed silent — push syncs the schema directly). Verified by a
+> idempotency edits, so `migrate` stayed silent  push syncs the schema directly). Verified by a
 > read-only information_schema probe: all 0038–0048 artifacts present (`secondary_professions`,
 > `llm_providers`, `student_milestones`, `module_skills`, `seeker_badges`, nullable
 > `vacancies.province_slug`, `academic_profiles.current_modules`), 24 profiles seeded, 51
 > catalogue rows. **One deviation found during verification:** the push path skips migration
 > INSERTs AND the seed's TRUNCATE CASCADE wipes `llm_providers` through its `configured_by`
-> FK — the 4 dormant provider rows were missing. Fixed by adding `seedLlmProviders()` to
+> FK  the 4 dormant provider rows were missing. Fixed by adding `seedLlmProviders()` to
 > `db/seed.ts` (idempotent, ON CONFLICT DO NOTHING). Task 3's workflow rule landed in
 > `docs/TO_START_EVERY_SESSION.md` (migration convention block) + a recovery pointer in the
 > README database section.
 
-> **↪ FOLLOW-UP 2026-06-13 — the second-order effect, fully resolved.** The `db:push` recovery
+> **↪ FOLLOW-UP 2026-06-13  the second-order effect, fully resolved.** The `db:push` recovery
 > above synced the schema but never touched drizzle's tracking table, so
 > `drizzle.__drizzle_migrations` stayed frozen at migration **0027** (28 rows, 11 of them stale
 > hashes from the idempotency edits to 0001–0011). `db:migrate` therefore couldn't reconcile and
-> silently applied **nothing** — which is why the Phase-16 search-vector fix (`0051`) never landed
+> silently applied **nothing**  which is why the Phase-16 search-vector fix (`0051`) never landed
 > until `scripts/heal-search-vectors.mts` ran it by hand. Permanently fixed with a **bookkeeping-only**
 > reconcile (`scripts/reconcile-migrations.mts`, committed `e3fb6b4`): TRUNCATE + rebuild the tracking
 > table to mirror the journal exactly (hash = sha256 of each `.sql`, `created_at` = journal `when`);
@@ -84,9 +84,9 @@ Add a short section to the README's database setup notes (or create `docs/DEV_DB
 
 ## 🚫 OUT OF SCOPE
 
-- ❌ Generating migrations via `drizzle-kit generate` (the canonical path going forward) — separate dev-workflow conversation. This plan fixes the immediate breakage.
+- ❌ Generating migrations via `drizzle-kit generate` (the canonical path going forward)  separate dev-workflow conversation. This plan fixes the immediate breakage.
 - ❌ Rewriting the seed to skip migrations entirely (would mask future migration drift).
-- ❌ Per-environment migration tracking — `__drizzle_migrations` already exists in the DB; we just need our journal aligned with it.
+- ❌ Per-environment migration tracking  `__drizzle_migrations` already exists in the DB; we just need our journal aligned with it.
 
 ---
 

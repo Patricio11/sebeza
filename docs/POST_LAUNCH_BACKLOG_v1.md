@@ -27,29 +27,29 @@ Keep entries terse  this is a triage list, not a spec.
 
 ---
 
-## Dashboard shell UX hardening — _(Origin: founder, clicking through /admin, 2026-06-14)_
+## Dashboard shell UX hardening  _(Origin: founder, clicking through /admin, 2026-06-14)_
 
 > Active plan: **`docs/ADMIN_SHELL_UX_PLAN.md`**.
 
-- **Persistent dashboard sidebar** — ✅ **done 2026-06-14** (Part A, all four groups). The sidebar
+- **Persistent dashboard sidebar**  ✅ **done 2026-06-14** (Part A, all four groups). The sidebar
   is hoisted into a route-group `layout.tsx` per group (`<DashboardFrame>`), so navigation only
   reloads the content column. `DashboardShell` is retired. Standalone print pages (`/dashboard/cv`,
   `/gov/brief`) print chrome-less via `print:hidden`/`print:block` on the frame.
   - _Deferred (optional cosmetic):_ strip the now-ignored compatibility-shim props
     (`workspaceLabel`/`workspaceEyebrow`/`nav`/`activeKey`) from the ~60 migrated `<DashboardMasthead>`
     call-sites.
-- **In-shell admin user-management** (`/admin/users/[id]`) — ✅ **done 2026-06-14** (Part D).
+- **In-shell admin user-management** (`/admin/users/[id]`)  ✅ **done 2026-06-14** (Part D).
   Full management console inside the admin frame: identity header, Security & access, seeker
   profile + verification (roll-up/KYC/qualifications), employer organisation, POPIA consents,
   recent activity, and a redesigned account-actions panel (suspend/restore, reset-2FA, danger-zone
-  erase — role-aware). Document-dependent reviews (KYC ID / qualifications / org vetting) surface
+  erase  role-aware). Document-dependent reviews (KYC ID / qualifications / org vetting) surface
   state inline + deep-link to the verification queues that hold the doc viewer.
   - ✅ _Follow-up done (2026-06-14):_ the KYC / qualification / org **decision actions** are now
     inlined on the user page (reusing `KycReviewActions` + `VerificationActions`) with a signed-URL
     "View" link beside each document. Backed by `getSeekerReviewBundle` + `getOrgDocuments`
     (DB + Supabase Storage; no mock). The rarer org actions (request-changes / resend / mark-email)
     stay in the vetting queue.
-- **Public profile loading-hang** — ✅ **resolved (not a bug) 2026-06-14.** Probed: the page
+- **Public profile loading-hang**  ✅ **resolved (not a bug) 2026-06-14.** Probed: the page
   renders fully server-side (HTTP 200, 179 KB); the "stuck skeleton" was first-hit dev Turbopack
   compilation, not a stall, and prod has no per-request compile. Restart `npm run dev` if it
   recurs after a large change.
@@ -60,9 +60,9 @@ Keep entries terse  this is a triage list, not a spec.
 
 > The Phase 10.5 audit (`A11Y_AUDIT.md`) ships with static scan + manual screen-reader passes; the automated runtime layer is deferred for capacity reasons.
 
-- **Playwright + `@axe-core/playwright` a11y suite**  one spec per route group (`public`, `seeker`, `employer`, `admin`, `gov`); per-test pattern is `new AxeBuilder({ page }).analyze()`, asserting zero serious / critical violations. **Phase 12 (2026-06-12) removed most of the setup cost**: `@playwright/test` + chromium are installed, `playwright.config.ts` already serves the production build against the test DB, and `tests/e2e/` has the spec layout to extend — remaining work is `npm i -D @axe-core/playwright` + the per-route-group specs.
-- **E2E follow-up arcs** _(Origin: Phase 12 close, 2026-06-12)_  four browser walks deferred from Task 12.3; the underlying behaviours are integration-covered, only the click-throughs remain: (1) full seeker sign-up with email-token capture (read the Better Auth `verification` row from the test DB inside the spec — the harness can query it directly); (2) the vacancy loop (create → match → invite → accept → mark-as-filled); (3) the 9.17 `/sign-up/invited/[token]` landing (mint a token with `signInviteToken` inside the spec); (4) the privacy export download click-through. The harness (`playwright.config.ts` + seeded accounts) makes each a focused half-day.
-- **Modal focus-return hook** _(Origin: Phase 12 modal sweep, 2026-06-12)_  none of the 20 `role="dialog"` components restores focus to the trigger element on close (browser drops focus to `<body>`). Esc-close is now universal (Phase 12 patched the last 4: `BulkInviteIsland`, `DepartureIsland`, `ConfirmStatusIsland`, mobile `SearchFilters`). Right shape: one `useModalFocus(ref, open)` hook capturing `document.activeElement` on open + restoring on close, applied across all 20 — a mechanical but wide change best done as one focused pass with an E2E assertion per modal.
+- **Playwright + `@axe-core/playwright` a11y suite**  one spec per route group (`public`, `seeker`, `employer`, `admin`, `gov`); per-test pattern is `new AxeBuilder({ page }).analyze()`, asserting zero serious / critical violations. **Phase 12 (2026-06-12) removed most of the setup cost**: `@playwright/test` + chromium are installed, `playwright.config.ts` already serves the production build against the test DB, and `tests/e2e/` has the spec layout to extend  remaining work is `npm i -D @axe-core/playwright` + the per-route-group specs.
+- **E2E follow-up arcs** _(Origin: Phase 12 close, 2026-06-12)_  four browser walks deferred from Task 12.3; the underlying behaviours are integration-covered, only the click-throughs remain: (1) full seeker sign-up with email-token capture (read the Better Auth `verification` row from the test DB inside the spec  the harness can query it directly); (2) the vacancy loop (create → match → invite → accept → mark-as-filled); (3) the 9.17 `/sign-up/invited/[token]` landing (mint a token with `signInviteToken` inside the spec); (4) the privacy export download click-through. The harness (`playwright.config.ts` + seeded accounts) makes each a focused half-day.
+- **Modal focus-return hook** _(Origin: Phase 12 modal sweep, 2026-06-12)_  none of the 20 `role="dialog"` components restores focus to the trigger element on close (browser drops focus to `<body>`). Esc-close is now universal (Phase 12 patched the last 4: `BulkInviteIsland`, `DepartureIsland`, `ConfirmStatusIsland`, mobile `SearchFilters`). Right shape: one `useModalFocus(ref, open)` hook capturing `document.activeElement` on open + restoring on close, applied across all 20  a mechanical but wide change best done as one focused pass with an E2E assertion per modal.
 
 ---
 
@@ -79,8 +79,8 @@ Keep entries terse  this is a triage list, not a spec.
 
 > Things to revisit if traffic patterns surprise us at launch.
 
-- ~~**Server-side full-text search**~~ **RESOLVED — entry was stale (Phase 12 verification, 2026-06-12).** `searchProfilesQuery` contains zero ILIKE: free-text search has run `websearch_to_tsquery` + `ts_rank_cd` over the GIN-indexed `search_vector` since Phase 4. The Phase 12 ranking fixtures (`tests/integration/ranking-freshness.test.ts`) pin the path.
-- **No-Flash bundle pass** _(Origin: Phase 12 perf gate, 2026-06-12)_  the automated script-budget gate (`tests/e2e/perf-budget.spec.ts`, deterministic encoded wire bytes on the production build) found the **shared App Router baseline puts every key route over the 160 KB target**: `/` 194.2 · `/search` 210.2 · `/p/[handle]` 195.5 · `/sign-in` 196.8 · `/insights` 291.7 KB (Recharts adds ~95 KB — it ships in the route bundle; mount-gating defers execution, not transfer). All five pinned with tight ratchet ceilings (measured +3 KB) so they can only improve. The pass: `ANALYZE=true npm run build`, read the shared-chunk treemap for the ~40 KB of baseline trim (likely suspects: next-intl message payloads, Better Auth client on non-auth routes, icon imports), and dynamic-import the `/insights` chart islands (`next/dynamic`, ssr:false). Lower the spec ceilings as each lands; target state is 160 everywhere.
+- ~~**Server-side full-text search**~~ **RESOLVED  entry was stale (Phase 12 verification, 2026-06-12).** `searchProfilesQuery` contains zero ILIKE: free-text search has run `websearch_to_tsquery` + `ts_rank_cd` over the GIN-indexed `search_vector` since Phase 4. The Phase 12 ranking fixtures (`tests/integration/ranking-freshness.test.ts`) pin the path.
+- **No-Flash bundle pass** _(Origin: Phase 12 perf gate, 2026-06-12)_  the automated script-budget gate (`tests/e2e/perf-budget.spec.ts`, deterministic encoded wire bytes on the production build) found the **shared App Router baseline puts every key route over the 160 KB target**: `/` 194.2 · `/search` 210.2 · `/p/[handle]` 195.5 · `/sign-in` 196.8 · `/insights` 291.7 KB (Recharts adds ~95 KB  it ships in the route bundle; mount-gating defers execution, not transfer). All five pinned with tight ratchet ceilings (measured +3 KB) so they can only improve. The pass: `ANALYZE=true npm run build`, read the shared-chunk treemap for the ~40 KB of baseline trim (likely suspects: next-intl message payloads, Better Auth client on non-auth routes, icon imports), and dynamic-import the `/insights` chart islands (`next/dynamic`, ssr:false). Lower the spec ceilings as each lands; target state is 160 everywhere.
 - **CDN edge config**  static assets cache fine via Next defaults; revisit if image-heavy public profiles see traffic spikes.
 
 ---

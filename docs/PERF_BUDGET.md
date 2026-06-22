@@ -21,7 +21,7 @@ Three measurements, in this order:
 > Fill in measured values as runs complete. Empty cells = not yet measured.
 >
 > **JS bundle column measured 2026-06-12 (Phase 12)** via the automated
-> gate `tests/e2e/perf-budget.spec.ts` — script WIRE bytes (encoded
+> gate `tests/e2e/perf-budget.spec.ts`  script WIRE bytes (encoded
 > transfer via `Request.sizes()`, deterministic across runs) for the
 > document's own `<script src>` set on the production build, asserted on
 > every `npm run test:e2e` run with zero-third-party enforcement.
@@ -33,9 +33,9 @@ Three measurements, in this order:
 
 | Route | Perf score | A11y score | LCP (Slow 3G) | TBT | CLS | JS bundle | Notes |
 |---|---|---|---|---|---|---|---|
-| `/` | _ | _ | _ | _ | _ | ⚠️ **194.2 KB** (2026-06-12) | Over target — shared baseline. Ratchet 198 KB. |
+| `/` | _ | _ | _ | _ | _ | ⚠️ **194.2 KB** (2026-06-12) | Over target  shared baseline. Ratchet 198 KB. |
 | `/search` | _ | _ | _ | _ | _ | ⚠️ **210.2 KB** (2026-06-12) | Heaviest public route (filters + roster islands). Ratchet 214 KB. |
-| `/p/[handle]` | _ | _ | _ | _ | _ | ⚠️ **195.5 KB** (2026-06-12) | Over target — shared baseline. Ratchet 199 KB. |
+| `/p/[handle]` | _ | _ | _ | _ | _ | ⚠️ **195.5 KB** (2026-06-12) | Over target  shared baseline. Ratchet 199 KB. |
 | `/sign-in` | _ | _ | _ | _ | _ | ⚠️ **196.8 KB** (2026-06-12) | Better Auth form. Ratchet 200 KB. |
 | `/sign-up/seeker` | _ | _ | _ | _ | _ | _ | 3-step wizard; ComboboxField + ConsentRow. |
 | `/sign-up/employer` | _ | _ | _ | _ | _ | _ | KYC form. |
@@ -49,7 +49,7 @@ Three measurements, in this order:
 | `/admin/audit-log` | _ | _ | _ | _ | _ | _ | Filterable table; check filter-form cost. |
 | `/gov` | _ | _ | _ | _ | _ | _ | LMI hero; Recharts is mount-gated. |
 | `/gov/curriculum` | _ | _ | _ | _ | _ | _ | Heatmaps; Recharts heavy. Verify the mount-gate. |
-| `/insights` | _ | _ | _ | _ | _ | ⚠️ **291.7 KB** (2026-06-12) | **Recharts adds ~95 KB on top of the shared baseline — it ships in the route bundle; mount-gating defers EXECUTION, not TRANSFER.** Ratchet 296 KB. Fix (dynamic-import the chart islands) is the backlog No-Flash bundle pass. |
+| `/insights` | _ | _ | _ | _ | _ | ⚠️ **291.7 KB** (2026-06-12) | **Recharts adds ~95 KB on top of the shared baseline  it ships in the route bundle; mount-gating defers EXECUTION, not TRANSFER.** Ratchet 296 KB. Fix (dynamic-import the chart islands) is the backlog No-Flash bundle pass. |
 | `/privacy` | _ | _ | _ | _ | _ | _ | Mostly static prose. Should LCP < 1.5s. |
 | `/paia` | _ | _ | _ | _ | _ | _ | Mostly static prose. |
 

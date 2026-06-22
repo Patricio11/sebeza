@@ -3,7 +3,7 @@ import { Skeleton } from "@/components/ui/Skeleton";
 /**
  * Loading fallback for the gov segment. The sidebar lives in the route-group
  * `layout.tsx` (outside this Suspense boundary), so this skeleton fills only
- * the main column — the sidebar stays put. Echoes the masthead + content.
+ * the main column  the sidebar stays put. Echoes the masthead + content.
  */
 export default function GovLoading() {
   return (

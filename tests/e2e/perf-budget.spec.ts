@@ -1,14 +1,14 @@
 /**
- * Phase 12 (Task 12.5) — the No-Flash JS budget as an automated gate.
+ * Phase 12 (Task 12.5)  the No-Flash JS budget as an automated gate.
  *
  * `lighthouse-budgets.json` encodes script ≤ 160 KB (wire size) per route
  * with zero third-party requests. Full Lighthouse runs stay operator-hands
  * (they need full Chrome + publish to public storage); this spec enforces
- * the load-bearing column — script transfer bytes + the no-third-party
- * rule — on every key route, against the production build.
+ * the load-bearing column  script transfer bytes + the no-third-party
+ * rule  on every key route, against the production build.
  *
  * Methodology: the gate sums the wire size (compressed Content-Length) of
- * exactly the `<script src>` set in the rendered document — the route's
+ * exactly the `<script src>` set in the rendered document  the route's
  * own bundle, the same population Lighthouse's script budget measures.
  * Counting network traffic instead would be nondeterministic: App Router
  * Link PREFETCHES of other routes' chunks land depending on viewport and
@@ -27,7 +27,7 @@ interface RouteSpec {
 /**
  * MEASURED REALITY (2026-06-12, deterministic encoded-bytes methodology):
  * the shared App Router baseline puts EVERY key route over the 160 KB
- * No-Flash target — /en 194.2 · /search 210.2 · /p 195.5 · /sign-in
+ * No-Flash target  /en 194.2 · /search 210.2 · /p 195.5 · /sign-in
  * 196.8 · /insights 291.7 (Recharts adds ~95 KB on top of the baseline;
  * mount-gating defers execution, not transfer). Ceilings below are tight
  * RATCHETS (measured + ~3 KB): regressions fail immediately, and the
@@ -43,7 +43,7 @@ const ROUTES: RouteSpec[] = [
 
 async function measure(page: Page, path: string) {
   let thirdPartyCount = 0;
-  // ENCODED (wire) bytes per URL via Request.sizes().responseBodySize —
+  // ENCODED (wire) bytes per URL via Request.sizes().responseBodySize 
   // the browser negotiates gzip, Next streams chunked (no
   // Content-Length), and sizes() reports the post-compression transfer.
   const wireBytes = new Map<string, number>();
@@ -60,13 +60,13 @@ async function measure(page: Page, path: string) {
         wireBytes.set(res.url(), sizes.responseBodySize);
       }
     } catch {
-      // navigation tore the request down — leave unrecorded
+      // navigation tore the request down  leave unrecorded
     }
   });
 
   await page.goto(path, { waitUntil: "load" });
 
-  // Sum ONLY the document's own <script src> set — prefetched chunks of
+  // Sum ONLY the document's own <script src> set  prefetched chunks of
   // OTHER routes also cross the wire but belong to their route's budget.
   const scriptSrcs = await page.$$eval("script[src]", (els) =>
     els.map((el) => (el as HTMLScriptElement).src),

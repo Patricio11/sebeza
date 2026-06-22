@@ -1,10 +1,10 @@
 /**
- * Phase 12 (Task 12.2) — POPIA data export + the dormant-by-default gates.
+ * Phase 12 (Task 12.2)  POPIA data export + the dormant-by-default gates.
  *
  * Data export (§23): the JSON dump must carry the national ID ONLY as
- * `v1.` ciphertext — never plaintext — and must audit-log the export.
+ * `v1.` ciphertext  never plaintext  and must audit-log the export.
  *
- * Dormant gates — the only "external integration" testing this phase does
+ * Dormant gates  the only "external integration" testing this phase does
  * (docs/PHASE_12_PLAN.md terminology note): no provider is ever called;
  * we prove the gates STAY CLOSED with the flags off, and that the inner
  * gates hold even when the platform flag is opened:
@@ -79,7 +79,7 @@ describe("POPIA §23 data export", () => {
   });
 });
 
-describe("LLM six-gate dispatcher (13.3) — gates stay closed", () => {
+describe("LLM six-gate dispatcher (13.3)  gates stay closed", () => {
   const base = {
     callerUserId: "user_admin",
     syllabusText: "Module CS101: data structures, algorithms, SQL basics.",
@@ -147,7 +147,7 @@ describe("LLM six-gate dispatcher (13.3) — gates stay closed", () => {
   });
 });
 
-describe("messaging dispatch (11.4.4) — six gates", () => {
+describe("messaging dispatch (11.4.4)  six gates", () => {
   afterAll(async () => {
     await setSetting("feature_flag_sms_channel_enabled", "false");
   });
@@ -182,7 +182,7 @@ describe("messaging dispatch (11.4.4) — six gates", () => {
   });
 });
 
-describe("KYC provider resolution — dormant path", () => {
+describe("KYC provider resolution  dormant path", () => {
   test("flag OFF resolves the mock verifier (admin-mediated path carries KYC)", async () => {
     const verifier = await resolveIdentityVerifier();
     expect(verifier).toBe(mockIdentityVerifier);

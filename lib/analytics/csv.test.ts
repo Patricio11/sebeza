@@ -1,5 +1,5 @@
 /**
- * Phase 12 (Task 12.1) — CSV export hardening fixtures.
+ * Phase 12 (Task 12.1)  CSV export hardening fixtures.
  *
  * Pins the Phase 6.5 security fixes that every analytics/audit export now
  * routes through:
@@ -15,7 +15,7 @@
 import { describe, expect, test } from "vitest";
 import { csvDisposition, csvFromRows, safeCell } from "./csv";
 
-describe("safeCell — OWASP injection guard", () => {
+describe("safeCell  OWASP injection guard", () => {
   test.each([
     ["=SUM(A1:A9)", '"\'=SUM(A1:A9)"'],
     ["+27821234567", '"\'+27821234567"'],
@@ -36,7 +36,7 @@ describe("safeCell — OWASP injection guard", () => {
   });
 });
 
-describe("safeCell — RFC 4180 quoting", () => {
+describe("safeCell  RFC 4180 quoting", () => {
   test("inner double-quotes are doubled", () => {
     expect(safeCell('Discovery "Bank" Ltd')).toBe('"Discovery ""Bank"" Ltd"');
   });
@@ -56,7 +56,7 @@ describe("safeCell — RFC 4180 quoting", () => {
   });
 });
 
-describe("csvFromRows — document shape", () => {
+describe("csvFromRows  document shape", () => {
   const out = csvFromRows(
     ["skill", "demand"],
     [

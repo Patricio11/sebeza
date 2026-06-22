@@ -110,7 +110,7 @@ export function InvitationResponseIsland({
         tone="accent"
         icon={CheckCircle2}
         title={`You've accepted "${vacancyTitle}".`}
-        body={`${orgName} has been notified. They'll move you through their hiring flow — interview details, contact, and next steps happen outside this page.`}
+        body={`${orgName} has been notified. They'll move you through their hiring flow  interview details, contact, and next steps happen outside this page.`}
       />
     );
   }

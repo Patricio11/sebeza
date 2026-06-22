@@ -20,7 +20,7 @@ interface Props {
  * Per-page editorial masthead + main content region. Rendered as the page's
  * content root, it slots into the main column of the persistent
  * <DashboardFrame> (supplied by the route-group `layout.tsx`). On navigation
- * only this part is replaced — the sidebar stays mounted.
+ * only this part is replaced  the sidebar stays mounted.
  */
 export function DashboardMasthead({
   role,
@@ -39,7 +39,7 @@ export function DashboardMasthead({
 
       {/* Masthead */}
       <header className="relative border-b-2 border-[color:var(--color-ink)] bg-[color:var(--color-paper)]">
-        {/* Faint chevron motif — clipped to the masthead by its OWN wrapper so
+        {/* Faint chevron motif  clipped to the masthead by its OWN wrapper so
             the header can stay overflow-visible and not clip descendant
             popovers (e.g. the notifications dropdown). */}
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
@@ -71,7 +71,7 @@ export function DashboardMasthead({
             )}
           </div>
           <div className="flex flex-wrap items-center gap-3">
-            {/* Desktop-only bell — mobile uses the frame's top strip placement. */}
+            {/* Desktop-only bell  mobile uses the frame's top strip placement. */}
             <div className="hidden md:block">
               <BellSlot role={role} />
             </div>

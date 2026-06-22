@@ -1,5 +1,5 @@
 /**
- * Phase 10.4 — gov help article view.
+ * Phase 10.4  gov help article view.
  *
  * Renders one article's body inside the DashboardShell. Auth-gated
  * by `verifyGov()`. 404 on unknown slug.
@@ -8,7 +8,7 @@
  *   - Reading column wrapped in `mx-auto max-w-3xl` at the page level
  *     (HelpProse stays width-agnostic).
  *   - Related strip is 2 columns at this width.
- *   - No `meta.updatedAt` rendered — kept in meta for editorial
+ *   - No `meta.updatedAt` rendered  kept in meta for editorial
  *     discipline only.
  */
 

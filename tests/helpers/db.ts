@@ -1,8 +1,8 @@
 /**
- * Phase 12 (Task 12.0) — test-database guard + harness entry point.
+ * Phase 12 (Task 12.0)  test-database guard + harness entry point.
  *
  * D1 in docs/PHASE_12_PLAN.md: integration + compliance suites run against a
- * DEDICATED, DISPOSABLE Postgres. `db/seed.ts` truncates every table — that
+ * DEDICATED, DISPOSABLE Postgres. `db/seed.ts` truncates every table  that
  * behaviour is exactly right for tests and catastrophic against the dev or
  * production database. This guard is the structural protection:
  *
@@ -28,7 +28,7 @@ let loaded = false;
 
 export function requireTestDb(): string {
   if (!loaded) {
-    // Deliberately ONLY .env.test.local — never .env.local / .env.
+    // Deliberately ONLY .env.test.local  never .env.local / .env.
     loadEnv({ path: path.resolve(process.cwd(), ".env.test.local") });
     loaded = true;
   }
@@ -41,7 +41,7 @@ export function requireTestDb(): string {
         "  SEBENZA_TEST_DB=1",
         "  DATABASE_URL=<connection string of a DISPOSABLE test database>",
         "  SEBENZA_ENCRYPTION_KEY=<any 32-byte base64 key, test-only>",
-        "The seed TRUNCATES tables — never point this at dev or prod.",
+        "The seed TRUNCATES tables  never point this at dev or prod.",
       ].join("\n"),
     );
   }

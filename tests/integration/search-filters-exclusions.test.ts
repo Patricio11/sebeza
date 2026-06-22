@@ -1,5 +1,5 @@
 /**
- * Phase 12 (Task 12.2) — search filters + visibility exclusions against
+ * Phase 12 (Task 12.2)  search filters + visibility exclusions against
  * the real database.
  *
  * Filters: work-availability `&&` overlap, minYears ("unknown is not a
@@ -141,7 +141,7 @@ describe("exclusion: seeker blocks employer (11.3.2)", () => {
       subjectHandle,
     );
 
-    // Anonymous / gov / admin callers (no callerOrgId) are unaffected —
+    // Anonymous / gov / admin callers (no callerOrgId) are unaffected 
     // the block is private to the seeker-org pair (D2 invariant).
     const anonymous = await searchProfilesQuery({});
     expect(anonymous.profiles.map((p) => p.handle)).toContain(subjectHandle);

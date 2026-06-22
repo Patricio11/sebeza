@@ -3,7 +3,7 @@ import { Skeleton } from "@/components/ui/Skeleton";
 /**
  * Loading fallback for the admin segment. Because the sidebar now lives in the
  * route-group `layout.tsx` (outside this Suspense boundary), this skeleton
- * fills ONLY the main column — the sidebar stays put during navigation. It
+ * fills ONLY the main column  the sidebar stays put during navigation. It
  * echoes the masthead + content so the swap reads as the page loading, not the
  * whole screen.
  */

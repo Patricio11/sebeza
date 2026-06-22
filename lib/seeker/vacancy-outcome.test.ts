@@ -1,9 +1,9 @@
 /**
- * Phase 12 (Task 12.1) — vacancy-outcome composer fixtures.
+ * Phase 12 (Task 12.1)  vacancy-outcome composer fixtures.
  *
  * Pins the Phase 9.11 D4 privacy invariant and the composer's observable
- * contract. The invariant is structural — `OutcomeComposerInput` has NO
- * field for the hired person, so the body *cannot* name them — but the
+ * contract. The invariant is structural  `OutcomeComposerInput` has NO
+ * field for the hired person, so the body *cannot* name them  but the
  * anonymous wording ("hired someone else") and the requirements-vs-recipient
  * framing are behaviour these fixtures keep honest:
  *

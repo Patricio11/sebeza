@@ -1,11 +1,11 @@
-# PHASE 10.4 COMPLETE — GOVERNMENT HELP CENTER
+# PHASE 10.4 COMPLETE  GOVERNMENT HELP CENTER
 *Shipped 2026-05-29. Final role of the four-role help-centre suite. 23 hand-written articles across 7 categories, 21 in-context HelpLink chips on the 8 highest-traffic gov analytics surfaces.*
 
-> **One-line summary**: A browseable + searchable help center at `/gov/help` covering the gov workspace — orientation + privacy floor, provincial briefs, shortage + opportunity, curriculum + outcomes, employer lookup, exports, account + oversight. Aggregate-only data posture documented end-to-end; the "watch the watchers" oversight model surfaced explicitly so gov users understand the symmetric trust posture.
+> **One-line summary**: A browseable + searchable help center at `/gov/help` covering the gov workspace  orientation + privacy floor, provincial briefs, shortage + opportunity, curriculum + outcomes, employer lookup, exports, account + oversight. Aggregate-only data posture documented end-to-end; the "watch the watchers" oversight model surfaced explicitly so gov users understand the symmetric trust posture.
 
 Commits:
 
-- (this commit) — Phase 10.4 ship: GovHelpCategory types + 23 articles + 8 deep-link surfaces
+- (this commit)  Phase 10.4 ship: GovHelpCategory types + 23 articles + 8 deep-link surfaces
 
 This is the final help centre. The role-agnostic refactor done in Phase 10.2 meant adding gov required only: a new role tag on the type union, one new BASE_PATH entry on HelpLink, and the content + pages.
 
@@ -13,71 +13,71 @@ This is the final help centre. The role-agnostic refactor done in Phase 10.2 mea
 
 ## 🎯 WHAT SHIPPED
 
-### A — Type extension (`content/help/types.ts`)
+### A  Type extension (`content/help/types.ts`)
 
 - New `GovHelpCategory` string-enum (`getting_started`, `provincial_briefs`, `shortage_opportunity`, `curriculum_outcomes`, `employer_lookup`, `exports_reports`, `account_oversight`).
 - `HelpCategory` union widened to include it. Seeker + employer + admin types continue to work unchanged.
 - New `GOV_HELP_CATEGORIES` constant: label + description + display order. IA reads top-down by frequency of daily work (orient → provincial → shortage/opportunity → curriculum → lookup → exports → account).
 
-### B — Reused infrastructure (Phase 10.2 refactor still serving)
+### B  Reused infrastructure (Phase 10.2 refactor still serving)
 
 - `HelpLink` got a fourth role: `"gov"` (basePath `/gov/help`). Default stays `"employer"`.
-- `HelpSearchIsland` already role-agnostic — no changes needed.
+- `HelpSearchIsland` already role-agnostic  no changes needed.
 - `HelpProse` reused verbatim.
 
-### C — Gov pages
+### C  Gov pages
 
-- **Index** `/gov/help` — hero search bar + 7 category sections with article cards. When `?q=` is present, the search island takes over with ranked results.
-- **Article** `/gov/help/[slug]` — breadcrumb back to index/category + article body inside a centered `max-w-3xl` reading column + "Related" strip in 2 columns. No `meta.updatedAt` rendered.
+- **Index** `/gov/help`  hero search bar + 7 category sections with article cards. When `?q=` is present, the search island takes over with ranked results.
+- **Article** `/gov/help/[slug]`  breadcrumb back to index/category + article body inside a centered `max-w-3xl` reading column + "Related" strip in 2 columns. No `meta.updatedAt` rendered.
 
 Both auth-gated by `verifyGov()`.
 
-### D — Nav entry (`components/layout/govNav.ts`)
+### D  Nav entry (`components/layout/govNav.ts`)
 
 New `{ key: "help", label: "Help", href: "/gov/help", icon: HelpCircle }` inserted between Policy brief and My account.
 
-### E — 23 articles (across 7 categories)
+### E  23 articles (across 7 categories)
 
 **Getting started (3)**
-- `what-sebenza-is-for-government` — four operating principles for the gov lens (confirmed-not-self-reported; aggregates not individuals; regulated lookup; symmetric audit)
-- `your-first-hour-orientation` — five surfaces in order; the access-scope question every new gov user asks
-- `privacy-floor-explained` — why k=10, how suppression manifests in heatmaps + CSVs + briefs, sub-querying doesn't defeat the floor
+- `what-sebenza-is-for-government`  four operating principles for the gov lens (confirmed-not-self-reported; aggregates not individuals; regulated lookup; symmetric audit)
+- `your-first-hour-orientation`  five surfaces in order; the access-scope question every new gov user asks
+- `privacy-floor-explained`  why k=10, how suppression manifests in heatmaps + CSVs + briefs, sub-querying doesn't defeat the floor
 
 **Provincial & municipal briefs (4)**
-- `reading-the-lmi` — three components (activity, conversion, persistence); geometric mean; reading the delta honestly
-- `reading-your-provincial-brief` — what each card shows; using the brief in a Treasury sitting
-- `top-skills-gaps-supply-freshness` — why raw supply misleads; reading freshness; cross-checks with Stats SA
-- `cities-coming-soon` — why the municipal surface ships dormant; the threshold logic; substitute workflow today
+- `reading-the-lmi`  three components (activity, conversion, persistence); geometric mean; reading the delta honestly
+- `reading-your-provincial-brief`  what each card shows; using the brief in a Treasury sitting
+- `top-skills-gaps-supply-freshness`  why raw supply misleads; reading freshness; cross-checks with Stats SA
+- `cities-coming-soon`  why the municipal surface ships dormant; the threshold logic; substitute workflow today
 
 **Shortage & opportunity (4)**
-- `shortage-justification-index-explained` — three classifications; four signals driving them; opinionated classifier disclaimer
-- `interpreting-demand-and-supply-ratios` — 1.0 baseline; thresholds; three edge cases that generate false signals
-- `local-supply-available-incentives` — opportunity vs shortage; four incentive postures (salary / mobility / employer-readiness / information)
-- `decline-reasons-and-stall-reasons` — aggregate policy diagnostic; what dominant reasons signal; not employer-specific
+- `shortage-justification-index-explained`  three classifications; four signals driving them; opinionated classifier disclaimer
+- `interpreting-demand-and-supply-ratios`  1.0 baseline; thresholds; three edge cases that generate false signals
+- `local-supply-available-incentives`  opportunity vs shortage; four incentive postures (salary / mobility / employer-readiness / information)
+- `decline-reasons-and-stall-reasons`  aggregate policy diagnostic; what dominant reasons signal; not employer-specific
 
 **Curriculum & outcomes (3)**
-- `curriculum-vs-market-demand` — two-axis alignment; reading a programme row; province + programme filters
-- `programme-cohort-outcomes-and-retention` — 6/12/24/36-month retention; reading retention + alignment together
-- `what-suppressed-cells-mean` — three reasons (k=10, composite confidence, high-sensitivity dimension); not the same as zero
+- `curriculum-vs-market-demand`  two-axis alignment; reading a programme row; province + programme filters
+- `programme-cohort-outcomes-and-retention`  6/12/24/36-month retention; reading retention + alignment together
+- `what-suppressed-cells-mean`  three reasons (k=10, composite confidence, high-sensitivity dimension); not the same as zero
 
 **Employer lookup & compliance (4)**
-- `per-employer-lookup-what-you-can-query` — exact-match only; result panel contents; what it deliberately doesn't show
-- `case-reference-documenting-your-query` — what makes a good reference; what doesn't; what admins see
-- `reading-employment-status-mix` — what it tells you; what it doesn't; three common mistakes; not the EEA-1 return
-- `the-oversight-log-your-lookups` — symmetric audit; why this protects gov users doing legitimate work
+- `per-employer-lookup-what-you-can-query`  exact-match only; result panel contents; what it deliberately doesn't show
+- `case-reference-documenting-your-query`  what makes a good reference; what doesn't; what admins see
+- `reading-employment-status-mix`  what it tells you; what it doesn't; three common mistakes; not the EEA-1 return
+- `the-oversight-log-your-lookups`  symmetric audit; why this protects gov users doing legitimate work
 
 **Exports & reports (3)**
-- `bulk-csv-downloads` — seven export types + schemas; query parameters; what suppression looks like in a CSV
-- `policy-brief-as-pdf` — print-styled aggregation; the deliberate non-customisation; PDF naming convention
-- `lmi-json-public-api` — `/api/lmi`, no auth, 5-min cache, what the endpoint commits us to publicly
+- `bulk-csv-downloads`  seven export types + schemas; query parameters; what suppression looks like in a CSV
+- `policy-brief-as-pdf`  print-styled aggregation; the deliberate non-customisation; PDF naming convention
+- `lmi-json-public-api`  `/api/lmi`, no auth, 5-min cache, what the endpoint commits us to publicly
 
 **Account & oversight (2)**
-- `two-factor-authentication` — mandatory TOTP; backup codes; switching devices; 12-hour session expiry; no remember-this-device
-- `your-activity-audit-trail` — what's in / not in your audit trail; POPIA Section 23 rights; 7-year retention for regulated lookups
+- `two-factor-authentication`  mandatory TOTP; backup codes; switching devices; 12-hour session expiry; no remember-this-device
+- `your-activity-audit-trail`  what's in / not in your audit trail; POPIA Section 23 rights; 7-year retention for regulated lookups
 
 Total **23 articles**.
 
-### F — 8 HelpLink deep-link surfaces
+### F  8 HelpLink deep-link surfaces
 
 | Surface | Chips |
 |---|---|
@@ -114,10 +114,10 @@ All three Phase 10.1 post-ship fixes baked in from day one (no follow-up commits
 - `docs/completed/PHASE_10_4_COMPLETE.md` (this doc)
 
 **Edited (10 files)**
-- `content/help/types.ts` — added `GovHelpCategory`, `GOV_HELP_CATEGORIES`; widened `HelpCategory` union
-- `components/feature/help/HelpLink.tsx` — added `"gov"` to the role union + base-path map
-- `components/layout/govNav.ts` — Help nav entry between Policy brief and My account
-- 8 gov surfaces — `<HelpLink>` chips wired (overview, provinces, shortage, opportunity, curriculum, employer-lookup, exports, account)
+- `content/help/types.ts`  added `GovHelpCategory`, `GOV_HELP_CATEGORIES`; widened `HelpCategory` union
+- `components/feature/help/HelpLink.tsx`  added `"gov"` to the role union + base-path map
+- `components/layout/govNav.ts`  Help nav entry between Policy brief and My account
+- 8 gov surfaces  `<HelpLink>` chips wired (overview, provinces, shortage, opportunity, curriculum, employer-lookup, exports, account)
 
 **Verification**
 - `tsc --noEmit` clean
@@ -142,10 +142,10 @@ All three Phase 10.1 post-ship fixes baked in from day one (no follow-up commits
 
 ## 🧭 IMPACT ON OTHER SURFACES
 
-- **Gov nav** — gains the Help entry between Policy brief and My account.
-- **8 gov surfaces** — gain unobtrusive `<HelpLink>` chips near the page header.
+- **Gov nav**  gains the Help entry between Policy brief and My account.
+- **8 gov surfaces**  gain unobtrusive `<HelpLink>` chips near the page header.
 - **Two new routes registered** in the production build (`/[locale]/gov/help` + `/[locale]/gov/help/[slug]`).
-- **Employer + seeker + admin help centres** — unchanged behaviour; role-agnostic refactor from Phase 10.2 continues to serve.
+- **Employer + seeker + admin help centres**  unchanged behaviour; role-agnostic refactor from Phase 10.2 continues to serve.
 - **No new tables, audit kinds, notification kinds, or external deps.**
 
 ---
@@ -177,7 +177,7 @@ All three Phase 10.1 post-ship fixes baked in from day one (no follow-up commits
    - "Try it now →" CTA when `surfaceLink` is set
    - Related strip at the bottom in 2 columns
 6. Visit `/gov/help/totally-bogus-slug`. Expect: Next.js notFound page.
-7. Visit `/gov`, `/gov/provinces`, `/gov/shortage`, `/gov/opportunity`, `/gov/curriculum`, `/gov/employer-lookup`, `/gov/exports`, `/gov/account` — each should carry one or more `<HelpLink>` chips near the page header. Clicking any chip should land on the correct article.
+7. Visit `/gov`, `/gov/provinces`, `/gov/shortage`, `/gov/opportunity`, `/gov/curriculum`, `/gov/employer-lookup`, `/gov/exports`, `/gov/account`  each should carry one or more `<HelpLink>` chips near the page header. Clicking any chip should land on the correct article.
 8. Sign in as the other three roles in turn. Verify each role's help centre still works end-to-end. The Phase 10.4 changes only added a new role to the unions and base-path map; they didn't change existing behaviour.
 
 ---
@@ -201,4 +201,4 @@ The trust posture documented in 108 articles is the same posture the platform wa
 
 ---
 
-*Phase 10.4 closes the four-role help-centre suite. The gov articles are the editorial bar for translating platform mechanics into policy-evidence-ready statements — what to cite, what not to cite, what the suppression chip means, why the LMI commits us publicly. Future phases can clone the scaffold for new roles if the platform ever adds one; the infrastructure is already there.*
+*Phase 10.4 closes the four-role help-centre suite. The gov articles are the editorial bar for translating platform mechanics into policy-evidence-ready statements  what to cite, what not to cite, what the suppression chip means, why the LMI commits us publicly. Future phases can clone the scaffold for new roles if the platform ever adds one; the infrastructure is already there.*

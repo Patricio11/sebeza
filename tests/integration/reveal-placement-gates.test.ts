@@ -1,12 +1,12 @@
 /**
- * Phase 12 (Task 12.2) — the three-lock reveal gate, the Placement-Truth
+ * Phase 12 (Task 12.2)  the three-lock reveal gate, the Placement-Truth
  * 30-day window, and the vacancy-invite consent gate, against the real
  * seeded database.
  *
  * Per D6 (docs/PHASE_12_PLAN.md): the DAL is the real security boundary,
  * so it is stubbed here with a verified-employer session (Discovery Bank's
- * owner) and the behaviour BENEATH it — consent checks, audit rows,
- * notifications, the reveal-window lookup — runs for real. Lock #1
+ * owner) and the behaviour BENEATH it  consent checks, audit rows,
+ * notifications, the reveal-window lookup  runs for real. Lock #1
  * (verified org) is pinned by asserting the action consults the DAL before
  * any data access.
  *
@@ -111,7 +111,7 @@ afterAll(async () => {
   );
 });
 
-describe("revealContact — the three-lock gate", () => {
+describe("revealContact  the three-lock gate", () => {
   test("lock #1: the DAL is consulted before anything else; its refusal aborts the action", async () => {
     const mock = vi.mocked(verifyOrgVerified);
     mock.mockRejectedValueOnce(new Error("REDIRECT:not-verified"));
@@ -167,7 +167,7 @@ describe("revealContact — the three-lock gate", () => {
   });
 });
 
-describe("markAsHired — Placement-Truth 30-day reveal window", () => {
+describe("markAsHired  Placement-Truth 30-day reveal window", () => {
   test("no prior reveal from this org → refused", async () => {
     const res = await markAsHired({
       handle: SEEKER_B.handle,
@@ -227,7 +227,7 @@ describe("markAsHired — Placement-Truth 30-day reveal window", () => {
   });
 });
 
-describe("bulkInviteToVacancy — consent gate (9.8.4 D5)", () => {
+describe("bulkInviteToVacancy  consent gate (9.8.4 D5)", () => {
   beforeAll(async () => {
     await setConsent(SEEKER_A.userId, "vacancy_matching", "granted");
     await setConsent(SEEKER_B.userId, "vacancy_matching", "delete");

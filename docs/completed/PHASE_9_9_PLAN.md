@@ -1,4 +1,4 @@
-# PHASE 9.9 PLAN — EXPERIENCE-IN-YEARS ON PROFILE & SKILLS
+# PHASE 9.9 PLAN  EXPERIENCE-IN-YEARS ON PROFILE & SKILLS
 *Side-phase between Phase 9.8 and Phase 10, mirroring the 6.5 / 7.5 / 9.7 / 9.8 pattern. Opened 2026-05-24 during the pre-launch system review. Tiny by design  pre-launch hygiene, not feature creep.*
 *Companion docs: `TO_START_EVERY_SESSION.md` · `ROADMAP.md` · `UX_UI_SPEC.md` · `docs/PHASE_10_PLAN.md`.*
 

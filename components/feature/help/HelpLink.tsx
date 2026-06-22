@@ -1,10 +1,10 @@
 /**
- * Phase 10.1 / 10.2 / 10.3 — in-context deep-link from a dashboard
+ * Phase 10.1 / 10.2 / 10.3  in-context deep-link from a dashboard
  * surface to the relevant help article.
  *
  * Used on the top dashboard surfaces (~8 per role) so users discover
  * help in the place they hit friction, not only when they go looking.
- * The chip is deliberately small + neutral — it never competes with
+ * The chip is deliberately small + neutral  it never competes with
  * the page's primary action, only signals "there's documentation if
  * you need it."
  *

@@ -1,5 +1,5 @@
 /**
- * Phase 12 (Task 12.1) — notification catalogue contract fixtures.
+ * Phase 12 (Task 12.1)  notification catalogue contract fixtures.
  *
  * The catalogue is the single source of truth for audience, channel
  * defaults, and dedupe windows. `createNotification` trusts it blindly, so

@@ -1,5 +1,5 @@
 /**
- * Phase 10.4 — gov help center index.
+ * Phase 10.4  gov help center index.
  *
  * Mirrors the employer / seeker / admin help indexes for the (gov)
  * route group. Auth-gated by `verifyGov()`. Hero search bar (client

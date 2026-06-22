@@ -1,16 +1,16 @@
 /**
- * Phase 12 (Task 12.0) — global setup for the integration + compliance
+ * Phase 12 (Task 12.0)  global setup for the integration + compliance
  * projects: migrate-from-zero + seed against the DISPOSABLE test database.
  *
  * Runs once per vitest project invocation, in its own process:
  *
- *   1. D1 guard via `requireTestDb()` — refuses without `.env.test.local`
+ *   1. D1 guard via `requireTestDb()`  refuses without `.env.test.local`
  *      carrying `SEBENZA_TEST_DB=1`.
  *   2. Programmatic Drizzle migrations (`drizzle-orm/postgres-js/migrator`)
- *      from `db/migrations` — the same journal `drizzle-kit migrate` uses,
+ *      from `db/migrations`  the same journal `drizzle-kit migrate` uses,
  *      so this doubles as a continuous proof that the journal repair holds
  *      (a missing journal entry = failing suite, not a silent skip).
- *   3. `db/seed.ts` via tsx — the truncating seed; the guard above is what
+ *   3. `db/seed.ts` via tsx  the truncating seed; the guard above is what
  *      makes that safe.
  *
  * Re-running is idempotent: migrator no-ops on applied entries, seed

@@ -1,16 +1,16 @@
 /**
- * Phase 12 (Task 12.1) — field-level encryption fixtures (POPIA-First Rule).
+ * Phase 12 (Task 12.1)  field-level encryption fixtures (POPIA-First Rule).
  *
  * `encryptField` / `decryptField` protect national IDs, passports, phone
  * numbers and LLM credentials at rest. These fixtures pin the wire contract:
  *
  *   1. Round-trip recovers the exact plaintext (ASCII, unicode, long, empty).
- *   2. Output carries the `v1.` key-id prefix (rotation seam — the
+ *   2. Output carries the `v1.` key-id prefix (rotation seam  the
  *      `id-encryption-mandatory` compliance assertion checks the same prefix
  *      on real rows).
  *   3. Each encryption of the same plaintext yields different ciphertext
- *      (random IV — equal ciphertexts would leak equality of IDs).
- *   4. Tampered ciphertext / wrong key / unknown key-id all throw — GCM
+ *      (random IV  equal ciphertexts would leak equality of IDs).
+ *   4. Tampered ciphertext / wrong key / unknown key-id all throw  GCM
  *      auth must fail closed, never return garbage plaintext.
  *
  * Treat failures as security regressions, not refactor noise.
@@ -39,7 +39,7 @@ describe("encryptField / decryptField round-trip", () => {
   });
 
   test("recovers unicode plaintext exactly", () => {
-    const s = "Nkosazana 🇿🇦 Dlamini-Zuma — ID·ñ·ü";
+    const s = "Nkosazana 🇿🇦 Dlamini-Zuma  ID·ñ·ü";
     expect(decryptField(encryptField(s))).toBe(s);
   });
 
