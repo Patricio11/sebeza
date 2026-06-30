@@ -666,6 +666,34 @@ export const profileSkillsCustom = pgTable(
   }),
 );
 
+/**
+ * Phase 20 ("Skill Prerequisites & Sequencing")  a small, high-signal,
+ * admin-curated dependency graph: skill `skill_slug` is best learned AFTER
+ * `prereq_skill_slug`. Used to (a) re-order compass recommendations so a
+ * prerequisite never sits below the skill it unlocks, and (b) surface a
+ * "Requires: X" pill on a recommendation when the seeker lacks the prereq. NOT
+ * a full ontology  curated, cycle-guarded in the write path. PK on the pair.
+ */
+export const skillPrereqs = pgTable(
+  "skill_prereqs",
+  {
+    skillSlug: text("skill_slug")
+      .notNull()
+      .references(() => skills.slug, { onDelete: "cascade" }),
+    prereqSkillSlug: text("prereq_skill_slug")
+      .notNull()
+      .references(() => skills.slug, { onDelete: "cascade" }),
+    /** One-line editorial justification, e.g. "Industrial wiring builds on
+     *  domestic wiring basics." Shown in the admin surface only. */
+    reason: text("reason").notNull(),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+  },
+  (t) => ({
+    pk: primaryKey({ columns: [t.skillSlug, t.prereqSkillSlug] }),
+    byPrereq: index("skill_prereqs_prereq_idx").on(t.prereqSkillSlug),
+  }),
+);
+
 export const experiences = pgTable("experiences", {
   id: text("id").primaryKey(),
   profileId: text("profile_id")

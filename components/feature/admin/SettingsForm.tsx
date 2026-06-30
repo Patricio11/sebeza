@@ -156,6 +156,12 @@ const ROWS: SettingRow[] = [
       "Seeker · Custom skills — add up to 3 self-described skills outside the taxonomy (never searchable until canonicalized)",
     type: "boolean",
   },
+  {
+    key: "feature_flag_skill_prereqs",
+    label:
+      "Seeker · Skill prerequisites — sequence recommendations (prereqs first), “Requires:” pills, and the “Unlocks next” moment",
+    type: "boolean",
+  },
 ];
 
 export function SettingsForm({ values }: Props) {

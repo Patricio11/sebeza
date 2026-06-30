@@ -183,11 +183,20 @@ profile completeness, and they feed an aggregate "most-requested unindexed skill
 graph makes the compass *teach in the right order* and turns each completion into a "what's next"
 moment. **Flag:** `feature_flag_skill_prereqs`.
 
-### 20.0 — Schema + editorial graph
-- New `skill_prereqs` table: `skill_slug` FK, `prereq_skill_slug` FK, `reason` (text ≤ 160),
-  `created_at`, `primary key (skill_slug, prereq_skill_slug)`. Admin-curated (small, high-signal —
-  not a full ontology). Seed a starter set for the densest professions (software, data, trades).
-- Cycle-guard in the write path (a prereq chain may not loop).
+### 20.0 — Schema + editorial graph ✅ DONE 2026-06-30
+- ✅ New `skill_prereqs` table (migration `0055`): `skill_slug` FK, `prereq_skill_slug` FK, `reason`,
+  `created_at`, **PK (skill_slug, prereq_skill_slug)** + a `CHECK` blocking self-loops. Seeded an
+  **8-edge starter graph** across software / trades / accounting / lifeguard / hospitality / care
+  (e.g. postgres→sql, industrial-wiring→wiring, payroll→bookkeeping, open-water-rescue→pool-rescue).
+- ✅ **Pure graph helper** `lib/skills/prereq-graph.ts` (`wouldCreateCycle`) + query
+  `db/queries/skill-prereqs.ts` (`listPrereqsForSkills` / `listAllPrereqEdges` / `listAllPrereqsAdmin`).
+- ✅ **Admin write path** `lib/admin/skill-prereqs.ts` (`addSkillPrereq` / `removeSkillPrereq`):
+  verifyAdmin + Zod + **cycle-guard** (refuses a loop) + audited `admin.skill_prereq.edit`.
+  `/admin/skill-prereqs` + `SkillPrereqsManager` + nav. Flag `feature_flag_skill_prereqs` scaffolded.
+- ✅ **Tests (green):** `test:all` (**332 vitest**, incl. a 5-case `wouldCreateCycle` unit test) + build ·
+  migration `0055` clean + 8 edges seeded · **admin E2E 2/2** (`admin-skill-prereqs.spec.ts`: a cycle
+  edge `sql→postgres` is refused, a valid `node→typescript` is added + listed) + role-arc regression.
+  Desktop + 360px; added edge removed in afterAll. ⚠️ Dev DB: `db:migrate`.
 
 ### 20.1 — Compass re-weighting + prereq pills (flag-gated)
 - In `db/queries/career-compass.ts`: after fetching the top-N demand skills, **re-order** so a

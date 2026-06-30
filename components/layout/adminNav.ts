@@ -13,6 +13,7 @@ import {
   BookOpen,
   GraduationCap,
   Sparkles,
+  Workflow,
 } from "lucide-react";
 import type { DashboardNavItem } from "./dashboardChrome";
 
@@ -31,6 +32,9 @@ export const ADMIN_NAV: DashboardNavItem[] = [
   // Phase 19.2 ("Custom Skills")  taxonomy-growth leaderboard: promote the
   // most-requested seeker-described skills into the searchable taxonomy.
   { key: "customSkills", label: "Custom skills", href: "/admin/custom-skills", icon: Sparkles },
+  // Phase 20 ("Skill Prerequisites")  curate the skill dependency graph that
+  // sequences compass recommendations.
+  { key: "skillPrereqs", label: "Skill prerequisites", href: "/admin/skill-prereqs", icon: Workflow },
   // Phase 13.3  LLM provider configuration. Above audit-log because
   // every action here writes to it; the admin should be one click away.
   { key: "llm", label: "LLM providers", href: "/admin/llm", icon: Sparkles },

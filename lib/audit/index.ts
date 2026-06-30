@@ -248,6 +248,9 @@ export type AuditKind =
   // Phase 19.2  admin promoted a frequent custom label to a canonical skill
   // slug, migrating existing custom rows. Subject = the new skills.slug.
   | "admin.custom_skill.canonicalize"
+  // Phase 20  admin added / removed a skill-prerequisite edge. Subject =
+  // skill_slug; meta carries prereqSkillSlug + action (add|remove).
+  | "admin.skill_prereq.edit"
   // Phase 11.2.2  seeker swapped a cost-abandoned learning item for a
   // free alternative. Subject = the original learning_items.id; meta
   // carries `originalSkillSlug`, `newPathTitle`, `newProvider`.

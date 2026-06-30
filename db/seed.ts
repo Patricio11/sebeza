@@ -189,6 +189,37 @@ function slugifyLearningPathId(title: string): string {
     .slice(0, 80);
 }
 
+/**
+ * Phase 20 ("Skill Prerequisites")  a small, high-signal starter graph across
+ * professions (software / trades / accounting / lifeguard / hospitality / care).
+ * Each pair: `skillSlug` is best learned after `prereqSlug`. All slugs exist in
+ * the SKILLS taxonomy (FK). Runs after `seedTaxonomy` (which seeds skills).
+ */
+async function seedSkillPrereqs() {
+  console.log("🪜 Phase 20  skill prerequisite graph…");
+  const PAIRS: Array<{ skill: string; prereq: string; reason: string }> = [
+    { skill: "postgres", prereq: "sql", reason: "SQL fundamentals come before Postgres-specific work." },
+    { skill: "industrial-wiring", prereq: "wiring", reason: "Industrial wiring builds on domestic wiring basics." },
+    { skill: "payroll", prereq: "bookkeeping-skill", reason: "Payroll assumes core bookkeeping." },
+    { skill: "saipa", prereq: "bookkeeping-skill", reason: "SAIPA articles assume bookkeeping fundamentals." },
+    { skill: "open-water-rescue", prereq: "pool-rescue", reason: "Open-water rescue extends pool rescue." },
+    { skill: "grill", prereq: "prep", reason: "Grill stations assume kitchen prep skills." },
+    { skill: "plating", prereq: "prep", reason: "Plating assumes prep fundamentals." },
+    { skill: "medication-administration", prereq: "first-aid", reason: "Medication administration assumes first-aid basics." },
+  ];
+  await db
+    .insert(schema.skillPrereqs)
+    .values(
+      PAIRS.map((p) => ({
+        skillSlug: p.skill,
+        prereqSkillSlug: p.prereq,
+        reason: p.reason,
+      })),
+    )
+    .onConflictDoNothing();
+  console.log(`   inserted ${PAIRS.length} prerequisite edges`);
+}
+
 async function seedTaxonomy() {
   console.log("🌍 Provinces + cities…");
   await db
@@ -2312,6 +2343,7 @@ async function main() {
   await seedLlmProviders();
   await seedLearningPaths();
   await seedTaxonomy();
+  await seedSkillPrereqs();
   await seedUsersAndProfiles();
   await seedProfileChildren();
   await seedAcademicProfiles();

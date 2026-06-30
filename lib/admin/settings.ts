@@ -124,7 +124,10 @@ export type SettingKey =
   | "feature_flag_living_catalog"
   // Phase 19 ("Custom Skills") — lets seekers add up to 3 self-described skills
   // outside the taxonomy (never searchable until an admin canonicalizes them).
-  | "feature_flag_seeker_custom_skills";
+  | "feature_flag_seeker_custom_skills"
+  // Phase 20 ("Skill Prerequisites") — compass re-ranking (prereqs bubble above
+  // dependents) + "Requires: X" pills + the "Unlocks next" moment on completion.
+  | "feature_flag_skill_prereqs";
 
 const DEFAULTS: Record<SettingKey, unknown> = {
   freshness_band_days_fresh: 30,
@@ -159,6 +162,7 @@ const DEFAULTS: Record<SettingKey, unknown> = {
   feature_flag_seeker_ai_coach: false,
   feature_flag_living_catalog: false,
   feature_flag_seeker_custom_skills: false,
+  feature_flag_skill_prereqs: false,
 };
 
 /**
