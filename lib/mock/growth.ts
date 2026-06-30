@@ -68,6 +68,15 @@ export interface LearningPath {
    * (which is taxonomic)  this is the trust signal.
    */
   sebenzaReviewed?: boolean;
+  /**
+   * Phase 18 ("Living Learning Catalog")  DB-only fields, present when the
+   * path comes from the `learning_paths` table (absent on the seed constant).
+   * `id` keys the review action; the two counts drive the seeker recommend
+   * roll-up ("recommended by N of M") behind a k-anonymity floor.
+   */
+  id?: string;
+  reviewCount?: number;
+  recommendCount?: number;
 }
 
 export interface AdjacentProfession {

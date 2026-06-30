@@ -117,7 +117,11 @@ export type SettingKey =
   // ──────────────────────────────────────────────────────────────────────
   | "feature_flag_seeker_skill_journey"
   | "feature_flag_seeker_demand_pulse"
-  | "feature_flag_seeker_ai_coach";
+  | "feature_flag_seeker_ai_coach"
+  // Phase 18 ("Living Learning Catalog") — surfaces the seeker path-review
+  // feedback loop + the recommend roll-up on learning-path cards. The catalog
+  // itself is always DB-backed (18.0); this gates the NEW seeker-facing UI.
+  | "feature_flag_living_catalog";
 
 const DEFAULTS: Record<SettingKey, unknown> = {
   freshness_band_days_fresh: 30,
@@ -150,6 +154,7 @@ const DEFAULTS: Record<SettingKey, unknown> = {
   feature_flag_seeker_skill_journey: false,
   feature_flag_seeker_demand_pulse: false,
   feature_flag_seeker_ai_coach: false,
+  feature_flag_living_catalog: false,
 };
 
 /**

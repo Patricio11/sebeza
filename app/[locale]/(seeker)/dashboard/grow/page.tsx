@@ -17,6 +17,7 @@ import type { GrowthMomentum } from "@/components/feature/seeker/learning/Growth
 import { getSetting } from "@/lib/admin/settings";
 import { AcceptRecommendationButton } from "@/components/feature/seeker/learning/AcceptRecommendationButton";
 import { OpenLearningPathButton } from "@/components/feature/seeker/learning/OpenLearningPathButton";
+import { PathReviewControl } from "@/components/feature/seeker/learning/PathReviewControl";
 import { AdjacentProfessionSwitch } from "@/components/feature/seeker/learning/AdjacentProfessionSwitch";
 import { StudentLaneDiscoveryCallout } from "@/components/feature/seeker/learning/StudentLaneDiscoveryCallout";
 import { RecommendedEmployersCard } from "@/components/feature/seeker/RecommendedEmployersCard";
@@ -194,6 +195,9 @@ export default async function CareerCompassPage({
   const skillJourney = await getSetting<boolean>(
     "feature_flag_seeker_skill_journey",
   );
+  // Phase 18.1 ("Living Learning Catalog")  gates the per-card path-review
+  // control + the recommend roll-up. Off = today's path cards, unchanged.
+  const livingCatalog = await getSetting<boolean>("feature_flag_living_catalog");
   let momentum: GrowthMomentum | null = null;
   let oneSkillRank: number | null = null;
   if (skillJourney) {
@@ -444,7 +448,12 @@ export default async function CareerCompassPage({
         </p>
         <ul className="grid gap-4 md:grid-cols-2">
           {compass.learningPaths.map((path, i) => (
-            <LearningPathCard key={i} path={path} t={t} />
+            <LearningPathCard
+              key={i}
+              path={path}
+              t={t}
+              livingCatalog={livingCatalog}
+            />
           ))}
         </ul>
       </section>
@@ -838,9 +847,11 @@ function ReasonChip({
 function LearningPathCard({
   path,
   t,
+  livingCatalog = false,
 }: {
   path: LearningPath;
   t: (k: string, v?: Record<string, string | number>) => string;
+  livingCatalog?: boolean;
 }) {
   return (
     <li className="flex flex-col gap-3 rounded-[var(--radius-md)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-5">
@@ -929,6 +940,15 @@ function LearningPathCard({
           </span>
         )}
       </div>
+
+      {/* Phase 18.1  seeker path-review feedback loop (flag-gated). */}
+      {livingCatalog && path.id && (
+        <PathReviewControl
+          pathId={path.id}
+          reviewCount={path.reviewCount}
+          recommendCount={path.recommendCount}
+        />
+      )}
     </li>
   );
 }

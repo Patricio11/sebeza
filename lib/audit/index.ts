@@ -233,6 +233,10 @@ export type AuditKind =
   // enough for editorial review). Meta carries `provider` + `providerKind`
   // + `url` so the audit row is self-contained.
   | "learning_path.opened"
+  // Phase 18.1 ("Living Learning Catalog")  seeker reviewed a learning path
+  // (would-recommend + optional blocker). Subject = learning_paths.id; meta
+  // carries wouldRecommend + hasBlocker (never the blocker text  PII-flagged).
+  | "learning_path.reviewed"
   // Phase 11.2.2  seeker swapped a cost-abandoned learning item for a
   // free alternative. Subject = the original learning_items.id; meta
   // carries `originalSkillSlug`, `newPathTitle`, `newProvider`.

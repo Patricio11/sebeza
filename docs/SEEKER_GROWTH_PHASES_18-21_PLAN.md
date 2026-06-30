@@ -88,16 +88,22 @@ back so product sees which paths convert and which rot, and admins get a re-veri
   `0053` clean from zero · **24/24 seeker + role-arc E2E** (compass/grow renders identically). ⚠️ Dev
   DB: run `npm run db:migrate` before the catalog reads from the table.
 
-### 18.1 — Seeker feedback loop (flag-gated)
-- After `completeLearningItem` succeeds, a lightweight 2-question modal (`PathReviewModal`):
-  "Would you recommend this path?" (yes/no) + optional "Any blockers?" → upserts
-  `learning_path_reviews`; rolls `avg_rating` + `review_count` onto the path. Audited
-  `learning_path.reviewed`. Dismissible, never blocking (No-Flash, honesty: opt-in).
-- **UX:** bottom-sheet on mobile, inline card on desktop (mirror `CompleteSkillModal`'s shell). On
-  path cards, render a quiet "★ 4.2 · 18 seekers" line **only when `review_count ≥ 5`** (k-anonymity
-  for the rating itself; below the floor show nothing, not "no reviews").
-- **Tests:** flag-ON E2E seeds a completed item → review modal → assert rating persists; flag-OFF =
-  no modal.
+### 18.1 — Seeker feedback loop (flag-gated) ✅ DONE 2026-06-30
+- ✅ **Flag** `feature_flag_living_catalog` (settings.ts + DEFAULTS + settings-actions validator/enum +
+  SettingsForm row  same Phase-17 pattern). Default OFF.
+- ✅ **Per-card review control** (`PathReviewControl`) on each `/dashboard/grow` learning-path card:
+  one-tap "Took this path?" 👍 Recommend / 👎 Not for me + an optional note → `submitPathReview`
+  (`lib/seeker/path-reviews.ts`): flag-gated, seeker-scoped, upserts `learning_path_reviews`
+  (one per seeker/path), recomputes `review_count` / `recommend_count` from source rows (no drift),
+  audits `learning_path.reviewed` (meta `wouldRecommend` + `hasBlocker` only  never the note text),
+  revalidates grow. Opt-in self-attestation (honesty), No-Flash.
+- ✅ **Recommend roll-up** "Recommended by N of M seekers who took it" renders **only when
+  `review_count ≥ 5`** (k-anonymity floor; below it → nothing, not "no reviews"). `LearningPath` gains
+  DB-only `id` / `reviewCount` / `recommendCount` (absent on the seed constant → parity test holds).
+- ✅ **Tests (green):** `test:all` → typecheck + lint (0 errors) + **322 vitest** + build · **flag OFF
+  E2E** (no control) + role-arc **12/12** = zero regression · **flag ON E2E** (control renders + submit
+  confirmed). New `tests/e2e/living-catalog.spec.ts` (desktop + 360px); flag + reviews + counts
+  restored in afterAll.
 
 ### 18.2 — Editorial / freshness admin (admin-gated, not a seeker flag)
 - `/admin/learning-paths` list + `/admin/learning-paths/[id]` editor (CRUD, soft-delete, set
@@ -243,7 +249,7 @@ becomes a priority, since it shares no schema with 18–20.
 
 ## 📌 STATUS
 
-- [~] **Phase 18 — Living Learning Catalog** (✅ 18.0 schema/migration · ☐ 18.1 feedback loop · ☐ 18.2 editorial+freshness)
+- [~] **Phase 18 — Living Learning Catalog** (✅ 18.0 schema/migration · ✅ 18.1 feedback loop · ☐ 18.2 editorial+freshness)
 - [ ] **Phase 19 — Custom Skills & Taxonomy Growth** (19.0 schema · 19.1 editor · 19.2 canonicalization)
 - [ ] **Phase 20 — Skill Prerequisites & Sequencing** (20.0 graph · 20.1 re-weight+pills · 20.2 unlocks-next)
 - [ ] **Phase 21 — Hyper-Local Demand** (21.0 capture · 21.1 gated aggregation · 21.2 hotspots surface)

@@ -144,6 +144,12 @@ const ROWS: SettingRow[] = [
       "Seeker · AI Career Coach — interview practice (also requires a configured + budgeted LLM provider on /admin/llm)",
     type: "boolean",
   },
+  {
+    key: "feature_flag_living_catalog",
+    label:
+      "Seeker · Living Learning Catalog — path reviews + “recommended by N of M” roll-up on learning-path cards",
+    type: "boolean",
+  },
 ];
 
 export function SettingsForm({ values }: Props) {

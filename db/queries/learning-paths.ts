@@ -35,6 +35,9 @@ function toLearningPath(row: LearningPathRow): LearningPath {
     national: row.national,
     url: row.url ?? undefined,
     sebenzaReviewed: row.sebenzaReviewed,
+    id: row.id,
+    reviewCount: row.reviewCount,
+    recommendCount: row.recommendCount,
   };
 }
 
