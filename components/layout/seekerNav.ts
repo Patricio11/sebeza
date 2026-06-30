@@ -4,6 +4,7 @@ import {
   Briefcase,
   GraduationCap,
   Compass,
+  Bot,
   Activity,
   Bell,
   Heart,
@@ -25,6 +26,10 @@ export const SEEKER_NAV: DashboardNavItem[] = [
   // response lifecycle).
   { key: "invitations", label: "Vacancy invites", href: "/dashboard/invitations", icon: Inbox },
   { key: "grow", label: "Career compass", href: "/dashboard/grow", icon: Compass },
+  // Phase 17 ("AI Career Coach", flag-gated)  removed from the nav unless
+  // `feature_flag_seeker_ai_coach` is ON (the seeker layout filters it). Sits
+  // next to Career compass: both are growth / work-readiness surfaces.
+  { key: "coach", label: "AI coach", href: "/dashboard/coach", icon: Bot },
   // Phase 11.4.2  private follow list. Sits next to Career compass
   // because both surfaces are about discovery + warm intent. The
   // employer is never told.

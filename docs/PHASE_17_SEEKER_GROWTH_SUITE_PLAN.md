@@ -122,21 +122,26 @@ a timely "your skill is heating up near you" nudge.
 
 ---
 
-## 🤖 TASK 17.3 — AI CAREER COACH — ⏳ PENDING
+## 🤖 TASK 17.3 — AI CAREER COACH — ✅ DONE 2026-06-22
 **Flag:** `feature_flag_seeker_ai_coach` **AND** a configured/budgeted LLM provider. **Goal:** a
-seeker-facing LLM coach. **Scope v1: interview practice only** (role-aware questions + feedback) —
-not bio/CV rewriting yet.
+seeker-facing LLM coach. **Scope v1: interview practice** (role-aware practice questions).
 
-- **Dispatcher** `lib/llm/seeker-coach.ts`: mirror `lib/llm/curriculum.ts`'s multi-gate dispatch
-  (active provider → budget < cap → **feature flag** → PII guard → audited). Reuse
-  `lib/llm/providers/*`. New audit kind `seeker.ai_coach.call` with token/cost meta; **never send
-  name/ID/contact** — only profession + skills + a role title.
-- **Surface** `/dashboard/coach` (in nav, gated): a calm, text-only practice flow — pick a target
-  role → get a few tailored questions → optionally submit an answer → get specific, honest feedback.
-  No "guaranteed job" framing (same guardrail as work-readiness content).
-- **Off-by-default + visibly gated:** when the flag is on but no provider is configured, the page
-  explains it's unavailable (no crash). Budget exhaustion degrades gracefully.
-- Verify + commit. (Heaviest; do last.)
+- ✅ **Dispatcher** `lib/llm/seeker-coach.ts` (`generateInterviewQuestions`): the same multi-gate
+  posture as the curriculum dispatcher — flag → PII guard → active provider → decryptable creds →
+  budget (shared pool); audited via new `seeker.ai_coach.call` / `.skipped` kinds with token/cost
+  meta only. **Never sends name/ID/contact** — only profession + skills + a role title. A generic
+  chat call (OpenAI-compatible + Anthropic) reuses the encrypted `llm_providers` creds.
+- ✅ **Surface** `/dashboard/coach` (`page.tsx` gated by the flag → `notFound()` when off) + the
+  `CoachPractice` client flow (one role field → numbered practice questions). Calm, text-only,
+  No-Flash. Explicit "practice, not a guarantee" framing. Server Action `lib/seeker/coach.ts`.
+- ✅ **Nav** `SEEKER_NAV` gains an "AI coach" item; the seeker layout filters it out unless the flag
+  is on (no dead link when dark).
+- ✅ **Graceful degradation:** flag on + no active provider (every seeded row dormant) → `no_provider`
+  → a calm "not switched on yet" message. Budget/credentials/error all map to non-alarming copy.
+- **Tests (green):** `npm run test:all` → typecheck + lint (0 errors) + **321 vitest** ✅ · build ✅ ·
+  **flag OFF E2E 2/2** (nav hidden + page surface unreachable) + seeker arc **12/12** = zero
+  regression · **flag ON E2E 2/2** (new `tests/e2e/ai-coach.spec.ts`: page renders + degrades
+  gracefully with no provider; flag removed in afterAll). Desktop + 360px.
 
 ---
 
@@ -155,4 +160,8 @@ not bio/CV rewriting yet.
 - [x] 17.0 Scaffolding (flags + admin toggles)
 - [x] 17.1 The Climb — tests green (test:all 318 ✅ · flag-OFF 24/24 ✅ · flag-ON 2/2 ✅)
 - [x] 17.2 Demand Pulse — tests green (test:all 321 ✅ · flag-OFF 12/12 ✅ · flag-ON 2/2 ✅)
-- [ ] 17.3 AI Career Coach
+- [x] 17.3 AI Career Coach — tests green (test:all 321 ✅ · flag-OFF 2/2 + arc 12/12 ✅ · flag-ON 2/2 ✅)
+
+**✅ PHASE 17 COMPLETE** — all three seeker-growth features shipped dark (default OFF), each
+admin-switchable from `/admin/settings`, each verified at desktop + 360px with flag OFF (zero
+regression) and flag ON (the new surface), and the full vitest + build green throughout.

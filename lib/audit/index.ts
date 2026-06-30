@@ -220,6 +220,11 @@ export type AuditKind =
   // Phase 17 ("The Climb")  self-paced progress checkpoint (0..100) on an
   // active item. Meta carries progressPercent; feeds future stall analytics.
   | "learning.progress"
+  // Phase 17 ("AI Career Coach", flag-gated)  a seeker-facing LLM call
+  // (interview practice) succeeded; meta carries token/cost, never the prompt
+  // text. `.skipped` records a gate that closed (flag/provider/budget/PII).
+  | "seeker.ai_coach.call"
+  | "seeker.ai_coach.skipped"
   | "learning.complete"
   | "learning.abandon"
   // Phase 11.2.1  click-through to the provider's enrolment page from
