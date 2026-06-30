@@ -1,29 +1,28 @@
 /**
  * Phase 11.2.2  free-alternative lookup.
+ * Phase 18 ("Living Learning Catalog")  the catalog source moved from the
+ * `MOCK_COMPASS.learningPaths` constant to the `learning_paths` table. The
+ * matching logic is unchanged + kept PURE (`pickFreeAlternative` over a passed
+ * catalog, so it stays a fast unit test); `findFreeAlternativeForSkill` is the
+ * async wrapper that loads the catalog from the DB.
  *
- * Pure helper over the static `MOCK_COMPASS.learningPaths` catalog
- * (Phase 6 swaps this for a DB-backed providers table when the
- * curriculum dataset lands  the signature is stable). Returns the
- * best free/subsidised path that unlocks the requested skill.
+ * Returns the best free/subsidised path that unlocks the requested skill.
  *
  * Ordering rules (codified, not heuristic):
  *   1. Prefer `cost === "free"` over `cost === "subsidised"`.
- *   2. Prefer `national === true` (works for seekers outside major
- *      metros).
+ *   2. Prefer `national === true` (works for seekers outside major metros).
  *   3. Prefer shorter durationWeeks (lower commitment ask).
  *
- * Excludes any path the caller passes in `excludeTitles`  used by the
- * modal to avoid recommending the same path the seeker just abandoned
- * (or any prior path they bailed on for the same skill).
+ * Excludes any path the caller passes in `excludeTitles`  used by the modal to
+ * avoid recommending the same path the seeker just abandoned (or any prior path
+ * they bailed on for the same skill).
  *
- * Returns null when nothing matches; the caller falls back to the
- * default abandon flow without surfacing a fake recommendation.
+ * Returns null when nothing matches; the caller falls back to the default
+ * abandon flow without surfacing a fake recommendation.
  */
 
-import {
-  MOCK_COMPASS,
-  type LearningPath,
-} from "@/lib/mock/growth";
+import { type LearningPath } from "@/lib/mock/growth";
+import { listAllLearningPaths } from "@/db/queries/learning-paths";
 import { SKILLS } from "@/lib/mock/taxonomy";
 
 export interface FreeAlternative {
@@ -43,7 +42,12 @@ const COST_PRIORITY: Record<"free" | "subsidised", number> = {
   subsidised: 1,
 };
 
-export function findFreeAlternativeForSkill(
+/**
+ * Pure picker over a supplied catalog  the codified ordering, no I/O. Unit-
+ * tested directly against any catalog (the seed mirrors the old constant).
+ */
+export function pickFreeAlternative(
+  catalog: LearningPath[],
   skillSlug: string,
   excludeTitles: string[] = [],
 ): FreeAlternative | null {
@@ -52,7 +56,7 @@ export function findFreeAlternativeForSkill(
   const skillLabel = skill.label.toLowerCase();
   const excludeSet = new Set(excludeTitles);
 
-  const candidates = MOCK_COMPASS.learningPaths.filter((p) => {
+  const candidates = catalog.filter((p) => {
     if (excludeSet.has(p.title)) return false;
     if (p.cost !== "free" && p.cost !== "subsidised") return false;
     // Skill match by label: path.unlocksSkills are free-text labels, not
@@ -90,4 +94,16 @@ export function findFreeAlternativeForSkill(
     url: best.url,
     sebenzaReviewed: best.sebenzaReviewed,
   };
+}
+
+/** Async wrapper: loads the live catalog from the DB, then applies the picker. */
+export async function findFreeAlternativeForSkill(
+  skillSlug: string,
+  excludeTitles: string[] = [],
+): Promise<FreeAlternative | null> {
+  return pickFreeAlternative(
+    await listAllLearningPaths(),
+    skillSlug,
+    excludeTitles,
+  );
 }

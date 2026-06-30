@@ -35,8 +35,8 @@ import { logAccess } from "@/lib/audit";
 import { createNotification } from "@/lib/notifications/server";
 import { rankInPoolQuery } from "@/db/queries/analytics";
 import { SKILLS } from "@/lib/mock/taxonomy";
-import { MOCK_COMPASS } from "@/lib/mock/growth";
 import type { LearningPath } from "@/lib/mock/growth";
+import { listAllLearningPaths } from "@/db/queries/learning-paths";
 import {
   ABANDON_REASON_LABEL,
   COST_ACCESS_ABANDON_REASONS,
@@ -71,13 +71,17 @@ async function getMyProfileId(userId: string): Promise<string | null> {
 
 /** Resolve a learning-path catalog entry that unlocks the target skill.
  *  Used by acceptRecommendation to default `title`/`provider`/`resourceKind`
- *  when the caller doesn't provide them. Pure (reads the static catalog). */
-function matchLearningPathForSkill(skillSlug: string): LearningPath | null {
+ *  when the caller doesn't provide them. Reads the `learning_paths` catalog
+ *  (Phase 18  was the static constant). */
+async function matchLearningPathForSkill(
+  skillSlug: string,
+): Promise<LearningPath | null> {
   const skillLabel = SKILLS.find((s) => s.slug === skillSlug)?.label;
   if (!skillLabel) return null;
   const labelLower = skillLabel.toLowerCase();
+  const catalog = await listAllLearningPaths();
   return (
-    MOCK_COMPASS.learningPaths.find((p) =>
+    catalog.find((p) =>
       p.unlocksSkills.some((s) => s.toLowerCase() === labelLower),
     ) ?? null
   );
@@ -247,7 +251,7 @@ export async function acceptRecommendation(
     return { ok: true, itemId: existing[0].id };
   }
 
-  const matched = matchLearningPathForSkill(input.skillSlug);
+  const matched = await matchLearningPathForSkill(input.skillSlug);
   const id = `lrn_${randomUUID()}`;
   await db.insert(schema.learningItems).values({
     id,
@@ -807,7 +811,7 @@ export async function markLearningInterested(
     return { ok: true, itemId: existing[0].id };
   }
 
-  const matched = matchLearningPathForSkill(skillSlug);
+  const matched = await matchLearningPathForSkill(skillSlug);
   const id = `lrn_${randomUUID()}`;
   await db.insert(schema.learningItems).values({
     id,

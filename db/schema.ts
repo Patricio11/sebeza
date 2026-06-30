@@ -714,6 +714,76 @@ export const learningItems = pgTable(
   }),
 );
 
+/**
+ * Phase 18 ("Living Learning Catalog")  the learning-path catalog moved off
+ * the hardcoded `MOCK_COMPASS.learningPaths` constant into an editable,
+ * rateable, freshness-tracked table. The seed mirrors the constant exactly so
+ * the compass renders identically post-migration (a parity test asserts this).
+ */
+export const learningPaths = pgTable(
+  "learning_paths",
+  {
+    id: text("id").primaryKey(),
+    title: text("title").notNull(),
+    provider: text("provider").notNull(),
+    /** "seta" | "tvet" | "university" | "open" | …  free text (mirrors the
+     *  LearningProviderKind union; no enum so a new kind needs no migration). */
+    providerKind: text("provider_kind").notNull(),
+    /** "free" | "subsidised" | "paid". */
+    cost: text("cost").notNull(),
+    costNote: text("cost_note"),
+    outcome: text("outcome").notNull(),
+    durationWeeks: integer("duration_weeks").notNull(),
+    /** Free-text skill labels this path unlocks (labels, not slugs  matched
+     *  case-insensitively, mirroring the constant). */
+    unlocksSkills: jsonb("unlocks_skills").notNull().$type<string[]>(),
+    national: boolean("national").notNull().default(false),
+    /** Direct enrolment URL; null is honest (better than a stale link). */
+    url: text("url"),
+    sebenzaReviewed: boolean("sebenza_reviewed").notNull().default(false),
+    /** Freshness contract (18.2): when an admin last re-verified the path. */
+    lastVerifiedAt: timestamp("last_verified_at"),
+    /** Seeker feedback roll-up (18.1). recommend_count <= review_count. */
+    reviewCount: integer("review_count").notNull().default(0),
+    recommendCount: integer("recommend_count").notNull().default(0),
+    /** Preserves the constant's display order (render parity with the old). */
+    sortOrder: integer("sort_order").notNull().default(0),
+    metadata: jsonb("metadata"),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    deletedAt: timestamp("deleted_at"),
+  },
+  (t) => ({
+    activeIdx: index("learning_paths_active_idx").on(t.deletedAt, t.sortOrder),
+  }),
+);
+
+/**
+ * Phase 18.1  one row per (seeker, path) review. `would_recommend` rolls up
+ * into `learning_paths.review_count` / `recommend_count`. The optional blocker
+ * note is PII-flagged in audit + future exports.
+ */
+export const learningPathReviews = pgTable(
+  "learning_path_reviews",
+  {
+    id: text("id").primaryKey(),
+    pathId: text("path_id")
+      .notNull()
+      .references(() => learningPaths.id, { onDelete: "cascade" }),
+    profileId: text("profile_id")
+      .notNull()
+      .references(() => profiles.id, { onDelete: "cascade" }),
+    wouldRecommend: boolean("would_recommend").notNull(),
+    blocker: text("blocker"),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+  },
+  (t) => ({
+    onePerSeeker: uniqueIndex("learning_path_reviews_path_profile_uniq").on(
+      t.pathId,
+      t.profileId,
+    ),
+  }),
+);
+
 export const qualifications = pgTable("qualifications", {
   id: text("id").primaryKey(),
   profileId: text("profile_id")

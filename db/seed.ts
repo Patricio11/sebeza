@@ -50,6 +50,7 @@ import {
   INSTITUTIONS,
 } from "@/lib/mock/taxonomy";
 import { mockProfiles } from "@/lib/mock/profiles";
+import { MOCK_COMPASS } from "@/lib/mock/growth";
 import { SEED_ADMIN, SEED_DISCOVERY_EMPLOYER } from "@/db/fixtures";
 import { CONSENT_PURPOSES } from "@/lib/consent";
 
@@ -147,6 +148,42 @@ async function seedLlmProviders() {
       { id: "self_hosted", displayName: "Self-hosted (POPIA-clean)", active: false, monthlyBudgetZar: 0 },
     ])
     .onConflictDoNothing();
+}
+
+/**
+ * Phase 18 ("Living Learning Catalog")  seed `learning_paths` directly from
+ * the `MOCK_COMPASS.learningPaths` constant, so the table is a faithful mirror
+ * of the old hardcoded catalog (single source of truth → the parity test holds
+ * and the compass renders identically). `sort_order = index` preserves the
+ * constant's display order.
+ */
+async function seedLearningPaths() {
+  console.log("📚 Phase 18  learning_paths catalog (mirrors MOCK_COMPASS)…");
+  const rows = MOCK_COMPASS.learningPaths.map((p, i) => ({
+    id: slugifyLearningPathId(p.title),
+    title: p.title,
+    provider: p.provider,
+    providerKind: p.providerKind,
+    cost: p.cost,
+    costNote: p.costNote ?? null,
+    outcome: p.outcome,
+    durationWeeks: p.durationWeeks,
+    unlocksSkills: p.unlocksSkills,
+    national: p.national ?? false,
+    url: p.url ?? null,
+    sebenzaReviewed: p.sebenzaReviewed ?? false,
+    sortOrder: i,
+  }));
+  await db.insert(schema.learningPaths).values(rows).onConflictDoNothing();
+  console.log(`   inserted ${rows.length} learning paths`);
+}
+
+function slugifyLearningPathId(title: string): string {
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 80);
 }
 
 async function seedTaxonomy() {
@@ -2270,6 +2307,7 @@ async function main() {
   // /admin/llm renders zero provider cards. ON CONFLICT keeps the
   // insert idempotent for DBs where the rows survived.
   await seedLlmProviders();
+  await seedLearningPaths();
   await seedTaxonomy();
   await seedUsersAndProfiles();
   await seedProfileChildren();

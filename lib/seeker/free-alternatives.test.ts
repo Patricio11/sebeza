@@ -1,19 +1,25 @@
 /**
  * Phase 12 (Task 12.1)  free-alternative lookup fixtures (Phase 11.2.2).
+ * Phase 18: the catalog source moved to the `learning_paths` table, but the
+ * ordering contract is unchanged and still lives in the PURE `pickFreeAlternative`
+ * (the async `findFreeAlternativeForSkill` just feeds it the DB catalog). We unit-
+ * test the pure picker against `MOCK_COMPASS.learningPaths` — the exact catalog
+ * the seed mirrors into the table, so this stays a fast, DB-free unit test AND
+ * proves the seeded behaviour (the integration parity test proves the seed === here).
  *
- * The ordering rules are codified in the module header: free beats
- * subsidised, national beats metro-only, shorter beats longer. Rather than
- * hand-pick catalogue entries (brittle against editorial changes), the main
- * fixture re-derives the expected winner for EVERY skill in the taxonomy
- * with an independent implementation of the documented rules and compares.
- * If the catalogue changes, both sides move together; if the ordering logic
- * drifts, the fixture catches it.
+ * The ordering rules are codified in the module header: free beats subsidised,
+ * national beats metro-only, shorter beats longer. Rather than hand-pick
+ * catalogue entries (brittle against editorial changes), the main fixture
+ * re-derives the expected winner for EVERY skill in the taxonomy with an
+ * independent implementation of the documented rules and compares.
  */
 
 import { describe, expect, test } from "vitest";
 import { MOCK_COMPASS } from "@/lib/mock/growth";
 import { SKILLS } from "@/lib/mock/taxonomy";
-import { findFreeAlternativeForSkill } from "./free-alternatives";
+import { pickFreeAlternative } from "./free-alternatives";
+
+const CATALOG = MOCK_COMPASS.learningPaths;
 
 /** Independent re-derivation of the documented contract. */
 function expectedWinner(skillSlug: string, excludeTitles: string[] = []) {
@@ -21,7 +27,7 @@ function expectedWinner(skillSlug: string, excludeTitles: string[] = []) {
   if (!skill) return null;
   const label = skill.label.toLowerCase();
   const exclude = new Set(excludeTitles);
-  const candidates = MOCK_COMPASS.learningPaths.filter((p) => {
+  const candidates = CATALOG.filter((p) => {
     if (exclude.has(p.title)) return false;
     if (p.cost !== "free" && p.cost !== "subsidised") return false;
     return p.unlocksSkills.some(
@@ -45,14 +51,14 @@ function expectedWinner(skillSlug: string, excludeTitles: string[] = []) {
   return candidates[0]!.title;
 }
 
-describe("findFreeAlternativeForSkill", () => {
+describe("pickFreeAlternative", () => {
   test("unknown skill slug → null (never a fake recommendation)", () => {
-    expect(findFreeAlternativeForSkill("not-a-real-skill")).toBeNull();
+    expect(pickFreeAlternative(CATALOG, "not-a-real-skill")).toBeNull();
   });
 
   test("matches the documented ordering for every skill in the taxonomy", () => {
     for (const { slug } of SKILLS) {
-      const actual = findFreeAlternativeForSkill(slug);
+      const actual = pickFreeAlternative(CATALOG, slug);
       const expected = expectedWinner(slug);
       expect(actual?.title ?? null, `skill: ${slug}`).toBe(expected);
     }
@@ -60,7 +66,7 @@ describe("findFreeAlternativeForSkill", () => {
 
   test("only ever recommends free or subsidised paths", () => {
     for (const { slug } of SKILLS) {
-      const alt = findFreeAlternativeForSkill(slug);
+      const alt = pickFreeAlternative(CATALOG, slug);
       if (alt) expect(["free", "subsidised"]).toContain(alt.cost);
     }
   });
@@ -69,11 +75,11 @@ describe("findFreeAlternativeForSkill", () => {
     // Find any skill that has at least one alternative, exclude the winner,
     // and assert it can never be recommended again.
     const withAlt = SKILLS.map((s) => s.slug).find(
-      (slug) => findFreeAlternativeForSkill(slug) !== null,
+      (slug) => pickFreeAlternative(CATALOG, slug) !== null,
     );
     expect(withAlt, "catalogue should yield at least one alternative").toBeDefined();
-    const first = findFreeAlternativeForSkill(withAlt!)!;
-    const second = findFreeAlternativeForSkill(withAlt!, [first.title]);
+    const first = pickFreeAlternative(CATALOG, withAlt!)!;
+    const second = pickFreeAlternative(CATALOG, withAlt!, [first.title]);
     expect(second?.title).not.toBe(first.title);
     expect(second?.title ?? null).toBe(expectedWinner(withAlt!, [first.title]));
   });

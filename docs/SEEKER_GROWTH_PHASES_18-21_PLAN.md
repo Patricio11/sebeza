@@ -69,19 +69,24 @@ rating UI + editorial surfaces; the migration itself is behaviour-preserving and
 **Thesis:** the catalog should *learn as seekers use it* — clicks, completions, and ratings flow
 back so product sees which paths convert and which rot, and admins get a re-verification heartbeat.
 
-### 18.0 — Schema + behaviour-preserving migration
-- New `learning_paths` table: `id`, `title`, `provider`, `provider_kind` (seta/tvet/indlela/mooc/
-  employer/community), `cost_zar` (0 = free), `duration_weeks`, `outcome`, `unlocks_skills` (jsonb
-  slug[]), `url`, `sebenza_reviewed` (bool), `last_verified_at`, `review_count`, `avg_rating`
-  (numeric, null until rated), `metadata` (jsonb), `created_at`, `deleted_at` (soft-delete).
-- New `learning_path_reviews` table: `id`, `path_id` FK, `profile_id` FK, `would_recommend` (bool),
-  `blocker` (text ≤ 280, optional), `created_at`, `unique(path_id, profile_id)` (one review per
-  seeker per path). Provenance auditable.
-- **Seed parity:** port every current `MOCK_COMPASS` / free-alternatives path into the seed so the
-  compass renders **identically** post-migration. `lib/seeker/free-alternatives.ts` reads the table
-  via a new `db/queries/learning-paths.ts` (`listPathsForSkills`, `getPath`), keeping its signature.
-- **Tests:** vitest parity test (the DB-backed path set === the old constant for the seed); migration
-  clean; flag-OFF E2E = compass unchanged.
+### 18.0 — Schema + behaviour-preserving migration ✅ DONE 2026-06-30
+- ✅ New `learning_paths` table (migration `0053`): `id`, `title`, `provider`, `provider_kind`,
+  `cost` (free/subsidised/paid  matches the existing `LearningCost`, not a ZAR field), `cost_note`,
+  `outcome`, `duration_weeks`, `unlocks_skills` (jsonb label[]), `national`, `url`, `sebenza_reviewed`,
+  `last_verified_at`, `review_count`, `recommend_count` (would-recommend roll-up  no fake stars),
+  `sort_order` (preserves the constant's render order), `metadata` (jsonb), `created_at`, `deleted_at`.
+- ✅ New `learning_path_reviews` table: `id`, `path_id` FK, `profile_id` FK, `would_recommend`,
+  `blocker` (optional), `created_at`, `unique(path_id, profile_id)`.
+- ✅ **Seed parity:** `seedLearningPaths()` ports `MOCK_COMPASS.learningPaths` verbatim (single source
+  → the constant stays the editable fixture; the table mirrors it). New `db/queries/learning-paths.ts`
+  (`listAllLearningPaths`, `getLearningPath`); the three consumers now read the DB:
+  `career-compass.ts` (`pickRelevantPaths`), `free-alternatives.ts` (pure `pickFreeAlternative` +
+  async `findFreeAlternativeForSkill`), `learning.ts` (`matchLearningPathForSkill` → async).
+- ✅ **Tests (green):** `test:all` → typecheck + lint (0 errors) + **322 vitest** incl. a new
+  integration **parity test** (`tests/integration/learning-paths-parity.test.ts`: DB catalog ===
+  constant, same order + every field) + the refactored pure-picker unit test · build ✅ · migration
+  `0053` clean from zero · **24/24 seeker + role-arc E2E** (compass/grow renders identically). ⚠️ Dev
+  DB: run `npm run db:migrate` before the catalog reads from the table.
 
 ### 18.1 — Seeker feedback loop (flag-gated)
 - After `completeLearningItem` succeeds, a lightweight 2-question modal (`PathReviewModal`):
@@ -238,7 +243,7 @@ becomes a priority, since it shares no schema with 18–20.
 
 ## 📌 STATUS
 
-- [ ] **Phase 18 — Living Learning Catalog** (18.0 schema/migration · 18.1 feedback loop · 18.2 editorial+freshness)
+- [~] **Phase 18 — Living Learning Catalog** (✅ 18.0 schema/migration · ☐ 18.1 feedback loop · ☐ 18.2 editorial+freshness)
 - [ ] **Phase 19 — Custom Skills & Taxonomy Growth** (19.0 schema · 19.1 editor · 19.2 canonicalization)
 - [ ] **Phase 20 — Skill Prerequisites & Sequencing** (20.0 graph · 20.1 re-weight+pills · 20.2 unlocks-next)
 - [ ] **Phase 21 — Hyper-Local Demand** (21.0 capture · 21.1 gated aggregation · 21.2 hotspots surface)

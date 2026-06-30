@@ -26,17 +26,16 @@ import { sql } from "drizzle-orm";
 import { getDb } from "@/db/client";
 import { SKILLS, PROFESSIONS, PROVINCES } from "@/lib/mock/taxonomy";
 import {
-  MOCK_COMPASS,
   type CompassSnapshot,
   type SkillRecommendation,
   type AdjacentProfession,
   type LearningPath,
 } from "@/lib/mock/growth";
-
-// Static SA-grounded learning-path catalog. Lives in `MOCK_COMPASS` today
-// (Phase 1.5 seeded it); Phase 7 admin/taxonomy lets admins curate the
-// list, at which point this becomes a `learning_paths` DB query.
-const STATIC_LEARNING_PATHS: LearningPath[] = MOCK_COMPASS.learningPaths;
+// Phase 18 ("Living Learning Catalog"): the catalog now lives in the
+// `learning_paths` table (admin-editable, seeker-rateable). `listAllLearningPaths`
+// returns the same `LearningPath` shape in the same order the constant did, so
+// `pickRelevantPaths` (a stable sort) renders identically.
+import { listAllLearningPaths } from "@/db/queries/learning-paths";
 import type { PublicProfile, TaxonomyEntry } from "@/lib/mock/types";
 
 const DEMAND_WINDOW_DAYS = 90;
@@ -215,7 +214,7 @@ export async function getCompassForProfile(
 
   // ── 6. Compose snapshot ─────────────────────────────────────────────────
   const learningPaths: LearningPath[] = pickRelevantPaths(
-    STATIC_LEARNING_PATHS,
+    await listAllLearningPaths(),
     recommendations.map((r) => r.skill.slug),
   );
 

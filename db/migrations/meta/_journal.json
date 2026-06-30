@@ -372,6 +372,13 @@
       "when": 1782400000000,
       "tag": "0052_phase17_learning_progress",
       "breakpoints": false
+    },
+    {
+      "idx": 53,
+      "version": "7",
+      "when": 1782500000000,
+      "tag": "0053_phase18_learning_paths",
+      "breakpoints": false
     }
   ]
 }
