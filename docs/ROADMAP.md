@@ -912,6 +912,109 @@ Five sub-phases, ordered by ROI per LOC:
 
 ---
 
+## 📡 PHASE 14: ZERO-RATING (STRATEGIC / PARTNERSHIP) ⏳ *planned — partnership-gated, dormant*
+*Goal: close the "low-data ≠ zero-data" gap that is SAYouth's real moat (their site is data-free on the
+major networks). **Planning-complete, NOT a sprint** — conditional on a registered company **and**
+government/institutional backing. Origin: `docs/COMPETITIVE_ANALYSIS_SAYOUTH.md` §2 + §5.1. Plan:
+`docs/PHASE_14_PLAN.md`.*
+
+- [ ] **14.1** Two technical routes researched into a one-page decision doc (mirrors `AWS_DATABASE_OPTIONS.md`).
+- [ ] **14.2** Eligibility / backing prerequisites written down honestly + tied to the partnership track.
+- [ ] **14.3** Cheap do-early engineering readiness (lighter app + honest outbound-link UX) — the only code
+  that lands, and only because it makes Sebenza a clean candidate *when* a route appears. Ships value on its
+  own merits even if zero-rating never happens.
+
+> **Do NOT block product work (15/16/17 or anything else) on this.** Build nothing that *claims* zero-rating
+> before a deal is signed (Verification-Honesty applies to product claims).
+
+---
+
+## 🧰 PHASE 15: WORK-READINESS CONTENT ✅ *(shipped 2026-06-13)*
+*Goal: add the **"get ready for the work," not just "find the work"** layer — entirely on infrastructure that
+already existed. Origin: `docs/COMPETITIVE_ANALYSIS_SAYOUTH.md` §5.2. Companion: `docs/completed/PHASE_15_COMPLETE.md`.*
+
+### Task 15.1: "Get work-ready" article collection ✅
+- [x] 6 hand-written, plain-language, SA-context articles in `content/help/seeker/work-ready/`, reusing the
+  Phase-10 help-centre architecture.
+
+### Task 15.2: CV generator (`/dashboard/cv`) — the marquee ✅
+- [x] Print-CSS profile→CV (reuses the `/insights/print` pattern); 2 ATS-friendly templates (`classic` /
+  `compact` via `?template=`); skills shown strongest-first at the seeker's own rating (Verification-Honesty);
+  seeker-only, never an employer surface, never indexed, never auto-shared; **no new PII / migration / consent**.
+
+### Task 15.3: Contextual surfacing ✅
+- [x] `<GetWorkReadyCard>` (full + compact) by deterministic profile relevance; "Prepare for this role" on the
+  invitation detail page; `build-your-cv` HelpLink on the profile editor. 360px-first, No-Flash.
+
+---
+
+## 📍 PHASE 16: "NEAR YOU" ✅ *(shipped 2026-06-13)*
+*Goal: foreground the location dimension Sebenza already has, expressed in **reverse-matching** terms (demand
+near you + be-found + locality-legible invitations/employers) — **not** a job-board feed (founder-confirmed
+§D1). Origin: `docs/COMPETITIVE_ANALYSIS_SAYOUTH.md` §5.3. Companion: `docs/completed/PHASE_16_COMPLETE.md`.*
+
+### Task 16.1: "Work near you" dashboard card — the marquee ✅
+- [x] Leads with agency ("Be found for {profession} work near {city}" + completeness bar); honest 90-day
+  province demand context; truthful pool link ("see who you're matched against", **not** a vacancy feed);
+  "near you **OR** remote" SA-wide demand line for remote/hybrid-available seekers.
+
+### Task 16.2: Locality made legible ✅
+- [x] `<TalentRosterItem>` shows "{city}, {province}" + an optional "Same city" chip; the same chip on the
+  invitations list + the vacancy match view; `<RecommendedEmployersCard>` stays province-scoped.
+
+### Task 16.3: Carried through the loop ✅
+- [x] Career Compass city-demand copy tightened to the honest near-you framing; `formatVacancyLocation`
+  (Phase 13.9) remains the single remote source. **318 vitest + 12/12 seeker E2E at 360px.**
+
+---
+
+## 🌱 PHASE 17: SEEKER GROWTH SUITE ✅ *(shipped 2026-06-30)*
+*Goal: make the learning flywheel's most-motivating half **visible** — three flag-gated, ship-dark seeker
+features, each default OFF + admin-switchable from `/admin/settings`. Origin: the skill-development gap
+assessment + `COMPETITIVE_ANALYSIS_SAYOUTH.md` §3 (the flywheel). Plan: `docs/PHASE_17_SEEKER_GROWTH_SUITE_PLAN.md`.*
+
+### Task 17.1: The Climb (live skill journey) ✅
+- [x] `feature_flag_seeker_skill_journey`. Migration 0052 (`learning_items.progress_percent`);
+  `setLearningProgress` + checkpoint UI; `CompleteSkillModal` (seeker-set proficiency 1–5 replaces the
+  hardcoded `3`) + `GrowthMomentumCard` with the **live rank payoff**. Closes assessment **Gaps 1 + 5**.
+
+### Task 17.2: Demand Pulse ✅
+- [x] `feature_flag_seeker_demand_pulse`. `getDemandPulse` (this-week vs prior-3-week, province-scoped, over
+  the seeker's profession + skills); `DemandPulseCard` on `/dashboard`; `demand.pulse` notification + weekly
+  cron (6-day dedupe). Demand-side, province-level only (D2).
+
+### Task 17.3: AI Career Coach ✅
+- [x] `feature_flag_seeker_ai_coach`. `lib/llm/seeker-coach.ts` reuses the gated `llm_providers` infra
+  (flag → PII guard → active provider → creds → budget); `/dashboard/coach` interview-practice surface + the
+  nav item filtered out when dark; graceful no-provider degradation; `seeker.ai_coach.call` / `.skipped`
+  audit kinds; **never sends name / ID / contact** — only profession + skills + a role title.
+
+### Task 17.4: Testing discipline ✅
+- [x] Per task: `npm run test:all` (321 vitest) + build green; **E2E both flag states** — flag OFF = today's
+  behaviour unchanged (zero regression), flag ON = the new surface — at desktop **and** 360px; clean migrations.
+
+> **Forward roadmap** for the four remaining assessment gaps (2/3/4/6): `docs/SEEKER_GROWTH_PHASES_18-21_PLAN.md`
+> — **Phase 18** Living Learning Catalog · **19** Custom Skills · **20** Skill Prerequisites · **21**
+> Hyper-Local Demand. Each flag-gated + ship-dark, same testing discipline.
+
+---
+
+## 🔭 PHASES 18–21: SEEKER GROWTH (forward roadmap) ⏳ *planned*
+*The four remaining gaps from the skill-development assessment, each flag-gated + ship-dark like Phase 17.
+Full task breakdown + UX/UI + testing discipline: `docs/SEEKER_GROWTH_PHASES_18-21_PLAN.md`.*
+
+- [ ] **Phase 18 — Living Learning Catalog** (Gap 2): move paths off the hardcoded constant into
+  `learning_paths` + `learning_path_reviews` DB tables (behaviour-preserving migration), a seeker feedback
+  loop, and an editorial admin with a 90-day freshness heartbeat. Foundation; unblocks Phase 7 provider hiring.
+- [ ] **Phase 19 — Custom Skills & Taxonomy Growth** (Gap 3): `profile_skills_custom` (self-attested, **never
+  searchable** until promoted), a seeker escape-hatch editor, an admin canonicalization workflow.
+- [ ] **Phase 20 — Skill Prerequisites & Sequencing** (Gap 4): `skill_prereqs` graph, compass re-ranking +
+  "Requires:" pills, an "Unlocks next" moment on completion.
+- [ ] **Phase 21 — Hyper-Local Demand** (Gap 6): capture city in `search_events.filters`, k-anonymized +
+  consent-gated city aggregation, a "Your city's hotspots" surface on `/dashboard/grow`.
+
+---
+
 ## 🚀 DEPLOYMENT CHECKLIST
 
 ### Pre-Launch
@@ -982,6 +1085,13 @@ HR Practitioner · Electrician · Plumber · Accountant · Nurse · Driver · Bo
 
 ---
 
-*Last Updated: 2026-06-13*
-*Version: 2.4  Phase 16 ("Near You") COMPLETE: reverse-matching location reframe (founder-confirmed §D1  not a job board)  Work-near-you dashboard card (be-found + honest province-level demand + truthful pool link + "or remote") + locality legibility ("{city}, {province}" + "Same city" chip on roster / vacancy match / invitations); 318 vitest + 12/12 seeker E2E at 360px. See `docs/completed/PHASE_16_COMPLETE.md`. v2.3  Phase 15 (Work-readiness content) COMPLETE: `work_ready` help collection + profile→CV generator + contextual surfacing. Post-launch phases 14/15/16 derive from `docs/COMPETITIVE_ANALYSIS_SAYOUTH.md`; 14 (zero-rating) is partnership-gated, 15 + 16 shipped. v2.2  Phase 12 (Testing & QA) COMPLETE: 309 vitest + 32 Playwright on a real-Postgres harness; 9 real bugs found + fixed. The next milestone before public ship is Phase 10 Arc B (operator tasks 10.5–10.11) plus the pre-commercial gates (Information Officer designation, pen-test, nonce CSP).*
+*Last Updated: 2026-06-30*
+*Version: 2.5  ROADMAP body synced through Phase 17 (sections for 14/15/16/17 added; previously only
+footer-referenced). **Phase 17 ("Seeker Growth Suite") COMPLETE** (2026-06-30): three flag-gated, ship-dark
+seeker features — The Climb (live skill journey: progress + seeker-set proficiency + live rank payoff,
+closes assessment Gaps 1+5), Demand Pulse (weekly "your skill is heating up" from employer-search spikes),
+AI Career Coach (interview practice on the gated `llm_providers` infra; never sends PII). Each verified
+flag-OFF (zero regression) + flag-ON at desktop + 360px; 321 vitest + build green. **Phase 14** (zero-rating)
+remains partnership-gated/dormant. Forward roadmap `docs/SEEKER_GROWTH_PHASES_18-21_PLAN.md` plans Phases
+18–21 for the four remaining assessment gaps (2/3/4/6). v2.4  Phase 16 ("Near You") COMPLETE: reverse-matching location reframe (founder-confirmed §D1  not a job board)  Work-near-you dashboard card (be-found + honest province-level demand + truthful pool link + "or remote") + locality legibility ("{city}, {province}" + "Same city" chip on roster / vacancy match / invitations); 318 vitest + 12/12 seeker E2E at 360px. See `docs/completed/PHASE_16_COMPLETE.md`. v2.3  Phase 15 (Work-readiness content) COMPLETE: `work_ready` help collection + profile→CV generator + contextual surfacing. Post-launch phases 14/15/16 derive from `docs/COMPETITIVE_ANALYSIS_SAYOUTH.md`; 14 (zero-rating) is partnership-gated, 15 + 16 shipped. v2.2  Phase 12 (Testing & QA) COMPLETE: 309 vitest + 32 Playwright on a real-Postgres harness; 9 real bugs found + fixed. The next milestone before public ship is Phase 10 Arc B (operator tasks 10.5–10.11) plus the pre-commercial gates (Information Officer designation, pen-test, nonce CSP).*
 *Working name: Sebenza  South African National Talent-Intelligence Platform.*
