@@ -105,15 +105,21 @@ back so product sees which paths convert and which rot, and admins get a re-veri
   confirmed). New `tests/e2e/living-catalog.spec.ts` (desktop + 360px); flag + reviews + counts
   restored in afterAll.
 
-### 18.2 — Editorial / freshness admin (admin-gated, not a seeker flag)
-- `/admin/learning-paths` list + `/admin/learning-paths/[id]` editor (CRUD, soft-delete, set
-  `sebenza_reviewed`, bump `last_verified_at`). Wire the existing `learning_path.opened` audit
-  (already logged in `lib/seeker/learning.ts`) into a click-vs-completion editorial view.
-- **Freshness heartbeat:** weekly cron flags paths with `last_verified_at` > 90 days → an admin
-  digest notification ("7 paths need re-verification"). Reuse the digest/notification idiom.
-- **UX:** a "Needs re-verification" rail at the top of the admin list, count badge, sorted oldest-
-  first; ochre accent on stale rows. Editorial, scannable, no data-grid soup.
-- **Tests:** admin E2E (add/edit/soft-delete a path; stale flag appears); cron unit test.
+### 18.2 — Editorial / freshness admin (admin-gated) ✅ DONE 2026-06-30
+- ✅ `/admin/learning-paths` + `LearningPathsManager` island: a "Needs re-verification" rail
+  (ochre, count) over the full path table with per-row **Verify / Edit / Remove / Restore** + an
+  **Add** form. Admin actions `lib/admin/learning-paths.ts` (`create` / `update` /
+  `markVerified` / `softDelete` / `restore`)  verifyAdmin + Zod + audited `admin.learning_path.edit`
+  (`meta.action`) + revalidate admin **and** `/dashboard/grow`. Nav item added.
+- ✅ **Freshness heartbeat:** `countStaleLearningPaths()` (live + `last_verified_at` null or > 90d) +
+  weekly cron `/api/cron/learning-path-freshness` → `notifyAllAdmins` (`admin.learning_path.stale`,
+  in-app, 6-day dedupe). Seeded paths are verified-at-launch so they don't flag stale on day one.
+- ✅ **Tests (green):** `test:all` → typecheck + lint (0 errors) + **325 vitest** + build · **admin E2E
+  4/4** (`tests/e2e/admin-learning-paths.spec.ts`: a forced-stale path appears in the rail → re-verify
+  clears it; remove → restore) + role-arc regression green. Desktop + 360px; one path forced stale in
+  beforeAll, all paths restored fresh + active in afterAll.
+- ↪ Deferred (noted): per-path click analytics from the `learning_path.opened` audit (the opened
+  audit isn't keyed to `learning_paths.id` today); a small follow-up, not blocking the freshness loop.
 
 ---
 
@@ -249,7 +255,7 @@ becomes a priority, since it shares no schema with 18–20.
 
 ## 📌 STATUS
 
-- [~] **Phase 18 — Living Learning Catalog** (✅ 18.0 schema/migration · ✅ 18.1 feedback loop · ☐ 18.2 editorial+freshness)
+- [x] **Phase 18 — Living Learning Catalog** ✅ (18.0 schema/migration · 18.1 feedback loop · 18.2 editorial+freshness) — all flag-/admin-gated, test:all + E2E green
 - [ ] **Phase 19 — Custom Skills & Taxonomy Growth** (19.0 schema · 19.1 editor · 19.2 canonicalization)
 - [ ] **Phase 20 — Skill Prerequisites & Sequencing** (20.0 graph · 20.1 re-weight+pills · 20.2 unlocks-next)
 - [ ] **Phase 21 — Hyper-Local Demand** (21.0 capture · 21.1 gated aggregation · 21.2 hotspots surface)

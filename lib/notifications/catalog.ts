@@ -100,6 +100,18 @@ export const NOTIFICATION_CATALOG = {
       "A gentle weekly heads-up when employers are searching more for one of your skills (or your profession) in your province — read straight off the live demand signal. In the bell by default; turn on email if you'd like it pushed.",
     dedupeWindowSeconds: 6 * 24 * 60 * 60,
   },
+  // Phase 18.2 ("Living Learning Catalog") — weekly heartbeat to admins when
+  // learning paths haven't been re-verified in 90+ days, so the catalog can't
+  // silently rot. In-app on, email off; 6-day dedupe (cron-restart safe).
+  "admin.learning_path.stale": {
+    defaultInApp: true,
+    defaultEmail: false,
+    audience: "all_admins",
+    label: "Learning paths need re-verification",
+    description:
+      "A weekly heads-up when one or more learning paths haven't been re-verified in over 90 days. Open /admin/learning-paths to review and re-verify them.",
+    dedupeWindowSeconds: 6 * 24 * 60 * 60,
+  },
   "qualification.rejected": {
     defaultInApp: true,
     defaultEmail: false,

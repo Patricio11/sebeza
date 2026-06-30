@@ -11,6 +11,7 @@ import {
   UserCog,
   HelpCircle,
   BookOpen,
+  GraduationCap,
   Sparkles,
 } from "lucide-react";
 import type { DashboardNavItem } from "./dashboardChrome";
@@ -24,6 +25,9 @@ export const ADMIN_NAV: DashboardNavItem[] = [
   // import. Sits next to taxonomy because they are the same kind of
   // editorial work over different tables.
   { key: "curriculum", label: "Curriculum", href: "/admin/curriculum", icon: BookOpen },
+  // Phase 18.2 ("Living Learning Catalog")  editorial + freshness admin for the
+  // learning-path catalog. Sits with curriculum: same editorial-over-a-table work.
+  { key: "learningPaths", label: "Learning paths", href: "/admin/learning-paths", icon: GraduationCap },
   // Phase 13.3  LLM provider configuration. Above audit-log because
   // every action here writes to it; the admin should be one click away.
   { key: "llm", label: "LLM providers", href: "/admin/llm", icon: Sparkles },

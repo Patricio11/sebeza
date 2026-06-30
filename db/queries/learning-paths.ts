@@ -10,7 +10,7 @@
  */
 
 import "server-only";
-import { and, asc, eq, isNull } from "drizzle-orm";
+import { and, asc, eq, isNull, lt, or, sql } from "drizzle-orm";
 import { getDb } from "@/db/client";
 import * as schema from "@/db/schema";
 import type {
@@ -72,4 +72,51 @@ export async function getLearningPath(
     )
     .limit(1);
   return rows[0] ?? null;
+}
+
+// ── Phase 18.2: editorial / freshness admin ──────────────────────────────────
+
+/** A path is "stale" (needs re-verification) when it's live but hasn't been
+ *  re-verified in over this many days (or never has). */
+export const FRESHNESS_STALE_DAYS = 90;
+
+export interface AdminLearningPathRow {
+  row: LearningPathRow;
+  stale: boolean;
+}
+
+/** Every path (incl. soft-deleted), in display order, each tagged stale-or-not.
+ *  For the `/admin/learning-paths` editorial surface. */
+export async function listLearningPathsAdmin(): Promise<AdminLearningPathRow[]> {
+  const db = getDb();
+  const rows = await db
+    .select()
+    .from(schema.learningPaths)
+    .orderBy(asc(schema.learningPaths.sortOrder), asc(schema.learningPaths.id));
+  const cutoff = Date.now() - FRESHNESS_STALE_DAYS * 86_400_000;
+  return rows.map((row) => ({
+    row,
+    stale:
+      row.deletedAt == null &&
+      (row.lastVerifiedAt == null || row.lastVerifiedAt.getTime() < cutoff),
+  }));
+}
+
+/** Count of live paths overdue for re-verification (drives the cron heartbeat). */
+export async function countStaleLearningPaths(): Promise<number> {
+  const db = getDb();
+  const cutoff = new Date(Date.now() - FRESHNESS_STALE_DAYS * 86_400_000);
+  const [agg] = await db
+    .select({ n: sql<number>`count(*)::int` })
+    .from(schema.learningPaths)
+    .where(
+      and(
+        isNull(schema.learningPaths.deletedAt),
+        or(
+          isNull(schema.learningPaths.lastVerifiedAt),
+          lt(schema.learningPaths.lastVerifiedAt, cutoff),
+        ),
+      ),
+    );
+  return agg?.n ?? 0;
 }

@@ -172,6 +172,9 @@ async function seedLearningPaths() {
     national: p.national ?? false,
     url: p.url ?? null,
     sebenzaReviewed: p.sebenzaReviewed ?? false,
+    // Seeded paths are editorially reviewed at launch → verified "now" so the
+    // 90-day freshness clock starts here (they don't flag stale on day one).
+    lastVerifiedAt: new Date(),
     sortOrder: i,
   }));
   await db.insert(schema.learningPaths).values(rows).onConflictDoNothing();
