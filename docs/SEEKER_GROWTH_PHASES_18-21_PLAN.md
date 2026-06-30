@@ -232,10 +232,15 @@ scale signal is high-value **but privacy-sharp**, so it ships behind both a flag
 gate, k-anonymized, top-metros-only. **Flag:** `feature_flag_city_demand` + consent
 `outcomes_research`.
 
-### 21.0 — Capture city (behaviour-preserving)
-- Extend the `/search` write path to store an optional `city` in `search_events.filters` (nullable;
-  province still always written). No read-path change yet — pure capture, backfill-safe.
-- **Tests:** unit test the write; existing demand queries unchanged (province path intact).
+### 21.0 — Capture city (behaviour-preserving) ✅ DONE 2026-06-30
+- ✅ City is **already captured** — `searchProfilesQuery` writes the full `filters` object and
+  `SearchFilters` carries `city`, so a city-scoped employer search records `filters->>'city'` (a slug)
+  with province still always written. No write-path change needed (truly behaviour-preserving).
+- ✅ **Seed** `seedCityDemand()`: 173 city-scoped `search_events` across the top-5 metros (Johannesburg,
+  Cape Town, Durban, Pretoria, Gqeberha) × profession segments, above the floor — so the hotspots
+  surface has real signal out of the box. andile-z (Johannesburg + `outcomes_research` consent) demos it.
+- ✅ **Tests (green):** `test:all` (**336 vitest**, incl. a new integration `city-capture.test.ts`:
+  a city-scoped search records `filters->>'city'` + keeps province). Existing demand queries unchanged.
 
 ### 21.1 — City aggregation behind k-anonymity + consent (flag-gated)
 - New query path in `getNearYouDemand` / `demandVsCurriculumQuery`: city-level aggregation that

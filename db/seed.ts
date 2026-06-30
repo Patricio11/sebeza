@@ -220,6 +220,90 @@ async function seedSkillPrereqs() {
   console.log(`   inserted ${PAIRS.length} prerequisite edges`);
 }
 
+/**
+ * Phase 21 ("Hyper-Local Demand")  city-scoped employer search demand for the
+ * top metros, so the flag-gated "Your city's hotspots" surface has real signal
+ * out of the box. Mirrors what the /search write path captures: `filters` holds
+ * a city SLUG (+ province slug). Volumes sit above the k-anonymity floor so the
+ * segments render. andile-z lives in Johannesburg + has outcomes_research
+ * consent, so the feature demos for the standard test seeker.
+ */
+async function seedCityDemand() {
+  console.log("📍 Phase 21  city-scoped employer demand (top metros)…");
+  const METROS: Array<{
+    city: string;
+    province: string;
+    segments: Array<{ term: string; n: number }>;
+  }> = [
+    {
+      city: "johannesburg",
+      province: "gauteng",
+      segments: [
+        { term: "Software Developer", n: 28 },
+        { term: "UX/UI Designer", n: 14 },
+        { term: "Accountant", n: 11 },
+        { term: "Call-Centre Agent", n: 9 },
+      ],
+    },
+    {
+      city: "cape-town",
+      province: "western-cape",
+      segments: [
+        { term: "Software Developer", n: 22 },
+        { term: "Chef", n: 16 },
+        { term: "Bookkeeper", n: 8 },
+      ],
+    },
+    {
+      city: "durban",
+      province: "kwazulu-natal",
+      segments: [
+        { term: "Electrician", n: 13 },
+        { term: "Call-Centre Agent", n: 10 },
+        { term: "Accountant", n: 7 },
+      ],
+    },
+    {
+      city: "pretoria",
+      province: "gauteng",
+      segments: [
+        { term: "HR Practitioner", n: 12 },
+        { term: "Software Developer", n: 9 },
+      ],
+    },
+    {
+      city: "gqeberha",
+      province: "eastern-cape",
+      segments: [
+        { term: "Boilermaker", n: 8 },
+        { term: "Electrician", n: 6 },
+      ],
+    },
+  ];
+
+  const rows: Array<{
+    id: string;
+    terms: string;
+    filters: Record<string, unknown>;
+    resultCount: number;
+  }> = [];
+  let idx = 0;
+  for (const m of METROS) {
+    for (const seg of m.segments) {
+      for (let i = 0; i < seg.n; i++) {
+        rows.push({
+          id: `srch_city_${idx++}`,
+          terms: seg.term,
+          filters: { province: m.province, city: m.city },
+          resultCount: 3,
+        });
+      }
+    }
+  }
+  await db.insert(schema.searchEvents).values(rows).onConflictDoNothing();
+  console.log(`   inserted ${rows.length} city-scoped search events`);
+}
+
 async function seedTaxonomy() {
   console.log("🌍 Provinces + cities…");
   await db
@@ -2344,6 +2428,7 @@ async function main() {
   await seedLearningPaths();
   await seedTaxonomy();
   await seedSkillPrereqs();
+  await seedCityDemand();
   await seedUsersAndProfiles();
   await seedProfileChildren();
   await seedAcademicProfiles();
