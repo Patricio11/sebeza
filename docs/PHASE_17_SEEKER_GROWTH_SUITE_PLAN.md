@@ -103,20 +103,22 @@ visible climb, and make the payoff (rank gain) the emotional core.
 
 ---
 
-## 📈 TASK 17.2 — DEMAND PULSE — ⏳ PENDING
-**Flag:** `feature_flag_seeker_demand_pulse`. **Goal:** when real employer demand for one of a
-seeker's skills (or a top recommended one) spikes in their province, tell them — turning the
-silent `search_events` signal into a timely, motivating nudge.
+## 📈 TASK 17.2 — DEMAND PULSE — ✅ DONE 2026-06-22
+**Flag:** `feature_flag_seeker_demand_pulse`. **Goal:** turn the silent `search_events` signal into
+a timely "your skill is heating up near you" nudge.
 
-- **Query** `lib/seeker/demand-pulse.ts`: for a seeker, compare this-week vs prior-weeks employer
-  searches (province-scoped, `search_events`) that hit their skills/profession; surface the
-  biggest mover above a floor. Province-level only (D2 k-anonymity; demand-side, no seeker cohort).
-- **Notification kind** `demand.pulse` (in-app ON, email OFF default) in the catalog.
-- **Cron** `app/api/cron/seeker-demand-pulse/route.ts` (weekly): gated by the flag; per active,
-  searchable seeker, fire at most one pulse with dedupe; reuse the digest cron's suppression idiom.
-- **Dashboard surface:** a small "Demand pulse" card on `/dashboard` (+ a link into Career Compass)
-  when there's a live spike — gated by the flag.
-- Verify + commit.
+- ✅ **Query** `lib/seeker/demand-pulse.ts` (`getDemandPulse`): biggest positive employer-demand
+  mover this week vs the prior-3-week baseline, province-scoped, over the seeker's profession +
+  top skills; null when nothing genuinely heats up. Demand-side, province-level only (D2).
+- ✅ **Notification kind** `demand.pulse` (in-app ON, email OFF, 6-day dedupe) in the catalog.
+- ✅ **Cron** `app/api/cron/seeker-demand-pulse/route.ts` (weekly): flag-gated; per non-deleted
+  seeker, dedupe → top-3 skills → `getDemandPulse` → `createNotification`; per-row isolation.
+- ✅ **Dashboard card** `DemandPulseCard` on `/dashboard`, gated by the flag (renders only on a real
+  spike → no quiet state), links into Career Compass.
+- **Tests (green):** `npm run test:all` → typecheck + lint + **321 vitest** ✅ (catalog kind
+  validated) · build ✅ · **flag OFF E2E 12/12** (seeker arc) = zero regression · **flag ON E2E
+  2/2** (new `tests/e2e/demand-pulse.spec.ts`: seeds a this-week spike for andile-z's profession,
+  asserts the card; flag + events restored in afterAll). Desktop + 360px.
 
 ---
 
@@ -152,5 +154,5 @@ not bio/CV rewriting yet.
 ## 📌 STATUS
 - [x] 17.0 Scaffolding (flags + admin toggles)
 - [x] 17.1 The Climb — tests green (test:all 318 ✅ · flag-OFF 24/24 ✅ · flag-ON 2/2 ✅)
-- [ ] 17.2 Demand Pulse
+- [x] 17.2 Demand Pulse — tests green (test:all 321 ✅ · flag-OFF 12/12 ✅ · flag-ON 2/2 ✅)
 - [ ] 17.3 AI Career Coach

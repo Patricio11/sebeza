@@ -35,6 +35,8 @@ import { listMyBadges } from "@/lib/seeker/badges";
 import { StudentLaneDiscoveryCallout } from "@/components/feature/seeker/learning/StudentLaneDiscoveryCallout";
 import { GetWorkReadyCard } from "@/components/feature/seeker/GetWorkReadyCard";
 import { WorkNearYouCard } from "@/components/feature/seeker/WorkNearYouCard";
+import { DemandPulseCard } from "@/components/feature/seeker/DemandPulseCard";
+import { getDemandPulse } from "@/lib/seeker/demand-pulse";
 
 export default async function SeekerOverviewPage({
   params,
@@ -138,6 +140,20 @@ export default async function SeekerOverviewPage({
   // hidden silently when the seeker has none.
   const recentBadges = await listMyBadges(me.profileId, 3);
 
+  // Phase 17 ("Demand Pulse")  flag-gated. When on, surface a live spike in
+  // employer demand for one of the seeker's skills / profession in their
+  // province. Null (no genuine spike) renders nothing  no quiet state.
+  const demandPulseOn = await getSetting<boolean>(
+    "feature_flag_seeker_demand_pulse",
+  );
+  const demandPulse = demandPulseOn
+    ? await getDemandPulse({
+        profession: me.profession,
+        province: me.province,
+        topSkills: me.topSkills,
+      })
+    : null;
+
   return (
     <DashboardMasthead
       role="seeker"
@@ -184,6 +200,9 @@ export default async function SeekerOverviewPage({
         <HelpLink role="seeker" slug="understanding-profile-completeness" label="Profile completeness" />
         <HelpLink role="seeker" slug="career-compass-recommendations" label="Career compass" />
       </div>
+
+      {/* Phase 17 ("Demand Pulse")  flag-gated live demand spike. */}
+      {demandPulse && <DemandPulseCard pulse={demandPulse} />}
 
       {/* Phase 11.1.6  audit-log link prominence. Surfaces the "who
           looked at me this week" signal as a top-of-page callout when
