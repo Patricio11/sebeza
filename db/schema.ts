@@ -688,6 +688,10 @@ export const learningItems = pgTable(
     resourceKind: text("resource_kind").notNull(),
     isFree: boolean("is_free").notNull().default(false),
     state: learningState("state").notNull().default("accepted"),
+    /** Phase 17 ("The Climb") — self-paced progress 0..100 on an active item.
+     *  Promotes accepted → in_progress on first move; purely the seeker's own
+     *  marker (external providers, so we can't observe real completion). */
+    progressPercent: integer("progress_percent").notNull().default(0),
     startedAt: timestamp("started_at"),
     completedAt: timestamp("completed_at"),
     abandonedAt: timestamp("abandoned_at"),

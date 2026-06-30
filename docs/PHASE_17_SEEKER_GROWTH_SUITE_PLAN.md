@@ -39,6 +39,17 @@ i18n-ready (en base + deepMerge), 360px-first. The AI Coach additionally inherit
 dispatcher's multi-gate posture (active provider → budget → s.72 cross-border ack → feature flag →
 PII guard): **zero spend until every gate is open.**
 
+> ### 🔒 Testing discipline (NON-NEGOTIABLE — applies to every task here)
+> Nothing is "done" until it is **tested and green**. For each feature, before its commit:
+> 1. **Unit/compliance** — `npm run test:all` (typecheck + lint + the full vitest suite) passes.
+> 2. **E2E both flag states** — at desktop **and** 360px: **flag OFF = today's behaviour
+>    unchanged** (proves zero regression), and **flag ON = the new surface works** (proves the
+>    feature). Flag-on specs flip the flag in the test DB and **restore it in `afterAll`** so the
+>    dark-ship default holds for every other suite.
+> 3. **No negative impact on existing functionality** — the existing seeker/employer/admin E2E
+>    arcs stay green. If anything breaks, it is **fixed before commit**, never committed red.
+> 4. **Migrations** apply clean (the test harness migrates-from-zero in `global-setup`).
+
 ---
 
 ## ✅ TASK 17.0 — Scaffolding (flags + admin toggles) — DONE 2026-06-22
@@ -51,7 +62,7 @@ PII guard): **zero spend until every gate is open.**
 
 ---
 
-## 🧗 TASK 17.1 — THE CLIMB (live skill journey) — ⏳ IN PROGRESS
+## 🧗 TASK 17.1 — THE CLIMB (live skill journey) — ✅ DONE 2026-06-22
 **Flag:** `feature_flag_seeker_skill_journey`. **Goal:** make the Active learning state a living,
 visible climb, and make the payoff (rank gain) the emotional core.
 
@@ -78,9 +89,17 @@ visible climb, and make the payoff (rank gain) the emotional core.
 - Wire into `/dashboard/grow` (top of "My learning") + a compact glance on `/dashboard` overview.
   **All gated** by `getSetting("feature_flag_seeker_skill_journey")` — off = today's behaviour.
 
-### 17.1.c — Verify + commit
-- typecheck + lint + build; extend seeker E2E (progress controls + momentum render when flag on);
-  `npm run test:all`; reseed note. Commit.
+### 17.1.c — Verify + commit ✅
+- **Shipped:** migration `0052_phase17_learning_progress.sql` (+ journal idx 52);
+  `setLearningProgress` + `learning.progress` audit kind; `completeLearningItem(opts)` (seeker
+  proficiency replaces the hardcoded 3); `CompleteSkillModal` + `GrowthMomentumCard` + progress
+  checkpoints in `LearningItemRow`; wired into `/dashboard/grow`, all gated by the flag.
+- **Tests (green):** `npm run test:all` → typecheck + lint + **318 vitest** ✅ · build ✅ ·
+  migration applied clean (harness migrate-from-zero) · **flag OFF E2E 24/24** (seeker + role
+  arcs, incl. `/dashboard/grow`) = zero regression · **flag ON E2E 2/2** (new
+  `tests/e2e/skill-journey.spec.ts`: growth momentum + progress checkpoints render; flag restored
+  in afterAll). Desktop + 360px.
+- ⚠️ Dev DB: run `npm run db:migrate` (adds `progress_percent`) before enabling the flag.
 
 ---
 
@@ -132,6 +151,6 @@ not bio/CV rewriting yet.
 
 ## 📌 STATUS
 - [x] 17.0 Scaffolding (flags + admin toggles)
-- [ ] 17.1 The Climb
+- [x] 17.1 The Climb — tests green (test:all 318 ✅ · flag-OFF 24/24 ✅ · flag-ON 2/2 ✅)
 - [ ] 17.2 Demand Pulse
 - [ ] 17.3 AI Career Coach

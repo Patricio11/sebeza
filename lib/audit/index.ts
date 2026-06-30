@@ -217,6 +217,9 @@ export type AuditKind =
   // cron-side; the audit row itself is always written.
   | "learning.accept"
   | "learning.start"
+  // Phase 17 ("The Climb")  self-paced progress checkpoint (0..100) on an
+  // active item. Meta carries progressPercent; feeds future stall analytics.
+  | "learning.progress"
   | "learning.complete"
   | "learning.abandon"
   // Phase 11.2.1  click-through to the provider's enrolment page from

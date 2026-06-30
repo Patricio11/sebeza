@@ -27,10 +27,12 @@ import { Button } from "@/components/ui/Button";
 import {
   startLearningItem,
   completeLearningItem,
+  setLearningProgress,
   promoteInterestedToPlanned,
   type MyLearningRow,
 } from "@/lib/seeker/learning";
 import { AbandonModal } from "./AbandonModal";
+import { CompleteSkillModal } from "./CompleteSkillModal";
 import {
   ABANDON_REASON_LABEL,
   type AbandonReasonValue,
@@ -47,13 +49,29 @@ import {
 
 interface Props {
   item: MyLearningRow;
+  /** Phase 17 ("The Climb"): when on, render progress checkpoints + the
+   *  self-assessment completion modal + rank payoff. Off = today's behaviour. */
+  skillJourney?: boolean;
+  /** Rank-payoff context for the completion modal (only used when skillJourney). */
+  poolLabel?: string | null;
+  currentRank?: number | null;
+  projectedRank?: number | null;
 }
 
-export function LearningItemRow({ item }: Props) {
+const CHECKPOINTS = [25, 50, 75] as const;
+
+export function LearningItemRow({
+  item,
+  skillJourney,
+  poolLabel,
+  currentRank,
+  projectedRank,
+}: Props) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [abandonOpen, setAbandonOpen] = useState(false);
+  const [completeOpen, setCompleteOpen] = useState(false);
 
   function onStart() {
     startTransition(async () => {
@@ -67,6 +85,20 @@ export function LearningItemRow({ item }: Props) {
     });
   }
 
+  function onProgress(pct: number) {
+    startTransition(async () => {
+      setError(null);
+      const res = await setLearningProgress(item.id, pct);
+      if (!res.ok) {
+        setError(res.message);
+        return;
+      }
+      router.refresh();
+    });
+  }
+
+  // Direct completion (flag OFF). With the flag ON, "Mark complete" opens the
+  // self-assessment modal instead, which calls completeLearningItem itself.
   function onComplete() {
     startTransition(async () => {
       setError(null);
@@ -121,6 +153,57 @@ export function LearningItemRow({ item }: Props) {
               <ExternalLink className="size-3" aria-hidden="true" />
             </a>
           )}
+
+          {/* Phase 17 — self-paced progress checkpoints (the climb). */}
+          {skillJourney && item.state === "in_progress" && (
+            <div className="mt-3">
+              <div className="mb-1.5 flex items-center justify-between text-[0.62rem] uppercase tracking-[0.18em] text-[color:var(--color-ink-soft)]">
+                <span>Your progress</span>
+                <span className="font-display tabular text-[color:var(--color-ink)]">
+                  {item.progressPercent}%
+                </span>
+              </div>
+              <div
+                role="progressbar"
+                aria-valuenow={item.progressPercent}
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-label={`${item.skillLabel} progress`}
+                className="h-2 w-full overflow-hidden rounded-full bg-[color:var(--color-surface-sunk)]"
+              >
+                <div
+                  className="h-full rounded-full bg-[color:var(--color-brand)] transition-[width]"
+                  style={{ width: `${item.progressPercent}%` }}
+                />
+              </div>
+              <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                <span className="text-[0.62rem] uppercase tracking-[0.18em] text-[color:var(--color-ink-soft)]">
+                  Log:
+                </span>
+                {CHECKPOINTS.map((pct) => {
+                  const reached = item.progressPercent >= pct;
+                  return (
+                    <button
+                      key={pct}
+                      type="button"
+                      disabled={pending}
+                      aria-pressed={reached}
+                      onClick={() => onProgress(pct)}
+                      className={
+                        "min-h-8 rounded-[var(--radius-pill)] border px-3 text-xs transition-colors disabled:opacity-60 " +
+                        (reached
+                          ? "border-[color:var(--color-brand)] bg-[color:var(--color-brand-tint)] text-[color:var(--color-brand-strong)]"
+                          : "border-[color:var(--color-hairline)] text-[color:var(--color-ink-soft)] hover:border-[color:var(--color-ink)]")
+                      }
+                    >
+                      {pct}%
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           {item.state === "abandoned" && item.abandonReason && (
             <p className="mt-2 text-[0.7rem] italic text-[color:var(--color-ink-soft)]">
               Reason: {ABANDON_REASON_LABEL[item.abandonReason]}
@@ -198,7 +281,9 @@ export function LearningItemRow({ item }: Props) {
                 variant="primary"
                 size="sm"
                 disabled={pending}
-                onClick={onComplete}
+                onClick={() =>
+                  skillJourney ? setCompleteOpen(true) : onComplete()
+                }
               >
                 <Sparkles className="mr-1 size-3.5" aria-hidden="true" />
                 {pending ? "Saving" : "Mark complete"}
@@ -232,6 +317,20 @@ export function LearningItemRow({ item }: Props) {
           onClose={() => setAbandonOpen(false)}
           onDone={() => {
             setAbandonOpen(false);
+            router.refresh();
+          }}
+        />
+      )}
+      {completeOpen && (
+        <CompleteSkillModal
+          itemId={item.id}
+          skillLabel={item.skillLabel}
+          poolLabel={poolLabel}
+          currentRank={currentRank}
+          projectedRank={projectedRank}
+          onClose={() => setCompleteOpen(false)}
+          onDone={() => {
+            setCompleteOpen(false);
             router.refresh();
           }}
         />

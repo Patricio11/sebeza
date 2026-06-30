@@ -13,6 +13,8 @@ import {
 } from "@/lib/seeker/learning";
 import { COST_ACCESS_ABANDON_REASONS } from "@/lib/seeker/learning-types";
 import { MyLearningSection } from "@/components/feature/seeker/learning/MyLearningSection";
+import type { GrowthMomentum } from "@/components/feature/seeker/learning/GrowthMomentumCard";
+import { getSetting } from "@/lib/admin/settings";
 import { AcceptRecommendationButton } from "@/components/feature/seeker/learning/AcceptRecommendationButton";
 import { OpenLearningPathButton } from "@/components/feature/seeker/learning/OpenLearningPathButton";
 import { AdjacentProfessionSwitch } from "@/components/feature/seeker/learning/AdjacentProfessionSwitch";
@@ -185,6 +187,49 @@ export default async function CareerCompassPage({
   const student = me.academic ? getStudentSnapshot(me.academic) : null;
   const nfmt = new Intl.NumberFormat(locale);
 
+  // Phase 17 ("The Climb") — flag-gated learning progress + visible rank
+  // payoff. Off = today's learning loop. When on, compute the growth momentum
+  // (skills grown, in flight, current → projected rank) + a single-skill
+  // projection for the per-row completion modal.
+  const skillJourney = await getSetting<boolean>(
+    "feature_flag_seeker_skill_journey",
+  );
+  let momentum: GrowthMomentum | null = null;
+  let oneSkillRank: number | null = null;
+  if (skillJourney) {
+    const activeCount = myLearning.filter(
+      (i) => i.state === "accepted" || i.state === "in_progress",
+    ).length;
+    const grownCount = myLearning.filter((i) => i.state === "completed").length;
+    const climb =
+      rank && activeCount > 0
+        ? await rankInPoolQuery({
+            handle: me.handle,
+            profession: me.profession,
+            province: me.province,
+            projectedSkillBoost: activeCount,
+          })
+        : null;
+    oneSkillRank = rank
+      ? (
+          await rankInPoolQuery({
+            handle: me.handle,
+            profession: me.profession,
+            province: me.province,
+            projectedSkillBoost: 1,
+          })
+        )?.projectedRank ?? rank.rank
+      : null;
+    momentum = {
+      skillsGrown: grownCount,
+      inProgress: activeCount,
+      currentRank: rank?.rank ?? null,
+      poolTotal: rank?.poolTotal ?? null,
+      projectedRank: climb?.projectedRank ?? rank?.rank ?? null,
+      poolLabel: rank?.poolLabel ?? null,
+    };
+  }
+
   return (
     <DashboardMasthead
       role="seeker"
@@ -331,7 +376,15 @@ export default async function CareerCompassPage({
       />
 
       {/* ───────────── My Learning (Phase 9.12 + 11.2.4/.5) ───────────── */}
-      <MyLearningSection items={myLearning} locale={locale} />
+      <MyLearningSection
+        items={myLearning}
+        locale={locale}
+        skillJourney={skillJourney}
+        momentum={momentum}
+        poolLabel={rank?.poolLabel ?? null}
+        currentRank={rank?.rank ?? null}
+        projectedRank={oneSkillRank}
+      />
 
       {/* Phase 15.3.2/.3  Get work-ready (compact), beside the learning
           loop. Student lane gets the first-day + still-learning guides;

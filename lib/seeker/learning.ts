@@ -117,6 +117,8 @@ export interface MyLearningRow {
   resourceUrl: string | null;
   resourceKind: string;
   isFree: boolean;
+  /** Phase 17 — self-paced progress 0..100 on an active item. */
+  progressPercent: number;
   state:
     | "interested"
     | "accepted"
@@ -155,6 +157,7 @@ export async function listMyLearningItems(): Promise<MyLearningRow[]> {
     resourceUrl: r.resourceUrl,
     resourceKind: r.resourceKind,
     isFree: r.isFree,
+    progressPercent: r.progressPercent,
     state: r.state,
     startedAt: r.startedAt?.toISOString() ?? null,
     completedAt: r.completedAt?.toISOString() ?? null,
@@ -303,6 +306,58 @@ export async function startLearningItem(
 }
 
 // ──────────────────────────────────────────────────────────────────────
+// Phase 17 ("The Climb")  self-paced progress on an active learning item.
+// External providers mean we can't observe real completion, so this is the
+// seeker's own marker. The first move promotes accepted/interested →
+// in_progress + stamps startedAt. Completion stays a separate, explicit
+// action (with self-assessed proficiency).
+// ──────────────────────────────────────────────────────────────────────
+
+export async function setLearningProgress(
+  itemId: string,
+  percent: number,
+): Promise<ActionResult<{ progressPercent: number }>> {
+  const me = await verifyRole("seeker");
+  const profileId = await getMyProfileId(me.id);
+  if (!profileId) return { ok: false, message: "Profile not found." };
+
+  const item = await loadOwnedItem(itemId, profileId);
+  if (!item) return { ok: false, message: "Learning item not found." };
+  if (item.state === "completed" || item.state === "abandoned") {
+    return { ok: false, message: "This item is finished  progress can't change." };
+  }
+
+  const clamped = Math.max(0, Math.min(100, Math.round(percent)));
+  const promote = item.state === "accepted" || item.state === "interested";
+
+  const db = getDb();
+  await db
+    .update(schema.learningItems)
+    .set({
+      progressPercent: clamped,
+      ...(promote
+        ? { state: "in_progress" as const, startedAt: item.startedAt ?? new Date() }
+        : {}),
+    })
+    .where(eq(schema.learningItems.id, itemId));
+
+  await logAccess({
+    kind: "learning.progress",
+    actor: me.id,
+    subject: itemId,
+    meta: {
+      skillSlug: item.skillSlug,
+      progressPercent: clamped,
+      from: item.state,
+    },
+  });
+
+  revalidatePath("/dashboard/grow");
+  revalidatePath("/dashboard");
+  return { ok: true, progressPercent: clamped };
+}
+
+// ──────────────────────────────────────────────────────────────────────
 // Phase 11.2.1  click-through tracking for LearningPathCard CTAs.
 // We don't redirect through Sebenza (D1: keeps the trust chain clean);
 // the seeker's browser goes straight to the provider URL. This action
@@ -339,6 +394,10 @@ export async function logLearningPathOpen(
 
 export async function completeLearningItem(
   itemId: string,
+  /** Phase 17 — the seeker's self-assessed depth on completion. Applied to a
+   *  newly-attached skill (replaces the old hardcoded proficiency 3); existing
+   *  rows keep the upgrade-only honesty contract. */
+  opts?: { proficiency?: number; yearsOfExperience?: number | null },
 ): Promise<
   ActionResult<{
     attachedSkill: boolean;
@@ -364,6 +423,17 @@ export async function completeLearningItem(
   const skill = SKILLS.find((s) => s.slug === item.skillSlug);
   if (!skill) return { ok: false, message: "Skill no longer in taxonomy." };
 
+  // Seeker-owned self-assessment (Phase 17). Clamp 1..5 / 0..60; default to the
+  // old honest "basics + <1yr" when the caller doesn't pass one.
+  const chosenProficiency = Math.max(
+    1,
+    Math.min(5, Math.round(opts?.proficiency ?? 3)),
+  );
+  const chosenYears =
+    opts?.yearsOfExperience == null
+      ? null
+      : Math.max(0, Math.min(60, Math.round(opts.yearsOfExperience)));
+
   const db = getDb();
   let attached = false;
   await db.transaction(async (tx) => {
@@ -383,8 +453,8 @@ export async function completeLearningItem(
       .values({
         profileId,
         skillSlug: item.skillSlug,
-        proficiency: 3,
-        yearsOfExperience: null,
+        proficiency: chosenProficiency,
+        yearsOfExperience: chosenYears,
         provenance: "self_attested_learning",
         verifiedAt: null,
       })

@@ -11,14 +11,33 @@
 import type { MyLearningRow } from "@/lib/seeker/learning";
 import { LearningItemRow } from "./LearningItemRow";
 import { SkillJourneyTimeline } from "./SkillJourneyTimeline";
+import { GrowthMomentumCard, type GrowthMomentum } from "./GrowthMomentumCard";
 import { Bookmark, Sparkles } from "lucide-react";
 
 interface Props {
   items: MyLearningRow[];
   locale: string;
+  /** Phase 17 ("The Climb") — flag + rank-payoff context. Off = today's UI. */
+  skillJourney?: boolean;
+  momentum?: GrowthMomentum | null;
+  poolLabel?: string | null;
+  currentRank?: number | null;
+  projectedRank?: number | null;
 }
 
-export function MyLearningSection({ items, locale }: Props) {
+export function MyLearningSection({
+  items,
+  locale,
+  skillJourney,
+  momentum,
+  poolLabel,
+  currentRank,
+  projectedRank,
+}: Props) {
+  // Per-row payoff context (only meaningful when the flag is on).
+  const rowProps = skillJourney
+    ? { skillJourney, poolLabel, currentRank, projectedRank }
+    : {};
   // Phase 11.2.4  parking-lot sub-section. Renders above active items
   // when the seeker has marked anything as "Saved for later".
   const parked = items.filter((i) => i.state === "interested");
@@ -39,6 +58,13 @@ export function MyLearningSection({ items, locale }: Props) {
           Self-paced  external providers
         </span>
       </header>
+
+      {/* Phase 17 ("The Climb") — growth momentum (visible rank payoff). */}
+      {skillJourney && momentum && (
+        <div className="mb-6">
+          <GrowthMomentumCard momentum={momentum} />
+        </div>
+      )}
 
       {items.length === 0 ? (
         <div className="rounded-[var(--radius-md)] border border-dashed border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-6">
@@ -74,7 +100,7 @@ export function MyLearningSection({ items, locale }: Props) {
               </h3>
               <ul className="flex flex-col gap-3">
                 {parked.map((it) => (
-                  <LearningItemRow key={it.id} item={it} />
+                  <LearningItemRow key={it.id} item={it} {...rowProps} />
                 ))}
               </ul>
             </div>
@@ -86,7 +112,7 @@ export function MyLearningSection({ items, locale }: Props) {
               </h3>
               <ul className="flex flex-col gap-3">
                 {active.map((it) => (
-                  <LearningItemRow key={it.id} item={it} />
+                  <LearningItemRow key={it.id} item={it} {...rowProps} />
                 ))}
               </ul>
             </div>
@@ -98,7 +124,7 @@ export function MyLearningSection({ items, locale }: Props) {
               </h3>
               <ul className="flex flex-col gap-3">
                 {recent.map((it) => (
-                  <LearningItemRow key={it.id} item={it} />
+                  <LearningItemRow key={it.id} item={it} {...rowProps} />
                 ))}
               </ul>
             </div>
