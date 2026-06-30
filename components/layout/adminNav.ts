@@ -28,6 +28,9 @@ export const ADMIN_NAV: DashboardNavItem[] = [
   // Phase 18.2 ("Living Learning Catalog")  editorial + freshness admin for the
   // learning-path catalog. Sits with curriculum: same editorial-over-a-table work.
   { key: "learningPaths", label: "Learning paths", href: "/admin/learning-paths", icon: GraduationCap },
+  // Phase 19.2 ("Custom Skills")  taxonomy-growth leaderboard: promote the
+  // most-requested seeker-described skills into the searchable taxonomy.
+  { key: "customSkills", label: "Custom skills", href: "/admin/custom-skills", icon: Sparkles },
   // Phase 13.3  LLM provider configuration. Above audit-log because
   // every action here writes to it; the admin should be one click away.
   { key: "llm", label: "LLM providers", href: "/admin/llm", icon: Sparkles },

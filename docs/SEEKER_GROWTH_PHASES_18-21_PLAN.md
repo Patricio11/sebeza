@@ -161,16 +161,19 @@ profile completeness, and they feed an aggregate "most-requested unindexed skill
   `tests/e2e/custom-skills.spec.ts` (desktop + 360px); flag + rows restored in afterAll. The
   not-searchable guarantee is proven at the data layer (19.0 invariant test).
 
-### 19.2 — Admin canonicalization workflow (admin-gated)
-- `/admin/custom-skills`: aggregated, anonymized leaderboard of unindexed labels
-  ("Solar panel installation — 12 adds this month"). One-click **"Promote to canonical"** → creates
-  a `skills` slug, and **migrates** existing `profile_skills_custom` rows to `profile_skills` at the
-  seeker's self-attested proficiency (honesty-preserving; upgrade-only contract intact).
-- **UX:** ranked list, add-count sparkline-free (No-Flash) but with a clear count + "promote"
-  affordance; a confirm step (canonicalization is irreversible-ish). POPIA: aggregate counts only,
-  never "who" added a label.
-- **Tests:** admin E2E (promote a label → canonical skill exists, custom rows migrated, seeker now
-  searchable); analytics query unit test (counts are aggregate, no PII).
+### 19.2 — Admin canonicalization workflow (admin-gated) ✅ DONE 2026-06-30
+- ✅ `/admin/custom-skills` + `CustomSkillsLeaderboard`: aggregated, **anonymized** leaderboard
+  (`listCustomSkillLeaderboard` — distinct seeker COUNT per normalized label, never which seekers).
+  One-click **Promote** reveals a pre-filled slug → `canonicalizeCustomSkill` (`lib/admin/custom-skills.ts`):
+  verifyAdmin + Zod, creates the `skills` row, **migrates** every live holder into `profile_skills` at
+  their own self-attested proficiency/years (the new slug can't collide), soft-deletes the custom rows,
+  audits `admin.custom_skill.canonicalize`. The existing `profile_skills` trigger refreshes each
+  holder's search vector → **they become searchable immediately**. Nav item added.
+- ✅ **Tests (green):** `test:all` (327 vitest) + build · **admin E2E 2/2**
+  (`tests/e2e/admin-custom-skills.spec.ts`: seed a custom skill → Promote → the label leaves the board
+  → DB assertions: canonical `skills` row exists, holder migrated into `profile_skills`, custom row
+  retired) + role-arc regression. Desktop + 360px (dismisses the cookie banner that overlaps on mobile);
+  all seeded/created rows removed in afterAll.
 
 ---
 
@@ -266,7 +269,7 @@ becomes a priority, since it shares no schema with 18–20.
 ## 📌 STATUS
 
 - [x] **Phase 18 — Living Learning Catalog** ✅ (18.0 schema/migration · 18.1 feedback loop · 18.2 editorial+freshness) — all flag-/admin-gated, test:all + E2E green
-- [ ] **Phase 19 — Custom Skills & Taxonomy Growth** (19.0 schema · 19.1 editor · 19.2 canonicalization)
+- [x] **Phase 19 — Custom Skills & Taxonomy Growth** ✅ (19.0 schema · 19.1 editor · 19.2 canonicalization) — flag-/admin-gated, test:all + E2E green
 - [ ] **Phase 20 — Skill Prerequisites & Sequencing** (20.0 graph · 20.1 re-weight+pills · 20.2 unlocks-next)
 - [ ] **Phase 21 — Hyper-Local Demand** (21.0 capture · 21.1 gated aggregation · 21.2 hotspots surface)
 
