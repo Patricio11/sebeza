@@ -125,6 +125,25 @@ const ROWS: SettingRow[] = [
       "the Justification Index OR per-employer lookup will classify the " +
       "cell. Single source of truth for both surfaces.",
   },
+  // Seeker growth suite — all ship dark (default OFF); flip on when ready.
+  {
+    key: "feature_flag_seeker_skill_journey",
+    label:
+      "Seeker · The Climb — live skill journey (learning progress + visible rank payoff + seeker-set proficiency)",
+    type: "boolean",
+  },
+  {
+    key: "feature_flag_seeker_demand_pulse",
+    label:
+      "Seeker · Demand Pulse — weekly “your skill is heating up near you” nudge",
+    type: "boolean",
+  },
+  {
+    key: "feature_flag_seeker_ai_coach",
+    label:
+      "Seeker · AI Career Coach — interview practice (also requires a configured + budgeted LLM provider on /admin/llm)",
+    type: "boolean",
+  },
 ];
 
 export function SettingsForm({ values }: Props) {

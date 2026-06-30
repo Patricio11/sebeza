@@ -82,6 +82,10 @@ const KEY_SCHEMAS = {
   // after configuring + testing a provider on /admin/llm. Zero spend
   // posture mirrors SMS / WhatsApp.
   feature_flag_llm_curriculum_enabled: z.boolean(),
+  // Seeker growth suite — three flag-gated seeker features, all ship dark.
+  feature_flag_seeker_skill_journey: z.boolean(),
+  feature_flag_seeker_demand_pulse: z.boolean(),
+  feature_flag_seeker_ai_coach: z.boolean(),
 } as const satisfies Record<SettingKey, z.ZodTypeAny>;
 
 const updateSchema = z.object({
@@ -108,6 +112,9 @@ const updateSchema = z.object({
     "feature_flag_sms_quiet_hours_start",
     "feature_flag_sms_quiet_hours_end",
     "feature_flag_llm_curriculum_enabled",
+    "feature_flag_seeker_skill_journey",
+    "feature_flag_seeker_demand_pulse",
+    "feature_flag_seeker_ai_coach",
   ] as const),
   value: z.unknown(),
 });

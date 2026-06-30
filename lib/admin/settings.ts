@@ -104,7 +104,20 @@ export type SettingKey =
   // SMS / WhatsApp: every single gate must be open before zero spend
   // becomes some spend.
   // ──────────────────────────────────────────────────────────────────────
-  | "feature_flag_llm_curriculum_enabled";
+  | "feature_flag_llm_curriculum_enabled"
+  // ──────────────────────────────────────────────────────────────────────
+  // Seeker growth suite — three flag-gated seeker features, all default OFF
+  // so they ship dark and the admin switches each on when ready:
+  //   - skill_journey ("The Climb"): live learning progress + visible rank
+  //     payoff + seeker-set proficiency on completion + a growth recap.
+  //   - demand_pulse: weekly "your skill is heating up near you" nudge.
+  //   - ai_coach: seeker-facing LLM coach (interview practice). ALSO gated
+  //     by the LLM dispatcher's provider/budget/s.72 checks — this flag is
+  //     just the surface switch.
+  // ──────────────────────────────────────────────────────────────────────
+  | "feature_flag_seeker_skill_journey"
+  | "feature_flag_seeker_demand_pulse"
+  | "feature_flag_seeker_ai_coach";
 
 const DEFAULTS: Record<SettingKey, unknown> = {
   freshness_band_days_fresh: 30,
@@ -133,6 +146,10 @@ const DEFAULTS: Record<SettingKey, unknown> = {
   // Phase 13.3  LLM kill-switch. Default OFF; admin must explicitly
   // flip ON after configuring + testing a provider on /admin/llm.
   feature_flag_llm_curriculum_enabled: false,
+  // Seeker growth suite — ship dark, admin switches each on.
+  feature_flag_seeker_skill_journey: false,
+  feature_flag_seeker_demand_pulse: false,
+  feature_flag_seeker_ai_coach: false,
 };
 
 /**
