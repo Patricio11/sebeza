@@ -8,6 +8,9 @@ import { and, asc, eq, isNull } from "drizzle-orm";
 import { getDb } from "@/db/client";
 import * as schema from "@/db/schema";
 
+/** Max self-described skills per seeker (shared by the action + the editor). */
+export const MAX_CUSTOM_SKILLS = 3;
+
 export interface CustomSkill {
   id: string;
   label: string;

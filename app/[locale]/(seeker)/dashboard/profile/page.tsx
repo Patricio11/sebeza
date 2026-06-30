@@ -14,6 +14,11 @@ import { SKILLS } from "@/lib/mock/taxonomy";
 import { GraduationCap } from "lucide-react";
 import { ProfileBasicsForm } from "@/components/feature/profile/ProfileBasicsForm";
 import { SkillsEditor } from "@/components/feature/profile/SkillsEditor";
+import { CustomSkillsEditor } from "@/components/feature/profile/CustomSkillsEditor";
+import {
+  listCustomSkills,
+  MAX_CUSTOM_SKILLS,
+} from "@/db/queries/custom-skills";
 import { WorkAvailabilityEditor } from "@/components/feature/profile/WorkAvailabilityEditor";
 import { CurrentEmploymentEditor } from "@/components/feature/profile/CurrentEmploymentEditor";
 import { EmploymentVerificationPanel } from "@/components/feature/profile/EmploymentVerificationPanel";
@@ -52,6 +57,13 @@ export default async function ProfileEditorPage({
   const verificationVisible = await getSetting<boolean>(
     "feature_flag_verification_badges_visible",
   );
+  // Phase 19.1 ("Custom Skills") — flag-gated escape hatch below the picker.
+  const customSkillsEnabled = await getSetting<boolean>(
+    "feature_flag_seeker_custom_skills",
+  );
+  const customSkills = customSkillsEnabled
+    ? await listCustomSkills(me.profileId)
+    : [];
   // Phase 9.22  picker-visible employers for the new editor.
   const employerOptions = await listEmployerOptions("");
   // Phase 9.23  most recent verification record for the new panel.
@@ -263,6 +275,12 @@ export default async function ProfileEditorPage({
               hint="Skills must come from our controlled taxonomy  keeps search and analytics clean."
             />
             <SkillsEditor initial={initialSkills} professionSlug={me.profession} />
+            {customSkillsEnabled && (
+              <CustomSkillsEditor
+                initial={customSkills}
+                max={MAX_CUSTOM_SKILLS}
+              />
+            )}
           </section>
 
           {/* Work availability (Phase 7.5) */}

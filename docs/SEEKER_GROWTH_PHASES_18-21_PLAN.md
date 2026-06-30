@@ -149,17 +149,17 @@ profile completeness, and they feed an aggregate "most-requested unindexed skill
   invariant (`custom-skills-not-searchable.test.ts`: a distinctive custom label attached to a seeker
   never surfaces them in `searchProfilesQuery`) + build; migration `0054` clean. ⚠️ Dev DB: `db:migrate`.
 
-### 19.1 — Seeker editor (flag-gated)
-- In `SkillsEditor`, **below** the taxonomy picker: "Don't see your skill? Add a custom one (max 3)."
-  → a small inline add row (label + proficiency selector + optional years). The taxonomy picker
-  stays the primary path; custom is the clearly-secondary escape hatch.
-- **UX:** custom skills render in a visually distinct group ("Self-described") with a quiet "not yet
-  searchable" tooltip — honest about the tradeoff, never apologetic. Proficiency uses the same 1–5
-  control as `CompleteSkillModal` for consistency. 360px: stacks; no horizontal scroll.
-- Count custom skills in `getProfileCompleteness` (so the seeker is rewarded for completeness without
-  the skill being searchable).
-- **Tests:** flag-ON E2E (add a custom skill, hits the cap at 3, persists, shows in completeness;
-  asserts it does **not** appear in `/search`); flag-OFF = editor unchanged.
+### 19.1 — Seeker editor (flag-gated) ✅ DONE 2026-06-30
+- ✅ `CustomSkillsEditor` rendered **below** the taxonomy `SkillsEditor` on `/dashboard/profile`
+  (flag-gated): a "Self-described skills" group (distinct dashed card, `N/3` counter, quiet "count
+  toward completeness but aren't searchable yet" note) + an inline add row (label + 1–5 level select
+  + optional years) → `addCustomSkill`; per-chip remove → `removeCustomSkill`. 360px-stacks, No-Flash.
+- ✅ Completeness already counts custom skills (19.0). Canonical-label collisions are pushed back to
+  the picker; cap/dup are surfaced as inline errors.
+- ✅ **Tests (green):** `test:all` (327 vitest) + build · **flag OFF E2E** (no section) + seeker-arc
+  **12/12** = zero regression · **flag ON E2E** (add → chip appears → remove → gone). New
+  `tests/e2e/custom-skills.spec.ts` (desktop + 360px); flag + rows restored in afterAll. The
+  not-searchable guarantee is proven at the data layer (19.0 invariant test).
 
 ### 19.2 — Admin canonicalization workflow (admin-gated)
 - `/admin/custom-skills`: aggregated, anonymized leaderboard of unindexed labels

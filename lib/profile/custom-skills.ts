@@ -17,8 +17,8 @@ import { verifyRole } from "@/lib/auth/dal";
 import { getSetting } from "@/lib/admin/settings";
 import { logAccess } from "@/lib/audit";
 import { computeCompleteness } from "@/lib/mock/helpers";
+import { MAX_CUSTOM_SKILLS } from "@/db/queries/custom-skills";
 
-export const MAX_CUSTOM_SKILLS = 3;
 const LABEL_MAX = 60;
 
 export type CustomSkillResult = { ok: true } | { ok: false; error: string };
