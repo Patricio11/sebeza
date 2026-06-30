@@ -198,14 +198,19 @@ moment. **Flag:** `feature_flag_skill_prereqs`.
   edge `sql→postgres` is refused, a valid `node→typescript` is added + listed) + role-arc regression.
   Desktop + 360px; added edge removed in afterAll. ⚠️ Dev DB: `db:migrate`.
 
-### 20.1 — Compass re-weighting + prereq pills (flag-gated)
-- In `db/queries/career-compass.ts`: after fetching the top-N demand skills, **re-order** so a
-  recommended skill never appears above its own unmet prerequisite — bubble the prereq up. Pure
-  re-rank; the demand math is unchanged (honesty: we don't fabricate demand, we sequence it).
-- **UX:** a quiet "Requires: Docker" pill on recommendation cards (only when the prereq is unmet);
-  Fraunces-cap eyebrow, hairline border, no color alarm. On a met prereq → no pill (don't nag).
-- **Tests:** flag-ON E2E (a profile missing Docker sees Docker ranked above Kubernetes + the pill);
-  flag-OFF = original demand-gap order; unit test for the re-rank + cycle guard.
+### 20.1 — Compass re-weighting + prereq pills (flag-gated) ✅ DONE 2026-06-30
+- ✅ Pure `applyPrereqOrdering` (`lib/skills/prereq-graph.ts`): stable topological sort over the
+  recommended-slug subgraph (a recommended prereq bubbles above its dependent) + annotates each rec
+  with `unmetPrereqs` (labels the seeker lacks). The demand math is untouched — we only sequence + label.
+- ✅ Wired into `getCompassForProfile` behind `feature_flag_skill_prereqs` (loads the prereq edges for
+  the recommended skills + the seeker's owned slugs; off → identical to today). `SkillRecommendation`
+  gains optional `unmetPrereqs`. The grow-page `RecommendationItem` renders a quiet **"Requires: X"**
+  pill (hairline, no colour alarm) only when unmet.
+- ✅ **Tests (green):** `test:all` (**335 vitest**, incl. 3 `applyPrereqOrdering` cases: prereq bubbles
+  up, unmet-label annotation, met-prereq drops off) + build · **flag OFF E2E** (recommendation, no pill)
+  + **flag ON E2E** (the pill renders) + role-arc regression. New `tests/e2e/skill-prereqs.spec.ts`
+  drives a deterministic recommendation (seeds "open water rescue" demand for a seeker who lacks it,
+  whose seeded prereq `pool-rescue` is unmet); search_events + flag restored in afterAll. Desktop + 360px.
 
 ### 20.2 — "Unlocks next" moment (flag-gated)
 - On completing a skill that is a prerequisite for an in-demand skill, the My Learning section shows

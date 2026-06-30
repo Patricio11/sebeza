@@ -36,6 +36,9 @@ import {
 // returns the same `LearningPath` shape in the same order the constant did, so
 // `pickRelevantPaths` (a stable sort) renders identically.
 import { listAllLearningPaths } from "@/db/queries/learning-paths";
+import { listPrereqsForSkills } from "@/db/queries/skill-prereqs";
+import { applyPrereqOrdering } from "@/lib/skills/prereq-graph";
+import { getSetting } from "@/lib/admin/settings";
 import type { PublicProfile, TaxonomyEntry } from "@/lib/mock/types";
 
 const DEMAND_WINDOW_DAYS = 90;
@@ -212,10 +215,40 @@ export async function getCompassForProfile(
     profile.profession,
   );
 
+  // ── 5b. Prerequisite sequencing (Phase 20.1, flag-gated) ─────────────────
+  // Re-order recommendations so a recommended prerequisite never sits below the
+  // skill it unlocks, and annotate each with the prereqs the seeker still lacks
+  // (the "Requires: X" pill). Pure re-rank — the demand math above is untouched.
+  let orderedRecommendations: SkillRecommendation[] = recommendations;
+  const prereqsEnabled = await getSetting<boolean>("feature_flag_skill_prereqs");
+  if (prereqsEnabled && recommendations.length > 0) {
+    const edges = await listPrereqsForSkills(
+      recommendations.map((r) => r.skill.slug),
+    );
+    if (edges.length > 0) {
+      const ownedResult = await db.execute(sql`
+        SELECT skill_slug FROM profile_skills
+        WHERE profile_id = (SELECT id FROM profiles WHERE handle = ${profile.handle} LIMIT 1)
+      `);
+      const ownedSlugs = new Set(
+        (ownedResult as unknown as { rows: { skill_slug: string }[] }).rows.map(
+          (r) => r.skill_slug,
+        ),
+      );
+      const labelBySlug = new Map(SKILLS.map((s) => [s.slug, s.label]));
+      orderedRecommendations = applyPrereqOrdering(
+        recommendations,
+        edges,
+        ownedSlugs,
+        labelBySlug,
+      );
+    }
+  }
+
   // ── 6. Compose snapshot ─────────────────────────────────────────────────
   const learningPaths: LearningPath[] = pickRelevantPaths(
     await listAllLearningPaths(),
-    recommendations.map((r) => r.skill.slug),
+    orderedRecommendations.map((r) => r.skill.slug),
   );
 
   const cityDemand = cityDemandRows.map((r) => ({
@@ -235,7 +268,7 @@ export async function getCompassForProfile(
         Math.max(1, 5 - profile.topSkills.length),
       ),
     },
-    recommendations,
+    recommendations: orderedRecommendations,
     learningPaths,
     adjacentProfessions,
     cityDemand,

@@ -765,6 +765,15 @@ function RecommendationItem({
             {rec.detail}
           </p>
 
+          {/* Phase 20.1  unmet-prerequisite pill (flag-gated upstream). */}
+          {rec.unmetPrereqs && rec.unmetPrereqs.length > 0 && (
+            <p className="mt-2">
+              <span className="inline-flex items-center gap-1 rounded-[var(--radius-pill)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface-sunk)] px-2 py-0.5 text-[0.62rem] uppercase tracking-[0.16em] text-[color:var(--color-ink-soft)]">
+                Requires {rec.unmetPrereqs.join(" · ")}
+              </span>
+            </p>
+          )}
+
           {rec.demandSignal && (
             <p className="mt-3 text-xs text-[color:var(--color-ink-soft)]">
               <span className="font-medium text-[color:var(--color-ink)]">

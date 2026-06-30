@@ -4,7 +4,11 @@
  * deadlock; `wouldCreateCycle` is the structural defence.
  */
 import { describe, expect, test } from "vitest";
-import { wouldCreateCycle, type PrereqEdge } from "./prereq-graph";
+import {
+  wouldCreateCycle,
+  applyPrereqOrdering,
+  type PrereqEdge,
+} from "./prereq-graph";
 
 const edges: PrereqEdge[] = [
   { skillSlug: "postgres", prereqSkillSlug: "sql" },
@@ -31,5 +35,41 @@ describe("wouldCreateCycle", () => {
 
   test("extending the chain forward is allowed (linux requires bash)", () => {
     expect(wouldCreateCycle(edges, "linux", "bash")).toBe(false);
+  });
+});
+
+describe("applyPrereqOrdering", () => {
+  const labels = new Map([
+    ["sql", "SQL"],
+    ["postgres", "Postgres"],
+    ["docker", "Docker"],
+  ]);
+  const rec = (slug: string) => ({ skill: { slug }, detail: slug });
+
+  test("a recommended prereq bubbles above its dependent", () => {
+    const recs = [rec("postgres"), rec("sql"), rec("docker")];
+    const edges: PrereqEdge[] = [
+      { skillSlug: "postgres", prereqSkillSlug: "sql" },
+    ];
+    const out = applyPrereqOrdering(recs, edges, new Set(), labels);
+    const order = out.map((r) => r.skill.slug);
+    expect(order.indexOf("sql")).toBeLessThan(order.indexOf("postgres"));
+  });
+
+  test("annotates unmet prereqs with labels; met prereqs drop off", () => {
+    const recs = [rec("postgres")];
+    const edges: PrereqEdge[] = [
+      { skillSlug: "postgres", prereqSkillSlug: "sql" },
+    ];
+    const unmet = applyPrereqOrdering(recs, edges, new Set(), labels);
+    expect(unmet[0]!.unmetPrereqs).toEqual(["SQL"]);
+    const met = applyPrereqOrdering(recs, edges, new Set(["sql"]), labels);
+    expect(met[0]!.unmetPrereqs).toEqual([]);
+  });
+
+  test("order is otherwise stable (no prereqs → original order)", () => {
+    const recs = [rec("docker"), rec("postgres"), rec("sql")];
+    const out = applyPrereqOrdering(recs, [], new Set(), labels);
+    expect(out.map((r) => r.skill.slug)).toEqual(["docker", "postgres", "sql"]);
   });
 });

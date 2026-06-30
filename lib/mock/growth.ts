@@ -29,6 +29,12 @@ export interface SkillRecommendation {
   rankIfLearned?: { current: number; projected: number; poolLabel: string };
   /** Searches-vs-matches signal in the seeker's province. */
   demandSignal?: { searches: number; matches: number };
+  /**
+   * Phase 20.1 ("Skill Prerequisites", flag-gated)  labels of prerequisites
+   * the seeker doesn't yet hold. Drives the "Requires: X" pill. Empty/absent
+   * when the flag is off or there are no unmet prereqs.
+   */
+  unmetPrereqs?: string[];
 }
 
 export type LearningProviderKind =
