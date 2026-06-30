@@ -3,7 +3,7 @@
  */
 
 import "server-only";
-import { inArray, eq, asc } from "drizzle-orm";
+import { inArray, eq, asc, sql } from "drizzle-orm";
 import { getDb } from "@/db/client";
 import * as schema from "@/db/schema";
 import type { PrereqEdge } from "@/lib/skills/prereq-graph";
@@ -74,5 +74,62 @@ export async function listAllPrereqsAdmin(): Promise<AdminPrereqRow[]> {
     prereqSkillSlug: r.prereqSkillSlug,
     prereqLabel: labelBySlug.get(r.prereqSkillSlug) ?? r.prereqSkillSlug,
     reason: r.reason,
+  }));
+}
+
+// ── Phase 20.2: "Unlocks next" ───────────────────────────────────────────────
+
+export interface UnlockedNext {
+  /** The skill a prereq the seeker already holds opens up. */
+  dependentSlug: string;
+  dependentLabel: string;
+  /** The prereq the seeker holds that unlocks it. */
+  prereqLabel: string;
+}
+
+/**
+ * Skills the seeker can now sensibly tackle: they hold a prerequisite but not
+ * the dependent, and the dependent isn't already on their active learning list.
+ * Drives the flag-gated "Unlocks next" card. Capped small (a nudge, not a list).
+ */
+export async function getUnlockedNextSkills(
+  profileId: string,
+): Promise<UnlockedNext[]> {
+  const db = getDb();
+  const result = await db.execute(sql`
+    SELECT DISTINCT ON (sp.skill_slug)
+      sp.skill_slug        AS dependent_slug,
+      dep.label            AS dependent_label,
+      pre.label            AS prereq_label
+    FROM skill_prereqs sp
+    JOIN profile_skills owned
+      ON owned.profile_id = ${profileId}
+     AND owned.skill_slug = sp.prereq_skill_slug
+    JOIN skills dep ON dep.slug = sp.skill_slug
+    JOIN skills pre ON pre.slug = sp.prereq_skill_slug
+    WHERE sp.skill_slug NOT IN (
+        SELECT skill_slug FROM profile_skills WHERE profile_id = ${profileId}
+      )
+      AND sp.skill_slug NOT IN (
+        SELECT skill_slug FROM learning_items
+        WHERE profile_id = ${profileId}
+          AND state IN ('interested', 'accepted', 'in_progress')
+      )
+    ORDER BY sp.skill_slug
+    LIMIT 3
+  `);
+  const rows = (
+    result as unknown as {
+      rows: Array<{
+        dependent_slug: string;
+        dependent_label: string;
+        prereq_label: string;
+      }>;
+    }
+  ).rows;
+  return rows.map((r) => ({
+    dependentSlug: r.dependent_slug,
+    dependentLabel: r.dependent_label,
+    prereqLabel: r.prereq_label,
   }));
 }

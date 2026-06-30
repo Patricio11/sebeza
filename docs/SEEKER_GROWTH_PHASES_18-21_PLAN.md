@@ -212,14 +212,16 @@ moment. **Flag:** `feature_flag_skill_prereqs`.
   drives a deterministic recommendation (seeds "open water rescue" demand for a seeker who lacks it,
   whose seeded prereq `pool-rescue` is unmet); search_events + flag restored in afterAll. Desktop + 360px.
 
-### 20.2 — "Unlocks next" moment (flag-gated)
-- On completing a skill that is a prerequisite for an in-demand skill, the My Learning section shows
-  an **"Unlocks next"** card: "You now have Docker. DevOps roles also want Kubernetes — add it?" →
-  one-tap accept into the learning loop (reuses `AcceptRecommendationButton`).
-- **UX:** appears inline in `MyLearningSection` only when there's a real unlocked next step; ties into
-  The Climb's momentum framing (continuity, not a new pattern). Dismissible.
-- **Tests:** flag-ON E2E (complete a prereq → unlocks card → accept adds the next item); flag-OFF =
-  no card.
+### 20.2 — "Unlocks next" moment (flag-gated) ✅ DONE 2026-06-30
+- ✅ `getUnlockedNextSkills` (`db/queries/skill-prereqs.ts`): skills the seeker can now tackle — they
+  hold a prerequisite but not the dependent, and it isn't already on their active learning list
+  (capped at 3, a nudge not a list). `UnlockedNextCard` renders above the loop on `/dashboard/grow`
+  ("You have {prereq} — a stepping stone to {dependent}") with a one-tap `AcceptRecommendationButton`.
+  Gated by `feature_flag_skill_prereqs`; off → nothing computed or shown.
+- ✅ **Tests (green):** `test:all` (335 vitest) + build · **flag OFF E2E** (no card) + **flag ON E2E**
+  (the card surfaces the unlocked skill + accept button) + role-arc regression. New
+  `tests/e2e/skill-prereqs-unlocks.spec.ts` gives andile the prereq `pool-rescue` so `open-water-rescue`
+  unlocks; skill row + flag restored in afterAll. Desktop + 360px.
 
 ---
 
@@ -284,7 +286,7 @@ becomes a priority, since it shares no schema with 18–20.
 
 - [x] **Phase 18 — Living Learning Catalog** ✅ (18.0 schema/migration · 18.1 feedback loop · 18.2 editorial+freshness) — all flag-/admin-gated, test:all + E2E green
 - [x] **Phase 19 — Custom Skills & Taxonomy Growth** ✅ (19.0 schema · 19.1 editor · 19.2 canonicalization) — flag-/admin-gated, test:all + E2E green
-- [ ] **Phase 20 — Skill Prerequisites & Sequencing** (20.0 graph · 20.1 re-weight+pills · 20.2 unlocks-next)
+- [x] **Phase 20 — Skill Prerequisites & Sequencing** ✅ (20.0 graph · 20.1 re-weight+pills · 20.2 unlocks-next) — flag-/admin-gated, test:all + E2E green
 - [ ] **Phase 21 — Hyper-Local Demand** (21.0 capture · 21.1 gated aggregation · 21.2 hotspots surface)
 
 *Each phase: flag-gated, ship-dark, admin-switchable from `/admin/settings`, verified flag-OFF (zero

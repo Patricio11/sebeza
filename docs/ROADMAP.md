@@ -1012,8 +1012,9 @@ Full task breakdown + UX/UI + testing discipline: `docs/SEEKER_GROWTH_PHASES_18-
   (self-attested, **never searchable** until promoted; migration `0054` + a not-searchable invariant test),
   flag-gated seeker editor (`feature_flag_seeker_custom_skills`), and `/admin/custom-skills` canonicalization
   (promote a label → canonical skill + migrate holders, who become searchable via the existing trigger).
-- [ ] **Phase 20 — Skill Prerequisites & Sequencing** (Gap 4): `skill_prereqs` graph, compass re-ranking +
-  "Requires:" pills, an "Unlocks next" moment on completion.
+- [x] **Phase 20 — Skill Prerequisites & Sequencing** (Gap 4) ✅ *shipped 2026-06-30*: `skill_prereqs` graph
+  (migration `0055`, cycle-guarded admin) + flag-gated (`feature_flag_skill_prereqs`) compass re-ranking +
+  "Requires:" pills + an "Unlocks next" nudge.
 - [ ] **Phase 21 — Hyper-Local Demand** (Gap 6): capture city in `search_events.filters`, k-anonymized +
   consent-gated city aggregation, a "Your city's hotspots" surface on `/dashboard/grow`.
 

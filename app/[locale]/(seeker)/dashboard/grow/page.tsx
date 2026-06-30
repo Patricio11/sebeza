@@ -13,6 +13,8 @@ import {
 } from "@/lib/seeker/learning";
 import { COST_ACCESS_ABANDON_REASONS } from "@/lib/seeker/learning-types";
 import { MyLearningSection } from "@/components/feature/seeker/learning/MyLearningSection";
+import { UnlockedNextCard } from "@/components/feature/seeker/learning/UnlockedNextCard";
+import { getUnlockedNextSkills } from "@/db/queries/skill-prereqs";
 import type { GrowthMomentum } from "@/components/feature/seeker/learning/GrowthMomentumCard";
 import { getSetting } from "@/lib/admin/settings";
 import { AcceptRecommendationButton } from "@/components/feature/seeker/learning/AcceptRecommendationButton";
@@ -198,6 +200,12 @@ export default async function CareerCompassPage({
   // Phase 18.1 ("Living Learning Catalog")  gates the per-card path-review
   // control + the recommend roll-up. Off = today's path cards, unchanged.
   const livingCatalog = await getSetting<boolean>("feature_flag_living_catalog");
+  // Phase 20.2 ("Unlocks next")  flag-gated. Skills the seeker can now tackle
+  // because they already hold the prerequisite. Off → nothing computed/shown.
+  const prereqsEnabled = await getSetting<boolean>("feature_flag_skill_prereqs");
+  const unlockedNext = prereqsEnabled
+    ? await getUnlockedNextSkills(me.profileId)
+    : [];
   let momentum: GrowthMomentum | null = null;
   let oneSkillRank: number | null = null;
   if (skillJourney) {
@@ -380,6 +388,9 @@ export default async function CareerCompassPage({
       />
 
       {/* ───────────── My Learning (Phase 9.12 + 11.2.4/.5) ───────────── */}
+      {/* Phase 20.2  "Unlocks next" nudge (flag-gated), above the loop. */}
+      <UnlockedNextCard items={unlockedNext} />
+
       <MyLearningSection
         items={myLearning}
         locale={locale}
