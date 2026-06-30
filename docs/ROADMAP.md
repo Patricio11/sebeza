@@ -971,7 +971,7 @@ near you + be-found + locality-legible invitations/employers) — **not** a job-
 ## 🌱 PHASE 17: SEEKER GROWTH SUITE ✅ *(shipped 2026-06-30)*
 *Goal: make the learning flywheel's most-motivating half **visible** — three flag-gated, ship-dark seeker
 features, each default OFF + admin-switchable from `/admin/settings`. Origin: the skill-development gap
-assessment + `COMPETITIVE_ANALYSIS_SAYOUTH.md` §3 (the flywheel). Plan: `docs/PHASE_17_SEEKER_GROWTH_SUITE_PLAN.md`.*
+assessment + `COMPETITIVE_ANALYSIS_SAYOUTH.md` §3 (the flywheel). Plan: `docs/completed/PHASE_17_SEEKER_GROWTH_SUITE_PLAN.md`.*
 
 ### Task 17.1: The Climb (live skill journey) ✅
 - [x] `feature_flag_seeker_skill_journey`. Migration 0052 (`learning_items.progress_percent`);

@@ -4,7 +4,7 @@
 Demand Pulse, AI Career Coach). Phase 17 closed two of the six gaps from the skill-development
 assessment; this roadmap turns the **remaining four** into discrete, flag-gated, ship-dark phases.*
 
-> **Numbering:** 17 shipped (`PHASE_17_SEEKER_GROWTH_SUITE_PLAN.md`). 18 → 21 are new. Each phase
+> **Numbering:** 17 shipped (`completed/PHASE_17_SEEKER_GROWTH_SUITE_PLAN.md`). 18 → 21 are new. Each phase
 > can spin out its own `PHASE_NN_*.md` when work starts (mirroring 17), marking tasks DONE inline.
 
 ---
