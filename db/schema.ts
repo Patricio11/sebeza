@@ -630,6 +630,42 @@ export const profileSkills = pgTable("profile_skills", {
   verifiedAt: timestamp("verified_at"),
 });
 
+/**
+ * Phase 19 ("Custom Skills & Taxonomy Growth")  niche skills a seeker claims
+ * that aren't (yet) in the controlled taxonomy. ALWAYS self-attested, NEVER
+ * verified, and NEVER searchable (no FK to `skills`, never joined into the
+ * search vector / match path)  they count toward profile completeness and feed
+ * the admin canonicalization leaderboard, but stay invisible to employer search
+ * until an admin promotes the label to a canonical `skills` slug. Cap of 3 per
+ * profile is enforced in the action layer. `label_normalized` (lowercased,
+ * collapsed whitespace) keys the per-seeker uniqueness + the aggregate grouping.
+ */
+export const profileSkillsCustom = pgTable(
+  "profile_skills_custom",
+  {
+    id: text("id").primaryKey(),
+    profileId: text("profile_id")
+      .notNull()
+      .references(() => profiles.id, { onDelete: "cascade" }),
+    /** Display label as the seeker typed it (trimmed), max 60 chars. */
+    label: text("label").notNull(),
+    /** Lowercased + whitespace-collapsed key for uniqueness + aggregation. */
+    labelNormalized: text("label_normalized").notNull(),
+    proficiency: integer("proficiency").notNull(),
+    yearsOfExperience: integer("years_of_experience"),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    deletedAt: timestamp("deleted_at"),
+  },
+  (t) => ({
+    byProfile: index("profile_skills_custom_profile_idx").on(t.profileId),
+    // One LIVE custom label per seeker (case-insensitive via the normalized
+    // key). Partial so a removed label can be re-added later.
+    onePerLabel: uniqueIndex("profile_skills_custom_profile_label_uniq")
+      .on(t.profileId, t.labelNormalized)
+      .where(sql`${t.deletedAt} IS NULL`),
+  }),
+);
+
 export const experiences = pgTable("experiences", {
   id: text("id").primaryKey(),
   profileId: text("profile_id")

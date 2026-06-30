@@ -240,6 +240,14 @@ export type AuditKind =
   // Phase 18.2  admin editorial action on a learning path. Subject =
   // learning_paths.id; meta.action ∈ create|update|verify|delete|restore.
   | "admin.learning_path.edit"
+  // Phase 19 ("Custom Skills")  seeker added / removed a self-described skill
+  // outside the taxonomy. Subject = profile_skills_custom.id; meta carries the
+  // normalized label (the demand signal), never anything sensitive.
+  | "profile.custom_skill.add"
+  | "profile.custom_skill.remove"
+  // Phase 19.2  admin promoted a frequent custom label to a canonical skill
+  // slug, migrating existing custom rows. Subject = the new skills.slug.
+  | "admin.custom_skill.canonicalize"
   // Phase 11.2.2  seeker swapped a cost-abandoned learning item for a
   // free alternative. Subject = the original learning_items.id; meta
   // carries `originalSkillSlug`, `newPathTitle`, `newProvider`.

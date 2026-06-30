@@ -14,7 +14,7 @@
 
 import { getDb } from "@/db/client";
 import * as schema from "@/db/schema";
-import { eq, and } from "drizzle-orm";
+import { eq, and, isNull } from "drizzle-orm";
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
@@ -789,11 +789,23 @@ async function recomputeCompleteness(
   basics: { city: string; bio: string },
 ): Promise<number | null> {
   try {
-    const [skillsRows, expRows, qualsRows] = await Promise.all([
+    const [skillsRows, customSkillRows, expRows, qualsRows] = await Promise.all([
       db
         .select({ slug: schema.profileSkills.skillSlug })
         .from(schema.profileSkills)
         .where(eq(schema.profileSkills.profileId, profileId)),
+      // Phase 19  self-described custom skills count toward completeness too
+      // (the seeker is rewarded for documenting niche skills, even though they
+      // stay out of search until canonicalized).
+      db
+        .select({ id: schema.profileSkillsCustom.id })
+        .from(schema.profileSkillsCustom)
+        .where(
+          and(
+            eq(schema.profileSkillsCustom.profileId, profileId),
+            isNull(schema.profileSkillsCustom.deletedAt),
+          ),
+        ),
       db
         .select({ id: schema.experiences.id })
         .from(schema.experiences)
@@ -806,7 +818,13 @@ async function recomputeCompleteness(
     return computeCompleteness({
       city: basics.city,
       bio: basics.bio,
-      topSkills: skillsRows.map((r) => ({ name: r.slug, proficiency: 3 })),
+      topSkills: [
+        ...skillsRows.map((r) => ({ name: r.slug, proficiency: 3 as const })),
+        ...customSkillRows.map((_, i) => ({
+          name: `custom-${i}`,
+          proficiency: 3 as const,
+        })),
+      ],
       experience: expRows.map(() => ({
         role: "",
         organization: "",

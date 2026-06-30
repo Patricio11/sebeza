@@ -379,6 +379,13 @@
       "when": 1782500000000,
       "tag": "0053_phase18_learning_paths",
       "breakpoints": false
+    },
+    {
+      "idx": 54,
+      "version": "7",
+      "when": 1782600000000,
+      "tag": "0054_phase19_custom_skills",
+      "breakpoints": false
     }
   ]
 }

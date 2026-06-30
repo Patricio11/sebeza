@@ -121,7 +121,10 @@ export type SettingKey =
   // Phase 18 ("Living Learning Catalog") — surfaces the seeker path-review
   // feedback loop + the recommend roll-up on learning-path cards. The catalog
   // itself is always DB-backed (18.0); this gates the NEW seeker-facing UI.
-  | "feature_flag_living_catalog";
+  | "feature_flag_living_catalog"
+  // Phase 19 ("Custom Skills") — lets seekers add up to 3 self-described skills
+  // outside the taxonomy (never searchable until an admin canonicalizes them).
+  | "feature_flag_seeker_custom_skills";
 
 const DEFAULTS: Record<SettingKey, unknown> = {
   freshness_band_days_fresh: 30,
@@ -155,6 +158,7 @@ const DEFAULTS: Record<SettingKey, unknown> = {
   feature_flag_seeker_demand_pulse: false,
   feature_flag_seeker_ai_coach: false,
   feature_flag_living_catalog: false,
+  feature_flag_seeker_custom_skills: false,
 };
 
 /**

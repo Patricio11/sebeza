@@ -150,6 +150,12 @@ const ROWS: SettingRow[] = [
       "Seeker · Living Learning Catalog — path reviews + “recommended by N of M” roll-up on learning-path cards",
     type: "boolean",
   },
+  {
+    key: "feature_flag_seeker_custom_skills",
+    label:
+      "Seeker · Custom skills — add up to 3 self-described skills outside the taxonomy (never searchable until canonicalized)",
+    type: "boolean",
+  },
 ];
 
 export function SettingsForm({ values }: Props) {

@@ -133,11 +133,21 @@ must be able to claim niche skills — and those claims become the signal that *
 enter search** (D2 k-anonymity) until an admin promotes them to canonical. They *do* count toward
 profile completeness, and they feed an aggregate "most-requested unindexed skills" analytic.
 
-### 19.0 — Schema
-- New `profile_skills_custom` table: `id`, `profile_id` FK, `label` (text ≤ 60, normalized-trim),
-  `proficiency` (1–5), `years_of_experience` (nullable), `provenance` const `self_attested_custom`,
-  `created_at`, `deleted_at`. **Cap: 3 per profile** (enforced in the action + a partial index).
-- Audit every add/remove (`profile.custom_skill.add` / `.remove`) — this *is* the demand signal.
+### 19.0 — Schema + data layer ✅ DONE 2026-06-30
+- ✅ New `profile_skills_custom` table (migration `0054`): `id`, `profile_id` FK, `label` (≤ 60),
+  `label_normalized` (lowercased/collapsed key), `proficiency`, `years_of_experience`, `created_at`,
+  `deleted_at`. **Partial unique** `(profile_id, label_normalized) WHERE deleted_at IS NULL` so a
+  removed label can be re-added. (Provenance is implicit — the table *is* the self-attested-custom lane.)
+- ✅ Actions `lib/profile/custom-skills.ts` (`addCustomSkill` / `removeCustomSkill`): flag-gated
+  (`feature_flag_seeker_custom_skills`), seeker-scoped, **cap 3** + dup + canonical-label rejection
+  ("add it from the picker"), audited `profile.custom_skill.add/remove` (meta = normalized label =
+  the demand signal). Read `db/queries/custom-skills.ts` (`listCustomSkills`).
+- ✅ **Completeness:** custom skills count toward `computeCompleteness` (shared recompute in
+  `actions.ts` + the action persists it) — the seeker is rewarded for documenting niche skills,
+  while they stay out of search.
+- ✅ **Tests (green):** `test:all` → typecheck + lint (0) + **327 vitest** incl. a new integration
+  invariant (`custom-skills-not-searchable.test.ts`: a distinctive custom label attached to a seeker
+  never surfaces them in `searchProfilesQuery`) + build; migration `0054` clean. ⚠️ Dev DB: `db:migrate`.
 
 ### 19.1 — Seeker editor (flag-gated)
 - In `SkillsEditor`, **below** the taxonomy picker: "Don't see your skill? Add a custom one (max 3)."
