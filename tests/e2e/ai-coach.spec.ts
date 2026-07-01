@@ -97,4 +97,8 @@ test("flag ON: the coach renders and degrades gracefully with no provider", asyn
   await expect(
     page.getByText(/switched on yet|check back soon|try again|paused/i),
   ).toBeVisible();
+  // Phase 22.4 — never a dead end: the human work-readiness guide is offered.
+  await expect(
+    page.getByRole("link", { name: /how to prepare for an interview/i }),
+  ).toBeVisible();
 });

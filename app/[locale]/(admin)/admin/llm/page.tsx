@@ -20,6 +20,7 @@ import * as schema from "@/db/schema";
 import { getSetting } from "@/lib/admin/settings";
 import { LlmProvidersManager } from "@/components/feature/admin/LlmProvidersManager";
 import { AiCoachIntegrationSwitch } from "@/components/feature/admin/AiCoachIntegrationSwitch";
+import { getCoachSafetyTelemetry } from "@/db/queries/coach-telemetry";
 
 export const revalidate = 0;
 
@@ -53,6 +54,8 @@ export default async function AdminLlmPage({
     getSetting<boolean>("feature_flag_llm_curriculum_enabled"),
     getSetting<boolean>("feature_flag_seeker_ai_coach"),
   ]);
+
+  const coachTelemetry = await getCoachSafetyTelemetry();
 
   const view = providers.map((p) => ({
     id: p.id,
@@ -92,6 +95,40 @@ export default async function AdminLlmPage({
       {/* Phase 22.5  system-wide AI Coach switch (different risk class;
           ack-gated). The seeker-facing coach also needs a configured provider. */}
       <AiCoachIntegrationSwitch enabled={aiCoachOn} />
+
+      {/* Phase 22.6  safety telemetry (counts only, never seeker content). */}
+      <section
+        aria-labelledby="coach-telemetry-h"
+        className="mt-4 rounded-[var(--radius-md)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface-sunk)] p-5"
+      >
+        <h2
+          id="coach-telemetry-h"
+          className="text-[0.65rem] uppercase tracking-[0.2em] text-[color:var(--color-ink-soft)]"
+        >
+          AI Coach safety telemetry
+        </h2>
+        <dl className="mt-3 grid grid-cols-3 gap-4">
+          {[
+            { label: "Practice calls", value: coachTelemetry.calls },
+            { label: "Distress path fired", value: coachTelemetry.distress },
+            { label: "Moderation drops", value: coachTelemetry.moderationDrops },
+          ].map((s) => (
+            <div key={s.label}>
+              <dt className="text-[0.6rem] uppercase tracking-[0.18em] text-[color:var(--color-ink-soft)]">
+                {s.label}
+              </dt>
+              <dd className="font-display tabular text-2xl text-[color:var(--color-ink)]">
+                {s.value}
+              </dd>
+            </div>
+          ))}
+        </dl>
+        <p className="mt-3 text-xs text-[color:var(--color-ink-soft)]">
+          Counts from the audit log; no seeker content is stored. A rising
+          distress count is expected + healthy (the safety net is working); a
+          high moderation-drop rate is a prompt-quality signal worth a look.
+        </p>
+      </section>
 
       <aside className="mt-10 rounded-[var(--radius-md)] border border-dashed border-[color:var(--color-hairline)] bg-[color:var(--color-surface-sunk)] p-5 text-xs text-[color:var(--color-ink-soft)]">
         <p className="font-medium text-[color:var(--color-ink)]">

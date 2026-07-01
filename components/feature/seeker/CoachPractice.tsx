@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/Button";
 import { requestInterviewPractice } from "@/lib/seeker/coach";
 import type { CoachResult } from "@/lib/llm/seeker-coach";
 import { CrisisSupport } from "@/components/feature/seeker/CrisisSupport";
+import { HelpLink } from "@/components/feature/help/HelpLink";
 
 const REASON_COPY: Record<string, string> = {
   no_provider:
@@ -109,9 +110,19 @@ export function CoachPractice({ defaultRole }: { defaultRole: string }) {
           role="status"
           className="rounded-[var(--radius-md)] border border-[color:var(--color-line)] bg-[color:var(--color-surface)] p-4 text-sm text-[color:var(--color-ink-soft)]"
         >
-          {result.reason === "off_scope"
-            ? result.message || REASON_COPY.off_scope
-            : REASON_COPY[result.reason] ?? REASON_COPY.failed}
+          <p>
+            {result.reason === "off_scope"
+              ? result.message || REASON_COPY.off_scope
+              : REASON_COPY[result.reason] ?? REASON_COPY.failed}
+          </p>
+          {/* Phase 22.4 — never a dead end: point to the human-written guide. */}
+          <div className="mt-3">
+            <HelpLink
+              role="seeker"
+              slug="prepare-for-an-interview"
+              label="In the meantime: how to prepare for an interview"
+            />
+          </div>
         </div>
       )}
 

@@ -56,6 +56,11 @@ test("the AI Coach switch is acknowledgement-gated (enable → disable)", async 
   const region = page.getByRole("region", { name: /AI Career Coach/ });
   await expect(region).toBeVisible();
 
+  // Phase 22.6 — the safety telemetry panel is present on Integrations.
+  await expect(
+    page.getByRole("region", { name: "AI Coach safety telemetry" }),
+  ).toBeVisible();
+
   // Enable is blocked until the safety acknowledgement is ticked.
   const enableBtn = region.getByRole("button", { name: /Enable AI Coach/i });
   await expect(enableBtn).toBeDisabled();
