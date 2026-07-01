@@ -1015,8 +1015,14 @@ Full task breakdown + UX/UI + testing discipline: `docs/SEEKER_GROWTH_PHASES_18-
 - [x] **Phase 20 — Skill Prerequisites & Sequencing** (Gap 4) ✅ *shipped 2026-06-30*: `skill_prereqs` graph
   (migration `0055`, cycle-guarded admin) + flag-gated (`feature_flag_skill_prereqs`) compass re-ranking +
   "Requires:" pills + an "Unlocks next" nudge.
-- [ ] **Phase 21 — Hyper-Local Demand** (Gap 6): capture city in `search_events.filters`, k-anonymized +
-  consent-gated city aggregation, a "Your city's hotspots" surface on `/dashboard/grow`.
+- [x] **Phase 21 — Hyper-Local Demand** (Gap 6) ✅ *shipped 2026-06-30*: city captured in
+  `search_events.filters` (behaviour-preserving); `getCityDemandHotspots` gated by
+  `feature_flag_city_demand` + top-5-metro + `outcomes_research` consent + a k-anon floor; "Your city's
+  hotspots" surface on `/dashboard/grow` (silent province fallback when any gate closes).
+
+**✅ Seeker growth roadmap complete** — Phases 17–21 close all six gaps from the skill-development
+assessment. Every feature flag-/consent-/admin-gated + ship-dark; `test:all` (339 vitest) + E2E both
+flag states at desktop + 360px green throughout.
 
 ---
 

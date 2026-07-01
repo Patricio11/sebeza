@@ -253,14 +253,31 @@ gate, k-anonymized, top-metros-only. **Flag:** `feature_flag_city_demand` + cons
   (**3/3**): metro + consent + flag → floor-respecting hotspots *and a below-floor cell is suppressed*;
   non-metro city → null; no research consent → null.
 
-### 21.2 — "Your city's hotspots" surface (flag-gated)
-- A new section on `/dashboard/grow` below the province rail: 3–4 city micro-segments (e.g. "Sandton
-  fintech — 1,240 employer searches", top-3 skills each). Renders only when 21.1 yields ≥1 segment.
-- **UX:** editorial card grid, ordinal pillars, tabular search counts, ochre accent on the hottest
-  segment; an explicit "based on employer searches in your city" provenance line + a one-line consent
-  reminder with a link to toggle it off. Honesty: it's market signal, not a job guarantee.
-- **Tests:** flag-ON E2E (seed metro city searches + consent → hotspots render; revoke consent → gone);
-  flag-OFF = grow page unchanged.
+### 21.2 — "Your city's hotspots" surface (flag-gated) ✅ DONE 2026-06-30
+- ✅ `CityHotspotsCard` on `/dashboard/grow` (below the province rail): ordinal pillars + tabular
+  search counts for the seeker's metro, an honest "market signal, not a job guarantee" line, and an
+  explicit provenance + **consent reminder** linking to Privacy & consent. Renders only when the gated
+  `getCityDemandHotspots` returned a value (null → silent fallback to the province rail).
+- ✅ **Tests (green):** `test:all` (339 vitest) + build · **flag OFF E2E** (no card) + **flag ON E2E**
+  (card renders for andile — Johannesburg + consent, seeded demand) + role-arc regression. New
+  `tests/e2e/city-demand.spec.ts` (desktop + 360px; scrolls the lazy section in); flag restored in
+  afterAll. The consent / metro / floor gates themselves are proven in `city-demand-gates.test.ts`.
+
+---
+
+## ✅ PHASES 18–21 COMPLETE — all six assessment gaps closed
+
+| Gap | Phase | Shipped |
+|---|---|---|
+| 1 · 5 | **17** | The Climb (progress + proficiency) — *(prior)* |
+| 2 | **18** | Living Learning Catalog (DB catalog + reviews + freshness admin) |
+| 3 | **19** | Custom Skills (self-attested, never-searchable, admin canonicalization) |
+| 4 | **20** | Skill Prerequisites (graph + compass sequencing + "Unlocks next") |
+| 6 | **21** | Hyper-Local Demand (city capture + k-anon/consent-gated hotspots) |
+
+Every feature flag-/admin-gated + ship-dark, verified flag-OFF (zero regression) + flag-ON at desktop
++ 360px, with `test:all` + build green throughout. Flags: `feature_flag_living_catalog`,
+`feature_flag_seeker_custom_skills`, `feature_flag_skill_prereqs`, `feature_flag_city_demand`.
 
 ---
 
@@ -294,7 +311,7 @@ becomes a priority, since it shares no schema with 18–20.
 - [x] **Phase 18 — Living Learning Catalog** ✅ (18.0 schema/migration · 18.1 feedback loop · 18.2 editorial+freshness) — all flag-/admin-gated, test:all + E2E green
 - [x] **Phase 19 — Custom Skills & Taxonomy Growth** ✅ (19.0 schema · 19.1 editor · 19.2 canonicalization) — flag-/admin-gated, test:all + E2E green
 - [x] **Phase 20 — Skill Prerequisites & Sequencing** ✅ (20.0 graph · 20.1 re-weight+pills · 20.2 unlocks-next) — flag-/admin-gated, test:all + E2E green
-- [ ] **Phase 21 — Hyper-Local Demand** (21.0 capture · 21.1 gated aggregation · 21.2 hotspots surface)
+- [x] **Phase 21 — Hyper-Local Demand** ✅ (21.0 capture · 21.1 gated aggregation · 21.2 hotspots surface) — flag-/consent-gated, test:all + E2E green
 
 *Each phase: flag-gated, ship-dark, admin-switchable from `/admin/settings`, verified flag-OFF (zero
 regression) + flag-ON (new surface) at desktop + 360px, with `test:all` + build green before commit.*

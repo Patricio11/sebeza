@@ -15,6 +15,9 @@ import { COST_ACCESS_ABANDON_REASONS } from "@/lib/seeker/learning-types";
 import { MyLearningSection } from "@/components/feature/seeker/learning/MyLearningSection";
 import { UnlockedNextCard } from "@/components/feature/seeker/learning/UnlockedNextCard";
 import { getUnlockedNextSkills } from "@/db/queries/skill-prereqs";
+import { CityHotspotsCard } from "@/components/feature/seeker/CityHotspotsCard";
+import { getCityDemandHotspots } from "@/db/queries/city-demand";
+import { getSessionUser } from "@/lib/auth/guard";
 import type { GrowthMomentum } from "@/components/feature/seeker/learning/GrowthMomentumCard";
 import { getSetting } from "@/lib/admin/settings";
 import { AcceptRecommendationButton } from "@/components/feature/seeker/learning/AcceptRecommendationButton";
@@ -206,6 +209,13 @@ export default async function CareerCompassPage({
   const unlockedNext = prereqsEnabled
     ? await getUnlockedNextSkills(me.profileId)
     : [];
+  // Phase 21.2 ("Hyper-Local Demand")  the query self-gates (flag + top-5
+  // metro + outcomes_research consent + k-anon floor); null → nothing renders,
+  // silent fallback to the province rail above.
+  const growSession = await getSessionUser();
+  const cityDemand = growSession
+    ? await getCityDemandHotspots({ cityLabel: me.city, userId: growSession.id })
+    : null;
   let momentum: GrowthMomentum | null = null;
   let oneSkillRank: number | null = null;
   if (skillJourney) {
@@ -653,6 +663,9 @@ export default async function CareerCompassPage({
           {t("honestBody")}
         </p>
       </aside>
+
+      {/* Phase 21.2  "Your city's hotspots" (gated query; null → hidden). */}
+      {cityDemand && <CityHotspotsCard data={cityDemand} />}
       </LazySection>
     </DashboardMasthead>
   );
