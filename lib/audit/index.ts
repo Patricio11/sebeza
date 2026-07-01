@@ -257,6 +257,9 @@ export type AuditKind =
   // Phase 20  admin added / removed a skill-prerequisite edge. Subject =
   // skill_slug; meta carries prereqSkillSlug + action (add|remove).
   | "admin.skill_prereq.edit"
+  // Phase 22.2  admin edited a crisis-support resource. Subject =
+  // crisis_resources.id; meta.action ∈ create|update|delete.
+  | "admin.crisis_resource.edit"
   // Phase 11.2.2  seeker swapped a cost-abandoned learning item for a
   // free alternative. Subject = the original learning_items.id; meta
   // carries `originalSkillSlug`, `newPathTitle`, `newProvider`.

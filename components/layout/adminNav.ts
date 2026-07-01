@@ -14,6 +14,7 @@ import {
   GraduationCap,
   Sparkles,
   Workflow,
+  LifeBuoy,
 } from "lucide-react";
 import type { DashboardNavItem } from "./dashboardChrome";
 
@@ -38,6 +39,9 @@ export const ADMIN_NAV: DashboardNavItem[] = [
   // Phase 13.3  LLM provider configuration. Above audit-log because
   // every action here writes to it; the admin should be one click away.
   { key: "llm", label: "LLM providers", href: "/admin/llm", icon: Sparkles },
+  // Phase 22.2 ("AI Coach — crisis pathway")  verified crisis-support resources
+  // shown to a seeker in distress. Sits by the LLM/AI integration config.
+  { key: "crisisResources", label: "Crisis resources", href: "/admin/crisis-resources", icon: LifeBuoy },
   { key: "auditLog", label: "Audit log", href: "/admin/audit-log", icon: ScrollText },
   // Phase 9.7.7  watch the watchers. Sits right after the general
   // audit log because it's a curated, sensitivity-focused slice of

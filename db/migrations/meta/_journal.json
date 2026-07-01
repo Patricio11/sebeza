@@ -393,6 +393,13 @@
       "when": 1782700000000,
       "tag": "0055_phase20_skill_prereqs",
       "breakpoints": false
+    },
+    {
+      "idx": 56,
+      "version": "7",
+      "when": 1782800000000,
+      "tag": "0056_phase22_crisis_resources",
+      "breakpoints": false
     }
   ]
 }

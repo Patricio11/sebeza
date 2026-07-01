@@ -694,6 +694,30 @@ export const skillPrereqs = pgTable(
   }),
 );
 
+/**
+ * Phase 22.2 ("AI Coach  crisis pathway")  admin-editable crisis-support
+ * resources shown when the coach's distress screen fires. Deliberately DATA,
+ * not hardcoded: helpline details change, and a wrong number is itself a safety
+ * failure  so an admin must add VERIFIED resources (and can correct them
+ * without a deploy). The AI-Coach switch (22.5) is acknowledgement-gated on
+ * these being live. Not PII  public support information.
+ */
+export const crisisResources = pgTable("crisis_resources", {
+  id: text("id").primaryKey(),
+  /** e.g. "SADAG Mental Health Line". */
+  name: text("name").notNull(),
+  /** Verified contact  free text so it can hold "0800 … / SMS …" etc. */
+  contact: text("contact").notNull(),
+  /** e.g. "24/7". Optional. */
+  availability: text("availability"),
+  /** One-line context. Optional. */
+  note: text("note"),
+  sortOrder: integer("sort_order").notNull().default(0),
+  /** Only `active` rows are shown to seekers; lets an admin stage/retire a row. */
+  active: boolean("active").notNull().default(true),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
 export const experiences = pgTable("experiences", {
   id: text("id").primaryKey(),
   profileId: text("profile_id")

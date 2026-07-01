@@ -13,7 +13,7 @@
  */
 
 import { useState, useTransition } from "react";
-import { useRouter } from "@/i18n/navigation";
+import { useRouter, Link } from "@/i18n/navigation";
 import { AlertTriangle, Bot, Loader2, Power } from "lucide-react";
 import { updateSetting } from "@/lib/admin/settings-actions";
 
@@ -81,8 +81,15 @@ export function AiCoachIntegrationSwitch({ enabled }: { enabled: boolean }) {
             resources</strong>, output moderation, and the &ldquo;practice, not a
             promise&rdquo; framing. See{" "}
             <code className="text-[0.85em]">docs/PHASE_22_AI_COACH_SAFETY_PLAN.md</code>.
-            The coach also needs a configured + budgeted provider above; without
-            one it degrades gracefully to &ldquo;not available&rdquo;.
+            Add verified helplines on{" "}
+            <Link
+              href="/admin/crisis-resources"
+              className="underline underline-offset-2 hover:text-[color:var(--color-ink)]"
+            >
+              Crisis resources
+            </Link>{" "}
+            first. The coach also needs a configured + budgeted provider above;
+            without one it degrades gracefully to &ldquo;not available&rdquo;.
           </p>
         </div>
       </div>

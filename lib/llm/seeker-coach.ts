@@ -22,7 +22,11 @@ import * as schema from "@/db/schema";
 import { decryptField } from "@/lib/crypto";
 import { logAccess } from "@/lib/audit";
 import { getSetting } from "@/lib/admin/settings";
-import { moderateQuestions } from "@/lib/llm/coach-safety";
+import { moderateQuestions, detectDistress } from "@/lib/llm/coach-safety";
+import {
+  listActiveCrisisResources,
+  type CrisisResource,
+} from "@/db/queries/crisis-resources";
 
 export type CoachSkipReason =
   | "flag_off"
@@ -34,12 +38,16 @@ export type CoachSkipReason =
   | "empty"
   // Phase 22.1/22.3 — the model refused an out-of-scope / unsafe request (or
   // moderation stripped everything). Carries a short, kind redirect message.
-  | "off_scope";
+  | "off_scope"
+  // Phase 22.2 — the pre-LLM distress screen fired. The provider was NOT called;
+  // the result carries human crisis resources instead of questions.
+  | "distress";
 
 export type CoachResult =
   | { ok: true; questions: string[]; providerId: string }
   | { ok: false; reason: "off_scope"; message: string }
-  | { ok: false; reason: Exclude<CoachSkipReason, "off_scope"> };
+  | { ok: false; reason: "distress"; crisisResources: CrisisResource[] }
+  | { ok: false; reason: Exclude<CoachSkipReason, "off_scope" | "distress"> };
 
 export interface CoachInput {
   callerUserId: string;
@@ -65,6 +73,21 @@ export async function generateInterviewQuestions(
   // Gate 1  surface flag.
   const enabled = await getSetting<boolean>("feature_flag_seeker_ai_coach");
   if (!enabled) return skip(input.callerUserId, "flag_off", "n/a");
+
+  // Phase 22.2  distress screen FIRST (before any provider interaction). A
+  // person in crisis must reach human support regardless of provider/budget, so
+  // this fires ahead of every other gate. The provider is NEVER called; we log
+  // only that the path fired (a count), never the seeker's text.
+  if (detectDistress(input.roleTitle)) {
+    await logAccess({
+      kind: "seeker.ai_coach.distress",
+      actor: input.callerUserId,
+      subject: "self",
+      meta: {},
+    });
+    const crisisResources = await listActiveCrisisResources();
+    return { ok: false, reason: "distress", crisisResources };
+  }
 
   // Gate 4  PII guard on the only free-text field (the role title).
   if (looksLikePii(input.roleTitle)) {
@@ -165,7 +188,7 @@ export async function generateInterviewQuestions(
 
 async function skip(
   callerUserId: string,
-  reason: Exclude<CoachSkipReason, "off_scope">,
+  reason: Exclude<CoachSkipReason, "off_scope" | "distress">,
   providerId: string,
 ): Promise<CoachResult> {
   await logAccess({

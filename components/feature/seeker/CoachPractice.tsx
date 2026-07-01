@@ -14,6 +14,7 @@ import { Bot, Loader2, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { requestInterviewPractice } from "@/lib/seeker/coach";
 import type { CoachResult } from "@/lib/llm/seeker-coach";
+import { CrisisSupport } from "@/components/feature/seeker/CrisisSupport";
 
 const REASON_COPY: Record<string, string> = {
   no_provider:
@@ -97,7 +98,13 @@ export function CoachPractice({ defaultRole }: { defaultRole: string }) {
         </p>
       </form>
 
-      {result && !result.ok && (
+      {/* Phase 22.2 — distress takes precedence over everything: human support,
+          never the model. */}
+      {result && !result.ok && result.reason === "distress" && (
+        <CrisisSupport resources={result.crisisResources} />
+      )}
+
+      {result && !result.ok && result.reason !== "distress" && (
         <div
           role="status"
           className="rounded-[var(--radius-md)] border border-[color:var(--color-line)] bg-[color:var(--color-surface)] p-4 text-sm text-[color:var(--color-ink-soft)]"

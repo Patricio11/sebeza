@@ -304,6 +304,31 @@ async function seedCityDemand() {
   console.log(`   inserted ${rows.length} city-scoped search events`);
 }
 
+/**
+ * Phase 22.2  a single INACTIVE crisis-resource template. It shows an admin the
+ * expected shape in `/admin/crisis-resources` but is never shown to seekers
+ * (active = false). We deliberately ship NO helpline numbers  a wrong/dead
+ * number is a safety failure, so an admin must add verified ones + activate them
+ * (the AI-Coach switch is acknowledgement-gated on this).
+ */
+async function seedCrisisResources() {
+  console.log("🛟 Phase 22  crisis-resource template (INACTIVE; admin verifies)…");
+  await db
+    .insert(schema.crisisResources)
+    .values([
+      {
+        id: "cr_template_sadag",
+        name: "SADAG (South African Depression and Anxiety Group)",
+        contact: "[ADMIN: add SADAG's current verified helpline number]",
+        availability: null,
+        note: "Template only — verify against sadag.org, then activate. Never ship an unverified number.",
+        active: false,
+        sortOrder: 0,
+      },
+    ])
+    .onConflictDoNothing();
+}
+
 async function seedTaxonomy() {
   console.log("🌍 Provinces + cities…");
   await db
@@ -2429,6 +2454,7 @@ async function main() {
   await seedTaxonomy();
   await seedSkillPrereqs();
   await seedCityDemand();
+  await seedCrisisResources();
   await seedUsersAndProfiles();
   await seedProfileChildren();
   await seedAcademicProfiles();
