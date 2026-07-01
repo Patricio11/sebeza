@@ -225,6 +225,12 @@ export type AuditKind =
   // text. `.skipped` records a gate that closed (flag/provider/budget/PII).
   | "seeker.ai_coach.call"
   | "seeker.ai_coach.skipped"
+  // Phase 22 safety telemetry (counts only, never the seeker's text):
+  //  - moderation_drop: the output backstop removed >=1 generated question.
+  //  - distress: the pre-LLM screen detected a crisis signal; the coach did
+  //    NOT call the provider and routed to human crisis resources instead.
+  | "seeker.ai_coach.moderation_drop"
+  | "seeker.ai_coach.distress"
   | "learning.complete"
   | "learning.abandon"
   // Phase 11.2.1  click-through to the provider's enrolment page from

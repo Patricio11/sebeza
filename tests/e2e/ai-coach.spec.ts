@@ -81,6 +81,10 @@ test("flag ON: the coach renders and degrades gracefully with no provider", asyn
 
   await page.goto("/en/dashboard/coach");
   await expect(page.getByText("AI interview coach")).toBeVisible();
+  // Phase 22.3 — the structural "practice, not a promise" framing is always present.
+  await expect(
+    page.getByText(/not a real interview, and not a job offer/i),
+  ).toBeVisible();
 
   await page.locator("#coach-role").fill("Junior software developer");
   await page

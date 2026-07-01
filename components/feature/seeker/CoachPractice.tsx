@@ -29,6 +29,8 @@ const REASON_COPY: Record<string, string> = {
     "The coach couldn't be reached right now. Please try again in a moment.",
   empty:
     "No questions came back  try describing the role a little differently.",
+  off_scope:
+    "I can only help you practise interview questions. Try a role you're preparing for.",
 };
 
 export function CoachPractice({ defaultRole }: { defaultRole: string }) {
@@ -52,6 +54,13 @@ export function CoachPractice({ defaultRole }: { defaultRole: string }) {
 
   return (
     <div className="max-w-2xl">
+      {/* Phase 22.3 — structural anti-opportunity framing. Always visible; not
+          copy the model can override. This is practice, never a real opening. */}
+      <p className="mb-6 rounded-[var(--radius-md)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface-sunk)] p-3 text-xs text-[color:var(--color-ink-soft)]">
+        This is practice to help you prepare  it is not a real interview, and
+        not a job offer.
+      </p>
+
       <form onSubmit={onSubmit} className="mb-6">
         <label
           htmlFor="coach-role"
@@ -93,7 +102,9 @@ export function CoachPractice({ defaultRole }: { defaultRole: string }) {
           role="status"
           className="rounded-[var(--radius-md)] border border-[color:var(--color-line)] bg-[color:var(--color-surface)] p-4 text-sm text-[color:var(--color-ink-soft)]"
         >
-          {REASON_COPY[result.reason] ?? REASON_COPY.failed}
+          {result.reason === "off_scope"
+            ? result.message || REASON_COPY.off_scope
+            : REASON_COPY[result.reason] ?? REASON_COPY.failed}
         </div>
       )}
 

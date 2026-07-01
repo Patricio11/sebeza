@@ -22,6 +22,7 @@ import * as schema from "@/db/schema";
 import { decryptField } from "@/lib/crypto";
 import { logAccess } from "@/lib/audit";
 import { getSetting } from "@/lib/admin/settings";
+import { moderateQuestions } from "@/lib/llm/coach-safety";
 
 export type CoachSkipReason =
   | "flag_off"
@@ -30,11 +31,15 @@ export type CoachSkipReason =
   | "budget"
   | "payload_unsafe"
   | "failed"
-  | "empty";
+  | "empty"
+  // Phase 22.1/22.3 — the model refused an out-of-scope / unsafe request (or
+  // moderation stripped everything). Carries a short, kind redirect message.
+  | "off_scope";
 
 export type CoachResult =
   | { ok: true; questions: string[]; providerId: string }
-  | { ok: false; reason: CoachSkipReason };
+  | { ok: false; reason: "off_scope"; message: string }
+  | { ok: false; reason: Exclude<CoachSkipReason, "off_scope"> };
 
 export interface CoachInput {
   callerUserId: string;
@@ -109,12 +114,8 @@ export async function generateInterviewQuestions(
     return { ok: false, reason: "failed" };
   }
 
-  const questions = parseQuestions(result.text);
-  if (questions.length === 0) {
-    return { ok: false, reason: "empty" };
-  }
-
-  // Bump provider counters + audit (token/cost only, never the prompt).
+  // The call happened + incurred cost regardless of what came back — bump the
+  // provider counters + audit the call (token/cost only, never the prompt).
   await db
     .update(schema.llmProviders)
     .set({
@@ -134,16 +135,37 @@ export async function generateInterviewQuestions(
       modelId: creds.modelId,
       tokenCount: result.tokenCount,
       estZarCost: result.estZarCost,
-      questionCount: questions.length,
     },
   });
 
-  return { ok: true, questions, providerId: active.id };
+  // Phase 22.1 — the model may return a structured refusal for an out-of-scope
+  // or unsafe request. Honour it (don't try to coerce it into questions).
+  const parsed = parseCoachOutput(result.text);
+  if (parsed.kind === "refusal") {
+    return { ok: false, reason: "off_scope", message: parsed.message };
+  }
+
+  // Phase 22.3 — moderation backstop: drop any question that slipped past the
+  // prompt into a promise / outcome claim / contact detail.
+  const { kept, droppedCount } = moderateQuestions(parsed.questions);
+  if (droppedCount > 0) {
+    await logAccess({
+      kind: "seeker.ai_coach.moderation_drop",
+      actor: input.callerUserId,
+      subject: active.id,
+      meta: { droppedCount },
+    });
+  }
+  if (kept.length === 0) {
+    return { ok: false, reason: "empty" };
+  }
+
+  return { ok: true, questions: kept, providerId: active.id };
 }
 
 async function skip(
   callerUserId: string,
-  reason: CoachSkipReason,
+  reason: Exclude<CoachSkipReason, "off_scope">,
   providerId: string,
 ): Promise<CoachResult> {
   await logAccess({
@@ -157,15 +179,23 @@ async function skip(
 
 // ── Prompts ────────────────────────────────────────────────────────────────
 
-function coachSystemPrompt(): string {
+// Exported so a fixture test can guard against safety-drift (a refusal being
+// silently removed). The prompt is the coach's first line of defence.
+export function coachSystemPrompt(): string {
   return [
-    "You are a calm, practical interview coach for South African job seekers on the platform Sebenza.",
-    "Given a target role plus the candidate's profession and skills, write realistic interview questions so they can practise.",
-    "Rules:",
-    `- Exactly ${MAX_QUESTIONS} questions: a mix of behavioural ("tell me about a time…") and role-specific / technical.`,
-    "- Grounded and fair, in a South African workplace context. No trick questions.",
-    "- NEVER promise a job, an interview, or any outcome. This is practice, not a guarantee.",
-    '- Respond ONLY as JSON of the shape: { "questions": string[] }.',
+    "You are a calm, practical INTERVIEW-PRACTICE coach for South African job seekers on the platform Sebenza.",
+    "Your ONLY job is to help them rehearse realistic job-interview questions. You are NOT a careers advisor, lawyer, financial advisor, doctor, or counsellor.",
+    "",
+    "STRICT RULES:",
+    "- Stay strictly in scope: interview practice only.",
+    "- REFUSE and gently redirect if asked for FINANCIAL, LEGAL, MEDICAL, or MENTAL-HEALTH advice. Never improvise such advice.",
+    "- NEVER promise or imply a job, an interview, a callback, or any outcome. No pass/fail, no scoring, no 'you'll get this'.",
+    "- Do NOT pretend to be a specific employer or recruiter, and do not include contact details, links, or phone numbers.",
+    "- Plain language, fair and encouraging, in a South African workplace context. No trick questions.",
+    "",
+    "OUTPUT — respond with JSON ONLY, exactly one of these shapes:",
+    `- In scope: { "questions": string[] }  with exactly ${MAX_QUESTIONS} interview-practice questions (a mix of behavioural, e.g. "tell me about a time…", and role-specific / technical).`,
+    '- Out of scope or unsafe request: { "refusal": "<one short, kind sentence that redirects to interview practice>" }.',
   ].join("\n");
 }
 
@@ -177,19 +207,33 @@ function coachUserPrompt(input: CoachInput): string {
   ].join("\n");
 }
 
-function parseQuestions(raw: string): string[] {
+type CoachOutput =
+  | { kind: "questions"; questions: string[] }
+  | { kind: "refusal"; message: string };
+
+function parseCoachOutput(raw: string): CoachOutput {
   let parsed: unknown;
   try {
     parsed = JSON.parse(raw);
   } catch {
-    return [];
+    return { kind: "questions", questions: [] };
   }
-  const arr = (parsed as { questions?: unknown })?.questions;
-  if (!Array.isArray(arr)) return [];
-  return arr
+  const obj = parsed as { questions?: unknown; refusal?: unknown };
+
+  // A structured refusal takes precedence.
+  if (typeof obj?.refusal === "string" && obj.refusal.trim().length > 0) {
+    return { kind: "refusal", message: obj.refusal.trim().slice(0, 240) };
+  }
+
+  const arr = obj?.questions;
+  if (!Array.isArray(arr)) {
+    return { kind: "questions", questions: [] };
+  }
+  const questions = arr
     .filter((q): q is string => typeof q === "string" && q.trim().length > 0)
     .map((q) => q.trim().slice(0, 400))
     .slice(0, MAX_QUESTIONS);
+  return { kind: "questions", questions };
 }
 
 // ── Generic chat (reuses the configured provider creds) ──────────────────────
