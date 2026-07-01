@@ -242,14 +242,16 @@ gate, k-anonymized, top-metros-only. **Flag:** `feature_flag_city_demand` + cons
 - ✅ **Tests (green):** `test:all` (**336 vitest**, incl. a new integration `city-capture.test.ts`:
   a city-scoped search records `filters->>'city'` + keeps province). Existing demand queries unchanged.
 
-### 21.1 — City aggregation behind k-anonymity + consent (flag-gated)
-- New query path in `getNearYouDemand` / `demandVsCurriculumQuery`: city-level aggregation that
-  **only** returns a segment when (a) the seeker's city is a top-5 metro (Joburg, Cape Town, Durban,
-  Pretoria, Gqeberha), (b) the segment clears a search-count floor (k-anonymity), and (c) the seeker
-  has `outcomes_research` consent. Otherwise → silently fall back to the province rail (no empty
-  state, no "we'd show you more if…").
-- **Tests:** unit tests for each gate (below-floor → suppressed; non-metro → suppressed; no consent →
-  suppressed); compliance test that no city segment leaks below the floor.
+### 21.1 — City aggregation behind k-anonymity + consent (flag-gated) ✅ DONE 2026-06-30
+- ✅ `getCityDemandHotspots({ cityLabel, userId })` (`db/queries/city-demand.ts`): city-scoped demand
+  (90-day window) that returns a result ONLY when **all** gates open — (1) `feature_flag_city_demand`
+  ON, (2) the seeker's city is a **top-5 metro** (`TOP_METRO_SLUGS`), (3) the seeker has
+  `outcomes_research` consent — AND each segment clears `CITY_DEMAND_FLOOR` (thin-cell suppression).
+  Any gate closed → `null` (the caller silently falls back to the province rail). Demand-side only.
+- ✅ Flag `feature_flag_city_demand` scaffolded (settings/-actions/SettingsForm).
+- ✅ **Tests (green):** `test:all` (**339 vitest**) + build · new integration `city-demand-gates.test.ts`
+  (**3/3**): metro + consent + flag → floor-respecting hotspots *and a below-floor cell is suppressed*;
+  non-metro city → null; no research consent → null.
 
 ### 21.2 — "Your city's hotspots" surface (flag-gated)
 - A new section on `/dashboard/grow` below the province rail: 3–4 city micro-segments (e.g. "Sandton

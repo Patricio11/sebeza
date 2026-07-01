@@ -162,6 +162,12 @@ const ROWS: SettingRow[] = [
       "Seeker · Skill prerequisites — sequence recommendations (prereqs first), “Requires:” pills, and the “Unlocks next” moment",
     type: "boolean",
   },
+  {
+    key: "feature_flag_city_demand",
+    label:
+      "Seeker · Hyper-local demand — “Your city’s hotspots” (top-5 metros only, k-anon floor, requires the seeker’s research-insights consent)",
+    type: "boolean",
+  },
 ];
 
 export function SettingsForm({ values }: Props) {

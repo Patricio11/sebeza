@@ -127,7 +127,11 @@ export type SettingKey =
   | "feature_flag_seeker_custom_skills"
   // Phase 20 ("Skill Prerequisites") — compass re-ranking (prereqs bubble above
   // dependents) + "Requires: X" pills + the "Unlocks next" moment on completion.
-  | "feature_flag_skill_prereqs";
+  | "feature_flag_skill_prereqs"
+  // Phase 21 ("Hyper-Local Demand") — city-level demand hotspots on the compass.
+  // ALSO gated by top-5-metro + a k-anon floor + the seeker's outcomes_research
+  // consent; this flag is just the surface switch.
+  | "feature_flag_city_demand";
 
 const DEFAULTS: Record<SettingKey, unknown> = {
   freshness_band_days_fresh: 30,
@@ -163,6 +167,7 @@ const DEFAULTS: Record<SettingKey, unknown> = {
   feature_flag_living_catalog: false,
   feature_flag_seeker_custom_skills: false,
   feature_flag_skill_prereqs: false,
+  feature_flag_city_demand: false,
 };
 
 /**
