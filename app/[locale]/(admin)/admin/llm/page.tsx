@@ -19,6 +19,7 @@ import { getDb } from "@/db/client";
 import * as schema from "@/db/schema";
 import { getSetting } from "@/lib/admin/settings";
 import { LlmProvidersManager } from "@/components/feature/admin/LlmProvidersManager";
+import { AiCoachIntegrationSwitch } from "@/components/feature/admin/AiCoachIntegrationSwitch";
 
 export const revalidate = 0;
 
@@ -32,7 +33,7 @@ export default async function AdminLlmPage({
   await verifyAdmin();
 
   const db = getDb();
-  const [providers, killSwitchOn] = await Promise.all([
+  const [providers, killSwitchOn, aiCoachOn] = await Promise.all([
     db
       .select({
         id: schema.llmProviders.id,
@@ -50,6 +51,7 @@ export default async function AdminLlmPage({
       .from(schema.llmProviders)
       .orderBy(asc(schema.llmProviders.id)),
     getSetting<boolean>("feature_flag_llm_curriculum_enabled"),
+    getSetting<boolean>("feature_flag_seeker_ai_coach"),
   ]);
 
   const view = providers.map((p) => ({
@@ -86,6 +88,10 @@ export default async function AdminLlmPage({
       <KillSwitchBanner on={killSwitchOn} />
 
       <LlmProvidersManager providers={view} killSwitchOn={killSwitchOn} />
+
+      {/* Phase 22.5  system-wide AI Coach switch (different risk class;
+          ack-gated). The seeker-facing coach also needs a configured provider. */}
+      <AiCoachIntegrationSwitch enabled={aiCoachOn} />
 
       <aside className="mt-10 rounded-[var(--radius-md)] border border-dashed border-[color:var(--color-hairline)] bg-[color:var(--color-surface-sunk)] p-5 text-xs text-[color:var(--color-ink-soft)]">
         <p className="font-medium text-[color:var(--color-ink)]">

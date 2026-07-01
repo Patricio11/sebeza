@@ -1026,6 +1026,26 @@ flag states at desktop + 360px green throughout.
 
 ---
 
+## 🛟 PHASE 22 — AI CAREER COACH: SAFETY & WELLBEING ⏳ *pre-production gate (plan: `docs/PHASE_22_AI_COACH_SAFETY_PLAN.md`)*
+*The one feature where "flag works + tests pass" is not the bar — an LLM addressing potentially
+vulnerable job seekers. The `feature_flag_seeker_ai_coach` switch must NOT go ON in production until
+this safety layer ships.*
+
+- [x] **22.5** System-wide AI-Coach switch on `/admin/llm` (Integrations), **acknowledgement-gated**
+  (admin must confirm the safety review is complete before it can be enabled; OFF is immediate). *Shipped 2026-07-01.*
+- [ ] **22.1** System-prompt hardening — scope lock + refuse financial / legal / medical / mental-health advice.
+- [ ] **22.2** Distress detection + crisis pathway (deterministic pre-LLM screen → **verified, admin-editable
+  SA crisis resources**, never the LLM; content never logged). ← *highest priority; switch stays OFF until this ships.*
+- [ ] **22.3** Output moderation + structural "practice, not a promise" framing.
+- [ ] **22.4** Graceful degradation to human resources (crisis / Phase-15 work-readiness) at every edge.
+- [ ] **22.6** Monitoring (distress + moderation counts), monthly content review, incident path.
+- [ ] **22.7** Verification (both flag states, desktop + 360px).
+
+> Crisis-line details must be **verified against an authoritative source + stored as admin-editable data**
+> — a wrong helpline number is itself a safety failure. This plan prints no numbers on purpose.
+
+---
+
 ## 🚀 DEPLOYMENT CHECKLIST
 
 ### Pre-Launch
