@@ -66,10 +66,12 @@ test("admin promotes a custom skill to canonical and holders migrate", async ({
 
   // Dismiss the cookie-consent banner — on 360px it sits at the bottom and
   // would intercept clicks on the promote panel.
-  const acceptCookies = page.getByRole("button", { name: /accept all/i });
-  if (await acceptCookies.isVisible().catch(() => false)) {
-    await acceptCookies.click();
-  }
+  // Robustly dismiss the cookie banner (auto-waits for it, so we don't race a
+  // point-in-time check and let the bottom banner intercept a click on 360px).
+  await page
+    .getByRole("button", { name: /accept all/i })
+    .click({ timeout: 8_000 })
+    .catch(() => {});
 
   const row = page.getByRole("listitem").filter({ hasText: LABEL });
   await expect(row).toBeVisible();

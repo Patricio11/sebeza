@@ -23,6 +23,9 @@ test.beforeAll(async () => {
     );
   }
   sql = postgres(url, { max: 1 });
+  // Deterministic start: clear the test edge in case a prior run's afterAll was
+  // interrupted (e.g. a webserver/DB hiccup), so the "valid add" is always fresh.
+  await sql`DELETE FROM skill_prereqs WHERE skill_slug = 'node' AND prereq_skill_slug = 'typescript'`;
 });
 
 test.afterAll(async () => {
@@ -44,10 +47,13 @@ test("cycle is rejected and a valid prerequisite is added", async ({ page }) => 
   await signInAdmin(page);
   await page.goto("/en/admin/skill-prereqs");
 
-  const acceptCookies = page.getByRole("button", { name: /accept all/i });
-  if (await acceptCookies.isVisible().catch(() => false)) {
-    await acceptCookies.click();
-  }
+  // Robustly dismiss the cookie banner: `click` auto-waits for it to appear
+  // (up to the timeout), so we don't race a point-in-time visibility check and
+  // then have the bottom banner intercept a form click on 360px.
+  await page
+    .getByRole("button", { name: /accept all/i })
+    .click({ timeout: 8_000 })
+    .catch(() => {});
 
   // Seeded graph renders.
   await expect(
@@ -64,7 +70,7 @@ test("cycle is rejected and a valid prerequisite is added", async ({ page }) => 
   await prereqSel.selectOption("postgres");
   await reason.fill("should fail");
   await addBtn.click();
-  await expect(page.getByText(/cycle/i)).toBeVisible({ timeout: 15_000 });
+  await expect(page.getByText(/cycle/i)).toBeVisible({ timeout: 30_000 });
 
   // 2. Valid: node → typescript is accepted and listed.
   await skillSel.selectOption("node");

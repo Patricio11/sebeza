@@ -1026,23 +1026,23 @@ flag states at desktop + 360px green throughout.
 
 ---
 
-## 🛟 PHASE 22 — AI CAREER COACH: SAFETY & WELLBEING ⏳ *pre-production gate (plan: `docs/PHASE_22_AI_COACH_SAFETY_PLAN.md`)*
+## 🛟 PHASE 22 — AI CAREER COACH: SAFETY & WELLBEING ✅ *safety layer shipped 2026-07-01 (plan: `docs/PHASE_22_AI_COACH_SAFETY_PLAN.md`)*
 *The one feature where "flag works + tests pass" is not the bar — an LLM addressing potentially
-vulnerable job seekers. The `feature_flag_seeker_ai_coach` switch must NOT go ON in production until
-this safety layer ships.*
+vulnerable job seekers. Built the wellbeing layer; `feature_flag_seeker_ai_coach` still must not go ON
+in production until an operator verifies + activates real crisis resources.*
 
-- [x] **22.5** System-wide AI-Coach switch on `/admin/llm` (Integrations), **acknowledgement-gated**
-  (admin must confirm the safety review is complete before it can be enabled; OFF is immediate). *Shipped 2026-07-01.*
-- [ ] **22.1** System-prompt hardening — scope lock + refuse financial / legal / medical / mental-health advice.
-- [ ] **22.2** Distress detection + crisis pathway (deterministic pre-LLM screen → **verified, admin-editable
-  SA crisis resources**, never the LLM; content never logged). ← *highest priority; switch stays OFF until this ships.*
-- [ ] **22.3** Output moderation + structural "practice, not a promise" framing.
-- [ ] **22.4** Graceful degradation to human resources (crisis / Phase-15 work-readiness) at every edge.
-- [ ] **22.6** Monitoring (distress + moderation counts), monthly content review, incident path.
-- [ ] **22.7** Verification (both flag states, desktop + 360px).
+- [x] **22.5** System-wide AI-Coach switch on `/admin/llm` (Integrations), **acknowledgement-gated**.
+- [x] **22.1** System-prompt hardening — scope lock + refuse financial / legal / medical / mental-health advice + structured refusal.
+- [x] **22.2** Distress detection + crisis pathway (deterministic pre-LLM screen, fires **before the provider
+  gate**; provider never called; **admin-editable crisis resources** via `/admin/crisis-resources`, migration
+  `0056`; content never logged). The load-bearing task.
+- [x] **22.3** Output moderation (`moderateQuestions`) + structural "practice, not a promise" banner.
+- [x] **22.4** Graceful degradation to the human "prepare for an interview" guide at every non-distress edge.
+- [x] **22.6** Safety telemetry (call / distress / moderation-drop counts) on `/admin/llm`.
+- [x] **22.7** Verification — `test:all` (354 vitest) + build + E2E both flag states (incl. `coach-distress.spec`), desktop + 360px.
 
-> Crisis-line details must be **verified against an authoritative source + stored as admin-editable data**
-> — a wrong helpline number is itself a safety failure. This plan prints no numbers on purpose.
+> Crisis-line details are **admin-editable data, verified by an operator** — the seed ships no numbers.
+> A wrong helpline number is itself a safety failure.
 
 ---
 

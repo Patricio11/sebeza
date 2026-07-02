@@ -156,15 +156,22 @@ time, not copied from a roadmap.)*
   counsel.
 - Any "you passed / you'd get this job" framing.
 
-## 📌 STATUS
-- [x] 22.5 — Production safety gate on `/admin/llm` (ack-gated switch) — *shipped with this plan*
-- [ ] 22.1 — System-prompt hardening (refusal boundaries)
-- [ ] 22.2 — Distress detection + crisis pathway  ← **highest priority; the switch stays OFF until this ships**
-- [ ] 22.3 — Output moderation + false-opportunity guard
-- [ ] 22.4 — Graceful degradation + human resources
-- [ ] 22.6 — Monitoring, audit, review cadence
-- [ ] 22.7 — Verification (both flag states, desktop + 360px)
+## 📌 STATUS — ✅ safety layer shipped 2026-07-01 (flag stays OFF pending operator sign-off)
+- [x] 22.5 — Production safety gate on `/admin/llm` (ack-gated switch).
+- [x] 22.1 — System-prompt hardening: scope-locked; refuses financial/legal/medical/mental-health advice;
+  no promises/scoring; structured `{ "refusal": … }` output. Drift-guard unit test.
+- [x] 22.2 — Distress detection + crisis pathway: deterministic pre-LLM screen fires **before the provider
+  gate**; on a hit the provider is never called, human crisis resources render, audit logs a count only
+  (never the text). Crisis resources are **admin-editable data** (`/admin/crisis-resources`, migration
+  `0056`); the seed ships ONE inactive template — no invented numbers.
+- [x] 22.3 — Output moderation (`moderateQuestions` drops promises/contact) + a persistent structural
+  "practice, not a promise" banner.
+- [x] 22.4 — Graceful degradation: every non-ok, non-distress path offers the human "prepare for an
+  interview" guide.
+- [x] 22.6 — Monitoring: `getCoachSafetyTelemetry` (call / distress / moderation-drop counts) on `/admin/llm`.
+- [x] 22.7 — Verification: `test:all` (354 vitest incl. 15 safety unit tests) + build + E2E both flag states
+  (incl. the load-bearing `coach-distress.spec`) at desktop + 360px.
 
-> **The switch does not go ON in production until 22.1–22.4 + 22.6 are done, the crisis resources are
-> verified + live, and the safety copy is human-reviewed.** 22.5 makes that a deliberate, acknowledged
-> act rather than an accidental toggle.
+> **Code is done; the switch must still not go ON in production until an operator adds + VERIFIES real
+> crisis resources (and activates them), and the safety copy is human-reviewed.** 22.5 makes enabling a
+> deliberate, acknowledged act. Any move to live back-and-forth conversation must re-run this phase.

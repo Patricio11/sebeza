@@ -48,10 +48,12 @@ test("the AI Coach switch is acknowledgement-gated (enable → disable)", async 
 
   await signInAdmin(page);
   await page.goto("/en/admin/llm");
-  const acceptCookies = page.getByRole("button", { name: /accept all/i });
-  if (await acceptCookies.isVisible().catch(() => false)) {
-    await acceptCookies.click();
-  }
+  // Robustly dismiss the cookie banner (auto-waits for it, so we don't race a
+  // point-in-time check and let the bottom banner intercept a click on 360px).
+  await page
+    .getByRole("button", { name: /accept all/i })
+    .click({ timeout: 8_000 })
+    .catch(() => {});
 
   const region = page.getByRole("region", { name: /AI Career Coach/ });
   await expect(region).toBeVisible();
