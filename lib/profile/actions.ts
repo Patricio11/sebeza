@@ -359,7 +359,16 @@ export async function updateSkills(
   // ones go to the admin taxonomy queue + are dropped from this save.
   // The seeker UI shows them as "pending" chips client-side; on
   // reload they fall off the profile until admin promotes them.
-  const validSlugs = new Set(SKILLS.map((s) => s.slug));
+  // Phase 23.4  validate against the LIVE `skills` table (the authority,
+  // grown by /admin/taxonomy + Phase-19 canonicalization), not the frozen
+  // constant  a canonicalized skill used to be silently dropped here.
+  const liveSkills = await db
+    .select({ slug: schema.skills.slug })
+    .from(schema.skills);
+  const validSlugs =
+    liveSkills.length > 0
+      ? new Set(liveSkills.map((s) => s.slug))
+      : new Set(SKILLS.map((s) => s.slug));
   const canonicalSkills = parsed.data.skills.filter((s) =>
     validSlugs.has(s.slug),
   );

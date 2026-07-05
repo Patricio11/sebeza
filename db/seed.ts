@@ -51,6 +51,7 @@ import {
 } from "@/lib/mock/taxonomy";
 import { mockProfiles } from "@/lib/mock/profiles";
 import { MOCK_COMPASS } from "@/lib/mock/growth";
+import { SEED_GRADUATE_PROGRAMMES } from "@/lib/mock/academic";
 import { SEED_ADMIN, SEED_DISCOVERY_EMPLOYER } from "@/db/fixtures";
 import { CONSENT_PURPOSES } from "@/lib/consent";
 
@@ -327,6 +328,32 @@ async function seedCrisisResources() {
       },
     ])
     .onConflictDoNothing();
+}
+
+/**
+ * Phase 23.1  seed `graduate_programmes` from the (now seed-source-only) mock
+ * snapshots, so the student lane's programme listings are live DB data with
+ * render parity. Admin-correctable from here on; never invented at runtime.
+ */
+async function seedGraduateProgrammes() {
+  console.log("🎓 Phase 23  graduate programmes (mirrors seed constants)…");
+  const rows = SEED_GRADUATE_PROGRAMMES.map((p, i) => ({
+    id: slugifyLearningPathId(`${p.organisation} ${p.title}`),
+    title: p.title,
+    organisation: p.organisation,
+    sector: p.sector,
+    kind: p.kind,
+    durationMonths: p.durationMonths,
+    cities: p.cities,
+    applicationStatus: p.applicationStatus,
+    applicationHint: p.applicationHint,
+    eligibility: p.eligibility,
+    fieldTags: p.fieldTags,
+    saqaRecognised: p.saqaRecognised ?? false,
+    sortOrder: i,
+  }));
+  await db.insert(schema.graduateProgrammes).values(rows).onConflictDoNothing();
+  console.log(`   inserted ${rows.length} graduate programmes`);
 }
 
 async function seedTaxonomy() {
@@ -2455,6 +2482,7 @@ async function main() {
   await seedSkillPrereqs();
   await seedCityDemand();
   await seedCrisisResources();
+  await seedGraduateProgrammes();
   await seedUsersAndProfiles();
   await seedProfileChildren();
   await seedAcademicProfiles();

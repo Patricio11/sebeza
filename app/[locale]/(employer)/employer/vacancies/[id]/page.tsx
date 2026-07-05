@@ -43,8 +43,8 @@ import {
   withdrawInvitation,
 } from "@/lib/employer/invitations";
 import { getPlacementsForVacancy } from "@/lib/employer/placements";
-import { getProfessions } from "@/lib/taxonomy/query";
-import { PROVINCES, PROFESSIONS, SKILLS } from "@/lib/mock/taxonomy";
+import { getProfessions, getSkills } from "@/lib/taxonomy/query";
+import { PROVINCES } from "@/lib/mock/taxonomy";
 import { formatVacancyLocation } from "@/lib/employer/vacancies-display";
 import { ChevronLeft, Lock, MapPin, Users } from "lucide-react";
 import type { WorkAvailabilityKind } from "@/lib/mock/types";
@@ -90,10 +90,14 @@ export default async function VacancyDetailPage({
     getPlacementsForVacancy(vacancy.id),
   ]);
 
-  const professions = await getProfessions();
+  // Phase 23.4  live catalogues; the DB is the authority for both.
+  const [professions, skills] = await Promise.all([
+    getProfessions(),
+    getSkills(),
+  ]);
 
   const professionLabel =
-    PROFESSIONS.find((p) => p.slug === vacancy.professionSlug)?.label ??
+    professions.find((p) => p.slug === vacancy.professionSlug)?.label ??
     vacancy.professionSlug;
   // Phase 13.9  single source of truth. Handles "Any province
   // Remote / Hybrid" for null-province vacancies.
@@ -294,7 +298,7 @@ export default async function VacancyDetailPage({
             initial={vacancy}
             professions={professions}
             provinces={PROVINCES}
-            skills={SKILLS}
+            skills={skills}
             draftId={vacancy.id}
             onSubmit={async (value) => {
               "use server";
@@ -309,7 +313,7 @@ export default async function VacancyDetailPage({
           />
         </div>
       ) : (
-        <ReadOnlyDetail vacancy={vacancy} skillLabels={SKILLS} />
+        <ReadOnlyDetail vacancy={vacancy} skillLabels={skills} />
       )}
 
       <p className="mt-8 text-xs italic text-[color:var(--color-ink-soft)]">
@@ -560,7 +564,7 @@ function ReadOnlyDetail({
   skillLabels,
 }: {
   vacancy: import("@/lib/employer/vacancies").VacancyRow;
-  skillLabels: typeof SKILLS;
+  skillLabels: Array<{ slug: string; label: string }>;
 }) {
   const skills = vacancy.skillSlugs
     .map((s) => skillLabels.find((sk) => sk.slug === s)?.label ?? s);

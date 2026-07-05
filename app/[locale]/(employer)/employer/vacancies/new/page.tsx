@@ -20,8 +20,8 @@ import {
   VacancyForm,
   type VacancyFormValue,
 } from "@/components/feature/employer/vacancies/VacancyForm";
-import { getProfessions } from "@/lib/taxonomy/query";
-import { PROVINCES, SKILLS } from "@/lib/mock/taxonomy";
+import { getProfessions, getSkills } from "@/lib/taxonomy/query";
+import { PROVINCES } from "@/lib/mock/taxonomy";
 import { HelpLink } from "@/components/feature/help/HelpLink";
 
 export const revalidate = 0;
@@ -87,7 +87,12 @@ export default async function NewVacancyPage({
     }
   }
 
-  const professions = await getProfessions();
+  // Phase 23.4  live catalogues (skills table is the authority; admin-added
+  // + canonicalized skills appear immediately).
+  const [professions, skills] = await Promise.all([
+    getProfessions(),
+    getSkills(),
+  ]);
 
   return (
     <DashboardMasthead
@@ -107,7 +112,7 @@ export default async function NewVacancyPage({
           initial={initial}
           professions={professions}
           provinces={PROVINCES}
-          skills={SKILLS}
+          skills={skills}
           // Phase 9.19  scope the sessionStorage draft per source so
           // duplicating two different vacancies doesn't bleed drafts.
           draftId={duplicateFrom ? `duplicate-${duplicateFrom}` : "new"}

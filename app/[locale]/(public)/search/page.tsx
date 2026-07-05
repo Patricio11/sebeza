@@ -17,7 +17,8 @@ import type {
   OpenToTag,
 } from "@/lib/mock/types";
 import { isOpenToTag } from "@/lib/mock/types";
-import { findProvinceBySlug, findCityBySlug, PROFESSIONS } from "@/lib/mock/taxonomy";
+import { findProvinceBySlug, findCityBySlug } from "@/lib/mock/taxonomy";
+import { getProfessions } from "@/lib/taxonomy/query";
 import { getSetting } from "@/lib/admin/settings";
 import { SearchX } from "lucide-react";
 // Phase 13.8  per-row "Invite to vacancy" affordance for the
@@ -202,8 +203,10 @@ export default async function SearchPage({ params, searchParams }: SearchPagePro
     citizenCount > 0 &&
     otherCount > 0;
 
+  // Phase 23.4  the live profession list (admin-added ones searchable).
+  const professions = await getProfessions();
   const inferredRole =
-    PROFESSIONS.find(
+    professions.find(
       (p) =>
         query &&
         (p.label.toLowerCase().includes(query.toLowerCase()) ||
@@ -223,6 +226,7 @@ export default async function SearchPage({ params, searchParams }: SearchPagePro
               variant="compact"
               defaultQuery={query}
               defaultLocation={filters.province ?? ""}
+              professionOptions={professions}
             />
           </div>
         </div>

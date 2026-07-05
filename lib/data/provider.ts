@@ -131,14 +131,26 @@ async function signPhotoUrls(
 // ─────────────────────────────────────────────────────────────────────────────
 
 function selectProvider(): DataProvider {
-  const choice = process.env.SEBENZA_DATA_PROVIDER ?? "mock";
-  if (choice === "db") return dbProvider;
-  if (choice === "mock") return mockProvider;
-  // Unknown value  fail closed to mock so dev doesn't crash on a typo.
-  console.warn(
-    `[dataProvider] Unknown SEBENZA_DATA_PROVIDER="${choice}"  falling back to mock.`,
-  );
-  return mockProvider;
+  // Phase 23.5 ("Truth & Data Integrity")  the DB is the default. The old
+  // `?? "mock"` default meant a production deploy that forgot the env var
+  // silently served fabricated numbers (48k fake actives) on public pages.
+  // Now: default db; `mock` must be EXPLICIT and is refused in production
+  // fail loud, never silently fake.
+  const choice = process.env.SEBENZA_DATA_PROVIDER ?? "db";
+  if (choice === "mock") {
+    if (process.env.NODE_ENV === "production") {
+      throw new Error(
+        "[dataProvider] SEBENZA_DATA_PROVIDER=mock is not allowed in production  fabricated data must never reach users. Set it to 'db'.",
+      );
+    }
+    return mockProvider;
+  }
+  if (choice !== "db") {
+    console.warn(
+      `[dataProvider] Unknown SEBENZA_DATA_PROVIDER="${choice}"  using db.`,
+    );
+  }
+  return dbProvider;
 }
 
 export const dataProvider: DataProvider = selectProvider();

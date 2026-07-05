@@ -10,7 +10,7 @@ import {
   INSTITUTION_KIND_LABEL,
   NQF_LEVELS,
 } from "@/lib/mock/taxonomy";
-import { SKILLS } from "@/lib/mock/taxonomy";
+import { getSkills } from "@/lib/taxonomy/query";
 import { GraduationCap } from "lucide-react";
 import { ProfileBasicsForm } from "@/components/feature/profile/ProfileBasicsForm";
 import { SkillsEditor } from "@/components/feature/profile/SkillsEditor";
@@ -73,9 +73,15 @@ export default async function ProfileEditorPage({
   const tAcademic = await getTranslations("seekerDash.profileEditor.academic");
   const academic = me.academic;
 
+  // Phase 23.4  the LIVE skill catalogue (skills table) is the authority, so
+  // admin-added + Phase-19 canonicalized skills appear in the picker AND map
+  // back into the editor's initial state. The constant is only the empty-DB
+  // fallback inside getSkills().
+  const skillCatalogue = await getSkills();
+
   // Map the live `topSkills` (labels) back to slug+label so the SkillsEditor
   // can validate against the controlled taxonomy.
-  const slugByLabel = new Map(SKILLS.map((s) => [s.label, s.slug]));
+  const slugByLabel = new Map(skillCatalogue.map((s) => [s.label, s.slug]));
   const initialSkills = me.topSkills
     .map((s) => {
       const slug = slugByLabel.get(s.name);
@@ -274,7 +280,11 @@ export default async function ProfileEditorPage({
               title={t("sections.skillsTitle")}
               hint="Skills must come from our controlled taxonomy  keeps search and analytics clean."
             />
-            <SkillsEditor initial={initialSkills} professionSlug={me.profession} />
+            <SkillsEditor
+              initial={initialSkills}
+              professionSlug={me.profession}
+              skillOptions={skillCatalogue}
+            />
             {customSkillsEnabled && (
               <CustomSkillsEditor
                 initial={customSkills}

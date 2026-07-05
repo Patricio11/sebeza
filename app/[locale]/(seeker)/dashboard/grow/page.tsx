@@ -48,7 +48,6 @@ import {
   type AdjacentProfession,
 } from "@/lib/mock/growth";
 import {
-  getStudentSnapshot,
   PROGRAMME_KIND_LABEL,
   SECTOR_LABEL,
   APPLICATION_STATUS_LABEL,
@@ -57,6 +56,9 @@ import {
   type ProgrammeElective,
   type GraduateDestination,
 } from "@/lib/mock/academic";
+// Phase 23.1  the student lane is now assembled from live data (programmes
+// table + real confirmed placements + the real curriculum-vs-demand signal).
+import { buildStudentSnapshot } from "@/db/queries/student-lane";
 import {
   Compass,
   TrendingUp,
@@ -190,7 +192,34 @@ export default async function CareerCompassPage({
         },
       }
     : rawCompass;
-  const student = me.academic ? getStudentSnapshot(me.academic) : null;
+  // Phase 23.3  the top recommendation's rank payoff is REAL: the boost-1
+  // projection from rankInPoolQuery (what learning ONE skill does). Absent
+  // when the seeker has no pool rank  the card simply doesn't render.
+  const oneSkillProjection = rank
+    ? await rankInPoolQuery({
+        handle: me.handle,
+        profession: me.profession,
+        province: me.province,
+        projectedSkillBoost: 1,
+      })
+    : null;
+  if (rank && oneSkillProjection && compass.recommendations.length > 0) {
+    compass.recommendations[0]!.rankIfLearned = {
+      current: rank.rank,
+      projected: oneSkillProjection.projectedRank,
+      poolLabel: rank.poolLabel,
+    };
+  }
+  // Phase 23.1  live student snapshot (was the hardcoded mock). Sections with
+  // no real data (destinations below the k-floor, no covered demand cells)
+  // return empty arrays and the renderer hides them  never fabricated.
+  const student = me.academic
+    ? await buildStudentSnapshot({
+        academic: me.academic,
+        curriculum,
+        recommendations: compass.recommendations,
+      })
+    : null;
   const nfmt = new Intl.NumberFormat(locale);
 
   // Phase 17 ("The Climb") — flag-gated learning progress + visible rank
@@ -232,16 +261,8 @@ export default async function CareerCompassPage({
             projectedSkillBoost: activeCount,
           })
         : null;
-    oneSkillRank = rank
-      ? (
-          await rankInPoolQuery({
-            handle: me.handle,
-            profession: me.profession,
-            province: me.province,
-            projectedSkillBoost: 1,
-          })
-        )?.projectedRank ?? rank.rank
-      : null;
+    // Phase 23.3  reuse the boost-1 projection computed above (one query).
+    oneSkillRank = rank ? oneSkillProjection?.projectedRank ?? rank.rank : null;
     momentum = {
       skillsGrown: grownCount,
       inProgress: activeCount,
@@ -1095,7 +1116,7 @@ function StudentLane({
   t,
 }: {
   academic: import("@/lib/mock/types").AcademicProfile;
-  snapshot: ReturnType<typeof getStudentSnapshot>;
+  snapshot: import("@/lib/mock/academic").StudentSnapshot;
   locale: string;
   nfmt: Intl.NumberFormat;
   t: (k: string, v?: Record<string, string | number>) => string;
@@ -1157,7 +1178,9 @@ function StudentLane({
           {snapshot.bridgeHeadline}
         </p>
 
-        {/* Electives */}
+        {/* Electives  hidden when the programme has no covered demand cells
+            yet (Phase 23.1: real data or nothing). */}
+        {snapshot.electives.length > 0 && (
         <section aria-labelledby="elec-h">
           <header className="mb-4 flex items-baseline justify-between border-b border-[color:var(--color-hairline)] pb-2">
             <h3 id="elec-h" className="font-display text-xl">
@@ -1176,8 +1199,10 @@ function StudentLane({
             ))}
           </ul>
         </section>
+        )}
 
-        {/* Programmes */}
+        {/* Programmes  hidden when no live listing matches the field. */}
+        {snapshot.programmes.length > 0 && (
         <section aria-labelledby="prog-h">
           <header className="mb-4 flex items-baseline justify-between border-b border-[color:var(--color-hairline)] pb-2">
             <h3 id="prog-h" className="font-display text-xl">
@@ -1196,8 +1221,11 @@ function StudentLane({
             ))}
           </ul>
         </section>
+        )}
 
-        {/* Destinations */}
+        {/* Destinations  REAL confirmed placements (k-floor suppressed);
+            below the floor the section hides rather than fabricating. */}
+        {snapshot.destinations.length > 0 && (
         <section aria-labelledby="dest-h">
           <header className="mb-4 flex items-baseline justify-between border-b border-[color:var(--color-hairline)] pb-2">
             <h3 id="dest-h" className="font-display text-xl">
@@ -1216,6 +1244,7 @@ function StudentLane({
             ))}
           </ul>
         </section>
+        )}
 
         {/* Supplementary */}
         {snapshot.supplementarySkills.length > 0 && (

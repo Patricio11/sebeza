@@ -7,6 +7,8 @@ import { SAChevron } from "@/components/ui/SAChevron";
 import { AnimatedCount } from "@/components/feature/AnimatedCount";
 import { dataProvider } from "@/lib/data/provider";
 import { overallFreshnessConfidence } from "@/lib/mock/analytics";
+import { getLandingTrends, type LandingTrends } from "@/db/queries/landing";
+import { getProfessions, type TaxonomyOption } from "@/lib/taxonomy/query";
 import { ArrowUpRight, MapPin, Clock, Sparkles, Quote } from "lucide-react";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -35,18 +37,33 @@ export default async function LandingPage({
   setRequestLocale(locale);
 
   const t = await getTranslations("landing");
-  const analytics = await dataProvider.getAnalyticsSnapshot();
+  // Phase 23.2  real MoM trends computed from the DB (null = no baseline →
+  // the chip hides). Never hardcoded.
+  const [analytics, trends, professions] = await Promise.all([
+    dataProvider.getAnalyticsSnapshot(),
+    getLandingTrends(),
+    getProfessions(),
+  ]);
   const confidence = overallFreshnessConfidence(analytics);
 
   return (
     <div className="bg-[color:var(--color-sa-cream)] text-[color:var(--color-sa-charcoal)]">
       <LandingHeader />
       <main id="main">
-        <Hero t={t} analytics={analytics} confidence={confidence} locale={locale} />
+        <Hero
+          t={t}
+          analytics={analytics}
+          confidence={confidence}
+          locale={locale}
+          trends={trends}
+          professions={professions}
+        />
         <PulseStrip t={t} analytics={analytics} confidence={confidence} locale={locale} />
         <Principles />
         <Pillars t={t} />
-        <Outcomes />
+        {/* Phase 23.2  the fabricated "Outcomes" testimonials were removed;
+            Phase 24 re-inhabits this slot with REAL, admin-curated
+            testimonials (section hidden until any exist). */}
         <DualSplit t={t} />
         <FinalCTA />
       </main>
@@ -64,11 +81,15 @@ async function Hero({
   analytics,
   confidence,
   locale,
+  trends,
+  professions,
 }: {
   t: Awaited<ReturnType<typeof getTranslations<"landing">>>;
   analytics: Awaited<ReturnType<typeof dataProvider.getAnalyticsSnapshot>>;
   confidence: number;
   locale: string;
+  trends: LandingTrends;
+  professions: TaxonomyOption[];
 }) {
   const nfmt = new Intl.NumberFormat(locale);
   const currentMonth = new Intl.DateTimeFormat(locale, { month: "long" }).format(
@@ -149,7 +170,7 @@ async function Hero({
 
           {/* Search */}
           <div className="anim-rise-soft anim-delay-6 mt-9 max-w-2xl">
-            <SearchBar variant="hero" />
+            <SearchBar variant="hero" professionOptions={professions} />
           </div>
 
           {/* Popular chips */}
@@ -210,7 +231,7 @@ async function Hero({
                       className="font-display tabular text-3xl"
                     />
                   }
-                  trend="+8.2% MoM"
+                  trend={trends.activesTrend ?? undefined}
                 />
                 <DossierStat
                   label={`Confirmed hires · ${currentMonth}`}
@@ -221,7 +242,7 @@ async function Hero({
                       className="font-display tabular text-3xl"
                     />
                   }
-                  trend="+11% MoM"
+                  trend={trends.hiresTrend ?? undefined}
                 />
                 <DossierStat
                   label="Tracked skills"
@@ -686,147 +707,8 @@ function Pillars({
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// OUTCOMES  humanise the platform
-// ─────────────────────────────────────────────────────────────────────────────
-
-interface Outcome {
-  initials: string;
-  initialsBg: string;
-  initialsFg: string;
-  name: string;
-  role: string;
-  city: string;
-  quote: string;
-  outcome: string;
-  daysToHire: number;
-}
-
-const OUTCOMES: Outcome[] = [
-  {
-    initials: "T",
-    initialsBg: "var(--color-sa-green)",
-    initialsFg: "var(--color-sa-cream)",
-    name: "Thandeka M.",
-    role: "Senior Pastry Chef",
-    city: "Cape Town",
-    quote:
-      "I confirmed I was open to work on a Sunday. By Friday I'd done two trial services. Tasting menu starts in three weeks.",
-    outcome: "Hired at La Colombe",
-    daysToHire: 11,
-  },
-  {
-    initials: "K",
-    initialsBg: "var(--color-sa-gold)",
-    initialsFg: "var(--color-sa-charcoal)",
-    name: "Kabelo M.",
-    role: "Electrician",
-    city: "Pretoria",
-    quote:
-      "My INDLELA trade test was already verified on the profile. The site supervisor saw it before they called.",
-    outcome: "Site role with Group Five",
-    daysToHire: 6,
-  },
-  {
-    initials: "L",
-    initialsBg: "var(--color-sa-charcoal)",
-    initialsFg: "var(--color-sa-gold)",
-    name: "Lerato N.",
-    role: "Senior Software Engineer",
-    city: "Johannesburg",
-    quote:
-      "The Career compass told me Kubernetes was the missing skill in Gauteng. I logged the cert; my rank moved from 4 to 2 the same week.",
-    outcome: "Offer from Discovery Bank",
-    daysToHire: 19,
-  },
-];
-
-function Outcomes() {
-  return (
-    <section
-      aria-labelledby="out-h"
-      className="bg-[color:var(--color-sa-cream)] py-20 md:py-28"
-    >
-      <div className="mx-auto max-w-[1320px] px-5 md:px-10">
-        <header className="mb-12 grid items-end gap-6 md:mb-16 md:grid-cols-[2fr_1fr]">
-          <div>
-            <div className="flex items-center gap-3 text-[0.72rem] uppercase tracking-[0.28em] text-[color:var(--color-sa-green-deep)]">
-              <SAChevron variant="mark" className="size-3" />
-              Real outcomes
-            </div>
-            <h2
-              id="out-h"
-              className="mt-3 font-display text-[clamp(2.2rem,5vw,3.6rem)] leading-[1.02] tracking-[-0.02em]"
-            >
-              Confirmed hires.
-              <br />
-              <span className="italic text-[color:var(--color-sa-green-deep)]">
-                Not screenshots.
-              </span>
-            </h2>
-          </div>
-          <p className="text-[color:var(--color-ink-soft)]">
-            Three anonymised placements logged on Sebenza this month. We
-            count hires only when both the employer and the candidate
-            confirm them  that is how the freshness numbers stay honest.
-          </p>
-        </header>
-
-        <ul className="grid gap-6 md:grid-cols-3">
-          {OUTCOMES.map((o, i) => (
-            <li
-              key={i}
-              className="group relative flex flex-col gap-5 rounded-2xl border border-[color:var(--color-sa-charcoal)]/10 bg-white p-7 transition-transform hover:-translate-y-1 hover:shadow-press md:p-8"
-            >
-              <div className="flex items-center gap-4">
-                <span
-                  aria-hidden="true"
-                  className="flex size-14 items-center justify-center rounded-full font-display text-2xl"
-                  style={{
-                    background: o.initialsBg,
-                    color: o.initialsFg,
-                  }}
-                >
-                  {o.initials}
-                </span>
-                <div>
-                  <div className="font-display text-lg leading-tight">
-                    {o.name}
-                  </div>
-                  <div className="text-sm text-[color:var(--color-ink-soft)]">
-                    {o.role} · {o.city}
-                  </div>
-                </div>
-              </div>
-
-              <blockquote className="border-l-2 border-[color:var(--color-sa-gold)] pl-4 text-[color:var(--color-sa-charcoal)]">
-                <p className="font-display text-lg italic leading-snug">
-                  &ldquo;{o.quote}&rdquo;
-                </p>
-              </blockquote>
-
-              <div className="mt-auto flex items-baseline justify-between border-t border-dashed border-[color:var(--color-sa-charcoal)]/15 pt-4">
-                <div>
-                  <div className="text-[0.66rem] uppercase tracking-[0.22em] text-[color:var(--color-sa-green-deep)]">
-                    Outcome
-                  </div>
-                  <div className="text-sm font-medium">{o.outcome}</div>
-                </div>
-                <div className="text-right">
-                  <div className="text-[0.66rem] uppercase tracking-[0.22em] text-[color:var(--color-ink-soft)]">
-                    Days
-                  </div>
-                  <div className="font-display tabular text-3xl text-[color:var(--color-sa-green-deep)]">
-                    {o.daysToHire}
-                  </div>
-                </div>
-              </div>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </section>
-  );
-}
+// OUTCOMES  the fabricated testimonials were removed in Phase 23.2 (truth
+// rule). Phase 24 re-inhabits this slot with real, admin-curated testimonials.
 
 // ─────────────────────────────────────────────────────────────────────────────
 // EMPLOYER / GOVERNMENT split

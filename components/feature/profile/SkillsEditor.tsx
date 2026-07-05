@@ -30,9 +30,14 @@ interface Props {
    *  first in the picker. Optional; when missing, the picker falls
    *  back to alphabetical only. */
   professionSlug?: string;
+  /** Phase 23.4  the LIVE skill catalogue from the `skills` table (via
+   *  `getSkills()`), so admin-added + Phase-19 canonicalized skills appear.
+   *  Falls back to the frozen constant when not passed (old callers/tests). */
+  skillOptions?: Array<{ slug: string; label: string }>;
 }
 
-export function SkillsEditor({ initial, professionSlug }: Props) {
+export function SkillsEditor({ initial, professionSlug, skillOptions }: Props) {
+  const catalogue = skillOptions ?? SKILLS;
   const [items, setItems] = useState<SkillState[]>(initial);
   const [pending, startTransition] = useTransition();
   const [message, setMessage] = useState<
@@ -74,7 +79,7 @@ export function SkillsEditor({ initial, professionSlug }: Props) {
     const added = nextSlugs
       .filter((s) => !currentSet.has(s))
       .map((slug) => {
-        const fromCatalogue = SKILLS.find((s) => s.slug === slug);
+        const fromCatalogue = catalogue.find((s) => s.slug === slug);
         return {
           slug,
           // Catalogue label when canonical; else the raw text the
@@ -206,7 +211,7 @@ export function SkillsEditor({ initial, professionSlug }: Props) {
           helpText="Type to search the catalogue. Suggested skills are common for your profession; you can pick any of them."
           values={items.map((i) => i.slug)}
           onChange={handlePickerChange}
-          options={SKILLS.map((s) => ({ value: s.slug, label: s.label }))}
+          options={catalogue.map((s) => ({ value: s.slug, label: s.label }))}
           suggestedValues={
             professionSlug ? PROFESSION_SKILLS_MAP[professionSlug] ?? [] : []
           }

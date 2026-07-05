@@ -198,15 +198,10 @@ export async function getCompassForProfile(
     });
   }
 
-  // Cap and add rank-delta hint to the top recommendation if we have peers data
-  if (recommendations.length > 0 && peerSkillRows.length > 0) {
-    // Simple heuristic: each high-demand skill moves you up ~1-2 places
-    recommendations[0]!.rankIfLearned = {
-      current: 0, // not surfaced as a real rank in Phase 6
-      projected: 0,
-      poolLabel: `${profile.profession} · ${profile.province}`,
-    };
-  }
+  // Phase 23.3  the {current: 0, projected: 0} placeholder that used to be
+  // set here leaked a "#0 → #0" card to seekers. rankIfLearned is now set ONLY
+  // by the grow page with the REAL boost-1 `rankInPoolQuery` projection; when
+  // no real rank exists it stays absent and the card doesn't render.
 
   // ── 5. Adjacent professions (skill-overlap heuristic) ────────────────────
   const adjacentProfessions = await loadAdjacentProfessions(

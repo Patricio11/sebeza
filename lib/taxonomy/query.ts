@@ -12,7 +12,10 @@ import { unstable_cache } from "next/cache";
 import { getDb } from "@/db/client";
 import * as schema from "@/db/schema";
 import { asc } from "drizzle-orm";
-import { PROFESSIONS as MOCK_PROFESSIONS } from "@/lib/mock/taxonomy";
+import {
+  PROFESSIONS as MOCK_PROFESSIONS,
+  SKILLS as MOCK_SKILLS,
+} from "@/lib/mock/taxonomy";
 
 export interface TaxonomyOption {
   slug: string;
@@ -40,5 +43,30 @@ export const getProfessions = unstable_cache(
     return MOCK_PROFESSIONS.map((p) => ({ slug: p.slug, label: p.label }));
   },
   ["taxonomy.professions"],
+  { revalidate: 300, tags: ["taxonomy"] },
+);
+
+/**
+ * Phase 23.4  DB-backed skill list, same posture as `getProfessions`. The
+ * `skills` table is the authority (grown by /admin/taxonomy AND Phase 19
+ * custom-skill canonicalization); the constant is only the empty-DB fallback.
+ * Before this, pickers read the frozen constant  a canonicalized skill never
+ * appeared in the picker.
+ */
+export const getSkills = unstable_cache(
+  async (): Promise<TaxonomyOption[]> => {
+    try {
+      const db = getDb();
+      const rows = await db
+        .select({ slug: schema.skills.slug, label: schema.skills.label })
+        .from(schema.skills)
+        .orderBy(asc(schema.skills.label));
+      if (rows.length > 0) return rows;
+    } catch {
+      // DB unavailable  fall through so the form still renders.
+    }
+    return MOCK_SKILLS.map((s) => ({ slug: s.slug, label: s.label }));
+  },
+  ["taxonomy.skills"],
   { revalidate: 300, tags: ["taxonomy"] },
 );

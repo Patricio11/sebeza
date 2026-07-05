@@ -702,6 +702,36 @@ export const skillPrereqs = pgTable(
  * without a deploy). The AI-Coach switch (22.5) is acknowledgement-gated on
  * these being live. Not PII  public support information.
  */
+/**
+ * Phase 23.1 ("Truth & Data Integrity")  internships / graduate programmes /
+ * learnerships shown on the student lane. Moved off the hardcoded
+ * `lib/mock/academic.ts` snapshots into an editable table (seeded from those
+ * constants  render parity) so listings are live data, admin-correctable, and
+ * honest about application status. Public info, not PII.
+ */
+export const graduateProgrammes = pgTable("graduate_programmes", {
+  id: text("id").primaryKey(),
+  title: text("title").notNull(),
+  organisation: text("organisation").notNull(),
+  /** "public" | "corporate" | "ngo" | "startup"  context, never a gate. */
+  sector: text("sector").notNull(),
+  /** "internship" | "graduate_programme" | "learnership". */
+  kind: text("kind").notNull(),
+  durationMonths: integer("duration_months").notNull(),
+  cities: jsonb("cities").notNull().$type<string[]>(),
+  /** "open" | "closing_soon" | "closed"  sourced from listings, never invented. */
+  applicationStatus: text("application_status").notNull(),
+  applicationHint: text("application_hint").notNull(),
+  /** Honest eligibility framing  who is and is NOT eligible. */
+  eligibility: text("eligibility").notNull(),
+  /** Matched against the student's fieldOfStudy. */
+  fieldTags: jsonb("field_tags").notNull().$type<string[]>(),
+  saqaRecognised: boolean("saqa_recognised").notNull().default(false),
+  sortOrder: integer("sort_order").notNull().default(0),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  deletedAt: timestamp("deleted_at"),
+});
+
 export const crisisResources = pgTable("crisis_resources", {
   id: text("id").primaryKey(),
   /** e.g. "SADAG Mental Health Line". */

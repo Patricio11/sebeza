@@ -14,6 +14,10 @@ interface Props {
   defaultQuery?: string;
   defaultLocation?: string;
   className?: string;
+  /** Phase 23.4  the LIVE profession list (professions table via
+   *  `getProfessions()`), so admin-added professions are searchable from the
+   *  public bar. Falls back to the frozen constant when not passed. */
+  professionOptions?: Array<{ slug: string; label: string }>;
 }
 
 /**
@@ -29,7 +33,9 @@ export function SearchBar({
   defaultQuery = "",
   defaultLocation = "",
   className,
+  professionOptions,
 }: Props) {
+  const professionList = professionOptions ?? PROFESSIONS;
   const t = useTranslations("landing.search");
   const router = useRouter();
   const [q, setQ] = useState(defaultQuery);
@@ -81,7 +87,7 @@ export function SearchBar({
             )}
           />
           <datalist id="profession-list">
-            {PROFESSIONS.map((p) => (
+            {professionList.map((p) => (
               <option key={p.slug} value={p.label} />
             ))}
           </datalist>

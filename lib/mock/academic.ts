@@ -274,14 +274,17 @@ const ACCOUNTING_SNAPSHOT: StudentSnapshot = {
   ],
 };
 
-/** Pick the right mock snapshot for the academic profile. */
-export function getStudentSnapshot(academic: AcademicProfile): StudentSnapshot {
-  const field = academic.fieldOfStudy.toLowerCase();
-  if (field.includes("accounting") || field.includes("finance")) {
-    return ACCOUNTING_SNAPSHOT;
-  }
-  return CS_SNAPSHOT;
-}
+/**
+ * Phase 23.1  the snapshots above are now SEED SOURCE ONLY. The student lane
+ * reads live data (`db/queries/student-lane.ts`): programmes from the
+ * `graduate_programmes` table (seeded from this list), destinations from real
+ * confirmed placements, electives from the real curriculum-vs-demand signal.
+ * `getStudentSnapshot` was the runtime mock read  deliberately removed.
+ */
+export const SEED_GRADUATE_PROGRAMMES: OpportunityProgramme[] = [
+  ...CS_SNAPSHOT.programmes,
+  ...ACCOUNTING_SNAPSHOT.programmes,
+];
 
 // ──────────────────────────────────────────────────────────────────────────────
 // Display helpers
