@@ -131,7 +131,11 @@ export type SettingKey =
   // Phase 21 ("Hyper-Local Demand") — city-level demand hotspots on the compass.
   // ALSO gated by top-5-metro + a k-anon floor + the seeker's outcomes_research
   // consent; this flag is just the surface switch.
-  | "feature_flag_city_demand";
+  | "feature_flag_city_demand"
+  // Phase 24 ("Testimonials") — while ON, eligible seekers + employers see the
+  // dismissible collection card. Managed from /admin/testimonials (not the
+  // settings form) so curation + campaign live on one surface.
+  | "testimonial_campaign_active";
 
 const DEFAULTS: Record<SettingKey, unknown> = {
   freshness_band_days_fresh: 30,
@@ -168,6 +172,7 @@ const DEFAULTS: Record<SettingKey, unknown> = {
   feature_flag_seeker_custom_skills: false,
   feature_flag_skill_prereqs: false,
   feature_flag_city_demand: false,
+  testimonial_campaign_active: false,
 };
 
 /**

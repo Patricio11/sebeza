@@ -13,6 +13,8 @@ import { employerOwnMixQuery } from "@/db/queries/employerMix";
 import { EmployerHiringMixCard } from "@/components/feature/employer/EmployerHiringMixCard";
 import { logAccess } from "@/lib/audit";
 import { getSetting } from "@/lib/admin/settings";
+import { TestimonialPromptCard } from "@/components/feature/TestimonialPromptCard";
+import { shouldPromptForTestimonial } from "@/lib/testimonials";
 
 export default async function EmployerOverviewPage({
   params,
@@ -113,6 +115,9 @@ export default async function EmployerOverviewPage({
         .limit(3)
     : [];
 
+  // Phase 24  eligibility for the testimonial collection card.
+  const promptTestimonial = await shouldPromptForTestimonial(session.id);
+
   return (
     <DashboardMasthead
       role="employer"
@@ -142,6 +147,9 @@ export default async function EmployerOverviewPage({
         ) : null
       }
     >
+      {/* Phase 24  testimonial collection moment (campaign-gated). */}
+      {promptTestimonial && <TestimonialPromptCard />}
+
       {/* KPIs  live from DB */}
       <section
         aria-label="Headline numbers"

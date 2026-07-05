@@ -91,7 +91,13 @@ the DB needs is seeded.**
   screenshots. **Verified:** test:all 358 vitest (incl. 30 compliance — which caught + forced the
   consent-correct seed design) · **full E2E 96/96, 0 flaky** (root-caused the recurring strict-mode
   flake: Next streaming-nav DOM duplication → main-scoped locators).
-- [ ] 24 Testimonials (24.1–24.4)
+- [x] **24 Testimonials** ✅ 2026-07-02 — migration `0058` (`testimonials` + `testimonial_prompt_state`) ·
+  campaign setting (`testimonial_campaign_active`, managed from `/admin/testimonials`) · dismissible
+  collection card on seeker + employer dashboards (consent-required submit; dismiss = 30-day snooze;
+  submit = never again) · admin curation (campaign toggle, approve/hide/delete, manual create, audited)
+  · landing rail renders ONLY approved consented quotes (hidden when none; display fields captured at
+  submission — never live PII). **Verified:** 358 vitest · E2E full loop 4/4 (campaign off → nothing;
+  on → submit-with-consent → thanked → never re-asked → admin approve → landing rail), desktop + 360px.
 - [ ] 25 Integrations Hub (25.1–25.5)
 - [ ] 26 Security (26.2–26.7 code; 26.1 operator)
 - [ ] 27 Docs & Governance (27.1–27.7)

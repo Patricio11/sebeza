@@ -90,6 +90,7 @@ const KEY_SCHEMAS = {
   feature_flag_seeker_custom_skills: z.boolean(),
   feature_flag_skill_prereqs: z.boolean(),
   feature_flag_city_demand: z.boolean(),
+  testimonial_campaign_active: z.boolean(),
 } as const satisfies Record<SettingKey, z.ZodTypeAny>;
 
 const updateSchema = z.object({
@@ -123,6 +124,7 @@ const updateSchema = z.object({
     "feature_flag_seeker_custom_skills",
     "feature_flag_skill_prereqs",
     "feature_flag_city_demand",
+    "testimonial_campaign_active",
   ] as const),
   value: z.unknown(),
 });

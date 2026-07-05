@@ -15,6 +15,7 @@ import {
   Sparkles,
   Workflow,
   LifeBuoy,
+  MessageSquareQuote,
 } from "lucide-react";
 import type { DashboardNavItem } from "./dashboardChrome";
 
@@ -42,6 +43,8 @@ export const ADMIN_NAV: DashboardNavItem[] = [
   // Phase 22.2 ("AI Coach — crisis pathway")  verified crisis-support resources
   // shown to a seeker in distress. Sits by the LLM/AI integration config.
   { key: "crisisResources", label: "Crisis resources", href: "/admin/crisis-resources", icon: LifeBuoy },
+  // Phase 24  testimonial collection + curation (landing-rail source of truth).
+  { key: "testimonials", label: "Testimonials", href: "/admin/testimonials", icon: MessageSquareQuote },
   { key: "auditLog", label: "Audit log", href: "/admin/audit-log", icon: ScrollText },
   // Phase 9.7.7  watch the watchers. Sits right after the general
   // audit log because it's a curated, sensitivity-focused slice of

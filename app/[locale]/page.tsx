@@ -9,6 +9,7 @@ import { dataProvider } from "@/lib/data/provider";
 import { overallFreshnessConfidence } from "@/lib/mock/analytics";
 import { getLandingTrends, type LandingTrends } from "@/db/queries/landing";
 import { getProfessions, type TaxonomyOption } from "@/lib/taxonomy/query";
+import { TestimonialsRail } from "@/components/feature/TestimonialsRail";
 import { ArrowUpRight, MapPin, Clock, Sparkles, Quote } from "lucide-react";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -61,9 +62,10 @@ export default async function LandingPage({
         <PulseStrip t={t} analytics={analytics} confidence={confidence} locale={locale} />
         <Principles />
         <Pillars t={t} />
-        {/* Phase 23.2  the fabricated "Outcomes" testimonials were removed;
-            Phase 24 re-inhabits this slot with REAL, admin-curated
-            testimonials (section hidden until any exist). */}
+        {/* Phase 24  REAL, admin-curated, consented testimonials (replaces the
+            fabricated cards 23.2 removed; renders nothing until any are
+            approved). */}
+        <TestimonialsRail />
         <DualSplit t={t} />
         <FinalCTA />
       </main>

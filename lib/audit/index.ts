@@ -260,6 +260,11 @@ export type AuditKind =
   // Phase 22.2  admin edited a crisis-support resource. Subject =
   // crisis_resources.id; meta.action ∈ create|update|delete.
   | "admin.crisis_resource.edit"
+  // Phase 24  a user submitted a testimonial (subject = testimonials.id;
+  // meta carries authorRole + consentDisplay, never the quote body), or an
+  // admin curated one (meta.action ∈ create|approve|hide|delete).
+  | "testimonial.submit"
+  | "admin.testimonial.edit"
   // Phase 11.2.2  seeker swapped a cost-abandoned learning item for a
   // free alternative. Subject = the original learning_items.id; meta
   // carries `originalSkillSlug`, `newPathTitle`, `newProvider`.

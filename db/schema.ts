@@ -732,6 +732,45 @@ export const graduateProgrammes = pgTable("graduate_programmes", {
   deletedAt: timestamp("deleted_at"),
 });
 
+/**
+ * Phase 24 ("Testimonials")  real, consented words from real users, replacing
+ * the fabricated landing quotes Phase 23.2 removed. Seekers + employers submit
+ * via a small dismissible dashboard card during an admin-run campaign; admins
+ * curate (approve / hide / create / order). Only `approved` rows render
+ * publicly, and only ever with the display fields captured AT SUBMISSION with
+ * explicit public-display consent  never live PII lookups.
+ */
+export const testimonials = pgTable("testimonials", {
+  id: text("id").primaryKey(),
+  /** Null for admin-created entries. */
+  userId: text("user_id").references(() => appUser.id, { onDelete: "set null" }),
+  /** "seeker" | "employer" | "admin" (admin = manually created). */
+  authorRole: text("author_role").notNull(),
+  quote: text("quote").notNull(),
+  /** Captured at submission (e.g. "Thandeka M.")  never a live join. */
+  displayName: text("display_name").notNull(),
+  /** e.g. "Pastry Chef · Cape Town" or "Talent lead, Discovery Bank". */
+  displayContext: text("display_context").notNull(),
+  /** Explicit public-display consent recorded at submission. */
+  consentDisplay: boolean("consent_display").notNull().default(false),
+  /** "pending" | "approved" | "hidden". Only approved renders publicly. */
+  state: text("state").notNull().default("pending"),
+  sortOrder: integer("sort_order").notNull().default(0),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+/**
+ * Phase 24  per-user prompt state: dismiss = snoozed 30 days; submitted =
+ * never prompted again. One row per user, created lazily on first interaction.
+ */
+export const testimonialPromptState = pgTable("testimonial_prompt_state", {
+  userId: text("user_id")
+    .primaryKey()
+    .references(() => appUser.id, { onDelete: "cascade" }),
+  snoozedUntil: timestamp("snoozed_until"),
+  submittedAt: timestamp("submitted_at"),
+});
+
 export const crisisResources = pgTable("crisis_resources", {
   id: text("id").primaryKey(),
   /** e.g. "SADAG Mental Health Line". */

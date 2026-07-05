@@ -36,6 +36,9 @@ import { StudentLaneDiscoveryCallout } from "@/components/feature/seeker/learnin
 import { GetWorkReadyCard } from "@/components/feature/seeker/GetWorkReadyCard";
 import { WorkNearYouCard } from "@/components/feature/seeker/WorkNearYouCard";
 import { DemandPulseCard } from "@/components/feature/seeker/DemandPulseCard";
+import { TestimonialPromptCard } from "@/components/feature/TestimonialPromptCard";
+import { shouldPromptForTestimonial } from "@/lib/testimonials";
+import { getSessionUser } from "@/lib/auth/guard";
 import { getDemandPulse } from "@/lib/seeker/demand-pulse";
 
 export default async function SeekerOverviewPage({
@@ -47,6 +50,11 @@ export default async function SeekerOverviewPage({
   setRequestLocale(locale);
 
   const me = await getMyProfile();
+  // Phase 24  eligibility for the testimonial collection card.
+  const dashSession = await getSessionUser();
+  const promptTestimonial = dashSession
+    ? await shouldPromptForTestimonial(dashSession.id)
+    : false;
   if (!me) redirect("/sign-in?next=/dashboard");
 
   // Phase 11.1.3  read the welcome-back cookie (absence days when
@@ -203,6 +211,10 @@ export default async function SeekerOverviewPage({
 
       {/* Phase 17 ("Demand Pulse")  flag-gated live demand spike. */}
       {demandPulse && <DemandPulseCard pulse={demandPulse} />}
+
+      {/* Phase 24  testimonial collection moment (campaign-gated, dismissible,
+          never re-asks after submission). */}
+      {promptTestimonial && <TestimonialPromptCard />}
 
       {/* Phase 11.1.6  audit-log link prominence. Surfaces the "who
           looked at me this week" signal as a top-of-page callout when
