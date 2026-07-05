@@ -55,27 +55,32 @@ test("cycle is rejected and a valid prerequisite is added", async ({ page }) => 
     .click({ timeout: 8_000 })
     .catch(() => {});
 
+  // Scope every locator to <main>: Next's streaming navigation can transiently
+  // leave a duplicate of the outgoing page's DOM outside main, which trips
+  // strict mode on bare selectors (root cause of the recurring flake here).
+  const main = page.getByRole("main");
+
   // Seeded graph renders.
   await expect(
-    page.getByRole("heading", { name: /^Prerequisites/ }),
+    main.getByRole("heading", { name: /^Prerequisites/ }),
   ).toBeVisible();
 
-  const skillSel = page.getByLabel("Skill", { exact: true });
-  const prereqSel = page.getByLabel("Prerequisite", { exact: true });
-  const reason = page.getByPlaceholder("Why this ordering?");
-  const addBtn = page.getByRole("button", { name: "Add prerequisite" });
+  const skillSel = main.getByLabel("Skill", { exact: true });
+  const prereqSel = main.getByLabel("Prerequisite", { exact: true });
+  const reason = main.getByPlaceholder("Why this ordering?");
+  const addBtn = main.getByRole("button", { name: "Add prerequisite" });
 
   // 1. Cycle: postgres already requires sql, so sql → postgres must be refused.
   await skillSel.selectOption("sql");
   await prereqSel.selectOption("postgres");
   await reason.fill("should fail");
   await addBtn.click();
-  await expect(page.getByText(/cycle/i)).toBeVisible({ timeout: 30_000 });
+  await expect(main.getByText(/cycle/i)).toBeVisible({ timeout: 30_000 });
 
   // 2. Valid: node → typescript is accepted and listed.
   await skillSel.selectOption("node");
   await prereqSel.selectOption("typescript");
   await reason.fill(REASON);
   await addBtn.click();
-  await expect(page.getByText(REASON)).toBeVisible({ timeout: 30_000 });
+  await expect(main.getByText(REASON)).toBeVisible({ timeout: 30_000 });
 });

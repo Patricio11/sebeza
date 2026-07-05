@@ -75,18 +75,21 @@ test("flag ON: a seeker can add then remove a custom skill", async ({
   await signInSeeker(page);
   await page.goto("/en/dashboard/profile");
 
-  await expect(page.getByText("Self-described skills")).toBeVisible();
+  // Scope to <main> — Next's streaming nav can transiently duplicate the
+  // outgoing DOM outside main, tripping strict mode on bare selectors.
+  const main = page.getByRole("main");
+  await expect(main.getByText("Self-described skills")).toBeVisible();
 
-  await page.locator("#custom-skill-label").fill(SKILL);
-  await page.getByRole("button", { name: "Add custom skill" }).click();
+  await main.locator("#custom-skill-label").fill(SKILL);
+  await main.getByRole("button", { name: "Add custom skill" }).click();
 
   // The first server action + full profile-page refresh on a cold worker can
   // be slow, so allow a generous window.
-  const chip = page.getByText(SKILL, { exact: true });
+  const chip = main.getByText(SKILL, { exact: true });
   await expect(chip).toBeVisible({ timeout: 30_000 });
 
-  await page.getByRole("button", { name: `Remove ${SKILL}` }).click();
-  await expect(page.getByText(SKILL, { exact: true })).toHaveCount(0, {
+  await main.getByRole("button", { name: `Remove ${SKILL}` }).click();
+  await expect(main.getByText(SKILL, { exact: true })).toHaveCount(0, {
     timeout: 30_000,
   });
 });

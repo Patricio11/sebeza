@@ -82,7 +82,15 @@ the DB needs is seeded.**
   completion + ENCRYPTION_INVENTORY env-var fix. 27.7 move shipped plan docs; dedupe backlog files.
 
 ## 📌 STATUS
-- [ ] 23 Truth & Data + Showcase (23.1–23.7)
+- [x] **23 Truth & Data + Showcase** ✅ 2026-07-02 — 23.1 student lane → DB (migration `0057`
+  `graduate_programmes`; real destinations from 11 confirmed placements; real electives) · 23.2
+  landing (computed MoM; fake outcomes removed) · 23.3 rank-leak fixed (real boost-1 projection) ·
+  23.4 `getSkills()` + DB pickers everywhere (canonicalized skills now appear + save) · 23.5 provider
+  default `db`, mock throws in prod · 23.6 showcase seed (filled-vacancy feedback via consented
+  invitees; flagship learning/badges; `docs/SHOWCASE_ACCOUNTS.md`) · 23.7 showcase E2E with 16
+  screenshots. **Verified:** test:all 358 vitest (incl. 30 compliance — which caught + forced the
+  consent-correct seed design) · **full E2E 96/96, 0 flaky** (root-caused the recurring strict-mode
+  flake: Next streaming-nav DOM duplication → main-scoped locators).
 - [ ] 24 Testimonials (24.1–24.4)
 - [ ] 25 Integrations Hub (25.1–25.5)
 - [ ] 26 Security (26.2–26.7 code; 26.1 operator)
