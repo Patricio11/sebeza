@@ -30,7 +30,7 @@ import { Pool, neonConfig } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-serverless";
 import { drizzle as drizzlePostgresJs } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
-import { sql } from "drizzle-orm";
+import { sql, inArray } from "drizzle-orm";
 import ws from "ws";
 
 // Match the runtime client (`db/client.ts`) so the seed runs against the
@@ -354,6 +354,180 @@ async function seedGraduateProgrammes() {
   }));
   await db.insert(schema.graduateProgrammes).values(rows).onConflictDoNothing();
   console.log(`   inserted ${rows.length} graduate programmes`);
+}
+
+/**
+ * Phase 23.6 ("Showcase seed")  makes the flagship accounts demo-complete so
+ * a stakeholder can log in and see EVERYTHING working on live DB data. Runs
+ * LAST (needs vacancies, cohort, learning tables in place). Credentials are
+ * documented in docs/SHOWCASE_ACCOUNTS.md; password for every seeded account
+ * is SEED_PASSWORD.
+ *
+ * What it completes:
+ *  1. The FILLED vacancy story (v3 "Graduate Software Developer Programme"):
+ *     invitations for the three hired cohort members (accepted) + two members
+ *     who were invited but NOT hired  and the honest
+ *     `vacancy.outcome.other-hired` feedback notifications those two received
+ *     (the 9.11 outcome loop, seeded end-to-end).
+ *  2. Pushes the Wits BSc CS cohort's employer-confirmed placements over the
+ *     outcomes k-floor (10) so the student lane's REAL destinations table
+ *     renders out of the box (roles varied  an honest distribution).
+ *  3. Flagship seeker enrichment: andile-z gets live learning items (one
+ *     in-progress at 50%, one accepted) + earned badges; lerato-n gets badges.
+ */
+async function seedShowcase() {
+  console.log("🌟 Phase 23.6  showcase seed (flagship accounts + filled-vacancy story)…");
+  const v3 = id("vac", "grad-sw-dev-programme");
+  const orgId = id("org", "discovery-bank");
+  const cohort = (n: string) => id("prof", `wits-bsc-cs-2026-${n}`);
+
+  // ── 1. Filled-vacancy story ──────────────────────────────────────────────
+  // WHO WAS HIRED is already marked: the 9.8.8 seed retro-links cohort
+  // 01-03's confirmed placements to v3. Here we add the OTHER half of the
+  // story: two consented invitees (06 + 07  members 04-07 hold
+  // `vacancy_matching` consent per the 9.8.3 design; 08-12 stay un-consented
+  // for the bulk-invite-skip demo) who accepted the invite but were NOT
+  // selected  and the honest outcome feedback they received.
+  const notHired = ["06", "07"];
+  await db
+    .insert(schema.vacancyInvitations)
+    .values(
+      notHired.map((n, i) => ({
+        id: id("vinv", `v3-showcase-${n}`),
+        vacancyId: v3,
+        profileId: cohort(n),
+        invitedByUserId: id("user", "naledi-k"),
+        state: "accepted" as const,
+        invitedAt: new Date(`2026-03-${10 + i}`),
+        respondedAt: new Date(`2026-03-${13 + i}`),
+        expiresAt: new Date("2026-04-01"),
+      })),
+    )
+    .onConflictDoNothing();
+
+  // The honest outcome feedback the two not-hired invitees received when the
+  // vacancy was marked filled (mirrors lib/employer/vacancies.ts's fan-out).
+  const notHiredUsers = await db
+    .select({ userId: schema.profiles.userId, id: schema.profiles.id })
+    .from(schema.profiles)
+    .where(inArray(schema.profiles.id, notHired.map(cohort)));
+  if (notHiredUsers.length > 0) {
+    await db
+      .insert(schema.notifications)
+      .values(
+        notHiredUsers.map((u, i) => ({
+          id: id("ntf", `v3-outcome-${i}`),
+          userId: u.userId,
+          kind: "vacancy.outcome.other-hired",
+          title: "Update on Graduate Software Developer Programme",
+          body: "Discovery Bank filled this role with another candidate. Your profile made the shortlist  keeping your status fresh and adding one in-demand skill puts you in a stronger position for the next one.",
+          link: "/dashboard/grow",
+          meta: { vacancyId: v3, orgId },
+          createdAt: new Date("2026-04-02"),
+        })),
+      )
+      .onConflictDoNothing();
+  }
+
+  // ── 2. Cohort placements over the outcomes k-floor (10) ─────────────────
+  // Members 01-03 were placed by the 7.5 seed; add 04-11 (8 more) with varied
+  // roles + dates → 11 employer-confirmed placements ≥ floor → the student
+  // lane's REAL destinations distribution renders.
+  const extraRoles = [
+    "Software developer",
+    "Data engineer",
+    "IT support technician",
+    "Software developer",
+    "QA analyst",
+    "Data analyst",
+    "Software developer",
+    "DevOps engineer",
+  ];
+  await db
+    .insert(schema.placements)
+    .values(
+      extraRoles.map((role, i) => ({
+        id: id("plc", `showcase-cohort-${String(i + 4).padStart(2, "0")}`),
+        profileId: cohort(String(i + 4).padStart(2, "0")),
+        organizationId: orgId,
+        actorUserId: id("user", "naledi-k"),
+        role,
+        city: "Johannesburg",
+        hiredAt: new Date(`2026-0${(i % 3) + 4}-${8 + i * 2}`),
+        source: "employer_confirmed" as const,
+      })),
+    )
+    .onConflictDoNothing();
+
+  // ── 3. Flagship enrichment ───────────────────────────────────────────────
+  const flagships = await db
+    .select({ id: schema.profiles.id, handle: schema.profiles.handle })
+    .from(schema.profiles)
+    .where(inArray(schema.profiles.handle, ["andile-z", "lerato-n"]));
+  const byHandle = new Map(flagships.map((p) => [p.handle, p.id]));
+  const andileId = byHandle.get("andile-z");
+  const leratoId = byHandle.get("lerato-n");
+
+  if (andileId) {
+    await db
+      .insert(schema.learningItems)
+      .values([
+        {
+          id: id("lrn", "showcase-andile-aws"),
+          profileId: andileId,
+          skillSlug: "aws",
+          title: "MICT SETA: Cloud Engineer learnership",
+          provider: "Media, Information & Communication Technologies SETA",
+          resourceKind: "seta",
+          isFree: true,
+          state: "in_progress" as const,
+          progressPercent: 50,
+          startedAt: new Date("2026-06-01"),
+        },
+        {
+          id: id("lrn", "showcase-andile-typescript"),
+          profileId: andileId,
+          skillSlug: "typescript",
+          title: "Learn TypeScript",
+          provider: "Free: official TypeScript handbook",
+          resourceKind: "free",
+          isFree: true,
+          state: "accepted" as const,
+        },
+      ])
+      .onConflictDoNothing();
+    await db
+      .insert(schema.seekerBadges)
+      .values([
+        {
+          id: id("bdg", "showcase-andile-invite"),
+          profileId: andileId,
+          slug: "first_invite_accepted",
+          awardedAt: new Date("2026-05-20"),
+        },
+        {
+          id: id("bdg", "showcase-andile-views"),
+          profileId: andileId,
+          slug: "five_view_week",
+          awardedAt: new Date("2026-06-15"),
+        },
+      ])
+      .onConflictDoNothing();
+  }
+  if (leratoId) {
+    await db
+      .insert(schema.seekerBadges)
+      .values([
+        {
+          id: id("bdg", "showcase-lerato-streak"),
+          profileId: leratoId,
+          slug: "status_streak_90",
+          awardedAt: new Date("2026-06-01"),
+        },
+      ])
+      .onConflictDoNothing();
+  }
+  console.log("   filled-vacancy feedback + cohort placements + flagship enrichment done");
 }
 
 async function seedTaxonomy() {
@@ -2549,6 +2723,10 @@ async function main() {
   // invite backdated 7 days before sign-up), one declined with a
   // reason. Requires Discovery to be `verified` (seeded above).
   await seedPhase9_17SeekerInvitations();
+  // Phase 23.6  showcase completions (filled-vacancy feedback story, cohort
+  // placements over the outcomes floor, flagship learning + badges). Runs
+  // after every table it touches exists + is populated.
+  await seedShowcase();
   // Phase 12 (2026-06-10)  converge profiles.verification to the Phase
   // 9.14 roll-up rule after all fixtures land. The mock dataset carries
   // per-profile verification values that pre-date 9.14 and can drift
