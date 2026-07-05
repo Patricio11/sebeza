@@ -33,7 +33,7 @@ function rec(
 }
 
 describe("consent purpose catalogue", () => {
-  test("contains exactly the eight known purposes (order-insensitive)", () => {
+  test("contains exactly the nine known purposes (order-insensitive)", () => {
     expect([...CONSENT_PURPOSES].sort()).toEqual(
       [
         "analytics_aggregate",
@@ -44,6 +44,8 @@ describe("consent purpose catalogue", () => {
         "outcomes_research",
         "searchability",
         "vacancy_matching",
+        // Phase 25.4 — opt-in platform announcements over SMS.
+        "announcements",
       ].sort(),
     );
   });

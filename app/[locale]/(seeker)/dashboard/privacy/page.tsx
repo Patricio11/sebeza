@@ -41,6 +41,8 @@ const FALLBACK_CONSENT: Record<
   // additionally flip the platform flag before any send fires.
   messaging_channel_sms: { state: "none", grantedAt: null, version: "v2.1" },
   messaging_channel_whatsapp: { state: "none", grantedAt: null, version: "v2.1" },
+  // Phase 25.4  opt-in platform announcements over SMS. Default off.
+  announcements: { state: "none", grantedAt: null, version: "v2.1" },
 };
 
 const PURPOSE_LABEL: Record<(typeof CONSENT_PURPOSES)[number], string> = {
@@ -52,6 +54,7 @@ const PURPOSE_LABEL: Record<(typeof CONSENT_PURPOSES)[number], string> = {
   vacancy_matching: "Vacancy invites (optional)",
   messaging_channel_sms: "SMS notifications (optional)",
   messaging_channel_whatsapp: "WhatsApp notifications (optional)",
+  announcements: "Platform announcements (optional)",
 };
 
 const PURPOSE_BODY: Record<(typeof CONSENT_PURPOSES)[number], string> = {
@@ -76,6 +79,8 @@ const PURPOSE_BODY: Record<(typeof CONSENT_PURPOSES)[number], string> = {
     "Let Sebenza send me an SMS for critical events (a new vacancy invite, a contact-reveal request) instead of waiting for me to open the app. Off-platform reach for the moments that matter.",
   messaging_channel_whatsapp:
     "Let Sebenza send me a WhatsApp message for critical events. Same scope as SMS  no chatty marketing, just the time-sensitive lifecycle events.",
+  announcements:
+    "Let Sebenza occasionally SMS me platform announcements (new features, important service notices). Optional and separate from critical notifications  saying no changes nothing about my job search. I can revoke any time.",
 };
 
 /**

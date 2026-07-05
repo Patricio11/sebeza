@@ -16,6 +16,7 @@ import {
   Workflow,
   LifeBuoy,
   MessageSquareQuote,
+  Plug,
 } from "lucide-react";
 import type { DashboardNavItem } from "./dashboardChrome";
 
@@ -39,6 +40,9 @@ export const ADMIN_NAV: DashboardNavItem[] = [
   { key: "skillPrereqs", label: "Skill prerequisites", href: "/admin/skill-prereqs", icon: Workflow },
   // Phase 13.3  LLM provider configuration. Above audit-log because
   // every action here writes to it; the admin should be one click away.
+  // Phase 25  every external integration on one surface (channel creds
+  // encrypted in DB, health for DB/storage, bulk announcements).
+  { key: "integrations", label: "Integrations", href: "/admin/integrations", icon: Plug },
   { key: "llm", label: "LLM providers", href: "/admin/llm", icon: Sparkles },
   // Phase 22.2 ("AI Coach — crisis pathway")  verified crisis-support resources
   // shown to a seeker in distress. Sits by the LLM/AI integration config.

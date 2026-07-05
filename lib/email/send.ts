@@ -32,6 +32,7 @@
  */
 
 import "server-only";
+import { resolveIntegration } from "@/lib/integrations/resolve";
 
 export interface SendEmailInput {
   to: string;
@@ -123,25 +124,31 @@ export async function sendEmail(input: SendEmailInput): Promise<{
   transport: EmailTransport;
   id?: string;
 }> {
-  const kind = transport();
-  const from = fromAddress(input.from);
+  // Phase 25  an ENABLED admin-managed integration (encrypted creds in the
+  // DB, /admin/integrations) wins over env; otherwise the historical env
+  // behaviour is unchanged.
+  const admin = await resolveIntegration("email");
+  const kind: EmailTransport = admin ? "smtp" : transport();
+  const from = fromAddress(input.from ?? admin?.config.from);
   const text = input.text ?? htmlToText(input.html);
 
   if (kind === "smtp") {
-    const host = process.env.SMTP_HOST;
-    const portRaw = process.env.SMTP_PORT;
-    const user = process.env.SMTP_USER;
-    const pass = process.env.SMTP_PASS;
+    const host = admin ? admin.config.host : process.env.SMTP_HOST;
+    const portRaw = admin ? admin.config.port : process.env.SMTP_PORT;
+    const user = admin ? admin.secrets.user : process.env.SMTP_USER;
+    const pass = admin ? admin.secrets.pass : process.env.SMTP_PASS;
     if (!host || !portRaw || !user || !pass) {
       throw new Error(
-        "EMAIL_TRANSPORT=smtp but one of SMTP_HOST / SMTP_PORT / SMTP_USER / SMTP_PASS is not set.",
+        "SMTP transport selected but one of host / port / user / pass is not set (admin integration or env).",
       );
     }
     const port = Number(portRaw);
     // `secure: true` => TLS-on-connect (port 465 convention).
     // `secure: false` => STARTTLS on a non-TLS port (587 / 2525). Both
     // are encrypted in flight  the flag only picks the handshake.
-    const secure = (process.env.SMTP_SECURE ?? "").toLowerCase() === "true";
+    const secure =
+      ((admin ? admin.config.secure : process.env.SMTP_SECURE) ?? "")
+        .toLowerCase() === "true";
     const nodemailer = await import("nodemailer");
     const transporter = nodemailer.default.createTransport({
       host,

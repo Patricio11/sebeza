@@ -98,6 +98,14 @@ the DB needs is seeded.**
   · landing rail renders ONLY approved consented quotes (hidden when none; display fields captured at
   submission — never live PII). **Verified:** 358 vitest · E2E full loop 4/4 (campaign off → nothing;
   on → submit-with-consent → thanked → never re-asked → admin approve → landing rail), desktop + 360px.
-- [ ] 25 Integrations Hub (25.1–25.5)
+- [x] **25 Integrations Hub** ✅ 2026-07-05 — migration `0059` `integration_settings` (encrypted creds,
+  llm_providers posture) · `/admin/integrations`: health row (live DB latency + migration count,
+  storage/LLM/KYC status) + channel cards (SMS/WhatsApp/Email: configure → encrypted save → EXPLICIT
+  enable; env stays the fallback — `resolveIntegration` overlay wired into `sendSms`/`sendWhatsApp`/
+  `sendEmail` with the historical env path unchanged) · **Bulk announcements** (25.4): new opt-in
+  `announcements` consent purpose (migration `0060`, privacy-page copy, non-degrading), fan-out ONLY to
+  consented + verified-phone users, 500-per-send cap, per-send audit (count only), graceful skip on
+  undecryptable phones. **Verified:** vitest (consent catalogue updated) + build + E2E 2/2 (health →
+  configure console SMS → enable → eligible-count → send reports honestly), desktop + 360px.
 - [ ] 26 Security (26.2–26.7 code; 26.1 operator)
 - [ ] 27 Docs & Governance (27.1–27.7)

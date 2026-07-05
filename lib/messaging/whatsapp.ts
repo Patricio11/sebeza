@@ -18,6 +18,7 @@
  */
 
 import "server-only";
+import { resolveIntegration } from "@/lib/integrations/resolve";
 
 export interface SendWhatsAppInput {
   /** E.164 destination phone number. */
@@ -49,7 +50,19 @@ function transport(): WhatsAppTransport {
 export async function sendWhatsApp(
   input: SendWhatsAppInput,
 ): Promise<SendWhatsAppResult> {
-  const kind = transport();
+  // Phase 25  an ENABLED admin-managed integration wins over env (same
+  // provider code; only the credential source differs).
+  const admin = await resolveIntegration("whatsapp");
+  const provider = admin ? (admin.config.provider ?? "").toLowerCase() : null;
+  const kind: WhatsAppTransport = admin
+    ? provider === "twilio"
+      ? "twilio"
+      : provider === "meta"
+        ? "meta"
+        : provider === "console"
+          ? "console"
+          : "disabled"
+    : transport();
 
   if (kind === "disabled") {
     // eslint-disable-next-line no-console
@@ -72,12 +85,14 @@ export async function sendWhatsApp(
   }
 
   if (kind === "twilio") {
-    const sid = process.env.TWILIO_ACCOUNT_SID;
-    const token = process.env.TWILIO_AUTH_TOKEN;
-    const from = process.env.WHATSAPP_FROM_NUMBER;
+    const sid = admin ? admin.secrets.twilioSid : process.env.TWILIO_ACCOUNT_SID;
+    const token = admin ? admin.secrets.twilioToken : process.env.TWILIO_AUTH_TOKEN;
+    const from = admin
+      ? admin.config.fromNumber
+      : process.env.WHATSAPP_FROM_NUMBER;
     if (!sid || !token || !from) {
       throw new Error(
-        "WHATSAPP_PROVIDER=twilio but TWILIO_ACCOUNT_SID / TWILIO_AUTH_TOKEN / WHATSAPP_FROM_NUMBER is missing.",
+        "WhatsApp provider=twilio but the account SID / auth token / from-number is missing (admin integration or env).",
       );
     }
     const auth = Buffer.from(`${sid}:${token}`).toString("base64");

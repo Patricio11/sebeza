@@ -265,6 +265,12 @@ export type AuditKind =
   // admin curated one (meta.action ∈ create|approve|hide|delete).
   | "testimonial.submit"
   | "admin.testimonial.edit"
+  // Phase 25  admin configured / enabled / disabled a channel integration
+  // (subject = channel; meta.action; NEVER credentials), and admin sent a
+  // consent-gated bulk announcement (meta = recipientCount + channel only,
+  // never the recipient list).
+  | "admin.integration.edit"
+  | "admin.announcement.send"
   // Phase 11.2.2  seeker swapped a cost-abandoned learning item for a
   // free alternative. Subject = the original learning_items.id; meta
   // carries `originalSkillSlug`, `newPathTitle`, `newProvider`.

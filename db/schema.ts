@@ -99,6 +99,8 @@ export const consentPurpose = pgEnum("consent_purpose", [
   // we never spend without explicit operator approval.
   "messaging_channel_sms",
   "messaging_channel_whatsapp",
+  // Phase 25.4  opt-in platform announcements over SMS (migration 0060).
+  "announcements",
 ]);
 
 export const consentState = pgEnum("consent_state", [
@@ -769,6 +771,26 @@ export const testimonialPromptState = pgTable("testimonial_prompt_state", {
     .references(() => appUser.id, { onDelete: "cascade" }),
   snoozedUntil: timestamp("snoozed_until"),
   submittedAt: timestamp("submitted_at"),
+});
+
+/**
+ * Phase 25 ("Integrations Hub")  admin-managed channel integrations (SMS,
+ * WhatsApp, Email), following the llm_providers posture: credentials live
+ * ENCRYPTED in the DB, configured + tested + enabled from /admin/integrations,
+ * with env vars as the legacy fallback when no row is enabled. DB + Storage
+ * are deliberately NOT here  the app can't bootstrap its own DB creds from
+ * the DB; those stay platform-env and the hub shows health only.
+ */
+export const integrationSettings = pgTable("integration_settings", {
+  /** "sms" | "whatsapp" | "email"  one row per channel. */
+  channel: text("channel").primaryKey(),
+  enabled: boolean("enabled").notNull().default(false),
+  /** AES-256-GCM (lib/crypto) JSON blob of the channel's secrets. */
+  credentialsEnc: text("credentials_enc"),
+  /** Non-secret config (provider kind, from number, region, host…). */
+  config: jsonb("config").$type<Record<string, string>>(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  updatedByUserId: text("updated_by_user_id").references(() => appUser.id),
 });
 
 export const crisisResources = pgTable("crisis_resources", {

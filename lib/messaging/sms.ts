@@ -34,6 +34,7 @@
  */
 
 import "server-only";
+import { resolveIntegration } from "@/lib/integrations/resolve";
 
 export interface SendSmsInput {
   /** E.164 destination phone number. Required. */
@@ -72,7 +73,27 @@ function transport(): SmsTransport {
 export async function sendSms(
   input: SendSmsInput,
 ): Promise<SendSmsResult> {
-  const kind = transport();
+  // Phase 25  an ENABLED admin-managed integration (encrypted creds in the
+  // DB, configured on /admin/integrations) wins over env. Same provider code
+  // paths; only the credential source differs.
+  const admin = await resolveIntegration("sms");
+  const provider = admin
+    ? (admin.config.provider ?? "").toLowerCase()
+    : null;
+
+  const kind: SmsTransport = admin
+    ? provider === "twilio"
+      ? "twilio"
+      : provider === "sns"
+        ? "sns"
+        : provider === "console"
+          ? "console"
+          : "disabled"
+    : transport();
+
+  const twilioSid = admin ? admin.secrets.twilioSid : process.env.TWILIO_ACCOUNT_SID;
+  const twilioToken = admin ? admin.secrets.twilioToken : process.env.TWILIO_AUTH_TOKEN;
+  const fromNumber = admin ? admin.config.fromNumber : process.env.SMS_FROM_NUMBER;
 
   if (kind === "disabled") {
     // eslint-disable-next-line no-console
@@ -95,12 +116,12 @@ export async function sendSms(
   }
 
   if (kind === "twilio") {
-    const sid = process.env.TWILIO_ACCOUNT_SID;
-    const token = process.env.TWILIO_AUTH_TOKEN;
-    const from = process.env.SMS_FROM_NUMBER;
+    const sid = twilioSid;
+    const token = twilioToken;
+    const from = fromNumber;
     if (!sid || !token || !from) {
       throw new Error(
-        "SMS_PROVIDER=twilio but TWILIO_ACCOUNT_SID / TWILIO_AUTH_TOKEN / SMS_FROM_NUMBER is missing.",
+        "SMS provider=twilio but the account SID / auth token / from-number is missing (admin integration or env).",
       );
     }
     // Twilio REST. We don't import the SDK  one HTTP call is cheaper
@@ -134,9 +155,15 @@ export async function sendSms(
     // AWS SNS Publish via the AWS SDK. We don't import it eagerly to
     // keep cold-start light; lazy require here so the codepath is
     // pay-as-you-use.
-    const region = process.env.SNS_AWS_REGION ?? "af-south-1";
-    const accessKey = process.env.AWS_ACCESS_KEY_ID;
-    const secret = process.env.AWS_SECRET_ACCESS_KEY;
+    const region =
+      (admin ? admin.config.awsRegion : process.env.SNS_AWS_REGION) ??
+      "af-south-1";
+    const accessKey = admin
+      ? admin.secrets.awsAccessKeyId
+      : process.env.AWS_ACCESS_KEY_ID;
+    const secret = admin
+      ? admin.secrets.awsSecretAccessKey
+      : process.env.AWS_SECRET_ACCESS_KEY;
     if (!accessKey || !secret) {
       throw new Error(
         "SMS_PROVIDER=sns but AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY is missing.",

@@ -37,6 +37,11 @@ export const CONSENT_PURPOSES = [
   // simultaneously true.
   "messaging_channel_sms",
   "messaging_channel_whatsapp",
+  // Phase 25.4  opt-in to platform ANNOUNCEMENTS over SMS (admin bulk-sends
+  // from /admin/integrations). Optional, default-off, **non-degrading**: it
+  // affects nothing about job search. A send fans out ONLY to users with this
+  // granted AND a verified phone AND the SMS channel enabled.
+  "announcements",
 ] as const;
 
 export type ConsentPurpose = (typeof CONSENT_PURPOSES)[number];
