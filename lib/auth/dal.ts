@@ -219,9 +219,15 @@ async function enforceTwoFactorSetup(user: SessionUser): Promise<void> {
   if (user.twoFactorEnabled) return;
   // Phase 26.3 (security audit)  ADMIN accounts are hard-required to enrol
   // 2FA in PRODUCTION regardless of the platform flag: an un-2FA'd admin is
-  // the highest-value credential on the platform. Dev/test keep the flag
-  // behaviour so seeded demo flows aren't blocked.
-  if (user.role === "admin" && process.env.NODE_ENV === "production") {
+  // the highest-value credential on the platform. Dev keeps the flag
+  // behaviour; the E2E harness (production build over plain http, flagged by
+  // SEBENZA_E2E_HTTP=1  set ONLY by playwright.config.ts) is exempt so
+  // seeded admin flows stay testable.
+  if (
+    user.role === "admin" &&
+    process.env.NODE_ENV === "production" &&
+    process.env.SEBENZA_E2E_HTTP !== "1"
+  ) {
     redirect("/setup-2fa");
   }
   // Lazy-load to avoid pulling the platform-settings module into the
