@@ -59,15 +59,15 @@ the keyring (currently single-key; multi-key for rotation below).
    ```
    node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
    ```
-   Store as `ID_ENCRYPTION_KEY_V2` in the production env. Do NOT
-   remove `ID_ENCRYPTION_KEY` yet.
+   Store as `SEBENZA_ENCRYPTION_KEY (v2 slot via the key-id prefix)` in the production env. Do NOT
+   remove `SEBENZA_ENCRYPTION_KEY` yet.
 
 2. **Teach `decryptField` about v2.** Extend the keyring map in
    `lib/crypto/index.ts`:
    ```ts
    const KEYS: Record<string, Buffer> = {
-     v1: Buffer.from(process.env.ID_ENCRYPTION_KEY!, "base64"),
-     v2: Buffer.from(process.env.ID_ENCRYPTION_KEY_V2!, "base64"),
+     v1: Buffer.from(process.env.SEBENZA_ENCRYPTION_KEY!, "base64"),
+     v2: Buffer.from(process.env.SEBENZA_ENCRYPTION_KEY (v2 slot via the key-id prefix)!, "base64"),
    };
    ```
    `encryptField` writes v2; `decryptField` reads either by prefix.
@@ -88,7 +88,7 @@ the keyring (currently single-key; multi-key for rotation below).
    Run in a transaction per batch of 100 to keep memory bounded.
 
 5. **Retire v1.** Once every row is `v2.%`, remove `v1` from the
-   keyring and unset `ID_ENCRYPTION_KEY` from prod env. Deploy.
+   keyring and unset `SEBENZA_ENCRYPTION_KEY` from prod env. Deploy.
 
 6. **Audit-log it.** Write a `setting.update` row with
    `meta = { event: "id_key_rotation", from: "v1", to: "v2", rows_affected: N }`.

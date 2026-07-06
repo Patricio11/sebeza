@@ -424,6 +424,59 @@ covered by this DPIA:
   (`student.milestone.added` / `.removed`) collectively make this
   the lowest-surface-area new data category in Phase 13.
 
+### R-17→25  Addendum (2026-07-06): seeker-growth, AI-coach safety, testimonials, integrations
+
+**R-17.1  Seeker-facing LLM (AI Career Coach, Phases 17.3 + 22).**
+R-13.2's mitigating claim *"the student never talks to the LLM / no seeker
+data is sent to the LLM"* is **superseded**: the flag-gated coach
+(`feature_flag_seeker_ai_coach`, default OFF) sends a seeker-typed **role
+title** plus profession + skill labels cross-border to the active provider.
+Mitigations: never name/ID/contact (structural  the dispatcher assembles
+the payload from safe fields only); PII-shape guard refuses ID/email/phone-
+shaped input; a **deterministic distress screen runs BEFORE any provider
+call** (a crisis input is never sent  the user is routed to admin-verified
+crisis resources, and only a COUNT is audited, never the text); per-user
+rate limit (10/day) + shared monthly budget; output moderation strips
+promises/contact; the enable switch is acknowledgement-gated on /admin/llm.
+Lawful basis: the seeker initiates each request (performance of the service
+they invoke); provider cross-border terms follow R-13.2's s.72 treatment.
+Residual risk: medium until the operator verifies live crisis resources
+the switch must stay OFF until then (Phase 22 plan §status).
+
+**R-17.2  Distress signals (special-category-adjacent).** The screen
+necessarily *evaluates* text that may reveal mental state. Posture: the
+evaluation is in-memory and deterministic (no ML, no third party); the text
+is never persisted or logged; only `seeker.ai_coach.distress` (timestamp,
+count) is recorded for safety monitoring. No profiling, no follow-on use.
+
+**R-19.1  Custom skills (user-authored strings).** `profile_skills_custom`
+holds free-text labels a seeker writes. Mitigations: 60-char cap, never
+searchable or public until an admin canonicalizes; the admin leaderboard is
+aggregate-only (label × distinct-seeker COUNT). Erasure: CASCADE on profile.
+
+**R-21.1  City-level demand cuts.** Demand-side only (employer searches,
+never a seeker cohort); surfaced exclusively to top-5-metro seekers holding
+`outcomes_research` consent, above a k-anonymity floor; silent province
+fallback otherwise. No new PII captured (city was already in search filters).
+
+**R-24.1  Testimonials.** Publication of a first name + role context +
+quote under an **explicit public-display consent captured at submission**
+(display fields frozen at that moment  no live PII joins). Admin curation
+gate before anything renders; deletion honoured on request via
+/admin/testimonials; audit rows never carry the quote body.
+
+**R-25.1  Announcements (bulk SMS) + admin-managed channel credentials.**
+Bulk sends require the dedicated opt-in `announcements` consent purpose
+(default-off, non-degrading) AND a verified phone; hard cap 500/send; the
+audit records the recipient COUNT only. Channel credentials
+(`integration_settings`) are AES-256-GCM encrypted at rest, admin-only,
+never returned to any client; phone numbers are decrypted in-memory during
+a fan-out only.
+
+**Crisis resources (`crisis_resources`).** Not PII  public support-line
+information, admin-verified before activation (a wrong number is treated as
+a safety failure; see the Phase 22 plan).
+
 ## 4. Sign-off
 
 To be signed by the Information Officer once designated. Until then,

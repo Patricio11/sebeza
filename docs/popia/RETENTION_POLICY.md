@@ -33,6 +33,17 @@ Last updated 2026-06-01 (Phase 13 added 4 new rows + 1 special-handling block).
 | **Self-declared student milestones** (Phase 13.4) | `student_milestones` | Same lifecycle as the user account | CASCADE on `app_user` DELETE via `profile_id` FK with `ON DELETE CASCADE` |
 | **Editorial module → skill catalogue** (Phase 13.2) | `module_skills` | Indefinite (editorial asset, not personal data) | None  append-only catalogue; monthly review re-validates rows older than 18 months per `PHASE_13_CATALOGUE_GUIDE.md` |
 | **LLM provider configuration** (Phase 13.3) | `llm_providers` | Indefinite while in production use; admin-controlled lifecycle | Admin deactivates / reconfigures from `/admin/llm`; rows are 4 seeded slots, never deleted at the DB layer  the credentials_enc column is overwritten on rotation |
+| **Learning items** (Phases 9.12 + 17) | `learning_items` (incl. `progress_percent`) | Same lifecycle as the user account | CASCADE via `profile_id` FK |
+| **Seeker badges / follows / blocks** (Phase 11.x) | `seeker_badges`, `seeker_followed_employers`, `seeker_blocked_employers` | Same lifecycle as the user account | CASCADE via `profile_id` / `user_id` FKs |
+| **Phone (encrypted) + SMS allowlist** (Phase 11.4) | `app_user.phone_e164_enc` / `phone_verified_at`, `seeker_sms_allowlist` | Same lifecycle as the user account | Deleted with the `app_user` row (hard-delete cron); AES-256-GCM at rest |
+| **Learning-path catalogue + reviews** (Phase 18) | `learning_paths` (editorial), `learning_path_reviews` | Catalogue: indefinite editorial asset (90-day freshness cron nudges re-verification). Reviews: same lifecycle as the user account | Reviews CASCADE via `profile_id` FK; catalogue soft-deleted by admins |
+| **Custom skills** (Phase 19) | `profile_skills_custom` | Same lifecycle as the user account | CASCADE via `profile_id` FK; canonicalization soft-retires the row |
+| **Skill prerequisites / graduate programmes** (Phases 20 + 23) | `skill_prereqs`, `graduate_programmes` | Indefinite (editorial, not personal data) | Admin-curated (`/admin/skill-prereqs`; programmes seeded + editable) |
+| **Crisis resources** (Phase 22) | `crisis_resources` | Indefinite (public support info, not PII)  admins must keep it CURRENT; a stale number is a safety failure | Admin-managed from `/admin/crisis-resources` |
+| **Testimonials + prompt state** (Phase 24) | `testimonials`, `testimonial_prompt_state` | Testimonial: until author-requested removal or admin delete (display fields frozen at consent time). Prompt state: same lifecycle as the account | Testimonials `user_id` FK is `ON DELETE SET NULL`  a published quote survives account deletion ONLY under its recorded display consent, and admins delete on request. Prompt state CASCADEs |
+| **Integration settings** (Phase 25) | `integration_settings` | Indefinite while in use; credentials overwritten on reconfigure | Admin-managed from `/admin/integrations`; AES-256-GCM at rest |
+
+*(Addendum rows above added 2026-07-06, closing the Phase 11→25 gap flagged by the full-system audit.)*
 
 ## Audit-log retention rationale (5 years)
 

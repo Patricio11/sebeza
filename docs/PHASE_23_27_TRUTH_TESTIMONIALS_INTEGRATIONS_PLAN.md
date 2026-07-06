@@ -116,4 +116,12 @@ the DB needs is seeded.**
   `escapeLike` on admin/audit/gov searches · 26.7 `vercel.json` gains the two missing schedules
   (`seeker-demand-pulse`, `learning-path-freshness`) → 20 crons. **26.1 (operator): rotate every
   `.env.local` secret — still yours.** Verified: 358 vitest + build green.
-- [ ] 27 Docs & Governance (27.1–27.7)
+- [x] **27 Docs & Governance** ✅ 2026-07-06 — 27.1 CLAUDE.md rewritten (true current state, fixed
+  companion-doc links) · 27.2 README refreshed to Phase 26 (phase table, 61 migrations/0060, 20 crons
+  consistent, de-Resended, showcase accounts) · 27.3 TO_START current-state extended 18–26 · 27.4
+  ROADMAP: Phases 23–27 section + footer v2.6 · 27.5 **DPIA addendum R-17→25** (seeker-LLM supersedes
+  R-13.2's claim; distress posture; custom skills; city cuts; testimonials consent; announcements +
+  encrypted channel creds) + retention rows for every Phase 11→25 table · 27.6 `.env.example`
+  completed (CRON_SECRET, DATABASE_DRIVER, SMS/WhatsApp/KYC…) + ENCRYPTION_INVENTORY env-var names
+  corrected to `SEBENZA_ENCRYPTION_KEY` · 27.7 shipped 18–21 plan moved to `docs/completed/`, orphaned
+  `POST_LAUNCH_BACKLOG_v1.md` removed, references updated.

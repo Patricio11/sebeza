@@ -993,7 +993,7 @@ assessment + `COMPETITIVE_ANALYSIS_SAYOUTH.md` §3 (the flywheel). Plan: `docs/c
 - [x] Per task: `npm run test:all` (321 vitest) + build green; **E2E both flag states** — flag OFF = today's
   behaviour unchanged (zero regression), flag ON = the new surface — at desktop **and** 360px; clean migrations.
 
-> **Forward roadmap** for the four remaining assessment gaps (2/3/4/6): `docs/SEEKER_GROWTH_PHASES_18-21_PLAN.md`
+> **Forward roadmap** for the four remaining assessment gaps (2/3/4/6): `docs/completed/SEEKER_GROWTH_PHASES_18-21_PLAN.md`
 > — **Phase 18** Living Learning Catalog · **19** Custom Skills · **20** Skill Prerequisites · **21**
 > Hyper-Local Demand. Each flag-gated + ship-dark, same testing discipline.
 
@@ -1001,7 +1001,7 @@ assessment + `COMPETITIVE_ANALYSIS_SAYOUTH.md` §3 (the flywheel). Plan: `docs/c
 
 ## 🔭 PHASES 18–21: SEEKER GROWTH (forward roadmap) ⏳ *planned*
 *The four remaining gaps from the skill-development assessment, each flag-gated + ship-dark like Phase 17.
-Full task breakdown + UX/UI + testing discipline: `docs/SEEKER_GROWTH_PHASES_18-21_PLAN.md`.*
+Full task breakdown + UX/UI + testing discipline: `docs/completed/SEEKER_GROWTH_PHASES_18-21_PLAN.md`.*
 
 - [x] **Phase 18 — Living Learning Catalog** (Gap 2) ✅ *shipped 2026-06-30*: paths moved off the
   hardcoded constant into `learning_paths` + `learning_path_reviews` (behaviour-preserving migration
@@ -1043,6 +1043,27 @@ in production until an operator verifies + activates real crisis resources.*
 
 > Crisis-line details are **admin-editable data, verified by an operator** — the seed ships no numbers.
 > A wrong helpline number is itself a safety failure.
+
+---
+
+## 🩺 PHASES 23–27 — TRUTH, TESTIMONIALS, INTEGRATIONS, SECURITY, GOVERNANCE ✅ *shipped 2026-07-02 → 07-06*
+*Executes `docs/FULL_SYSTEM_AUDIT_2026_07.md` (plan: `docs/PHASE_23_27_TRUTH_TESTIMONIALS_INTEGRATIONS_PLAN.md`).*
+
+- [x] **23 Truth & Data Integrity + Showcase** — student lane → live DB (`graduate_programmes`, real
+  placement destinations, k-floor); computed landing MoM; fabricated testimonials removed; `getSkills()`
+  DB pickers; provider default `db` (mock throws in prod); showcase seed (`docs/SHOWCASE_ACCOUNTS.md`);
+  showcase E2E with 16 screenshots. Migrations `0057`.
+- [x] **24 Testimonials** — admin-run collection campaign; consented, curated, landing rail renders
+  approved only. Migration `0058`.
+- [x] **25 Integrations Hub** — `/admin/integrations`: encrypted admin-managed SMS/WhatsApp/Email creds
+  (env fallback), DB/storage health, consent-gated bulk announcements (`announcements` purpose).
+  Migrations `0059` + `0060`.
+- [x] **26 Security Hardening** — rate limits wired (reveal, per-user coach); prod admin 2FA hard-require;
+  CSP `unsafe-eval` dev-only; bound array params; constant-time cron auth; LIKE escaping; 20 crons.
+  *(26.1 operator: rotate `.env.local` secrets.)*
+- [x] **27 Docs & Governance** — CLAUDE.md/README/TO_START synced to Phase 26; **DPIA addendum R-17→25**
+  (seeker-LLM supersedes R-13.2's "no seeker data" claim; distress posture; testimonials consent;
+  announcements) + retention rows for every Phase 11→25 table; `.env.example` completed.
 
 ---
 
@@ -1116,13 +1137,17 @@ HR Practitioner · Electrician · Plumber · Accountant · Nurse · Driver · Bo
 
 ---
 
-*Last Updated: 2026-06-30*
-*Version: 2.5  ROADMAP body synced through Phase 17 (sections for 14/15/16/17 added; previously only
+*Last Updated: 2026-07-06*
+*Version: 2.6  synced through **Phase 27**. Phases 18–21 (seeker growth gaps), 22 (AI-coach safety),
+23–26 (truth/testimonials/integrations/security) + the governance sync all shipped; only Phase 14
+(zero-rating, partnership-gated) remains. Remaining work is OPERATOR-side: Phase 10 Arc B launch ops,
+`.env.local` secret rotation, crisis-resource verification before the AI-coach flag, DPIA sign-off.*
+*Prior: v2.5  ROADMAP body synced through Phase 17 (sections for 14/15/16/17 added; previously only
 footer-referenced). **Phase 17 ("Seeker Growth Suite") COMPLETE** (2026-06-30): three flag-gated, ship-dark
 seeker features — The Climb (live skill journey: progress + seeker-set proficiency + live rank payoff,
 closes assessment Gaps 1+5), Demand Pulse (weekly "your skill is heating up" from employer-search spikes),
 AI Career Coach (interview practice on the gated `llm_providers` infra; never sends PII). Each verified
 flag-OFF (zero regression) + flag-ON at desktop + 360px; 321 vitest + build green. **Phase 14** (zero-rating)
-remains partnership-gated/dormant. Forward roadmap `docs/SEEKER_GROWTH_PHASES_18-21_PLAN.md` plans Phases
+remains partnership-gated/dormant. Forward roadmap `docs/completed/SEEKER_GROWTH_PHASES_18-21_PLAN.md` plans Phases
 18–21 for the four remaining assessment gaps (2/3/4/6). v2.4  Phase 16 ("Near You") COMPLETE: reverse-matching location reframe (founder-confirmed §D1  not a job board)  Work-near-you dashboard card (be-found + honest province-level demand + truthful pool link + "or remote") + locality legibility ("{city}, {province}" + "Same city" chip on roster / vacancy match / invitations); 318 vitest + 12/12 seeker E2E at 360px. See `docs/completed/PHASE_16_COMPLETE.md`. v2.3  Phase 15 (Work-readiness content) COMPLETE: `work_ready` help collection + profile→CV generator + contextual surfacing. Post-launch phases 14/15/16 derive from `docs/COMPETITIVE_ANALYSIS_SAYOUTH.md`; 14 (zero-rating) is partnership-gated, 15 + 16 shipped. v2.2  Phase 12 (Testing & QA) COMPLETE: 309 vitest + 32 Playwright on a real-Postgres harness; 9 real bugs found + fixed. The next milestone before public ship is Phase 10 Arc B (operator tasks 10.5–10.11) plus the pre-commercial gates (Information Officer designation, pen-test, nonce CSP).*
 *Working name: Sebenza  South African National Talent-Intelligence Platform.*

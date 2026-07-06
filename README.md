@@ -6,16 +6,19 @@ and location, and gives government an honest picture of the labour market.
 
 > The trustworthy, real-time layer for South African work.
 
-Built through **Phase 13.10** (2026-06-06  three Phase 13 side-phases
-shipped post-13.7 closing real-world UX gaps surfaced in demo +
-feedback: 13.8 Invite-from-search, 13.9 Any-province for remote /
-hybrid vacancies, 13.10 multi-archetype seeker support with secondary
-professions + cross-trainable Open-To tags. Phase 13 complete
-2026-06-01; Phase 11 complete 2026-05-31; Phase 12 Testing & QA still
-pending). The product is launch-ready against the current Neon (EU)
-database; everything beyond is operational + commercial, not
-engineering. The AWS Cape Town migration is a documented one-day
-cutover (see [docs/AWS_MIGRATION_RUNBOOK.md](docs/AWS_MIGRATION_RUNBOOK.md))
+Built through **Phase 26** (2026-07-06  security hardening: rate limits
+wired on the hot paths, production admin 2FA hard-required, CSP
+`unsafe-eval` dev-only, bound array params, `timingSafeEqual` on secret
+comparisons, LIKE escaping. Phase 25 shipped the admin Integrations Hub
+2026-07-05; Phases 23–24 landed Truth & Data Integrity + consented
+testimonials 2026-07-02; Phases 17–22 shipped the Seeker Growth Suite,
+Living Learning Catalog, and AI-coach safety 2026-06-30 → 07-01; Phases
+15–16 shipped work-readiness content + "Near You" 2026-06-13; Phase 12
+Testing & QA shipped 2026-06-10 → 12). The product is launch-ready
+against the current Neon (EU) database; everything beyond is
+operational + commercial, not engineering. The AWS Cape Town migration
+is a documented one-day cutover (see
+[docs/AWS_MIGRATION_RUNBOOK.md](docs/AWS_MIGRATION_RUNBOOK.md))
 deferred pending partnership confirmation.
 
 The pre-launch gov analytics chapter is now complete end-to-end:
@@ -37,23 +40,22 @@ with zero paid credentials. Each integration has one obvious activation path.
 | Service | Gate | Effect when dormant | When to activate |
 |---|---|---|---|
 | **Sentry** | `SENTRY_DSN` unset | No-op `initSentry()`; nothing leaves the box | Add DSN + install `@sentry/nextjs` |
-| **Resend** transactional email | `feature_flag_email_notifications` (default OFF) | Templates exist; dispatch is skipped; in-app notifications still fire | Admin flips the flag once Resend domain auth is verified |
+| **Transactional email** (generic SMTP via nodemailer) | `feature_flag_email_notifications` (default OFF) + `EMAIL_TRANSPORT=console` default | Templates exist; dispatch logs to console; in-app notifications still fire | Set `EMAIL_TRANSPORT=smtp` + `SMTP_*` credentials (any provider  Resend works via its SMTP interface), then admin flips the flag |
 | **KYC SaaS** partnership path | `feature_flag_kyc_provider` (default OFF) | **Superseded in 9.10** by admin-mediated org vetting at `/employer/onboarding`  admins now review 4 SA-standard KYC docs themselves. Provider path stays available for future partnership. | Drop a provider in `lib/kyc/providers/*`, flip flag |
 | **SAQA NLRD worker** | `feature_flag_saqa_worker` (default OFF) | `approveQualification` flips directly; cron is a no-op | Admin flips the flag once the SAQA agreement is signed |
 | **Per-employer mix lookup** (gov) | `feature_flag_employer_mix_lookup` (default OFF) | `/gov/employer-lookup` renders informative dormant notice; query refuses | Admin flips the flag once the partnership + oversight protocol is in place |
 | **2FA enforcement** | `feature_flag_2fa_enforced` (default OFF for seekers) | Admins must enrol; seekers + employers are encouraged but not forced | Admin flips the flag when the roll-out is communicated |
-| **Upstash rate limiter** | No call sites wired | In-memory `RateLimiter` exists; nothing is enforced | Import `enforce(bucket, key)` on the Server Action you want to gate |
-| **Vercel Cron** | `CRON_SECRET` unset | `isAuthorizedCron` refuses every request | Set `CRON_SECRET`  paths already declared in `vercel.json` (18 jobs, staggered 02:0006:00 UTC) |
+| **Rate limiter** | Wired since Phase 26 | In-memory `RateLimiter` enforced via `enforce(bucket, key)` on the hot paths (contact reveal, AI coach, uploads); no external service required | Nothing to activate  swap in a shared store only if multi-instance limits are needed |
+| **Vercel Cron** | `CRON_SECRET` unset | `isAuthorizedCron` refuses every request | Set `CRON_SECRET`  paths already declared in `vercel.json` (20 jobs, staggered 02:0006:00 UTC) |
 | **SMS / WhatsApp channel** | `feature_flag_sms_channel_enabled` + `feature_flag_whatsapp_channel_enabled` (default OFF) + `SMS_PROVIDER` / `WHATSAPP_PROVIDER` env unset | `lib/messaging/dispatch.ts` enforces a 6-gate check; without admin flag + env vars, all sends short-circuit to `console` and audit-log as `skipped`. Zero spend. | Admin: `/admin/settings` flip flag ON. Operator: set `SMS_PROVIDER=twilio` + `SMS_FROM_NUMBER` + Twilio credentials. Per-seeker: add to `seeker_sms_allowlist` via admin action. |
 | **LLM editorial curriculum pipeline** (Phase 13.3) | `feature_flag_llm_curriculum_enabled` (default OFF) + every `llm_providers` row dormant + zero `monthly_budget_zar` | `lib/llm/curriculum.ts` enforces a 6-gate dispatch (active row · valid creds · budget > 0 · admin role · kill-switch ON · payload safety). Without all six, every call short-circuits with `llm.curriculum.skipped`. Zero spend, no outbound HTTP. Admin-side only  the student never talks to the LLM. | Admin: configure a provider on `/admin/llm` (cross-border providers require explicit POPIA s.72 acknowledgement), set a monthly budget, click Test, then Activate. Flip `feature_flag_llm_curriculum_enabled` ON in `/admin/settings`. Bulk-import on `/admin/curriculum`. Self-hosted is the POPIA-clean recommended path. |
 
 ### On rate limiting
 
-Rate limiting is **not enforced anywhere by default**. The `lib/rate-limit/`
-module is shipped and ready to wire when real abuse is observed; budgets get
-sized from real traffic, not guessed. Decision recorded in
-[docs/popia/DPIA.md](docs/popia/DPIA.md) (Risk R8) and in code comments on
-`signIn` + `revealContact`.
+Phase 26 wired the `lib/rate-limit/` module onto the abuse-relevant Server
+Actions: contact reveal (per org), AI-coach calls (per user), and storage
+uploads. Background decision recorded in
+[docs/popia/DPIA.md](docs/popia/DPIA.md) (Risk R8).
 
 Why no sign-in rate limit? A per-email limit creates a denial-of-service
 vector  an attacker who knows your email can submit bad passwords and lock
@@ -71,7 +73,7 @@ high-value accounts.
 - **Tailwind v4** (design tokens in `app/globals.css` via `@theme`); Fraunces
   display + Hanken Grotesk body via `next/font`.
 - **Drizzle ORM 0.45** + **Neon serverless** Postgres (EU, Phase 9; AWS Cape
-  Town `af-south-1` migration deferred). 22 migrations through 0021.
+  Town `af-south-1` migration deferred). 61 migrations through 0060.
 - **Better Auth 1.6.11** with `nextCookies()` + `twoFactor` plugins
   (TOTP + backup codes).
 - **next-intl 4.12**  Tier-1 locales `en` / `zu` / `xh` / `af`; deep-merge
@@ -126,11 +128,24 @@ high-value accounts.
 | 11.3 | Seeker control + trust posture (pause, block, report-invite, vacancy snapshot) | ✅ | [PHASE_11_3_COMPLETE](docs/completed/PHASE_11_3_COMPLETE.md) |
 | 11.4 | SA distribution surface (share-card PNG, follow employer, data-saver, dormant SMS/WhatsApp) | ✅ | [PHASE_11_4_COMPLETE](docs/completed/PHASE_11_4_COMPLETE.md) |
 | 11.5 | Profile depth + mobile / a11y polish (Open-to tags, CV backup, lazy load, 9 a11y fixes) | ✅ | [PHASE_11_5_COMPLETE](docs/completed/PHASE_11_5_COMPLETE.md) |
-| 12 | Testing & QA (renumbered from old Phase 11) | planned | Public-launch operator phase |
+| 12 | Testing & QA (Docker test Postgres, vitest suite, Playwright E2E harness, perf ratchets) | ✅ | Shipped 2026-06-10 → 12 |
 | 13 | Student lane expansion + editorial-LLM curriculum pipeline (shipped ahead of 12) | ✅ | [PHASE_13_COMPLETE](docs/completed/PHASE_13_COMPLETE.md) · [CATALOGUE_GUIDE](docs/PHASE_13_CATALOGUE_GUIDE.md) |
 | 13.8 | Per-row "Invite to vacancy" CTA on `/search` (verified-org employers) | ✅ | [PHASE_13_8_COMPLETE](docs/completed/PHASE_13_8_COMPLETE.md) |
 | 13.9 | "Any province" option for remote / hybrid vacancies | ✅ | [PHASE_13_9_COMPLETE](docs/completed/PHASE_13_9_COMPLETE.md) |
 | 13.10 | Multi-archetype seeker support (secondary professions + cross-trainable Open-To tags) | ✅ | [PHASE_13_10_COMPLETE](docs/completed/PHASE_13_10_COMPLETE.md) |
+| 14 | Zero-rating (data-free access) | dormant | Partnership-gated; wakes on operator agreement, no engineering pending |
+| 15 | Work-readiness content + CV generator | ✅ | Shipped 2026-06-13 |
+| 16 | "Near You" local-first discovery | ✅ | Shipped 2026-06-13 |
+| 17 | Seeker Growth Suite (The Climb, Demand Pulse, AI Career Coach  all flag-gated, shipped dark) | ✅ | Shipped 2026-06-30 · [plan](docs/completed/PHASE_17_SEEKER_GROWTH_SUITE_PLAN.md) |
+| 18 | Living Learning Catalog (`learning_paths` in DB + reviews + freshness admin) | ✅ | Shipped 2026-06-30 · [plan](docs/completed/SEEKER_GROWTH_PHASES_18-21_PLAN.md) |
+| 19 | Custom skills + admin canonicalization | ✅ | Shipped 2026-06-30 |
+| 20 | Skill prerequisites graph + compass sequencing | ✅ | Shipped 2026-06-30 |
+| 21 | Hyper-local city demand (consent + k-anonymity gated) | ✅ | Shipped 2026-06-30 |
+| 22 | AI-coach safety (distress detection → crisis resources, output moderation, ack-gated admin switch) | ✅ | Shipped 2026-07-01 · [plan](docs/PHASE_22_AI_COACH_SAFETY_PLAN.md) |
+| 23 | Truth & Data Integrity (student lane → DB, real landing stats, DB-backed taxonomy pickers, provider default = `db`, showcase seed) | ✅ | Shipped 2026-07-02 · [SHOWCASE_ACCOUNTS](docs/SHOWCASE_ACCOUNTS.md) |
+| 24 | Testimonials (admin-run collection, consented, curated, landing rail) | ✅ | Shipped 2026-07-02 |
+| 25 | Integrations Hub (`/admin/integrations`: encrypted admin-managed SMS / WhatsApp / Email creds, DB + storage health, consent-gated bulk announcements) | ✅ | Shipped 2026-07-05 · [plan](docs/PHASE_23_27_TRUTH_TESTIMONIALS_INTEGRATIONS_PLAN.md) |
+| 26 | Security hardening (rate limits wired, prod admin 2FA hard-require, CSP `unsafe-eval` dev-only, bound array params, `timingSafeEqual`, LIKE escaping) | ✅ | Shipped 2026-07-06 |
 
 ---
 
@@ -168,7 +183,7 @@ cp .env.example .env.local
 
 # 3. Database
 npm run db:generate     # generate Drizzle migration (only if you changed schema)
-npm run db:migrate      # apply all migrations (0000 → 0051) to your Neon DB
+npm run db:migrate      # apply all migrations (0000 → 0060) to your Neon DB
 npm run db:seed         # idempotent seed (taxonomy + fixture cohort + lifecycle fixtures)
 # If migrate exits silently but the seed fails on a missing column, the
 # DB and the migration journal have drifted  run `npm run db:push` to
@@ -186,7 +201,8 @@ npm run dev             # http://localhost:3000
 npm run build           # production build (4 locales × every route)
 npm run typecheck       # tsc --noEmit
 npm run lint
-npm test                # vitest run (suppression engine + outcomes-query fixtures)
+npm test                # vitest run (358 tests / 29 files)
+npm run test:e2e        # Playwright (~98 tests, desktop + mobile-360 projects)
 ```
 
 ### Seed credentials (dev only  never deploy)
@@ -207,6 +223,11 @@ outcomes + 9.13 stall analytics; 3 vacancies + 5 invitations across
 every state for the 9.8 demo; 3 learning items on `wits-bsc-cs-2026-08`
 for the 9.12 My Learning section; 10 abandoned learning items on
 `postgres` so the 9.13 stall infrastructure has demonstrable counts.
+
+The Phase 23 **showcase seed** adds a set of demo-ready accounts with
+realistic, coherent journeys across every role  see
+[docs/SHOWCASE_ACCOUNTS.md](docs/SHOWCASE_ACCOUNTS.md) for the account
+list and what each one demonstrates.
 
 ---
 
@@ -238,13 +259,14 @@ for the 9.12 My Learning section; 10 abandoned learning items on
 - `GET /api/gov/decline-reasons/export`  "why roles go unfilled" CSV (suppressed)
 - `GET /api/gov/stall-reasons/export`  "why learners stall" CSV (suppressed + `outcomes_research`-gated)
 - `GET /api/gov/curriculum/export`  curriculum-vs-demand CSV (suppressed)
-- `GET /api/cron/*`  18 Vercel Cron entry points (CRON_SECRET-gated; fail-closed; schedules in `vercel.json`, staggered 02:00–06:00 UTC = 04:00–08:00 SAST):
+- `GET /api/cron/*`  20 Vercel Cron entry points (CRON_SECRET-gated; fail-closed; schedules in `vercel.json`, staggered 02:00–06:00 UTC = 04:00–08:00 SAST):
   `hard-delete-erased`, `status-stale-warning`, `saved-search-matches`,
   `skill-gap-snapshot`, `outcome-snapshots`, `lmi-snapshot`, `saqa-worker`,
   `vacancy-invite-expiry`, `seeker-invite-expiry`, `seeker-weekly-digest` (Mondays only),
   `learning-nudge`, `vacancy-follow-up-nudges`, `placement-status-check-due`,
   `placement-retention-snapshot`, `employment-verification-expire`, `seeker-badge-sweep`,
-  `searchability-pause-sweep`, `followed-employer-vacancy-sweep`
+  `searchability-pause-sweep`, `followed-employer-vacancy-sweep`,
+  `seeker-demand-pulse`, `learning-path-freshness`
 
 All authed routes localised at `/[locale]/...` for `en`, `zu`, `xh`, `af`.
 
@@ -296,8 +318,8 @@ Built-in mechanisms:
 When it's time to activate a deferred service, the runbook is already written:
 
 - **AWS Cape Town `af-south-1` migration**  [docs/AWS_MIGRATION_RUNBOOK.md](docs/AWS_MIGRATION_RUNBOOK.md) (~4 hours, zero remaining POPIA work).
-- **KYC / SAQA / Resend activation**  [docs/completed/PHASE_8_COMPLETE.md](docs/completed/PHASE_8_COMPLETE.md) "Activation" section.
-- **Cron + CRON_SECRET wiring**  schedules in `vercel.json` (16 jobs, staggered 02:00–05:30 UTC). Background in [docs/completed/PHASE_8_COMPLETE.md](docs/completed/PHASE_8_COMPLETE.md).
+- **KYC / SAQA / email activation**  [docs/completed/PHASE_8_COMPLETE.md](docs/completed/PHASE_8_COMPLETE.md) "Activation" section.
+- **Cron + CRON_SECRET wiring**  schedules in `vercel.json` (20 jobs, staggered 02:00–06:00 UTC). Background in [docs/completed/PHASE_8_COMPLETE.md](docs/completed/PHASE_8_COMPLETE.md).
 - **Per-employer mix lookup activation**  [docs/completed/PHASE_9_7_COMPLETE.md](docs/completed/PHASE_9_7_COMPLETE.md) "Dormant-by-default" section + oversight log protocol.
 - **Outcomes-dataset compliance**  `GET /api/admin/outcomes-compliance` runs the 18 assertions live; CI hookup is the Phase 10 polish.
 
@@ -306,8 +328,8 @@ When it's time to activate a deferred service, the runbook is already written:
 ## Architecture seams to know
 
 - **`lib/data/provider.ts`**  the typed mock-↔-DB seam. Pages never branch
-  on which provider is active. Production uses `dbProvider`; mock stays for
-  isolated demos.
+  on which provider is active. `SEBENZA_DATA_PROVIDER` defaults to `db`
+  (since 23.5); `mock` is dev/test-only and **throws in production**.
 - **`lib/audit/logAccess()`**  every PII-touching code path wraps in this.
   `AuditKind` union is the canonical catalogue (currently ~60 kinds).
 - **`lib/auth/dal.ts`**  `verifySession()`, `verifyRole(role)`, `verifyAdmin()`,
@@ -356,29 +378,36 @@ that preserves the suppression floor. Every read + every export lands an
 The three documents in `docs/` are load-bearing and read together every session:
 
 1. [docs/TO_START_EVERY_SESSION.md](docs/TO_START_EVERY_SESSION.md)  non-negotiable rules + Current State block.
-2. [docs/ROADMAP.md](docs/ROADMAP.md)  phased build plan (Phase 0 → 13).
+2. [docs/ROADMAP.md](docs/ROADMAP.md)  phased build plan (Phase 0 → 26).
 3. [docs/UX_UI_SPEC.md](docs/UX_UI_SPEC.md)  design system + screen-by-screen UX.
 
 See also [CLAUDE.md](CLAUDE.md) for a per-session agent brief and
 [docs/SECURITY.md](docs/SECURITY.md) for the security posture summary.
 
+Recent-phase plan docs:
+[docs/completed/PHASE_17_SEEKER_GROWTH_SUITE_PLAN.md](docs/completed/PHASE_17_SEEKER_GROWTH_SUITE_PLAN.md),
+[docs/completed/SEEKER_GROWTH_PHASES_18-21_PLAN.md](docs/completed/SEEKER_GROWTH_PHASES_18-21_PLAN.md),
+[docs/PHASE_22_AI_COACH_SAFETY_PLAN.md](docs/PHASE_22_AI_COACH_SAFETY_PLAN.md),
+[docs/PHASE_23_27_TRUTH_TESTIMONIALS_INTEGRATIONS_PLAN.md](docs/PHASE_23_27_TRUTH_TESTIMONIALS_INTEGRATIONS_PLAN.md),
+and the full-system audit at
+[docs/FULL_SYSTEM_AUDIT_2026_07.md](docs/FULL_SYSTEM_AUDIT_2026_07.md).
+
 ---
 
 ## What's next
 
-Sebenza is launch-ready against the current Neon (EU) DB. The pre-launch gov
-analytics chapter is closed (Phase 9.13). Remaining work is operational +
-commercial:
+Sebenza is engineering-complete through Phase 26. What remains is operator
+work, not code:
 
-1. **Designate the Information Officer** + Deputy; register with the
-   Information Regulator.
-2. **Pitch the government partner / pilot**. The full nine-surface story
-   above, the Sebenza LMI, the longitudinal outcomes dataset, the 18-strong
-   compliance assertion suite, and the POPIA / PAIA / DPIA documentation are
-   the materials.
-3. **On partnership confirmation**: flip the relevant platform flags
-   (KYC, SAQA, Resend, employer-mix lookup, 2FA enforcement), follow the AWS
-   migration runbook, designate providers.
-4. **Phase 10**  accessibility audit (WCAG 2.2 AA), performance budget on
-   throttled 3G, full Tier-1 + Tier-2 + Tier-3 localisation rollout, the
-   compliance assertions wired into CI as a build gate.
+1. **Phase 10 Arc B launch ops**  designate the Information Officer +
+   Deputy, register with the Information Regulator, DPIA sign-off, and the
+   go-live checklist.
+2. **Secret rotation**  rotate `SEBENZA_ENCRYPTION_KEY`, `BETTER_AUTH_SECRET`,
+   `CRON_SECRET`, and provider credentials before public launch.
+3. **Crisis-resource verification**  a human must verify the crisis-line
+   numbers before `feature_flag_seeker_ai_coach` goes ON in prod (the switch
+   is ack-gated on `/admin/llm`; safety layer shipped in Phase 22).
+4. **Phase 14 zero-rating**  dormant pending a mobile-operator partnership.
+5. **On government partnership confirmation**: flip the relevant platform
+   flags (KYC, SAQA, employer-mix lookup, 2FA enforcement), follow the AWS
+   Cape Town migration runbook, designate providers.
