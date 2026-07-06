@@ -71,6 +71,14 @@
     {
       "path": "/api/cron/followed-employer-vacancy-sweep",
       "schedule": "0 6 * * *"
+    },
+    {
+      "path": "/api/cron/seeker-demand-pulse",
+      "schedule": "0 5 * * 1"
+    },
+    {
+      "path": "/api/cron/learning-path-freshness",
+      "schedule": "15 6 * * 1"
     }
   ]
 }

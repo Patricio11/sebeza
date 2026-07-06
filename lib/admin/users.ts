@@ -14,6 +14,7 @@
  */
 
 import "server-only";
+import { escapeLike } from "@/lib/sql/escape-like";
 import { getDb } from "@/db/client";
 import * as schema from "@/db/schema";
 import { and, desc, eq, ilike, isNull, isNotNull, or, sql } from "drizzle-orm";
@@ -62,11 +63,13 @@ export async function listUsersQuery(
   // Build WHERE clauses. We compose them via Drizzle's and() helper.
   const conditions = [] as Array<ReturnType<typeof sql>>;
   if (search) {
+    // Phase 26.6  escape %/_ so a wildcard in the box can't scan-match.
+    const term = `%${escapeLike(search)}%`;
     conditions.push(
       or(
-        ilike(schema.appUser.email, `%${search}%`),
-        ilike(schema.appUser.name, `%${search}%`),
-        ilike(schema.profiles.handle, `%${search}%`),
+        ilike(schema.appUser.email, term),
+        ilike(schema.appUser.name, term),
+        ilike(schema.profiles.handle, term),
       )!,
     );
   }

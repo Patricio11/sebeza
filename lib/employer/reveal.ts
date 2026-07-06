@@ -28,6 +28,7 @@ import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { verifyOrgVerified } from "@/lib/auth/dal";
 import { logAccess } from "@/lib/audit";
+import { enforce } from "@/lib/rate-limit";
 import { signedDocumentUrl } from "@/lib/storage/signed";
 import { createNotification } from "@/lib/notifications/server";
 
@@ -61,14 +62,16 @@ export async function revealContact(input: {
   if (!input?.handle) return fail("Missing profile handle.");
   const session = await verifyOrgVerified();
 
-  // Phase 9 review (2026-05-23)  rate limiting deliberately NOT
-  // enforced anywhere by default. The infrastructure exists in
-  // `lib/rate-limit/` ready to wire when abuse is observed; until
-  // then the existing protections (verified-org gate + per-reveal
-  // consent check + audit log + 30-day reveal-gate window) carry the
-  // load. Re-enable by importing `enforce("reveal", …)` and gating
-  // the action  but only after observing real abuse patterns to
-  // size the budget. See docs/popia/DPIA.md R-series.
+  // Phase 26.2 (security audit)  reveal is now rate-limited per org (the
+  // "reveal" bucket, 20/hr). The verified-org gate + consent + audit still
+  // carry the authorisation load; this stops a compromised or scraping org
+  // account from bulk-enumerating seeker contact details.
+  const limit = await enforce("reveal", session.orgId);
+  if (!limit.ok) {
+    return fail(
+      "Reveal limit reached for this hour  please try again shortly.",
+    );
+  }
 
   const db = getDb();
 

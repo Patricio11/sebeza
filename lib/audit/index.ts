@@ -20,6 +20,7 @@ import { randomUUID } from "node:crypto";
 import { getDb } from "@/db/client";
 import { auditLog } from "@/db/schema";
 import { and, desc, eq, ilike, or, sql } from "drizzle-orm";
+import { escapeLike } from "@/lib/sql/escape-like";
 
 export type AuditKind =
   | "search.profiles"
@@ -457,11 +458,10 @@ export async function recentAuditEventsFromDb(
     }
     const trimmed = (normalized.actor ?? "").trim();
     if (trimmed) {
+      // Phase 26.6  escape %/_ so a wildcard can't scan-match.
+      const term = `%${escapeLike(trimmed)}%`;
       where.push(
-        or(
-          ilike(auditLog.actor, `%${trimmed}%`),
-          ilike(auditLog.subject, `%${trimmed}%`),
-        )!,
+        or(ilike(auditLog.actor, term), ilike(auditLog.subject, term))!,
       );
     }
 

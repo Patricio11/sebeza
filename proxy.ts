@@ -72,7 +72,12 @@ function securityHeaders(): Record<string, string> {
     : "https://*.supabase.co";
   const csp = [
     "default-src 'self'",
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+    // Phase 26.4 (security audit)  `unsafe-eval` is DEV-ONLY (Turbopack HMR
+    // needs eval). Production ships without it, so CSP keeps real teeth as an
+    // XSS backstop. `unsafe-inline` stays until the nonce-CSP pre-launch item.
+    process.env.NODE_ENV === "development"
+      ? "script-src 'self' 'unsafe-inline' 'unsafe-eval'"
+      : "script-src 'self' 'unsafe-inline'",
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: blob: https:",
     "font-src 'self' data:",

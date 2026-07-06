@@ -217,6 +217,13 @@ export async function verifyGov(): Promise<SessionUser> {
 async function enforceTwoFactorSetup(user: SessionUser): Promise<void> {
   if (user.role === "seeker") return;
   if (user.twoFactorEnabled) return;
+  // Phase 26.3 (security audit)  ADMIN accounts are hard-required to enrol
+  // 2FA in PRODUCTION regardless of the platform flag: an un-2FA'd admin is
+  // the highest-value credential on the platform. Dev/test keep the flag
+  // behaviour so seeded demo flows aren't blocked.
+  if (user.role === "admin" && process.env.NODE_ENV === "production") {
+    redirect("/setup-2fa");
+  }
   // Lazy-load to avoid pulling the platform-settings module into the
   // seeker hot path. `getSetting` is React-cached per render.
   const { getSetting } = await import("@/lib/admin/settings");

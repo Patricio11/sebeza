@@ -213,23 +213,26 @@ export async function searchProfilesQuery(
   // a profile matches if ANY of its availability kinds is in the
   // requested set. Backed by the GIN index on `work_availability`.
   if (filters.availableFor && filters.availableFor.length > 0) {
-    const kindsLiteral = sql.raw(
-      `ARRAY[${filters.availableFor
-        .map((k) => `'${k.replace(/'/g, "''")}'`)
-        .join(",")}]::work_availability_kind[]`,
+    // Phase 26.5 (security audit)  every element is an individually BOUND
+    // parameter (ARRAY[$1,$2,…]) instead of a hand-escaped string literal.
+    // No manual quote escaping anywhere in the query layer.
+    const kinds = sql.join(
+      filters.availableFor.map((k) => sql`${k}`),
+      sql`, `,
     );
-    conditions.push(sql`p.work_availability && ${kindsLiteral}`);
+    conditions.push(
+      sql`p.work_availability && ARRAY[${kinds}]::work_availability_kind[]`,
+    );
   }
   // Phase 11.5.1  "open to" tag filter. Same `&&` overlap operator
   // as workAvailability, backed by the GIN index on `open_to_tags`.
   // Empty array (or absent) = no constraint.
   if (filters.openTo && filters.openTo.length > 0) {
-    const tagsLiteral = sql.raw(
-      `ARRAY[${filters.openTo
-        .map((t) => `'${t.replace(/'/g, "''")}'`)
-        .join(",")}]::text[]`,
+    const tags = sql.join(
+      filters.openTo.map((t) => sql`${t}`),
+      sql`, `,
     );
-    conditions.push(sql`p.open_to_tags && ${tagsLiteral}`);
+    conditions.push(sql`p.open_to_tags && ARRAY[${tags}]::text[]`);
   }
   // Phase 9.19 D2  years-experience hard floor. Vacancy is the source
   // of truth: NULL on the vacancy = no constraint (skip entirely).
@@ -531,12 +534,14 @@ export async function countMatchesByCitizenship(
     );
   }
   if (filters.availableFor && filters.availableFor.length > 0) {
-    const kindsLiteral = sql.raw(
-      `ARRAY[${filters.availableFor
-        .map((k) => `'${k.replace(/'/g, "''")}'`)
-        .join(",")}]::work_availability_kind[]`,
+    // Phase 26.5  individually bound elements (see the ranked-list twin above).
+    const kinds = sql.join(
+      filters.availableFor.map((k) => sql`${k}`),
+      sql`, `,
     );
-    conditions.push(sql`p.work_availability && ${kindsLiteral}`);
+    conditions.push(
+      sql`p.work_availability && ARRAY[${kinds}]::work_availability_kind[]`,
+    );
   }
   // Phase 9.19  mirror the years/NQF gates so the honest-supply
   // counts agree with the ranked list (every WHERE clause must match).

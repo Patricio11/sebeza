@@ -23,6 +23,7 @@ import { decryptField } from "@/lib/crypto";
 import { logAccess } from "@/lib/audit";
 import { getSetting } from "@/lib/admin/settings";
 import { moderateQuestions, detectDistress } from "@/lib/llm/coach-safety";
+import { enforce } from "@/lib/rate-limit";
 import {
   listActiveCrisisResources,
   type CrisisResource,
@@ -87,6 +88,15 @@ export async function generateInterviewQuestions(
     });
     const crisisResources = await listActiveCrisisResources();
     return { ok: false, reason: "distress", crisisResources };
+  }
+
+  // Phase 26.2  per-user daily throttle (10/day). Placed AFTER the distress
+  // screen on purpose: a person in crisis always reaches human support; only
+  // provider-spending calls are throttled. Protects the shared monthly budget
+  // from a single account looping the endpoint.
+  const limit = await enforce("coach", input.callerUserId);
+  if (!limit.ok) {
+    return skip(input.callerUserId, "budget", "n/a");
   }
 
   // Gate 4  PII guard on the only free-text field (the role title).

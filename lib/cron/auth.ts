@@ -10,6 +10,7 @@
  */
 
 import "server-only";
+import { timingSafeEqual } from "node:crypto";
 import { NextResponse } from "next/server";
 
 export function isAuthorizedCron(request: Request):
@@ -29,7 +30,13 @@ export function isAuthorizedCron(request: Request):
   }
   const header = request.headers.get("authorization") ?? "";
   const expected = `Bearer ${secret}`;
-  if (header !== expected) {
+  // Phase 26.6 (security audit)  constant-time compare so the secret can't
+  // be recovered byte-by-byte through response timing. Length mismatch fails
+  // immediately (length itself isn't a secret).
+  const a = Buffer.from(header);
+  const b = Buffer.from(expected);
+  const matches = a.length === b.length && timingSafeEqual(a, b);
+  if (!matches) {
     return {
       ok: false,
       response: NextResponse.json(

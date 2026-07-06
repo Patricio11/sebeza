@@ -19,6 +19,7 @@
  */
 
 import "server-only";
+import { escapeLike } from "@/lib/sql/escape-like";
 import { and, desc, eq, gte, ilike, lt, or, sql } from "drizzle-orm";
 import { getDb } from "@/db/client";
 import { auditLog, organizations } from "@/db/schema";
@@ -134,11 +135,10 @@ export async function oversightLogQuery(
 
   const trimmedActor = opts.actor?.trim();
   if (trimmedActor) {
+    // Phase 26.6  escape %/_ so a wildcard can't scan-match.
+    const term = `%${escapeLike(trimmedActor)}%`;
     where.push(
-      or(
-        ilike(auditLog.actor, `%${trimmedActor}%`),
-        ilike(auditLog.subject, `%${trimmedActor}%`),
-      )!,
+      or(ilike(auditLog.actor, term), ilike(auditLog.subject, term))!,
     );
   }
   if (resolvedOrgId) {

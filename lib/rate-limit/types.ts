@@ -50,6 +50,13 @@ export const BUCKETS = {
    * never hit this.
    */
   "search": { limit: 30, windowSeconds: 60 },
+  /**
+   * Phase 26.2  AI-coach practice calls per USER per day. The global
+   * monthly LLM budget is shared across the whole platform; without a
+   * per-user throttle one seeker could drain it. Ten practice rounds a
+   * day is generous for a real user, ruinous for a loop.
+   */
+  "coach": { limit: 10, windowSeconds: 24 * 60 * 60 },
 } as const;
 
 export type BucketName = keyof typeof BUCKETS;

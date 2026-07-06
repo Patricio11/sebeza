@@ -107,5 +107,13 @@ the DB needs is seeded.**
   consented + verified-phone users, 500-per-send cap, per-send audit (count only), graceful skip on
   undecryptable phones. **Verified:** vitest (consent catalogue updated) + build + E2E 2/2 (health →
   configure console SMS → enable → eligible-count → send reports honestly), desktop + 360px.
-- [ ] 26 Security (26.2–26.7 code; 26.1 operator)
+- [x] **26 Security Hardening** ✅ 2026-07-06 (code items) — 26.2 rate limits wired: contact reveal
+  (20/hr per org) + a new per-user AI-coach bucket (10/day, placed AFTER the distress screen so crisis
+  routing is never throttled) · 26.3 admins hard-require 2FA **in production** regardless of the flag
+  (dev/test keep flag behaviour for seeded flows) · 26.4 CSP: `unsafe-eval` is now DEV-ONLY · 26.5 the
+  `sql.raw` hand-escaped array literals → individually bound `ARRAY[$1,…]` params (caught + fixed a
+  drizzle binding subtlety via the existing filter test) · 26.6 constant-time `CRON_SECRET` compare +
+  `escapeLike` on admin/audit/gov searches · 26.7 `vercel.json` gains the two missing schedules
+  (`seeker-demand-pulse`, `learning-path-freshness`) → 20 crons. **26.1 (operator): rotate every
+  `.env.local` secret — still yours.** Verified: 358 vitest + build green.
 - [ ] 27 Docs & Governance (27.1–27.7)
