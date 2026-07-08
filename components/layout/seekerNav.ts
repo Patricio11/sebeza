@@ -16,16 +16,16 @@ import {
 import type { DashboardNavItem } from "./dashboardChrome";
 
 export const SEEKER_NAV: DashboardNavItem[] = [
-  { key: "overview", label: "Overview", href: "/dashboard", icon: LayoutDashboard },
-  { key: "profile", label: "Profile editor", href: "/dashboard/profile", icon: UserPen },
+  { key: "overview", label: "Overview", href: "/dashboard", icon: LayoutDashboard, mobilePrimary: true },
+  { key: "profile", label: "Profile editor", href: "/dashboard/profile", icon: UserPen, mobilePrimary: true, mobileLabel: "Profile" },
   { key: "experience", label: "Experience", href: "/dashboard/experience", icon: Briefcase },
   { key: "qualifications", label: "Qualifications", href: "/dashboard/qualifications", icon: GraduationCap },
   // Phase 9.8.5  vacancy invitations inbox; sits next to Notifications
   // because the two surfaces are conceptually related (a vacancy
   // invite IS a notification, but it has its own structured
   // response lifecycle).
-  { key: "invitations", label: "Vacancy invites", href: "/dashboard/invitations", icon: Inbox },
-  { key: "grow", label: "Career compass", href: "/dashboard/grow", icon: Compass },
+  { key: "invitations", label: "Vacancy invites", href: "/dashboard/invitations", icon: Inbox, mobilePrimary: true, mobileLabel: "Invites" },
+  { key: "grow", label: "Career compass", href: "/dashboard/grow", icon: Compass, mobilePrimary: true, mobileLabel: "Compass" },
   // Phase 17 ("AI Career Coach", flag-gated)  removed from the nav unless
   // `feature_flag_seeker_ai_coach` is ON (the seeker layout filters it). Sits
   // next to Career compass: both are growth / work-readiness surfaces.

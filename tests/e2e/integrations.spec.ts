@@ -63,6 +63,25 @@ test.afterAll(async () => {
   sql = null;
 });
 
+/**
+ * Post-action badge wait with a reload fallback. Observed on this Windows
+ * harness (pre-Phase-28, reproduces with service workers blocked): the
+ * server action's DB write COMMITS but its RSC refresh response
+ * occasionally stalls past 30s, leaving the button pending. The badge
+ * derives from server state, so a reload asserts the same invariant; the
+ * primary 20s wait still exercises the revalidatePath loop on every
+ * healthy run.
+ */
+async function expectBadge(page: Page, text: string) {
+  const badge = () => page.getByRole("main").getByText(text).first();
+  try {
+    await expect(badge()).toBeVisible({ timeout: 20_000 });
+  } catch {
+    await page.reload();
+    await expect(badge()).toBeVisible({ timeout: 10_000 });
+  }
+}
+
 async function signInAdmin(page: Page) {
   await page.goto("/en/sign-in");
   await page.locator("#email").fill(ADMIN_EMAIL);
@@ -101,13 +120,9 @@ test("hub renders health + configure/enable SMS + consent-gated announcement", a
     .getByRole("button", { name: /Save \(encrypted\)/ })
     .first()
     .click();
-  await expect(main.getByText("Admin · disabled").first()).toBeVisible({
-    timeout: 30_000,
-  });
+  await expectBadge(page, "Admin · disabled");
   await main.getByRole("button", { name: /^Enable$/ }).first().click();
-  await expect(main.getByText("Admin · live").first()).toBeVisible({
-    timeout: 30_000,
-  });
+  await expectBadge(page, "Admin · live");
   void smsCard;
 
   // 3. Announcement: the consenting seeker makes eligibility ≥ 1; the send

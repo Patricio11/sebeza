@@ -44,6 +44,14 @@ export default defineConfig({
   use: {
     baseURL: `http://localhost:${PORT}`,
     trace: "retain-on-failure",
+    // Phase 28  block the offline-fallback service worker (public/sw.js) in
+    // E2E. The suite asserts APP behaviour; letting the SW intercept
+    // navigations means a transient server hiccup renders offline.html
+    // instead of a retryable network error, which turns real failures into
+    // confusing ones. The SW asset itself is verified in pwa-mobile-nav.spec.
+    // (Measured: the integrations flake reproduces identically with the SW
+    // blocked, so this hides nothing.)
+    serviceWorkers: "block",
   },
   projects: [
     { name: "desktop", use: { ...devices["Desktop Chrome"] } },

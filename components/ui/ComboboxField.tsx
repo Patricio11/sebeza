@@ -407,7 +407,7 @@ export function ComboboxField({
         <>
           {/* Mobile backdrop */}
           <div
-            className="fixed inset-0 z-20 bg-[color:var(--color-ink)]/30 md:hidden"
+            className="fixed inset-0 z-[45] bg-[color:var(--color-ink)]/30 md:hidden"
             onClick={() => setOpen(false)}
             aria-hidden="true"
           />
@@ -416,7 +416,9 @@ export function ComboboxField({
             role="dialog"
             aria-label={`${label} picker`}
             className={
-              "z-30 flex flex-col " +
+              // z-[46]: above the Phase 28 floating bottom nav (z-40)  a
+              // bottom sheet covers the tab bar, like a native app.
+              "z-[46] flex flex-col " +
               "fixed inset-x-0 bottom-0 max-h-[80vh] rounded-t-[var(--radius-md)] " +
               "md:absolute md:inset-x-auto md:bottom-auto md:mt-2 md:w-full md:max-w-[420px] md:max-h-[360px] md:rounded-[var(--radius-md)] " +
               "border-2 border-[color:var(--color-ink)] bg-[color:var(--color-paper)] shadow-2xl"

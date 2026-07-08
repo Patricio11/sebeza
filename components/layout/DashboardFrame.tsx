@@ -10,6 +10,7 @@ import {
   type DashboardRole,
 } from "./dashboardChrome";
 import { DashboardNavLink } from "./DashboardNavLink";
+import { MobileBottomNav, type BottomNavEntry } from "./MobileBottomNav";
 
 interface Props {
   role: DashboardRole;
@@ -41,6 +42,27 @@ export function DashboardFrame({
 }: Props) {
   const roleAccent = ROLE_ACCENT[role];
   const rootHref = nav[0]?.href;
+
+  // Phase 28  split the nav for the floating mobile bottom bar: ≤4 promoted
+  // tabs (flagged in the role's nav config) + everything else in the More
+  // sheet. Icons are rendered HERE (server side) because component functions
+  // can't cross into the client island  rendered elements can.
+  const toEntry = (item: DashboardNavItem): BottomNavEntry => {
+    const Icon = item.icon;
+    return {
+      key: item.key,
+      label: item.label,
+      tabLabel: item.mobileLabel,
+      href: item.href,
+      exact: item.href === rootHref,
+      icon: <Icon className="size-4" aria-hidden="true" />,
+    };
+  };
+  const flagged = nav.filter((i) => i.mobilePrimary).slice(0, 4);
+  const primary = flagged.length > 0 ? flagged : nav.slice(0, 4);
+  const primaryKeys = new Set(primary.map((i) => i.key));
+  const mobileTabs = primary.map(toEntry);
+  const mobileMore = nav.filter((i) => !primaryKeys.has(i.key)).map(toEntry);
 
   return (
     <div className="min-h-screen bg-[color:var(--color-paper)]">
@@ -121,9 +143,11 @@ export function DashboardFrame({
           </div>
         </aside>
 
-        {/* Main column */}
-        <div className="flex min-h-screen flex-col">
-          {/* Mobile top strip */}
+        {/* Main column. Mobile reserves space at the bottom so in-flow
+            content never hides behind the floating bar (Phase 28). */}
+        <div className="flex min-h-screen flex-col pb-[calc(88px+env(safe-area-inset-bottom,0px))] md:pb-0 print:pb-0">
+          {/* Mobile top strip  slim header only; navigation moved to the
+              floating bottom bar (Phase 28). */}
           <div className="border-b border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] md:hidden print:hidden">
             <div aria-hidden="true" className="flex h-[3px] w-full">
               <div className="flex-[3] bg-[color:var(--color-brand)]" />
@@ -148,33 +172,32 @@ export function DashboardFrame({
                 <SignOutButton iconOnly />
               </div>
             </div>
-            <nav
-              aria-label={`${workspaceLabel} navigation`}
-              className="relative overflow-x-auto border-t border-[color:var(--color-hairline)]"
-            >
-              <ul className="flex min-w-max">
-                {nav.map((item) => (
-                  <li key={item.key}>
-                    <DashboardNavLink
-                      href={item.href}
-                      exact={item.href === rootHref}
-                      className="block min-h-11 whitespace-nowrap border-b-2 border-transparent px-4 py-3 text-xs uppercase tracking-[0.18em] text-[color:var(--color-ink-soft)] aria-[current=page]:border-[color:var(--color-ink)] aria-[current=page]:text-[color:var(--color-ink)]"
-                    >
-                      {item.label}
-                    </DashboardNavLink>
-                  </li>
-                ))}
-              </ul>
-              {/* Fade-edge cue  signals there's more to scroll */}
-              <div
-                aria-hidden="true"
-                className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-[color:var(--color-surface)] to-transparent"
-              />
-            </nav>
           </div>
 
           {children}
         </div>
+
+        {/* Phase 28  floating bottom bar + More sheet (mobile only) */}
+        <MobileBottomNav
+          tabs={mobileTabs}
+          moreItems={mobileMore}
+          workspaceLabel={workspaceLabel}
+          footer={
+            <>
+              <LocaleSwitcher />
+              <Link
+                href="/"
+                className="block text-xs uppercase tracking-[0.18em] text-[color:var(--color-ink-soft)] hover:text-[color:var(--color-ink)]"
+              >
+                ← Back to public site
+              </Link>
+              <SignOutButton
+                label="Sign out"
+                className="w-full justify-start gap-2 rounded-[var(--radius-sm)] border border-[color:var(--color-hairline)] px-3 py-2 text-sm hover:border-[color:var(--color-ink)]"
+              />
+            </>
+          }
+        />
       </div>
     </div>
   );

@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#fbf8f0" />
+<title>Offline · Sebenza</title>
+<style>
+  /* Civic Editorial, self-contained (no webfonts — this page IS the offline
+     fallback). Georgia stands in for Fraunces; system sans for Hanken. */
+  :root {
+    --paper: #fbf8f0; --ink: #14110d; --ink-soft: #5d574c;
+    --brand: #006b3c; --accent: #c98214; --danger: #de3831;
+    --hairline: #e5dfd2;
+  }
+  * { margin: 0; box-sizing: border-box; }
+  body {
+    min-height: 100vh; display: flex; flex-direction: column;
+    background: var(--paper); color: var(--ink);
+    font-family: "Hanken Grotesk", system-ui, -apple-system, sans-serif;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .band { display: flex; height: 4px; }
+  .band .b { flex: 3; background: var(--brand); }
+  .band .a { flex: 2; background: var(--accent); }
+  .band .d { flex: 1; background: var(--danger); }
+  main {
+    flex: 1; display: flex; flex-direction: column; justify-content: center;
+    max-width: 34rem; width: 100%; margin: 0 auto; padding: 2.5rem 1.5rem;
+  }
+  .eyebrow {
+    font-size: .68rem; letter-spacing: .22em; text-transform: uppercase;
+    color: var(--ink-soft); margin-bottom: .9rem;
+  }
+  h1 {
+    font-family: Georgia, "Times New Roman", serif; font-weight: 600;
+    font-size: clamp(1.9rem, 7vw, 2.6rem); line-height: 1.12;
+    margin-bottom: 1rem;
+  }
+  p { color: var(--ink-soft); line-height: 1.55; margin-bottom: 1.75rem; }
+  .rule { border: 0; border-top: 3px solid var(--ink); width: 3.5rem; margin: 0 0 1.5rem; }
+  button {
+    appearance: none; border: 2px solid var(--ink); border-radius: 999px;
+    background: var(--ink); color: var(--paper); cursor: pointer;
+    font: inherit; font-weight: 600; padding: .8rem 1.9rem; min-height: 44px;
+  }
+  button:active { transform: scale(.97); }
+  footer {
+    border-top: 1px solid var(--hairline); padding: 1rem 1.5rem;
+    font-size: .68rem; letter-spacing: .18em; text-transform: uppercase;
+    color: var(--ink-soft); text-align: center;
+  }
+</style>
+</head>
+<body>
+  <div class="band" aria-hidden="true"><span class="b"></span><span class="a"></span><span class="d"></span></div>
+  <main>
+    <div class="eyebrow">Sebenza · Connection</div>
+    <hr class="rule" />
+    <h1>You&rsquo;re offline right now.</h1>
+    <p>Sebenza needs a connection to show live, honest data &mdash; nothing here is
+       ever cached or made up. As soon as you&rsquo;re back on the network, pick up
+       exactly where you left off.</p>
+    <button type="button" onclick="location.reload()">Try again</button>
+  </main>
+  <footer>Sebenza &mdash; South African talent platform</footer>
+</body>
+</html>

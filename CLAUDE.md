@@ -8,11 +8,14 @@
 - `docs/ROADMAP.md`  phased build plan (Phase 0 → 26; all shipped except 14, which is partnership-gated).
 - `docs/UX_UI_SPEC.md`  design system + screen-by-screen.
 
-**Current state (2026-07): LIVE, DB-BACKED, shipped through Phase 26.** Postgres (Neon) + Drizzle,
+**Current state (2026-07): LIVE, DB-BACKED, shipped through Phase 28.** Postgres (Neon) + Drizzle,
 61 migrations (0000→0060), Better Auth sessions, 358-test vitest suite (unit/integration/compliance)
-+ ~98-test Playwright E2E (desktop + 360px), 20 cron jobs. Nothing user-facing renders mock data
++ ~100-test Playwright E2E (desktop + 360px), 20 cron jobs. Nothing user-facing renders mock data
 (Phase 23 truth pass); `lib/mock/` survives only as seed source, taxonomy-constant fallback, pure
 helpers, and test fixtures. Showcase login accounts: `docs/SHOWCASE_ACCOUNTS.md`.
+Phase 28: installable PWA (`app/manifest.ts`, brand icons, minimal offline-only service worker in
+`public/sw.js`) + floating mobile bottom nav w/ More sheet (`components/layout/MobileBottomNav.tsx`,
+`mobilePrimary` flags in the nav configs) replacing the old mobile top tab strip on all dashboards.
 
 ## Non-negotiable rules (summary  full text in docs/TO_START_EVERY_SESSION.md)
 1. **No-Flash.** Works on a low-end Android over 3G. JS budget ~150KB on key routes.

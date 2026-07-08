@@ -5,6 +5,7 @@ import { Fraunces, Hanken_Grotesk } from "next/font/google";
 import { notFound } from "next/navigation";
 import { routing, type AppLocale } from "@/i18n/routing";
 import { CookieConsentBanner } from "@/components/feature/legal/CookieConsentBanner";
+import { ServiceWorkerRegistrar } from "@/components/pwa/ServiceWorkerRegistrar";
 import { readCookieConsent } from "@/lib/cookies/consent";
 import "../globals.css";
 
@@ -27,6 +28,9 @@ export const viewport: Viewport = {
   themeColor: "#FAF8F4",
   width: "device-width",
   initialScale: 1,
+  // Phase 28 (PWA)  extend the layout into the notch/home-indicator areas
+  // so `env(safe-area-inset-*)` padding works when installed standalone.
+  viewportFit: "cover",
 };
 
 export const metadata: Metadata = {
@@ -36,6 +40,21 @@ export const metadata: Metadata = {
   },
   description:
     "Find skilled people near you. Get found for the work you do. POPIA-compliant, accessibility-first, freshness-weighted talent data for South Africa.",
+  // Phase 28 (PWA)  installed-app identity. The manifest (app/manifest.ts)
+  // carries the Android side; these cover iOS "Add to Home Screen".
+  applicationName: "Sebenza",
+  appleWebApp: {
+    capable: true,
+    title: "Sebenza",
+    statusBarStyle: "default",
+  },
+  icons: {
+    icon: [
+      { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icons/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: "/apple-touch-icon.png",
+  },
 };
 
 export function generateStaticParams() {
@@ -95,6 +114,8 @@ export default async function LocaleLayout({
               choice has been made yet (consent.recordedAt === null). */}
           <CookieConsentBanner alreadyDecided={Boolean(consent.recordedAt)} />
         </NextIntlClientProvider>
+        {/* Phase 28  offline-fallback service worker (production only). */}
+        <ServiceWorkerRegistrar />
       </body>
     </html>
   );

@@ -269,7 +269,7 @@ export function MonthYearPicker({
         <>
           {/* Mobile backdrop  closes on tap */}
           <div
-            className="fixed inset-0 z-20 bg-[color:var(--color-ink)]/30 md:hidden"
+            className="fixed inset-0 z-[45] bg-[color:var(--color-ink)]/30 md:hidden"
             onClick={() => setOpen(false)}
             aria-hidden="true"
           />
@@ -280,7 +280,9 @@ export function MonthYearPicker({
             className={
               // Mobile: full-width bottom-sheet pinned to bottom of viewport.
               // md+: dropdown anchored to the field below it.
-              "z-30 " +
+              // z-[46]: above the Phase 28 floating bottom nav (z-40)  a
+              // bottom sheet covers the tab bar, like a native app.
+              "z-[46] " +
               "fixed inset-x-0 bottom-0 rounded-t-[var(--radius-md)] " +
               "md:absolute md:inset-x-auto md:bottom-auto md:mt-2 md:w-[320px] md:rounded-[var(--radius-md)] " +
               "border-2 border-[color:var(--color-ink)] bg-[color:var(--color-paper)] shadow-2xl"

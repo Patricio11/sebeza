@@ -1067,6 +1067,42 @@ in production until an operator verifies + activates real crisis resources.*
 
 ---
 
+## 📱 PHASE 28 — PWA + NATIVE-FEEL MOBILE NAVIGATION *(shipped 2026-07-07)*
+
+**Thesis: the mobile web app should install and feel like a native Android/iOS app —
+without violating No-Flash (no heavy JS, no animation library, no app-shell caching risk).**
+
+- [x] **28.1 PWA foundation.** `app/manifest.ts` (standalone display, Civic Editorial paper
+  colors, `id:"/"`), generated brand icon set (`public/icons/` 192/512 + maskable 512 +
+  `apple-touch-icon.png` — serif "S" monogram + the tri-colour flag band), `appleWebApp` +
+  `applicationName` metadata, `viewportFit: "cover"` so `env(safe-area-inset-*)` works installed.
+- [x] **28.2 Offline honesty.** Minimal service worker (`public/sw.js`, ~1KB): pre-caches ONLY
+  `offline.html` and serves it when a *navigation* fetch fails. Never caches app pages or data —
+  it can't serve stale content, break auth, or fight deploys. Registered production-only by
+  `components/pwa/ServiceWorkerRegistrar.tsx`. `offline.html` is a self-contained Civic Editorial
+  page (system fonts) that says, honestly, that Sebenza never shows cached/made-up data.
+- [x] **28.3 Floating bottom nav.** `components/layout/MobileBottomNav.tsx` replaces the old
+  scrolling top tab strip on ALL four role dashboards (`DashboardFrame`): a floating paper pill
+  (hairline border, backdrop blur, safe-area padding) with ≤4 promoted tabs per role
+  (`mobilePrimary`/`mobileLabel` in the nav configs) + a **"More" bottom sheet** holding the full
+  sectioned menu, locale switcher + sign-out. Active tab = ink capsule with a gentle spring
+  (transform/opacity only, `motion-reduce` honoured); the sheet has drag-to-dismiss (pointer
+  capture, 90px threshold), Esc close, body scroll lock, `inert` when closed, `aria-current`
+  preserved for every link. Icons render server-side and cross into the client island as nodes.
+- [x] **28.4 Verified.** New `tests/e2e/pwa-mobile-nav.spec.ts` (manifest/SW/offline/icons on both
+  projects; bar + sheet walkthrough with screenshots at 360px) + the full suite green on a fresh
+  production build; `role-arcs` nav-click assertions hold against the new bar (it now dismisses the
+  cookie banner first — both are bottom-fixed on mobile). Layering: the DatePicker/Combobox/
+  MonthYearPicker mobile bottom-sheets moved to `z-[45/46]` so they cover the bar (native-app
+  convention); `html{scroll-padding-bottom}` keeps scrollIntoView targets clear of it. Harness:
+  E2E now runs with `serviceWorkers: "block"` (the offline SW must not convert transient server
+  hiccups into offline.html renders mid-test; measured to hide nothing) and the two chronic
+  post-action badge waits got a reload fallback — on this Windows harness a server action's DB
+  write can commit while its RSC refresh response stalls >30s (pre-existing, reproduces with the
+  SW blocked; the badge derives from server state, so reload asserts the same invariant).
+
+---
+
 ## 🚀 DEPLOYMENT CHECKLIST
 
 ### Pre-Launch
@@ -1137,11 +1173,13 @@ HR Practitioner · Electrician · Plumber · Accountant · Nurse · Driver · Bo
 
 ---
 
-*Last Updated: 2026-07-06*
-*Version: 2.6  synced through **Phase 27**. Phases 18–21 (seeker growth gaps), 22 (AI-coach safety),
-23–26 (truth/testimonials/integrations/security) + the governance sync all shipped; only Phase 14
-(zero-rating, partnership-gated) remains. Remaining work is OPERATOR-side: Phase 10 Arc B launch ops,
-`.env.local` secret rotation, crisis-resource verification before the AI-coach flag, DPIA sign-off.*
+*Last Updated: 2026-07-07*
+*Version: 2.7  synced through **Phase 28** (PWA installability + floating mobile bottom nav across
+all role dashboards). Prior: v2.6 synced through Phase 27 — Phases 18–21 (seeker growth gaps), 22
+(AI-coach safety), 23–26 (truth/testimonials/integrations/security) + the governance sync all shipped;
+only Phase 14 (zero-rating, partnership-gated) remains. Remaining work is OPERATOR-side: Phase 10 Arc B
+launch ops, `.env.local` secret rotation, crisis-resource verification before the AI-coach flag, DPIA
+sign-off.*
 *Prior: v2.5  ROADMAP body synced through Phase 17 (sections for 14/15/16/17 added; previously only
 footer-referenced). **Phase 17 ("Seeker Growth Suite") COMPLETE** (2026-06-30): three flag-gated, ship-dark
 seeker features — The Climb (live skill journey: progress + seeker-set proficiency + live rank payoff,

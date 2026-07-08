@@ -21,9 +21,9 @@ import {
 import type { DashboardNavItem } from "./dashboardChrome";
 
 export const ADMIN_NAV: DashboardNavItem[] = [
-  { key: "overview", label: "Overview", href: "/admin", icon: LayoutDashboard },
-  { key: "verifications", label: "Verification queue", href: "/admin/verifications", icon: ShieldCheck },
-  { key: "moderation", label: "Moderation", href: "/admin/moderation", icon: Flag },
+  { key: "overview", label: "Overview", href: "/admin", icon: LayoutDashboard, mobilePrimary: true },
+  { key: "verifications", label: "Verification queue", href: "/admin/verifications", icon: ShieldCheck, mobilePrimary: true, mobileLabel: "Verify" },
+  { key: "moderation", label: "Moderation", href: "/admin/moderation", icon: Flag, mobilePrimary: true, mobileLabel: "Moderate" },
   { key: "taxonomy", label: "Taxonomy", href: "/admin/taxonomy", icon: Library },
   // Phase 13.3  module → skill curation queue + bulk syllabus
   // import. Sits next to taxonomy because they are the same kind of
@@ -59,7 +59,7 @@ export const ADMIN_NAV: DashboardNavItem[] = [
     href: "/admin/oversight",
     icon: ShieldAlert,
   },
-  { key: "users", label: "Users", href: "/admin/users", icon: Users },
+  { key: "users", label: "Users", href: "/admin/users", icon: Users, mobilePrimary: true },
   { key: "notifications", label: "Notifications", href: "/admin/notifications", icon: Bell },
   // Phase 10.3  admin help center. Sits between Notifications and
   // Platform settings so it's reachable without scrolling through

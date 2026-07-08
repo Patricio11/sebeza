@@ -14,18 +14,21 @@ import {
 import type { DashboardNavItem } from "./dashboardChrome";
 
 export const GOV_NAV: DashboardNavItem[] = [
-  { key: "overview", label: "Overview", href: "/gov", icon: LayoutDashboard },
+  { key: "overview", label: "Overview", href: "/gov", icon: LayoutDashboard, mobilePrimary: true },
   {
     key: "provinces",
     label: "Provinces",
     href: "/gov/provinces",
     icon: MapPin,
+    mobilePrimary: true,
   },
   {
     key: "shortage",
     label: "Shortage justification",
     href: "/gov/shortage",
     icon: Scale,
+    mobilePrimary: true,
+    mobileLabel: "Shortage",
   },
   {
     key: "opportunity",
@@ -71,6 +74,8 @@ export const GOV_NAV: DashboardNavItem[] = [
     label: "Policy brief",
     href: "/gov/brief",
     icon: FileText,
+    mobilePrimary: true,
+    mobileLabel: "Brief",
   },
   // Phase 10.4  gov help center. Sits between Policy brief and
   // My account, matching the placement of the help entry on the

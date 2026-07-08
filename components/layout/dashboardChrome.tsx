@@ -19,6 +19,12 @@ export interface DashboardNavItem {
   label: string;
   href: string;
   icon: React.ComponentType<{ className?: string }>;
+  /** Phase 28  promoted to the floating mobile bottom bar (max 4 per role;
+      everything else lives in the "More" sheet). */
+  mobilePrimary?: boolean;
+  /** Phase 28  short label for the bottom-bar tab where the sidebar label
+      is too long for a 360px-wide fifth. Falls back to `label`. */
+  mobileLabel?: string;
 }
 
 export const NOTIFICATIONS_HREF: Record<DashboardRole, string> = {

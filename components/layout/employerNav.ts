@@ -15,13 +15,13 @@ import {
 import type { DashboardNavItem } from "./dashboardChrome";
 
 export const EMPLOYER_NAV: DashboardNavItem[] = [
-  { key: "overview", label: "Overview", href: "/employer", icon: LayoutDashboard },
-  { key: "search", label: "Search talent", href: "/search", icon: Search },
+  { key: "overview", label: "Overview", href: "/employer", icon: LayoutDashboard, mobilePrimary: true },
+  { key: "search", label: "Search talent", href: "/search", icon: Search, mobilePrimary: true, mobileLabel: "Search" },
   { key: "savedSearches", label: "Saved searches", href: "/employer/saved-searches", icon: Bookmark },
   // Phase 9.8  vacancies sit between saved searches (passive
   // monitoring) and talent pools (manual shortlisting) because they
   // are the active reverse-matching workflow that bridges the two.
-  { key: "vacancies", label: "Vacancies", href: "/employer/vacancies", icon: Briefcase },
+  { key: "vacancies", label: "Vacancies", href: "/employer/vacancies", icon: Briefcase, mobilePrimary: true },
   // Phase 9.17  invited seekers (roster-building flow). Sits next to
   // Vacancies because both are outbound-from-employer workflows;
   // Vacancies invites EXISTING seekers, Invites onboards NEW ones.
@@ -31,7 +31,7 @@ export const EMPLOYER_NAV: DashboardNavItem[] = [
   // historic deep link (audit log meta, notification emails, ISR
   // cache keys) keeps resolving. The label is the recruiter's
   // mental model: "Employees", not the platform's internal noun.
-  { key: "placements", label: "Employees", href: "/employer/placements", icon: CheckCircle2 },
+  { key: "placements", label: "Employees", href: "/employer/placements", icon: CheckCircle2, mobilePrimary: true },
   { key: "organisation", label: "Organisation", href: "/employer/organisation", icon: Building2 },
   { key: "team", label: "Team", href: "/employer/team", icon: UsersRound },
   { key: "notifications", label: "Notifications", href: "/employer/notifications", icon: Bell },

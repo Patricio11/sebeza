@@ -26,9 +26,19 @@ test("admin arc: overview KPIs + verification queue render from the real DB", as
   await page.waitForURL(/\/admin/, { timeout: 30_000 });
   await expect(page.locator("main")).toBeVisible();
 
-  // Persistent-sidebar nav (admin route-group layout): a *client-side* click
-  // on the sidebar must route without unmounting the sidebar, and the active
-  // item is derived from the pathname (aria-current), not a per-page prop.
+  // Phase 28: on mobile the nav is the floating BOTTOM bar, and the cookie
+  // banner (also bottom-fixed, z-50) covers it until a choice is made —
+  // dismiss it first or the nav click below is intercepted. `.click()`
+  // auto-waits; `.catch` absorbs the banner being absent (desktop reuse).
+  await page
+    .getByRole("button", { name: /accept all/i })
+    .click({ timeout: 8_000 })
+    .catch(() => {});
+
+  // Persistent nav (admin route-group layout): a *client-side* click on the
+  // sidebar (desktop) / bottom bar (mobile) must route without unmounting
+  // the frame, and the active item is derived from the pathname
+  // (aria-current), not a per-page prop.
   const visibleNavLink = (name: string) =>
     page
       .getByRole("navigation")
