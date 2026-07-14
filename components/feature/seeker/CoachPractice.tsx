@@ -56,7 +56,7 @@ export function CoachPractice({ defaultRole }: { defaultRole: string }) {
 
   return (
     <div className="max-w-2xl">
-      {/* Phase 22.3 — structural anti-opportunity framing. Always visible; not
+      {/* Phase 22.3  structural anti-opportunity framing. Always visible; not
           copy the model can override. This is practice, never a real opening. */}
       <p className="mb-6 rounded-[var(--radius-md)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface-sunk)] p-3 text-xs text-[color:var(--color-ink-soft)]">
         This is practice to help you prepare  it is not a real interview, and
@@ -99,7 +99,7 @@ export function CoachPractice({ defaultRole }: { defaultRole: string }) {
         </p>
       </form>
 
-      {/* Phase 22.2 — distress takes precedence over everything: human support,
+      {/* Phase 22.2  distress takes precedence over everything: human support,
           never the model. */}
       {result && !result.ok && result.reason === "distress" && (
         <CrisisSupport resources={result.crisisResources} />
@@ -115,7 +115,7 @@ export function CoachPractice({ defaultRole }: { defaultRole: string }) {
               ? result.message || REASON_COPY.off_scope
               : REASON_COPY[result.reason] ?? REASON_COPY.failed}
           </p>
-          {/* Phase 22.4 — never a dead end: point to the human-written guide. */}
+          {/* Phase 22.4  never a dead end: point to the human-written guide. */}
           <div className="mt-3">
             <HelpLink
               role="seeker"

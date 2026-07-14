@@ -1,5 +1,5 @@
 /**
- * Phase 20.2 ("Unlocks next") — flag-gated nudge on the Career Compass.
+ * Phase 20.2 ("Unlocks next")  flag-gated nudge on the Career Compass.
  *
  * We give andile-z the prerequisite `pool-rescue` (which he lacks in the seed);
  * the seeded edge open-water-rescue → pool-rescue then means he now holds the
@@ -23,7 +23,7 @@ test.beforeAll(async () => {
   const url = process.env.DATABASE_URL;
   if (!url) {
     throw new Error(
-      "DATABASE_URL missing — playwright.config loads it from .env.test.local.",
+      "DATABASE_URL missing  playwright.config loads it from .env.test.local.",
     );
   }
   sql = postgres(url, { max: 1 });

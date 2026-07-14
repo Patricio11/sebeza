@@ -213,7 +213,7 @@ export async function getCompassForProfile(
   // ── 5b. Prerequisite sequencing (Phase 20.1, flag-gated) ─────────────────
   // Re-order recommendations so a recommended prerequisite never sits below the
   // skill it unlocks, and annotate each with the prereqs the seeker still lacks
-  // (the "Requires: X" pill). Pure re-rank — the demand math above is untouched.
+  // (the "Requires: X" pill). Pure re-rank  the demand math above is untouched.
   let orderedRecommendations: SkillRecommendation[] = recommendations;
   const prereqsEnabled = await getSetting<boolean>("feature_flag_skill_prereqs");
   if (prereqsEnabled && recommendations.length > 0) {

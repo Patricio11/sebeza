@@ -37,10 +37,10 @@ export type CoachSkipReason =
   | "payload_unsafe"
   | "failed"
   | "empty"
-  // Phase 22.1/22.3 — the model refused an out-of-scope / unsafe request (or
+  // Phase 22.1/22.3  the model refused an out-of-scope / unsafe request (or
   // moderation stripped everything). Carries a short, kind redirect message.
   | "off_scope"
-  // Phase 22.2 — the pre-LLM distress screen fired. The provider was NOT called;
+  // Phase 22.2  the pre-LLM distress screen fired. The provider was NOT called;
   // the result carries human crisis resources instead of questions.
   | "distress";
 
@@ -147,7 +147,7 @@ export async function generateInterviewQuestions(
     return { ok: false, reason: "failed" };
   }
 
-  // The call happened + incurred cost regardless of what came back — bump the
+  // The call happened + incurred cost regardless of what came back  bump the
   // provider counters + audit the call (token/cost only, never the prompt).
   await db
     .update(schema.llmProviders)
@@ -171,14 +171,14 @@ export async function generateInterviewQuestions(
     },
   });
 
-  // Phase 22.1 — the model may return a structured refusal for an out-of-scope
+  // Phase 22.1  the model may return a structured refusal for an out-of-scope
   // or unsafe request. Honour it (don't try to coerce it into questions).
   const parsed = parseCoachOutput(result.text);
   if (parsed.kind === "refusal") {
     return { ok: false, reason: "off_scope", message: parsed.message };
   }
 
-  // Phase 22.3 — moderation backstop: drop any question that slipped past the
+  // Phase 22.3  moderation backstop: drop any question that slipped past the
   // prompt into a promise / outcome claim / contact detail.
   const { kept, droppedCount } = moderateQuestions(parsed.questions);
   if (droppedCount > 0) {
@@ -226,7 +226,7 @@ export function coachSystemPrompt(): string {
     "- Do NOT pretend to be a specific employer or recruiter, and do not include contact details, links, or phone numbers.",
     "- Plain language, fair and encouraging, in a South African workplace context. No trick questions.",
     "",
-    "OUTPUT — respond with JSON ONLY, exactly one of these shapes:",
+    "OUTPUT  respond with JSON ONLY, exactly one of these shapes:",
     `- In scope: { "questions": string[] }  with exactly ${MAX_QUESTIONS} interview-practice questions (a mix of behavioural, e.g. "tell me about a time…", and role-specific / technical).`,
     '- Out of scope or unsafe request: { "refusal": "<one short, kind sentence that redirects to interview practice>" }.',
   ].join("\n");

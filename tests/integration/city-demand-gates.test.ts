@@ -1,5 +1,5 @@
 /**
- * Phase 21.1 ("Hyper-Local Demand") — the privacy gates on city-level demand.
+ * Phase 21.1 ("Hyper-Local Demand")  the privacy gates on city-level demand.
  *
  * City-level cuts only surface for top-5-metro seekers who consent to research
  * insights, and only for segments above the thin-cell floor. This proves each

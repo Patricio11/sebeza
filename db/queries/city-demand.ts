@@ -54,15 +54,15 @@ export async function getCityDemandHotspots(opts: {
   cityLabel: string;
   userId: string;
 }): Promise<CityDemand | null> {
-  // Gate 1 — surface flag.
+  // Gate 1  surface flag.
   const enabled = await getSetting<boolean>("feature_flag_city_demand");
   if (!enabled) return null;
 
-  // Gate 2 — top-5 metro only.
+  // Gate 2  top-5 metro only.
   const slug = citySlug(opts.cityLabel);
   if (!TOP_METRO_SLUGS.has(slug)) return null;
 
-  // Gate 3 — the seeker's research-insights consent.
+  // Gate 3  the seeker's research-insights consent.
   const consented = await hasConsent(opts.userId, "outcomes_research");
   if (!consented) return null;
 

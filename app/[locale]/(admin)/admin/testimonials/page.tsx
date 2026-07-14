@@ -29,7 +29,7 @@ export default async function AdminTestimonialsPage({
       role="admin"
       pageEyebrow="Voice of users"
       pageTitle="Testimonials"
-      pageSubtitle="Real, consented words from seekers and employers. Run a collection campaign, review what comes in, and choose what shows on the landing page — nothing renders publicly without approval."
+      pageSubtitle="Real, consented words from seekers and employers. Run a collection campaign, review what comes in, and choose what shows on the landing page  nothing renders publicly without approval."
     >
       <TestimonialsManager rows={rows} campaignOn={campaignOn} />
     </DashboardMasthead>

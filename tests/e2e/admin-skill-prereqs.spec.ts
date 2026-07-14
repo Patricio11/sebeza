@@ -1,5 +1,5 @@
 /**
- * Phase 20 (20.0) — the skill-prerequisite admin + its cycle guard.
+ * Phase 20 (20.0)  the skill-prerequisite admin + its cycle guard.
  *
  * The seed ships a starter graph (e.g. postgres → sql). Here we prove the write
  * path: an edge that would close a loop (sql → postgres) is refused, and a fresh
@@ -19,7 +19,7 @@ test.beforeAll(async () => {
   const url = process.env.DATABASE_URL;
   if (!url) {
     throw new Error(
-      "DATABASE_URL missing — playwright.config loads it from .env.test.local.",
+      "DATABASE_URL missing  playwright.config loads it from .env.test.local.",
     );
   }
   sql = postgres(url, { max: 1 });

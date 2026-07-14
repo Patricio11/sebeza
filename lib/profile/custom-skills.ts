@@ -132,7 +132,7 @@ export async function addCustomSkill(
   if (canonical.length > 0) {
     return {
       ok: false,
-      error: "That's already a standard skill — add it from the picker above.",
+      error: "That's already a standard skill  add it from the picker above.",
     };
   }
 

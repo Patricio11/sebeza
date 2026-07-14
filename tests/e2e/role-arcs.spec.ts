@@ -27,7 +27,7 @@ test("admin arc: overview KPIs + verification queue render from the real DB", as
   await expect(page.locator("main")).toBeVisible();
 
   // Phase 28: on mobile the nav is the floating BOTTOM bar, and the cookie
-  // banner (also bottom-fixed, z-50) covers it until a choice is made —
+  // banner (also bottom-fixed, z-50) covers it until a choice is made 
   // dismiss it first or the nav click below is intercepted. `.click()`
   // auto-waits; `.catch` absorbs the banner being absent (desktop reuse).
   await page

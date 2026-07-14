@@ -1,4 +1,4 @@
--- Phase 25 ("Integrations Hub") — admin-managed channel integrations (SMS /
+-- Phase 25 ("Integrations Hub")  admin-managed channel integrations (SMS /
 -- WhatsApp / Email), llm_providers posture: encrypted credentials in the DB,
 -- configured + enabled from /admin/integrations, env as legacy fallback.
 -- DB + Storage deliberately excluded (can't bootstrap DB creds from the DB).

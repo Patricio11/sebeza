@@ -1,5 +1,5 @@
 /**
- * Phase 28 — minimal, safe service worker.
+ * Phase 28  minimal, safe service worker.
  *
  * Deliberately does ONE thing: when a page navigation fails because the
  * device is offline, serve the pre-cached /offline.html instead of the
@@ -29,7 +29,7 @@ self.addEventListener("activate", (event) => {
 });
 
 self.addEventListener("fetch", (event) => {
-  // Navigations only — assets/API requests pass straight through untouched.
+  // Navigations only  assets/API requests pass straight through untouched.
   if (event.request.mode !== "navigate") return;
   event.respondWith(
     fetch(event.request).catch(() => caches.match(OFFLINE_URL)),

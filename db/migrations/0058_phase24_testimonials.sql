@@ -1,4 +1,4 @@
--- Phase 24 ("Testimonials") — real, consented user quotes replacing the
+-- Phase 24 ("Testimonials")  real, consented user quotes replacing the
 -- fabricated landing testimonials removed in Phase 23.2. Admin-run collection
 -- campaign; only `approved` rows render publicly; display fields are captured
 -- at submission with explicit consent (never live PII joins).

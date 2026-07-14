@@ -26,7 +26,7 @@ export default async function AdminCustomSkillsPage({
       role="admin"
       pageEyebrow="Taxonomy growth"
       pageTitle="Custom skills"
-      pageSubtitle="The most-requested skills seekers have described but the taxonomy doesn't cover yet. Promote a label to make it a canonical, searchable skill — every seeker who claimed it moves across at their own self-attested level."
+      pageSubtitle="The most-requested skills seekers have described but the taxonomy doesn't cover yet. Promote a label to make it a canonical, searchable skill  every seeker who claimed it moves across at their own self-attested level."
     >
       <CustomSkillsLeaderboard rows={rows} />
     </DashboardMasthead>

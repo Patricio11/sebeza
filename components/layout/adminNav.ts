@@ -44,7 +44,7 @@ export const ADMIN_NAV: DashboardNavItem[] = [
   // encrypted in DB, health for DB/storage, bulk announcements).
   { key: "integrations", label: "Integrations", href: "/admin/integrations", icon: Plug },
   { key: "llm", label: "LLM providers", href: "/admin/llm", icon: Sparkles },
-  // Phase 22.2 ("AI Coach — crisis pathway")  verified crisis-support resources
+  // Phase 22.2 ("AI Coach  crisis pathway")  verified crisis-support resources
   // shown to a seeker in distress. Sits by the LLM/AI integration config.
   { key: "crisisResources", label: "Crisis resources", href: "/admin/crisis-resources", icon: LifeBuoy },
   // Phase 24  testimonial collection + curation (landing-rail source of truth).

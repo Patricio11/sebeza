@@ -44,7 +44,7 @@ describe("consent purpose catalogue", () => {
         "outcomes_research",
         "searchability",
         "vacancy_matching",
-        // Phase 25.4 — opt-in platform announcements over SMS.
+        // Phase 25.4  opt-in platform announcements over SMS.
         "announcements",
       ].sort(),
     );

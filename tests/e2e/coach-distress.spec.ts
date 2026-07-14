@@ -1,8 +1,8 @@
 /**
- * Phase 22.2 ("AI Coach — crisis pathway") — the load-bearing safety test.
+ * Phase 22.2 ("AI Coach  crisis pathway")  the load-bearing safety test.
  *
  * When a seeker types something that reads as distress, the coach must route to
- * HUMAN crisis support, not the LLM — and it must do so BEFORE the provider
+ * HUMAN crisis support, not the LLM  and it must do so BEFORE the provider
  * gate, so it works even with no provider configured (as in the seed). We flip
  * the flag ON, activate a test crisis resource, submit a distress phrase, and
  * assert: the crisis-support block + its resource render, and the normal
@@ -25,7 +25,7 @@ test.beforeAll(async () => {
   const url = process.env.DATABASE_URL;
   if (!url) {
     throw new Error(
-      "DATABASE_URL missing — playwright.config loads it from .env.test.local.",
+      "DATABASE_URL missing  playwright.config loads it from .env.test.local.",
     );
   }
   sql = postgres(url, { max: 1 });

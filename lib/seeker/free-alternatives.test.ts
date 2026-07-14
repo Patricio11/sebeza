@@ -3,7 +3,7 @@
  * Phase 18: the catalog source moved to the `learning_paths` table, but the
  * ordering contract is unchanged and still lives in the PURE `pickFreeAlternative`
  * (the async `findFreeAlternativeForSkill` just feeds it the DB catalog). We unit-
- * test the pure picker against `MOCK_COMPASS.learningPaths` — the exact catalog
+ * test the pure picker against `MOCK_COMPASS.learningPaths`  the exact catalog
  * the seed mirrors into the table, so this stays a fast, DB-free unit test AND
  * proves the seeded behaviour (the integration parity test proves the seed === here).
  *

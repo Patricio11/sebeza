@@ -1,6 +1,6 @@
-# SEEKER GROWTH — PHASES 18–21 (forward roadmap)
+# SEEKER GROWTH  PHASES 18–21 (forward roadmap)
 
-*Opened 2026-06-30. Direct continuation of **Phase 17 — Seeker Growth Suite** (shipped: The Climb,
+*Opened 2026-06-30. Direct continuation of **Phase 17  Seeker Growth Suite** (shipped: The Climb,
 Demand Pulse, AI Career Coach). Phase 17 closed two of the six gaps from the skill-development
 assessment; this roadmap turns the **remaining four** into discrete, flag-gated, ship-dark phases.*
 
@@ -13,10 +13,10 @@ assessment; this roadmap turns the **remaining four** into discrete, flag-gated,
 
 | # | Gap (from the assessment) | Status | Home |
 |---|---|---|---|
-| 1 | Learning progress invisible (no checkpoints / rank delta / momentum) | ✅ **Done** | Phase 17.1 — The Climb |
-| 5 | Skill attachment binary (proficiency hardcoded `3`) | ✅ **Done** | Phase 17.1 — `CompleteSkillModal` |
-| — | (Demand timeliness — weekly "heating up" nudge) | ✅ **Done** | Phase 17.2 — Demand Pulse |
-| — | (Seeker-facing AI coaching) | ✅ **Done** | Phase 17.3 — AI Career Coach |
+| 1 | Learning progress invisible (no checkpoints / rank delta / momentum) | ✅ **Done** | Phase 17.1  The Climb |
+| 5 | Skill attachment binary (proficiency hardcoded `3`) | ✅ **Done** | Phase 17.1  `CompleteSkillModal` |
+|  | (Demand timeliness  weekly "heating up" nudge) | ✅ **Done** | Phase 17.2  Demand Pulse |
+|  | (Seeker-facing AI coaching) | ✅ **Done** | Phase 17.3  AI Career Coach |
 | 2 | Learning-paths catalog static + manually curated + rots | ⏳ **Phase 18** |
 | 3 | "Other / custom skills" unimplemented (taxonomy-only) | ⏳ **Phase 19** |
 | 4 | No prerequisite mapping / learning sequencing | ⏳ **Phase 20** |
@@ -24,19 +24,19 @@ assessment; this roadmap turns the **remaining four** into discrete, flag-gated,
 
 **Confirmed current state (grounded 2026-06-30):** paths live in `lib/mock/growth.ts` (`MOCK_COMPASS`)
 + `lib/seeker/free-alternatives.ts`; `profile_skills.skill_slug` carries an FK to `skills.slug`
-(taxonomy-only — the comma-split combobox matches the catalogue and drops unknowns); no
+(taxonomy-only  the comma-split combobox matches the catalogue and drops unknowns); no
 `skill_prereqs` table exists; `getNearYouDemand` filters `search_events.filters->>'province'` only.
 
 ---
 
 ## 🔒 SHARED NON-NEGOTIABLES (every task in every phase below)
 
-Identical posture to Phase 17 — repeated here so each phase doc inherits it:
+Identical posture to Phase 17  repeated here so each phase doc inherits it:
 
 > ### Testing discipline (NON-NEGOTIABLE)
 > Nothing is "done" until it is **tested and green**, before its commit:
-> 1. **`npm run test:all`** — typecheck + lint + the full vitest suite passes.
-> 2. **E2E at desktop AND 360px, both flag states** — **flag OFF = today's behaviour unchanged**
+> 1. **`npm run test:all`**  typecheck + lint + the full vitest suite passes.
+> 2. **E2E at desktop AND 360px, both flag states**  **flag OFF = today's behaviour unchanged**
 >    (proves zero regression), **flag ON = the new surface works**. Flag-on specs flip the flag in
 >    the test DB and **restore it in `afterAll`** so the dark-ship default holds for every other suite.
 > 3. **No negative impact** on existing seeker/employer/admin/gov arcs. Broken → fixed before commit.
@@ -52,24 +52,24 @@ Location-Not-Nationality · i18n-ready (en base + deepMerge; **never machine-tra
 `settings-actions.ts` validator map **and** the `updateSetting` enum, and a boolean row in
 `SettingsForm.tsx` (auto-renders in "Feature flags"). Off = byte-for-byte today.
 
-**Civic Editorial UX bar (the user's explicit bar — senior-grade, not a SaaS template):** editorial
+**Civic Editorial UX bar (the user's explicit bar  senior-grade, not a SaaS template):** editorial
 layouts, thick rules, all-caps eyebrows w/ tracking, Fraunces tabular numerals, the Talent Pulse
 glyph, warm paper/ink + teal brand + one ochre accent. Each phase's "UX" notes below are
 load-bearing, not decoration.
 
 ---
 
-## 📚 PHASE 18 — LIVING LEARNING CATALOG (Gap 2)
+## 📚 PHASE 18  LIVING LEARNING CATALOG (Gap 2)
 
 **Why first:** every other learning feature reads the catalog. Moving it off a hardcoded constant
-into a DB table with a freshness contract + a feedback loop is the foundation — and it unblocks the
+into a DB table with a freshness contract + a feedback loop is the foundation  and it unblocks the
 Phase 7 provider-hiring work. **Flag:** `feature_flag_living_catalog` (gates the *new* seeker-facing
 rating UI + editorial surfaces; the migration itself is behaviour-preserving and unflagged).
 
-**Thesis:** the catalog should *learn as seekers use it* — clicks, completions, and ratings flow
+**Thesis:** the catalog should *learn as seekers use it*  clicks, completions, and ratings flow
 back so product sees which paths convert and which rot, and admins get a re-verification heartbeat.
 
-### 18.0 — Schema + behaviour-preserving migration ✅ DONE 2026-06-30
+### 18.0  Schema + behaviour-preserving migration ✅ DONE 2026-06-30
 - ✅ New `learning_paths` table (migration `0053`): `id`, `title`, `provider`, `provider_kind`,
   `cost` (free/subsidised/paid  matches the existing `LearningCost`, not a ZAR field), `cost_note`,
   `outcome`, `duration_weeks`, `unlocks_skills` (jsonb label[]), `national`, `url`, `sebenza_reviewed`,
@@ -88,7 +88,7 @@ back so product sees which paths convert and which rot, and admins get a re-veri
   `0053` clean from zero · **24/24 seeker + role-arc E2E** (compass/grow renders identically). ⚠️ Dev
   DB: run `npm run db:migrate` before the catalog reads from the table.
 
-### 18.1 — Seeker feedback loop (flag-gated) ✅ DONE 2026-06-30
+### 18.1  Seeker feedback loop (flag-gated) ✅ DONE 2026-06-30
 - ✅ **Flag** `feature_flag_living_catalog` (settings.ts + DEFAULTS + settings-actions validator/enum +
   SettingsForm row  same Phase-17 pattern). Default OFF.
 - ✅ **Per-card review control** (`PathReviewControl`) on each `/dashboard/grow` learning-path card:
@@ -105,7 +105,7 @@ back so product sees which paths convert and which rot, and admins get a re-veri
   confirmed). New `tests/e2e/living-catalog.spec.ts` (desktop + 360px); flag + reviews + counts
   restored in afterAll.
 
-### 18.2 — Editorial / freshness admin (admin-gated) ✅ DONE 2026-06-30
+### 18.2  Editorial / freshness admin (admin-gated) ✅ DONE 2026-06-30
 - ✅ `/admin/learning-paths` + `LearningPathsManager` island: a "Needs re-verification" rail
   (ochre, count) over the full path table with per-row **Verify / Edit / Remove / Restore** + an
   **Add** form. Admin actions `lib/admin/learning-paths.ts` (`create` / `update` /
@@ -123,33 +123,33 @@ back so product sees which paths convert and which rot, and admins get a re-veri
 
 ---
 
-## ➕ PHASE 19 — CUSTOM SKILLS & TAXONOMY GROWTH (Gap 3)
+## ➕ PHASE 19  CUSTOM SKILLS & TAXONOMY GROWTH (Gap 3)
 
 **Why:** emerging SA markets (climate tech, rural trades) outrun the controlled taxonomy. Seekers
-must be able to claim niche skills — and those claims become the signal that *grows* the taxonomy.
+must be able to claim niche skills  and those claims become the signal that *grows* the taxonomy.
 **Flag:** `feature_flag_seeker_custom_skills`.
 
 **Honesty + privacy spine:** custom skills are **self-attested, never "verified"**, and **never
 enter search** (D2 k-anonymity) until an admin promotes them to canonical. They *do* count toward
 profile completeness, and they feed an aggregate "most-requested unindexed skills" analytic.
 
-### 19.0 — Schema + data layer ✅ DONE 2026-06-30
+### 19.0  Schema + data layer ✅ DONE 2026-06-30
 - ✅ New `profile_skills_custom` table (migration `0054`): `id`, `profile_id` FK, `label` (≤ 60),
   `label_normalized` (lowercased/collapsed key), `proficiency`, `years_of_experience`, `created_at`,
   `deleted_at`. **Partial unique** `(profile_id, label_normalized) WHERE deleted_at IS NULL` so a
-  removed label can be re-added. (Provenance is implicit — the table *is* the self-attested-custom lane.)
+  removed label can be re-added. (Provenance is implicit  the table *is* the self-attested-custom lane.)
 - ✅ Actions `lib/profile/custom-skills.ts` (`addCustomSkill` / `removeCustomSkill`): flag-gated
   (`feature_flag_seeker_custom_skills`), seeker-scoped, **cap 3** + dup + canonical-label rejection
   ("add it from the picker"), audited `profile.custom_skill.add/remove` (meta = normalized label =
   the demand signal). Read `db/queries/custom-skills.ts` (`listCustomSkills`).
 - ✅ **Completeness:** custom skills count toward `computeCompleteness` (shared recompute in
-  `actions.ts` + the action persists it) — the seeker is rewarded for documenting niche skills,
+  `actions.ts` + the action persists it)  the seeker is rewarded for documenting niche skills,
   while they stay out of search.
 - ✅ **Tests (green):** `test:all` → typecheck + lint (0) + **327 vitest** incl. a new integration
   invariant (`custom-skills-not-searchable.test.ts`: a distinctive custom label attached to a seeker
   never surfaces them in `searchProfilesQuery`) + build; migration `0054` clean. ⚠️ Dev DB: `db:migrate`.
 
-### 19.1 — Seeker editor (flag-gated) ✅ DONE 2026-06-30
+### 19.1  Seeker editor (flag-gated) ✅ DONE 2026-06-30
 - ✅ `CustomSkillsEditor` rendered **below** the taxonomy `SkillsEditor` on `/dashboard/profile`
   (flag-gated): a "Self-described skills" group (distinct dashed card, `N/3` counter, quiet "count
   toward completeness but aren't searchable yet" note) + an inline add row (label + 1–5 level select
@@ -161,9 +161,9 @@ profile completeness, and they feed an aggregate "most-requested unindexed skill
   `tests/e2e/custom-skills.spec.ts` (desktop + 360px); flag + rows restored in afterAll. The
   not-searchable guarantee is proven at the data layer (19.0 invariant test).
 
-### 19.2 — Admin canonicalization workflow (admin-gated) ✅ DONE 2026-06-30
+### 19.2  Admin canonicalization workflow (admin-gated) ✅ DONE 2026-06-30
 - ✅ `/admin/custom-skills` + `CustomSkillsLeaderboard`: aggregated, **anonymized** leaderboard
-  (`listCustomSkillLeaderboard` — distinct seeker COUNT per normalized label, never which seekers).
+  (`listCustomSkillLeaderboard`  distinct seeker COUNT per normalized label, never which seekers).
   One-click **Promote** reveals a pre-filled slug → `canonicalizeCustomSkill` (`lib/admin/custom-skills.ts`):
   verifyAdmin + Zod, creates the `skills` row, **migrates** every live holder into `profile_skills` at
   their own self-attested proficiency/years (the new slug can't collide), soft-deletes the custom rows,
@@ -177,13 +177,13 @@ profile completeness, and they feed an aggregate "most-requested unindexed skill
 
 ---
 
-## 🔗 PHASE 20 — SKILL PREREQUISITES & SEQUENCING (Gap 4)
+## 🔗 PHASE 20  SKILL PREREQUISITES & SEQUENCING (Gap 4)
 
 **Why:** recommending "Kubernetes" before "Docker" wastes seeker effort. A lightweight prerequisite
 graph makes the compass *teach in the right order* and turns each completion into a "what's next"
 moment. **Flag:** `feature_flag_skill_prereqs`.
 
-### 20.0 — Schema + editorial graph ✅ DONE 2026-06-30
+### 20.0  Schema + editorial graph ✅ DONE 2026-06-30
 - ✅ New `skill_prereqs` table (migration `0055`): `skill_slug` FK, `prereq_skill_slug` FK, `reason`,
   `created_at`, **PK (skill_slug, prereq_skill_slug)** + a `CHECK` blocking self-loops. Seeded an
   **8-edge starter graph** across software / trades / accounting / lifeguard / hospitality / care
@@ -198,10 +198,10 @@ moment. **Flag:** `feature_flag_skill_prereqs`.
   edge `sql→postgres` is refused, a valid `node→typescript` is added + listed) + role-arc regression.
   Desktop + 360px; added edge removed in afterAll. ⚠️ Dev DB: `db:migrate`.
 
-### 20.1 — Compass re-weighting + prereq pills (flag-gated) ✅ DONE 2026-06-30
+### 20.1  Compass re-weighting + prereq pills (flag-gated) ✅ DONE 2026-06-30
 - ✅ Pure `applyPrereqOrdering` (`lib/skills/prereq-graph.ts`): stable topological sort over the
   recommended-slug subgraph (a recommended prereq bubbles above its dependent) + annotates each rec
-  with `unmetPrereqs` (labels the seeker lacks). The demand math is untouched — we only sequence + label.
+  with `unmetPrereqs` (labels the seeker lacks). The demand math is untouched  we only sequence + label.
 - ✅ Wired into `getCompassForProfile` behind `feature_flag_skill_prereqs` (loads the prereq edges for
   the recommended skills + the seeker's owned slugs; off → identical to today). `SkillRecommendation`
   gains optional `unmetPrereqs`. The grow-page `RecommendationItem` renders a quiet **"Requires: X"**
@@ -212,11 +212,11 @@ moment. **Flag:** `feature_flag_skill_prereqs`.
   drives a deterministic recommendation (seeds "open water rescue" demand for a seeker who lacks it,
   whose seeded prereq `pool-rescue` is unmet); search_events + flag restored in afterAll. Desktop + 360px.
 
-### 20.2 — "Unlocks next" moment (flag-gated) ✅ DONE 2026-06-30
-- ✅ `getUnlockedNextSkills` (`db/queries/skill-prereqs.ts`): skills the seeker can now tackle — they
+### 20.2  "Unlocks next" moment (flag-gated) ✅ DONE 2026-06-30
+- ✅ `getUnlockedNextSkills` (`db/queries/skill-prereqs.ts`): skills the seeker can now tackle  they
   hold a prerequisite but not the dependent, and it isn't already on their active learning list
   (capped at 3, a nudge not a list). `UnlockedNextCard` renders above the loop on `/dashboard/grow`
-  ("You have {prereq} — a stepping stone to {dependent}") with a one-tap `AcceptRecommendationButton`.
+  ("You have {prereq}  a stepping stone to {dependent}") with a one-tap `AcceptRecommendationButton`.
   Gated by `feature_flag_skill_prereqs`; off → nothing computed or shown.
 - ✅ **Tests (green):** `test:all` (335 vitest) + build · **flag OFF E2E** (no card) + **flag ON E2E**
   (the card surfaces the unlocked skill + accept button) + role-arc regression. New
@@ -225,51 +225,51 @@ moment. **Flag:** `feature_flag_skill_prereqs`.
 
 ---
 
-## 📍 PHASE 21 — HYPER-LOCAL DEMAND SIGNAL (Gap 6)
+## 📍 PHASE 21  HYPER-LOCAL DEMAND SIGNAL (Gap 6)
 
-**Why:** "Gauteng wants data-eng" is true but blunt — Sandton fintech ≠ Soweto contractors. City-
+**Why:** "Gauteng wants data-eng" is true but blunt  Sandton fintech ≠ Soweto contractors. City-
 scale signal is high-value **but privacy-sharp**, so it ships behind both a flag **and** a consent
 gate, k-anonymized, top-metros-only. **Flag:** `feature_flag_city_demand` + consent
 `outcomes_research`.
 
-### 21.0 — Capture city (behaviour-preserving) ✅ DONE 2026-06-30
-- ✅ City is **already captured** — `searchProfilesQuery` writes the full `filters` object and
+### 21.0  Capture city (behaviour-preserving) ✅ DONE 2026-06-30
+- ✅ City is **already captured**  `searchProfilesQuery` writes the full `filters` object and
   `SearchFilters` carries `city`, so a city-scoped employer search records `filters->>'city'` (a slug)
   with province still always written. No write-path change needed (truly behaviour-preserving).
 - ✅ **Seed** `seedCityDemand()`: 173 city-scoped `search_events` across the top-5 metros (Johannesburg,
-  Cape Town, Durban, Pretoria, Gqeberha) × profession segments, above the floor — so the hotspots
+  Cape Town, Durban, Pretoria, Gqeberha) × profession segments, above the floor  so the hotspots
   surface has real signal out of the box. andile-z (Johannesburg + `outcomes_research` consent) demos it.
 - ✅ **Tests (green):** `test:all` (**336 vitest**, incl. a new integration `city-capture.test.ts`:
   a city-scoped search records `filters->>'city'` + keeps province). Existing demand queries unchanged.
 
-### 21.1 — City aggregation behind k-anonymity + consent (flag-gated) ✅ DONE 2026-06-30
+### 21.1  City aggregation behind k-anonymity + consent (flag-gated) ✅ DONE 2026-06-30
 - ✅ `getCityDemandHotspots({ cityLabel, userId })` (`db/queries/city-demand.ts`): city-scoped demand
-  (90-day window) that returns a result ONLY when **all** gates open — (1) `feature_flag_city_demand`
+  (90-day window) that returns a result ONLY when **all** gates open  (1) `feature_flag_city_demand`
   ON, (2) the seeker's city is a **top-5 metro** (`TOP_METRO_SLUGS`), (3) the seeker has
-  `outcomes_research` consent — AND each segment clears `CITY_DEMAND_FLOOR` (thin-cell suppression).
+  `outcomes_research` consent  AND each segment clears `CITY_DEMAND_FLOOR` (thin-cell suppression).
   Any gate closed → `null` (the caller silently falls back to the province rail). Demand-side only.
 - ✅ Flag `feature_flag_city_demand` scaffolded (settings/-actions/SettingsForm).
 - ✅ **Tests (green):** `test:all` (**339 vitest**) + build · new integration `city-demand-gates.test.ts`
   (**3/3**): metro + consent + flag → floor-respecting hotspots *and a below-floor cell is suppressed*;
   non-metro city → null; no research consent → null.
 
-### 21.2 — "Your city's hotspots" surface (flag-gated) ✅ DONE 2026-06-30
+### 21.2  "Your city's hotspots" surface (flag-gated) ✅ DONE 2026-06-30
 - ✅ `CityHotspotsCard` on `/dashboard/grow` (below the province rail): ordinal pillars + tabular
   search counts for the seeker's metro, an honest "market signal, not a job guarantee" line, and an
   explicit provenance + **consent reminder** linking to Privacy & consent. Renders only when the gated
   `getCityDemandHotspots` returned a value (null → silent fallback to the province rail).
 - ✅ **Tests (green):** `test:all` (339 vitest) + build · **flag OFF E2E** (no card) + **flag ON E2E**
-  (card renders for andile — Johannesburg + consent, seeded demand) + role-arc regression. New
+  (card renders for andile  Johannesburg + consent, seeded demand) + role-arc regression. New
   `tests/e2e/city-demand.spec.ts` (desktop + 360px; scrolls the lazy section in); flag restored in
   afterAll. The consent / metro / floor gates themselves are proven in `city-demand-gates.test.ts`.
 
 ---
 
-## ✅ PHASES 18–21 COMPLETE — all six assessment gaps closed
+## ✅ PHASES 18–21 COMPLETE  all six assessment gaps closed
 
 | Gap | Phase | Shipped |
 |---|---|---|
-| 1 · 5 | **17** | The Climb (progress + proficiency) — *(prior)* |
+| 1 · 5 | **17** | The Climb (progress + proficiency)  *(prior)* |
 | 2 | **18** | Living Learning Catalog (DB catalog + reviews + freshness admin) |
 | 3 | **19** | Custom Skills (self-attested, never-searchable, admin canonicalization) |
 | 4 | **20** | Skill Prerequisites (graph + compass sequencing + "Unlocks next") |
@@ -308,10 +308,10 @@ becomes a priority, since it shares no schema with 18–20.
 
 ## 📌 STATUS
 
-- [x] **Phase 18 — Living Learning Catalog** ✅ (18.0 schema/migration · 18.1 feedback loop · 18.2 editorial+freshness) — all flag-/admin-gated, test:all + E2E green
-- [x] **Phase 19 — Custom Skills & Taxonomy Growth** ✅ (19.0 schema · 19.1 editor · 19.2 canonicalization) — flag-/admin-gated, test:all + E2E green
-- [x] **Phase 20 — Skill Prerequisites & Sequencing** ✅ (20.0 graph · 20.1 re-weight+pills · 20.2 unlocks-next) — flag-/admin-gated, test:all + E2E green
-- [x] **Phase 21 — Hyper-Local Demand** ✅ (21.0 capture · 21.1 gated aggregation · 21.2 hotspots surface) — flag-/consent-gated, test:all + E2E green
+- [x] **Phase 18  Living Learning Catalog** ✅ (18.0 schema/migration · 18.1 feedback loop · 18.2 editorial+freshness)  all flag-/admin-gated, test:all + E2E green
+- [x] **Phase 19  Custom Skills & Taxonomy Growth** ✅ (19.0 schema · 19.1 editor · 19.2 canonicalization)  flag-/admin-gated, test:all + E2E green
+- [x] **Phase 20  Skill Prerequisites & Sequencing** ✅ (20.0 graph · 20.1 re-weight+pills · 20.2 unlocks-next)  flag-/admin-gated, test:all + E2E green
+- [x] **Phase 21  Hyper-Local Demand** ✅ (21.0 capture · 21.1 gated aggregation · 21.2 hotspots surface)  flag-/consent-gated, test:all + E2E green
 
 *Each phase: flag-gated, ship-dark, admin-switchable from `/admin/settings`, verified flag-OFF (zero
 regression) + flag-ON (new surface) at desktop + 360px, with `test:all` + build green before commit.*

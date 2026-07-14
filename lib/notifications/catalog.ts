@@ -87,7 +87,7 @@ export const NOTIFICATION_CATALOG = {
     description: "Admins reviewed your evidence and confirmed it.",
     dedupeWindowSeconds: 0,
   },
-  // Phase 17 ("Demand Pulse", flag-gated) — weekly nudge when employer demand
+  // Phase 17 ("Demand Pulse", flag-gated)  weekly nudge when employer demand
   // for one of the seeker's skills / profession spikes in their province. Reads
   // the same employer-search signal the Career Compass uses. In-app default ON,
   // email default OFF (low intrusion); 6-day dedupe so a cron restart is safe.
@@ -97,10 +97,10 @@ export const NOTIFICATION_CATALOG = {
     audience: "seeker",
     label: "A skill of yours is heating up",
     description:
-      "A gentle weekly heads-up when employers are searching more for one of your skills (or your profession) in your province — read straight off the live demand signal. In the bell by default; turn on email if you'd like it pushed.",
+      "A gentle weekly heads-up when employers are searching more for one of your skills (or your profession) in your province  read straight off the live demand signal. In the bell by default; turn on email if you'd like it pushed.",
     dedupeWindowSeconds: 6 * 24 * 60 * 60,
   },
-  // Phase 18.2 ("Living Learning Catalog") — weekly heartbeat to admins when
+  // Phase 18.2 ("Living Learning Catalog")  weekly heartbeat to admins when
   // learning paths haven't been re-verified in 90+ days, so the catalog can't
   // silently rot. In-app on, email off; 6-day dedupe (cron-restart safe).
   "admin.learning_path.stale": {

@@ -106,33 +106,33 @@ export type SettingKey =
   // ──────────────────────────────────────────────────────────────────────
   | "feature_flag_llm_curriculum_enabled"
   // ──────────────────────────────────────────────────────────────────────
-  // Seeker growth suite — three flag-gated seeker features, all default OFF
+  // Seeker growth suite  three flag-gated seeker features, all default OFF
   // so they ship dark and the admin switches each on when ready:
   //   - skill_journey ("The Climb"): live learning progress + visible rank
   //     payoff + seeker-set proficiency on completion + a growth recap.
   //   - demand_pulse: weekly "your skill is heating up near you" nudge.
   //   - ai_coach: seeker-facing LLM coach (interview practice). ALSO gated
-  //     by the LLM dispatcher's provider/budget/s.72 checks — this flag is
+  //     by the LLM dispatcher's provider/budget/s.72 checks  this flag is
   //     just the surface switch.
   // ──────────────────────────────────────────────────────────────────────
   | "feature_flag_seeker_skill_journey"
   | "feature_flag_seeker_demand_pulse"
   | "feature_flag_seeker_ai_coach"
-  // Phase 18 ("Living Learning Catalog") — surfaces the seeker path-review
+  // Phase 18 ("Living Learning Catalog")  surfaces the seeker path-review
   // feedback loop + the recommend roll-up on learning-path cards. The catalog
   // itself is always DB-backed (18.0); this gates the NEW seeker-facing UI.
   | "feature_flag_living_catalog"
-  // Phase 19 ("Custom Skills") — lets seekers add up to 3 self-described skills
+  // Phase 19 ("Custom Skills")  lets seekers add up to 3 self-described skills
   // outside the taxonomy (never searchable until an admin canonicalizes them).
   | "feature_flag_seeker_custom_skills"
-  // Phase 20 ("Skill Prerequisites") — compass re-ranking (prereqs bubble above
+  // Phase 20 ("Skill Prerequisites")  compass re-ranking (prereqs bubble above
   // dependents) + "Requires: X" pills + the "Unlocks next" moment on completion.
   | "feature_flag_skill_prereqs"
-  // Phase 21 ("Hyper-Local Demand") — city-level demand hotspots on the compass.
+  // Phase 21 ("Hyper-Local Demand")  city-level demand hotspots on the compass.
   // ALSO gated by top-5-metro + a k-anon floor + the seeker's outcomes_research
   // consent; this flag is just the surface switch.
   | "feature_flag_city_demand"
-  // Phase 24 ("Testimonials") — while ON, eligible seekers + employers see the
+  // Phase 24 ("Testimonials")  while ON, eligible seekers + employers see the
   // dismissible collection card. Managed from /admin/testimonials (not the
   // settings form) so curation + campaign live on one surface.
   | "testimonial_campaign_active";
@@ -164,7 +164,7 @@ const DEFAULTS: Record<SettingKey, unknown> = {
   // Phase 13.3  LLM kill-switch. Default OFF; admin must explicitly
   // flip ON after configuring + testing a provider on /admin/llm.
   feature_flag_llm_curriculum_enabled: false,
-  // Seeker growth suite — ship dark, admin switches each on.
+  // Seeker growth suite  ship dark, admin switches each on.
   feature_flag_seeker_skill_journey: false,
   feature_flag_seeker_demand_pulse: false,
   feature_flag_seeker_ai_coach: false,

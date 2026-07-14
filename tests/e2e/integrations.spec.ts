@@ -1,5 +1,5 @@
 /**
- * Phase 25 ("Integrations Hub") — the admin integrations surface end-to-end:
+ * Phase 25 ("Integrations Hub")  the admin integrations surface end-to-end:
  *
  *  1. Health row renders live facts (DB connected + migration count; storage;
  *     LLM; KYC) and the three channel cards show their true source.
@@ -7,7 +7,7 @@
  *     default) → explicitly enable → badge flips to "Admin · live".
  *  3. Bulk announcement: a consenting user with a verified phone makes the
  *     eligible count ≥ 1; sending walks the full consent-gated fan-out (the
- *     bogus encrypted phone decrypts-fails → counted as skipped — proving the
+ *     bogus encrypted phone decrypts-fails → counted as skipped  proving the
  *     pipeline never crashes on bad rows) and reports honestly.
  *
  * Everything is restored in afterAll.
@@ -26,14 +26,14 @@ test.beforeAll(async () => {
   const url = process.env.DATABASE_URL;
   if (!url) {
     throw new Error(
-      "DATABASE_URL missing — playwright.config loads it from .env.test.local.",
+      "DATABASE_URL missing  playwright.config loads it from .env.test.local.",
     );
   }
   sql = postgres(url, { max: 1 });
   await sql`DELETE FROM integration_settings`;
 
   // An eligible announcement recipient: announcements consent granted + a
-  // verified phone (value is not real ciphertext — the send path must treat
+  // verified phone (value is not real ciphertext  the send path must treat
   // an undecryptable phone as skipped, never crash).
   const rows = await sql<{ user_id: string }[]>`
     SELECT user_id FROM profiles WHERE handle = ${SEEKER_HANDLE} LIMIT 1
@@ -94,7 +94,7 @@ test("hub renders health + configure/enable SMS + consent-gated announcement", a
   page,
 }) => {
   // Self-resetting: the desktop + mobile projects share the DB and this flow
-  // creates + enables the SMS integration — start each run from clean.
+  // creates + enables the SMS integration  start each run from clean.
   if (sql) await sql`DELETE FROM integration_settings`;
 
   await signInAdmin(page);
@@ -132,7 +132,7 @@ test("hub renders health + configure/enable SMS + consent-gated announcement", a
   ).toBeVisible();
   await main
     .getByPlaceholder(/Announcement text/)
-    .fill("Sebenza now supports skills passports — check your dashboard.");
+    .fill("Sebenza now supports skills passports  check your dashboard.");
   await main.getByRole("checkbox").last().check();
   await main.getByRole("button", { name: /Send announcement/ }).click();
   await expect(main.getByText(/Sent to \d+ recipient/)).toBeVisible({

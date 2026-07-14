@@ -64,7 +64,7 @@ export function TestimonialPromptCard() {
           <button
             type="button"
             onClick={dismiss}
-            aria-label="Not now — ask me again next month"
+            aria-label="Not now  ask me again next month"
             className="grid size-6 place-items-center rounded-full text-[color:var(--color-ink-soft)] hover:bg-[color:var(--color-surface)] hover:text-[color:var(--color-ink)]"
           >
             <X className="size-4" aria-hidden="true" />

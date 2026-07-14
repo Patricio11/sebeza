@@ -1,5 +1,5 @@
 /**
- * Phase 22.5 — the system-wide AI Coach switch on /admin/llm (Integrations).
+ * Phase 22.5  the system-wide AI Coach switch on /admin/llm (Integrations).
  *
  * Turning the coach ON is a deliberate, acknowledged act: the "Enable" button
  * stays disabled until the safety-review acknowledgement is ticked. Turning OFF
@@ -19,7 +19,7 @@ test.beforeAll(async () => {
   const url = process.env.DATABASE_URL;
   if (!url) {
     throw new Error(
-      "DATABASE_URL missing — playwright.config loads it from .env.test.local.",
+      "DATABASE_URL missing  playwright.config loads it from .env.test.local.",
     );
   }
   sql = postgres(url, { max: 1 });
@@ -58,7 +58,7 @@ test("the AI Coach switch is acknowledgement-gated (enable → disable)", async 
   const region = page.getByRole("region", { name: /AI Career Coach/ });
   await expect(region).toBeVisible();
 
-  // Phase 22.6 — the safety telemetry panel is present on Integrations.
+  // Phase 22.6  the safety telemetry panel is present on Integrations.
   await expect(
     page.getByRole("region", { name: "AI Coach safety telemetry" }),
   ).toBeVisible();
@@ -72,9 +72,9 @@ test("the AI Coach switch is acknowledgement-gated (enable → disable)", async 
 
   await enableBtn.click();
 
-  // Now ON — the immediate OFF control appears. Reload fallback: on this
+  // Now ON  the immediate OFF control appears. Reload fallback: on this
   // Windows harness a server action's DB write can commit while its RSC
-  // refresh response stalls past 30s (same class as integrations.spec) —
+  // refresh response stalls past 30s (same class as integrations.spec) 
   // the switch state lives in the DB, so a reload asserts the same truth.
   const offBtn = () => region.getByRole("button", { name: /Turn OFF/i });
   try {

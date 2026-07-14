@@ -84,7 +84,7 @@ export default async function AdminIntegrationsPage({
       role="admin"
       pageEyebrow="Platform"
       pageTitle="Integrations"
-      pageSubtitle="Every external integration on one surface. Channel credentials are encrypted at rest and managed here; Database and Storage credentials stay platform-env (the app can't bootstrap its own DB connection from the DB) — their health shows below."
+      pageSubtitle="Every external integration on one surface. Channel credentials are encrypted at rest and managed here; Database and Storage credentials stay platform-env (the app can't bootstrap its own DB connection from the DB)  their health shows below."
     >
       {/* Read-only health row */}
       <section aria-label="Infrastructure health" className="mb-8 grid gap-4 md:grid-cols-4">

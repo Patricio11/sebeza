@@ -1,11 +1,11 @@
 /**
- * Phase 28 — PWA installability assets + the floating mobile bottom nav.
+ * Phase 28  PWA installability assets + the floating mobile bottom nav.
  *
  * Part 1 (both projects): the manifest, service worker, offline fallback and
- * icons must be served — these are what make Android/iOS offer "install".
+ * icons must be served  these are what make Android/iOS offer "install".
  *
  * Part 2 (mobile-360 only): the floating bottom bar replaces the old top tab
- * strip — 4 promoted tabs + a "More" sheet holding the full role menu.
+ * strip  4 promoted tabs + a "More" sheet holding the full role menu.
  * Screenshots land in test-results/screenshots/<project>/ like the showcase.
  */
 import { expect, test, type Page, type TestInfo } from "@playwright/test";
@@ -15,7 +15,7 @@ const SEED_PASSWORD = "sebenza-dev-2026";
 async function shoot(page: Page, testInfo: TestInfo, name: string) {
   await page.screenshot({
     path: `test-results/screenshots/${testInfo.project.name}/${name}.png`,
-    fullPage: false, // the bar/sheet are viewport-fixed — full-page would scroll past them
+    fullPage: false, // the bar/sheet are viewport-fixed  full-page would scroll past them
   });
 }
 
@@ -75,7 +75,7 @@ test("floating bottom nav: 4 tabs + More sheet with the full role menu", async (
 }, testInfo) => {
   test.skip(
     (viewport?.width ?? 1280) > 500,
-    "mobile-only chrome — desktop keeps the sidebar",
+    "mobile-only chrome  desktop keeps the sidebar",
   );
 
   await signIn(page, "andile-z@example.co.za", /\/dashboard(\/|$|\?)/);

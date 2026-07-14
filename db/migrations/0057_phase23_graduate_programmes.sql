@@ -1,4 +1,4 @@
--- Phase 23.1 ("Truth & Data Integrity") — internships / graduate programmes /
+-- Phase 23.1 ("Truth & Data Integrity")  internships / graduate programmes /
 -- learnerships for the student lane, moved off the hardcoded mock snapshots
 -- into an editable table (seeded from those constants). Live data, admin-
 -- correctable, honest application status. Public info, not PII.
@@ -9,13 +9,13 @@ CREATE TABLE IF NOT EXISTS graduate_programmes (
   id                 text PRIMARY KEY,
   title              text NOT NULL,
   organisation       text NOT NULL,
-  -- "public" | "corporate" | "ngo" | "startup" — context, never a gate.
+  -- "public" | "corporate" | "ngo" | "startup"  context, never a gate.
   sector             text NOT NULL,
   -- "internship" | "graduate_programme" | "learnership".
   kind               text NOT NULL,
   duration_months    integer NOT NULL,
   cities             jsonb NOT NULL,
-  -- "open" | "closing_soon" | "closed" — sourced from listings, never invented.
+  -- "open" | "closing_soon" | "closed"  sourced from listings, never invented.
   application_status text NOT NULL,
   application_hint   text NOT NULL,
   eligibility        text NOT NULL,

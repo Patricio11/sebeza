@@ -57,7 +57,7 @@ export default async function ProfileEditorPage({
   const verificationVisible = await getSetting<boolean>(
     "feature_flag_verification_badges_visible",
   );
-  // Phase 19.1 ("Custom Skills") — flag-gated escape hatch below the picker.
+  // Phase 19.1 ("Custom Skills")  flag-gated escape hatch below the picker.
   const customSkillsEnabled = await getSetting<boolean>(
     "feature_flag_seeker_custom_skills",
   );

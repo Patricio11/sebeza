@@ -1,5 +1,5 @@
 /**
- * Phase 24 ("Testimonials") — the full loop, campaign-gated:
+ * Phase 24 ("Testimonials")  the full loop, campaign-gated:
  *
  *  1. Campaign OFF (default): no collection card on the dashboard; the landing
  *     rail is absent (zero approved).
@@ -26,7 +26,7 @@ test.beforeAll(async () => {
   const url = process.env.DATABASE_URL;
   if (!url) {
     throw new Error(
-      "DATABASE_URL missing — playwright.config loads it from .env.test.local.",
+      "DATABASE_URL missing  playwright.config loads it from .env.test.local.",
     );
   }
   sql = postgres(url, { max: 1 });
@@ -80,7 +80,7 @@ test("campaign ON: submit with consent → thanked → never asked again → adm
   page,
 }) => {
   // Self-resetting: the desktop + mobile projects share the DB, and this flow
-  // consumes the seeker's one-time prompt — start each run fresh.
+  // consumes the seeker's one-time prompt  start each run fresh.
   if (sql) {
     await sql`DELETE FROM testimonials`;
     await sql`DELETE FROM testimonial_prompt_state`;
@@ -110,7 +110,7 @@ test("campaign ON: submit with consent → thanked → never asked again → adm
   await page.context().clearCookies();
   await signIn(page, ADMIN_EMAIL, /\/admin/);
   await page.goto("/en/admin/testimonials");
-  // clearCookies reset the cookie-consent choice — the banner reappears and
+  // clearCookies reset the cookie-consent choice  the banner reappears and
   // intercepts taps on 360px; dismiss it robustly (auto-waits, no race).
   await page
     .getByRole("button", { name: /accept all/i })

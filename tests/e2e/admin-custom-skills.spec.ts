@@ -1,5 +1,5 @@
 /**
- * Phase 19.2 ("Custom Skills — canonicalization") — the admin promotes a
+ * Phase 19.2 ("Custom Skills  canonicalization")  the admin promotes a
  * frequently-claimed custom label into the searchable taxonomy.
  *
  * Seeds one custom skill for a seeker, then drives the admin leaderboard:
@@ -26,7 +26,7 @@ test.beforeAll(async () => {
   const url = process.env.DATABASE_URL;
   if (!url) {
     throw new Error(
-      "DATABASE_URL missing — playwright.config loads it from .env.test.local.",
+      "DATABASE_URL missing  playwright.config loads it from .env.test.local.",
     );
   }
   sql = postgres(url, { max: 1 });
@@ -64,7 +64,7 @@ test("admin promotes a custom skill to canonical and holders migrate", async ({
   await signInAdmin(page);
   await page.goto("/en/admin/custom-skills");
 
-  // Dismiss the cookie-consent banner — on 360px it sits at the bottom and
+  // Dismiss the cookie-consent banner  on 360px it sits at the bottom and
   // would intercept clicks on the promote panel.
   // Robustly dismiss the cookie banner (auto-waits for it, so we don't race a
   // point-in-time check and let the bottom banner intercept a click on 360px).
@@ -79,7 +79,7 @@ test("admin promotes a custom skill to canonical and holders migrate", async ({
   await row.getByRole("button", { name: /promote to canonical/i }).click();
   // Slug pre-fills from the label.
   await expect(page.locator(`input[id^="slug-"]`).first()).toHaveValue(SLUG);
-  // Scroll into view first — on 360px the confirm button can sit under the
+  // Scroll into view first  on 360px the confirm button can sit under the
   // persistent dashboard chrome otherwise.
   const confirmBtn = page.getByRole("button", { name: /confirm promote/i });
   await confirmBtn.scrollIntoViewIfNeeded();

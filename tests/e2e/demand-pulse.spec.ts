@@ -1,5 +1,5 @@
 /**
- * Phase 17 ("Demand Pulse") — flag-gated seeker demand-spike card.
+ * Phase 17 ("Demand Pulse")  flag-gated seeker demand-spike card.
  *
  * Flag OFF (the dark-ship default) = no card; covered by the other seeker
  * specs. Here we flip `feature_flag_seeker_demand_pulse` ON and seed a genuine
@@ -22,7 +22,7 @@ test.beforeAll(async () => {
   const url = process.env.DATABASE_URL;
   if (!url) {
     throw new Error(
-      "DATABASE_URL missing — playwright.config loads it from .env.test.local.",
+      "DATABASE_URL missing  playwright.config loads it from .env.test.local.",
     );
   }
   sql = postgres(url, { max: 1 });

@@ -1,5 +1,5 @@
 /**
- * Phase 18.2 ("Living Learning Catalog") — the editorial / freshness admin.
+ * Phase 18.2 ("Living Learning Catalog")  the editorial / freshness admin.
  *
  * Proves the freshness loop end-to-end: a path that's gone 90+ days unverified
  * surfaces in the "Needs re-verification" rail; an admin re-verifies it and it
@@ -20,7 +20,7 @@ test.beforeAll(async () => {
   const url = process.env.DATABASE_URL;
   if (!url) {
     throw new Error(
-      "DATABASE_URL missing — playwright.config loads it from .env.test.local.",
+      "DATABASE_URL missing  playwright.config loads it from .env.test.local.",
     );
   }
   sql = postgres(url, { max: 1 });

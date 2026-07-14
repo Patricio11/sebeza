@@ -322,7 +322,7 @@ async function seedCrisisResources() {
         name: "SADAG (South African Depression and Anxiety Group)",
         contact: "[ADMIN: add SADAG's current verified helpline number]",
         availability: null,
-        note: "Template only — verify against sadag.org, then activate. Never ship an unverified number.",
+        note: "Template only  verify against sadag.org, then activate. Never ship an unverified number.",
         active: false,
         sortOrder: 0,
       },

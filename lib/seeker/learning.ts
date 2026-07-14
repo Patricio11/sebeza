@@ -121,7 +121,7 @@ export interface MyLearningRow {
   resourceUrl: string | null;
   resourceKind: string;
   isFree: boolean;
-  /** Phase 17 — self-paced progress 0..100 on an active item. */
+  /** Phase 17  self-paced progress 0..100 on an active item. */
   progressPercent: number;
   state:
     | "interested"
@@ -398,7 +398,7 @@ export async function logLearningPathOpen(
 
 export async function completeLearningItem(
   itemId: string,
-  /** Phase 17 — the seeker's self-assessed depth on completion. Applied to a
+  /** Phase 17  the seeker's self-assessed depth on completion. Applied to a
    *  newly-attached skill (replaces the old hardcoded proficiency 3); existing
    *  rows keep the upgrade-only honesty contract. */
   opts?: { proficiency?: number; yearsOfExperience?: number | null },

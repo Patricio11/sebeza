@@ -1,5 +1,5 @@
 /**
- * Phase 23.7 — the showcase walkthrough. Proves the flagship seeded flows work
+ * Phase 23.7  the showcase walkthrough. Proves the flagship seeded flows work
  * end-to-end on LIVE DB data (no fabricated content anywhere) and captures a
  * screenshot at each key step to `test-results/screenshots/<project>/` for
  * visual review. Accounts: docs/SHOWCASE_ACCOUNTS.md.
@@ -52,7 +52,7 @@ test("student flagship: dashboard + career compass + REAL student lane", async (
   await shoot(page, testInfo, "03-career-compass");
 
   // The student lane's destinations are REAL: 11 employer-confirmed cohort
-  // placements (over the k-floor) — the table renders with a real role.
+  // placements (over the k-floor)  the table renders with a real role.
   await expect(
     page.getByRole("heading", { name: /Where BSc Computer Science graduates go/i }),
   ).toBeVisible();

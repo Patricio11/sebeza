@@ -191,12 +191,12 @@ function ResourceForm({
       <div className="grid gap-3 sm:grid-cols-2">
         <input className={field} placeholder="Name (e.g. SADAG Mental Health Line)" value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} required />
         <input className={field} placeholder="Verified contact (e.g. 0800 … / SMS …)" value={form.contact} onChange={(e) => setForm((f) => ({ ...f, contact: e.target.value }))} required />
-        <input className={field} placeholder="Availability (e.g. 24/7) — optional" value={form.availability} onChange={(e) => setForm((f) => ({ ...f, availability: e.target.value }))} />
-        <input className={field} placeholder="Note — optional" value={form.note} onChange={(e) => setForm((f) => ({ ...f, note: e.target.value }))} />
+        <input className={field} placeholder="Availability (e.g. 24/7)  optional" value={form.availability} onChange={(e) => setForm((f) => ({ ...f, availability: e.target.value }))} />
+        <input className={field} placeholder="Note  optional" value={form.note} onChange={(e) => setForm((f) => ({ ...f, note: e.target.value }))} />
       </div>
       <label className="flex items-center gap-2 text-sm">
         <input type="checkbox" checked={form.active} onChange={(e) => setForm((f) => ({ ...f, active: e.target.checked }))} />
-        Active (shown to seekers) — only tick once the contact is verified
+        Active (shown to seekers)  only tick once the contact is verified
       </label>
       <div className="flex gap-2">
         <button type="submit" disabled={pending} className="inline-flex h-9 items-center gap-1 rounded-[var(--radius-pill)] bg-[color:var(--color-ink)] px-4 text-sm text-[color:var(--color-paper)] disabled:opacity-50">

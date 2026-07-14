@@ -1,5 +1,5 @@
 /**
- * Phase 23.1 — the DB-backed student lane. Proves the runtime mock is gone:
+ * Phase 23.1  the DB-backed student lane. Proves the runtime mock is gone:
  * programmes come from the seeded `graduate_programmes` table (field-matched,
  * public sector first), and destinations obey the k-floor (below it → empty →
  * the section hides; never a fabricated distribution).
@@ -68,9 +68,9 @@ describe("student lane (Phase 23.1)", () => {
     ).toBe(false);
   });
 
-  test("destinations obey the k-floor — never fabricated below it", async () => {
+  test("destinations obey the k-floor  never fabricated below it", async () => {
     // The base seed has 3 employer-confirmed placements for the Wits BSc CS
-    // cohort — below the default floor (10) — so destinations must be EMPTY
+    // cohort  below the default floor (10)  so destinations must be EMPTY
     // (the renderer hides the section), not an invented distribution.
     const snap = await buildStudentSnapshot({
       academic: CS_ACADEMIC,

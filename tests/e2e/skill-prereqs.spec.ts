@@ -1,5 +1,5 @@
 /**
- * Phase 20.1 ("Skill Prerequisites") — flag-gated "Requires:" pill on the
+ * Phase 20.1 ("Skill Prerequisites")  flag-gated "Requires:" pill on the
  * Career Compass.
  *
  * We seed heavy employer demand for "open water rescue" (a skill the BSc-CS
@@ -24,7 +24,7 @@ test.beforeAll(async () => {
   const url = process.env.DATABASE_URL;
   if (!url) {
     throw new Error(
-      "DATABASE_URL missing — playwright.config loads it from .env.test.local.",
+      "DATABASE_URL missing  playwright.config loads it from .env.test.local.",
     );
   }
   sql = postgres(url, { max: 1 });

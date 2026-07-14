@@ -1,8 +1,8 @@
 /**
- * Phase 21.2 ("Hyper-Local Demand") — flag-gated "Your city's hotspots" surface.
+ * Phase 21.2 ("Hyper-Local Demand")  flag-gated "Your city's hotspots" surface.
  *
  * andile-z lives in Johannesburg (a top-5 metro) and has outcomes_research
- * consent, and the seed ships Johannesburg city demand — so with the flag ON
+ * consent, and the seed ships Johannesburg city demand  so with the flag ON
  * the hotspots card renders; with it OFF the compass is unchanged. The card sits
  * in a lazy-loaded section, so we scroll to trigger it. The consent + metro +
  * floor gates themselves are proven at the query layer (city-demand-gates.test).
@@ -22,7 +22,7 @@ test.beforeAll(async () => {
   const url = process.env.DATABASE_URL;
   if (!url) {
     throw new Error(
-      "DATABASE_URL missing — playwright.config loads it from .env.test.local.",
+      "DATABASE_URL missing  playwright.config loads it from .env.test.local.",
     );
   }
   sql = postgres(url, { max: 1 });

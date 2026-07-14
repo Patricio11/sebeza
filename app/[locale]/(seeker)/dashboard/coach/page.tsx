@@ -30,7 +30,7 @@ export default async function CoachPage({
       role="seeker"
       pageEyebrow="Practice"
       pageTitle="AI interview coach"
-      pageSubtitle="Practise realistic questions for a role you're aiming at. This is practice to help you prepare — never a guarantee of any job."
+      pageSubtitle="Practise realistic questions for a role you're aiming at. This is practice to help you prepare  never a guarantee of any job."
     >
       <CoachPractice defaultRole={profile?.profession ?? ""} />
     </DashboardMasthead>

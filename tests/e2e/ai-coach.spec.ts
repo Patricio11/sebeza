@@ -1,9 +1,9 @@
 /**
- * Phase 17 ("AI Career Coach") — flag-gated seeker LLM surface.
+ * Phase 17 ("AI Career Coach")  flag-gated seeker LLM surface.
  *
  * Two halves, both asserted here so the gating is provably symmetric:
  *  - Flag OFF (the dark-ship default): the "AI coach" nav item is hidden and
- *    /dashboard/coach 404s — no dead link, no surface.
+ *    /dashboard/coach 404s  no dead link, no surface.
  *  - Flag ON: the page renders and, with NO active provider configured (every
  *    seeded llm_providers row is dormant), the request degrades gracefully to a
  *    calm "not switched on yet" message instead of crashing or spending.
@@ -23,7 +23,7 @@ test.beforeAll(async () => {
   const url = process.env.DATABASE_URL;
   if (!url) {
     throw new Error(
-      "DATABASE_URL missing — playwright.config loads it from .env.test.local.",
+      "DATABASE_URL missing  playwright.config loads it from .env.test.local.",
     );
   }
   sql = postgres(url, { max: 1 });
@@ -66,7 +66,7 @@ test("flag OFF: the AI coach nav item is hidden and the page 404s", async ({
   await page.goto("/en/dashboard");
   await expect(page.getByRole("link", { name: "AI coach" })).toHaveCount(0);
 
-  // The page gates with notFound() — assert the coach surface is unreachable
+  // The page gates with notFound()  assert the coach surface is unreachable
   // (the masthead + role field never render), regardless of soft/hard 404.
   await page.goto("/en/dashboard/coach");
   await expect(page.getByText("AI interview coach")).toHaveCount(0);
@@ -81,7 +81,7 @@ test("flag ON: the coach renders and degrades gracefully with no provider", asyn
 
   await page.goto("/en/dashboard/coach");
   await expect(page.getByText("AI interview coach")).toBeVisible();
-  // Phase 22.3 — the structural "practice, not a promise" framing is always present.
+  // Phase 22.3  the structural "practice, not a promise" framing is always present.
   await expect(
     page.getByText(/not a real interview, and not a job offer/i),
   ).toBeVisible();
@@ -97,7 +97,7 @@ test("flag ON: the coach renders and degrades gracefully with no provider", asyn
   await expect(
     page.getByText(/switched on yet|check back soon|try again|paused/i),
   ).toBeVisible();
-  // Phase 22.4 — never a dead end: the human work-readiness guide is offered.
+  // Phase 22.4  never a dead end: the human work-readiness guide is offered.
   await expect(
     page.getByRole("link", { name: /how to prepare for an interview/i }),
   ).toBeVisible();

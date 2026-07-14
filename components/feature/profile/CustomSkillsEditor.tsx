@@ -168,7 +168,7 @@ export function CustomSkillsEditor({
               max={60}
               value={years}
               onChange={(e) => setYears(e.target.value)}
-              placeholder="—"
+              placeholder=""
               className="h-10 w-full rounded-[var(--radius-md)] border border-[color:var(--color-line)] bg-[color:var(--color-paper)] px-2 text-sm outline-none focus:border-[color:var(--color-brand)]"
             />
           </div>

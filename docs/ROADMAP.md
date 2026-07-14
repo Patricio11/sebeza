@@ -912,15 +912,15 @@ Five sub-phases, ordered by ROI per LOC:
 
 ---
 
-## 📡 PHASE 14: ZERO-RATING (STRATEGIC / PARTNERSHIP) ⏳ *planned — partnership-gated, dormant*
+## 📡 PHASE 14: ZERO-RATING (STRATEGIC / PARTNERSHIP) ⏳ *planned  partnership-gated, dormant*
 *Goal: close the "low-data ≠ zero-data" gap that is SAYouth's real moat (their site is data-free on the
-major networks). **Planning-complete, NOT a sprint** — conditional on a registered company **and**
+major networks). **Planning-complete, NOT a sprint**  conditional on a registered company **and**
 government/institutional backing. Origin: `docs/COMPETITIVE_ANALYSIS_SAYOUTH.md` §2 + §5.1. Plan:
 `docs/PHASE_14_PLAN.md`.*
 
 - [ ] **14.1** Two technical routes researched into a one-page decision doc (mirrors `AWS_DATABASE_OPTIONS.md`).
 - [ ] **14.2** Eligibility / backing prerequisites written down honestly + tied to the partnership track.
-- [ ] **14.3** Cheap do-early engineering readiness (lighter app + honest outbound-link UX) — the only code
+- [ ] **14.3** Cheap do-early engineering readiness (lighter app + honest outbound-link UX)  the only code
   that lands, and only because it makes Sebenza a clean candidate *when* a route appears. Ships value on its
   own merits even if zero-rating never happens.
 
@@ -930,14 +930,14 @@ government/institutional backing. Origin: `docs/COMPETITIVE_ANALYSIS_SAYOUTH.md`
 ---
 
 ## 🧰 PHASE 15: WORK-READINESS CONTENT ✅ *(shipped 2026-06-13)*
-*Goal: add the **"get ready for the work," not just "find the work"** layer — entirely on infrastructure that
+*Goal: add the **"get ready for the work," not just "find the work"** layer  entirely on infrastructure that
 already existed. Origin: `docs/COMPETITIVE_ANALYSIS_SAYOUTH.md` §5.2. Companion: `docs/completed/PHASE_15_COMPLETE.md`.*
 
 ### Task 15.1: "Get work-ready" article collection ✅
 - [x] 6 hand-written, plain-language, SA-context articles in `content/help/seeker/work-ready/`, reusing the
   Phase-10 help-centre architecture.
 
-### Task 15.2: CV generator (`/dashboard/cv`) — the marquee ✅
+### Task 15.2: CV generator (`/dashboard/cv`)  the marquee ✅
 - [x] Print-CSS profile→CV (reuses the `/insights/print` pattern); 2 ATS-friendly templates (`classic` /
   `compact` via `?template=`); skills shown strongest-first at the seeker's own rating (Verification-Honesty);
   seeker-only, never an employer surface, never indexed, never auto-shared; **no new PII / migration / consent**.
@@ -950,10 +950,10 @@ already existed. Origin: `docs/COMPETITIVE_ANALYSIS_SAYOUTH.md` §5.2. Companion
 
 ## 📍 PHASE 16: "NEAR YOU" ✅ *(shipped 2026-06-13)*
 *Goal: foreground the location dimension Sebenza already has, expressed in **reverse-matching** terms (demand
-near you + be-found + locality-legible invitations/employers) — **not** a job-board feed (founder-confirmed
+near you + be-found + locality-legible invitations/employers)  **not** a job-board feed (founder-confirmed
 §D1). Origin: `docs/COMPETITIVE_ANALYSIS_SAYOUTH.md` §5.3. Companion: `docs/completed/PHASE_16_COMPLETE.md`.*
 
-### Task 16.1: "Work near you" dashboard card — the marquee ✅
+### Task 16.1: "Work near you" dashboard card  the marquee ✅
 - [x] Leads with agency ("Be found for {profession} work near {city}" + completeness bar); honest 90-day
   province demand context; truthful pool link ("see who you're matched against", **not** a vacancy feed);
   "near you **OR** remote" SA-wide demand line for remote/hybrid-available seekers.
@@ -969,7 +969,7 @@ near you + be-found + locality-legible invitations/employers) — **not** a job-
 ---
 
 ## 🌱 PHASE 17: SEEKER GROWTH SUITE ✅ *(shipped 2026-06-30)*
-*Goal: make the learning flywheel's most-motivating half **visible** — three flag-gated, ship-dark seeker
+*Goal: make the learning flywheel's most-motivating half **visible**  three flag-gated, ship-dark seeker
 features, each default OFF + admin-switchable from `/admin/settings`. Origin: the skill-development gap
 assessment + `COMPETITIVE_ANALYSIS_SAYOUTH.md` §3 (the flywheel). Plan: `docs/completed/PHASE_17_SEEKER_GROWTH_SUITE_PLAN.md`.*
 
@@ -987,14 +987,14 @@ assessment + `COMPETITIVE_ANALYSIS_SAYOUTH.md` §3 (the flywheel). Plan: `docs/c
 - [x] `feature_flag_seeker_ai_coach`. `lib/llm/seeker-coach.ts` reuses the gated `llm_providers` infra
   (flag → PII guard → active provider → creds → budget); `/dashboard/coach` interview-practice surface + the
   nav item filtered out when dark; graceful no-provider degradation; `seeker.ai_coach.call` / `.skipped`
-  audit kinds; **never sends name / ID / contact** — only profession + skills + a role title.
+  audit kinds; **never sends name / ID / contact**  only profession + skills + a role title.
 
 ### Task 17.4: Testing discipline ✅
-- [x] Per task: `npm run test:all` (321 vitest) + build green; **E2E both flag states** — flag OFF = today's
-  behaviour unchanged (zero regression), flag ON = the new surface — at desktop **and** 360px; clean migrations.
+- [x] Per task: `npm run test:all` (321 vitest) + build green; **E2E both flag states**  flag OFF = today's
+  behaviour unchanged (zero regression), flag ON = the new surface  at desktop **and** 360px; clean migrations.
 
 > **Forward roadmap** for the four remaining assessment gaps (2/3/4/6): `docs/completed/SEEKER_GROWTH_PHASES_18-21_PLAN.md`
-> — **Phase 18** Living Learning Catalog · **19** Custom Skills · **20** Skill Prerequisites · **21**
+>  **Phase 18** Living Learning Catalog · **19** Custom Skills · **20** Skill Prerequisites · **21**
 > Hyper-Local Demand. Each flag-gated + ship-dark, same testing discipline.
 
 ---
@@ -1003,81 +1003,81 @@ assessment + `COMPETITIVE_ANALYSIS_SAYOUTH.md` §3 (the flywheel). Plan: `docs/c
 *The four remaining gaps from the skill-development assessment, each flag-gated + ship-dark like Phase 17.
 Full task breakdown + UX/UI + testing discipline: `docs/completed/SEEKER_GROWTH_PHASES_18-21_PLAN.md`.*
 
-- [x] **Phase 18 — Living Learning Catalog** (Gap 2) ✅ *shipped 2026-06-30*: paths moved off the
+- [x] **Phase 18  Living Learning Catalog** (Gap 2) ✅ *shipped 2026-06-30*: paths moved off the
   hardcoded constant into `learning_paths` + `learning_path_reviews` (behaviour-preserving migration
   `0053` + parity test); seeker path-review feedback loop + recommend roll-up (flag
   `feature_flag_living_catalog`); `/admin/learning-paths` editorial admin + weekly 90-day freshness
   heartbeat cron. test:all (325) + E2E (both flag states + admin) green.
-- [x] **Phase 19 — Custom Skills & Taxonomy Growth** (Gap 3) ✅ *shipped 2026-06-30*: `profile_skills_custom`
+- [x] **Phase 19  Custom Skills & Taxonomy Growth** (Gap 3) ✅ *shipped 2026-06-30*: `profile_skills_custom`
   (self-attested, **never searchable** until promoted; migration `0054` + a not-searchable invariant test),
   flag-gated seeker editor (`feature_flag_seeker_custom_skills`), and `/admin/custom-skills` canonicalization
   (promote a label → canonical skill + migrate holders, who become searchable via the existing trigger).
-- [x] **Phase 20 — Skill Prerequisites & Sequencing** (Gap 4) ✅ *shipped 2026-06-30*: `skill_prereqs` graph
+- [x] **Phase 20  Skill Prerequisites & Sequencing** (Gap 4) ✅ *shipped 2026-06-30*: `skill_prereqs` graph
   (migration `0055`, cycle-guarded admin) + flag-gated (`feature_flag_skill_prereqs`) compass re-ranking +
   "Requires:" pills + an "Unlocks next" nudge.
-- [x] **Phase 21 — Hyper-Local Demand** (Gap 6) ✅ *shipped 2026-06-30*: city captured in
+- [x] **Phase 21  Hyper-Local Demand** (Gap 6) ✅ *shipped 2026-06-30*: city captured in
   `search_events.filters` (behaviour-preserving); `getCityDemandHotspots` gated by
   `feature_flag_city_demand` + top-5-metro + `outcomes_research` consent + a k-anon floor; "Your city's
   hotspots" surface on `/dashboard/grow` (silent province fallback when any gate closes).
 
-**✅ Seeker growth roadmap complete** — Phases 17–21 close all six gaps from the skill-development
+**✅ Seeker growth roadmap complete**  Phases 17–21 close all six gaps from the skill-development
 assessment. Every feature flag-/consent-/admin-gated + ship-dark; `test:all` (339 vitest) + E2E both
 flag states at desktop + 360px green throughout.
 
 ---
 
-## 🛟 PHASE 22 — AI CAREER COACH: SAFETY & WELLBEING ✅ *safety layer shipped 2026-07-01 (plan: `docs/PHASE_22_AI_COACH_SAFETY_PLAN.md`)*
-*The one feature where "flag works + tests pass" is not the bar — an LLM addressing potentially
+## 🛟 PHASE 22  AI CAREER COACH: SAFETY & WELLBEING ✅ *safety layer shipped 2026-07-01 (plan: `docs/PHASE_22_AI_COACH_SAFETY_PLAN.md`)*
+*The one feature where "flag works + tests pass" is not the bar  an LLM addressing potentially
 vulnerable job seekers. Built the wellbeing layer; `feature_flag_seeker_ai_coach` still must not go ON
 in production until an operator verifies + activates real crisis resources.*
 
 - [x] **22.5** System-wide AI-Coach switch on `/admin/llm` (Integrations), **acknowledgement-gated**.
-- [x] **22.1** System-prompt hardening — scope lock + refuse financial / legal / medical / mental-health advice + structured refusal.
+- [x] **22.1** System-prompt hardening  scope lock + refuse financial / legal / medical / mental-health advice + structured refusal.
 - [x] **22.2** Distress detection + crisis pathway (deterministic pre-LLM screen, fires **before the provider
   gate**; provider never called; **admin-editable crisis resources** via `/admin/crisis-resources`, migration
   `0056`; content never logged). The load-bearing task.
 - [x] **22.3** Output moderation (`moderateQuestions`) + structural "practice, not a promise" banner.
 - [x] **22.4** Graceful degradation to the human "prepare for an interview" guide at every non-distress edge.
 - [x] **22.6** Safety telemetry (call / distress / moderation-drop counts) on `/admin/llm`.
-- [x] **22.7** Verification — `test:all` (354 vitest) + build + E2E both flag states (incl. `coach-distress.spec`), desktop + 360px.
+- [x] **22.7** Verification  `test:all` (354 vitest) + build + E2E both flag states (incl. `coach-distress.spec`), desktop + 360px.
 
-> Crisis-line details are **admin-editable data, verified by an operator** — the seed ships no numbers.
+> Crisis-line details are **admin-editable data, verified by an operator**  the seed ships no numbers.
 > A wrong helpline number is itself a safety failure.
 
 ---
 
-## 🩺 PHASES 23–27 — TRUTH, TESTIMONIALS, INTEGRATIONS, SECURITY, GOVERNANCE ✅ *shipped 2026-07-02 → 07-06*
+## 🩺 PHASES 23–27  TRUTH, TESTIMONIALS, INTEGRATIONS, SECURITY, GOVERNANCE ✅ *shipped 2026-07-02 → 07-06*
 *Executes `docs/FULL_SYSTEM_AUDIT_2026_07.md` (plan: `docs/PHASE_23_27_TRUTH_TESTIMONIALS_INTEGRATIONS_PLAN.md`).*
 
-- [x] **23 Truth & Data Integrity + Showcase** — student lane → live DB (`graduate_programmes`, real
+- [x] **23 Truth & Data Integrity + Showcase**  student lane → live DB (`graduate_programmes`, real
   placement destinations, k-floor); computed landing MoM; fabricated testimonials removed; `getSkills()`
   DB pickers; provider default `db` (mock throws in prod); showcase seed (`docs/SHOWCASE_ACCOUNTS.md`);
   showcase E2E with 16 screenshots. Migrations `0057`.
-- [x] **24 Testimonials** — admin-run collection campaign; consented, curated, landing rail renders
+- [x] **24 Testimonials**  admin-run collection campaign; consented, curated, landing rail renders
   approved only. Migration `0058`.
-- [x] **25 Integrations Hub** — `/admin/integrations`: encrypted admin-managed SMS/WhatsApp/Email creds
+- [x] **25 Integrations Hub**  `/admin/integrations`: encrypted admin-managed SMS/WhatsApp/Email creds
   (env fallback), DB/storage health, consent-gated bulk announcements (`announcements` purpose).
   Migrations `0059` + `0060`.
-- [x] **26 Security Hardening** — rate limits wired (reveal, per-user coach); prod admin 2FA hard-require;
+- [x] **26 Security Hardening**  rate limits wired (reveal, per-user coach); prod admin 2FA hard-require;
   CSP `unsafe-eval` dev-only; bound array params; constant-time cron auth; LIKE escaping; 20 crons.
   *(26.1 operator: rotate `.env.local` secrets.)*
-- [x] **27 Docs & Governance** — CLAUDE.md/README/TO_START synced to Phase 26; **DPIA addendum R-17→25**
+- [x] **27 Docs & Governance**  CLAUDE.md/README/TO_START synced to Phase 26; **DPIA addendum R-17→25**
   (seeker-LLM supersedes R-13.2's "no seeker data" claim; distress posture; testimonials consent;
   announcements) + retention rows for every Phase 11→25 table; `.env.example` completed.
 
 ---
 
-## 📱 PHASE 28 — PWA + NATIVE-FEEL MOBILE NAVIGATION *(shipped 2026-07-07)*
+## 📱 PHASE 28  PWA + NATIVE-FEEL MOBILE NAVIGATION *(shipped 2026-07-07)*
 
-**Thesis: the mobile web app should install and feel like a native Android/iOS app —
+**Thesis: the mobile web app should install and feel like a native Android/iOS app 
 without violating No-Flash (no heavy JS, no animation library, no app-shell caching risk).**
 
 - [x] **28.1 PWA foundation.** `app/manifest.ts` (standalone display, Civic Editorial paper
   colors, `id:"/"`), generated brand icon set (`public/icons/` 192/512 + maskable 512 +
-  `apple-touch-icon.png` — serif "S" monogram + the tri-colour flag band), `appleWebApp` +
+  `apple-touch-icon.png`  serif "S" monogram + the tri-colour flag band), `appleWebApp` +
   `applicationName` metadata, `viewportFit: "cover"` so `env(safe-area-inset-*)` works installed.
 - [x] **28.2 Offline honesty.** Minimal service worker (`public/sw.js`, ~1KB): pre-caches ONLY
-  `offline.html` and serves it when a *navigation* fetch fails. Never caches app pages or data —
+  `offline.html` and serves it when a *navigation* fetch fails. Never caches app pages or data 
   it can't serve stale content, break auth, or fight deploys. Registered production-only by
   `components/pwa/ServiceWorkerRegistrar.tsx`. `offline.html` is a self-contained Civic Editorial
   page (system fonts) that says, honestly, that Sebenza never shows cached/made-up data.
@@ -1092,25 +1092,25 @@ without violating No-Flash (no heavy JS, no animation library, no app-shell cach
 - [x] **28.4 Verified.** New `tests/e2e/pwa-mobile-nav.spec.ts` (manifest/SW/offline/icons on both
   projects; bar + sheet walkthrough with screenshots at 360px) + the full suite green on a fresh
   production build; `role-arcs` nav-click assertions hold against the new bar (it now dismisses the
-  cookie banner first — both are bottom-fixed on mobile). Layering: the DatePicker/Combobox/
+  cookie banner first  both are bottom-fixed on mobile). Layering: the DatePicker/Combobox/
   MonthYearPicker mobile bottom-sheets moved to `z-[45/46]` so they cover the bar (native-app
   convention); `html{scroll-padding-bottom}` keeps scrollIntoView targets clear of it. Harness:
   E2E now runs with `serviceWorkers: "block"` (the offline SW must not convert transient server
   hiccups into offline.html renders mid-test; measured to hide nothing) and the two chronic
-  post-action badge waits got a reload fallback — on this Windows harness a server action's DB
+  post-action badge waits got a reload fallback  on this Windows harness a server action's DB
   write can commit while its RSC refresh response stalls >30s (pre-existing, reproduces with the
   SW blocked; the badge derives from server state, so reload asserts the same invariant).
 
 ---
 
-## 🧲 PHASE 29 — VACANCY SEATS + THE SEAMLESS SEARCH-INVITE FUNNEL *(shipped 2026-07-08)*
+## 🧲 PHASE 29  VACANCY SEATS + THE SEAMLESS SEARCH-INVITE FUNNEL *(shipped 2026-07-08)*
 
 **Thesis: the public search is the top of the employer funnel. Anyone can select candidates;
-the moment they act, they're routed through the right gate — and their selection survives.**
+the moment they act, they're routed through the right gate  and their selection survives.**
 Full detail: `docs/PHASE_29_SEATS_AND_SEARCH_INVITE_FUNNEL.md`.
 
 - [x] **29.1 Vacancy seats.** Optional `positions` headcount (migration `0061`; NULL = unspecified,
-  never fabricated) — form field + honest "N positions to fill" context on the match page.
+  never fabricated)  form field + honest "N positions to fill" context on the match page.
 - [x] **29.2 Select top N.** With a headcount set, the match page fills the selection with the top
   N eligible rows in the current view order; sending stays behind the explicit consent-gated modal.
 - [x] **29.3–29.6 The funnel.** Checkbox per public result row + floating action bar; selection in
@@ -1199,14 +1199,14 @@ HR Practitioner · Electrician · Plumber · Accountant · Nurse · Driver · Bo
 *Last Updated: 2026-07-08*
 *Version: 2.8  synced through **Phase 29** (vacancy seats + the seamless /search invite funnel).
 Prior: v2.7 synced through Phase 28 (PWA installability + floating mobile bottom nav across
-all role dashboards). Prior: v2.6 synced through Phase 27 — Phases 18–21 (seeker growth gaps), 22
+all role dashboards). Prior: v2.6 synced through Phase 27  Phases 18–21 (seeker growth gaps), 22
 (AI-coach safety), 23–26 (truth/testimonials/integrations/security) + the governance sync all shipped;
 only Phase 14 (zero-rating, partnership-gated) remains. Remaining work is OPERATOR-side: Phase 10 Arc B
 launch ops, `.env.local` secret rotation, crisis-resource verification before the AI-coach flag, DPIA
 sign-off.*
 *Prior: v2.5  ROADMAP body synced through Phase 17 (sections for 14/15/16/17 added; previously only
 footer-referenced). **Phase 17 ("Seeker Growth Suite") COMPLETE** (2026-06-30): three flag-gated, ship-dark
-seeker features — The Climb (live skill journey: progress + seeker-set proficiency + live rank payoff,
+seeker features  The Climb (live skill journey: progress + seeker-set proficiency + live rank payoff,
 closes assessment Gaps 1+5), Demand Pulse (weekly "your skill is heating up" from employer-search spikes),
 AI Career Coach (interview practice on the gated `llm_providers` infra; never sends PII). Each verified
 flag-OFF (zero regression) + flag-ON at desktop + 360px; 321 vitest + build green. **Phase 14** (zero-rating)

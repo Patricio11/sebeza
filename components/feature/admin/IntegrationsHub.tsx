@@ -233,7 +233,7 @@ function ChannelCard({
                 onChange={(e) => set("provider", e.target.value)}
                 className={field}
               >
-                <option value="console">console (dev — logs only)</option>
+                <option value="console">console (dev  logs only)</option>
                 <option value="twilio">twilio</option>
                 {view.channel === "sms" && <option value="sns">sns (AWS)</option>}
               </select>
@@ -268,7 +268,7 @@ function ChannelCard({
             className="inline-flex h-8 items-center gap-1 rounded-[var(--radius-pill)] bg-[color:var(--color-ink)] px-3 text-xs text-[color:var(--color-paper)] disabled:opacity-50"
           >
             {pending && <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />}
-            Save (encrypted) — enable separately
+            Save (encrypted)  enable separately
           </button>
         </div>
       )}

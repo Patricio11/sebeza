@@ -1,9 +1,9 @@
-# PHASE 17 — SEEKER GROWTH SUITE (flag-gated, ship-dark)
+# PHASE 17  SEEKER GROWTH SUITE (flag-gated, ship-dark)
 
 *Opened 2026-06-22. Direct continuation of Phase 11 (Seeker Retention & Skill-Growth
 Conversion). Derives from the differentiator in `docs/COMPETITIVE_ANALYSIS_SAYOUTH.md` §3 line
-46: the learning **flywheel** — "recommend → accept → progress → honest self-attested skill →
-visible ranking gain — a retention + skills-growth flywheel, not a resource list."*
+46: the learning **flywheel**  "recommend → accept → progress → honest self-attested skill →
+visible ranking gain  a retention + skills-growth flywheel, not a resource list."*
 
 > **Numbering note:** 14 = zero-rating (`PHASE_14_PLAN.md`, partnership-gated); 15 + 16 shipped.
 > This is the next new phase. Renumber freely if preferred.
@@ -16,13 +16,13 @@ Phase 11 built the learning loop's *machinery* (recommendations, accept/progress
 skill-attach, badges, the student lane). But the **most motivating + most *different* half of the
 flywheel is invisible**:
 
-- A seeker taps **Start** on a skill, then nothing happens until they tap **Mark complete** — the
+- A seeker taps **Start** on a skill, then nothing happens until they tap **Mark complete**  the
   empty-state literally promises *"start tracking your progress,"* but `learning_items` has **no
   progress column**. The "Active" state is a void.
 - The **rank payoff is never shown live.** `rankInPoolQuery` can already compute *"finish this →
-  #31 → #22,"* and completion even calculates that delta for the notification — but the seeker
+  #31 → #22,"* and completion even calculates that delta for the notification  but the seeker
   never *watches their rank climb as they learn*. No job board does this. It is the wedge.
-- On completion, proficiency is **hardcoded to 3** — the seeker's real depth is guessed, not owned.
+- On completion, proficiency is **hardcoded to 3**  the seeker's real depth is guessed, not owned.
 
 This phase ships **three flag-gated seeker features**, each **default OFF** so it ships dark and
 the admin switches it on from `/admin/settings`:
@@ -39,20 +39,20 @@ i18n-ready (en base + deepMerge), 360px-first. The AI Coach additionally inherit
 dispatcher's multi-gate posture (active provider → budget → s.72 cross-border ack → feature flag →
 PII guard): **zero spend until every gate is open.**
 
-> ### 🔒 Testing discipline (NON-NEGOTIABLE — applies to every task here)
+> ### 🔒 Testing discipline (NON-NEGOTIABLE  applies to every task here)
 > Nothing is "done" until it is **tested and green**. For each feature, before its commit:
-> 1. **Unit/compliance** — `npm run test:all` (typecheck + lint + the full vitest suite) passes.
-> 2. **E2E both flag states** — at desktop **and** 360px: **flag OFF = today's behaviour
+> 1. **Unit/compliance**  `npm run test:all` (typecheck + lint + the full vitest suite) passes.
+> 2. **E2E both flag states**  at desktop **and** 360px: **flag OFF = today's behaviour
 >    unchanged** (proves zero regression), and **flag ON = the new surface works** (proves the
 >    feature). Flag-on specs flip the flag in the test DB and **restore it in `afterAll`** so the
 >    dark-ship default holds for every other suite.
-> 3. **No negative impact on existing functionality** — the existing seeker/employer/admin E2E
+> 3. **No negative impact on existing functionality**  the existing seeker/employer/admin E2E
 >    arcs stay green. If anything breaks, it is **fixed before commit**, never committed red.
 > 4. **Migrations** apply clean (the test harness migrates-from-zero in `global-setup`).
 
 ---
 
-## ✅ TASK 17.0 — Scaffolding (flags + admin toggles) — DONE 2026-06-22
+## ✅ TASK 17.0  Scaffolding (flags + admin toggles)  DONE 2026-06-22
 - `lib/admin/settings.ts`: added 3 `SettingKey`s + DEFAULTS (all `false`).
 - `lib/admin/settings-actions.ts`: added to the per-key validator map (`z.boolean()`) + the
   `updateSetting` key enum.
@@ -62,23 +62,23 @@ PII guard): **zero spend until every gate is open.**
 
 ---
 
-## 🧗 TASK 17.1 — THE CLIMB (live skill journey) — ✅ DONE 2026-06-22
+## 🧗 TASK 17.1  THE CLIMB (live skill journey)  ✅ DONE 2026-06-22
 **Flag:** `feature_flag_seeker_skill_journey`. **Goal:** make the Active learning state a living,
 visible climb, and make the payoff (rank gain) the emotional core.
 
-### 17.1.a — Data + actions
+### 17.1.a  Data + actions
 - **Migration** `0052_*`: `learning_items.progress_percent integer NOT NULL DEFAULT 0` (idempotent
   `ADD COLUMN IF NOT EXISTS`; journal entry idx 52, `when` 1782400000000). Add to `db/schema.ts`.
 - `lib/seeker/learning.ts`:
-  - `setLearningProgress(itemId, percent)` — clamp 0–100; `accepted` → promote to `in_progress` +
+  - `setLearningProgress(itemId, percent)`  clamp 0–100; `accepted` → promote to `in_progress` +
     `startedAt`; audit `learning.progress`; revalidate grow + dashboard. Reject completed/abandoned.
-  - `completeLearningItem(itemId, opts?: { proficiency?: 1–5; yearsOfExperience?: number|null })` —
+  - `completeLearningItem(itemId, opts?: { proficiency?: 1–5; yearsOfExperience?: number|null })` 
     use the seeker's chosen proficiency/years on the **insert** (new skill) instead of the hardcoded
     `3`/null. Existing rows keep the upgrade-only honesty contract (provenance only; never downgrade
     `verified_provider`).
   - `listMyLearningItems()` + `MyLearningRow`: expose `progressPercent`.
 
-### 17.1.b — UI (`components/feature/seeker/learning/`)
+### 17.1.b  UI (`components/feature/seeker/learning/`)
 - `LearningItemRow`: for `accepted`/`in_progress`, render a **progress bar + checkpoint buttons**
   (0/25/50/75/100) → `setLearningProgress`. Show the **live rank payoff** ("finish → #X") when
   passed. "Mark complete" opens a new **`CompleteSkillModal`** (proficiency 1–5 selector + optional
@@ -87,9 +87,9 @@ visible climb, and make the payoff (rank gain) the emotional core.
   #N of M, **projected rank if they finish the in-progress ones** (`rankInPoolQuery` boost =
   in-progress count), and an honest momentum line. No fabricated history.
 - Wire into `/dashboard/grow` (top of "My learning") + a compact glance on `/dashboard` overview.
-  **All gated** by `getSetting("feature_flag_seeker_skill_journey")` — off = today's behaviour.
+  **All gated** by `getSetting("feature_flag_seeker_skill_journey")`  off = today's behaviour.
 
-### 17.1.c — Verify + commit ✅
+### 17.1.c  Verify + commit ✅
 - **Shipped:** migration `0052_phase17_learning_progress.sql` (+ journal idx 52);
   `setLearningProgress` + `learning.progress` audit kind; `completeLearningItem(opts)` (seeker
   proficiency replaces the hardcoded 3); `CompleteSkillModal` + `GrowthMomentumCard` + progress
@@ -103,7 +103,7 @@ visible climb, and make the payoff (rank gain) the emotional core.
 
 ---
 
-## 📈 TASK 17.2 — DEMAND PULSE — ✅ DONE 2026-06-22
+## 📈 TASK 17.2  DEMAND PULSE  ✅ DONE 2026-06-22
 **Flag:** `feature_flag_seeker_demand_pulse`. **Goal:** turn the silent `search_events` signal into
 a timely "your skill is heating up near you" nudge.
 
@@ -122,14 +122,14 @@ a timely "your skill is heating up near you" nudge.
 
 ---
 
-## 🤖 TASK 17.3 — AI CAREER COACH — ✅ DONE 2026-06-22
+## 🤖 TASK 17.3  AI CAREER COACH  ✅ DONE 2026-06-22
 **Flag:** `feature_flag_seeker_ai_coach` **AND** a configured/budgeted LLM provider. **Goal:** a
 seeker-facing LLM coach. **Scope v1: interview practice** (role-aware practice questions).
 
 - ✅ **Dispatcher** `lib/llm/seeker-coach.ts` (`generateInterviewQuestions`): the same multi-gate
-  posture as the curriculum dispatcher — flag → PII guard → active provider → decryptable creds →
+  posture as the curriculum dispatcher  flag → PII guard → active provider → decryptable creds →
   budget (shared pool); audited via new `seeker.ai_coach.call` / `.skipped` kinds with token/cost
-  meta only. **Never sends name/ID/contact** — only profession + skills + a role title. A generic
+  meta only. **Never sends name/ID/contact**  only profession + skills + a role title. A generic
   chat call (OpenAI-compatible + Anthropic) reuses the encrypted `llm_providers` creds.
 - ✅ **Surface** `/dashboard/coach` (`page.tsx` gated by the flag → `notFound()` when off) + the
   `CoachPractice` client flow (one role field → numbered practice questions). Calm, text-only,
@@ -158,10 +158,10 @@ seeker-facing LLM coach. **Scope v1: interview practice** (role-aware practice q
 
 ## 📌 STATUS
 - [x] 17.0 Scaffolding (flags + admin toggles)
-- [x] 17.1 The Climb — tests green (test:all 318 ✅ · flag-OFF 24/24 ✅ · flag-ON 2/2 ✅)
-- [x] 17.2 Demand Pulse — tests green (test:all 321 ✅ · flag-OFF 12/12 ✅ · flag-ON 2/2 ✅)
-- [x] 17.3 AI Career Coach — tests green (test:all 321 ✅ · flag-OFF 2/2 + arc 12/12 ✅ · flag-ON 2/2 ✅)
+- [x] 17.1 The Climb  tests green (test:all 318 ✅ · flag-OFF 24/24 ✅ · flag-ON 2/2 ✅)
+- [x] 17.2 Demand Pulse  tests green (test:all 321 ✅ · flag-OFF 12/12 ✅ · flag-ON 2/2 ✅)
+- [x] 17.3 AI Career Coach  tests green (test:all 321 ✅ · flag-OFF 2/2 + arc 12/12 ✅ · flag-ON 2/2 ✅)
 
-**✅ PHASE 17 COMPLETE** — all three seeker-growth features shipped dark (default OFF), each
+**✅ PHASE 17 COMPLETE**  all three seeker-growth features shipped dark (default OFF), each
 admin-switchable from `/admin/settings`, each verified at desktop + 360px with flag OFF (zero
 regression) and flag ON (the new surface), and the full vitest + build green throughout.

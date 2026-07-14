@@ -125,47 +125,47 @@ const ROWS: SettingRow[] = [
       "the Justification Index OR per-employer lookup will classify the " +
       "cell. Single source of truth for both surfaces.",
   },
-  // Seeker growth suite — all ship dark (default OFF); flip on when ready.
+  // Seeker growth suite  all ship dark (default OFF); flip on when ready.
   {
     key: "feature_flag_seeker_skill_journey",
     label:
-      "Seeker · The Climb — live skill journey (learning progress + visible rank payoff + seeker-set proficiency)",
+      "Seeker · The Climb  live skill journey (learning progress + visible rank payoff + seeker-set proficiency)",
     type: "boolean",
   },
   {
     key: "feature_flag_seeker_demand_pulse",
     label:
-      "Seeker · Demand Pulse — weekly “your skill is heating up near you” nudge",
+      "Seeker · Demand Pulse  weekly “your skill is heating up near you” nudge",
     type: "boolean",
   },
   {
     key: "feature_flag_seeker_ai_coach",
     label:
-      "Seeker · AI Career Coach — interview practice (also requires a configured + budgeted LLM provider on /admin/llm)",
+      "Seeker · AI Career Coach  interview practice (also requires a configured + budgeted LLM provider on /admin/llm)",
     type: "boolean",
   },
   {
     key: "feature_flag_living_catalog",
     label:
-      "Seeker · Living Learning Catalog — path reviews + “recommended by N of M” roll-up on learning-path cards",
+      "Seeker · Living Learning Catalog  path reviews + “recommended by N of M” roll-up on learning-path cards",
     type: "boolean",
   },
   {
     key: "feature_flag_seeker_custom_skills",
     label:
-      "Seeker · Custom skills — add up to 3 self-described skills outside the taxonomy (never searchable until canonicalized)",
+      "Seeker · Custom skills  add up to 3 self-described skills outside the taxonomy (never searchable until canonicalized)",
     type: "boolean",
   },
   {
     key: "feature_flag_skill_prereqs",
     label:
-      "Seeker · Skill prerequisites — sequence recommendations (prereqs first), “Requires:” pills, and the “Unlocks next” moment",
+      "Seeker · Skill prerequisites  sequence recommendations (prereqs first), “Requires:” pills, and the “Unlocks next” moment",
     type: "boolean",
   },
   {
     key: "feature_flag_city_demand",
     label:
-      "Seeker · Hyper-local demand — “Your city’s hotspots” (top-5 metros only, k-anon floor, requires the seeker’s research-insights consent)",
+      "Seeker · Hyper-local demand  “Your city’s hotspots” (top-5 metros only, k-anon floor, requires the seeker’s research-insights consent)",
     type: "boolean",
   },
 ];

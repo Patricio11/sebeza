@@ -222,7 +222,7 @@ export default async function CareerCompassPage({
     : null;
   const nfmt = new Intl.NumberFormat(locale);
 
-  // Phase 17 ("The Climb") — flag-gated learning progress + visible rank
+  // Phase 17 ("The Climb")  flag-gated learning progress + visible rank
   // payoff. Off = today's learning loop. When on, compute the growth momentum
   // (skills grown, in flight, current → projected rank) + a single-skill
   // projection for the per-row completion modal.

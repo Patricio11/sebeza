@@ -61,7 +61,7 @@ export async function saveIntegration(
     .insert(schema.integrationSettings)
     .values({
       channel: ch.data,
-      enabled: false, // configuring never auto-enables — enabling is explicit
+      enabled: false, // configuring never auto-enables  enabling is explicit
       credentialsEnc: encryptField(JSON.stringify(cleanSecrets)),
       config: cfg.data as Record<string, string>,
       updatedAt: new Date(),

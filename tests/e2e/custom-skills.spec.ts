@@ -1,5 +1,5 @@
 /**
- * Phase 19.1 ("Custom Skills") — flag-gated seeker escape hatch on
+ * Phase 19.1 ("Custom Skills")  flag-gated seeker escape hatch on
  * /dashboard/profile.
  *
  * Flag OFF (the dark-ship default) = no "Self-described skills" section. Flag
@@ -22,7 +22,7 @@ test.beforeAll(async () => {
   const url = process.env.DATABASE_URL;
   if (!url) {
     throw new Error(
-      "DATABASE_URL missing — playwright.config loads it from .env.test.local.",
+      "DATABASE_URL missing  playwright.config loads it from .env.test.local.",
     );
   }
   sql = postgres(url, { max: 1 });
@@ -75,7 +75,7 @@ test("flag ON: a seeker can add then remove a custom skill", async ({
   await signInSeeker(page);
   await page.goto("/en/dashboard/profile");
 
-  // Scope to <main> — Next's streaming nav can transiently duplicate the
+  // Scope to <main>  Next's streaming nav can transiently duplicate the
   // outgoing DOM outside main, tripping strict mode on bare selectors.
   const main = page.getByRole("main");
   await expect(main.getByText("Self-described skills")).toBeVisible();

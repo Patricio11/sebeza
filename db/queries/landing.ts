@@ -13,7 +13,7 @@ import { sql } from "drizzle-orm";
 import { getDb } from "@/db/client";
 
 export interface LandingTrends {
-  /** e.g. "+8.2% MoM" — null when last month has no baseline. */
+  /** e.g. "+8.2% MoM"  null when last month has no baseline. */
   activesTrend: string | null;
   hiresTrend: string | null;
 }

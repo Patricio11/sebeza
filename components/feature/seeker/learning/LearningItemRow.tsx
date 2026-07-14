@@ -154,7 +154,7 @@ export function LearningItemRow({
             </a>
           )}
 
-          {/* Phase 17 — self-paced progress checkpoints (the climb). */}
+          {/* Phase 17  self-paced progress checkpoints (the climb). */}
           {skillJourney && item.state === "in_progress" && (
             <div className="mt-3">
               <div className="mb-1.5 flex items-center justify-between text-[0.62rem] uppercase tracking-[0.18em] text-[color:var(--color-ink-soft)]">

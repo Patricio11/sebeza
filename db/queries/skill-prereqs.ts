@@ -24,7 +24,7 @@ export async function listPrereqsForSkills(
   return rows;
 }
 
-/** Every edge (raw) — for cycle-checking in the write path. */
+/** Every edge (raw)  for cycle-checking in the write path. */
 export async function listAllPrereqEdges(): Promise<PrereqEdge[]> {
   const db = getDb();
   return db
@@ -43,7 +43,7 @@ export interface AdminPrereqRow {
   reason: string;
 }
 
-/** Every edge with both skill labels resolved — for the admin surface. */
+/** Every edge with both skill labels resolved  for the admin surface. */
 export async function listAllPrereqsAdmin(): Promise<AdminPrereqRow[]> {
   const db = getDb();
   const skillTbl = schema.skills;

@@ -1,5 +1,5 @@
 /**
- * Phase 21 (21.0) — city capture. The /search write path persists the full
+ * Phase 21 (21.0)  city capture. The /search write path persists the full
  * `filters` object, so an employer search scoped to a city records that city in
  * `search_events.filters->>'city'` (province still always written). This is the
  * raw signal Phase 21.1 aggregates behind its k-anonymity + consent gates.

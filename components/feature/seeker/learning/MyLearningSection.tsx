@@ -17,7 +17,7 @@ import { Bookmark, Sparkles } from "lucide-react";
 interface Props {
   items: MyLearningRow[];
   locale: string;
-  /** Phase 17 ("The Climb") — flag + rank-payoff context. Off = today's UI. */
+  /** Phase 17 ("The Climb")  flag + rank-payoff context. Off = today's UI. */
   skillJourney?: boolean;
   momentum?: GrowthMomentum | null;
   poolLabel?: string | null;
@@ -59,7 +59,7 @@ export function MyLearningSection({
         </span>
       </header>
 
-      {/* Phase 17 ("The Climb") — growth momentum (visible rank payoff). */}
+      {/* Phase 17 ("The Climb")  growth momentum (visible rank payoff). */}
       {skillJourney && momentum && (
         <div className="mb-6">
           <GrowthMomentumCard momentum={momentum} />

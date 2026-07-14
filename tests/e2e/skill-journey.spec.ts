@@ -1,8 +1,8 @@
 /**
- * Phase 17 ("The Climb") — flag-gated seeker skill journey.
+ * Phase 17 ("The Climb")  flag-gated seeker skill journey.
  *
  * With `feature_flag_seeker_skill_journey` OFF (the dark-ship default), the
- * Career Compass renders exactly as before — covered by the other seeker
+ * Career Compass renders exactly as before  covered by the other seeker
  * specs. This spec flips the flag ON, seeds one in-progress learning item for
  * andile-z, and asserts the two new surfaces render:
  *   - the growth-momentum card (the visible rank payoff), and
@@ -27,7 +27,7 @@ test.beforeAll(async () => {
   const url = process.env.DATABASE_URL;
   if (!url) {
     throw new Error(
-      "DATABASE_URL missing — playwright.config loads it from .env.test.local.",
+      "DATABASE_URL missing  playwright.config loads it from .env.test.local.",
     );
   }
   sql = postgres(url, { max: 1 });
@@ -78,7 +78,7 @@ test("The Climb surfaces the growth momentum + progress checkpoints when the fla
   await page.goto("/en/dashboard/grow");
   await expect(page.locator("main")).toBeVisible();
 
-  // The growth-momentum card (visible rank payoff) — eyebrow "Your growth".
+  // The growth-momentum card (visible rank payoff)  eyebrow "Your growth".
   await expect(page.getByText("Your growth", { exact: false }).first()).toBeVisible();
 
   // Per-item self-paced progress on the seeded in-progress item.

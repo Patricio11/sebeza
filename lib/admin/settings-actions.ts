@@ -82,7 +82,7 @@ const KEY_SCHEMAS = {
   // after configuring + testing a provider on /admin/llm. Zero spend
   // posture mirrors SMS / WhatsApp.
   feature_flag_llm_curriculum_enabled: z.boolean(),
-  // Seeker growth suite — three flag-gated seeker features, all ship dark.
+  // Seeker growth suite  three flag-gated seeker features, all ship dark.
   feature_flag_seeker_skill_journey: z.boolean(),
   feature_flag_seeker_demand_pulse: z.boolean(),
   feature_flag_seeker_ai_coach: z.boolean(),

@@ -25,7 +25,7 @@ export default async function AdminCrisisResourcesPage({
       role="admin"
       pageEyebrow="AI Coach safety"
       pageTitle="Crisis resources"
-      pageSubtitle="Verified crisis-support lines shown when the AI Coach detects a seeker in distress. Add + activate real, current resources before enabling the coach — a wrong number is a safety failure."
+      pageSubtitle="Verified crisis-support lines shown when the AI Coach detects a seeker in distress. Add + activate real, current resources before enabling the coach  a wrong number is a safety failure."
     >
       <CrisisResourcesManager resources={resources} />
     </DashboardMasthead>

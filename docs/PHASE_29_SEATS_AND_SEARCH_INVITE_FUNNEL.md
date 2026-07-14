@@ -1,9 +1,9 @@
-# PHASE 29 — VACANCY SEATS + THE SEAMLESS SEARCH-INVITE FUNNEL
+# PHASE 29  VACANCY SEATS + THE SEAMLESS SEARCH-INVITE FUNNEL
 
 *Opened 2026-07-08. Founder request: (a) the approved "positions / headcount" recommendation
 (truthful seat count instead of blind auto-invite), and (b) a seamless public-search invite
 funnel: anyone can select candidates on `/search`; the moment they act they're routed through
-sign-in, their selection survives, and they finish with a vacancy picker — including a
+sign-in, their selection survives, and they finish with a vacancy picker  including a
 create-a-vacancy detour that returns them to complete the invites.*
 
 > **Discipline (unchanged):** `test:all` + E2E at desktop + 360px green + clean migrations
@@ -11,14 +11,14 @@ create-a-vacancy detour that returns them to complete the invites.*
 > gate + 50-cap; selection stores only PUBLIC identifiers (handle + display name).
 
 ## 29.1 Vacancy seats (`positions`)
-- Migration `0061`: `vacancies.positions integer` (NULL = unspecified — many SA vacancies
+- Migration `0061`: `vacancies.positions integer` (NULL = unspecified  many SA vacancies
   genuinely have no fixed headcount; the field never fabricates one).
 - `vacancyInputSchema` + `VacancyForm` ("Open positions (optional)", 1–999) + seats context
   on the match page ("N positions · X invited").
 
 ## 29.2 Select top N (match page)
 - With `positions` set, `BulkInviteIsland` gains a "Select top N" button that ticks the first
-  N eligible (not-yet-invited, consent-visible) rows. Human stays in the loop — it fills the
+  N eligible (not-yet-invited, consent-visible) rows. Human stays in the loop  it fills the
   selection; the existing explicit send button still does the sending.
 
 ## 29.3 `bulkInviteByHandles` (server)
@@ -40,7 +40,7 @@ create-a-vacancy detour that returns them to complete the invites.*
 ## 29.5 Create-vacancy detour
 - Picker's "create a new vacancy" carries `?returnTo=<validated internal path>` into
   `/employer/vacancies/new`; after create, the form redirects back to the search URL with
-  `invite=1` — dialog reopens, selection intact, new vacancy in the list.
+  `invite=1`  dialog reopens, selection intact, new vacancy in the list.
 
 ## 📌 STATUS
 - [x] 29.1 `positions` (migration `0061`, zod 1–999 nullable, form field, VacancyRow read shape,

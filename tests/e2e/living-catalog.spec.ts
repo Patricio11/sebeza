@@ -1,5 +1,5 @@
 /**
- * Phase 18.1 ("Living Learning Catalog") — flag-gated seeker path-review loop.
+ * Phase 18.1 ("Living Learning Catalog")  flag-gated seeker path-review loop.
  *
  * Flag OFF (the dark-ship default) = the learning-path cards on /dashboard/grow
  * are exactly as before (no review control). Flag ON = each card gains a "Took
@@ -21,7 +21,7 @@ test.beforeAll(async () => {
   const url = process.env.DATABASE_URL;
   if (!url) {
     throw new Error(
-      "DATABASE_URL missing — playwright.config loads it from .env.test.local.",
+      "DATABASE_URL missing  playwright.config loads it from .env.test.local.",
     );
   }
   sql = postgres(url, { max: 1 });

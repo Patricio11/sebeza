@@ -15,7 +15,7 @@
 // ── 22.3: output moderation ──────────────────────────────────────────────────
 
 const QUESTION_BLOCK_PATTERNS: RegExp[] = [
-  // Promises / outcome claims — an interview PRACTICE question never asserts these.
+  // Promises / outcome claims  an interview PRACTICE question never asserts these.
   /\b(you(?:'re| are) hired|you got the job|you(?:'ll| will) get (?:the|this) (?:job|role|position)|guaranteed?|you passed|we(?:'ll| will) hire you|offer you the (?:job|role|position))\b/i,
   // Contact details have no place in a practice question.
   /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/, // email

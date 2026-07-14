@@ -12,7 +12,7 @@ import type { MetadataRoute } from "next";
  */
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Sebenza — South African talent platform",
+    name: "Sebenza  South African talent platform",
     short_name: "Sebenza",
     description:
       "Find skilled people near you. Get found for the work you do. POPIA-compliant, freshness-weighted talent data for South Africa.",

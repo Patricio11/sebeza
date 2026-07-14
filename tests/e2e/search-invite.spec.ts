@@ -1,5 +1,5 @@
 /**
- * Phase 29 — the seamless /search invite funnel, end to end:
+ * Phase 29  the seamless /search invite funnel, end to end:
  *
  *   logged-out visitor selects candidates on the PUBLIC search
  *     → floating bar → "Invite" → sign-in gate (selection saved locally)
@@ -14,7 +14,7 @@
  *
  * Self-resetting: the funnel vacancy (and its invitations) are deleted
  * at start + end so desktop/mobile runs and re-runs stay independent.
- * Candidates: andile-z + lerato-n — the two seeded seekers holding
+ * Candidates: andile-z + lerato-n  the two seeded seekers holding
  * `vacancy_matching` consent, so exactly 2 invites send (0 skipped).
  */
 import { expect, test, type Page, type TestInfo } from "@playwright/test";
@@ -38,14 +38,14 @@ async function cleanupFunnelVacancy() {
 
 test.beforeAll(async () => {
   const url = process.env.DATABASE_URL;
-  if (!url) throw new Error("DATABASE_URL missing — see playwright.config.");
+  if (!url) throw new Error("DATABASE_URL missing  see playwright.config.");
   sql = postgres(url, { max: 1 });
   await cleanupFunnelVacancy();
 
   // Self-sufficient consent posture: the funnel asserts "2 sent, 0
   // skipped", which requires the SEEDED vacancy_matching grants for
   // both candidates. An integration suite historically wiped one
-  // (reveal-placement-gates — now fixed to restore), so we pin the
+  // (reveal-placement-gates  now fixed to restore), so we pin the
   // posture here instead of trusting suite order. Granted IS the seed
   // state for these two, so no afterAll reversal is needed.
   for (const handle of ["andile-z", "lerato-n"]) {
@@ -103,7 +103,7 @@ test("public multi-select → sign-in → create-vacancy detour → bulk invite"
   await expect(bar).toContainText("2 candidates selected");
   await shoot(page, testInfo, "funnel-1-selection-bar");
 
-  // The selection lives in localStorage — a reload must not lose it.
+  // The selection lives in localStorage  a reload must not lose it.
   await page.reload();
   await expect(bar).toContainText("2 candidates selected");
 
@@ -150,7 +150,7 @@ test("public multi-select → sign-in → create-vacancy detour → bulk invite"
   // Province is a CustomSelect (button + listbox), not a native <select>.
   await page.getByRole("button", { name: "Province" }).click();
   await page.getByRole("option", { name: "Gauteng", exact: true }).click();
-  // Phase 29.1 — the new headcount field.
+  // Phase 29.1  the new headcount field.
   await page.getByLabel(/open positions/i).fill("2");
   await shoot(page, testInfo, "funnel-4-vacancy-form");
   await page.getByRole("button", { name: /^Create vacancy$/ }).click();

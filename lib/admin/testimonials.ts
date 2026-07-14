@@ -23,7 +23,7 @@ export type AdminTestimonialResult =
 
 function revalidate() {
   revalidatePath("/admin/testimonials");
-  // The landing rail lives under /[locale] — layout-scoped revalidation
+  // The landing rail lives under /[locale]  layout-scoped revalidation
   // invalidates every locale's landing in one call.
   revalidatePath("/", "layout");
 }
@@ -87,7 +87,7 @@ export async function createTestimonial(
     quote: parsed.data.quote,
     displayName: parsed.data.displayName,
     displayContext: parsed.data.displayContext,
-    consentDisplay: true, // admin-authored copy — the admin owns it
+    consentDisplay: true, // admin-authored copy  the admin owns it
     state: "approved",
     sortOrder: (agg?.max ?? 0) + 1,
   });
