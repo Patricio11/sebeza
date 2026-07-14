@@ -109,6 +109,24 @@ afterAll(async () => {
   await db.execute(
     sql`DELETE FROM audit_log WHERE meta->>'phase12Test' = 'true'`,
   );
+  // Phase 29 fix  RESTORE the seeded consent posture this suite
+  // mutates via setConsent (it deletes/rewrites contact_reveal +
+  // vacancy_matching for both fixture seekers). Without this, every
+  // integration run silently stripped lerato-n's seeded
+  // `vacancy_matching` grant, which downstream E2E (the /search
+  // invite funnel) depends on. Seed posture: vacancy_matching =
+  // granted for both; contact_reveal = 'none' row.
+  for (const seeker of [SEEKER_A, SEEKER_B]) {
+    await setConsent(seeker.userId, "vacancy_matching", "granted");
+    await setConsent(seeker.userId, "contact_reveal", "delete");
+    await db.insert(schema.consents).values({
+      id: randomUUID(),
+      userId: seeker.userId,
+      purpose: "contact_reveal",
+      state: "none",
+      version: "v2.1",
+    });
+  }
 });
 
 describe("revealContact  the three-lock gate", () => {

@@ -35,7 +35,17 @@ import {
   type OpenVacancyOption,
 } from "@/lib/employer/vacancies";
 import { formatVacancyLocation } from "@/lib/employer/vacancies-display";
-import { InviteFromSearchButton } from "@/components/feature/employer/vacancies/InviteFromSearchButton";
+import {
+  InviteFromSearchButton,
+  type InviteFromSearchVacancy,
+} from "@/components/feature/employer/vacancies/InviteFromSearchButton";
+// Phase 29.4  the seamless multi-select invite funnel: checkbox per row,
+// floating action bar, sign-in / verification / vacancy-picker dialog.
+import {
+  SearchInviteProvider,
+  SelectCandidateCheckbox,
+  type SearchInviteViewer,
+} from "@/components/feature/search/SearchInviteSelection";
 
 interface SearchPageProps {
   params: Promise<{ locale: string }>;
@@ -142,8 +152,14 @@ export default async function SearchPage({ params, searchParams }: SearchPagePro
     /** Active invitations keyed by `profileId`. */
     activeInvitations: Map<string, Set<string>>;
   } | null = null;
+  // Phase 29.4  which invite-funnel leg this viewer gets. NULL = no
+  // selection UI at all (seeker / gov / admin: the action can never
+  // apply to them  hide-not-disable).
+  let inviteViewer: SearchInviteViewer | null = null;
   const session = await getSessionUser();
-  if (session?.role === "employer" && result.profiles.length > 0) {
+  if (!session) {
+    inviteViewer = "logged_out";
+  } else if (session.role === "employer") {
     const db = getDb();
     const orgRow = await db
       .select({
@@ -162,15 +178,19 @@ export default async function SearchPage({ params, searchParams }: SearchPagePro
       )
       .limit(1);
     if (orgRow[0]?.verification === "verified") {
+      inviteViewer = "employer_verified";
       const vacancies = await listMyOrgOpenVacancies();
       const handles = result.profiles.map((p) => p.handle);
-      const idRows = await db
-        .select({
-          id: schemaDb.profiles.id,
-          handle: schemaDb.profiles.handle,
-        })
-        .from(schemaDb.profiles)
-        .where(inArray(schemaDb.profiles.handle, handles));
+      const idRows =
+        handles.length > 0
+          ? await db
+              .select({
+                id: schemaDb.profiles.id,
+                handle: schemaDb.profiles.handle,
+              })
+              .from(schemaDb.profiles)
+              .where(inArray(schemaDb.profiles.handle, handles))
+          : [];
       const profileIdByHandle = new Map(
         idRows.map((r) => [r.handle, r.id] as const),
       );
@@ -180,8 +200,30 @@ export default async function SearchPage({ params, searchParams }: SearchPagePro
           ? await activeInvitationsByProfileForMyOrg(profileIds)
           : new Map<string, Set<string>>();
       inviteCtx = { vacancies, profileIdByHandle, activeInvitations };
+    } else {
+      // Employer without a verified org (incl. no org yet)  the funnel
+      // shows the honest verification gate instead of the picker.
+      inviteViewer = "employer_unverified";
     }
   }
+
+  // The picker payload for the selection dialog (verified employers only;
+  // empty for the other legs). Same location formatting as the per-row
+  // single-invite island so the two pickers read identically.
+  const pickerVacancies: InviteFromSearchVacancy[] = (
+    inviteCtx?.vacancies ?? []
+  ).map((v) => ({
+    id: v.id,
+    title: v.title,
+    // Phase 29.4  drafts are invitable (the action always allowed it)
+    // and now listed; the subtitle labels them honestly.
+    locationLabel:
+      formatVacancyLocation({
+        provinceSlug: v.provinceSlug,
+        citySlug: null,
+        workAvailability: v.workAvailability,
+      }) + (v.status === "draft" ? "  ·  Draft" : ""),
+  }));
 
   const province = findProvinceBySlug(filters.province ?? undefined);
   const city = findCityBySlug(filters.city ?? undefined);
@@ -283,6 +325,10 @@ export default async function SearchPage({ params, searchParams }: SearchPagePro
           <div className="grid grid-cols-1 gap-10 py-6 md:grid-cols-[260px_1fr] md:gap-12 md:py-10">
             <SearchFilters defaultFilters={filters} query={query} />
 
+            <MaybeInviteProvider
+              viewer={inviteViewer}
+              vacancies={pickerVacancies}
+            >
             <section aria-label="Talent roster">
               {result.profiles.length === 0 ? (
                 <EmptyState
@@ -324,6 +370,17 @@ export default async function SearchPage({ params, searchParams }: SearchPagePro
                               highlightCitizen={filters.highlightCitizens}
                               verificationVisible={verificationVisible}
                               trailingAction={renderInviteSlot(p.handle, p.displayName, inviteCtx)}
+                              // Phase 29.4  selection checkbox for the
+                              // invite funnel (absent for seeker/gov/admin
+                              // viewers  the provider isn't rendered).
+                              leadingSelect={
+                                inviteViewer ? (
+                                  <SelectCandidateCheckbox
+                                    handle={p.handle}
+                                    displayName={p.displayName}
+                                  />
+                                ) : null
+                              }
                             />
                           </li>
                         </Fragment>
@@ -352,6 +409,7 @@ export default async function SearchPage({ params, searchParams }: SearchPagePro
                 </>
               )}
             </section>
+            </MaybeInviteProvider>
           </div>
         </div>
       </main>
@@ -372,6 +430,29 @@ export default async function SearchPage({ params, searchParams }: SearchPagePro
  * lookup) silently degrades to "no button"  honest end-state, never
  * a broken affordance.
  */
+/**
+ * Phase 29.4  wraps the roster in the invite-funnel provider (checkbox
+ * context + floating bar + dialog) for viewers the funnel applies to.
+ * Seeker / gov / admin viewers get the bare section  no selection UI
+ * exists for them at all (hide-not-disable).
+ */
+function MaybeInviteProvider({
+  viewer,
+  vacancies,
+  children,
+}: {
+  viewer: SearchInviteViewer | null;
+  vacancies: InviteFromSearchVacancy[];
+  children: React.ReactNode;
+}) {
+  if (!viewer) return <>{children}</>;
+  return (
+    <SearchInviteProvider viewer={viewer} vacancies={vacancies}>
+      {children}
+    </SearchInviteProvider>
+  );
+}
+
 function renderInviteSlot(
   handle: string,
   displayName: string,
@@ -399,11 +480,13 @@ function renderInviteSlot(
         // null-province vacancies + the conventional province label
         // for scoped ones. Empty string for city since /search
         // doesn't ship city scope on the open-vacancy summary.
-        locationLabel: formatVacancyLocation({
-          provinceSlug: v.provinceSlug,
-          citySlug: null,
-          workAvailability: v.workAvailability,
-        }),
+        // Phase 29.4  drafts are listed too, labelled honestly.
+        locationLabel:
+          formatVacancyLocation({
+            provinceSlug: v.provinceSlug,
+            citySlug: null,
+            workAvailability: v.workAvailability,
+          }) + (v.status === "draft" ? "  ·  Draft" : ""),
       }))}
       alreadyInvitedVacancyIds={alreadyInvitedVacancyIds}
     />

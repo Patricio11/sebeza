@@ -212,6 +212,8 @@ export default async function VacancyMatchPage({
             vacancyId={vacancy.id}
             vacancyTitle={vacancy.title}
             canInvite={canInvite}
+            // Phase 29.1  seat context + "Select top N" convenience.
+            positions={vacancy.positions}
             addToShortlistAction={async (profileId: string) => {
               "use server";
               const res = await addToVacancyShortlist({

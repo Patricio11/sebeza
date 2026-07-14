@@ -32,6 +32,14 @@ interface Props {
    */
   trailingAction?: ReactNode;
   /**
+   * Phase 29.4  optional leading slot rendered in its own first grid
+   * column (before the avatar). Used by /search to inject the
+   * candidate-selection checkbox for the invite funnel. Same contract
+   * as `trailingAction`: a generic ReactNode so the row stays free of
+   * viewer-role conditionals  the parent server page decides.
+   */
+  leadingSelect?: ReactNode;
+  /**
    * Phase 16.2.1  "near you" legibility. When the viewer has a city in
    * context (an employer's vacancy city on the match page), pass it here:
    * a quiet "Same city" chip lights up for candidates in that city so the
@@ -56,6 +64,7 @@ export function TalentRosterItem({
   highlightCitizen = false,
   verificationVisible = true,
   trailingAction = null,
+  leadingSelect = null,
   viewerCity = null,
   className,
 }: Props) {
@@ -70,12 +79,16 @@ export function TalentRosterItem({
   return (
     <article
       className={cn(
-        "group relative grid grid-cols-[auto_1fr] gap-4 border-b border-[color:var(--color-hairline)] py-5",
+        "group relative grid gap-4 border-b border-[color:var(--color-hairline)] py-5",
+        leadingSelect ? "grid-cols-[auto_auto_1fr]" : "grid-cols-[auto_1fr]",
         showCitizenHighlight &&
           "border-l-2 border-l-[color:var(--color-brand)] pl-4",
         className,
       )}
     >
+      {leadingSelect && (
+        <div className="flex items-start pt-2">{leadingSelect}</div>
+      )}
       <Avatar
         name={profile.displayName}
         photoUrl={profile.profilePhotoUrl}

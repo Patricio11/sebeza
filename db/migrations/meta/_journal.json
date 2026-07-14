@@ -428,6 +428,13 @@
       "when": 1783200000000,
       "tag": "0060_phase25_announcements_consent",
       "breakpoints": false
+    },
+    {
+      "idx": 61,
+      "version": "7",
+      "when": 1783286400000,
+      "tag": "0061_phase29_vacancy_positions",
+      "breakpoints": false
     }
   ]
 }

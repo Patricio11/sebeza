@@ -1103,6 +1103,29 @@ without violating No-Flash (no heavy JS, no animation library, no app-shell cach
 
 ---
 
+## 🧲 PHASE 29 — VACANCY SEATS + THE SEAMLESS SEARCH-INVITE FUNNEL *(shipped 2026-07-08)*
+
+**Thesis: the public search is the top of the employer funnel. Anyone can select candidates;
+the moment they act, they're routed through the right gate — and their selection survives.**
+Full detail: `docs/PHASE_29_SEATS_AND_SEARCH_INVITE_FUNNEL.md`.
+
+- [x] **29.1 Vacancy seats.** Optional `positions` headcount (migration `0061`; NULL = unspecified,
+  never fabricated) — form field + honest "N positions to fill" context on the match page.
+- [x] **29.2 Select top N.** With a headcount set, the match page fills the selection with the top
+  N eligible rows in the current view order; sending stays behind the explicit consent-gated modal.
+- [x] **29.3–29.6 The funnel.** Checkbox per public result row + floating action bar; selection in
+  localStorage (public identifiers only, cap 50) so it survives sign-in; `?invite=1` re-opens the
+  dialog on return. Legs: logged-out → sign-in gate; unverified employer → honest verification
+  gate; verified employer → vacancy picker (drafts listed + labelled) → `bulkInviteByHandles`
+  (handle→id resolution inside the verified boundary, delegating to the single consent-gated bulk
+  action) → honest sent/skipped counts. Create-vacancy detour round-trips via open-redirect-guarded
+  `?returnTo=` and reopens the dialog with the new vacancy in the list. Seekers/gov/admin see no
+  selection UI at all.
+- [x] **29.7 Verified.** `tests/e2e/search-invite.spec.ts` walks the whole funnel (incl. the detour
+  with positions=2 and the seat context) at desktop + 360px with screenshots; safe-path unit tests.
+
+---
+
 ## 🚀 DEPLOYMENT CHECKLIST
 
 ### Pre-Launch
@@ -1173,8 +1196,9 @@ HR Practitioner · Electrician · Plumber · Accountant · Nurse · Driver · Bo
 
 ---
 
-*Last Updated: 2026-07-07*
-*Version: 2.7  synced through **Phase 28** (PWA installability + floating mobile bottom nav across
+*Last Updated: 2026-07-08*
+*Version: 2.8  synced through **Phase 29** (vacancy seats + the seamless /search invite funnel).
+Prior: v2.7 synced through Phase 28 (PWA installability + floating mobile bottom nav across
 all role dashboards). Prior: v2.6 synced through Phase 27 — Phases 18–21 (seeker growth gaps), 22
 (AI-coach safety), 23–26 (truth/testimonials/integrations/security) + the governance sync all shipped;
 only Phase 14 (zero-rating, partnership-gated) remains. Remaining work is OPERATOR-side: Phase 10 Arc B

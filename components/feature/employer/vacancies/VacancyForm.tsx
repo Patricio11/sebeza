@@ -51,6 +51,8 @@ export interface VacancyFormValue {
   description?: string | null;
   documentsRequired: string[];
   inviteExpiryDays?: number | null;
+  /** Phase 29.1  optional headcount. NULL = unspecified (never fabricated). */
+  positions?: number | null;
   /** Phase 9.19  empty array = no constraint (matcher ignores axis). */
   workAvailability: WorkAvailabilityKind[];
   /** Phase 9.19  NULL = no constraint (matcher does NOT check this axis). */
@@ -114,6 +116,8 @@ interface VacancyDraft {
   salaryBand: string;
   description: string;
   inviteExpiryDays: string;
+  /** Phase 29.1  headcount as a form string; empty = unspecified. */
+  positions: string;
   skillSlugs: string[];
   // Phase 9.19  serialised as strings so the draft round-trips through JSON
   // cleanly. Empty string for the two numeric inputs = "blank = no constraint."
@@ -322,6 +326,10 @@ export function VacancyForm({
       ? String(initial.inviteExpiryDays)
       : "14",
   );
+  // Phase 29.1  optional headcount. Empty string = unspecified (NULL).
+  const [positions, setPositions] = useState<string>(
+    initial?.positions != null ? String(initial.positions) : "",
+  );
   const [skillSet, setSkillSet] = useState<Set<string>>(
     new Set(initial?.skillSlugs ?? []),
   );
@@ -397,6 +405,7 @@ export function VacancyForm({
       salaryBand,
       description,
       inviteExpiryDays,
+      positions,
       skillSlugs: Array.from(skillSet),
       workAvailability: Array.from(workAvailabilitySet),
       minYearsExperience,
@@ -416,6 +425,7 @@ export function VacancyForm({
       salaryBand,
       description,
       inviteExpiryDays,
+      positions,
       skillSet,
       workAvailabilitySet,
       minYearsExperience,
@@ -441,6 +451,7 @@ export function VacancyForm({
         if (draft.description !== undefined) setDescription(draft.description);
         if (draft.inviteExpiryDays !== undefined)
           setInviteExpiryDays(draft.inviteExpiryDays);
+        if (draft.positions !== undefined) setPositions(draft.positions);
         if (Array.isArray(draft.skillSlugs))
           setSkillSet(new Set(draft.skillSlugs));
         if (Array.isArray(draft.workAvailability))
@@ -506,6 +517,20 @@ export function VacancyForm({
     // Phase 9.19 D0  blank = no constraint. Empty string maps to NULL,
     // matcher then skips the axis entirely. Validate the numeric inputs
     // only when populated.
+    // Phase 29.1  blank = unspecified headcount (NULL). Validate only
+    // when populated.
+    const positionsRaw = positions.trim();
+    const positionsNum = positionsRaw === "" ? null : Number(positionsRaw);
+    if (
+      positionsNum !== null &&
+      (!Number.isFinite(positionsNum) || positionsNum < 1 || positionsNum > 999)
+    ) {
+      setError(
+        "Open positions must be empty, or a whole number between 1 and 999.",
+      );
+      return;
+    }
+
     const yearsRaw = minYearsExperience.trim();
     const yearsNum = yearsRaw === "" ? null : Number(yearsRaw);
     if (
@@ -555,6 +580,7 @@ export function VacancyForm({
       description: description.trim() || null,
       documentsRequired: [], // vNext  for now the matching uses skills + profession
       inviteExpiryDays: expiryNum,
+      positions: positionsNum,
       workAvailability: Array.from(workAvailabilitySet),
       minYearsExperience: yearsNum,
       minNqfLevel: nqfNum,
@@ -947,6 +973,23 @@ export function VacancyForm({
           onChange={(e) => setInviteExpiryDays(e.target.value)}
           disabled={pending}
           hint="14 days is the typical default; 0 or empty = never expires."
+        />
+
+        {/* Phase 29.1  optional headcount. Blank = unspecified; the match
+            page then shows plain invite counts with no seat framing. */}
+        <TextField
+          id="positions"
+          name="positions"
+          label="Open positions"
+          type="number"
+          inputMode="numeric"
+          min={1}
+          max={999}
+          optional
+          value={positions}
+          onChange={(e) => setPositions(e.target.value)}
+          disabled={pending}
+          hint="How many people you plan to hire on this vacancy. Leave empty if there's no fixed headcount  the match page then simply counts invites."
         />
 
         {/* Phase 9.19 D8  opt-in follow-up nudge. A single gentle

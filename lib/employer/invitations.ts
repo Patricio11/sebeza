@@ -476,6 +476,65 @@ export async function bulkInviteToVacancy(
   return ok({ invited: invitedCount, skipped: skippedCount });
 }
 
+const bulkInviteByHandlesSchema = z.object({
+  vacancyId: z.string().min(1),
+  // Same 50-cap as bulkInviteSchema  the /search selection is capped
+  // client-side at the same number.
+  handles: z.array(z.string().min(1).max(80)).min(1).max(50),
+  personalNote: z
+    .string()
+    .trim()
+    .max(200, "Note must be 200 characters or fewer.")
+    .optional(),
+});
+
+/**
+ * Phase 29.3  bulk-invite by PUBLIC handle, for the /search selection
+ * funnel. The public result row exposes `handle` only (Redaction Rule:
+ * internal profile ids never appear in public payloads), so the
+ * selection arrives as handles and gets resolved to profile ids HERE
+ * inside the same verified-employer boundary as every other invite
+ * write. Delegates to `bulkInviteToVacancy`, which stays the single
+ * home for consent gates, dedupe, caps, notifications and audit.
+ *
+ * Handles that no longer resolve (profile deleted between selection
+ * and send) are reported inside the returned `skipped` count  the
+ * caller sees honest totals, never a silent shrink.
+ */
+export async function bulkInviteByHandles(
+  input: z.infer<typeof bulkInviteByHandlesSchema>,
+): Promise<ActionResult<{ invited: number; skipped: number }>> {
+  const guard = await requireEditRole();
+  if (!guard.ok) return guard;
+
+  const parsed = bulkInviteByHandlesSchema.safeParse(input);
+  if (!parsed.success) return fail("Invalid invite request.");
+  const { vacancyId, handles, personalNote } = parsed.data;
+
+  const db = getDb();
+  const rows = await db
+    .select({ id: schema.profiles.id, handle: schema.profiles.handle })
+    .from(schema.profiles)
+    .where(inArray(schema.profiles.handle, Array.from(new Set(handles))));
+  const unresolved = handles.length - rows.length;
+
+  if (rows.length === 0) {
+    // Nothing resolvable  every selection entry is stale. Honest zero.
+    return ok({ invited: 0, skipped: handles.length });
+  }
+
+  const res = await bulkInviteToVacancy({
+    vacancyId,
+    profileIds: rows.map((r) => r.id),
+    ...(personalNote && personalNote.length > 0 ? { personalNote } : {}),
+  });
+  if (!res.ok) return res;
+  return ok({
+    invited: res.invited,
+    skipped: res.skipped + Math.max(0, unresolved),
+  });
+}
+
 const withdrawSchema = z.object({
   invitationId: z.string().min(1),
 });

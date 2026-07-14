@@ -23,6 +23,7 @@ import {
 import { getProfessions, getSkills } from "@/lib/taxonomy/query";
 import { PROVINCES } from "@/lib/mock/taxonomy";
 import { HelpLink } from "@/components/feature/help/HelpLink";
+import { safeInternalPath } from "@/lib/nav/safe-internal-path";
 
 export const revalidate = 0;
 
@@ -31,7 +32,7 @@ export default async function NewVacancyPage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ duplicateFrom?: string }>;
+  searchParams: Promise<{ duplicateFrom?: string; returnTo?: string }>;
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
@@ -47,7 +48,14 @@ export default async function NewVacancyPage({
   // (org-scoped via getMyVacancy) and pre-fill the form. The new
   // vacancy is its own draft  saving doesn't touch the source row.
   // Title suffix " (copy)" so the editor knows which is which.
-  const { duplicateFrom } = await searchParams;
+  const { duplicateFrom, returnTo } = await searchParams;
+  // Phase 29.5  the /search invite funnel's create-vacancy detour. The
+  // validated internal path (open-redirect guarded) becomes the form's
+  // success destination, so the employer lands back on their search
+  // results with `?invite=1` re-opening the selection dialog. Locale-
+  // stripped by the caller; VacancyForm pushes it through the i18n
+  // router which re-adds the prefix.
+  const successRedirect = safeInternalPath(returnTo, "/employer/vacancies");
   // Phase 9.21  the form's `initial` prop accepts either the flat
   // VacancyFormValue shape OR a nested `seasonalWindow` object (read
   // shape). The duplicate-from-existing path uses the nested object
@@ -123,7 +131,7 @@ export default async function NewVacancyPage({
               ? { ok: true }
               : { ok: false, message: res.message };
           }}
-          redirectTo="/employer/vacancies"
+          redirectTo={successRedirect}
           submitLabel="Create vacancy"
         />
       </div>

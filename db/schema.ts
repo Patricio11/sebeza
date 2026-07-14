@@ -1388,6 +1388,13 @@ export const vacancies = pgTable(
      */
     inviteExpiryDays: integer("invite_expiry_days"),
     /**
+     * Phase 29.1  optional headcount ("2 positions"). NULL = unspecified;
+     * many SA vacancies (casual, seasonal, rolling intake) have no fixed
+     * seat count and the field never fabricates one. Drives the honest
+     * seat context on the match page + the "Select top N" convenience.
+     */
+    positions: integer("positions"),
+    /**
      * Phase 9.19  vacancy-side match enrichment. All three columns
      * follow the D0 "vacancy is the source of truth" principle: empty
      * array / NULL = the matcher does NOT constrain on that axis.

@@ -113,6 +113,14 @@ export interface BulkInviteIslandProps {
   vacancyId: string;
   vacancyTitle: string;
   canInvite: boolean;
+  /**
+   * Phase 29.1  the vacancy's optional headcount. NULL = unspecified
+   * (no seat framing anywhere). When set, the eligibility strip shows
+   * honest seat context and offers "Select top N"  a convenience that
+   * fills the selection with the N best-ranked eligible rows; sending
+   * still happens through the explicit, consent-gated confirm modal.
+   */
+  positions?: number | null;
   items: BulkInviteItem[];
   /**
    * Phase 9.19 Tier 2  add/remove the (vacancy, profile) pair from
@@ -136,6 +144,7 @@ export function BulkInviteIsland({
   vacancyId,
   vacancyTitle,
   canInvite,
+  positions = null,
   items,
   addToShortlistAction,
   removeFromShortlistAction,
@@ -257,6 +266,19 @@ export function BulkInviteIsland({
       new Set(
         displayItems
           .filter((i) => !i.alreadyInvited)
+          .map((i) => i.profileId),
+      ),
+    );
+  }
+  /** Phase 29.2  fill the selection with the top N eligible rows in the
+   *  CURRENT view order (so "best match" honours the ranking, and an
+   *  active sort/filter honours what the employer is looking at). */
+  function selectTopN(n: number) {
+    setSelected(
+      new Set(
+        displayItems
+          .filter((i) => !i.alreadyInvited)
+          .slice(0, n)
           .map((i) => i.profileId),
       ),
     );
@@ -511,8 +533,29 @@ export function BulkInviteIsland({
               {selectedCount === 0
                 ? `${eligibleDisplayed} candidate${eligibleDisplayed === 1 ? "" : "s"} eligible to invite`
                 : `${selectedCount} selected of ${eligibleDisplayed} eligible`}
+              {/* Phase 29.1  honest seat context; only when the vacancy
+                  actually declared a headcount. */}
+              {positions != null && positions > 0 && (
+                <span className="ml-1">
+                  · {positions} position{positions === 1 ? "" : "s"} to fill
+                </span>
+              )}
             </span>
             <div className="flex gap-3">
+              {/* Phase 29.2  fill the selection with the top N by the
+                  current view order. Convenience only  the send still
+                  goes through the explicit confirm modal. */}
+              {positions != null &&
+                positions > 0 &&
+                positions < eligibleDisplayed && (
+                  <button
+                    type="button"
+                    onClick={() => selectTopN(positions)}
+                    className="rounded-[var(--radius-pill)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] px-2.5 py-1 hover:border-[color:var(--color-ink)] hover:text-[color:var(--color-ink)]"
+                  >
+                    Select top {positions}
+                  </button>
+                )}
               <button
                 type="button"
                 onClick={selectAll}

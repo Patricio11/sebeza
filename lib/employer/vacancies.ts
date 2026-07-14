@@ -110,6 +110,8 @@ export interface VacancyRow {
   documentsRequired: string[];
   status: VacancyStatus;
   inviteExpiryDays: number | null;
+  /** Phase 29.1  optional headcount. NULL = unspecified (never fabricated). */
+  positions: number | null;
   /** Phase 9.19  what work modes / employment types the role offers.
    *  Empty array = "no constraint" (matcher ignores this axis). */
   workAvailability: WorkAvailabilityKind[];
@@ -149,6 +151,7 @@ function rowToVacancy(r: typeof schema.vacancies.$inferSelect): VacancyRow {
     documentsRequired: r.documentsRequired ?? [],
     status: r.status as VacancyStatus,
     inviteExpiryDays: r.inviteExpiryDays ?? null,
+    positions: r.positions ?? null,
     workAvailability: (r.workAvailability ?? []) as WorkAvailabilityKind[],
     minYearsExperience: r.minYearsExperience ?? null,
     minNqfLevel: r.minNqfLevel ?? null,
@@ -222,6 +225,9 @@ export interface OpenVacancyOption {
   /** Phase 13.9  picker subtitle needs work-mode awareness to render
    *  "Any province · Remote / Hybrid" correctly. */
   workAvailability: WorkAvailabilityKind[];
+  /** Phase 29.4  drafts are listed too (the invite action has always
+   *  accepted them); the picker labels them so the employer knows. */
+  status: "open" | "draft";
 }
 
 export async function listMyOrgOpenVacancies(): Promise<OpenVacancyOption[]> {
@@ -235,12 +241,18 @@ export async function listMyOrgOpenVacancies(): Promise<OpenVacancyOption[]> {
       professionSlug: schema.vacancies.professionSlug,
       provinceSlug: schema.vacancies.provinceSlug,
       workAvailability: schema.vacancies.workAvailability,
+      status: schema.vacancies.status,
     })
     .from(schema.vacancies)
     .where(
       and(
         eq(schema.vacancies.organizationId, session.orgId),
-        eq(schema.vacancies.status, "open"),
+        // Phase 29.4  drafts included: `bulkInviteToVacancy` has always
+        // accepted open + draft, and the /search funnel's create-vacancy
+        // detour produces a draft that must appear in the picker
+        // immediately. Closed / filled stay excluded  those genuinely
+        // don't accept new invites.
+        inArray(schema.vacancies.status, ["open", "draft"]),
       ),
     )
     .orderBy(desc(schema.vacancies.createdAt));
@@ -250,6 +262,7 @@ export async function listMyOrgOpenVacancies(): Promise<OpenVacancyOption[]> {
     professionSlug: r.professionSlug,
     provinceSlug: r.provinceSlug,
     workAvailability: (r.workAvailability ?? []) as WorkAvailabilityKind[],
+    status: r.status as "open" | "draft",
   }));
 }
 
@@ -398,6 +411,16 @@ const vacancyInputSchema = z.object({
     .int()
     .min(1)
     .max(365)
+    .nullable()
+    .optional(),
+  /** Phase 29.1  optional headcount ("2 positions"). NULL / omitted =
+   *  unspecified: never fabricated. Drives the honest seat context on
+   *  the match page + the "Select top N" convenience. */
+  positions: z.coerce
+    .number()
+    .int()
+    .min(1)
+    .max(999)
     .nullable()
     .optional(),
   /** Phase 9.19 D0/D1  work modes / employment types the role offers.
@@ -582,6 +605,7 @@ export async function createVacancy(
     documentsRequired: v.documentsRequired ?? [],
     status: "draft" as const,
     inviteExpiryDays: v.inviteExpiryDays ?? null,
+    positions: v.positions ?? null,
     workAvailability: v.workAvailability ?? [],
     minYearsExperience: v.minYearsExperience ?? null,
     minNqfLevel: v.minNqfLevel ?? null,
@@ -690,6 +714,7 @@ export async function updateVacancy(
       description: v.description ?? null,
       documentsRequired: v.documentsRequired ?? [],
       inviteExpiryDays: v.inviteExpiryDays ?? null,
+      positions: v.positions ?? null,
       workAvailability: v.workAvailability ?? [],
       minYearsExperience: v.minYearsExperience ?? null,
       minNqfLevel: v.minNqfLevel ?? null,
