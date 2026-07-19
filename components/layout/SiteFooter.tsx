@@ -95,7 +95,9 @@ export function SiteFooter() {
 
         {/* Bottom band */}
         <div className="mt-16 flex flex-wrap items-center justify-between gap-3 border-t border-[color:var(--color-paper)]/15 pt-6 text-xs text-[color:var(--color-paper)]/60">
-          <span>{t("rights")}</span>
+          {/* © + name + year  the copyright-notice formula. The year is
+              computed server-side so the notice never goes stale. */}
+          <span>{t("rights", { year: new Date().getFullYear() })}</span>
           <span className="font-display italic">
             South African talent. Visible. In real time.
           </span>

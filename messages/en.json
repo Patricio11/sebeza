@@ -69,7 +69,7 @@
       "terms": "Terms",
       "accessibility": "Accessibility",
       "language": "Language",
-      "rights": "© 2026 Sebenza. A national talent platform for South Africa."
+      "rights": "© {year} Sebenza. A national talent platform for South Africa."
     }
   },
   "auth": {
