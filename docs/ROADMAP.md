@@ -1126,6 +1126,27 @@ Full detail: `docs/PHASE_29_SEATS_AND_SEARCH_INVITE_FUNNEL.md`.
 
 ---
 
+## 🛡️ PHASE 31 — DATA MINIMISATION: DORMANT ID COLLECTION + TWO-CLASS CITIZEN CAPTURE *(shipped 2026-07-19)*
+
+**Thesis: don't hold the heaviest POPIA liability in the system while nothing uses it.** Full plan:
+`docs/PHASE_9_19_PLAN.md` (drafted under that name; ships as Phase 31 — "9.19" was already taken by
+the shipped vacancy-enrichment phase). Responsible party: **Yetotec (Pty) Ltd**.
+
+- [x] **31.1 Dormant ID/passport collection.** `feature_flag_id_verification_enabled` (default OFF,
+  ack-gated switch on /admin/verifications). While OFF — the launch posture — no ID or passport is
+  requested anywhere: the profile editor shows Date-of-birth only and the collection Server Actions
+  hard-refuse. Removal/revoke paths are NEVER gated (data-subject rights). Flipping ON restores the
+  full 9.16 opt-in KYC flow exactly as built — a toggle, not a rebuild.
+- [x] **31.2 Two-class citizen capture (Option A).** The 191-country picker is gone; sign-up asks one
+  "South African citizen? Yes/No" (never a gate — copy says so). `is_citizen` stays the single source
+  of truth for the 9.7 analytics + Citizen-Visibility ranking (verified: nothing reads the raw label
+  except display). Label write path retired; legacy labels display-only, column drops next release.
+- [x] **31.3 Governance.** DPIA addendum R-26 (risk reduction; verify-and-discard commitment for the
+  ON state) + structural tests: collection endpoints refuse before validation when OFF, and no
+  granular immigration-status column can ever be added without failing the build.
+
+---
+
 ## 🚀 DEPLOYMENT CHECKLIST
 
 ### Pre-Launch
@@ -1196,8 +1217,10 @@ HR Practitioner · Electrician · Plumber · Accountant · Nurse · Driver · Bo
 
 ---
 
-*Last Updated: 2026-07-08*
-*Version: 2.8  synced through **Phase 29** (vacancy seats + the seamless /search invite funnel).
+*Last Updated: 2026-07-19*
+*Version: 2.9  synced through **Phase 31** (data minimisation: dormant ID collection + two-class
+citizen capture; DPIA R-26). Prior: v2.8 synced through Phase 29 (vacancy seats + the seamless
+/search invite funnel).
 Prior: v2.7 synced through Phase 28 (PWA installability + floating mobile bottom nav across
 all role dashboards). Prior: v2.6 synced through Phase 27  Phases 18–21 (seeker growth gaps), 22
 (AI-coach safety), 23–26 (truth/testimonials/integrations/security) + the governance sync all shipped;

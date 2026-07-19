@@ -31,7 +31,6 @@ interface InitialValues {
   seniority: Seniority | null;
   city: string;
   province: string;
-  nationality: string | null;
   isCitizen: boolean;
   bio: string;
   completeness: number;
@@ -66,7 +65,6 @@ interface Props {
     saveButton: string;
     completenessLive: string;
     citizen: string;
-    nationality: string;
   };
 }
 
@@ -93,7 +91,10 @@ export function ProfileBasicsForm({
   const [seniority, setSeniority] = useState<Seniority | null>(initial.seniority);
   const [province, setProvince] = useState(initial.province);
   const [city, setCity] = useState(initial.city);
-  const [nationality, setNationality] = useState(initial.nationality ?? "South African");
+  // Phase 31 ("Data minimisation")  the free-text nationality label is no
+  // longer captured; the two-class isCitizen flag is the only signal the
+  // system uses. Legacy labels already stored keep displaying elsewhere;
+  // this form simply stops writing the column.
   const [isCitizen, setIsCitizen] = useState(initial.isCitizen);
   const [bio, setBio] = useState(initial.bio ?? "");
   // Phase 9.9  total years of experience. Stored as a string in form
@@ -116,7 +117,6 @@ export function ProfileBasicsForm({
       seniority,
       province,
       city,
-      nationality,
       isCitizen,
       bio,
       yearsExperience,
@@ -128,7 +128,6 @@ export function ProfileBasicsForm({
       seniority,
       province,
       city,
-      nationality,
       isCitizen,
       bio,
       yearsExperience,
@@ -148,7 +147,6 @@ export function ProfileBasicsForm({
         if (draft.seniority !== undefined) setSeniority(draft.seniority);
         if (draft.province !== undefined) setProvince(draft.province);
         if (draft.city !== undefined) setCity(draft.city);
-        if (draft.nationality !== undefined) setNationality(draft.nationality);
         if (draft.isCitizen !== undefined) setIsCitizen(draft.isCitizen);
         if (draft.bio !== undefined) setBio(draft.bio);
         if (draft.yearsExperience !== undefined)
@@ -183,7 +181,6 @@ export function ProfileBasicsForm({
         seniority: seniority ?? null,
         city,
         province,
-        nationality: nationality || null,
         isCitizen,
         bio: bio || null,
         yearsExperience:
@@ -212,16 +209,9 @@ export function ProfileBasicsForm({
             hint={labels.displayNameHelp}
             autoComplete="name"
           />
-          <TextField
-            id="nationality"
-            label={labels.nationality}
-            value={nationality}
-            onChange={(e) => setNationality(e.target.value)}
-            name="nationality"
-            autoComplete="off"
-            placeholder="e.g. South African"
-            hint="Free text  Sebenza matches by location + skill, never by nationality."
-          />
+          {/* Phase 31  the free-text nationality field is gone; the
+              two-class citizen flag is the only signal Sebenza uses.
+              Never a gate: matching is by location + skill. */}
           <Checkbox
             className="mt-2 md:mt-auto md:pb-3"
             align="center"

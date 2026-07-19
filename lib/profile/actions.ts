@@ -68,7 +68,10 @@ const basicsSchema = z
       .optional(),
     city: z.string().min(1).max(80),
     province: z.string().min(1).max(80),
-    nationality: z.string().max(80).nullable().optional(),
+    // Phase 31 ("Data minimisation")  the free-text nationality label is
+    // no longer accepted or written; the two-class isCitizen flag is the
+    // only nationality signal. Legacy labels stay untouched in the column
+    // (one-release rollback net; display-only).
     isCitizen: z.boolean().optional().default(false),
     bio: z.string().max(2000).optional().nullable(),
     /** Phase 9.9  total years of experience. NULL = "rather not say."
@@ -148,7 +151,8 @@ export async function updateProfileBasics(
       seniority: v.seniority ?? null,
       city: v.city,
       province: v.province,
-      nationality: v.nationality ?? null,
+      // Phase 31  nationality label deliberately NOT written (retired
+      // write path; legacy values persist untouched for display).
       isCitizen: v.isCitizen ?? false,
       bio: v.bio ?? null,
       yearsExperience: v.yearsExperience ?? null,
@@ -574,6 +578,19 @@ export async function changeNationalId(
 ): Promise<ActionResult> {
   const session = await getSessionUser();
   if (!session) return fail("Not signed in.");
+  // Phase 31 (data minimisation)  ID COLLECTION is dormant by default.
+  // The Server Action refuses (not just a hidden UI): no new ID number
+  // enters the DB while the flag is OFF. `removeNationalId` below is
+  // deliberately NOT gated  erasing your own ID always works.
+  const { getSetting } = await import("@/lib/admin/settings");
+  const idCollectionEnabled = await getSetting<boolean>(
+    "feature_flag_id_verification_enabled",
+  );
+  if (!idCollectionEnabled) {
+    return fail(
+      "ID collection is currently disabled on this platform  your profile works fully without it.",
+    );
+  }
   const parsed = changeIdSchema.safeParse(input);
   if (!parsed.success) return fail("Enter a valid SA ID number.");
   const v = validateSaIdNumber(parsed.data.idNumber);

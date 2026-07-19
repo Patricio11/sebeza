@@ -54,6 +54,13 @@ export default async function ProfileEditorPage({
   const me = await getMyProfile();
   if (!me) redirect("/sign-in?next=/dashboard/profile");
   const kycProviderEnabled = await getSetting<boolean>("feature_flag_kyc_provider");
+  // Phase 31 (data minimisation)  ID/passport COLLECTION is dormant by
+  // default. When OFF, the ID controls + KYC panel render ONLY if the
+  // seeker already holds ID data (remove/status affordances  data-subject
+  // rights never switch off); otherwise the section is Date of birth only.
+  const idCollectionEnabled = await getSetting<boolean>(
+    "feature_flag_id_verification_enabled",
+  );
   const verificationVisible = await getSetting<boolean>(
     "feature_flag_verification_badges_visible",
   );
@@ -228,7 +235,6 @@ export default async function ProfileEditorPage({
               seniority: me.seniority,
               city: me.city,
               province: me.province,
-              nationality: me.nationality,
               isCitizen: me.isCitizen,
               bio: me.bio ?? "",
               completeness: me.completeness,
@@ -239,7 +245,7 @@ export default async function ProfileEditorPage({
               <SectionHeading
                 eyebrow="01"
                 title={t("sections.identity")}
-                hint="Display name + nationality. ID number lives in its own section below  encrypted, never displayed back."
+                hint="Display name + citizenship. Sebenza matches by location and skill  citizenship is analytics + highlight only, never a gate."
               />
             }
             locationHeading={
@@ -269,7 +275,6 @@ export default async function ProfileEditorPage({
               saveButton: t("saveButton"),
               completenessLive: t("completenessLive"),
               citizen: t("fields.citizen"),
-              nationality: t("fields.nationality"),
             }}
           />
 
@@ -339,28 +344,49 @@ export default async function ProfileEditorPage({
             </div>
           </section>
 
-          {/* National ID */}
+          {/* National ID  Phase 31: collection dormant by default. The
+              ID/KYC panels appear ONLY when collection is ON, or when the
+              seeker already holds ID data (then in status/remove-only
+              mode  erasure never switches off). */}
           <section id="national-id">
             <SectionHeading
               eyebrow="06"
-              title="National ID"
-              hint="Captured once, encrypted on save, never displayed back. POPIA special-category data."
+              title={
+                idCollectionEnabled || me.hasNationalId || me.hasIdDocument || me.kycVerifiedAt
+                  ? "National ID"
+                  : "Date of birth"
+              }
+              hint={
+                idCollectionEnabled || me.hasNationalId || me.hasIdDocument || me.kycVerifiedAt
+                  ? "Captured once, encrypted on save, never displayed back. POPIA special-category data."
+                  : "Used only for the age check at sign-up. Sebenza does not ask for ID or passport numbers."
+              }
             />
             <div className="mb-3">
               <DateOfBirthEditor initialValue={me.dateOfBirth} />
             </div>
-            <NationalIdControls hasNationalId={me.hasNationalId} />
-            <div className="mt-4">
-              <KycPanel
+            {(idCollectionEnabled || me.hasNationalId) && (
+              <NationalIdControls
                 hasNationalId={me.hasNationalId}
-                kycVerifiedAt={me.kycVerifiedAt}
-                realProviderEnabled={kycProviderEnabled}
-                hasIdDocument={me.hasIdDocument}
-                idDocumentUploadedAt={me.idDocumentUploadedAt}
-                idDocumentRejectionReason={me.idDocumentRejectionReason}
-                idDocumentKind={me.idDocumentKind}
+                collectionEnabled={idCollectionEnabled}
               />
-            </div>
+            )}
+            {(idCollectionEnabled ||
+              me.hasIdDocument ||
+              Boolean(me.kycVerifiedAt)) && (
+              <div className="mt-4">
+                <KycPanel
+                  hasNationalId={me.hasNationalId}
+                  kycVerifiedAt={me.kycVerifiedAt}
+                  realProviderEnabled={kycProviderEnabled}
+                  hasIdDocument={me.hasIdDocument}
+                  idDocumentUploadedAt={me.idDocumentUploadedAt}
+                  idDocumentRejectionReason={me.idDocumentRejectionReason}
+                  idDocumentKind={me.idDocumentKind}
+                  collectionEnabled={idCollectionEnabled}
+                />
+              </div>
+            )}
           </section>
 
           {/* Studies  student mode (read-only display for now;

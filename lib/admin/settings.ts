@@ -76,6 +76,16 @@ export type SettingKey =
   // either way: the column still exists, the rule still holds
   // we just don't paint anything.
   | "feature_flag_verification_badges_visible"
+  // Phase 31 ("Data minimisation", plan drafted as docs/PHASE_9_19_PLAN.md)
+  //  gates the ENTIRE ID/passport COLLECTION surface, not just the SaaS
+  // verifier (feature_flag_kyc_provider gates that). Default OFF: Sebenza
+  // runs on self-reported profiles with zero ID/passport collected  the
+  // LinkedIn model with POPIA discipline. Flipping ON is acknowledgement-
+  // gated on /admin/verifications (a verification partnership must be
+  // confirmed + lawful). IMPORTANT: this flag gates COLLECTION only
+  // removal (removeNationalId / revokeMyKyc) always works, because a data
+  // subject's right to erase their own ID never switches off.
+  | "feature_flag_id_verification_enabled"
   // ──────────────────────────────────────────────────────────────────────
   // Phase 11.4.4  SMS + WhatsApp outbound notification channels.
   // BOTH default OFF; ships dormant. Even when an admin flips one or
@@ -156,6 +166,9 @@ const DEFAULTS: Record<SettingKey, unknown> = {
   employer_mix_min_placements: 5,
   feature_flag_employer_mix_lookup: false,
   feature_flag_verification_badges_visible: true,
+  // Phase 31  ID/passport collection stays dormant until a real
+  // verification partnership is confirmed (ack-gated switch).
+  feature_flag_id_verification_enabled: false,
   // Phase 11.4.4  all four default to OFF / SAST 2107. Dormant ship.
   feature_flag_sms_channel_enabled: false,
   feature_flag_whatsapp_channel_enabled: false,

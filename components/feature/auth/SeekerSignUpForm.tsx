@@ -22,7 +22,6 @@ import {
   NQF_LEVELS,
 } from "@/lib/mock/taxonomy";
 import { validateDob } from "@/lib/auth/id-validation";
-import { COUNTRIES, flagEmoji } from "@/lib/taxonomy/countries";
 
 interface ProfessionOption {
   slug: string;
@@ -103,12 +102,12 @@ interface FormState {
    *  + uploaded for KYC review from the dashboard's KYC panel
    *  (Phase 9.16, follow-up: 2026-05-27 trim). */
   dateOfBirth: string;
-  /** Phase 9.16 follow-up  ISO 3166-1 alpha-2 country code of the
-   *  seeker's nationality. Drives the `isCitizen` derivation
-   *  (code === "ZA") + persists as the country label on
-   *  `profiles.nationality`. Defaults to ZA since ~99% of users are
-   *  South African. */
-  nationality: string;
+  /** Phase 31 ("Data minimisation")  the only nationality signal the
+   *  system uses is the two-class citizen split, so that's all we ask:
+   *  a single Yes/No. Defaults to Yes since ~99% of users are South
+   *  African. Analytics + Citizen-Visibility ranking only  never a
+   *  gate; non-citizens are first-class users. */
+  isCitizen: boolean;
   password: string;
   passwordConfirm: string;
   // Step 2
@@ -149,7 +148,7 @@ const initialState: FormState = {
   email: "",
   phone: "",
   dateOfBirth: "",
-  nationality: "ZA",
+  isCitizen: true,
   password: "",
   passwordConfirm: "",
   consents: Object.fromEntries(
@@ -257,7 +256,7 @@ export function SeekerSignUpForm({
       email: state.email,
       phone: state.phone,
       dateOfBirth: state.dateOfBirth,
-      nationality: state.nationality,
+      isCitizen: state.isCitizen,
       consents: state.consents,
       profession: state.profession,
       province: state.province,
@@ -313,7 +312,6 @@ export function SeekerSignUpForm({
     if (state.fullName.trim().length < 2) return false;
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(state.email)) return false;
     if (!validateDob(state.dateOfBirth).ok) return false;
-    if (state.nationality.length !== 2) return false;
     if (state.password.length < 10) return false;
     if (state.password !== state.passwordConfirm) return false;
     if (scorePassword(state.password).score < 2) return false;
@@ -416,7 +414,7 @@ export function SeekerSignUpForm({
             fullName: state.fullName,
             phone: state.phone || undefined,
             dateOfBirth: state.dateOfBirth,
-            nationality: state.nationality,
+            isCitizen: state.isCitizen,
             password: state.password,
             grantedConsents,
             profession: state.profession,
@@ -430,7 +428,7 @@ export function SeekerSignUpForm({
             email: state.email,
             phone: state.phone || undefined,
             dateOfBirth: state.dateOfBirth,
-            nationality: state.nationality,
+            isCitizen: state.isCitizen,
             password: state.password,
             grantedConsents,
             profession: state.profession,
@@ -531,33 +529,54 @@ export function SeekerSignUpForm({
             disabled={pending}
           />
 
-          {/* Phase 9.16 follow-up (2026-05-27)  nationality at sign-up
-              so analytics + the Citizen-Visibility Rule have a real
-              signal from day one. ID / passport NUMBERS are NOT asked
-              for here  the user adds them later from /dashboard/profile
-              when they're ready to be KYC-verified.
-
-              Searchable ComboboxField (191 countries is too many for a
-              native <select>); flag emoji renders in a `leading` slot
-              that's excluded from the type-to-filter rank, so "south"
-              still ranks "South Africa" at idx 0. SA + SADC are pinned
-              at the head of the COUNTRIES array so they appear first
-              when the search box is empty. */}
-          <ComboboxField
-            id="nationality"
-            label="Nationality"
-            value={state.nationality}
-            onChange={(v) => setState({ ...state, nationality: v })}
-            options={COUNTRIES.map((c) => ({
-              value: c.code,
-              label: c.label,
-              leading: flagEmoji(c.code),
-            }))}
-            placeholder="Search countries…"
-            helpText="Used for analytics + to highlight South African candidates in employer searches. You can change this any time."
-            required
-            disabled={pending}
-          />
+          {/* Phase 31 ("Data minimisation")  the 191-country picker is
+              gone: the only nationality signal Sebenza uses is the
+              two-class citizen split, so that's all we ask. One Yes/No,
+              plain language, lowest possible friction for a nervous
+              first-time user. Never a gate  the help text says so. */}
+          <fieldset disabled={pending}>
+            <legend className="text-sm font-medium text-[color:var(--color-ink)]">
+              Are you a South African citizen?
+            </legend>
+            <div
+              role="radiogroup"
+              aria-label="South African citizen"
+              className="mt-2 inline-flex rounded-[var(--radius-pill)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-0.5"
+            >
+              {(
+                [
+                  { value: true, label: "Yes" },
+                  { value: false, label: "No" },
+                ] as const
+              ).map((opt) => (
+                <label
+                  key={opt.label}
+                  className={`cursor-pointer rounded-[var(--radius-pill)] px-5 py-1.5 text-sm transition-colors ${
+                    state.isCitizen === opt.value
+                      ? "bg-[color:var(--color-ink)] text-[color:var(--color-paper)]"
+                      : "text-[color:var(--color-ink-soft)] hover:text-[color:var(--color-ink)]"
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="isCitizen"
+                    className="sr-only"
+                    checked={state.isCitizen === opt.value}
+                    onChange={() =>
+                      setState({ ...state, isCitizen: opt.value })
+                    }
+                  />
+                  {opt.label}
+                </label>
+              ))}
+            </div>
+            <p className="mt-1.5 text-xs text-[color:var(--color-ink-soft)]">
+              Used only for labour-market analytics and the SA-citizen
+              highlight in employer searches. It never affects whether you
+              can use Sebenza or be found  everyone is matched by location
+              and skill.
+            </p>
+          </fieldset>
           <div className="flex flex-col gap-1">
             <PasswordField
               id="password"

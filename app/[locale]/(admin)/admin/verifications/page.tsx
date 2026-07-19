@@ -8,6 +8,7 @@ import { listKycSubmissions, type KycReviewRow } from "@/lib/admin/kyc-review";
 import { VerificationActions } from "@/components/feature/admin/VerificationActions";
 import { OrgReviewLauncher } from "@/components/feature/admin/OrgReviewLauncher";
 import { KycReviewActions } from "@/components/feature/admin/KycReviewActions";
+import { IdVerificationSwitch } from "@/components/feature/admin/IdVerificationSwitch";
 import { getSetting } from "@/lib/admin/settings";
 import {
   CheckCircle2,
@@ -38,12 +39,16 @@ export default async function VerificationsPage({
         : "qualifications";
 
   const t = await getTranslations("adminDash.verifications");
-  const [quals, orgGroups, kycGroups, saqaWorkerEnabled] = await Promise.all([
-    listPendingQualifications(),
-    listOrgsForReview(),
-    listKycSubmissions(),
-    getSetting<boolean>("feature_flag_saqa_worker"),
-  ]);
+  const [quals, orgGroups, kycGroups, saqaWorkerEnabled, idCollectionEnabled] =
+    await Promise.all([
+      listPendingQualifications(),
+      listOrgsForReview(),
+      listKycSubmissions(),
+      getSetting<boolean>("feature_flag_saqa_worker"),
+      // Phase 31  the ack-gated ID/passport collection switch lives on
+      // the Seeker IDs tab (where admins think about identity).
+      getSetting<boolean>("feature_flag_id_verification_enabled"),
+    ]);
   // Default org sub-view = pending (the actionable queue); drafts are
   // pre-submission, rejected + verified are history.
   const orgsActionable = orgGroups.pending.length + orgGroups.unverified.length;
@@ -96,6 +101,8 @@ export default async function VerificationsPage({
 
       {active === "seeker-ids" ? (
         <div className="space-y-8">
+          {/* Phase 31  the ack-gated collection switch (default OFF). */}
+          <IdVerificationSwitch enabled={idCollectionEnabled} />
           <KycGroup
             title={`Pending review · ${kycGroups.pending.length}`}
             tone="brand"

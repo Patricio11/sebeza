@@ -31,6 +31,19 @@ import {
 } from "@/lib/storage/upload";
 import { StorageError } from "@/lib/storage/supabase";
 import { resolveIdentityVerifier } from "./provider";
+import { getSetting } from "@/lib/admin/settings";
+
+/**
+ * Phase 31 (data minimisation)  ID/passport COLLECTION is dormant by
+ * default behind `feature_flag_id_verification_enabled`. Collection
+ * entry points (submit-for-verification, document upload) hard-refuse
+ * while OFF; removal paths (`revokeMyKyc`, `removeNationalId`) are
+ * deliberately NOT gated  a data subject's right to erase their own
+ * identity data never switches off.
+ */
+async function idCollectionEnabled(): Promise<boolean> {
+  return getSetting<boolean>("feature_flag_id_verification_enabled");
+}
 
 export type ActionResult<T extends object = object> =
   | ({ ok: true } & T)
@@ -48,6 +61,11 @@ export async function submitMyIdForVerification(): Promise<
 > {
   const session = await getSessionUser();
   if (!session) return fail("Not signed in.");
+  if (!(await idCollectionEnabled())) {
+    return fail(
+      "ID verification is currently disabled on this platform  your profile works fully without it.",
+    );
+  }
   const db = getDb();
 
   const profile = await db
@@ -176,6 +194,11 @@ export async function uploadIdDocument(
 ): Promise<ActionResult<{ key: string }>> {
   const session = await getSessionUser();
   if (!session) return fail("Not signed in.");
+  if (!(await idCollectionEnabled())) {
+    return fail(
+      "ID document upload is currently disabled on this platform  your profile works fully without it.",
+    );
+  }
 
   const file = formData.get("file");
   if (!(file instanceof File)) return fail("Missing file.");

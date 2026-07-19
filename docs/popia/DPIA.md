@@ -477,6 +477,47 @@ a fan-out only.
 information, admin-verified before activation (a wrong number is treated as
 a safety failure; see the Phase 22 plan).
 
+### R-26  Addendum (2026-07-19): Phase 31 data minimisation  ID collection dormant by default
+
+**This is a RISK REDUCTION  the largest one since the register opened.**
+The responsible party making this POPIA representation is **Yetotec (Pty)
+Ltd**. Decision (operator, 2026-07-08; plan `docs/PHASE_9_19_PLAN.md`,
+shipped as Phase 31):
+
+**R-26.1  ID/passport collection is OFF by default.** The entire
+collection surface (profile-editor ID field, document upload,
+submit-for-verification) is gated behind
+`feature_flag_id_verification_enabled` (default OFF; enabling is an
+acknowledged admin act on /admin/verifications that requires a confirmed,
+lawful verification partnership). While OFF  the launch posture  Sebenza
+holds ZERO newly-collected ID/passport numbers: profiles are self-reported,
+which supersedes every register entry that assumed ID capture at profile
+time (R2 blast-radius shrinks to legacy rows only; R-13.x and the 9.16
+addendum apply only when the flag is ON). Structural backstops: the Server
+Actions refuse while OFF (not just hidden UI), covered by integration
+tests. **Removal paths are never gated**  a data subject's erasure rights
+(remove ID, revoke KYC) work regardless of the flag.
+
+**R-26.2  Nationality capture reduced to the two-class signal.** The
+191-country picker is retired; sign-up and the profile editor now ask a
+single "South African citizen? Yes/No"  exactly the one bit the Phase 9.7
+analytics and Citizen-Visibility ranking consume. No granular immigration
+status (asylum / refugee / permit / PR) is collected  a structural test
+fails the build if such a column ever appears. The legacy
+`profiles.nationality` label column stays read-only for one release
+(display of previously-stored values only; write path retired), then
+drops in a follow-up. The citizen question is analytics + highlight only,
+NEVER a gate (Location-Not-Nationality rule holds; non-citizens are
+first-class users).
+
+**R-26.3  ON-state design commitment.** When a partnership lands and the
+flag is turned ON, the target posture is **verify-and-discard** (store the
+verification RESULT, not the raw number) wherever the provider allows;
+where a raw value is unavoidable it stays AES-256-GCM encrypted-at-rest
+under the existing key + strict redaction. This commitment is recorded now
+so the activation phase implements the dormant path honestly; the final
+choice is confirmed with POPIA counsel at activation and recorded here.
+
 ## 4. Sign-off
 
 To be signed by the Information Officer once designated. Until then,

@@ -8,9 +8,13 @@
 - `docs/ROADMAP.md`  phased build plan (Phase 0 → 26; all shipped except 14, which is partnership-gated).
 - `docs/UX_UI_SPEC.md`  design system + screen-by-screen.
 
-**Current state (2026-07): LIVE, DB-BACKED, shipped through Phase 29.** Postgres (Neon) + Drizzle,
-62 migrations (0000→0061), Better Auth sessions, 363-test vitest suite (unit/integration/compliance)
-+ ~105-test Playwright E2E (desktop + 360px), 20 cron jobs. Nothing user-facing renders mock data
+**Current state (2026-07): LIVE, DB-BACKED, shipped through Phase 31.** Postgres (Neon) + Drizzle,
+62 migrations (0000→0061), Better Auth sessions, ~367-test vitest suite (unit/integration/compliance)
++ ~110-test Playwright E2E (desktop + 360px), 20 cron jobs.
+Phase 31 (data minimisation, plan `docs/PHASE_9_19_PLAN.md`): ID/passport collection DORMANT by
+default (`feature_flag_id_verification_enabled` OFF; ack-gated on /admin/verifications; collection
+actions hard-refuse, removal never gated) and nationality reduced to the two-class `is_citizen`
+Yes/No (no country picker; label write path retired). Responsible party: Yetotec (Pty) Ltd. Nothing user-facing renders mock data
 (Phase 23 truth pass); `lib/mock/` survives only as seed source, taxonomy-constant fallback, pure
 helpers, and test fixtures. Showcase login accounts: `docs/SHOWCASE_ACCOUNTS.md`.
 Phase 28: installable PWA (`app/manifest.ts`, brand icons, minimal offline-only service worker in

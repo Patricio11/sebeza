@@ -37,7 +37,6 @@ import {
   REQUIRED_FOR_SEARCHABILITY,
 } from "@/lib/consent";
 import { validateDob } from "@/lib/auth/id-validation";
-import { isValidCountryCode, countryLabel } from "@/lib/taxonomy/countries";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Shared helpers
@@ -92,12 +91,14 @@ const seekerSignUpSchema = z.object({
   // age window. Storing this lets us run the LMI youth-cohort split
   // (15-24).
   dateOfBirth: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-  // Phase 9.16 follow-up (2026-05-27)  ISO 3166-1 alpha-2 nationality
-  // code. Drives `is_citizen = (code === "ZA")` + the country label
-  // stored on `profiles.nationality`. ID / passport numbers are no
-  // longer collected at sign-up  the seeker adds them later from
-  // /dashboard/profile when ready to be KYC-verified.
-  nationality: z.string().length(2),
+  // Phase 31 ("Data minimisation", plan: docs/PHASE_9_19_PLAN.md)
+  // nationality capture reduced to the ONLY distinction the system uses:
+  // the two-class citizen / non-citizen split. The 191-country picker is
+  // gone; no country label is written any more (`profiles.nationality`
+  // stays as a legacy display column for one release). The question is
+  // analytics + Citizen-Visibility ranking only  NEVER a gate
+  // (Location-Not-Nationality rule); non-citizens are first-class users.
+  isCitizen: z.boolean(),
   password: z.string().min(10).max(128),
   // Consent purposes the user granted in step 2.
   grantedConsents: z.array(z.enum(CONSENT_PURPOSES)).min(1),
@@ -187,9 +188,6 @@ export async function signUpSeeker(
   // the form.
   const dobCheck = validateDob(v.dateOfBirth);
   if (!dobCheck.ok) return fail(dobCheck.message);
-  if (!isValidCountryCode(v.nationality)) {
-    return fail("That nationality isn't recognised  pick from the list.");
-  }
 
   // Searchability must be granted before the profile becomes searchable
   // (Phase 2 acceptance criterion). We require it on the form too.
@@ -215,11 +213,11 @@ export async function signUpSeeker(
     const handle = await uniqueHandle(db, v.fullName);
 
     const displayName = redactSurname(v.fullName);
-    // Phase 9.16 follow-up  derive citizenship from the picked country.
-    // SA = citizen-or-PR class for the Phase 9.7 2-class analytics.
-    // Refinable later from /dashboard/profile.
-    const isCitizen = v.nationality === "ZA";
-    const nationalityLabel = countryLabel(v.nationality) ?? null;
+    // Phase 31  the two-class flag comes straight from the Yes/No
+    // question. No country label is captured any more; the legacy
+    // `profiles.nationality` column stays NULL for new sign-ups.
+    const isCitizen = v.isCitizen;
+    const nationalityLabel: string | null = null;
 
     // Phase 9.15  resolve free-text "Other" entries BEFORE the transaction.
     // For institutions: the FK constraint on academic_profiles requires the

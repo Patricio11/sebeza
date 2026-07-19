@@ -188,3 +188,78 @@ describe("KYC provider resolution  dormant path", () => {
     expect(verifier).toBe(mockIdentityVerifier);
   });
 });
+
+describe("Phase 31  ID/passport COLLECTION gate (dormant by default)", () => {
+  afterAll(async () => {
+    // Restore the launch default so suite order never matters.
+    await setSetting("feature_flag_id_verification_enabled", "false");
+  });
+
+  test("flag OFF (default): every collection endpoint refuses BEFORE validation", async () => {
+    await setSetting("feature_flag_id_verification_enabled", "false");
+    const { changeNationalId } = await import("@/lib/profile/actions");
+    const { uploadIdDocument, submitMyIdForVerification } = await import(
+      "@/lib/kyc/actions"
+    );
+
+    // Deliberately garbage inputs  the gate must refuse before the
+    // validators even run (the endpoint doesn't execute, not "executes
+    // then errors").
+    const change = await changeNationalId({ idNumber: "0000000000000" });
+    expect(change.ok).toBe(false);
+    if (!change.ok) expect(change.message).toMatch(/disabled/i);
+
+    const upload = await uploadIdDocument(new FormData());
+    expect(upload.ok).toBe(false);
+    if (!upload.ok) expect(upload.message).toMatch(/disabled/i);
+
+    const submit = await submitMyIdForVerification();
+    expect(submit.ok).toBe(false);
+    if (!submit.ok) expect(submit.message).toMatch(/disabled/i);
+  });
+
+  test("removal is NEVER gated  erasing your own ID works with the flag OFF", async () => {
+    await setSetting("feature_flag_id_verification_enabled", "false");
+    const { removeNationalId } = await import("@/lib/profile/actions");
+    const res = await removeNationalId();
+    // Either it succeeds, or it fails for a non-gate reason  the
+    // "disabled" refusal must never appear on a removal path.
+    if (!res.ok) expect(res.message).not.toMatch(/disabled/i);
+  });
+
+  test("flag ON: the gate opens and ordinary validation takes over", async () => {
+    await setSetting("feature_flag_id_verification_enabled", "true");
+    const { changeNationalId } = await import("@/lib/profile/actions");
+    const res = await changeNationalId({ idNumber: "0000000000000" });
+    expect(res.ok).toBe(false);
+    if (!res.ok) {
+      // Refused by the SA-ID checksum validator now, NOT the gate.
+      expect(res.message).not.toMatch(/disabled/i);
+    }
+  });
+
+  test("structural guard: no granular immigration-status field exists anywhere", async () => {
+    // Phase 31 scope discipline: the system uses TWO classes
+    // (is_citizen), nothing finer. Asylum/refugee/permit/PR capture is
+    // sensitive, unused, and explicitly out of scope  this guard makes
+    // quiet scope-creep a failing test.
+    const { getTableColumns } = await import("drizzle-orm");
+    const schemaModule = await import("@/db/schema");
+    const banned = /asylum|refugee|permit|visa|immigration/i;
+    for (const [tableName, table] of Object.entries(schemaModule)) {
+      let columns: Record<string, unknown> | undefined;
+      try {
+        columns = getTableColumns(table as never);
+      } catch {
+        continue; // not a table export (enum, relation, type)
+      }
+      if (!columns) continue; // non-table export returns undefined
+      for (const columnName of Object.keys(columns)) {
+        expect(
+          banned.test(columnName),
+          `granular immigration-status column "${columnName}" on "${tableName}"`,
+        ).toBe(false);
+      }
+    }
+  });
+});

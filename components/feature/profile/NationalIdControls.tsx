@@ -22,11 +22,22 @@ import { validateSaIdNumber } from "@/lib/id-number";
 
 interface Props {
   hasNationalId: boolean;
+  /**
+   * Phase 31 (data minimisation)  when false (the default launch
+   * posture), Add/Change are hidden and the server refuses new IDs;
+   * Remove stays available (a data subject's right to erase never
+   * switches off). The parent only renders this component at all when
+   * collection is on OR an ID is already on file.
+   */
+  collectionEnabled?: boolean;
 }
 
 type Mode = "view" | "change" | "confirm-remove";
 
-export function NationalIdControls({ hasNationalId }: Props) {
+export function NationalIdControls({
+  hasNationalId,
+  collectionEnabled = true,
+}: Props) {
   const [mode, setMode] = useState<Mode>("view");
   const [pending, startTransition] = useTransition();
   const [value, setValue] = useState("");
@@ -96,15 +107,18 @@ export function NationalIdControls({ hasNationalId }: Props) {
             )}
           </div>
           <div className="flex gap-2">
-            <Button
-              type="button"
-              variant="secondary"
-              size="sm"
-              onClick={() => setMode("change")}
-            >
-              <Pencil className="size-4" aria-hidden="true" />
-              {hasOnFile ? "Change" : "Add"}
-            </Button>
+            {/* Phase 31  Add/Change only while collection is enabled. */}
+            {collectionEnabled && (
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                onClick={() => setMode("change")}
+              >
+                <Pencil className="size-4" aria-hidden="true" />
+                {hasOnFile ? "Change" : "Add"}
+              </Button>
+            )}
             {hasOnFile && (
               <Button
                 type="button"
