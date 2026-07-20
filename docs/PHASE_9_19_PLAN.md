@@ -63,17 +63,17 @@ profile editor. 9.19 makes them **invisible + inert by default**, controlled by 
 
 ## ✅ PRE-FLIGHT RECHECK (run before writing code)
 
-- [ ] Confirm every read of `profiles.nationality` (label) + `profiles.is_citizen` so the capture change
+- [x] Confirm every read of `profiles.nationality` (label) + `profiles.is_citizen` so the capture change
       updates all callers cleanly: 9.7 `nationality_class`, `citizen_boost` ranking, employer-search
       highlight, `/gov` analytics, any CSV export, any profile render. (Most already read `is_citizen` —
       confirm none depend on the raw country *label* except display.)
-- [ ] Confirm the `<KycPanel>` + `uploadIdDocument` + `/dashboard/profile` ID/passport field mount points
+- [x] Confirm the `<KycPanel>` + `uploadIdDocument` + `/dashboard/profile` ID/passport field mount points
       (the surfaces to hide behind the new flag).
-- [ ] Confirm `platform_settings` flag pattern (`feature_flag_kyc_provider`,
+- [x] Confirm `platform_settings` flag pattern (`feature_flag_kyc_provider`,
       `feature_flag_verification_badges_visible`) so the new flag follows the exact same shape.
-- [ ] Confirm `id_document_kind` / `passport_country` / `national_id_enc` are only touched via the KYC
+- [x] Confirm `id_document_kind` / `passport_country` / `national_id_enc` are only touched via the KYC
       path (so gating that path fully dormant-izes them).
-- [ ] Confirm DPIA sections referencing ID collection (R-13.x / R-17→25 / the 9.16 addendum) so the DPIA
+- [x] Confirm DPIA sections referencing ID collection (R-13.x / R-17→25 / the 9.16 addendum) so the DPIA
       update is complete, not partial.
 
 ---
@@ -87,76 +87,76 @@ exactly the one bit the analytics + ranking consume and nothing more. (Option B,
 genuinely wanted for a future regional/diaspora angle: keep the existing country picker and just wire
 everything to the derived flag. See Open Q1 — pick one before building.)
 
-- [ ] **Canonical field:** ensure a single boolean/flag `profiles.is_citizen` (already exists from 9.16)
+- [x] **Canonical field:** ensure a single boolean/flag `profiles.is_citizen` (already exists from 9.16)
       is the **one source of truth** for the two-class split. Everything reads this, nothing re-derives
       from a country label.
-- [ ] **Option A capture (recommended):** replace the 191-country `<ComboboxField>` on signup + profile
+- [x] **Option A capture (recommended)  ADOPTED:** replace the 191-country `<ComboboxField>` on signup + profile
       editor with a plain **Yes / No "South African citizen?"** control (radio / segmented). Persists
       `is_citizen` directly. Plain-language, i18n strings, mobile-first. Lowest friction for a nervous user.
       - Retire the country-label write path; keep `profiles.nationality` column for one release as a
         rollback net, then drop (Open Q3). No live surface reads the label except (optionally) display.
-- [ ] **Option B capture (only if country-of-origin is genuinely used later):** keep the country picker
+- [~] ~~**Option B capture**~~  not chosen (Option A adopted; Open Q1 resolved): keep the country picker
       as-is; change nothing about capture; just confirm every consumer reads `is_citizen`, not the label.
-- [ ] **Analytics + ranking unchanged:** `nationality_class` (9.7) = `is_citizen ? sa_citizen :
+- [x] **Analytics + ranking unchanged:** `nationality_class` (9.7) = `is_citizen ? sa_citizen :
       foreign_national`; `citizen_boost` reads `is_citizen`. Two-class suppression (k=10) unchanged.
-- [ ] **No granular status field.** Do **not** add asylum / refugee / permit / PR capture. Explicitly out
+- [x] **No granular status field.** Do **not** add asylum / refugee / permit / PR capture. Explicitly out
       of scope (see guardrails) — sensitive, unused, pure liability. A future need = its own governed phase.
-- [ ] **Framing guardrail:** the citizen question is for *labour-market analytics + citizen-visibility
+- [x] **Framing guardrail:** the citizen question is for *labour-market analytics + citizen-visibility
       ranking*, never a gate. Copy must not imply status affects whether the person can use Sebenza or be
       found (Rules 2 & 3 — Location-Not-Nationality / Citizen-Visibility). Non-citizens are first-class users.
 
 ### Task 9.19.2 — New admin flag gating the ENTIRE ID/passport collection surface
-- [ ] New `feature_flag_id_verification_enabled` in `platform_settings` (**default OFF**), on
+- [x] New `feature_flag_id_verification_enabled` in `platform_settings` (**default OFF**), on
       `/admin/settings`, **acknowledgement-gated** (mirror the Phase 22.5 coach-switch pattern: the admin
       must tick "a verification partnership is confirmed and lawful" before it flips ON).
-- [ ] **When OFF (the default, launch state):**
+- [x] **When OFF (the default, launch state):**
       - `<KycPanel>`, the ID/passport fields, `id_document_kind` picker, and `uploadIdDocument` entry point
         are **hidden and inert** on `/dashboard/profile` (not just visually — the Server Action refuses).
       - No ID/passport is collected, stored, or requested anywhere. Profiles are fully self-reported.
       - `<VerificationBadge>` follows existing `feature_flag_verification_badges_visible` (already OFF-able).
       - Sebenza is fully usable: search, profiles, vacancies, analytics, coach — none depend on ID.
-- [ ] **When ON (post-partnership):**
+- [x] **When ON (post-partnership):**
       - The existing 8.1/9.10/9.16 KYC path activates exactly as already built (opt-in `<KycPanel>`,
         SA-ID/passport capture, admin review or SaaS verifier per `feature_flag_kyc_provider`).
       - **Opt-in only:** turning the feature ON must NOT retroactively demand ID from existing users; it
         merely makes the optional upgrade *available*. No feature is gated behind being ID-verified
         (consistent with the 9.4 "Lever B rejected — don't conflate KYC with behaviour" decision).
-- [ ] Structural backstop: a compliance assertion that **no ID/passport collection endpoint executes when
+- [x] Structural backstop: a compliance assertion that **no ID/passport collection endpoint executes when
       the flag is OFF** (the Server Action hard-refuses, not just a hidden UI).
 
 ### Task 9.19.3 — "Verify-and-minimise" posture for when it IS on (design now, honest later)
-- [ ] Document the target handling for the ON state so it's not an afterthought: prefer **store the
+- [x] Document the target handling for the ON state so it's not an afterthought: prefer **store the
       verification *result*, not the raw number** where the provider allows (verify-and-discard), or keep
       `national_id_enc` encrypted-at-rest with the existing AES-GCM + strict redaction if the raw value is
       unavoidable. Decision recorded in the DPIA (Open Q4).
-- [ ] No change to encryption/redaction infra now — this task is a **documented design commitment** the
+- [x] No change to encryption/redaction infra now — this task is a **documented design commitment** the
       partnership-activation phase will implement, so the dormant path activates *honestly*.
 
 ### Task 9.19.4 — DPIA + governance update (load-bearing, not optional)
-- [ ] DPIA addendum: record the **data-minimisation decision** — ID/passport not collected by default;
+- [x] DPIA addendum: record the **data-minimisation decision** — ID/passport not collected by default;
       the biggest special-category field is now dormant. This is a *risk reduction* the DPIA should
       celebrate and the government pitch can cite.
-- [ ] Update every DPIA/Privacy/PAIA reference that currently assumes ID collection at profile time
+- [x] Update every DPIA/Privacy/PAIA reference that currently assumes ID collection at profile time
       (R-13.x, the 9.16 addendum) to reflect "collected only when `feature_flag_id_verification_enabled`
       is ON, opt-in, post-partnership."
-- [ ] Note the **responsible party is Yetotec (Pty) Ltd** — the entity making the POPIA representation.
+- [x] Note the **responsible party is Yetotec (Pty) Ltd** — the entity making the POPIA representation.
 
 ### Task 9.19.5 — Wiring, verification, doc convention
-- [ ] All new copy in `messages/en.json` (zu/xh/af deepMerge fallback; the citizen question is short and
+- [x] All new copy in `messages/en.json` (zu/xh/af deepMerge fallback; the citizen question is short and
       identity-sensitive — worth prioritising for real translation).
-- [ ] Migration: **Option A** — no new column needed (`is_citizen` already exists); just retire the
+- [x] Migration: **Option A** — no new column needed (`is_citizen` already exists); just retire the
       country-label write path and keep `profiles.nationality` for one release as rollback safety.
       **Option B** — no migration at all. Either way: **do not** drop old columns in this phase.
-- [ ] Compliance assertions (extend suite): (a) no ID/passport endpoint runs with the flag OFF;
+- [x] Compliance assertions (extend suite): (a) no ID/passport endpoint runs with the flag OFF;
       (b) `nationality_class` + `citizen_boost` read the single `is_citizen` flag, never a raw country
       label; (c) no granular immigration-status field exists anywhere (structural guard against scope
       creep); (d) two-class analytics + k=10 suppression unchanged; (e) no raw country label resurfaces in
       any analytics list or export.
-- [ ] `npm run test:all` green; `build` clean; E2E in **both flag states** (OFF = no ID surface anywhere;
+- [x] `npm run test:all` green; `build` clean; E2E in **both flag states** (OFF = no ID surface anywhere;
       ON = the existing KYC flow works), desktop + 360px.
-- [ ] Seed: profiles across both classes (citizen + non-citizen) so analytics + ranking render; ID flag
+- [x] Seed: profiles across both classes (citizen + non-citizen) so analytics + ranking render; ID flag
       seeded OFF so the default launch state is what's exercised by default.
-- [ ] On ship: `docs/completed/PHASE_9_19_COMPLETE.md`; tick 9.19 in `ROADMAP.md` ✅ + date; refresh
+- [x] On ship: `docs/completed/PHASE_31_COMPLETE.md` (the 9.19 name was taken by the real Phase 9.19's completion doc); tick 9.19 in `ROADMAP.md` ✅ + date; refresh
       **Current State** in `TO_START_EVERY_SESSION.md`; commit `Phase 9.19 complete`.
 
 ---

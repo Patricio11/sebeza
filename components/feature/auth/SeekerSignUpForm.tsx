@@ -536,17 +536,17 @@ export function SeekerSignUpForm({
               first-time user. Never a gate  the help text says so. */}
           <fieldset disabled={pending}>
             <legend className="text-sm font-medium text-[color:var(--color-ink)]">
-              Are you a South African citizen?
+              {t("step1.citizenQuestion")}
             </legend>
             <div
               role="radiogroup"
-              aria-label="South African citizen"
+              aria-label={t("step1.citizenQuestion")}
               className="mt-2 inline-flex rounded-[var(--radius-pill)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-0.5"
             >
               {(
                 [
-                  { value: true, label: "Yes" },
-                  { value: false, label: "No" },
+                  { value: true, label: t("step1.citizenYes") },
+                  { value: false, label: t("step1.citizenNo") },
                 ] as const
               ).map((opt) => (
                 <label
@@ -571,10 +571,7 @@ export function SeekerSignUpForm({
               ))}
             </div>
             <p className="mt-1.5 text-xs text-[color:var(--color-ink-soft)]">
-              Used only for labour-market analytics and the SA-citizen
-              highlight in employer searches. It never affects whether you
-              can use Sebenza or be found  everyone is matched by location
-              and skill.
+              {t("step1.citizenHelp")}
             </p>
           </fieldset>
           <div className="flex flex-col gap-1">
