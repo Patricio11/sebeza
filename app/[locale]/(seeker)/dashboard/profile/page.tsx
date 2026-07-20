@@ -235,6 +235,7 @@ export default async function ProfileEditorPage({
               seniority: me.seniority,
               city: me.city,
               province: me.province,
+              nationality: me.nationality,
               isCitizen: me.isCitizen,
               bio: me.bio ?? "",
               completeness: me.completeness,
@@ -275,6 +276,7 @@ export default async function ProfileEditorPage({
               saveButton: t("saveButton"),
               completenessLive: t("completenessLive"),
               citizen: t("fields.citizen"),
+              nationality: t("fields.nationality"),
             }}
           />
 

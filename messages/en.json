@@ -128,7 +128,9 @@
         "citizenQuestion": "Are you a South African citizen?",
         "citizenYes": "Yes",
         "citizenNo": "No",
-        "citizenHelp": "Used only for labour-market analytics and the SA-citizen highlight in employer searches. It never affects whether you can use Sebenza or be found  everyone is matched by location and skill."
+        "citizenHelp": "Used only for labour-market analytics and the SA-citizen highlight in employer searches. It never affects whether you can use Sebenza or be found  everyone is matched by location and skill.",
+        "nationalityLabel": "Which country are you from?",
+        "nationalityHelp": "Shown on your profile and in search results so employers know where you're from. Sebenza matches by location + skill  where you're from is never a gate."
       },
       "step2": {
         "heading": "Your consent matters",

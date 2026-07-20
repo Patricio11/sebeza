@@ -22,6 +22,7 @@ import {
   NQF_LEVELS,
 } from "@/lib/mock/taxonomy";
 import { validateDob } from "@/lib/auth/id-validation";
+import { COUNTRIES, flagEmoji } from "@/lib/taxonomy/countries";
 
 interface ProfessionOption {
   slug: string;
@@ -102,12 +103,15 @@ interface FormState {
    *  + uploaded for KYC review from the dashboard's KYC panel
    *  (Phase 9.16, follow-up: 2026-05-27 trim). */
   dateOfBirth: string;
-  /** Phase 31 ("Data minimisation")  the only nationality signal the
-   *  system uses is the two-class citizen split, so that's all we ask:
-   *  a single Yes/No. Defaults to Yes since ~99% of users are South
-   *  African. Analytics + Citizen-Visibility ranking only  never a
-   *  gate; non-citizens are first-class users. */
+  /** Phase 31 ("Data minimisation", amended 2026-07-20)  the primary
+   *  question is the two-class citizen Yes/No (defaults to Yes; ~99% of
+   *  users are South African). HYBRID: answering No reveals the country
+   *  picker  nationality displays on the public profile + search rows,
+   *  so for non-citizens we still capture WHICH country. Analytics +
+   *  ranking read only the flag; never a gate. */
   isCitizen: boolean;
+  /** ISO alpha-2 code; only relevant (and required) when isCitizen=false. */
+  nationality: string;
   password: string;
   passwordConfirm: string;
   // Step 2
@@ -149,6 +153,7 @@ const initialState: FormState = {
   phone: "",
   dateOfBirth: "",
   isCitizen: true,
+  nationality: "",
   password: "",
   passwordConfirm: "",
   consents: Object.fromEntries(
@@ -257,6 +262,7 @@ export function SeekerSignUpForm({
       phone: state.phone,
       dateOfBirth: state.dateOfBirth,
       isCitizen: state.isCitizen,
+      nationality: state.nationality,
       consents: state.consents,
       profession: state.profession,
       province: state.province,
@@ -312,6 +318,9 @@ export function SeekerSignUpForm({
     if (state.fullName.trim().length < 2) return false;
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(state.email)) return false;
     if (!validateDob(state.dateOfBirth).ok) return false;
+    // Phase 31 hybrid  non-citizens must pick their country (it displays
+    // on the profile + search rows).
+    if (!state.isCitizen && state.nationality.length !== 2) return false;
     if (state.password.length < 10) return false;
     if (state.password !== state.passwordConfirm) return false;
     if (scorePassword(state.password).score < 2) return false;
@@ -415,6 +424,7 @@ export function SeekerSignUpForm({
             phone: state.phone || undefined,
             dateOfBirth: state.dateOfBirth,
             isCitizen: state.isCitizen,
+            ...(state.isCitizen ? {} : { nationality: state.nationality }),
             password: state.password,
             grantedConsents,
             profession: state.profession,
@@ -429,6 +439,7 @@ export function SeekerSignUpForm({
             phone: state.phone || undefined,
             dateOfBirth: state.dateOfBirth,
             isCitizen: state.isCitizen,
+            ...(state.isCitizen ? {} : { nationality: state.nationality }),
             password: state.password,
             grantedConsents,
             profession: state.profession,
@@ -574,6 +585,30 @@ export function SeekerSignUpForm({
               {t("step1.citizenHelp")}
             </p>
           </fieldset>
+
+          {/* Phase 31 hybrid (operator feedback 2026-07-20)  answering No
+              reveals the country picker: nationality displays on the
+              public profile + search rows, so for non-citizens we still
+              capture WHICH country. ZA is excluded ("not a citizen but
+              from South Africa" is contradictory  flip the toggle
+              instead). Citizens never see this. */}
+          {!state.isCitizen && (
+            <ComboboxField
+              id="nationality"
+              label={t("step1.nationalityLabel")}
+              value={state.nationality}
+              onChange={(v) => setState({ ...state, nationality: v })}
+              options={COUNTRIES.filter((c) => c.code !== "ZA").map((c) => ({
+                value: c.code,
+                label: c.label,
+                leading: flagEmoji(c.code),
+              }))}
+              placeholder="Search countries…"
+              helpText={t("step1.nationalityHelp")}
+              required
+              disabled={pending}
+            />
+          )}
           <div className="flex flex-col gap-1">
             <PasswordField
               id="password"

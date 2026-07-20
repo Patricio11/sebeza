@@ -1137,10 +1137,12 @@ the shipped vacancy-enrichment phase). Responsible party: **Yetotec (Pty) Ltd**.
   requested anywhere: the profile editor shows Date-of-birth only and the collection Server Actions
   hard-refuse. Removal/revoke paths are NEVER gated (data-subject rights). Flipping ON restores the
   full 9.16 opt-in KYC flow exactly as built — a toggle, not a rebuild.
-- [x] **31.2 Two-class citizen capture (Option A).** The 191-country picker is gone; sign-up asks one
-  "South African citizen? Yes/No" (never a gate — copy says so). `is_citizen` stays the single source
-  of truth for the 9.7 analytics + Citizen-Visibility ranking (verified: nothing reads the raw label
-  except display). Label write path retired; legacy labels display-only, column drops next release.
+- [x] **31.2 Two-class citizen capture (HYBRID — amended 2026-07-20).** Sign-up asks one
+  "South African citizen? Yes/No" (never a gate — copy says so); answering **No reveals the canonical
+  country picker** (ZA excluded), because nationality displays on the public profile + search rows.
+  Labels are always derived server-side (citizens → "South Africa"); free text retired; `is_citizen`
+  stays the single source of truth for the 9.7 analytics + Citizen-Visibility ranking. The
+  `nationality` column stays (derived display label — the planned drop is withdrawn).
 - [x] **31.3 Governance.** DPIA addendum R-26 (risk reduction; verify-and-discard commitment for the
   ON state) + structural tests: collection endpoints refuse before validation when OFF, and no
   granular immigration-status column can ever be added without failing the build.

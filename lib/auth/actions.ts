@@ -21,6 +21,7 @@
 
 import { auth } from "./server";
 import { roleHome } from "./guard";
+import { isValidCountryCode, countryLabel } from "@/lib/taxonomy/countries";
 import { getDb } from "@/db/client";
 import * as schema from "@/db/schema";
 import { eq, and, sql, isNull } from "drizzle-orm";
@@ -91,14 +92,17 @@ const seekerSignUpSchema = z.object({
   // age window. Storing this lets us run the LMI youth-cohort split
   // (15-24).
   dateOfBirth: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-  // Phase 31 ("Data minimisation", plan: docs/PHASE_9_19_PLAN.md)
-  // nationality capture reduced to the ONLY distinction the system uses:
-  // the two-class citizen / non-citizen split. The 191-country picker is
-  // gone; no country label is written any more (`profiles.nationality`
-  // stays as a legacy display column for one release). The question is
-  // analytics + Citizen-Visibility ranking only  NEVER a gate
-  // (Location-Not-Nationality rule); non-citizens are first-class users.
+  // Phase 31 ("Data minimisation", plan: docs/PHASE_9_19_PLAN.md) as
+  // amended by operator feedback (2026-07-20): the primary question is the
+  // two-class citizen Yes/No  the only signal analytics + ranking use.
+  // HYBRID capture: when the answer is NO we additionally ask WHICH
+  // country (ISO alpha-2), because nationality displays on the public
+  // profile + search rows and "non-citizen from where?" is real product
+  // information. Citizens never see a country picker  their label is
+  // derived ("South Africa"). Never a gate (Location-Not-Nationality);
+  // non-citizens are first-class users.
   isCitizen: z.boolean(),
+  nationality: z.string().length(2).optional(),
   password: z.string().min(10).max(128),
   // Consent purposes the user granted in step 2.
   grantedConsents: z.array(z.enum(CONSENT_PURPOSES)).min(1),
@@ -188,6 +192,17 @@ export async function signUpSeeker(
   // the form.
   const dobCheck = validateDob(v.dateOfBirth);
   if (!dobCheck.ok) return fail(dobCheck.message);
+  // Phase 31 hybrid  non-citizens must say which country (it displays on
+  // the profile + search rows); "ZA while not a citizen" is contradictory.
+  if (!v.isCitizen) {
+    if (
+      !v.nationality ||
+      !isValidCountryCode(v.nationality) ||
+      v.nationality === "ZA"
+    ) {
+      return fail("Please pick the country you're from.");
+    }
+  }
 
   // Searchability must be granted before the profile becomes searchable
   // (Phase 2 acceptance criterion). We require it on the form too.
@@ -213,11 +228,13 @@ export async function signUpSeeker(
     const handle = await uniqueHandle(db, v.fullName);
 
     const displayName = redactSurname(v.fullName);
-    // Phase 31  the two-class flag comes straight from the Yes/No
-    // question. No country label is captured any more; the legacy
-    // `profiles.nationality` column stays NULL for new sign-ups.
+    // Phase 31 hybrid  citizens get the derived label ("South Africa");
+    // non-citizens get the country they picked. Both display on the
+    // public profile + search rows, matching the pre-31 surface.
     const isCitizen = v.isCitizen;
-    const nationalityLabel: string | null = null;
+    const nationalityLabel: string | null = isCitizen
+      ? countryLabel("ZA") || null
+      : countryLabel(v.nationality) || null;
 
     // Phase 9.15  resolve free-text "Other" entries BEFORE the transaction.
     // For institutions: the FK constraint on academic_profiles requires the

@@ -231,6 +231,15 @@ acknowledged toggle — built, dormant, honest — not a rebuild.
   structural guard: no asylum/refugee/permit/visa/immigration column may ever exist) +
   `tests/e2e/id-minimisation.spec.ts` (citizen question at sign-up, both flag states on the
   profile editor, the ack-gated admin switch), desktop + 360px, screenshots.
+- **⚠️ AMENDMENT (operator feedback, 2026-07-20 — after live sign-up testing):** Option A is
+  revised to a **HYBRID**: the citizen Yes/No stays the primary (and only) question for the ~99%
+  SA majority, but answering **No now reveals the canonical country picker** (ZA excluded) — the
+  nationality label displays on the public profile + search rows, so "non-citizen from where?"
+  is real product information the operator wants kept. Labels are always DERIVED server-side
+  (citizens → "South Africa"; non-citizens → the picked country); free text stays retired; the
+  analytics still read only `is_citizen`. The `nationality` column is therefore NO longer
+  deprecated — Open Q3 (drop the column) is **withdrawn**: the column is live again as the
+  derived display label.
 - **Open Q2 (government-pitch story):** adopted the minimised model per the plan's
   recommendation — "we don't hoard unverifiable ID numbers" is the pitch line.
-- **Open Q3 (drop the label column):** deliberately deferred one release, as planned.
+- **Open Q3 (drop the label column):** ~~deferred~~ **WITHDRAWN** by the 2026-07-20 amendment — the column now carries the derived display label (citizens "South Africa", non-citizens their picked country) and stays.

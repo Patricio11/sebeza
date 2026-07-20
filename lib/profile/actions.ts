@@ -22,6 +22,7 @@ import { getSessionUser } from "@/lib/auth/guard";
 import { logAccess } from "@/lib/audit";
 import { encryptField } from "@/lib/crypto";
 import { validateSaIdNumber } from "@/lib/id-number";
+import { isValidCountryCode, countryLabel } from "@/lib/taxonomy/countries";
 import { validateDob } from "@/lib/auth/id-validation";
 import { computeCompleteness } from "@/lib/mock/helpers";
 import { SKILLS, PROFESSIONS } from "@/lib/mock/taxonomy";
@@ -68,11 +69,12 @@ const basicsSchema = z
       .optional(),
     city: z.string().min(1).max(80),
     province: z.string().min(1).max(80),
-    // Phase 31 ("Data minimisation")  the free-text nationality label is
-    // no longer accepted or written; the two-class isCitizen flag is the
-    // only nationality signal. Legacy labels stay untouched in the column
-    // (one-release rollback net; display-only).
+    // Phase 31 hybrid (operator feedback 2026-07-20)  free text stays
+    // retired; NON-citizens send an ISO alpha-2 code and the server
+    // derives the display label (it shows on the profile + search rows).
+    // Citizens send no code; their label is derived ("South Africa").
     isCitizen: z.boolean().optional().default(false),
+    nationality: z.string().length(2).optional(),
     bio: z.string().max(2000).optional().nullable(),
     /** Phase 9.9  total years of experience. NULL = "rather not say."
      *  Clamped 0..60 server-side; UI also clamps. */
@@ -116,6 +118,18 @@ export async function updateProfileBasics(
   const db = getDb();
   const v = parsed.data;
 
+  // Phase 31 hybrid  a non-citizen must carry a valid non-ZA country
+  // code (the label displays publicly); a citizen's label is derived.
+  if (!v.isCitizen) {
+    if (
+      !v.nationality ||
+      !isValidCountryCode(v.nationality) ||
+      v.nationality === "ZA"
+    ) {
+      return fail("Please pick the country you're from.");
+    }
+  }
+
   // Recompute completeness based on the new shape. Cheap; keeps the
   // ProfileCompleteness UI honest in real time.
   const profile = await loadOwnedProfile(db, session.id);
@@ -151,8 +165,11 @@ export async function updateProfileBasics(
       seniority: v.seniority ?? null,
       city: v.city,
       province: v.province,
-      // Phase 31  nationality label deliberately NOT written (retired
-      // write path; legacy values persist untouched for display).
+      // Phase 31 hybrid  label always DERIVED (never free text):
+      // citizens → "South Africa"; non-citizens → their picked country.
+      nationality: v.isCitizen
+        ? countryLabel("ZA") || null
+        : countryLabel(v.nationality) || null,
       isCitizen: v.isCitizen ?? false,
       bio: v.bio ?? null,
       yearsExperience: v.yearsExperience ?? null,

@@ -510,6 +510,20 @@ drops in a follow-up. The citizen question is analytics + highlight only,
 NEVER a gate (Location-Not-Nationality rule holds; non-citizens are
 first-class users).
 
+**R-26.2a  Amendment (2026-07-20, operator feedback after live testing).**
+Capture is a HYBRID: citizens answer only the Yes/No; a **non-citizen
+additionally picks their country** from the canonical ISO catalogue (ZA
+excluded), because the nationality label displays on the public profile
+and search rows and is legitimate product information. The label is always
+DERIVED server-side from the flag/code (citizens → "South Africa"); free
+text remains retired; analytics and ranking still consume only the
+two-class `is_citizen` flag; the k=10 suppression and the no-granular-
+status structural guard are unchanged. The `nationality` column is no
+longer scheduled for removal  it carries the derived display label.
+Purpose-limitation note: country-of-origin is collected ONLY for
+non-citizens, for display/transparency  never as a matching or access
+criterion (Location-Not-Nationality rule holds).
+
 **R-26.3  ON-state design commitment.** When a partnership lands and the
 flag is turned ON, the target posture is **verify-and-discard** (store the
 verification RESULT, not the raw number) wherever the provider allows;

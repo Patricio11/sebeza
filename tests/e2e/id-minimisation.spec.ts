@@ -66,7 +66,7 @@ async function signIn(page: Page, email: string, urlRe: RegExp) {
   await page.waitForURL(urlRe, { timeout: 30_000 });
 }
 
-test("sign-up asks one Yes/No citizen question — no country picker, no ID", async ({
+test("sign-up: citizen Yes/No first; answering No reveals the country picker; no ID anywhere", async ({
   page,
 }, testInfo) => {
   // /sign-up is the role chooser; the seeker form lives one level down.
@@ -85,10 +85,42 @@ test("sign-up asks one Yes/No citizen question — no country picker, no ID", as
     page.getByText(/never affects whether you can use Sebenza/i),
   ).toBeVisible();
 
-  // The 191-country picker is gone; no ID/passport capture anywhere.
-  await expect(page.getByPlaceholder(/search countries/i)).toHaveCount(0);
+  // Default (Yes = citizen): no country picker, no ID/passport capture.
+  await expect(
+    page.getByRole("button", { name: "Which country are you from?" }),
+  ).toHaveCount(0);
   await expect(page.getByText(/passport/i)).toHaveCount(0);
   await shoot(page, testInfo, "idmin-1-signup-citizen-question");
+
+  // Phase 31 hybrid (operator feedback 2026-07-20): answering No reveals
+  // the country picker — nationality displays on the profile + search
+  // rows, so non-citizens still say WHICH country. ZA is excluded.
+  await citizenGroup.getByText("No", { exact: true }).click();
+  // exact: true — after a selection, a "Clear Which country are you
+  // from?" affordance also matches a substring name.
+  const countryButton = page.getByRole("button", {
+    name: "Which country are you from?",
+    exact: true,
+  });
+  await expect(countryButton).toBeVisible();
+  await countryButton.click();
+  const picker = page.getByRole("dialog", { name: /country.*picker/i });
+  await expect(picker).toBeVisible();
+  // ZA is excluded from the non-citizen list ("not a citizen but from
+  // South Africa" is contradictory — flip the toggle instead).
+  await expect(
+    picker.getByRole("option", { name: /^South Africa$/ }),
+  ).toHaveCount(0);
+  await picker.getByRole("combobox").fill("Zimba");
+  await picker.getByRole("option", { name: /^Zimbabwe$/ }).first().click();
+  await expect(countryButton).toContainText("Zimbabwe");
+  await shoot(page, testInfo, "idmin-1b-signup-noncitizen-country");
+
+  // Flipping back to Yes hides the picker again.
+  await citizenGroup.getByText("Yes", { exact: true }).click();
+  await expect(
+    page.getByRole("button", { name: "Which country are you from?" }),
+  ).toHaveCount(0);
 });
 
 test("profile editor: flag OFF hides the ID surface; ON restores it", async ({
