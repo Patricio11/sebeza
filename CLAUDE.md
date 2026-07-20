@@ -5,7 +5,7 @@
 **Working name:** Sebenza · South African National Talent-Intelligence Platform.
 **Companion docs (read together, always):**
 - `docs/TO_START_EVERY_SESSION.md`  non-negotiable rules + tone + current state.
-- `docs/ROADMAP.md`  phased build plan (Phase 0 → 26; all shipped except 14, which is partnership-gated).
+- `docs/ROADMAP.md`  phased build plan (Phase 0 → 31; all shipped except 14, which is partnership-gated).
 - `docs/UX_UI_SPEC.md`  design system + screen-by-screen.
 
 **Current state (2026-07): LIVE, DB-BACKED, shipped through Phase 31.** Postgres (Neon) + Drizzle,
