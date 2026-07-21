@@ -103,14 +103,12 @@ interface FormState {
    *  + uploaded for KYC review from the dashboard's KYC panel
    *  (Phase 9.16, follow-up: 2026-05-27 trim). */
   dateOfBirth: string;
-  /** Phase 31 ("Data minimisation", amended 2026-07-20)  the primary
-   *  question is the two-class citizen Yes/No (defaults to Yes; ~99% of
-   *  users are South African). HYBRID: answering No reveals the country
-   *  picker  nationality displays on the public profile + search rows,
-   *  so for non-citizens we still capture WHICH country. Analytics +
-   *  ranking read only the flag; never a gate. */
-  isCitizen: boolean;
-  /** ISO alpha-2 code; only relevant (and required) when isCitizen=false. */
+  /** Phase 31 final shape (operator, 2026-07-21)  ONE familiar
+   *  nationality picker for everyone; no explicit "are you a citizen?"
+   *  question, so the form never reads as separating users into kinds.
+   *  Defaults to ZA (~99% of users). The two-class `is_citizen` the
+   *  analytics + ranking consume is DERIVED server-side (code === "ZA").
+   *  Displays on the profile + search rows; never a gate. */
   nationality: string;
   password: string;
   passwordConfirm: string;
@@ -152,8 +150,7 @@ const initialState: FormState = {
   email: "",
   phone: "",
   dateOfBirth: "",
-  isCitizen: true,
-  nationality: "",
+  nationality: "ZA",
   password: "",
   passwordConfirm: "",
   consents: Object.fromEntries(
@@ -261,7 +258,6 @@ export function SeekerSignUpForm({
       email: state.email,
       phone: state.phone,
       dateOfBirth: state.dateOfBirth,
-      isCitizen: state.isCitizen,
       nationality: state.nationality,
       consents: state.consents,
       profession: state.profession,
@@ -318,9 +314,7 @@ export function SeekerSignUpForm({
     if (state.fullName.trim().length < 2) return false;
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(state.email)) return false;
     if (!validateDob(state.dateOfBirth).ok) return false;
-    // Phase 31 hybrid  non-citizens must pick their country (it displays
-    // on the profile + search rows).
-    if (!state.isCitizen && state.nationality.length !== 2) return false;
+    if (state.nationality.length !== 2) return false;
     if (state.password.length < 10) return false;
     if (state.password !== state.passwordConfirm) return false;
     if (scorePassword(state.password).score < 2) return false;
@@ -423,8 +417,7 @@ export function SeekerSignUpForm({
             fullName: state.fullName,
             phone: state.phone || undefined,
             dateOfBirth: state.dateOfBirth,
-            isCitizen: state.isCitizen,
-            ...(state.isCitizen ? {} : { nationality: state.nationality }),
+            nationality: state.nationality,
             password: state.password,
             grantedConsents,
             profession: state.profession,
@@ -438,8 +431,7 @@ export function SeekerSignUpForm({
             email: state.email,
             phone: state.phone || undefined,
             dateOfBirth: state.dateOfBirth,
-            isCitizen: state.isCitizen,
-            ...(state.isCitizen ? {} : { nationality: state.nationality }),
+            nationality: state.nationality,
             password: state.password,
             grantedConsents,
             profession: state.profession,
@@ -540,75 +532,31 @@ export function SeekerSignUpForm({
             disabled={pending}
           />
 
-          {/* Phase 31 ("Data minimisation")  the 191-country picker is
-              gone: the only nationality signal Sebenza uses is the
-              two-class citizen split, so that's all we ask. One Yes/No,
-              plain language, lowest possible friction for a nervous
-              first-time user. Never a gate  the help text says so. */}
-          <fieldset disabled={pending}>
-            <legend className="text-sm font-medium text-[color:var(--color-ink)]">
-              {t("step1.citizenQuestion")}
-            </legend>
-            <div
-              role="radiogroup"
-              aria-label={t("step1.citizenQuestion")}
-              className="mt-2 inline-flex rounded-[var(--radius-pill)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-0.5"
-            >
-              {(
-                [
-                  { value: true, label: t("step1.citizenYes") },
-                  { value: false, label: t("step1.citizenNo") },
-                ] as const
-              ).map((opt) => (
-                <label
-                  key={opt.label}
-                  className={`cursor-pointer rounded-[var(--radius-pill)] px-5 py-1.5 text-sm transition-colors ${
-                    state.isCitizen === opt.value
-                      ? "bg-[color:var(--color-ink)] text-[color:var(--color-paper)]"
-                      : "text-[color:var(--color-ink-soft)] hover:text-[color:var(--color-ink)]"
-                  }`}
-                >
-                  <input
-                    type="radio"
-                    name="isCitizen"
-                    className="sr-only"
-                    checked={state.isCitizen === opt.value}
-                    onChange={() =>
-                      setState({ ...state, isCitizen: opt.value })
-                    }
-                  />
-                  {opt.label}
-                </label>
-              ))}
-            </div>
-            <p className="mt-1.5 text-xs text-[color:var(--color-ink-soft)]">
-              {t("step1.citizenHelp")}
-            </p>
-          </fieldset>
-
-          {/* Phase 31 hybrid (operator feedback 2026-07-20)  answering No
-              reveals the country picker: nationality displays on the
-              public profile + search rows, so for non-citizens we still
-              capture WHICH country. ZA is excluded ("not a citizen but
-              from South Africa" is contradictory  flip the toggle
-              instead). Citizens never see this. */}
-          {!state.isCitizen && (
-            <ComboboxField
-              id="nationality"
-              label={t("step1.nationalityLabel")}
-              value={state.nationality}
-              onChange={(v) => setState({ ...state, nationality: v })}
-              options={COUNTRIES.filter((c) => c.code !== "ZA").map((c) => ({
-                value: c.code,
-                label: c.label,
-                leading: flagEmoji(c.code),
-              }))}
-              placeholder="Search countries…"
-              helpText={t("step1.nationalityHelp")}
-              required
-              disabled={pending}
-            />
-          )}
+          {/* Phase 31 final shape (operator, 2026-07-21)  ONE familiar
+              nationality picker for everyone, defaulting to South Africa.
+              No "are you a citizen?" question: the form never reads as
+              separating users into kinds. The two-class signal the
+              analytics + Citizen-Visibility ranking use is DERIVED
+              server-side from the picked country (ZA → citizen class).
+              SA + SADC are pinned at the head of the list; the flag
+              emoji renders in the `leading` slot and is excluded from
+              type-to-filter ranking. Never a gate  the help text says
+              so. */}
+          <ComboboxField
+            id="nationality"
+            label={t("step1.nationalityLabel")}
+            value={state.nationality}
+            onChange={(v) => setState({ ...state, nationality: v })}
+            options={COUNTRIES.map((c) => ({
+              value: c.code,
+              label: c.label,
+              leading: flagEmoji(c.code),
+            }))}
+            placeholder="Search countries…"
+            helpText={t("step1.nationalityHelp")}
+            required
+            disabled={pending}
+          />
           <div className="flex flex-col gap-1">
             <PasswordField
               id="password"

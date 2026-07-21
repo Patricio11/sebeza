@@ -69,12 +69,11 @@ const basicsSchema = z
       .optional(),
     city: z.string().min(1).max(80),
     province: z.string().min(1).max(80),
-    // Phase 31 hybrid (operator feedback 2026-07-20)  free text stays
-    // retired; NON-citizens send an ISO alpha-2 code and the server
-    // derives the display label (it shows on the profile + search rows).
-    // Citizens send no code; their label is derived ("South Africa").
-    isCitizen: z.boolean().optional().default(false),
-    nationality: z.string().length(2).optional(),
+    // Phase 31 final shape (operator, 2026-07-21)  ONE nationality picker
+    // for everyone; free text stays retired. The two-class `is_citizen` is
+    // DERIVED server-side (code === "ZA")  the form never asks "are you a
+    // citizen?" so it can't read as separating users into kinds.
+    nationality: z.string().length(2),
     bio: z.string().max(2000).optional().nullable(),
     /** Phase 9.9  total years of experience. NULL = "rather not say."
      *  Clamped 0..60 server-side; UI also clamps. */
@@ -118,16 +117,10 @@ export async function updateProfileBasics(
   const db = getDb();
   const v = parsed.data;
 
-  // Phase 31 hybrid  a non-citizen must carry a valid non-ZA country
-  // code (the label displays publicly); a citizen's label is derived.
-  if (!v.isCitizen) {
-    if (
-      !v.nationality ||
-      !isValidCountryCode(v.nationality) ||
-      v.nationality === "ZA"
-    ) {
-      return fail("Please pick the country you're from.");
-    }
+  // Phase 31 final shape  the code must be canonical (the derived label
+  // displays publicly on the profile + search rows).
+  if (!isValidCountryCode(v.nationality)) {
+    return fail("That nationality isn't recognised  pick from the list.");
   }
 
   // Recompute completeness based on the new shape. Cheap; keeps the
@@ -165,12 +158,10 @@ export async function updateProfileBasics(
       seniority: v.seniority ?? null,
       city: v.city,
       province: v.province,
-      // Phase 31 hybrid  label always DERIVED (never free text):
-      // citizens → "South Africa"; non-citizens → their picked country.
-      nationality: v.isCitizen
-        ? countryLabel("ZA") || null
-        : countryLabel(v.nationality) || null,
-      isCitizen: v.isCitizen ?? false,
+      // Phase 31 final shape  label + class both DERIVED from the one
+      // picked country (never free text, never a separate question).
+      nationality: countryLabel(v.nationality) || null,
+      isCitizen: v.nationality === "ZA",
       bio: v.bio ?? null,
       yearsExperience: v.yearsExperience ?? null,
       completeness: liveCompleteness ?? newCompleteness,

@@ -524,6 +524,19 @@ Purpose-limitation note: country-of-origin is collected ONLY for
 non-citizens, for display/transparency  never as a matching or access
 criterion (Location-Not-Nationality rule holds).
 
+**R-26.2b  Final shape (2026-07-21, operator).** The explicit citizen
+Yes/No question is removed: capture is ONE nationality picker for every
+user (defaulting to South Africa), and `is_citizen` is DERIVED
+(`code === "ZA"`)  the operator judged a separate citizen toggle could
+read as separating users into kinds, which conflicts with the platform's
+non-separating framing (Location-Not-Nationality). Data held is identical
+to the pre-Phase-31 posture (one country label + the derived flag); free
+text stays retired; analytics remain two-class with k=10 suppression; no
+granular status exists. Known approximation, accepted since 9.16: a
+naturalised SA citizen who picks their birth country is classed
+foreign_national  tolerable because the flag feeds AGGREGATE analytics
+and a ranking highlight only, never access.
+
 **R-26.3  ON-state design commitment.** When a partnership lands and the
 flag is turned ON, the target posture is **verify-and-discard** (store the
 verification RESULT, not the raw number) wherever the provider allows;

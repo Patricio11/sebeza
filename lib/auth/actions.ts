@@ -92,17 +92,14 @@ const seekerSignUpSchema = z.object({
   // age window. Storing this lets us run the LMI youth-cohort split
   // (15-24).
   dateOfBirth: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-  // Phase 31 ("Data minimisation", plan: docs/PHASE_9_19_PLAN.md) as
-  // amended by operator feedback (2026-07-20): the primary question is the
-  // two-class citizen Yes/No  the only signal analytics + ranking use.
-  // HYBRID capture: when the answer is NO we additionally ask WHICH
-  // country (ISO alpha-2), because nationality displays on the public
-  // profile + search rows and "non-citizen from where?" is real product
-  // information. Citizens never see a country picker  their label is
-  // derived ("South Africa"). Never a gate (Location-Not-Nationality);
-  // non-citizens are first-class users.
-  isCitizen: z.boolean(),
-  nationality: z.string().length(2).optional(),
+  // Phase 31 final shape (operator, 2026-07-21): ONE familiar nationality
+  // picker for everyone  no explicit "are you a citizen?" question, so
+  // the form never reads as separating users into kinds. The two-class
+  // `is_citizen` the analytics + Citizen-Visibility ranking consume is
+  // DERIVED server-side (code === "ZA"), exactly the 9.16 approach. The
+  // label displays on the public profile + search rows. Never a gate
+  // (Location-Not-Nationality); non-SA users are first-class users.
+  nationality: z.string().length(2),
   password: z.string().min(10).max(128),
   // Consent purposes the user granted in step 2.
   grantedConsents: z.array(z.enum(CONSENT_PURPOSES)).min(1),
@@ -192,16 +189,8 @@ export async function signUpSeeker(
   // the form.
   const dobCheck = validateDob(v.dateOfBirth);
   if (!dobCheck.ok) return fail(dobCheck.message);
-  // Phase 31 hybrid  non-citizens must say which country (it displays on
-  // the profile + search rows); "ZA while not a citizen" is contradictory.
-  if (!v.isCitizen) {
-    if (
-      !v.nationality ||
-      !isValidCountryCode(v.nationality) ||
-      v.nationality === "ZA"
-    ) {
-      return fail("Please pick the country you're from.");
-    }
+  if (!isValidCountryCode(v.nationality)) {
+    return fail("That nationality isn't recognised  pick from the list.");
   }
 
   // Searchability must be granted before the profile becomes searchable
@@ -228,13 +217,11 @@ export async function signUpSeeker(
     const handle = await uniqueHandle(db, v.fullName);
 
     const displayName = redactSurname(v.fullName);
-    // Phase 31 hybrid  citizens get the derived label ("South Africa");
-    // non-citizens get the country they picked. Both display on the
-    // public profile + search rows, matching the pre-31 surface.
-    const isCitizen = v.isCitizen;
-    const nationalityLabel: string | null = isCitizen
-      ? countryLabel("ZA") || null
-      : countryLabel(v.nationality) || null;
+    // Phase 31 final shape  citizenship class DERIVED from the picked
+    // country (SA = citizen-or-PR class for the 9.7 two-class analytics;
+    // the same approximation 9.16 made). Refinable later from the editor.
+    const isCitizen = v.nationality === "ZA";
+    const nationalityLabel: string | null = countryLabel(v.nationality) || null;
 
     // Phase 9.15  resolve free-text "Other" entries BEFORE the transaction.
     // For institutions: the FK constraint on academic_profiles requires the

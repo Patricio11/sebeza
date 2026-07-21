@@ -22,15 +22,13 @@ The plan file stays at its original path because code comments reference it.*
   erasure rights). Seekers with pre-existing ID data keep status + remove-only affordances; the
   admin review queue keeps working for already-submitted documents. Flipping ON restores the
   full 9.16 opt-in KYC flow unchanged — a toggle, not a rebuild.
-- **Amendment (2026-07-20, operator feedback after live testing):** capture is a HYBRID —
-  answering **No** reveals the canonical country picker (ZA excluded), because nationality
-  displays on the public profile + search rows. Labels always derived server-side (citizens →
-  "South Africa"); the `nationality` column stays (planned drop withdrawn). DPIA R-26.2a.
-- Sign-up asks one i18n'd "Are you a South African citizen? Yes/No" (segmented control;
-  `signUpSeeker` takes `isCitizen: boolean` + a conditional country code; the invited path
-  inherits it). Citizens never see a country picker; the profile editor keeps its citizen
-  checkbox with the same conditional picker, and the old free-text nationality field stays
-  retired (labels are always derived from the picked ISO code).
+- **Nationality capture — FINAL SHAPE (2026-07-21, after live operator testing of Option A and
+  a hybrid):** ONE familiar nationality picker for everyone (canonical ISO catalogue, defaults
+  to South Africa) on sign-up AND the profile editor — **no explicit "are you a citizen?"
+  question anywhere** (a separate citizen toggle read as separating users into kinds). The
+  two-class `is_citizen` is DERIVED server-side (`code === "ZA"`); labels always derive from
+  the code (free text retired); the label displays on the public profile + search rows; the
+  `nationality` column stays. DPIA R-26.2a/b.
 - DPIA addendum **R-26**: the risk REDUCTION recorded (supersedes register entries assuming ID
   capture at profile time) + the verify-and-discard commitment for the ON state.
 

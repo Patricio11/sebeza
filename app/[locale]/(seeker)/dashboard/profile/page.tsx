@@ -275,7 +275,6 @@ export default async function ProfileEditorPage({
               bioHelp: t("fields.bioHelp"),
               saveButton: t("saveButton"),
               completenessLive: t("completenessLive"),
-              citizen: t("fields.citizen"),
               nationality: t("fields.nationality"),
             }}
           />

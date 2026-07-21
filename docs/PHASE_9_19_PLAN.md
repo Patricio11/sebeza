@@ -240,6 +240,13 @@ acknowledged toggle — built, dormant, honest — not a rebuild.
   analytics still read only `is_citizen`. The `nationality` column is therefore NO longer
   deprecated — Open Q3 (drop the column) is **withdrawn**: the column is live again as the
   derived display label.
+- **⚠️ FINAL SHAPE (operator, 2026-07-21):** the explicit "Are you a South African citizen?"
+  question is REMOVED entirely — the operator judged that a separate citizen toggle reads as
+  separating users into kinds. Capture is now **one familiar nationality picker for everyone**
+  (defaulting to South Africa), and the two-class `is_citizen` is **DERIVED server-side**
+  (`code === "ZA"`) — i.e. the plan's **Option B**, arrived at after live testing of A and the
+  hybrid. Free text stays retired (labels always derive from the ISO code); analytics/ranking
+  still consume only `is_citizen`; the no-granular-status guard is unchanged.
 - **Open Q2 (government-pitch story):** adopted the minimised model per the plan's
   recommendation — "we don't hoard unverifiable ID numbers" is the pitch line.
 - **Open Q3 (drop the label column):** ~~deferred~~ **WITHDRAWN** by the 2026-07-20 amendment — the column now carries the derived display label (citizens "South Africa", non-citizens their picked country) and stays.

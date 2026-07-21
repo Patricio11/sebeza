@@ -66,61 +66,51 @@ async function signIn(page: Page, email: string, urlRe: RegExp) {
   await page.waitForURL(urlRe, { timeout: 30_000 });
 }
 
-test("sign-up: citizen Yes/No first; answering No reveals the country picker; no ID anywhere", async ({
+test("sign-up: one nationality picker for everyone (default South Africa); no citizen question; no ID", async ({
   page,
 }, testInfo) => {
   // /sign-up is the role chooser; the seeker form lives one level down.
   await page.goto("/en/sign-up/seeker");
   await dismissCookieBanner(page);
 
+  // Phase 31 final shape (operator, 2026-07-21): a single familiar
+  // nationality field — no "are you a citizen?" question anywhere, so
+  // the form never reads as separating users into kinds. The two-class
+  // analytics flag is derived server-side from the picked country.
   await expect(
     page.getByText("Are you a South African citizen?"),
-  ).toBeVisible();
-  const citizenGroup = page.getByRole("radiogroup", {
-    name: /south african citizen/i,
-  });
-  await expect(citizenGroup).toBeVisible();
-  // "Never a gate" copy is load-bearing (Location-Not-Nationality rule).
-  await expect(
-    page.getByText(/never affects whether you can use Sebenza/i),
-  ).toBeVisible();
-
-  // Default (Yes = citizen): no country picker, no ID/passport capture.
-  await expect(
-    page.getByRole("button", { name: "Which country are you from?" }),
   ).toHaveCount(0);
-  await expect(page.getByText(/passport/i)).toHaveCount(0);
-  await shoot(page, testInfo, "idmin-1-signup-citizen-question");
+  await expect(
+    page.getByRole("radiogroup", { name: /citizen/i }),
+  ).toHaveCount(0);
 
-  // Phase 31 hybrid (operator feedback 2026-07-20): answering No reveals
-  // the country picker — nationality displays on the profile + search
-  // rows, so non-citizens still say WHICH country. ZA is excluded.
-  await citizenGroup.getByText("No", { exact: true }).click();
-  // exact: true — after a selection, a "Clear Which country are you
-  // from?" affordance also matches a substring name.
+  // exact: true — once a value is selected, a "Clear …" affordance also
+  // matches a substring name.
   const countryButton = page.getByRole("button", {
     name: "Which country are you from?",
     exact: true,
   });
   await expect(countryButton).toBeVisible();
+  // Defaults to South Africa (~99% of users — one tap less).
+  await expect(countryButton).toContainText("South Africa");
+  // "Never a gate" copy is load-bearing (Location-Not-Nationality rule).
+  await expect(page.getByText(/never a gate/i)).toBeVisible();
+  // No ID/passport capture anywhere at sign-up.
+  await expect(page.getByText(/passport/i)).toHaveCount(0);
+  await shoot(page, testInfo, "idmin-1-signup-nationality");
+
+  // Any other country simply derives the non-citizen class server-side —
+  // same field, no separate declaration. South Africa IS in the list.
   await countryButton.click();
   const picker = page.getByRole("dialog", { name: /country.*picker/i });
   await expect(picker).toBeVisible();
-  // ZA is excluded from the non-citizen list ("not a citizen but from
-  // South Africa" is contradictory — flip the toggle instead).
   await expect(
-    picker.getByRole("option", { name: /^South Africa$/ }),
-  ).toHaveCount(0);
+    picker.getByRole("option", { name: /^South Africa$/ }).first(),
+  ).toBeVisible();
   await picker.getByRole("combobox").fill("Zimba");
   await picker.getByRole("option", { name: /^Zimbabwe$/ }).first().click();
   await expect(countryButton).toContainText("Zimbabwe");
-  await shoot(page, testInfo, "idmin-1b-signup-noncitizen-country");
-
-  // Flipping back to Yes hides the picker again.
-  await citizenGroup.getByText("Yes", { exact: true }).click();
-  await expect(
-    page.getByRole("button", { name: "Which country are you from?" }),
-  ).toHaveCount(0);
+  await shoot(page, testInfo, "idmin-1b-signup-other-nationality");
 });
 
 test("profile editor: flag OFF hides the ID surface; ON restores it", async ({

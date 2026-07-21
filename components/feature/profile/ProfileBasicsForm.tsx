@@ -68,7 +68,6 @@ interface Props {
     bioHelp: string;
     saveButton: string;
     completenessLive: string;
-    citizen: string;
     nationality: string;
   };
 }
@@ -96,19 +95,19 @@ export function ProfileBasicsForm({
   const [seniority, setSeniority] = useState<Seniority | null>(initial.seniority);
   const [province, setProvince] = useState(initial.province);
   const [city, setCity] = useState(initial.city);
-  // Phase 31 hybrid (operator feedback 2026-07-20)  citizen Yes/No is the
-  // primary signal; NON-citizens additionally pick their country from the
-  // canonical catalogue (it displays on the profile + search rows). The
-  // old free-text field stays retired  labels are always derived from
-  // the picked ISO code server-side.
-  const [isCitizen, setIsCitizen] = useState(initial.isCitizen);
+  // Phase 31 final shape (operator, 2026-07-21)  ONE nationality picker
+  // for everyone; no "are you a citizen?" control (the two-class flag is
+  // derived server-side from the picked country). Free text stays retired
+  //  labels always derive from the ISO code.
   const [nationalityCode, setNationalityCode] = useState<string>(() => {
-    if (initial.isCitizen || !initial.nationality) return "";
-    // Stored label → code (legacy free-text that doesn't match the
-    // catalogue starts empty, forcing an explicit re-pick on save).
-    return (
-      COUNTRIES.find((c) => c.label === initial.nationality)?.code ?? ""
-    );
+    // Stored label → code. Legacy labels that don't match the catalogue
+    // (old free-text demonyms) fall back via the stored citizen flag so
+    // the picker starts on a sensible value.
+    const matched = COUNTRIES.find(
+      (c) => c.label === initial.nationality,
+    )?.code;
+    if (matched) return matched;
+    return initial.isCitizen ? "ZA" : "";
   });
   const [bio, setBio] = useState(initial.bio ?? "");
   // Phase 9.9  total years of experience. Stored as a string in form
@@ -131,7 +130,6 @@ export function ProfileBasicsForm({
       seniority,
       province,
       city,
-      isCitizen,
       nationalityCode,
       bio,
       yearsExperience,
@@ -143,7 +141,6 @@ export function ProfileBasicsForm({
       seniority,
       province,
       city,
-      isCitizen,
       nationalityCode,
       bio,
       yearsExperience,
@@ -163,7 +160,6 @@ export function ProfileBasicsForm({
         if (draft.seniority !== undefined) setSeniority(draft.seniority);
         if (draft.province !== undefined) setProvince(draft.province);
         if (draft.city !== undefined) setCity(draft.city);
-        if (draft.isCitizen !== undefined) setIsCitizen(draft.isCitizen);
         if (draft.nationalityCode !== undefined)
           setNationalityCode(draft.nationalityCode);
         if (draft.bio !== undefined) setBio(draft.bio);
@@ -199,10 +195,9 @@ export function ProfileBasicsForm({
         seniority: seniority ?? null,
         city,
         province,
-        isCitizen,
-        // Phase 31 hybrid  the ISO code only travels for non-citizens;
-        // the server derives the display label from it.
-        ...(isCitizen ? {} : { nationality: nationalityCode }),
+        // Phase 31 final shape  the server derives BOTH the display
+        // label and the two-class citizen flag from this one code.
+        nationality: nationalityCode,
         bio: bio || null,
         yearsExperience:
           yearsNum !== null && Number.isFinite(yearsNum) ? yearsNum : null,
@@ -230,33 +225,23 @@ export function ProfileBasicsForm({
             hint={labels.displayNameHelp}
             autoComplete="name"
           />
-          {/* Phase 31 hybrid  citizen flag first; unticking reveals the
-              canonical country picker (nationality displays on the
-              profile + search rows). Never a gate: matching is by
-              location + skill. */}
-          <Checkbox
-            className="mt-2 md:mt-auto md:pb-3"
-            align="center"
-            checked={isCitizen}
-            onChange={setIsCitizen}
-            label={labels.citizen}
+          {/* Phase 31 final shape  one nationality picker for everyone;
+              no separate citizen control (the two-class flag is derived
+              server-side). Never a gate: matching is by location + skill. */}
+          <ComboboxField
+            id="nationality"
+            label={labels.nationality}
+            value={nationalityCode}
+            onChange={setNationalityCode}
+            options={COUNTRIES.map((c) => ({
+              value: c.code,
+              label: c.label,
+              leading: flagEmoji(c.code),
+            }))}
+            placeholder="Search countries…"
+            helpText="Shown on your profile and in search results. Never a gate  Sebenza matches by location + skill."
+            required
           />
-          {!isCitizen && (
-            <ComboboxField
-              id="nationality"
-              label={labels.nationality}
-              value={nationalityCode}
-              onChange={setNationalityCode}
-              options={COUNTRIES.filter((c) => c.code !== "ZA").map((c) => ({
-                value: c.code,
-                label: c.label,
-                leading: flagEmoji(c.code),
-              }))}
-              placeholder="Search countries…"
-              helpText="Shown on your profile and in search results. Never a gate  Sebenza matches by location + skill."
-              required
-            />
-          )}
         </div>
       </section>
 
