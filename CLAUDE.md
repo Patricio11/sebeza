@@ -13,8 +13,9 @@
 + ~110-test Playwright E2E (desktop + 360px), 20 cron jobs.
 Phase 31 (data minimisation, plan `docs/PHASE_9_19_PLAN.md`): ID/passport collection DORMANT by
 default (`feature_flag_id_verification_enabled` OFF; ack-gated on /admin/verifications; collection
-actions hard-refuse, removal never gated) and nationality reduced to the two-class `is_citizen`
-Yes/No (no country picker; label write path retired). Responsible party: Yetotec (Pty) Ltd. Nothing user-facing renders mock data
+actions hard-refuse, removal never gated). Nationality = ONE picker for everyone (default ZA, no
+citizen question); `is_citizen` DERIVED server-side (`code === "ZA"`); labels derive from the ISO
+code (free text retired). Responsible party: Yetotec (Pty) Ltd. Nothing user-facing renders mock data
 (Phase 23 truth pass); `lib/mock/` survives only as seed source, taxonomy-constant fallback, pure
 helpers, and test fixtures. Showcase login accounts: `docs/SHOWCASE_ACCOUNTS.md`.
 Phase 28: installable PWA (`app/manifest.ts`, brand icons, minimal offline-only service worker in

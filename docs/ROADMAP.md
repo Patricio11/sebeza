@@ -1126,7 +1126,7 @@ Full detail: `docs/PHASE_29_SEATS_AND_SEARCH_INVITE_FUNNEL.md`.
 
 ---
 
-## 🛡️ PHASE 31 — DATA MINIMISATION: DORMANT ID COLLECTION + TWO-CLASS CITIZEN CAPTURE *(shipped 2026-07-19)*
+## 🛡️ PHASE 31 — DATA MINIMISATION: DORMANT ID COLLECTION + DERIVED NATIONALITY CLASS *(shipped 2026-07-19 → 21)*
 
 **Thesis: don't hold the heaviest POPIA liability in the system while nothing uses it.** Full plan:
 `docs/PHASE_9_19_PLAN.md` (drafted under that name; ships as Phase 31 — "9.19" was already taken by
@@ -1220,10 +1220,11 @@ HR Practitioner · Electrician · Plumber · Accountant · Nurse · Driver · Bo
 
 ---
 
-*Last Updated: 2026-07-19*
-*Version: 2.9  synced through **Phase 31** (data minimisation: dormant ID collection + two-class
-citizen capture; DPIA R-26). Prior: v2.8 synced through Phase 29 (vacancy seats + the seamless
-/search invite funnel).
+*Last Updated: 2026-07-21*
+*Version: 2.10  synced through **Phase 31 final shape** (data minimisation: ID/passport collection
+dormant by default; ONE nationality picker for everyone with `is_citizen` DERIVED server-side — no
+explicit citizen question; DPIA R-26 + R-26.2a/b). Prior: v2.9 first Phase 31 cut (2026-07-19);
+v2.8 synced through Phase 29 (vacancy seats + the seamless /search invite funnel).
 Prior: v2.7 synced through Phase 28 (PWA installability + floating mobile bottom nav across
 all role dashboards). Prior: v2.6 synced through Phase 27  Phases 18–21 (seeker growth gaps), 22
 (AI-coach safety), 23–26 (truth/testimonials/integrations/security) + the governance sync all shipped;
