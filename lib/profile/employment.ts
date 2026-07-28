@@ -36,7 +36,7 @@ import { z } from "zod";
 import { verifyRole } from "@/lib/auth/dal";
 import { logAccess } from "@/lib/audit";
 import { submitTaxonomySuggestion } from "@/lib/taxonomy/suggestions";
-import { supersedeEmploymentVerifications } from "@/lib/profile/employment-verification";
+import { supersedeEmploymentVerifications } from "@/lib/profile/employment-verification-internal";
 
 export type ActionResult<T extends object = object> =
   | ({ ok: true } & T)

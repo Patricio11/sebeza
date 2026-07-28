@@ -558,84 +558,14 @@ export async function respondToVerification(
 // ─────────────────────────────────────────────────────────────────────
 // D7  supersede on employer change
 // ─────────────────────────────────────────────────────────────────────
-
-/**
- * Phase 9.23 D7  called from Phase 9.22's updateCurrentEmployment
- * when the seeker changes `current_employer_org_id`. Flips any
- * `pending` or `verified` verification for the PRIOR employer to
- * `state='superseded'`, redacts the contact email, fires the seeker
- * outcome notification (informational  no action required).
- *
- * Caller passes the profile id so we don't re-load the session.
- */
-export async function supersedeEmploymentVerifications(args: {
-  profileId: string;
-  priorEmployerOrgId: string;
-}): Promise<void> {
-  const db = getDb();
-  const active = await db
-    .select({
-      id: schema.employmentVerifications.id,
-      state: schema.employmentVerifications.state,
-      employerName: schema.organizations.name,
-      profileUserId: schema.profiles.userId,
-    })
-    .from(schema.employmentVerifications)
-    .leftJoin(
-      schema.organizations,
-      eq(
-        schema.organizations.id,
-        schema.employmentVerifications.employerOrgId,
-      ),
-    )
-    .innerJoin(
-      schema.profiles,
-      eq(schema.profiles.id, schema.employmentVerifications.profileId),
-    )
-    .where(
-      and(
-        eq(schema.employmentVerifications.profileId, args.profileId),
-        eq(
-          schema.employmentVerifications.employerOrgId,
-          args.priorEmployerOrgId,
-        ),
-        sql`${schema.employmentVerifications.state} IN ('pending', 'verified')`,
-      ),
-    );
-  for (const row of active) {
-    await db
-      .update(schema.employmentVerifications)
-      .set({
-        state: "superseded",
-        respondedAt: new Date(),
-        contactEmailEnc: null,
-        verificationToken: null,
-      })
-      .where(eq(schema.employmentVerifications.id, row.id));
-    await logAccess({
-      kind: "employment.verification.superseded",
-      actor: "system",
-      subject: row.id,
-      meta: {
-        verificationId: row.id,
-        priorEmployerOrgId: args.priorEmployerOrgId,
-      },
-    });
-    if (row.state === "verified") {
-      try {
-        await createNotification({
-          userId: row.profileUserId,
-          kind: "employment.verification.outcome",
-          title: "Your employer-verified badge has been cleared",
-          body: `You changed your current employer  the verified badge at ${row.employerName ?? "your previous employer"} no longer applies. You can request a new verification at your new employer any time.`,
-          link: "/dashboard/profile",
-          meta: { verificationId: row.id, outcome: "superseded" },
-        });
-      } catch (e) {
-        // eslint-disable-next-line no-console
-        console.error("[employment-verification] supersede notify failed:", e);
-      }
-    }
-  }
-}
-
+//
+// Phase 32.1.1 (security remediation)  `supersedeEmploymentVerifications`
+// MOVED to `lib/profile/employment-verification-internal.ts`.
+//
+// It trusts its arguments (the caller passes profileId so we don't
+// re-load the session), which is fine for an internal helper but NOT
+// for an export of a `"use server"` module: every exported async
+// function here is a public HTTP endpoint with a stable action id, so
+// it was anonymously callable and could destroy any seeker's
+// employment verification. Helpers that trust their caller now live in
+// a plain module that cannot be reached over the wire.

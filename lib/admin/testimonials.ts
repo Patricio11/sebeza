@@ -31,6 +31,12 @@ function revalidate() {
 export async function setTestimonialCampaign(
   on: boolean,
 ): Promise<AdminTestimonialResult> {
+  // Phase 32.1.3  explicit guard, not merely inherited. `updateSetting`
+  // does call verifyAdmin() itself, but a reader of THIS file shouldn't
+  // have to trace into another module to know the endpoint is safe, and
+  // an exported action of a "use server" module is a public HTTP
+  // endpoint. Defence in depth; the sibling actions below do the same.
+  await verifyAdmin();
   const res = await updateSetting({
     key: "testimonial_campaign_active",
     value: on,

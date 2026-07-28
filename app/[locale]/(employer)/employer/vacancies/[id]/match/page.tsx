@@ -66,12 +66,17 @@ export default async function VacancyMatchPage({
 
   const [match, role, alreadyInvitedProfileIds, verificationVisible, shortlistedProfileIds] =
     await Promise.all([
-      matchVacancyCandidates(vacancy),
+      // Phase 32.1.2  takes the ID and re-resolves org-scoped inside the
+      // action (it no longer trusts a caller-supplied VacancyRow).
+      matchVacancyCandidates(vacancy.id),
       getMyOrgRole(),
       getInvitedProfileIdsForVacancy(vacancy.id),
       getSetting<boolean>("feature_flag_verification_badges_visible"),
       getVacancyShortlistProfileIds(vacancy.id),
     ]);
+  // `getMyVacancy` already resolved above, so a null here means the row
+  // vanished mid-request  treat it the same as not-found.
+  if (!match) notFound();
   const { candidates, counts, filters } = match;
   const canInvite =
     canEditVacancies(role) &&

@@ -956,18 +956,31 @@ export interface VacancyMatchResult {
 }
 
 /**
- * Compose the match view for a given vacancy. Two queries: the ranked
- * list (capped) + the full-match citizenship buckets (for the honest-
- * supply line). Both use identical WHERE clauses so the figures are
+ * Compose the match view for a vacancy. Two queries: the ranked list
+ * (capped) + the full-match citizenship buckets (for the honest-supply
+ * line). Both use identical WHERE clauses so the figures stay
  * internally consistent.
  *
- * Caller is responsible for the org-ownership check on the vacancy
- * before calling (the page passes a vacancy already loaded via
- * getMyVacancy()).
+ * Phase 32.1.2 (security remediation)  takes a vacancy **ID**, never a
+ * `VacancyRow`. The previous signature accepted a caller-supplied row
+ * and did no authorisation of its own; because this module carries
+ * `"use server"`, that made it a public HTTP endpoint through which an
+ * anonymous caller could obtain (a) nationality-split supply counts for
+ * arbitrary filters  data reachable nowhere else and squarely against
+ * the Location-Not-Nationality rule  (b) raw private-bucket storage
+ * keys for profile photos, and (c) a `search_events` write that
+ * polluted the skills-gap dataset.
+ *
+ * `getMyVacancy` is the org-scoping primitive: it calls
+ * `verifyEmployer()` and matches `organization_id` to the session's
+ * org, returning null (never an error that discloses existence) on a
+ * miss. Returns null here so the caller renders its own not-found.
  */
 export async function matchVacancyCandidates(
-  vacancy: VacancyRow,
-): Promise<VacancyMatchResult> {
+  vacancyId: string,
+): Promise<VacancyMatchResult | null> {
+  const vacancy = await getMyVacancy(vacancyId);
+  if (!vacancy) return null;
   const filters = vacancyToSearchFilters(vacancy);
   const [search, counts] = await Promise.all([
     searchProfilesQuery(filters),
