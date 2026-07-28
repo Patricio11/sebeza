@@ -683,6 +683,27 @@ export async function findProfileByHandleQuery(
           WHERE au.id = ${schema.profiles.userId}
             AND au.suspended_at IS NOT NULL
         )`,
+        // Phase 32.3.5 (security audit)  DELIBERATE DIVERGENCE, DO NOT
+        // "FIX" BY COPYING searchProfilesQuery's pause clause.
+        //
+        // `searchProfilesQuery` (and the invite path) exclude profiles
+        // whose `searchability` consent is paused. This by-handle read
+        // does NOT, and that is correct: the pause control promises the
+        // seeker
+        //
+        //   "You stay in the system + keep your freshness streak.
+        //    Employers can't send you new invites; YOUR EXISTING
+        //    RELATIONSHIPS CARRY ON. Auto-resumes on the date you pick."
+        //   (components/feature/privacy/SearchabilityPauseControl.tsx)
+        //
+        // Pause means "stop NEW discovery", not "go invisible" — a
+        // seeker who wants to disappear revokes searchability instead
+        // (which this query does honour, via the consent join upstream).
+        // 404-ing a direct link would break exactly the existing
+        // relationships the copy commits to preserving: an employer
+        // mid-conversation, a link the seeker pasted into an
+        // application. If the product ever redefines pause as
+        // invisibility, change the COPY first, then this clause.
       ),
     )
     .limit(1);

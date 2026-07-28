@@ -16,6 +16,8 @@
  */
 
 import { getDb } from "@/db/client";
+import { enforce } from "@/lib/rate-limit";
+import { clientIpKey } from "@/lib/rate-limit/client-ip";
 import * as schema from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
@@ -52,8 +54,24 @@ export async function flagProfile(
   const parsed = flagSchema.safeParse(input);
   if (!parsed.success) return fail("Please pick a reason and try again.");
 
-  // Optional session  reports can be filed anonymously.
+  // Optional session  reports can be filed anonymously. That is
+  // deliberate: a seeker reporting a predatory employer must not have
+  // to identify themselves first.
   const session = await getSessionUser();
+
+  // Phase 32.3.8 (security remediation)  but anonymous + unthrottled
+  // meant each call inserted a row AND notified every admin, so a loop
+  // could flood the moderation queue and every admin's bell, or
+  // mass-flag a competitor's seekers. Signed-in reporters are keyed by
+  // user id (fairer  they share an office NAT); anonymous ones by IP.
+  const reportKey = session?.id ?? (await clientIpKey());
+  const limit = await enforce("report", reportKey);
+  if (!limit.ok) {
+    return fail(
+      "You've filed several reports just now. Please wait a few minutes before sending another.",
+    );
+  }
+
   const db = getDb();
 
   const profileRows = await db

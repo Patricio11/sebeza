@@ -185,6 +185,74 @@ const seekerSignUpSchema = z.object({
   currentRoleCity: z.string().trim().max(80).nullable().optional(),
 });
 
+/**
+ * Phase 32.3.9 (security remediation)  duplicate-email handling that
+ * does not become an enumeration oracle.
+ *
+ * Sign-up used to answer "An account with this email already exists"
+ * (and a `return e.message` fallthrough leaked Better Auth's own
+ * `USER_ALREADY_EXISTS_...` string). That undid the careful
+ * anti-enumeration work on the reset + resend paths, where sign-up was
+ * simply the easier oracle.
+ *
+ * On a JOB platform this matters more than usual: confirming an address
+ * has an account can reveal that a specific person is job-hunting 
+ * exactly the inference a current employer should not be able to draw.
+ *
+ * So we return the SAME shape as a successful sign-up and email the
+ * genuine owner instead. The honest user who forgot they had an account
+ * still gets guidance, delivered to the address only they control; an
+ * attacker learns nothing. Nothing here is fatal: a send failure must
+ * not turn into a different response shape (that would restore the
+ * oracle), so it is caught and logged.
+ */
+/**
+ * Is this address already registered? Checked BEFORE calling Better
+ * Auth, deterministically  not by pattern-matching an error message.
+ *
+ * Behaviour worth knowing (verified against Better Auth 1.6.25): a
+ * duplicate `signUpEmail` does NOT throw. It returns a PHANTOM user
+ * object carrying a brand-new id while persisting nothing, and leaves
+ * the real account's password and role untouched (both verified). Our
+ * sign-up then tried to insert a profile pointing at that non-existent
+ * user id and failed with a FOREIGN-KEY violation  so the seeker saw a
+ * baffling "a required field was missing" error, AND the response still
+ * differed from a real sign-up, which is the oracle we are closing.
+ * Checking first removes the guesswork entirely.
+ */
+async function emailAlreadyRegistered(email: string): Promise<boolean> {
+  const rows = await getDb()
+    .select({ id: schema.appUser.id })
+    .from(schema.appUser)
+    .where(eq(schema.appUser.email, email))
+    .limit(1);
+  return rows.length > 0;
+}
+
+async function notifyExistingAccountHolder(email: string): Promise<void> {
+  try {
+    const { sendEmail } = await import("@/lib/email/send");
+    const origin = (
+      process.env.NEXT_PUBLIC_APP_ORIGIN ??
+      process.env.BETTER_AUTH_URL ??
+      "http://localhost:3000"
+    ).replace(/\/$/, "");
+    await sendEmail({
+      to: email,
+      subject: "You already have a Sebenza account",
+      html: `<p>Someone just tried to create a Sebenza account with this email address.</p>
+<p>If that was you: you already have an account  just sign in instead.</p>
+<p><a href="${origin}/sign-in">Sign in to Sebenza</a> ·
+<a href="${origin}/forgot-password">Forgotten your password?</a></p>
+<p style="color:#5a5249;font-size:13px;">If it wasn't you, you can ignore this email  no new account was created and nothing about your account has changed. We will never ask you for your password.</p>`,
+    });
+  } catch (err) {
+    // Never surface this: a send failure must not change the response
+    // shape, or the enumeration oracle comes straight back.
+    console.error("[signUp] existing-account notice failed:", err);
+  }
+}
+
 export async function signUpSeeker(
   input: z.infer<typeof seekerSignUpSchema>,
 ): Promise<ActionResult> {
@@ -208,6 +276,19 @@ export async function signUpSeeker(
     !REQUIRED_FOR_SEARCHABILITY.every((p) => v.grantedConsents.includes(p))
   ) {
     return fail("Searchability consent is required to create a profile.");
+  }
+
+  // Phase 32.3.9 (security remediation)  duplicate address: respond
+  // EXACTLY as for a real sign-up and tell the genuine owner by email.
+  // Sign-up used to answer "An account with this email already exists",
+  // which made it the easy enumeration oracle and undid the careful
+  // anti-enumeration work on the reset + resend paths. On a job
+  // platform that inference is unusually sensitive  it can reveal that
+  // a named person is job-hunting, exactly what their current employer
+  // must not be able to learn.
+  if (await emailAlreadyRegistered(v.email)) {
+    await notifyExistingAccountHolder(v.email);
+    return ok({ next: "/verify-email" });
   }
 
   const db = getDb();
@@ -759,6 +840,14 @@ export async function signUpEmployer(
   if (!parsed.success) return fail("Please check the form and try again.");
   const v = parsed.data;
 
+  // Phase 32.3.9  same neutral duplicate handling as the seeker path.
+  // Employer addresses are the higher-value enumeration target (which
+  // companies are registered here?), so this matters on both forms.
+  if (await emailAlreadyRegistered(v.email)) {
+    await notifyExistingAccountHolder(v.email);
+    return ok({ next: "/verify-email" });
+  }
+
   const db = getDb();
 
   try {
@@ -1174,7 +1263,10 @@ function toMessage(e: unknown): string {
   // 23505 = unique_violation, 23503 = foreign_key_violation,
   // 23502 = not_null_violation, 42703 = undefined_column
   if (causeCode === "23505") {
-    return "An account with this email already exists. Try signing in instead.";
+    // Phase 32.3.9  never reached for sign-up (the catch intercepts
+    // duplicates first and returns the neutral success shape), but kept
+    // neutral so no other caller can turn it into an oracle.
+    return "Sign-up failed. Please refresh and try again, or contact support if the problem persists.";
   }
   if (causeCode === "42703") {
     return "The database is missing a column the app expects. An administrator needs to run `npm run db:migrate`.";
@@ -1188,7 +1280,13 @@ function toMessage(e: unknown): string {
     return "Sign-up failed. Please refresh and try again, or contact support if the problem persists.";
   }
 
-  if (e instanceof Error && e.message) return e.message;
+  // Phase 32.3.9  do NOT return the raw error. Better Auth's own
+  // `USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL` used to reach the client
+  // through this line, re-creating the enumeration oracle the branch
+  // above closes.
+  if (e instanceof Error && e.message) {
+    console.error("[signUp] unmapped error:", e);
+  }
   return "Sign-up failed. Please try again.";
 }
 

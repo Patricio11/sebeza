@@ -97,6 +97,17 @@ export const BUCKETS = {
    * busy recruiter; it is not a mass-messaging tool.
    */
   "invite": { limit: 10, windowSeconds: 60 * 60 },
+  /**
+   * Phase 32.3.8  anonymous abuse reports (`flagProfile`).
+   *
+   * Filing anonymously is deliberate and correct  a seeker reporting a
+   * predatory employer must not have to identify themselves. But each
+   * call inserts a `reports` row AND notifies every admin, so
+   * unthrottled it is both a moderation-queue flood and a way to
+   * mass-flag a competitor's seekers. Keyed per IP; generous enough
+   * that a genuine reporter filing about several profiles is unaffected.
+   */
+  "report": { limit: 5, windowSeconds: 10 * 60 },
 } as const;
 
 export type BucketName = keyof typeof BUCKETS;

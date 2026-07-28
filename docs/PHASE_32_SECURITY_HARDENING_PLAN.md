@@ -278,24 +278,54 @@ check that the employer match page still renders candidates.
       makes the admin storage health card
       (`app/[locale]/(admin)/admin/integrations/page.tsx:66`) permanently read "not configured", and
       `CLAUDE.md:86` documents the wrong name. → read `SUPABASE_URL` in all three places.
-- [ ] **32.3.5 `/p/{handle}` ignores the searchability pause.** `db/queries/profiles.ts:634-646`
+- [x] **32.3.5 `/p/{handle}` ignores the searchability pause.** ✅ **Open Q3 RESOLVED — AGAINST my
+      stated lean, on evidence.** I read what the pause control actually promises the seeker:
+      *"You stay in the system + keep your freshness streak. Employers can't send you new invites;
+      **your existing relationships carry on**. Auto-resumes on the date you pick."* Pause means
+      "stop NEW discovery", not "go invisible" — a seeker wanting to vanish REVOKES searchability
+      (which the by-handle query does honour). 404-ing a direct link would break precisely the
+      existing relationships that copy commits to: an employer mid-conversation, a link pasted into
+      an application. So: behaviour UNCHANGED, divergence documented in `db/queries/profiles.ts`
+      with the quoted copy and a "if the product redefines pause, change the COPY first" note.
+      Original finding: `db/queries/profiles.ts:634-646`
       applies only `deletedAt IS NULL` + the suspended-account check, while `searchProfilesQuery`
       (`:265-273`) and the invite path (`lib/employer/invitations.ts:367-380`) both honour
       `paused_until`. A paused seeker vanishes from search but their full dossier stays live at
       `/p/{handle}` and in the 7-day-cached OG card. **Product decision — Open Q3.**
-- [ ] **32.3.6 Security headers skip `/api`.** `proxy.ts:141-143` excludes `api` from the matcher, so
+- [x] **32.3.6 Security headers skip `/api`.** ✅ FIXED — `next.config.ts` now sets `nosniff`,
+      `X-Frame-Options`, `Referrer-Policy`, HSTS and a `default-src 'none'; sandbox` CSP for
+      `/api/:path*`. Done in the config rather than by widening the proxy matcher so the Better Auth
+      handler's request handling stays untouched. Original finding: `proxy.ts:141-143` excludes `api` from the matcher, so
       the POPIA data export, the 6 gov CSV exports and the 2 admin exports ship with no `nosniff`,
       no HSTS, no Referrer-Policy. → add a `headers()` entry in `next.config.ts` for `/api/:path*`
       (simpler than widening the matcher).
-- [ ] **32.3.7 `trustedOrigins` hardcodes localhost in production** (`lib/auth/server.ts:37`) → gate
+- [x] **32.3.7 `trustedOrigins` hardcodes localhost in production** ✅ FIXED — localhost entries are
+      now dev-only. Original finding: (`lib/auth/server.ts:37`) → gate
       the localhost entries on `NODE_ENV !== "production"`. Also make `BETTER_AUTH_URL` **required**
       in production instead of defaulting to `http://localhost:3000` (`:29`) — that default silently
       produces localhost verification/reset links if the env var is ever missing.
-- [ ] **32.3.8 Anonymous report flood.** `flagProfile` (`lib/admin/moderation.ts:49-56`) is
+- [x] **32.3.8 Anonymous report flood.** ✅ FIXED — new `report` bucket (5/10min). Anonymous filing
+      is preserved deliberately (a seeker reporting a predatory employer must not have to identify
+      themselves); signed-in reporters key on user id, anonymous ones on IP — fairer than keying
+      everyone by IP when colleagues share a NAT. Original finding: `flagProfile` (`lib/admin/moderation.ts:49-56`) is
       deliberately anonymous (correct) but each call inserts a row **and** notifies every admin, with
       no throttle or dedupe → add an `enforce()` bucket + collapse duplicate open reports per
       (handle, reason).
-- [ ] **32.3.9 Sign-up email enumeration.** `lib/auth/actions.ts:1070-1072` and the
+- [x] **32.3.9 Sign-up email enumeration.** ✅ FIXED — and the investigation changed the design.
+      **Open Q4 resolved: do it, and the UX cost is lower than feared** — a duplicate now returns the
+      SAME shape as a real sign-up while the genuine owner gets an email ("you already have an
+      account, sign in / reset"), so the forgetful honest user still gets guidance, delivered to the
+      address only they control.
+      **Discovered while implementing (verified by probe against Better Auth 1.6.25):** a duplicate
+      `signUpEmail` does NOT throw. It returns a PHANTOM user with a brand-new id, persists nothing,
+      and leaves the real account's password and role untouched (both explicitly verified — no
+      takeover, no privilege change). Our code then inserted a profile pointing at that non-existent
+      user id and failed with a FOREIGN-KEY violation, so the seeker saw a baffling "a required field
+      was missing" error AND the response still differed from a real sign-up. The fix therefore
+      checks the address BEFORE calling Better Auth rather than pattern-matching an error shape —
+      deterministic, and it also removes a real UX bug. The `return e.message` fallthrough (which
+      leaked `USER_ALREADY_EXISTS_...`) is gone; unmapped errors log server-side and return a fixed
+      string. Original finding: `lib/auth/actions.ts:1070-1072` and the
       `return e.message` fallthrough at `:1085` leak "account already exists", undoing the careful
       anti-enumeration work on the reset/resend paths → return the neutral shape and mail the
       existing owner instead. (Lower priority; note the UX trade in Open Q4.)
@@ -399,7 +429,8 @@ correct and secure, but it explains nothing about the platform.
         **Verified:** 380 vitest green · build clean · mutation-tested.
   - [x] **32.2.1** ✅ 2026-07-28 — suspension/erasure terminate sessions; DAL fails closed;
         cookieCache 5min→60s. **Verified:** 375 vitest green · build clean · mutation-tested.
-- [ ] **32.3 Medium** — 9 items
+- [x] **32.3 Medium** ✅ 2026-07-28 — ALL 9 ITEMS COMPLETE. **Verified:** 405 vitest green (37
+      files) · production build clean.
 - [ ] **32.4 Welcome email** — role-aware, consent-summarising, i18n'd
 
 *Plan opened 2026-07-28 against `862a432`. Audit method: four parallel read-only sweeps

@@ -34,7 +34,16 @@ export const auth = betterAuth({
   // Origins Better Auth will accept sign-in / sign-up requests from.
   // Without this dev sign-ins can fail with CSRF-style errors when the
   // request origin doesn't match the configured baseURL exactly.
-  trustedOrigins: [appUrl, "http://localhost:3000", "http://localhost:3001"],
+  // Phase 32.3.7 (security remediation)  localhost is a DEV-ONLY
+  // trusted origin. This list is what Better Auth's origin-check
+  // middleware validates `callbackURL` / `redirectTo` /
+  // `errorCallbackURL` against, and `/api/auth/*` is publicly mounted —
+  // so shipping localhost meant production accepted `http://localhost:*`
+  // as a legitimate post-auth redirect target and request origin.
+  trustedOrigins:
+    process.env.NODE_ENV === "production"
+      ? [appUrl]
+      : [appUrl, "http://localhost:3000", "http://localhost:3001"],
 
   database: drizzleAdapter(db, {
     provider: "pg",
