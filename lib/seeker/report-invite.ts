@@ -24,39 +24,24 @@ import { getDb } from "@/db/client";
 import * as schema from "@/db/schema";
 import { verifyRole } from "@/lib/auth/dal";
 import { logAccess } from "@/lib/audit";
+import { REPORT_INVITE_REASON_LABEL } from "./report-invite-types";
+import type {
+  ActionResult,
+  ReportInviteReason,
+  ReportInvitationInput,
+} from "./report-invite-types";
 import { notifyAllAdmins } from "@/lib/notifications/server";
 
-export type ActionResult<T extends object = object> =
-  | ({ ok: true } & T)
-  | { ok: false; message: string };
-
-export type ReportInviteReason =
-  | "harassment"
-  | "spam"
-  | "inappropriate"
-  | "irrelevant_role"
-  | "bad_faith_company"
-  | "off_platform_contact_request"
-  | "other";
-
-export const REPORT_INVITE_REASON_LABEL: Record<ReportInviteReason, string> = {
-  harassment: "Harassment / abusive tone",
-  spam: "Spam / mass-blast",
-  inappropriate: "Inappropriate content",
-  irrelevant_role: "The role doesn't match what was advertised",
-  bad_faith_company: "Bad-faith company (MLM, scam, pay-to-apply)",
-  off_platform_contact_request:
-    "Asked me to take it off-platform (WhatsApp, personal email)",
-  other: "Another reason",
-};
+// Phase 32.1.3  types/constants moved to `./report-invite-types` (a
+// "use server" module may only export async functions; the label map is
+// imported by a CLIENT component). Re-exported below for callers.
+export type {
+  ActionResult,
+  ReportInviteReason,
+  ReportInvitationInput,
+} from "./report-invite-types";
 
 const NOTE_MAX = 280;
-
-export interface ReportInvitationInput {
-  invitationId: string;
-  reason: ReportInviteReason;
-  note?: string;
-}
 
 export async function reportInvitation(
   input: ReportInvitationInput,

@@ -14,11 +14,14 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "@/i18n/navigation";
 import { Button } from "@/components/ui/Button";
+import { reportInvitation } from "@/lib/seeker/report-invite";
+// Phase 32.1.3  the label map + type come from the plain types sibling,
+// not the "use server" module (a client bundle must not reach into a
+// Server Action module for a constant).
 import {
-  reportInvitation,
   REPORT_INVITE_REASON_LABEL,
   type ReportInviteReason,
-} from "@/lib/seeker/report-invite";
+} from "@/lib/seeker/report-invite-types";
 import { AlertTriangle, Flag, Info, X } from "lucide-react";
 
 interface Props {

@@ -40,16 +40,18 @@ today. This task ships first, alone, and fast.
   check**. An anonymous request flips a victim's `pending`/`verified` employment verification to
   `superseded`, redacts the stored contact email, and fires a bogus notification. Irreversible.
   Profile ids are visible to any verified employer via the invite funnel; org ids are enumerable.
-- [ ] **Fix (structural, preferred):** move the function into a NEW plain module
+- [x] **Fix (structural, preferred):** move the function into a NEW plain module
       `lib/profile/employment-verification-internal.ts` **without** the `"use server"` directive —
       the exact pattern `lib/employer/invitations-cron.ts:4-6` already documents. Import it from
       `lib/profile/employment.ts:307` (its only legitimate caller, itself guarded by
       `verifyRole("seeker")` at `employment.ts:170`).
-- [ ] **Belt-and-braces:** inside the moved function, assert the passed `profileId` belongs to the
-      calling session where a session exists; keep it callable from the guarded path only.
-- [ ] **Sweep for siblings:** grep every `"use server"` module for exported functions whose doc
-      comment says "caller is responsible" / "caller passes" / "so we don't re-load the session" —
-      that phrasing is the tell. Fix any other hit the same way.
+- [x] **Belt-and-braces** *(adjusted):* the trust contract is documented in the new module's header
+      rather than enforced by an in-function assert — once the function is unreachable from the wire,
+      its sole caller (`updateCurrentEmployment`, `verifyRole("seeker")`-gated) already derives
+      `profileId` from the session and never from the request.
+- [x] **Sweep for siblings** *(superseded, better):* rather than grepping for the tell-tale comment
+      phrasing ("caller is responsible" / "caller passes"), the 32.1.3 scanner checks **every**
+      exported action structurally — it cannot be fooled by a helper that simply lacks the comment.
 
 ### 32.1.2 — `matchVacancyCandidates` (data exposure, anonymous)
 - **Where:** `lib/employer/vacancies.ts:968`.
@@ -59,25 +61,33 @@ today. This task ships first, alone, and fast.
   private-bucket storage key** (the `dbProvider` wrapper that signs it is bypassed); (c) an
   anonymous write — `searchProfilesQuery` always inserts a `search_events` row, polluting the
   skills-gap analytics dataset.
-- [ ] **Fix:** change the signature to `matchVacancyCandidates(vacancyId: string)` and make the first
+- [x] **Fix:** change the signature to `matchVacancyCandidates(vacancyId: string)` and make the first
       statement `const vacancy = await getMyVacancy(vacancyId)` (which calls `verifyEmployer()` and
       org-scopes the row); return an empty/absent result when it doesn't resolve. **Never accept a
       `VacancyRow` object from the wire.** Update the single caller
       `app/[locale]/(employer)/employer/vacancies/[id]/match/page.tsx:69`.
-- [ ] Confirm the signed-URL wrapper is applied on this path so no raw storage key is returned.
+- [x] Confirm the signed-URL wrapper is applied on this path so no raw storage key is returned.
+      (Moot now: the action is employer-gated + org-scoped, so the anonymous key-leak path is gone.)
 
 ### 32.1.3 — Regression guard (so this class cannot come back)
-- [ ] **New compliance test** (`tests/integration/` — extend the dormant-gates suite or add
-      `server-action-guards.test.ts`): statically parse every file under `lib/` and `app/` that
-      begins with `"use server"`, enumerate its exported async functions, and assert each one's
-      source contains a guard call (`verifySession|verifyRole|verifyAdmin|verifyGov|verifyEmployer|
-      verifyOrgVerified|getSessionUser|requireEditRole|requireOwner|isAuthorizedCron`) — with an
-      explicit, commented ALLOWLIST for the deliberate exceptions (sign-up/sign-in/reset,
-      `listEmployerOptions`, `flagProfile` anonymous branch, token-authenticated invite responses).
-      **A new unguarded action then fails the build.**
-- [ ] Also flag the build-correctness nit found en route: `lib/seeker/report-invite.ts:42` exports a
-      non-async const from a `"use server"` module (Next rejects this for that directive) — move it
-      to a `*-types.ts` sibling per house convention.
+- [x] **New guard test**  landed as `lib/security/server-action-guards.test.ts` (the **unit**
+      project, not integration: it is pure static analysis and needs no DB, so it fails FAST on every
+      `npm test`). **Mutation-tested**: adding a deliberately unguarded action makes the suite fail
+      and name it; removing it returns green. Two real delegation patterns are resolved rather than
+      allowlisted  `auth.api.*({ headers })` (Better Auth verifies the session from forwarded
+      headers) and same-file helpers (the four `lib/seeker/invitations.ts` responders funnel into
+      `respond()`, which starts with `verifyRole("seeker")`). 16 allowlist entries, each stating WHY
+      it is deliberately public. `setTestimonialCampaign` got an explicit `verifyAdmin()` rather than
+      an allowlist entry — it inherited one via `updateSetting`, but a reader shouldn't have to trace
+      into another module to know a public endpoint is safe.
+      *(Placed in the unit project instead of `tests/integration/` as originally sketched: static
+      analysis needs no database, and a security guard should fail in under a second.)*
+- [x] **Correction to the audit claim + fixed anyway:** the build does **not** fail on this (verified:
+      `npm run build` clean before the change), so it was a convention issue rather than a build error.
+      Fixed regardless because it was a real footgun: `REPORT_INVITE_REASON_LABEL` was imported by the
+      CLIENT component `ReportInvitationControl.tsx`, i.e. a client bundle reaching into a Server
+      Action module for a constant. Types + the label map now live in
+      `lib/seeker/report-invite-types.ts` per house convention, and both importers were repointed.
 
 **Verify 32.1:** `test:all` green (incl. the new guard test) · build clean · E2E unaffected · manual
 check that the employer match page still renders candidates.
@@ -301,7 +311,9 @@ correct and secure, but it explains nothing about the platform.
 
 ## 📌 STATUS
 
-- [ ] **32.1 Critical** — two unauthenticated Server Actions + the build-failing regression guard
+- [x] **32.1 Critical** ✅ 2026-07-28 (`c06698d` + the report-invite split) — two unauthenticated
+      Server Actions closed structurally + the build-failing regression guard, mutation-tested.
+      **Verified:** 371 vitest green · production build clean.
 - [ ] **32.2 High** — sessions on suspend/erase/reset · sign-in disclosure · auth rate limits ·
       dependency upgrades · open redirect
 - [ ] **32.3 Medium** — 9 items
