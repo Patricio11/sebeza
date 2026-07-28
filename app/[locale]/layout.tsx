@@ -189,9 +189,16 @@ export default async function LocaleLayout({
             design (no cross-site tracking, no persistent identifier), so
             they sit outside the cookie-consent gate  consistent with
             the banner's "no profile is built from your browsing"
-            promise. No-ops locally; activate with the dashboard toggles. */}
-        <Analytics />
-        <SpeedInsights />
+            promise. Mounted only when actually running on Vercel: the
+            injected /_vercel/*.js scripts exist nowhere else, so on
+            localhost, in E2E, or on the future af-south-1 self-hosted
+            deployment they would just 404 in every visitor's console. */}
+        {process.env.VERCEL === "1" ? (
+          <>
+            <Analytics />
+            <SpeedInsights />
+          </>
+        ) : null}
       </body>
     </html>
   );
