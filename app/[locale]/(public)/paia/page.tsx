@@ -33,7 +33,7 @@ export default async function PaiaManualPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const lastUpdated = "2026-05-23";
+  const lastUpdated = "2026-07-28";
 
   return (
     <>
@@ -60,10 +60,10 @@ export default async function PaiaManualPage({
           <Section title="1. Particulars of Sebenza (Section 51(1)(a))">
             <table className="my-4 w-full text-sm">
               <tbody>
-                <Row k="Name" v="Sebenza (working name)" />
+                <Row k="Name" v="Sebenza (operated by Yetotec (Pty) Ltd)" />
                 <Row k="Type" v="Private body, South African talent-intelligence platform" />
-                <Row k="Postal address" v="To be confirmed before commercial launch" />
-                <Row k="Physical address" v="To be confirmed before commercial launch" />
+                <Row k="Postal address" v="8 Hans Strijdom Ave, Cape Town City Centre, Cape Town, 8000" />
+                <Row k="Physical address" v="8 Hans Strijdom Ave, Cape Town City Centre, Cape Town, 8000" />
                 <Row k="Telephone" v="To be published with commercial launch" />
                 <Row k="Email (Information Officer)" v="popia@sebenzasa.com" />
                 <Row k="Website" v="https://sebenzasa.com" />
@@ -78,8 +78,8 @@ export default async function PaiaManualPage({
             </p>
             <table className="my-4 w-full text-sm">
               <tbody>
-                <Row k="Information Officer" v="To be designated (named individual recorded in docs/popia/INFORMATION_OFFICER.md)" />
-                <Row k="Deputy Information Officer" v="To be designated alongside" />
+                <Row k="Information Officer" v="Patricio Cristo Manuel, Chief Executive Officer, Yetotec (Pty) Ltd" />
+                <Row k="Deputy Information Officer" v="To be designated" />
                 <Row k="Email" v="popia@sebenzasa.com" />
               </tbody>
             </table>

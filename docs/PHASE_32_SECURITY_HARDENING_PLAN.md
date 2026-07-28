@@ -431,6 +431,12 @@ correct and secure, but it explains nothing about the platform.
 - [ ] Delete the stale duplicate `EMAIL_TRANSPORT=mailtrap` line in `.env.local` (the later
       `EMAIL_TRANSPORT=smtp` wins, so sending works — but the duplicate is a trap).
 - [ ] Information Officer designation + DPIA sign-off; pen-test before public launch.
+      **Progress 2026-07-28:** designated — Patricio Cristo Manuel, CEO of Yetotec (Pty) Ltd, holds
+      the role (POPIA default for the head of a private body; confirmed directly). Recorded in
+      `docs/popia/INFORMATION_OFFICER.md` with name + work address; `/paia` Sections 1–2 and the
+      BREACH_RESPONSE rota now name them. Remaining: Regulator eServices registration (required
+      BEFORE commercial-scale processing), the DPIA signature block, ideally a Deputy IO, and the
+      pen-test.
 
 ---
 

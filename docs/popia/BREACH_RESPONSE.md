@@ -41,8 +41,10 @@ is documented in this folder all the same.
 2. **Snapshot the audit log.** `SELECT * FROM audit_log WHERE at >
    <suspected start>` → write to a separate location for the forensic
    timeline. Do not let the rolling retention prune it.
-3. **Page the Information Officer.** Phone, not email. They own the
-   external comms decision.
+3. **Page the Information Officer** — Patricio Cristo Manuel, CEO of
+   Yetotec (Pty) Ltd (designated 2026-07-28; see
+   `INFORMATION_OFFICER.md`). Phone, not email. They own the external
+   comms decision.
 4. **Confirm the boundary.** Is it our infrastructure or a sub-
    processor? Different notification paths.
 
