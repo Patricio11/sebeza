@@ -38,6 +38,7 @@ import {
   REQUIRED_FOR_SEARCHABILITY,
 } from "@/lib/consent";
 import { validateDob } from "@/lib/auth/id-validation";
+import { safeInternalPath } from "@/lib/nav/safe-internal-path";
 import { enforce } from "@/lib/rate-limit";
 import { clientIpKey, emailKey } from "@/lib/rate-limit/client-ip";
 
@@ -946,7 +947,11 @@ export async function signIn(
     // pending" state has already been set; we just route to the verify
     // page. `next` is preserved so post-verify routing is unchanged.
     if (result.twoFactorRedirect) {
-      const next = v.next && v.next.startsWith("/") ? v.next : "";
+      // Phase 32.2.6  `startsWith("/")` accepted `//evil.example` and
+      // `/\evil.example`, both of which browsers resolve as
+      // PROTOCOL-RELATIVE (i.e. off-site). safeInternalPath rejects
+      // those, backslashes, `://` and CR/LF.
+      const next = safeInternalPath(v.next, "");
       const qs = next ? `?next=${encodeURIComponent(next)}` : "";
       return ok({ next: `/verify-2fa${qs}` });
     }
@@ -966,7 +971,8 @@ export async function signIn(
     }
 
     const home = roleHome(((u.role as "seeker" | "employer" | "admin") ?? "seeker"));
-    return ok({ next: v.next && v.next.startsWith("/") ? v.next : home });
+    // Phase 32.2.6  see above: protocol-relative targets must not pass.
+    return ok({ next: safeInternalPath(v.next, home) });
   } catch (e) {
     return fail("Email or password is incorrect.");
   }

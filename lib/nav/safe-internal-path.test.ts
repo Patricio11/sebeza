@@ -36,3 +36,39 @@ describe("safeInternalPath (Phase 29.5 open-redirect guard)", () => {
     expect(safeInternalPath("/x\npwned", FALLBACK)).toBe(FALLBACK);
   });
 });
+
+/**
+ * Phase 32.2.6  the payloads that were accepted by the old
+ * `next.startsWith("/")` guard in the four auth redirect sites. These
+ * are protocol-relative: a browser resolves `//evil.example` against
+ * the current scheme and navigates OFF-SITE, so a freshly-authenticated
+ * user could be dropped on an attacker's page with a trustworthy
+ * referrer chain.
+ */
+describe("Phase 32.2.6  auth ?next= payloads", () => {
+  const HOME = "/dashboard";
+  const attacks = [
+    "//evil.example",
+    "//evil.example/sebenza-login",
+    "/\\evil.example",
+    "/\\/evil.example",
+    "https://evil.example",
+    "javascript:alert(1)",
+    "/x\r\nLocation: https://evil.example",
+  ];
+
+  for (const payload of attacks) {
+    it(`refuses ${JSON.stringify(payload)} and falls back to the role home`, () => {
+      expect(safeInternalPath(payload, HOME)).toBe(HOME);
+    });
+  }
+
+  it("still allows the genuine in-app destinations the flow needs", () => {
+    expect(safeInternalPath("/employer/vacancies", HOME)).toBe(
+      "/employer/vacancies",
+    );
+    expect(safeInternalPath("/search?q=chef&invite=1", HOME)).toBe(
+      "/search?q=chef&invite=1",
+    );
+  });
+});

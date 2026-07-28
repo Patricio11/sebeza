@@ -19,6 +19,7 @@ import { headers as nextHeaders } from "next/headers";
 import { z } from "zod";
 import { auth } from "./server";
 import { roleHome } from "./guard";
+import { safeInternalPath } from "@/lib/nav/safe-internal-path";
 import { enforce } from "@/lib/rate-limit";
 import { clientIpKey } from "@/lib/rate-limit/client-ip";
 import { verifyAdmin } from "./dal";
@@ -141,10 +142,12 @@ export async function verifyTotp(
       asResponse: false,
     })) as { user?: { role?: string } };
     const role = (res.user?.role as "seeker" | "employer" | "admin") ?? "seeker";
-    const next =
-      parsed.data.next && parsed.data.next.startsWith("/")
-        ? parsed.data.next
-        : roleHome(role);
+    // Phase 32.2.6  the post-2FA destination is handed straight to
+    // `window.location.assign()` by TwoFactorVerifyForm, so a
+    // protocol-relative value here lands the freshly-authenticated user
+    // on an attacker's page. safeInternalPath rejects `//host`,
+    // backslash variants, `://` and CR/LF.
+    const next = safeInternalPath(parsed.data.next, roleHome(role));
     return ok({ next });
   } catch {
     return fail("That code didn't match. Try the next one your app shows.");
@@ -186,10 +189,12 @@ export async function verifyBackupCode(
       asResponse: false,
     })) as { user?: { role?: string } };
     const role = (res.user?.role as "seeker" | "employer" | "admin") ?? "seeker";
-    const next =
-      parsed.data.next && parsed.data.next.startsWith("/")
-        ? parsed.data.next
-        : roleHome(role);
+    // Phase 32.2.6  the post-2FA destination is handed straight to
+    // `window.location.assign()` by TwoFactorVerifyForm, so a
+    // protocol-relative value here lands the freshly-authenticated user
+    // on an attacker's page. safeInternalPath rejects `//host`,
+    // backslash variants, `://` and CR/LF.
+    const next = safeInternalPath(parsed.data.next, roleHome(role));
     return ok({ next });
   } catch {
     return fail("Backup code didn't match. Try again or contact support.");

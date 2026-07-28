@@ -219,8 +219,14 @@ check that the employer match page still renders candidates.
   `window.location.assign()` on it raw.
 - **The fix already exists and is unused here:** `lib/nav/safe-internal-path.ts` rejects `//`,
   backslashes, `://` and CR/LF, and has tests covering exactly these payloads.
-- [ ] Replace all four checks with `safeInternalPath(next, roleHome(role))`.
-- [ ] Add a test asserting `//evil.example` and `/\evil.example` fall back to the role home.
+- [x] All four checks replaced with `safeInternalPath(...)` — two in `lib/auth/actions.ts`
+      (`signIn`: the 2FA-redirect branch and the role-home branch), two in
+      `lib/auth/two-factor.ts` (`verifyTotp`, `verifyBackupCode`).
+- [x] `lib/nav/safe-internal-path.test.ts` extended with the exact payloads the old guard accepted:
+      `//evil.example`, `//evil.example/sebenza-login`, `/\evil.example`, `/\/evil.example`,
+      `https://evil.example`, `javascript:alert(1)` and a CR/LF header-splitting string — each must
+      fall back to the role home — plus a positive case proving genuine in-app destinations
+      (`/employer/vacancies`, `/search?q=chef&invite=1`) still pass. 13/13 green.
 
 ---
 
@@ -357,8 +363,10 @@ correct and secure, but it explains nothing about the platform.
 - [x] **32.1 Critical** ✅ 2026-07-28 (`c06698d` + the report-invite split) — two unauthenticated
       Server Actions closed structurally + the build-failing regression guard, mutation-tested.
       **Verified:** 371 vitest green · production build clean.
-- [ ] **32.2 High** — sessions on suspend/erase/reset · sign-in disclosure · auth rate limits ·
-      dependency upgrades · open redirect
+- [x] **32.2 High** ✅ 2026-07-28 — ALL SIX SUB-TASKS COMPLETE — sessions on suspend/erase/reset ·
+      sign-in disclosure · auth rate limits · dependency upgrades · open redirect
+  - [x] **32.2.6** ✅ 2026-07-28 — open redirect closed at all four `?next=` sites.
+        **Verified:** 393 vitest green (34 files).
   - [x] **32.2.5** ✅ 2026-07-28 — Next 16.2.12, Better Auth 1.6.25, nodemailer 9.0.3; residual
         advisories assessed as unreachable. **Verified:** 385 vitest green · build clean after each.
   - [x] **32.2.4** ✅ 2026-07-28 — signin / 2fa-verify / email-send / invite buckets wired;
