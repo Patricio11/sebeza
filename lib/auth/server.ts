@@ -104,6 +104,26 @@ export const auth = betterAuth({
         html: verifyEmailTemplate({ name: user.name || user.email, url }),
       });
     },
+    /**
+     * Phase 32.4  the welcome email fires HERE, not at sign-up, so it
+     * only ever reaches an address the user has proven they control.
+     *
+     * Deliberately non-fatal: a mail failure must never break account
+     * verification. The user has done their part; losing the welcome
+     * note is an annoyance, being unable to verify is a broken product.
+     */
+    afterEmailVerification: async (user) => {
+      try {
+        const { sendWelcomeEmail } = await import("@/lib/email/welcome");
+        await sendWelcomeEmail({
+          userId: user.id,
+          email: user.email,
+          name: user.name || user.email,
+        });
+      } catch (e) {
+        console.error("[auth] welcome email failed (non-fatal):", e);
+      }
+    },
   },
 
   session: {

@@ -340,14 +340,26 @@ nothing. The one moment they are most likely to trust us is the moment we go sil
 Today the only sign-up email is the Better Auth verification link (`lib/auth/server.ts:78-89`) —
 correct and secure, but it explains nothing about the platform.
 
-- [ ] **Trigger:** Better Auth exposes `emailVerification.afterEmailVerification(user, request)`
+- [x] **Trigger:** wired to `emailVerification.afterEmailVerification` in `lib/auth/server.ts`, so
+      the welcome lands only AFTER the address is proven. Non-fatal by construction (caught at the
+      hook AND degrading inside `lib/email/welcome.ts`): losing a welcome note is an annoyance,
+      being unable to verify your account is a broken product. Original text:
       (confirmed present in 1.6.11) — send the welcome email there, so it lands **after** the user
       has proven the address, not before. Must be non-fatal: a send failure never breaks
       verification.
-- [ ] **Role-aware content.** Seeker and employer need different things. Build on
+- [x] **Role-aware content.** ✅ `lib/email/templates/welcome.ts` — seeker + employer variants on the
+      existing `emailShell`, Civic Editorial, no webfont dependency, plain-text derived by
+      `sendEmail`. Admin/gov accounts get nothing (issued by Sebenza, nothing to onboard).
+      Original text: Seeker and employer need different things. Build on
       `lib/email/templates/shell.ts` (`emailShell` + `escapeHtml`), Civic Editorial, mobile-first,
       no webfont dependency, plain-text fallback (No-Flash discipline applies to email too).
-- [ ] **Seeker email must carry:**
+- [x] **Seeker email carries all of it** — what Sebenza is in one honest line; the three actions
+      that actually improve outcomes (skills / experience / confirm availability), each deep-linked;
+      **the consents they really granted, read LIVE from the `consents` table at send time** (not
+      reconstructed from the form payload, which may since have changed) plus the privacy-centre link
+      and "withdrawing never weakens your job search"; the honest promises (contact details never in
+      search, no ID collected, hires only counted when confirmed); and the anti-phishing line.
+      Original spec:
       - what Sebenza is, in one honest line (found by skill + place; never a job board);
       - **the 2–3 next steps that actually improve their outcomes** — add skills, confirm status,
         complete the profile — each a deep link;
@@ -357,18 +369,31 @@ correct and secure, but it explains nothing about the platform.
       - the honest promises: we never show your ID number or contact details without your consent;
         we don't ask for ID at all right now (Phase 31);
       - a real support contact + the "we will never ask for your password" anti-phishing line.
-- [ ] **Employer email must carry:** verification-before-contact-reveal expectation, 2FA
+- [x] **Employer email carries all of it** — verification-gates-contact-details, the 2FA
+      requirement, how vacancies/invitations work, and the audit-log transparency line (framed as
+      *why candidates are willing to be here*). Original spec: verification-before-contact-reveal expectation, 2FA
       requirement, how vacancies + invitations work, audit-log transparency (every reveal is logged),
       support contact.
-- [ ] **i18n:** copy into `messages/en.json` (zu/xh/af deep-merge fallback). Per the standing rule,
-      **consent/legal sentences must be human-translated, never machine-translated** — ship English
-      for those until a translator signs off.
-- [ ] **No new consent, no new tracking.** Transactional email only; no open-tracking pixel, no
-      marketing opt-in smuggled in. If a marketing digest is ever wanted, that's its own consent
-      purpose and its own phase.
-- [ ] **Tests:** unit test asserting both templates escape user input and contain the required links;
-      an integration test that verification triggers exactly one welcome send and that a send failure
-      leaves verification successful.
+- [~] **i18n: DEFERRED, and the reason is a real gap worth fixing separately.** Moving the strings
+      into `messages/en.json` now would have been *theatre*: **no user's locale is persisted
+      anywhere** (no column on `app_user` or `profiles` — verified), and `afterEmailVerification`
+      receives only the user object, no request and no locale. Every email would render English
+      regardless of where the strings lived, so the catalog move would create the appearance of
+      i18n-readiness with zero behaviour change. All five existing email templates (verification,
+      reset, seeker-invite, notifications, employment-verification) are likewise English-only, so
+      this is consistent rather than a new exception.
+      **FOLLOW-UP (worth a small phase of its own):** persist the user's chosen locale at sign-up,
+      then translate ALL transactional email together. This matters on a national SA platform —
+      today a seeker who used the whole product in isiZulu still gets an English welcome. The
+      standing rule holds when that happens: consent/legal sentences must be human-translated.
+- [x] **No new consent, no new tracking** — enforced by test, not just intent:
+      `welcome.test.ts` fails the build on a 1x1 beacon, `utm_`/ESP open-tracking URLs, or the words
+      subscribe/newsletter/marketing.
+- [x] **Tests:** `lib/email/templates/welcome.test.ts` (12 — first-name-only greeting, HTML escaping
+      of name AND org name, consents stated in plain words, honest empty-state, privacy-centre link,
+      anti-phishing line, the transactional guardrails) + `tests/integration/welcome-email.test.ts`
+      (4 — seeker gets consents matching the DB, employer gets the org-named variant, admin gets
+      nothing, unknown id sends nothing and does not throw).
 
 ---
 
@@ -431,7 +456,8 @@ correct and secure, but it explains nothing about the platform.
         cookieCache 5min→60s. **Verified:** 375 vitest green · build clean · mutation-tested.
 - [x] **32.3 Medium** ✅ 2026-07-28 — ALL 9 ITEMS COMPLETE. **Verified:** 405 vitest green (37
       files) · production build clean.
-- [ ] **32.4 Welcome email** — role-aware, consent-summarising, i18n'd
+- [x] **32.4 Welcome email** ✅ 2026-07-28 — role-aware, consent-summarising, transactional-only.
+      i18n deferred with cause (no locale is persisted; see the task note).
 
 *Plan opened 2026-07-28 against `862a432`. Audit method: four parallel read-only sweeps
 (auth/session · authorization coverage of 64 action modules + 33 API routes · injection & data
