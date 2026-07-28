@@ -43,7 +43,13 @@ import { eq, and, isNull } from "drizzle-orm";
 import { auth } from "./server";
 import { getDb } from "@/db/client";
 import { appUser, organizationMembers, organizations } from "@/db/schema";
+import { assertNoTestEscapeHatchesInProduction } from "@/lib/env-guard";
 import type { UserRole } from "@/lib/mock/types";
+
+// Phase 32.3.3  runs once at module load. If the E2E escape hatch is
+// set in a deployed environment this throws, so the app refuses to
+// start rather than starting with admin 2FA silently disabled.
+assertNoTestEscapeHatchesInProduction();
 
 export interface SessionUser {
   id: string;

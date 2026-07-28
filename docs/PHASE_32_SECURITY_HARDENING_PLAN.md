@@ -256,12 +256,22 @@ check that the employer match page still renders candidates.
       `:108-111`. Same pattern at `lib/gov/oversight-query.ts:111` (which correctly uses `escapeLike`
       30 lines later) and `lib/profile/employment.ts:93` (low impact). → use
       `eq(lower(name), lower(input))` for the exact-match cases and `escapeLike` for the prefix case.
-- [ ] **32.3.3 `SEBENZA_E2E_HTTP` production kill-switch.** Setting it to `1` disables the prod admin
+- [x] **32.3.3 `SEBENZA_E2E_HTTP` production kill-switch.** ✅ FIXED — new `lib/env-guard.ts`
+      throws at module load (wired into `lib/auth/dal.ts`) when the hatch is set while
+      `VERCEL_ENV` is `production` **or `preview`** (a preview is still internet-reachable). The app
+      refuses to start rather than starting with admin 2FA silently disabled — a crashing deploy is
+      noticed in minutes; a quietly disabled second factor might never be. The error names WHAT was
+      weakened, not just the variable. Documented (commented-out) in `.env.example` so it appears in
+      any environment audit. `lib/env-guard.test.ts`: 5 cases. Original finding: Setting it to `1` disables the prod admin
       2FA hard-require (`lib/auth/dal.ts:226-232`) and strips `upgrade-insecure-requests`
       (`proxy.ts:95-97`). Protected only by a comment, and absent from `.env.example` so it's
       invisible to an env audit. → throw at module load if it's set while `VERCEL_ENV=production`;
       document it in `.env.example` with a red-flag comment.
-- [ ] **32.3.4 CSP falls back to a Supabase wildcard.** `proxy.ts:70-72` reads
+- [x] **32.3.4 CSP falls back to a Supabase wildcard.** ✅ FIXED — `proxy.ts` now reads
+      `SUPABASE_URL` (the name that actually exists). Two further drift sites found and fixed while
+      in there: the admin storage health card (`/admin/integrations`), which read the phantom name
+      and therefore reported "Not configured" permanently, and `CLAUDE.md`'s env list, which
+      documented the wrong name for future readers. Original finding: `proxy.ts:70-72` reads
       `NEXT_PUBLIC_SUPABASE_URL`, which is **defined nowhere** (`.env.example`, `.env.local` and
       `lib/storage/supabase.ts:38` all use `SUPABASE_URL`), so `connect-src` always lands on
       `https://*.supabase.co` — any Supabase project is a permitted exfil destination. The same typo

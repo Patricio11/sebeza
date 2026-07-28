@@ -67,8 +67,18 @@ function isProtected(pathname: string): boolean {
  * docs/popia/ENCRYPTION_INVENTORY.md "Open items".
  */
 function securityHeaders(): Record<string, string> {
-  const supabaseHost = process.env.NEXT_PUBLIC_SUPABASE_URL
-    ? new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).origin
+  // Phase 32.3.4 (security remediation)  read `SUPABASE_URL`, not
+  // `NEXT_PUBLIC_SUPABASE_URL`. The latter is defined NOWHERE
+  // (`.env.example`, `.env.local` and `lib/storage/supabase.ts` all use
+  // `SUPABASE_URL`), so this ternary always took the wildcard branch and
+  // production `connect-src` permitted ANY Supabase project  including
+  // an attacker's  as an exfiltration destination. The value is only
+  // ever read server-side here, so the NEXT_PUBLIC_ prefix was never
+  // needed. The wildcard remains only as a last-resort fallback when
+  // storage is genuinely unconfigured (local dev).
+  const supabaseUrl = process.env.SUPABASE_URL;
+  const supabaseHost = supabaseUrl
+    ? new URL(supabaseUrl).origin
     : "https://*.supabase.co";
   const csp = [
     "default-src 'self'",

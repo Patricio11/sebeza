@@ -83,7 +83,7 @@ npm run test:e2e     # Playwright (Docker test Postgres + .env.test.local)
 - `SEBENZA_DATA_PROVIDER`  defaults to `db`; `mock` is dev/test-only (throws in prod).
 - `DATABASE_URL` (+ optional `DATABASE_DRIVER=postgres-js`) · `SEBENZA_ENCRYPTION_KEY` (base64, 32B).
 - `BETTER_AUTH_SECRET` · `CRON_SECRET` (all 20 cron routes fail closed without it).
-- Supabase: `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` · SMTP: `EMAIL_TRANSPORT`, `SMTP_*`.
+- Supabase: `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` · SMTP: `EMAIL_TRANSPORT`, `SMTP_*`.
 
 ## When in doubt
 Rule wins over instinct. If a "wow" instinct conflicts with No-Flash, POPIA-First, or

@@ -62,8 +62,11 @@ export default async function AdminIntegrationsPage({
   ).rows;
   const migrationCount = migrationRows[0]?.n ?? 0;
 
+  // Phase 32.3.4  was `NEXT_PUBLIC_SUPABASE_URL`, which is defined
+  // nowhere, so this card read "Not configured" permanently even with
+  // storage working. `lib/storage/supabase.ts` reads `SUPABASE_URL`.
   const storageConfigured =
-    !!process.env.NEXT_PUBLIC_SUPABASE_URL && !!process.env.SUPABASE_SERVICE_ROLE_KEY;
+    !!process.env.SUPABASE_URL && !!process.env.SUPABASE_SERVICE_ROLE_KEY;
 
   const [llmActive] = await db
     .select({ displayName: schema.llmProviders.displayName })
