@@ -42,7 +42,7 @@ import { headers as nextHeaders } from "next/headers";
 import { eq, and, isNull } from "drizzle-orm";
 import { auth } from "./server";
 import { getDb } from "@/db/client";
-import { organizationMembers, organizations } from "@/db/schema";
+import { appUser, organizationMembers, organizations } from "@/db/schema";
 import type { UserRole } from "@/lib/mock/types";
 
 export interface SessionUser {
@@ -80,7 +80,17 @@ export interface OrgContext {
  * Memoised with React's `cache()` so calling it many times during one render
  * (e.g. once in a layout, once in a page, once in a leaf component) costs
  * exactly one Better Auth round-trip. Better Auth additionally has its own
- * 5-min cookieCache for cross-request speed (see `lib/auth/server.ts`).
+ * 60-second cookieCache for cross-request speed (see `lib/auth/server.ts`).
+ *
+ * Phase 32.2.1 (security remediation)  this ALSO re-checks the account's
+ * moderation state on every render pass and fails closed. Suspension and
+ * erasure now delete the user's session rows, so this is defence in depth
+ * rather than the primary control: it covers a session row that outlives
+ * its revocation for any reason (replica lag, a future code path that
+ * forgets to revoke, a cached session cookie still inside its 60s window).
+ * Before this, `suspended_at` was consulted ONLY at sign-in, so a
+ * suspended employer kept full PII access until their 30-day session
+ * expired.
  */
 export const getSessionUser = cache(async (): Promise<SessionUser | null> => {
   try {
@@ -96,6 +106,19 @@ export const getSessionUser = cache(async (): Promise<SessionUser | null> => {
       role?: UserRole;
       twoFactorEnabled?: boolean;
     };
+
+    // Moderation re-check. One indexed PK lookup, memoised per render pass.
+    const state = await getDb()
+      .select({
+        suspendedAt: appUser.suspendedAt,
+        deletedAt: appUser.deletedAt,
+      })
+      .from(appUser)
+      .where(eq(appUser.id, u.id))
+      .limit(1);
+    const row = state[0];
+    // No row = the account is gone underneath a live session → fail closed.
+    if (!row || row.suspendedAt || row.deletedAt) return null;
 
     return {
       id: u.id,

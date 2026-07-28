@@ -150,6 +150,16 @@ export async function suspendUser(
     })
     .where(eq(schema.appUser.id, user.id));
 
+  // Phase 32.2.1 (security remediation)  END EVERY LIVE SESSION.
+  // Setting `suspended_at` alone only blocked the NEXT sign-in: the
+  // suspended user's existing cookie stayed valid for the remainder of
+  // its 30-day life, so a suspended employer kept full PII-reveal
+  // access. Suspension has to take effect on the next request, not the
+  // next sign-in.
+  await db
+    .delete(schema.session)
+    .where(eq(schema.session.userId, user.id));
+
   await logAccess({
     kind: "account.suspend",
     actor: session.id,

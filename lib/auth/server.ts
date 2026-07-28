@@ -93,7 +93,14 @@ export const auth = betterAuth({
     updateAge: 60 * 60 * 24, // refresh once a day on use
     cookieCache: {
       enabled: true,
-      maxAge: 60 * 5, // 5 minutes
+      // Phase 32.2.1 (security remediation)  was 5 minutes. While the
+      // cache is warm, `getSession` rebuilds the session from a signed
+      // cookie without touching the DB, so a suspension / role change /
+      // session revocation stays invisible for the whole window. 60s
+      // keeps the read-path win while bounding that blind spot to one
+      // minute; the DAL's moderation re-check (which DOES hit the DB)
+      // then closes it on the next request.
+      maxAge: 60,
     },
   },
 

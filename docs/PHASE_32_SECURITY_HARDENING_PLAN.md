@@ -102,16 +102,19 @@ check that the employer match page still renders candidates.
   deletion anywhere in the codebase** (verified by grep). Session table: `db/schema.ts:283`.
 - **Exposure:** an admin suspends an abusive employer; that employer keeps full PII-reveal access
   for up to 30 days. Self-erase signs out the *current* device only — other devices stay live.
-- [ ] `suspendUser`: after the UPDATE, `await db.delete(schema.session).where(eq(schema.session.userId, user.id))`.
-- [ ] `eraseMyAccount`: same delete (in addition to the existing `auth.api.signOut`), so **all**
-      devices drop.
-- [ ] **Defence in depth:** have `getSessionUser()` select `suspendedAt`/`deletedAt` and fail closed
-      (return `null`) when either is set — so a session that somehow survives is still inert.
-- [ ] **Interaction to handle:** `session.cookieCache` (`lib/auth/server.ts:94-97`) serves session
-      state from a signed cookie for up to 5 minutes without a DB read, which would blunt the
-      recheck. Either drop `maxAge` to ~60s or bypass the cache on the recheck path. **Decide in
-      Open Q1.**
-- [ ] Test: integration test proving a suspended user's existing session is dead on the next request.
+- [x] `suspendUser`: session rows deleted immediately after the UPDATE  suspension now takes effect
+      on the next REQUEST, not the next sign-in.
+- [x] `eraseMyAccount`: same delete alongside the existing `auth.api.signOut`, so **all** devices
+      drop  not just the one that clicked erase.
+- [x] **Defence in depth:** `getSessionUser()` now selects `suspendedAt`/`deletedAt` and fails closed
+      (returns `null`) when either is set, or when the user row has vanished entirely. One indexed PK
+      lookup, memoised per render pass by the existing `cache()`.
+- [x] **Open Q1 RESOLVED (operator, 2026-07-28): `cookieCache.maxAge` 5 min → 60s.** The blind
+      window in which a suspension/role change is invisible is now bounded at one minute, and the
+      DAL re-check (which always hits the DB) closes it on the next request.
+- [x] Test: `tests/integration/session-revocation.test.ts` (4 cases  sessions deleted, suspension
+      recorded, restore does NOT resurrect old cookies, DAL fails closed on a stale session).
+      **Mutation-tested:** reverting the delete leaves 1 live session and the suite fails.
 
 ### 32.2.2 — Sign-in must not disclose account state or moderation notes
 - **Where:** `lib/auth/actions.ts:824-847`. The suspension/erasure lookup runs **before** any
@@ -316,6 +319,8 @@ correct and secure, but it explains nothing about the platform.
       **Verified:** 371 vitest green · production build clean.
 - [ ] **32.2 High** — sessions on suspend/erase/reset · sign-in disclosure · auth rate limits ·
       dependency upgrades · open redirect
+  - [x] **32.2.1** ✅ 2026-07-28 — suspension/erasure terminate sessions; DAL fails closed;
+        cookieCache 5min→60s. **Verified:** 375 vitest green · build clean · mutation-tested.
 - [ ] **32.3 Medium** — 9 items
 - [ ] **32.4 Welcome email** — role-aware, consent-summarising, i18n'd
 

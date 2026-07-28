@@ -52,6 +52,15 @@ export async function eraseMyAccount(
     .set({ deletedAt: new Date() })
     .where(eq(schema.appUser.id, session.id));
 
+  // Phase 32.2.1 (security remediation)  end EVERY session, not just
+  // this device's. The `auth.api.signOut` below clears the current
+  // browser's cookie; without this delete, the same account stayed
+  // signed in on every OTHER device the user had used, for up to 30
+  // days after they asked to be erased.
+  await db
+    .delete(schema.session)
+    .where(eq(schema.session.userId, session.id));
+
   await logAccess({
     kind: "account.self_erase",
     actor: session.id,
