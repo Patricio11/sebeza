@@ -38,6 +38,8 @@ import {
   REQUIRED_FOR_SEARCHABILITY,
 } from "@/lib/consent";
 import { validateDob } from "@/lib/auth/id-validation";
+import { enforce } from "@/lib/rate-limit";
+import { clientIpKey, emailKey } from "@/lib/rate-limit/client-ip";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Shared helpers
@@ -872,17 +874,23 @@ export async function signIn(
   if (!parsed.success) return fail("Enter a valid email and password.");
   const v = parsed.data;
 
-  // Phase 9 review (2026-05-23)  deliberately NO per-email sign-in
-  // rate limit. Decided after weighing the trade:
-  //   1. Better Auth password hashing (scrypt) is intentionally slow
-  //      (~100-200ms per attempt)  that IS the brute-force mitigation.
-  //   2. 2FA enforcement on employer + admin (Phase 7.2).
-  //   3. Suspended-user check + the account.suspended notification
-  //      surface a compromised account fast.
-  // A per-email rate limit would create a denial-of-service vector
-  // (an attacker submits bad passwords for a target email → legitimate
-  // user locked out). Reveal + upload paths DO rate-limit, because
-  // their abuse pattern has no legitimate-user collision.
+  // Phase 32.2.4 (security remediation)  sign-in IS rate-limited now.
+  //
+  // The Phase 9 decision recorded here previously ("no sign-in rate
+  // limit; Better Auth handles it") rested on a premise the 2026-07-28
+  // audit disproved: Better Auth's limiter runs only for requests
+  // through its HTTP router (`/api/auth/*`), and this action calls
+  // `auth.api.signInEmail()` directly  so nothing was throttling the
+  // auth surface at all.
+  //
+  // The DoS concern that motivated that decision was right, and is
+  // preserved: the key is the CLIENT IP, never the email, so nobody can
+  // lock a victim out of their own account by guessing at their address.
+  const ipKey = await clientIpKey();
+  const signInLimit = await enforce("signin", ipKey);
+  if (!signInLimit.ok) {
+    return fail("Too many sign-in attempts. Please wait a few minutes and try again.");
+  }
 
   try {
     const result = (await auth.api.signInEmail({
@@ -988,6 +996,16 @@ export async function requestPasswordReset(
     // Still return "ok" to avoid enumeration.
     return ok();
   }
+  // Phase 32.2.4  throttle per IP AND per address. Unthrottled, this
+  // public endpoint let anyone flood a victim's mailbox (burying a real
+  // security alert) or burn the platform's SMTP quota and reputation.
+  // Returns ok() when limited: the anti-enumeration contract still
+  // holds  a caller must not learn anything from the response.
+  const [ipOk, addrOk] = await Promise.all([
+    enforce("email-send", await clientIpKey()),
+    enforce("email-send", emailKey(parsed.data.email)),
+  ]);
+  if (!ipOk.ok || !addrOk.ok) return ok();
   try {
     await auth.api.requestPasswordReset({
       body: {
@@ -1032,6 +1050,14 @@ export async function completePasswordReset(
 
 export async function resendVerificationEmail(email: string): Promise<ActionResult> {
   if (!email || !email.includes("@")) return ok(); // anti-enumeration
+  // Phase 32.2.4  same throttle as requestPasswordReset. `?email=` on
+  // /verify-email is attacker-controllable, so this endpoint could be
+  // pointed at any address; the limit is what stops it being a mailer.
+  const [ipOk, addrOk] = await Promise.all([
+    enforce("email-send", await clientIpKey()),
+    enforce("email-send", emailKey(email)),
+  ]);
+  if (!ipOk.ok || !addrOk.ok) return ok();
   try {
     await auth.api.sendVerificationEmail({
       body: { email, callbackURL: "/dashboard" },

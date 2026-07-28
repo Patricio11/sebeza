@@ -19,6 +19,8 @@ import { headers as nextHeaders } from "next/headers";
 import { z } from "zod";
 import { auth } from "./server";
 import { roleHome } from "./guard";
+import { enforce } from "@/lib/rate-limit";
+import { clientIpKey } from "@/lib/rate-limit/client-ip";
 import { verifyAdmin } from "./dal";
 import { getDb } from "@/db/client";
 import * as schema from "@/db/schema";
@@ -115,6 +117,22 @@ export async function verifyTotp(
   const parsed = verifySchema.safeParse(input);
   if (!parsed.success) return fail("Enter the 6-digit code from your app.");
 
+
+  // Phase 32.2.4 (security remediation)  THROTTLE. A 6-digit TOTP is a
+  // 10^6 space with a ~90s validity window, so unthrottled online
+  // guessing is a real attack once an attacker holds the password.
+  // Better Auth ships a {window:10, max:3} rule for its own
+  // /two-factor/* routes, but that limiter only runs for requests
+  // through `auth.handler`  this action calls `auth.api.verifyTOTP()`
+  // directly, so it never applied. Keyed per IP (the pending-2FA cookie
+  // identifies the account, but the IP is what an attacker must burn).
+  const limit = await enforce("2fa-verify", await clientIpKey());
+  if (!limit.ok) {
+    return fail(
+      "Too many attempts. Wait a few minutes, then try the next code your app shows.",
+    );
+  }
+
   try {
     const headers = await nextHeaders();
     const res = (await auth.api.verifyTOTP({
@@ -143,6 +161,22 @@ export async function verifyBackupCode(
 ): Promise<ActionResult<{ next: string }>> {
   const parsed = backupSchema.safeParse(input);
   if (!parsed.success) return fail("Backup codes are at least 8 characters.");
+
+
+  // Phase 32.2.4 (security remediation)  THROTTLE. A 6-digit TOTP is a
+  // 10^6 space with a ~90s validity window, so unthrottled online
+  // guessing is a real attack once an attacker holds the password.
+  // Better Auth ships a {window:10, max:3} rule for its own
+  // /two-factor/* routes, but that limiter only runs for requests
+  // through `auth.handler`  this action calls `auth.api.verifyTOTP()`
+  // directly, so it never applied. Keyed per IP (the pending-2FA cookie
+  // identifies the account, but the IP is what an attacker must burn).
+  const limit = await enforce("2fa-verify", await clientIpKey());
+  if (!limit.ok) {
+    return fail(
+      "Too many attempts. Wait a few minutes, then try the next code your app shows.",
+    );
+  }
 
   try {
     const headers = await nextHeaders();

@@ -35,6 +35,7 @@ import { createNotification, notifyOrgMembers } from "@/lib/notifications/server
 import { getMyVacancy, getMyOrgRole } from "./vacancies";
 import { canEditVacancies } from "./vacancies-types";
 import { verifyEmployer } from "@/lib/auth/dal";
+import { enforce } from "@/lib/rate-limit";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Result shapes (kept narrow + serialisable for the client island)
@@ -265,6 +266,18 @@ export async function bulkInviteToVacancy(
   const parsed = bulkInviteSchema.safeParse(input);
   if (!parsed.success) return fail("Invalid invite request.");
   const { vacancyId, profileIds, personalNote } = parsed.data;
+
+  // Phase 32.2.4  cap invite BATCHES per org. The 50-profile ceiling on
+  // a single call was never a real limit because nothing capped the
+  // number of calls. Every entry point funnels through here (the match
+  // page, the /search selection funnel via bulkInviteByHandles, the
+  // per-row single invite), so this is the one place it belongs.
+  const inviteLimit = await enforce("invite", guard.orgId);
+  if (!inviteLimit.ok) {
+    return fail(
+      "You've sent a lot of invitations in the last hour. Please pause and continue shortly.",
+    );
+  }
   const noteForMeta = personalNote && personalNote.length > 0 ? personalNote : null;
 
   // Re-fetch the vacancy with org scoping (the privacy invariant).

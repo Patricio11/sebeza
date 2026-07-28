@@ -163,18 +163,28 @@ check that the employer match page still renders candidates.
   Action, so it never applies. Same for the two-factor plugin's `{window:10, max:3}` rule vs
   `lib/auth/two-factor.ts:112-163`. Existing buckets: `reveal`, `upload`, `search`, `coach`
   (`lib/rate-limit/types.ts`).
-- [ ] New buckets + wiring:
-      - `signin` — per **IP** (not per email: a per-email lock is a DoS vector against the victim).
-      - `2fa-verify` — per session/IP, ~5 per 5 min, on `verifyTotp` **and** `verifyBackupCode`.
-        Unthrottled 6-digit TOTP is brute-forceable today.
-      - `email-send` — on `requestPasswordReset` + `resendVerificationEmail` (both public, both
-        currently unthrottled → mailbox flooding + SMTP-reputation burn).
-      - `invite` — per org on `bulkInviteToVacancy` / `bulkInviteByHandles` (the 50-per-call cap is
-        not a global cap).
-- [ ] **Rewrite the stale comment block** at `actions.ts:808-818` to record the corrected reasoning.
-- [ ] Note for the operator: the limiter is in-memory per instance
-      (`lib/rate-limit/memory.ts`); on serverless the effective cap multiplies by instance count.
-      Upstash env vars already exist in `.env.example`. Flag as an operator item, not a code item.
+- [x] **New buckets + wiring** (`lib/rate-limit/types.ts` + `lib/rate-limit/client-ip.ts`):
+      - `signin` 20/10min per **IP** (never per email  a per-email counter would let an attacker
+        lock a victim out; the original Phase 9 DoS concern was right and is preserved).
+      - `2fa-verify` 5/5min on `verifyTotp` **and** `verifyBackupCode`. The important one: a 6-digit
+        TOTP is 10^6 with a ~90s window, so it was brute-forceable online by anyone holding the
+        password.
+      - `email-send` 5/15min on `requestPasswordReset` + `resendVerificationEmail`, keyed per IP AND
+        per address. Both return `ok()` when limited so the **anti-enumeration contract survives** —
+        the limit itself must not become an oracle.
+      - `invite` 10 batches/hour per org on `bulkInviteToVacancy` (every entry point funnels through
+        it, including the /search selection funnel), making the 50-per-call cap a real ceiling.
+      - Keys are **hashed** (truncated SHA-256): rate-limit keys reach logs and the shared store, and
+        a raw IP or email is personal information under POPIA.
+- [x] **Rewrote the stale comment block** at `actions.ts` and the note in `rate-limit/types.ts` to
+      record the correction: the old decision rested on "Better Auth handles it", which is false for
+      Server Actions (its limiter only runs for requests through `auth.handler`).
+- [x] Test: `tests/integration/auth-rate-limits.test.ts` (4 cases  sign-in refuses past budget;
+      the key is per-IP not per-email; TOTP refuses on a tight budget; a throttled password-reset
+      still returns `ok()`). **Mutation-tested:** disabling the TOTP throttle fails the suite.
+- [ ] **OPERATOR:** the limiter is in-memory per instance (`lib/rate-limit/memory.ts`), so on
+      serverless the effective cap multiplies by instance count. Upstash env vars are already stubbed
+      in `.env.example`; wiring the adapter is an infra task, not a code one.
 
 ### 32.2.5 — Dependency upgrades (separate commit, own verification)
 - [ ] **Next.js 16.2.6 → 16.2.12** (patch, non-semver-major). Closes 9 advisories incl. SSRF in
@@ -335,6 +345,9 @@ correct and secure, but it explains nothing about the platform.
       **Verified:** 371 vitest green · production build clean.
 - [ ] **32.2 High** — sessions on suspend/erase/reset · sign-in disclosure · auth rate limits ·
       dependency upgrades · open redirect
+  - [x] **32.2.4** ✅ 2026-07-28 — signin / 2fa-verify / email-send / invite buckets wired;
+        prior no-limit decision corrected. **Verified:** 385 vitest green · build clean ·
+        mutation-tested.
   - [x] **32.2.3** ✅ 2026-07-28 — password reset + admin 2FA reset revoke sessions.
         **Verified:** 381 vitest green · build clean · mutation-tested.
   - [x] **32.2.2** ✅ 2026-07-28 — sign-in disclosure closed; fails closed on DB error.

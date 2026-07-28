@@ -62,3 +62,17 @@ export const memoryRateLimiter: RateLimiter = {
     };
   },
 };
+
+/**
+ * Phase 32.2.4  test-only reset of the in-memory window store.
+ *
+ * Exported because rate-limit tests must start from a known budget:
+ * without it, whichever test file ran first would silently consume the
+ * allowance and the next one's assertions would be meaningless. Never
+ * called from application code (the guard test enumerates exported
+ * Server Actions, not plain modules, and this file carries no
+ * `"use server"` directive, so it is unreachable over the wire).
+ */
+export function __resetRateLimiterForTests(): void {
+  store.clear();
+}

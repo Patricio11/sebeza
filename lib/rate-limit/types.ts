@@ -57,16 +57,69 @@ export const BUCKETS = {
    * day is generous for a real user, ruinous for a loop.
    */
   "coach": { limit: 10, windowSeconds: 24 * 60 * 60 },
+  /**
+   * Phase 32.2.4  sign-in attempts per CLIENT IP.
+   *
+   * Keyed on IP, deliberately NOT on email: a per-email counter is a
+   * denial-of-service vector (an attacker submits bad passwords for a
+   * victim's address and locks them out). Per-IP throttling slows a
+   * credential-stuffing run without giving anyone a lockout weapon.
+   * 20 attempts in 10 minutes is far above honest use  a real person
+   * mistyping their password three times never notices  and far below
+   * what an automated run needs.
+   */
+  "signin": { limit: 20, windowSeconds: 10 * 60 },
+  /**
+   * Phase 32.2.4  TOTP / backup-code verification.
+   *
+   * THIS IS THE IMPORTANT ONE. A 6-digit TOTP is a 10^6 space with a
+   * ~90-second validity window; unthrottled online guessing is a real
+   * attack once an attacker holds the password. Better Auth ships a
+   * `{window: 10, max: 3}` rule for its own /two-factor/* routes, but
+   * that limiter only runs for requests through `auth.handler`  we
+   * call `auth.api.verifyTOTP()` directly from a Server Action, so it
+   * never applied. 5 per 5 minutes covers a user fumbling a code or
+   * their clock drifting; it makes brute force hopeless.
+   */
+  "2fa-verify": { limit: 5, windowSeconds: 5 * 60 },
+  /**
+   * Phase 32.2.4  unauthenticated email sends (password reset,
+   * verification resend). Both endpoints are public and were
+   * unthrottled, so they could be used to flood a victim's mailbox
+   * (burying a genuine security alert) or to burn the platform's SMTP
+   * reputation and quota. Keyed per IP AND per address.
+   */
+  "email-send": { limit: 5, windowSeconds: 15 * 60 },
+  /**
+   * Phase 32.2.4  vacancy invitations per ORG. `bulkInviteToVacancy`
+   * caps a single call at 50 profiles, but nothing capped the number of
+   * calls, so the 50 was not a real ceiling. 10 batches an hour is a
+   * busy recruiter; it is not a mass-messaging tool.
+   */
+  "invite": { limit: 10, windowSeconds: 60 * 60 },
 } as const;
 
 export type BucketName = keyof typeof BUCKETS;
 
 /**
- * Note (Phase 9 review, 2026-05-23): we intentionally do NOT
- * rate-limit sign-in. Better Auth's scrypt password hashing is the
- * brute-force mitigation; 2FA is the second factor for high-value
- * accounts; a per-email rate limit would create a denial-of-service
- * vector (locking out the legitimate user by submitting their email
- * with bad passwords). See `lib/auth/actions.ts signIn` for the
- * decision record.
+ * Phase 32.2.4 (security remediation)  CORRECTION TO A PRIOR DECISION.
+ *
+ * The Phase 9 review (2026-05-23) recorded a deliberate choice NOT to
+ * rate-limit sign-in, resting on three premises. The 2026-07-28 audit
+ * found the load-bearing one to be false:
+ *
+ *   - "Better Auth handles it."  Better Auth's limiter is invoked from
+ *     its HTTP router's `onRequest` hook, i.e. ONLY for requests through
+ *     `/api/auth/*`. Sebenza calls `auth.api.signInEmail()` /
+ *     `verifyTOTP()` directly from Server Actions, which never touch
+ *     that hook. There was no limiter on the auth surface at all.
+ *   - "scrypt is the mitigation."  True for offline cracking, but
+ *     ~100-200ms per attempt is no obstacle to an online run against a
+ *     6-digit TOTP.
+ *   - "2FA covers high-value accounts."  `feature_flag_2fa_enforced`
+ *     defaults to false.
+ *
+ * The DoS concern that motivated the original decision was correct and
+ * is preserved: sign-in is limited per IP, never per email, so nobody
+ * can lock a victim out of their own account.
  */
