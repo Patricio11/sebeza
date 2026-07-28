@@ -810,6 +810,61 @@ const signInSchema = z.object({
   next: z.string().optional(),
 });
 
+/**
+ * Phase 32.2.2  the account's moderation state, resolved by email.
+ *
+ * `"unavailable"` means the lookup itself failed: callers must FAIL
+ * CLOSED on it rather than assume the account is fine. An unknown email
+ * resolves to `"active"` on purpose  a non-existent account must be
+ * indistinguishable from a healthy one, and the credential check is
+ * what actually rejects it.
+ */
+async function accountModerationState(
+  email: string,
+): Promise<"active" | "suspended" | "erased" | "unavailable"> {
+  try {
+    const rows = await getDb()
+      .select({
+        suspendedAt: schema.appUser.suspendedAt,
+        deletedAt: schema.appUser.deletedAt,
+      })
+      .from(schema.appUser)
+      .where(eq(schema.appUser.email, email))
+      .limit(1);
+    const account = rows[0];
+    if (!account) return "active";
+    if (account.deletedAt) return "erased";
+    if (account.suspendedAt) return "suspended";
+    return "active";
+  } catch (e) {
+    console.error("[signIn] moderation lookup failed:", e);
+    return "unavailable";
+  }
+}
+
+/**
+ * Phase 32.2.2  drop every session for an address. Used when a
+ * moderation gate rejects a sign-in AFTER Better Auth has already
+ * issued the cookie for a correct password.
+ */
+async function revokeAllSessionsForEmail(email: string): Promise<void> {
+  try {
+    const db = getDb();
+    const rows = await db
+      .select({ id: schema.appUser.id })
+      .from(schema.appUser)
+      .where(eq(schema.appUser.email, email))
+      .limit(1);
+    const userId = rows[0]?.id;
+    if (!userId) return;
+    await db.delete(schema.session).where(eq(schema.session.userId, userId));
+  } catch (e) {
+    // Non-fatal: the DAL re-check (32.2.1) still fails closed for a
+    // suspended account, so a surviving row grants no access.
+    console.error("[signIn] session revocation after moderation gate failed:", e);
+  }
+}
+
 export async function signIn(
   input: z.infer<typeof signInSchema>,
 ): Promise<ActionResult<{ next: string }>> {
@@ -829,35 +884,6 @@ export async function signIn(
   // user locked out). Reveal + upload paths DO rate-limit, because
   // their abuse pattern has no legitimate-user collision.
 
-  // Phase 7  before issuing a session, check `app_user.suspended_at` /
-  // `deleted_at`. Both states must block sign-in. We look up by email
-  // first; if it doesn't resolve we fall through to Better Auth which
-  // returns the same generic "incorrect" error (no enumeration).
-  try {
-    const db = getDb();
-    const lookup = await db
-      .select({
-        id: schema.appUser.id,
-        suspendedAt: schema.appUser.suspendedAt,
-        suspendedReason: schema.appUser.suspendedReason,
-        deletedAt: schema.appUser.deletedAt,
-      })
-      .from(schema.appUser)
-      .where(eq(schema.appUser.email, v.email))
-      .limit(1);
-    const account = lookup[0];
-    if (account?.deletedAt) {
-      return fail("This account has been erased.");
-    }
-    if (account?.suspendedAt) {
-      const tail = account.suspendedReason ? `: ${account.suspendedReason}` : ".";
-      return fail(`Your account is suspended${tail}`);
-    }
-  } catch {
-    // DB hiccup shouldn't break the sign-in path; fall through to
-    // Better Auth which returns its standard error envelope.
-  }
-
   try {
     const result = (await auth.api.signInEmail({
       body: {
@@ -869,6 +895,42 @@ export async function signIn(
       user?: { id: string; emailVerified: boolean; role?: string };
       twoFactorRedirect?: boolean;
     };
+
+    // ── Phase 32.2.2 (security remediation)  moderation gate ──────────
+    //
+    // This check USED TO RUN BEFORE the password was verified, and it
+    // returned `Your account is suspended: <admin's free-text reason>`.
+    // Anyone who knew an email address could therefore learn, with no
+    // credential at all, (a) that the account exists, (b) its moderation
+    // state, and (c) a verbatim internal admin assessment  a POPIA
+    // disclosure to an unauthenticated party, and a clean account-
+    // enumeration oracle.
+    //
+    // It now runs only AFTER `signInEmail` has accepted the password, so
+    // reaching this branch proves the caller owns the credentials. That
+    // makes an honest "your account is suspended" safe to say  but the
+    // REASON stays internal (the account.suspended notification already
+    // delivers the user-facing explanation, and the audit log keeps the
+    // full record). Covers the 2FA branch too, since the password is
+    // verified before Better Auth asks for the second factor.
+    const moderation = await accountModerationState(v.email);
+    if (moderation === "unavailable") {
+      // Fail CLOSED: the previous code swallowed DB errors here and let
+      // the sign-in continue, so a partial outage could admit a
+      // suspended user.
+      return fail("Sign-in is temporarily unavailable. Please try again.");
+    }
+    if (moderation !== "active") {
+      // Better Auth has already issued a session for the accepted
+      // password  destroy it before returning, or a suspended user
+      // would leave here holding a valid cookie.
+      await revokeAllSessionsForEmail(v.email);
+      return fail(
+        moderation === "erased"
+          ? "This account has been erased and can no longer be used."
+          : "Your account is suspended. Contact support if you think this is a mistake.",
+      );
+    }
 
     // Phase 7 (Task 7.2)  2FA branch. Better Auth signals it has
     // accepted the password but is holding the session until the user

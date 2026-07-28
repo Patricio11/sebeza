@@ -122,14 +122,24 @@ check that the employer match page still renders candidates.
   `` `Your account is suspended: ${suspendedReason}` `` — the admin's verbatim internal note.
 - **Exposure:** anyone who knows an email (no password) learns the account exists, its moderation
   state, and a private admin assessment. POPIA disclosure to an unauthenticated party.
-- [ ] Move the suspension/erasure check to **after** `signInEmail()` succeeds.
-- [ ] Return a single generic message — `"This account isn't available. Contact support."` — with
-      **no reason string**. The reason stays in the authenticated in-app notification that already
-      exists, and in the audit log.
-- [ ] Fail **closed** on the DB error path (`:844-847` currently swallows errors and falls through):
-      return `"Sign-in is temporarily unavailable."` rather than proceeding.
-- [ ] Test: assert the pre-auth response for a suspended account is byte-identical to a
-      wrong-password response.
+- [x] Moved the suspension/erasure check to **after** `signInEmail()` succeeds  reaching it now
+      proves the caller owns the credentials. Also **revokes the session Better Auth just issued**
+      for the accepted password (found while implementing: without this the suspended user walks
+      away holding a valid cookie).
+- [x] **No reason string, ever.** *Adjusted from the plan's wording:* since the branch is now
+      post-authentication, an honest `"Your account is suspended. Contact support…"` is safe and is
+      better UX than a vague "isn't available"  the caller has proved they own the account. The
+      admin's free-text note stays internal (the `account.suspended` notification and the audit log
+      carry the explanation). Pre-authentication, nothing is disclosed at all.
+- [x] Fails **closed** on the DB error path via `accountModerationState()`'s explicit
+      `"unavailable"` state  the previous bare `catch {}` let a partial outage admit a suspended
+      user.
+- [x] Test: `tests/integration/signin-disclosure.test.ts` (5 cases  suspended vs healthy with a
+      wrong password are byte-identical; the admin note never reaches the client; unknown vs known
+      addresses are indistinguishable; erased behaves likewise; and with the CORRECT password the
+      user is told honestly AND their freshly-issued session is revoked).
+      **Mutation-tested:** reinstating the old pre-auth branch makes the suite fail and print the
+      leaked note verbatim.
 
 ### 32.2.3 — Password reset must revoke other sessions (the UI already promises it)
 - **Where:** `lib/auth/server.ts:63-76` (no `revokeSessionsOnPasswordReset`), while
@@ -319,6 +329,8 @@ correct and secure, but it explains nothing about the platform.
       **Verified:** 371 vitest green · production build clean.
 - [ ] **32.2 High** — sessions on suspend/erase/reset · sign-in disclosure · auth rate limits ·
       dependency upgrades · open redirect
+  - [x] **32.2.2** ✅ 2026-07-28 — sign-in disclosure closed; fails closed on DB error.
+        **Verified:** 380 vitest green · build clean · mutation-tested.
   - [x] **32.2.1** ✅ 2026-07-28 — suspension/erasure terminate sessions; DAL fails closed;
         cookieCache 5min→60s. **Verified:** 375 vitest green · build clean · mutation-tested.
 - [ ] **32.3 Medium** — 9 items
