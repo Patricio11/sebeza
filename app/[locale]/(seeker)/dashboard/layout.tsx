@@ -5,6 +5,13 @@ import { verifyRole } from "@/lib/auth/dal";
 import { getMyProfile } from "@/lib/profile/me";
 import { getSetting } from "@/lib/admin/settings";
 
+// Phase 33 (33.6)  belt to the robots.txt braces: robots.txt only
+// prevents CRAWLING; a leaked/linked workspace URL could still be
+// indexed by reference. This meta makes the whole group non-indexable.
+export const metadata = {
+  robots: { index: false, follow: false },
+};
+
 /**
  * Seeker route-group layout. Renders the persistent <DashboardFrame> once, so
  * navigation only swaps the content column  the sidebar stays mounted

@@ -3,6 +3,13 @@ import { DashboardFrame } from "@/components/layout/DashboardFrame";
 import { GOV_NAV } from "@/components/layout/govNav";
 import { verifyGov } from "@/lib/auth/dal";
 
+// Phase 33 (33.6)  belt to the robots.txt braces: robots.txt only
+// prevents CRAWLING; a leaked/linked workspace URL could still be
+// indexed by reference. This meta makes the whole group non-indexable.
+export const metadata = {
+  robots: { index: false, follow: false },
+};
+
 /**
  * Gov / policy route-group layout. Renders the persistent <DashboardFrame>
  * once (Part A pattern); `verifyGov()` guards (gov or admin, 2FA enforced).

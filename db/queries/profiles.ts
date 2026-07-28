@@ -588,6 +588,47 @@ export async function countMatchesByCitizenship(
 // Public profile read by handle
 // ─────────────────────────────────────────────────────────────────────────────
 
+/**
+ * Phase 33 (D3 in docs/PHASE_33_SEO_PLAN.md)  consent-aware indexing.
+ *
+ * A public dossier is INDEXABLE by search engines only while the seeker's
+ * own `searchability` consent is granted  Google's reach must never
+ * exceed the seeker's grant. The direct URL keeps working either way
+ * (revoking searchability hides you from search, it doesn't delete your
+ * page); this only controls the robots meta on /p/[handle].
+ *
+ * Same join the sitemap uses, so the two surfaces can't drift: a handle
+ * is listed in sitemap.xml IFF its page says index. Fails CLOSED  any
+ * error (mock-mode dev without a DB, transient outage) reads as
+ * not-indexable, never the reverse.
+ */
+export async function isProfileIndexableQuery(handle: string): Promise<boolean> {
+  try {
+    const db = getDb();
+    const rows = await db
+      .select({ id: schema.profiles.id })
+      .from(schema.profiles)
+      .innerJoin(
+        schema.consents,
+        and(
+          eq(schema.consents.userId, schema.profiles.userId),
+          eq(schema.consents.purpose, "searchability"),
+          eq(schema.consents.state, "granted"),
+        ),
+      )
+      .where(
+        and(
+          eq(schema.profiles.handle, handle),
+          isNull(schema.profiles.deletedAt),
+        ),
+      )
+      .limit(1);
+    return rows.length > 0;
+  } catch {
+    return false;
+  }
+}
+
 export async function findProfileByHandleQuery(
   handle: string,
 ): Promise<PublicProfile | null> {

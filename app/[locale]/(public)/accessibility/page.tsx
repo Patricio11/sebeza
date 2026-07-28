@@ -1,3 +1,4 @@
+import { localeAlternates } from "@/lib/seo";
 import { setRequestLocale } from "next-intl/server";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
@@ -7,6 +8,8 @@ export const metadata = {
   title: "Accessibility",
   description:
     "Sebenza's accessibility commitment: WCAG 2.2 AA, low-data by design, and how to reach us when something doesn't work for you.",
+  // Phase 33  canonical + hreflang (en unprefixed per as-needed).
+  alternates: localeAlternates("/accessibility"),
 };
 
 /**

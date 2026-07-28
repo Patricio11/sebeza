@@ -1,3 +1,4 @@
+import { localeAlternates } from "@/lib/seo";
 import { setRequestLocale } from "next-intl/server";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
@@ -8,6 +9,8 @@ export const metadata = {
   title: "PAIA Manual",
   description:
     "Sebenza's manual under the South African Promotion of Access to Information Act, 2000.",
+  // Phase 33  canonical + hreflang (en unprefixed per as-needed).
+  alternates: localeAlternates("/paia"),
 };
 
 /**

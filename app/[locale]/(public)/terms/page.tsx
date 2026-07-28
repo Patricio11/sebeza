@@ -1,3 +1,4 @@
+import { localeAlternates } from "@/lib/seo";
 import { setRequestLocale } from "next-intl/server";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
@@ -8,6 +9,8 @@ export const metadata = {
   title: "Terms of Service",
   description:
     "The agreement between you and Sebenza covering accounts, acceptable use, employer obligations, and your rights.",
+  // Phase 33  canonical + hreflang (en unprefixed per as-needed).
+  alternates: localeAlternates("/terms"),
 };
 
 /**

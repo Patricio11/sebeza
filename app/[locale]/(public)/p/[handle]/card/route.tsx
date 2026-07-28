@@ -27,6 +27,7 @@
 
 import { ImageResponse } from "next/og";
 import { dataProvider } from "@/lib/data/provider";
+import { SITE_HOST } from "@/lib/seo";
 
 // 7 days. Pre-computed literal so the segment-config check sees a
 // straight numeric  Next 16 segment-config validator rejects
@@ -90,7 +91,10 @@ export async function GET(_request: Request, { params }: Params) {
         >
           <span
             style={{
-              display: "inline-block",
+              // Phase 33 fix: Satori only supports flex|block|contents|
+              // none  "inline-block" made this route throw, so every
+              // shared-profile preview image has been 500ing.
+              display: "block",
               width: "10px",
               height: "10px",
               borderRadius: "9999px",
@@ -124,7 +128,10 @@ export async function GET(_request: Request, { params }: Params) {
             fontFamily: "Helvetica, Arial, sans-serif",
           }}
         >
-          {profile.profession}  {profile.city}, {profile.province}
+          {/* Single template string  Satori requires explicit
+              display:flex on any element with >1 child node, and JSX
+              expressions interleaved with text count as multiple. */}
+          {`${profile.profession}  ${profile.city}, ${profile.province}`}
         </div>
 
         {/* Top skills */}
@@ -181,7 +188,7 @@ export async function GET(_request: Request, { params }: Params) {
           >
             <span
               style={{
-                display: "inline-block",
+                display: "block",
                 width: "16px",
                 height: "16px",
                 borderRadius: "9999px",
@@ -197,7 +204,7 @@ export async function GET(_request: Request, { params }: Params) {
               fontFamily: "Helvetica, Arial, sans-serif",
             }}
           >
-            sebenza.co.za/p/{handle}
+            {`${SITE_HOST}/p/${handle}`}
           </div>
         </div>
       </div>

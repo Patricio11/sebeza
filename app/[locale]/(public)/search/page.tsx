@@ -46,6 +46,7 @@ import {
   SelectCandidateCheckbox,
   type SearchInviteViewer,
 } from "@/components/feature/search/SearchInviteSelection";
+import { localeAlternates } from "@/lib/seo";
 
 interface SearchPageProps {
   params: Promise<{ locale: string }>;
@@ -91,7 +92,15 @@ function parseOpenTo(raw: string | undefined): OpenToTag[] | undefined {
 export async function generateMetadata({ params }: SearchPageProps) {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "search" });
-  return { title: t("headingFallback") };
+  // Phase 33  static description + canonical (D5: query-parameter
+  // variants collapse onto the bare /search canonical; per-query pages
+  // are deliberately not indexed).
+  return {
+    title: t("headingFallback"),
+    description:
+      "Search South Africa's national talent register by profession, province and skills. Live, freshness-weighted, consent-first profiles  free to browse.",
+    alternates: localeAlternates("/search"),
+  };
 }
 
 export default async function SearchPage({ params, searchParams }: SearchPageProps) {

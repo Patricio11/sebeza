@@ -4,9 +4,19 @@ import { getMessages, setRequestLocale } from "next-intl/server";
 import { Fraunces, Hanken_Grotesk } from "next/font/google";
 import { notFound } from "next/navigation";
 import { routing, type AppLocale } from "@/i18n/routing";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { CookieConsentBanner } from "@/components/feature/legal/CookieConsentBanner";
 import { ServiceWorkerRegistrar } from "@/components/pwa/ServiceWorkerRegistrar";
 import { readCookieConsent } from "@/lib/cookies/consent";
+import {
+  BRAND_NAME,
+  LEGAL_NAME,
+  SITE_DESCRIPTION,
+  SITE_KEYWORDS,
+  SITE_TITLE,
+  SITE_URL,
+} from "@/lib/seo";
 import "../globals.css";
 
 // Subset to latin (Tier 1 locales  en/zu/xh/af  all use latin).
@@ -34,12 +44,71 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
+  // Phase 33  THE WhatsApp fix. Without metadataBase every relative
+  // openGraph/twitter image URL fails to resolve to an absolute URL
+  // (or resolves against the deployment URL rather than the canonical
+  // domain), and WhatsApp/scrapers only render previews from absolute
+  // URLs. All URL config lives in lib/seo.ts (D1).
+  metadataBase: new URL(SITE_URL),
   title: {
-    default: "Sebenza  South African talent platform",
+    default: SITE_TITLE,
     template: "%s · Sebenza",
   },
-  description:
-    "Find skilled people near you. Get found for the work you do. POPIA-compliant, accessibility-first, freshness-weighted talent data for South Africa.",
+  description: SITE_DESCRIPTION,
+  keywords: SITE_KEYWORDS,
+  authors: [{ name: BRAND_NAME, url: SITE_URL }],
+  creator: BRAND_NAME,
+  publisher: LEGAL_NAME,
+  category: "employment",
+  // Phase 33  sitewide OpenGraph + Twitter defaults. Every public
+  // page inherits these (and the generated /og-image card), so a
+  // WhatsApp/LinkedIn/X share of ANY route unfurls branded. Pages
+  // with richer cards (/p/[handle]) override images per-page.
+  openGraph: {
+    type: "website",
+    siteName: BRAND_NAME,
+    locale: "en_ZA",
+    url: SITE_URL,
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+    images: [
+      {
+        url: "/og-image",
+        width: 1200,
+        height: 630,
+        alt: SITE_TITLE,
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+    images: ["/og-image"],
+  },
+  // Explicit sitewide default; private route-group layouts override
+  // with index:false (Phase 33.6 belt to the robots.txt braces).
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  // Env-driven search-console verification: set the env var in Vercel,
+  // redeploy, click Verify  no code change when tokens rotate.
+  verification: {
+    ...(process.env.GOOGLE_SITE_VERIFICATION
+      ? { google: process.env.GOOGLE_SITE_VERIFICATION }
+      : {}),
+    ...(process.env.BING_SITE_VERIFICATION
+      ? { other: { "msvalidate.01": process.env.BING_SITE_VERIFICATION } }
+      : {}),
+  },
   // Phase 28 (PWA)  installed-app identity. The manifest (app/manifest.ts)
   // carries the Android side; these cover iOS "Add to Home Screen".
   applicationName: "Sebenza",
@@ -116,6 +185,13 @@ export default async function LocaleLayout({
         </NextIntlClientProvider>
         {/* Phase 28  offline-fallback service worker (production only). */}
         <ServiceWorkerRegistrar />
+        {/* Phase 33  Vercel Analytics + Speed Insights. COOKIELESS by
+            design (no cross-site tracking, no persistent identifier), so
+            they sit outside the cookie-consent gate  consistent with
+            the banner's "no profile is built from your browsing"
+            promise. No-ops locally; activate with the dashboard toggles. */}
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );

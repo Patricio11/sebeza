@@ -1,4 +1,6 @@
-# PHASE 33 PLAN — FULL SEO + SOCIAL SHARING PASS
+# PHASE 33 PLAN — FULL SEO + SOCIAL SHARING PASS ✅ COMPLETE
+
+**Status: SHIPPED 2026-07-28.** All tasks 33.1–33.7 implemented as planned (no scope changes): `lib/seo.ts` + root `metadataBase`/OG/twitter/robots/verification, generated `/og-image` (lives under `app/[locale]/(public)/og-image/` because the i18n proxy rewrites unprefixed paths), share-card domain fixed, per-page metadata + hreflang everywhere public, consent-aware profile indexing (`isProfileIndexableQuery`, fails closed), Organization/WebSite/Person/FAQPage JSON-LD, landing FAQ, sitemap + robots fixes, noindex on all five private route groups (new `(auth)/layout.tsx`), Vercel Analytics + Speed Insights. Remaining work is the founder-side manual checklist (§VERIFY item 7): GSC/Bing verification env vars, sitemap submission, Vercel dashboard toggles, WhatsApp paste-test.
 
 *Executes `docs/SEO_PLAYBOOK.md` end-to-end for Sebenza, adapted for a 4-locale national platform. Prompted by founder (2026-07-02): "work on SEO fully… remember the sharing as well, like when I send the link on WhatsApp." Runs alongside Phase 32 (security hardening).*
 

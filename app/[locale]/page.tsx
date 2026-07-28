@@ -1,5 +1,12 @@
+import type { Metadata } from "next";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
+import { localeAlternates, SITE_DESCRIPTION, SITE_TITLE } from "@/lib/seo";
+import {
+  FaqJsonLd,
+  OrganizationJsonLd,
+  WebSiteJsonLd,
+} from "@/components/seo/StructuredData";
 import { LandingHeader } from "@/components/layout/LandingHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { SearchBar } from "@/components/feature/SearchBar";
@@ -29,6 +36,15 @@ import { ArrowUpRight, MapPin, Clock, Sparkles, Quote } from "lucide-react";
 // untouched until you approve, so you can review side-by-side.
 // ─────────────────────────────────────────────────────────────────────────────
 
+// Phase 33  the landing owns the brand title verbatim (absolute, no
+// "%s · Sebenza" template) plus canonical + hreflang for the four
+// launch locales. OG/twitter inherit the root defaults (/og-image).
+export const metadata: Metadata = {
+  title: { absolute: SITE_TITLE },
+  description: SITE_DESCRIPTION,
+  alternates: localeAlternates("/"),
+};
+
 export default async function LandingPage({
   params,
 }: {
@@ -49,6 +65,11 @@ export default async function LandingPage({
 
   return (
     <div className="bg-[color:var(--color-sa-cream)] text-[color:var(--color-sa-charcoal)]">
+      {/* Phase 33  structured data: who we are, that the site is
+          searchable (sitelinks search box), and the FAQ below. */}
+      <OrganizationJsonLd />
+      <WebSiteJsonLd />
+      <FaqJsonLd items={FAQ_ITEMS} />
       <LandingHeader />
       <main id="main">
         <Hero
@@ -67,6 +88,7 @@ export default async function LandingPage({
             approved). */}
         <TestimonialsRail />
         <DualSplit t={t} />
+        <FAQ />
         <FinalCTA />
       </main>
       <SiteFooter />
@@ -773,6 +795,98 @@ function DualSplit({
             className="pointer-events-none absolute -top-10 -right-10 size-72 rounded-full bg-[color:var(--color-sa-green)] opacity-20 blur-3xl"
           />
         </article>
+      </div>
+    </section>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// FAQ  Phase 33. Six real questions, answered honestly (D4: platform
+// facts only, no superlatives). The SAME strings feed the FAQPage
+// JSON-LD mounted at the top of the page  Google requires the marked-
+// up content to be visible on the page, so the two must not drift.
+// Native <details>/<summary> accordion: zero JS, keyboard-accessible,
+// No-Flash compliant.
+// ─────────────────────────────────────────────────────────────────────────────
+
+const FAQ_ITEMS: { question: string; answer: string }[] = [
+  {
+    question: "What is Sebenza?",
+    answer:
+      "Sebenza is a South African national talent platform. Job seekers create a professional profile once and can be found by verified employers across all nine provinces. Employers search live, freshness-weighted profiles by profession, province and skills. It is operated by Yetotec (Pty) Ltd and built POPIA-first.",
+  },
+  {
+    question: "Is Sebenza free for job seekers?",
+    answer:
+      "Yes. Creating a profile, being found, receiving invitations and accepting work are free for job seekers. Sebenza is not an employment agency  we never take a fee from your wages.",
+  },
+  {
+    question: "How do employers find me?",
+    answer:
+      "Verified employers search by profession, province and skills. Your public profile shows a redacted name and never shows your contact details, ID number or documents. An employer only reaches you through the platform, with your consent, and every contact reveal is recorded in an audit log you can review.",
+  },
+  {
+    question: "Do I need matric or a degree to join?",
+    answer:
+      "No. Sebenza is for every skill level  from general workers, artisans and drivers to graduates and professionals. Current students can register a student profile with their expected completion date. What matters is a truthful profile, not a specific qualification.",
+  },
+  {
+    question: "How is my personal information protected?",
+    answer:
+      "Sebenza is built around POPIA, South Africa's data protection law. You give specific consent for each way your information is used, and you can pause your visibility or withdraw consent at any time. Sensitive fields are encrypted, public pages are redacted, and every access to your personal information is logged.",
+  },
+  {
+    question: "What does “verified” mean on a profile?",
+    answer:
+      "A verification badge means the platform actually verified something  for example an employer confirming a work record. Every profile starts as “unverified” and we say so honestly; badges are never bought or assumed. Statistics count a hire only when it is confirmed through the platform.",
+  },
+];
+
+function FAQ() {
+  return (
+    <section
+      id="faq"
+      aria-labelledby="faq-h"
+      className="bg-[color:var(--color-sa-cream)] py-20 md:py-28"
+    >
+      <div className="mx-auto max-w-[1320px] px-5 md:px-10">
+        <header className="mb-10 md:mb-14">
+          <div className="flex items-center gap-3 text-[0.72rem] uppercase tracking-[0.28em] text-[color:var(--color-sa-green-deep)]">
+            <SAChevron variant="mark" className="size-3" />
+            Straight answers
+          </div>
+          <h2
+            id="faq-h"
+            className="mt-3 max-w-3xl font-display text-[clamp(2.2rem,5vw,3.6rem)] leading-[1.02] tracking-[-0.02em]"
+          >
+            Questions, answered{" "}
+            <span className="italic text-[color:var(--color-sa-green-deep)]">
+              honestly
+            </span>
+            .
+          </h2>
+        </header>
+
+        <div className="divide-y divide-[color:var(--color-sa-charcoal)]/10 border-y border-[color:var(--color-sa-charcoal)]/10">
+          {FAQ_ITEMS.map((item) => (
+            <details key={item.question} className="group">
+              <summary className="flex cursor-pointer list-none items-baseline justify-between gap-6 py-5 text-left md:py-6 [&::-webkit-details-marker]:hidden">
+                <span className="font-display text-xl leading-snug text-[color:var(--color-sa-charcoal)] md:text-2xl">
+                  {item.question}
+                </span>
+                <span
+                  aria-hidden="true"
+                  className="shrink-0 font-display text-2xl leading-none text-[color:var(--color-sa-gold-deep)] transition-transform group-open:rotate-45"
+                >
+                  +
+                </span>
+              </summary>
+              <p className="max-w-3xl pb-6 leading-relaxed text-[color:var(--color-ink-soft)]">
+                {item.answer}
+              </p>
+            </details>
+          ))}
+        </div>
       </div>
     </section>
   );

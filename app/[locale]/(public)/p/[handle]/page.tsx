@@ -33,6 +33,9 @@ import { WorkAvailabilityChips } from "@/components/feature/profile/WorkAvailabi
 import { getSessionUser } from "@/lib/auth/dal";
 import { getMyProfile } from "@/lib/profile/me";
 import { getSetting } from "@/lib/admin/settings";
+import { isProfileIndexableQuery } from "@/db/queries/profiles";
+import { localeAlternates } from "@/lib/seo";
+import { PersonJsonLd } from "@/components/seo/StructuredData";
 
 interface Props {
   params: Promise<{ locale: string; handle: string }>;
@@ -40,7 +43,12 @@ interface Props {
 
 export async function generateMetadata({ params }: Props) {
   const { handle } = await params;
-  const p = await dataProvider.getProfile(handle);
+  const [p, indexable] = await Promise.all([
+    dataProvider.getProfile(handle),
+    // Phase 33 (D3)  consent-aware indexing: robots follows the
+    // seeker's own `searchability` grant (fails closed to noindex).
+    isProfileIndexableQuery(handle),
+  ]);
   if (!p) return { title: "Profile" };
   const title = `${p.displayName} · ${p.profession}`;
   const description = `${p.displayName}  ${p.profession} based in ${p.city}, ${p.province}. Trust-verified Sebenza profile.`;
@@ -56,6 +64,8 @@ export async function generateMetadata({ params }: Props) {
       // apply (the /card route reads through dataProvider.getProfile
       // which enforces them). The seeker is the one sharing the URL;
       // we don't bake the image into every public hit unprompted.
+      // Phase 33: resolved absolute via the root layout's metadataBase
+      // WhatsApp only renders previews from absolute image URLs.
       images: [
         {
           url: `/p/${p.handle}/card`,
@@ -71,10 +81,12 @@ export async function generateMetadata({ params }: Props) {
       description,
       images: [`/p/${p.handle}/card`],
     },
-    alternates: {
-      canonical: `/p/${p.handle}`,
-    },
-    robots: { index: true, follow: true },
+    // Phase 33  canonical + hreflang across the four launch locales
+    // (same dossier content in every locale; en is unprefixed).
+    alternates: localeAlternates(`/p/${p.handle}`),
+    robots: indexable
+      ? { index: true, follow: true }
+      : { index: false, follow: false },
   };
 }
 
@@ -97,6 +109,11 @@ export default async function ProfilePage({ params }: Props) {
 
   const profile = await dataProvider.getProfile(handle);
   if (!profile) notFound();
+
+  // Phase 33  Person JSON-LD, but only on indexable (searchability-
+  // consented) dossiers: structured data must never out-reach the
+  // robots meta the seeker's own consent controls.
+  const indexable = await isProfileIndexableQuery(handle);
 
   // Route the CTAs based on who's looking. Public visitors → sign-in
   // with a ?next= cursor back to the dossier. Verified employers →
@@ -129,6 +146,14 @@ export default async function ProfilePage({ params }: Props) {
 
   return (
     <>
+      {indexable && (
+        <PersonJsonLd
+          displayName={profile.displayName}
+          profession={profile.profession}
+          province={profile.province}
+          handle={profile.handle}
+        />
+      )}
       <SiteHeader />
       <main id="main" className="bg-[color:var(--color-paper)]">
         {/* Owner-preview banner  proves they're signed in and gives them the

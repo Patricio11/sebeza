@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
@@ -17,6 +18,7 @@ import { getLatestRetentionSnapshot } from "@/lib/analytics/retention";
 import { InsightsCharts } from "@/components/feature/InsightsCharts";
 import { InsightsExportButton } from "@/components/feature/InsightsExportButton";
 import { TrendingUp, AlertCircle, ArrowUp, ArrowDown, Minus } from "lucide-react";
+import { localeAlternates } from "@/lib/seo";
 
 /**
  * Re-prerender /insights every 5 min. Aggregates over the live DB; doesn't
@@ -25,6 +27,16 @@ import { TrendingUp, AlertCircle, ArrowUp, ArrowDown, Minus } from "lucide-react
  * gets a fresh static HTML every 300 s.
  */
 export const revalidate = 300;
+
+// Phase 33  /insights is a genuine ranking asset ("south africa
+// employment statistics"); until now it shipped with no metadata at
+// all. OG/twitter inherit the branded /og-image defaults.
+export const metadata: Metadata = {
+  title: "National Employment Insights",
+  description:
+    "Live South African employment statistics: skills gaps, hiring demand by province, freshness-weighted workforce data and confirmed placement outcomes  from Sebenza's national talent register.",
+  alternates: localeAlternates("/insights"),
+};
 
 const STATUS_ORDER = [
   "open_to_work",

@@ -1,3 +1,4 @@
+import { localeAlternates } from "@/lib/seo";
 import { setRequestLocale } from "next-intl/server";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
@@ -8,6 +9,8 @@ export const metadata = {
   title: "Privacy Policy",
   description:
     "How Sebenza collects, uses, and protects your personal information under POPIA.",
+  // Phase 33  canonical + hreflang (en unprefixed per as-needed).
+  alternates: localeAlternates("/privacy"),
 };
 
 /**
