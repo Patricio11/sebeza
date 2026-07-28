@@ -54,20 +54,38 @@ const PURPOSE_ONBOARDING_EXPLAINER: Partial<Record<ConsentPurpose, string>> = {
 };
 
 /**
- * Phase 11.4.4 follow-up  the two messaging-channel purposes are
- * deliberately EXCLUDED from sign-up. Per D2 the seeker grants them
- * from /dashboard/account alongside phone verification  asking for
- * SMS/WhatsApp consent before a phone number even exists on file is
- * premature, and the dispatch layer multi-gates on verified phone +
- * allowlist anyway. The consents state map still carries all 8 keys
- * (the two excluded ones simply stay false and no row is written).
- * This filter is also what keeps the step-2 render inside the
- * `auth.seekerSignUp.step2.purposes` en.json catalog  the messaging
- * purposes have no sign-up label by design (their consent copy lives
- * on the privacy centre + PhoneChannelPanel where it has context).
+ * ALLOWLIST of the purposes that render at sign-up step 2. Everything
+ * else in CONSENT_PURPOSES is granted later, in context, from the
+ * privacy centre / account surfaces:
+ *
+ *   - messaging_channel_sms / _whatsapp (Phase 11.4.4 D2)  granted
+ *     alongside phone verification on /dashboard/account; asking
+ *     before a phone exists on file is premature.
+ *   - announcements (Phase 25.4)  SMS-delivered platform news; same
+ *     phone dependency, same home.
+ *
+ * WHY AN ALLOWLIST (2026-07-02, after the same bug twice): each entry
+ * here must have a matching label in en.json under
+ * `auth.seekerSignUp.step2.purposes.<purpose>`  next-intl renders
+ * the RAW KEY for a missing one (a previous new purpose leaked
+ * through the old blocklist and shipped as
+ * "auth.seekerSignUp.step2.purposes.announcements" on production).
+ * With an allowlist a future purpose FAILS SAFE: it simply doesn't
+ * appear at sign-up until someone deliberately adds it here + its
+ * catalog label in the same commit. The consents state map still
+ * carries every purpose (non-listed ones stay false; no row written).
  */
-const SIGN_UP_CONSENT_PURPOSES = CONSENT_PURPOSES.filter(
-  (p) => p !== "messaging_channel_sms" && p !== "messaging_channel_whatsapp",
+const SIGN_UP_PURPOSE_ALLOWLIST: readonly ConsentPurpose[] = [
+  "searchability",
+  "contact_reveal",
+  "document_sharing",
+  "analytics_aggregate",
+  "outcomes_research",
+  "vacancy_matching",
+];
+
+const SIGN_UP_CONSENT_PURPOSES = CONSENT_PURPOSES.filter((p) =>
+  SIGN_UP_PURPOSE_ALLOWLIST.includes(p),
 );
 
 interface AcademicState {
