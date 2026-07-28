@@ -448,6 +448,17 @@ correct and secure, but it explains nothing about the platform.
   - [x] **32.2.4** ✅ 2026-07-28 — signin / 2fa-verify / email-send / invite buckets wired;
         prior no-limit decision corrected. **Verified:** 385 vitest green · build clean ·
         mutation-tested.
+  - [x] **32.2.4b** ✅ 2026-07-28 — **correction, found by the full E2E run:** the first version
+        consumed budget on EVERY sign-in, so 20 *correct* sign-ins from one IP inside 10 minutes
+        locked the 21st person out — a real availability bug for shared-IP offices, campus labs and
+        CGNAT'd SA mobile networks (the serial E2E suite is exactly that shape: one IP, dozens of
+        honest sign-ins → cascade of timeouts from `locality.spec` onward). Fixed with a
+        `peek`/`enforce` split on the limiter seam: `signIn`, `verifyTotp` and `verifyBackupCode`
+        now *peek* the budget up front and *consume only on a rejected credential*, so honest use is
+        free while a credential-stuffing or TOTP-guessing run (all failures) burns exactly as fast
+        as before. `email-send`, `invite` and `report` still count every call — there the action
+        itself is the cost. **Verified:** regression test pins "N successes never throttle" +
+        "failures still spend"; 18/18 targeted auth tests green; full E2E re-run.
   - [x] **32.2.3** ✅ 2026-07-28 — password reset + admin 2FA reset revoke sessions.
         **Verified:** 381 vitest green · build clean · mutation-tested.
   - [x] **32.2.2** ✅ 2026-07-28 — sign-in disclosure closed; fails closed on DB error.

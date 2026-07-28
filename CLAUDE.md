@@ -5,12 +5,23 @@
 **Working name:** Sebenza · South African National Talent-Intelligence Platform.
 **Companion docs (read together, always):**
 - `docs/TO_START_EVERY_SESSION.md`  non-negotiable rules + tone + current state.
-- `docs/ROADMAP.md`  phased build plan (Phase 0 → 31; all shipped except 14, which is partnership-gated).
+- `docs/ROADMAP.md`  phased build plan (Phase 0 → 33; all shipped except 14, which is partnership-gated).
 - `docs/UX_UI_SPEC.md`  design system + screen-by-screen.
 
-**Current state (2026-07): LIVE, DB-BACKED, shipped through Phase 31.** Postgres (Neon) + Drizzle,
-62 migrations (0000→0061), Better Auth sessions, ~367-test vitest suite (unit/integration/compliance)
-+ ~110-test Playwright E2E (desktop + 360px), 20 cron jobs.
+**Current state (2026-07): LIVE, DB-BACKED, shipped through Phase 33.** Postgres (Neon) + Drizzle,
+62 migrations (0000→0061), Better Auth sessions, ~425-test vitest suite (unit/integration/compliance)
++ ~116-test Playwright E2E (desktop + 360px), 20 cron jobs.
+Phase 32 (security remediation, plan `docs/PHASE_32_SECURITY_HARDENING_PLAN.md`, DPIA addendum R-27):
+**a `"use server"` export is a PUBLIC HTTP endpoint**  `lib/security/server-action-guards.test.ts`
+fails the build on any unguarded Server Action (allowlist entries must justify being public).
+Suspension/erasure/password-reset/2FA-reset revoke sessions; DAL fails closed on moderation state;
+auth rate limits in `lib/rate-limit` (signin/2fa-verify keyed per IP and counting FAILURES only 
+`peek` up front, `enforce` on the failure path  so shared-IP offices/CGNAT never lock out; per-email
+keying is a lockout weapon, never use it); open redirects closed via `safeInternalPath`; welcome
+email (role-aware, POPIA §18 consent restatement) fires from `afterEmailVerification`. Known gap: no
+persisted user locale → transactional email is English-only.
+Phase 33 (SEO): metadata/JSON-LD/social previews; Vercel `<Analytics/>`+`<SpeedInsights/>` in the
+locale layout render ONLY when `process.env.VERCEL === "1"` (they 404 anywhere else  keep the gate).
 Phase 31 (data minimisation, plan `docs/PHASE_9_19_PLAN.md`): ID/passport collection DORMANT by
 default (`feature_flag_id_verification_enabled` OFF; ack-gated on /admin/verifications; collection
 actions hard-refuse, removal never gated). Nationality = ONE picker for everyone (default ZA, no

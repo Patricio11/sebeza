@@ -545,6 +545,89 @@ under the existing key + strict redaction. This commitment is recorded now
 so the activation phase implements the dormant path honestly; the final
 choice is confirmed with POPIA counsel at activation and recorded here.
 
+### R-27  Addendum (2026-07-28): Phase 32 security remediation
+
+A four-sweep security audit (auth/session · authorization coverage ·
+injection & data exposure · dependencies) was run against the whole
+codebase and every finding remediated. Entries here supersede the
+matching risk text above where they conflict.
+
+**R-27.1  Two unauthenticated Server Actions closed (CRITICAL).** A
+function exported from a `"use server"` module is a public HTTP
+endpoint. Two internal helpers had crossed that boundary:
+`supersedeEmploymentVerifications` (anonymous, destructive  it could
+flip any seeker's employment verification to `superseded` and redact
+the stored contact email) and `matchVacancyCandidates` (anonymous read
+of nationality-split supply counts and RAW private-bucket storage keys,
+plus an unauthenticated write into `search_events`). Both fixed
+structurally  the first moved to a module without the directive, the
+second re-resolves its vacancy through the org-scoped guard  and a
+build-failing test now walks every Server Action and refuses any
+exported action that does not establish the caller's identity.
+
+**R-27.2  Session lifecycle (supersedes R8's assumptions).** Suspension
+and self-erasure now DELETE the user's sessions; password reset and
+admin 2FA reset revoke them too. The DAL additionally re-checks
+`suspended_at` / `deleted_at` on every render pass and fails closed, and
+the session cookie-cache window dropped 5min → 60s. Previously a
+suspended employer retained full PII-reveal access for up to 30 days,
+and a user who reset their password after a compromise left the
+attacker's cookie live  while the reset page told them otherwise.
+
+**R-27.3  Disclosure at sign-in (POPIA).** The suspension check ran
+BEFORE password verification and echoed the admin's free-text
+moderation note. Anyone knowing an address learned, with no credential,
+that the account existed, its moderation state, and a private internal
+assessment. The check now runs only after the password is accepted; the
+reason never leaves the platform. Sign-up was likewise an enumeration
+oracle and now returns the same shape for a duplicate address while
+emailing the genuine owner  which matters unusually here, since
+confirming an account can reveal that a named person is job-hunting.
+
+**R-27.4  Abuse paths (supersedes R8's "not enforced by default").**
+The Phase 9 decision to skip auth rate limiting rested on "Better Auth
+handles it", which is false for Server Actions (its limiter only runs
+for requests through `/api/auth/*`). Unthrottled 6-digit TOTP
+verification was therefore brute-forceable. Buckets now cover sign-in
+(per IP, never per email  a per-email counter would let an attacker
+lock a victim out), 2FA verification, unauthenticated email sends,
+invitations and anonymous abuse reports. Keys are hashed, since
+rate-limit keys reach logs and an IP or address is personal information.
+
+**R-27.5  Gov lookup enumeration.** The per-employer lookup passed raw
+input to `ILIKE`, so a gov user submitting `%` (then `A%`, `B%`, …)
+could walk the entire organisation register  defeating the documented
+no-leaderboard guarantee. Exact-match sites now compare
+`lower(a) = lower(b)`, removing pattern semantics entirely.
+
+**R-27.6  Configuration.** The E2E escape hatch (`SEBENZA_E2E_HTTP`,
+which disables the admin 2FA hard-require) now throws at startup if set
+in a deployed environment, and is documented in `.env.example`; CSP
+`connect-src` no longer falls back to a Supabase wildcard; API routes
+receive security headers; `trustedOrigins` no longer trusts localhost in
+production; dependencies patched (Next 16.2.12, Better Auth 1.6.25,
+nodemailer 9.0.3) with residual advisories assessed as unreachable.
+
+**R-27.7  Searchability pause  deliberate scope (no change).** The
+by-handle profile read does NOT honour the pause, and that is correct:
+the control promises the seeker "you stay in the system … your existing
+relationships carry on". Pause means stop NEW discovery; a seeker who
+wants to disappear revokes searchability, which IS honoured. Documented
+at the query so it is not "fixed" by mistake.
+
+**R-27.8  Transparency at onboarding.** A welcome email now follows
+verification, restating in plain language exactly which consents the
+seeker granted (read live from `consents`) and where to withdraw them 
+the POPIA §18 moment, previously silent. Transactional only: no
+tracking pixel, no marketing opt-in, enforced by test.
+
+**Known gap (recorded, not fixed):** no user's locale is persisted, so
+all transactional email renders in English regardless of the language
+the person used in the product. On a platform with isiZulu, isiXhosa
+and Afrikaans as Tier-1 locales this is a real accessibility gap; it is
+a follow-up phase, and consent/legal copy must be human-translated when
+it lands.
+
 ## 4. Sign-off
 
 To be signed by the Information Officer once designated. Until then,

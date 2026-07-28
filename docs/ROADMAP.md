@@ -1150,6 +1150,36 @@ the shipped vacancy-enrichment phase). Responsible party: **Yetotec (Pty) Ltd**.
 
 ---
 
+## 🔐 PHASE 32 — SECURITY REMEDIATION + THE WELCOME EMAIL *(shipped 2026-07-28)*
+
+**Thesis: a four-sweep audit of the whole codebase, then every finding fixed structurally rather
+than patched.** Full plan + ledger: `docs/PHASE_32_SECURITY_HARDENING_PLAN.md`. DPIA addendum R-27.
+
+- [x] **32.1 Critical — two unauthenticated Server Actions.** A function exported from a
+  `"use server"` module is a PUBLIC HTTP endpoint; two internal helpers had crossed that boundary
+  (`supersedeEmploymentVerifications` — anonymous + destructive; `matchVacancyCandidates` — anonymous
+  nationality-split supply data + raw private storage keys). Both fixed structurally, plus a
+  **build-failing guard test** that walks every Server Action and refuses any unguarded export.
+- [x] **32.2 High (6).** Suspension/erasure/password-reset/2FA-reset now revoke sessions (a suspended
+  employer previously kept PII access for 30 days) · sign-in no longer discloses account state or
+  admins' private moderation notes · **auth rate limits** (the prior "Better Auth handles it"
+  decision was false for Server Actions — unthrottled TOTP was brute-forceable) · dependency patches
+  (Next 16.2.12, Better Auth 1.6.25, nodemailer 9.0.3) · open redirect closed at all four `?next=`.
+- [x] **32.3 Medium (9).** Verified-org gate on invites · gov `ILIKE` employer-register enumeration
+  closed · `SEBENZA_E2E_HTTP` now fails closed in deployed environments · CSP no longer falls back to
+  a Supabase wildcard · API routes get security headers · `trustedOrigins` drops localhost in prod ·
+  anonymous report flood throttled · sign-up enumeration closed. **32.3.5 deliberately made NO
+  change**: `/p/{handle}` ignoring the searchability pause is correct, because the control promises
+  "your existing relationships carry on" — documented at the query.
+- [x] **32.4 The welcome email.** New users heard nothing after verifying. Now a role-aware email
+  fires from `afterEmailVerification`, restating in plain language exactly which consents the seeker
+  granted (read live from the DB) and where to withdraw them — the POPIA §18 moment. Transactional
+  only; no tracking pixel or marketing opt-in, enforced by test.
+- **Known gap recorded:** no user locale is persisted, so all transactional email is English
+  regardless of the language used in the product. Follow-up phase.
+
+---
+
 ## 🚀 DEPLOYMENT CHECKLIST
 
 ### Pre-Launch
@@ -1221,7 +1251,9 @@ HR Practitioner · Electrician · Plumber · Accountant · Nurse · Driver · Bo
 ---
 
 *Last Updated: 2026-07-21*
-*Version: 2.10  synced through **Phase 31 final shape** (data minimisation: ID/passport collection
+*Version: 2.11  synced through **Phase 32** (security remediation: 2 critical + 6 high + 9 medium
+findings closed, build-failing Server-Action guard, welcome email; DPIA R-27). Prior: v2.10 synced
+through **Phase 31 final shape** (data minimisation: ID/passport collection
 dormant by default; ONE nationality picker for everyone with `is_citizen` DERIVED server-side — no
 explicit citizen question; DPIA R-26 + R-26.2a/b). Prior: v2.9 first Phase 31 cut (2026-07-19);
 v2.8 synced through Phase 29 (vacancy seats + the seamless /search invite funnel).
