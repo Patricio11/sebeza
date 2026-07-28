@@ -49,6 +49,7 @@ vi.mock("next/cache", () => ({
 import { getDb } from "@/db/client";
 import * as schema from "@/db/schema";
 import { suspendUser, restoreUser } from "@/lib/admin/moderation";
+import { reset2faForUser } from "@/lib/auth/two-factor";
 
 const db = getDb();
 
@@ -166,5 +167,25 @@ describe("Phase 32.2.1  the DAL fails closed on a stale session", () => {
     // a suspended account.
     const user = await realDal.getSessionUser();
     expect(user).toBeNull();
+  });
+});
+
+describe("Phase 32.2.3  an admin 2FA reset also ends live sessions", () => {
+  test("reset2faForUser revokes the target's sessions", async () => {
+    // An admin resets 2FA exactly when the second factor is suspect
+    // (lost device, suspected compromise). Sessions established under
+    // the OLD second factor must not survive it.
+    await seedSessionFor(TARGET.userId);
+    expect(await sessionCountFor(TARGET.userId)).toBe(1);
+
+    const res = await reset2faForUser({
+      userId: TARGET.userId,
+      reason: "Phase 32 test  lost device, resetting the second factor.",
+    });
+    expect(res.ok, "reset2faForUser should succeed").toBe(true);
+    expect(
+      await sessionCountFor(TARGET.userId),
+      "sessions established under the old second factor must be revoked",
+    ).toBe(0);
   });
 });

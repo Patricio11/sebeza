@@ -66,6 +66,15 @@ export const auth = betterAuth({
     autoSignIn: false,
     minPasswordLength: 10,
     maxPasswordLength: 128,
+    // Phase 32.2.3 (security remediation)  a password reset MUST kill
+    // every other session. Without this, the classic recovery flow
+    // failed at exactly the moment it matters: a user who notices a
+    // compromise and resets their password left the attacker's stolen
+    // cookie working for the rest of its 30-day life. The reset page has
+    // always TOLD the user "you'll be signed out of any other devices"
+    // (app/[locale]/(auth)/reset-password/page.tsx)  so this was a
+    // broken promise as well as a security gap.
+    revokeSessionsOnPasswordReset: true,
     sendResetPassword: async ({ user, url }) => {
       await sendEmail({
         to: user.email,

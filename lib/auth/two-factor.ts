@@ -238,6 +238,13 @@ export async function reset2faForUser(
     .set({ twoFactorEnabled: false })
     .where(eq(schema.appUser.id, user.id));
 
+  // Phase 32.2.3 (security remediation)  end every live session too.
+  // An admin resets 2FA precisely when the second factor is suspect
+  // (lost device, possible compromise); leaving the target's existing
+  // sessions alive would keep any attacker-held cookie working, and
+  // those sessions were established under the OLD second factor.
+  await db.delete(schema.session).where(eq(schema.session.userId, user.id));
+
   await logAccess({
     kind: "account.2fa.reset",
     actor: session.id,

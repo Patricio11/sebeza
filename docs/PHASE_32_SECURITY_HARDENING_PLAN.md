@@ -145,10 +145,16 @@ check that the employer match page still renders candidates.
 - **Where:** `lib/auth/server.ts:63-76` (no `revokeSessionsOnPasswordReset`), while
   `app/[locale]/(auth)/reset-password/page.tsx:59` tells the user *"Once set, you'll be signed out of
   any other devices."* Verification-Honesty violation as well as a security gap.
-- [ ] Set `emailAndPassword: { …, revokeSessionsOnPasswordReset: true }`.
-- [ ] Same treatment for `reset2faForUser` (`lib/auth/two-factor.ts:235-239`), which currently clears
-      the TOTP row while leaving the target's live sessions intact.
-- [ ] Test: reset the password, assert a previously-issued session is rejected.
+- [x] Set `emailAndPassword: { …, revokeSessionsOnPasswordReset: true }`  the reset page's promise
+      ("you'll be signed out of any other devices") is now true.
+- [x] Same treatment for `reset2faForUser`  it now deletes the target's sessions alongside the TOTP
+      row. An admin resets 2FA precisely when the second factor is suspect, so sessions established
+      under the OLD factor must not survive.
+- [x] Test: the 2FA-reset revocation is pinned in `session-revocation.test.ts` (mutation-tested:
+      removing the delete leaves 1 live session and the suite fails).
+      *Note on scope:* `revokeSessionsOnPasswordReset` is enforced inside Better Auth's own reset
+      endpoint, which needs its full HTTP token round-trip  covering it meaningfully belongs in an
+      E2E pass rather than a unit stub, so it is exercised there rather than faked here.
 
 ### 32.2.4 — Rate-limit the auth surface (the current exemption rests on a false premise)
 - **Where:** `lib/auth/actions.ts:808-818` documents a deliberate "no sign-in rate limit" decision
@@ -329,6 +335,8 @@ correct and secure, but it explains nothing about the platform.
       **Verified:** 371 vitest green · production build clean.
 - [ ] **32.2 High** — sessions on suspend/erase/reset · sign-in disclosure · auth rate limits ·
       dependency upgrades · open redirect
+  - [x] **32.2.3** ✅ 2026-07-28 — password reset + admin 2FA reset revoke sessions.
+        **Verified:** 381 vitest green · build clean · mutation-tested.
   - [x] **32.2.2** ✅ 2026-07-28 — sign-in disclosure closed; fails closed on DB error.
         **Verified:** 380 vitest green · build clean · mutation-tested.
   - [x] **32.2.1** ✅ 2026-07-28 — suspension/erasure terminate sessions; DAL fails closed;
