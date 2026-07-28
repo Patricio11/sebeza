@@ -36,7 +36,7 @@
  */
 
 import { z } from "zod";
-import { eq, ilike, sql } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { getDb } from "@/db/client";
 import * as schema from "@/db/schema";
 import { verifyGov } from "@/lib/auth/dal";
@@ -105,10 +105,18 @@ export async function performEmployerLookup(
   const db = getDb();
   const floor = await getSetting<number>("employer_mix_min_placements");
 
-  // Org lookup  EXACT match, case-insensitive on the name (ILIKE
-  // with no wildcards is functionally equality, just case-folded),
-  // exact on the registration number. No partial-match autocomplete;
-  // the input shape itself is part of the no-leaderboard guarantee.
+  // Org lookup  EXACT match, case-insensitive on the name, exact on
+  // the registration number. No partial-match autocomplete; the input
+  // shape itself is part of the no-leaderboard guarantee.
+  //
+  // Phase 32.3.2 (security remediation): this used `ilike(name, orgName)`
+  // with the comment "ILIKE with no wildcards is functionally equality".
+  // The premise was wrong  the WILDCARDS COME FROM THE USER. A gov
+  // account submitting `%` matched the first organisation in the table,
+  // and `A%`, `B%`, … walked the entire register one row per request,
+  // defeating the no-leaderboard guarantee this very comment describes.
+  // `lower(x) = lower(y)` removes pattern semantics altogether, which is
+  // stronger than escaping them (nothing to forget next time).
   const org = await (async () => {
     if (v.orgName) {
       const rows = await db
@@ -118,7 +126,9 @@ export async function performEmployerLookup(
           registrationNumber: schema.organizations.registrationNumber,
         })
         .from(schema.organizations)
-        .where(ilike(schema.organizations.name, v.orgName))
+        .where(
+          sql`lower(${schema.organizations.name}) = lower(${v.orgName})`,
+        )
         .limit(1);
       return rows[0] ?? null;
     }

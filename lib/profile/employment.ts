@@ -29,6 +29,7 @@
  */
 
 import { getDb } from "@/db/client";
+import { escapeLike } from "@/lib/sql/escape-like";
 import * as schema from "@/db/schema";
 import { and, asc, desc, eq, ilike, isNull, or, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
@@ -90,7 +91,12 @@ export async function listEmployerOptions(
     )!,
   ];
   if (trimmed.length > 0) {
-    conditions.push(ilike(schema.organizations.name, `${trimmed}%`));
+    // Phase 32.3.2  escape LIKE metacharacters. This one IS a genuine
+    // prefix search, so the pattern stays  but a seeker typing `%` or
+    // `_` must not turn it into a broad scan.
+    conditions.push(
+      ilike(schema.organizations.name, `${escapeLike(trimmed)}%`),
+    );
   }
   const rows = await db
     .select({

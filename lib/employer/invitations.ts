@@ -5,9 +5,11 @@
  *
  * Same privacy invariant as `lib/employer/vacancies.ts`: every read is
  * scoped by `organizationId` (resolved via the parent vacancy) and
- * every write Server Action calls `verifyEmployer()` then re-checks
- * vacancy ownership via `getMyVacancy()` before mutating. The
- * compliance assertion (a) in 9.8.8 catches regressions.
+ * every write Server Action calls `verifyOrgVerified()` (Phase 32.3.1
+ * — invitations require a VERIFIED org, matching the sibling
+ * seeker-invite path) then re-checks vacancy ownership via
+ * `getMyVacancy()` before mutating. The compliance assertion (a) in
+ * 9.8.8 catches regressions.
  *
  * Consent gate (D5 + 9.8.8 check (b)): a row is only ever written
  * when the seeker had `vacancy_matching` consent in `state='granted'`
@@ -34,7 +36,7 @@ import { createNotification, notifyOrgMembers } from "@/lib/notifications/server
 
 import { getMyVacancy, getMyOrgRole } from "./vacancies";
 import { canEditVacancies } from "./vacancies-types";
-import { verifyEmployer } from "@/lib/auth/dal";
+import { verifyOrgVerified } from "@/lib/auth/dal";
 import { enforce } from "@/lib/rate-limit";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -648,11 +650,31 @@ export async function withdrawInvitation(
 // Helpers
 // ─────────────────────────────────────────────────────────────────────────────
 
+/**
+ * Phase 32.3.1 (security remediation)  invitations require a VERIFIED
+ * organisation, not merely an employer session.
+ *
+ * This used to call `verifyEmployer()` (permissive  it returns
+ * unverified / pending / rejected orgs too), which made the Server
+ * Action strictly WEAKER than its own UI: `/search` only renders the
+ * invite affordance when `verification === "verified"`, so anyone
+ * calling the action directly bypassed a gate the interface enforced.
+ * An unvetted company could create a vacancy and then blast named
+ * invitations at up to 50 seekers per batch under a company name
+ * nobody had checked.
+ *
+ * `verifyOrgVerified()` is what the sibling seeker-invite path has
+ * always used (`lib/employer/seeker-invitations.ts`)  this brings the
+ * two into line. Vacancy CREATION deliberately stays permissive
+ * (`vacancies.ts` keeps its own `requireEditRole`): drafting a role
+ * before verification completes is reasonable onboarding, and nothing
+ * reaches a seeker until an invite is sent.
+ */
 async function requireEditRole(): Promise<
   | { ok: true; orgId: string; userId: string }
   | { ok: false; message: string }
 > {
-  const session = await verifyEmployer();
+  const session = await verifyOrgVerified();
   if (!session.orgId) {
     return { ok: false, message: "No organisation context." };
   }

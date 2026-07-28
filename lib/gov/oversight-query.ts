@@ -108,7 +108,12 @@ export async function oversightLogQuery(
     const orgs = await db
       .select({ id: organizations.id })
       .from(organizations)
-      .where(ilike(organizations.name, opts.employerName.trim()))
+      // Phase 32.3.2  exact + case-insensitive, NOT ilike: a raw `%`
+      // from the caller would otherwise match the first org in the
+      // table and let the register be enumerated one query at a time.
+      .where(
+        sql`lower(${organizations.name}) = lower(${opts.employerName.trim()})`,
+      )
       .limit(1);
     if (orgs[0]) {
       resolvedOrgId = orgs[0].id;

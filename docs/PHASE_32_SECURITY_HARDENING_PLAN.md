@@ -232,14 +232,25 @@ check that the employer match page still renders candidates.
 
 ## 🟡 TASK 32.3 — MEDIUM
 
-- [ ] **32.3.1 Unverified orgs can bulk-invite.** `requireEditRole()` (`lib/employer/invitations.ts:642`)
+- [x] **32.3.1 Unverified orgs can bulk-invite.** ✅ FIXED — `requireEditRole()` in
+      `lib/employer/invitations.ts` now calls `verifyOrgVerified()`, matching the sibling
+      seeker-invite path. **Open Q2 resolved as leaned:** vacancy CREATION stays permissive
+      (`vacancies.ts` keeps its own helper) — drafting before verification is reasonable
+      onboarding, and nothing reaches a seeker until an invite is sent. Original finding: `requireEditRole()` (`lib/employer/invitations.ts:642`)
       uses the permissive `verifyEmployer()`; the sibling seeker-invite path correctly uses
       `verifyOrgVerified()` (`lib/employer/seeker-invitations.ts:96,275,322`). The server action is
       weaker than its own UI gate (`app/[locale]/(public)/search/page.tsx:161-183` requires
       `verification === "verified"`). → switch to `verifyOrgVerified()`. Check whether
       `createVacancy` should follow (drafting a vacancy pre-verification may be intentional —
       **Open Q2**).
-- [ ] **32.3.2 Gov user can enumerate the employer register.** `lib/gov/employer-lookup.ts:121`
+- [x] **32.3.2 Gov user can enumerate the employer register.** ✅ FIXED — both exact-match sites
+      (`employer-lookup.ts`, `oversight-query.ts`) now use `lower(a) = lower(b)`, which removes
+      pattern semantics ENTIRELY rather than escaping them (nothing to forget next time); the one
+      genuine prefix search (`profile/employment.ts` picker) keeps ILIKE but escapes via
+      `escapeLike`. New `tests/integration/gov-lookup-enumeration.test.ts` (4 cases) proves `%`,
+      `A%`, `_` etc. resolve nothing while real names still match case-insensitively.
+      **Mutation-tested:** restoring the old `ilike` query fails 3 of the 4 cases.
+      Original finding: `lib/gov/employer-lookup.ts:121`
       passes raw user input to `ilike()`; submitting `%` (or `A%`, `B%`, …) walks every organisation
       one row at a time, defeating the documented "no partial-match / no leaderboard" guarantee at
       `:108-111`. Same pattern at `lib/gov/oversight-query.ts:111` (which correctly uses `escapeLike`
