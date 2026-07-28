@@ -137,14 +137,35 @@
         "subhead": "Your profile is not searchable until you say it can be. You can revoke consent any time from your privacy centre.",
         "next": "Grant consent & continue",
         "purposes": {
-          "searchability": "Searchability  let employers find me by skill + location",
-          "contact_reveal": "Contact reveal  allow verified employers to request my contact details, audit-logged",
-          "document_sharing": "Document sharing  allow verified employers to request my qualifications",
-          "analytics_aggregate": "Aggregate analytics  count me in national employment statistics (no personal data shared)",
-          "outcomes_research": "Outcomes research (optional)  include me in cohort-level education-to-employment statistics. Never identifies any individual.",
-          "vacancy_matching": "Vacancy invites (optional)  verified employers can flag me for a specific named role"
+          "searchability": "Searchability",
+          "contact_reveal": "Contact reveal",
+          "document_sharing": "Document sharing",
+          "analytics_aggregate": "Aggregate statistics",
+          "outcomes_research": "Outcomes research",
+          "vacancy_matching": "Vacancy invites"
         },
-        "required": "Required for your profile to appear in search results."
+        "purposeDetails": {
+          "searchability": "Let employers find me by skill + location.",
+          "contact_reveal": "Verified employers can request my contact details. Every reveal is audit-logged.",
+          "document_sharing": "Verified employers can request my uploaded qualifications.",
+          "analytics_aggregate": "Count me in national employment statistics. No personal data is shared.",
+          "outcomes_research": "Include me in cohort-level education-to-employment statistics. Never identifies any individual.",
+          "vacancy_matching": "Verified employers can flag me for a specific named role."
+        },
+        "groups": {
+          "employers": "What employers may do",
+          "employersHint": "All three are optional. Every access is verified-employers-only and audit-logged.",
+          "statistics": "Count me in national statistics",
+          "statisticsHint": "Optional. Aggregate-only  never identifies you."
+        },
+        "required": "Required for your profile to appear in search results.",
+        "terms": {
+          "agreePrefix": "I agree to the",
+          "termsLink": "Terms of Service",
+          "and": "and",
+          "privacyLink": "Privacy Policy",
+          "hint": "The Terms cover your account + acceptable use. Consent choices above stay separately revocable from your privacy centre."
+        }
       },
       "step3": {
         "heading": "Your first profile fields",

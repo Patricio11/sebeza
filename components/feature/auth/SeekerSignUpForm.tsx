@@ -3,7 +3,7 @@
 import { useMemo, useState, useTransition } from "react";
 import { useSessionDraft } from "@/lib/hooks/useSessionDraft";
 import { useTranslations } from "next-intl";
-import { useRouter } from "@/i18n/navigation";
+import { Link, useRouter } from "@/i18n/navigation";
 import { TextField, SelectField } from "@/components/ui/FormField";
 import { PasswordField } from "@/components/ui/PasswordField";
 import { Button } from "@/components/ui/Button";
@@ -54,9 +54,9 @@ const PURPOSE_ONBOARDING_EXPLAINER: Partial<Record<ConsentPurpose, string>> = {
 };
 
 /**
- * ALLOWLIST of the purposes that render at sign-up step 2. Everything
- * else in CONSENT_PURPOSES is granted later, in context, from the
- * privacy centre / account surfaces:
+ * ALLOWLIST (grouped) of the purposes that render at sign-up step 2.
+ * Everything else in CONSENT_PURPOSES is granted later, in context,
+ * from the privacy centre / account surfaces:
  *
  *   - messaging_channel_sms / _whatsapp (Phase 11.4.4 D2)  granted
  *     alongside phone verification on /dashboard/account; asking
@@ -66,27 +66,41 @@ const PURPOSE_ONBOARDING_EXPLAINER: Partial<Record<ConsentPurpose, string>> = {
  *
  * WHY AN ALLOWLIST (2026-07-02, after the same bug twice): each entry
  * here must have a matching label in en.json under
- * `auth.seekerSignUp.step2.purposes.<purpose>`  next-intl renders
- * the RAW KEY for a missing one (a previous new purpose leaked
- * through the old blocklist and shipped as
+ * `auth.seekerSignUp.step2.purposes.<purpose>` AND
+ * `...step2.purposeDetails.<purpose>`  next-intl renders the RAW
+ * KEY for a missing one (a previous new purpose leaked through the
+ * old blocklist and shipped as
  * "auth.seekerSignUp.step2.purposes.announcements" on production).
  * With an allowlist a future purpose FAILS SAFE: it simply doesn't
  * appear at sign-up until someone deliberately adds it here + its
- * catalog label in the same commit. The consents state map still
+ * catalog labels in the same commit. The consents state map still
  * carries every purpose (non-listed ones stay false; no row written).
+ *
+ * WHY GROUPS (founder review, 2026-07-02): seven flat checkboxes read
+ * as bureaucracy. Grouping into "what employers may do" + "count me
+ * in national statistics" makes the screen read as two decisions
+ * while keeping every purpose individually grantable  a single
+ * blanket T&C checkbox was explicitly rejected (POPIA consent must
+ * be "voluntary, specific and informed"; bundled consent is the
+ * classic invalid pattern + the per-purpose gates depend on granular
+ * rows). See docs/SIGNUP_CONSENT_REGROUP_PLAN.md.
  */
-const SIGN_UP_PURPOSE_ALLOWLIST: readonly ConsentPurpose[] = [
-  "searchability",
-  "contact_reveal",
-  "document_sharing",
-  "analytics_aggregate",
-  "outcomes_research",
-  "vacancy_matching",
+const SIGN_UP_CONSENT_GROUPS: ReadonlyArray<{
+  /** en.json key under `step2.groups`, or null for the ungrouped
+   *  required row at the top. */
+  groupKey: "employers" | "statistics" | null;
+  purposes: readonly ConsentPurpose[];
+}> = [
+  { groupKey: null, purposes: ["searchability"] },
+  {
+    groupKey: "employers",
+    purposes: ["contact_reveal", "document_sharing", "vacancy_matching"],
+  },
+  {
+    groupKey: "statistics",
+    purposes: ["analytics_aggregate", "outcomes_research"],
+  },
 ];
-
-const SIGN_UP_CONSENT_PURPOSES = CONSENT_PURPOSES.filter((p) =>
-  SIGN_UP_PURPOSE_ALLOWLIST.includes(p),
-);
 
 interface AcademicState {
   isStudent: boolean;
@@ -132,6 +146,13 @@ interface FormState {
   passwordConfirm: string;
   // Step 2
   consents: Record<ConsentPurpose, boolean>;
+  /** Terms-of-Service + Privacy Policy acceptance  a CONTRACT
+   *  acceptance, deliberately distinct from the granular POPIA
+   *  consents above (bundling those into one T&C tick would be
+   *  invalid consent  see docs/SIGNUP_CONSENT_REGROUP_PLAN.md).
+   *  Gates the step-2 Continue button; re-checked server-side via
+   *  z.literal(true). */
+  termsAccepted: boolean;
   // Step 3
   profession: string;
   province: string;
@@ -174,6 +195,7 @@ const initialState: FormState = {
   consents: Object.fromEntries(
     CONSENT_PURPOSES.map((p) => [p, REQUIRED_FOR_SEARCHABILITY.includes(p)]),
   ) as Record<ConsentPurpose, boolean>,
+  termsAccepted: false,
   profession: "",
   province: "",
   status: "open_to_work",
@@ -265,6 +287,7 @@ export function SeekerSignUpForm({
   const tCommon = useTranslations("auth.common");
   const tStatus = useTranslations("status");
   const tPurposes = useTranslations("auth.seekerSignUp.step2.purposes");
+  const tDetails = useTranslations("auth.seekerSignUp.step2.purposeDetails");
 
   // Build the persistable slice fresh each render. Passwords are
   // NEVER included  even though sessionStorage is tab-scoped, the
@@ -278,6 +301,7 @@ export function SeekerSignUpForm({
       dateOfBirth: state.dateOfBirth,
       nationality: state.nationality,
       consents: state.consents,
+      termsAccepted: state.termsAccepted,
       profession: state.profession,
       province: state.province,
       status: state.status,
@@ -366,6 +390,14 @@ export function SeekerSignUpForm({
       goto(2);
       return;
     }
+    // The step-2 Continue button already gates on this; the check here
+    // narrows the boolean to the literal `true` the action schema
+    // requires + covers any path that skips the button.
+    if (!state.termsAccepted) {
+      setError("Please accept the Terms of Service to continue.");
+      goto(2);
+      return;
+    }
 
     startTransition(async () => {
       // Phase 9.22  resolve the employer block. The combobox value is
@@ -438,6 +470,7 @@ export function SeekerSignUpForm({
             nationality: state.nationality,
             password: state.password,
             grantedConsents,
+            termsAccepted: true,
             profession: state.profession,
             province: state.province,
             status: state.status,
@@ -452,6 +485,7 @@ export function SeekerSignUpForm({
             nationality: state.nationality,
             password: state.password,
             grantedConsents,
+            termsAccepted: true,
             profession: state.profession,
             province: state.province,
             status: state.status,
@@ -619,71 +653,123 @@ export function SeekerSignUpForm({
 
       {state.step === 2 && (
         <div className="flex flex-col gap-6">
-          <ul className="space-y-3">
-            {SIGN_UP_CONSENT_PURPOSES.map((purpose) => {
-              const required = REQUIRED_FOR_SEARCHABILITY.includes(purpose);
-              // Per-purpose onboarding explainer (D8 source text for
-              // vacancy_matching). Whitelist  not every purpose gets a
-              // sub-paragraph; the short label is enough for the
-              // already-familiar ones. Added at 9.8.3 because Sebenza
-              // had not previously asked seekers for invite-channel
-              // consent and a one-line label can't carry the lawful
-              // basis. Renders as a tap-to-expand `<details>` on
-              // mobile, always visible on md+  same pattern as the
-              // /dashboard/privacy explainer.
-              const explainer = PURPOSE_ONBOARDING_EXPLAINER[purpose];
-              return (
-                <li
-                  key={purpose}
-                  className="rounded-[var(--radius-sm)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-4"
-                >
-                  <Checkbox
-                    checked={state.consents[purpose]}
-                    disabled={required || pending}
-                    onChange={(v) =>
-                      setState({
-                        ...state,
-                        consents: {
-                          ...state.consents,
-                          [purpose]: v,
-                        },
-                      })
-                    }
-                    label={
-                      <>
-                        <span className="font-medium text-[color:var(--color-ink)]">
-                          {tPurposes(purpose)}
-                        </span>
-                        {required && (
-                          <span className="ml-2 inline-block rounded-[var(--radius-pill)] border border-[color:var(--color-brand)] bg-[color:var(--color-brand-tint)] px-2 py-0.5 text-[0.6rem] uppercase tracking-[0.18em] text-[color:var(--color-brand-strong)]">
-                            Required
-                          </span>
-                        )}
-                        {required && (
-                          <span className="mt-1 block text-xs text-[color:var(--color-ink-soft)]">
-                            {t("step2.required")}
-                          </span>
-                        )}
-                        {explainer && (
+          {SIGN_UP_CONSENT_GROUPS.map((group) => (
+            <section key={group.groupKey ?? "required"}>
+              {group.groupKey && (
+                <header className="mb-2">
+                  <h3 className="text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--color-brand-strong)]">
+                    {t(`step2.groups.${group.groupKey}`)}
+                  </h3>
+                  <p className="mt-0.5 text-xs text-[color:var(--color-ink-soft)]">
+                    {t(`step2.groups.${group.groupKey}Hint`)}
+                  </p>
+                </header>
+              )}
+              <ul className="space-y-2">
+                {group.purposes.map((purpose) => {
+                  const required =
+                    REQUIRED_FOR_SEARCHABILITY.includes(purpose);
+                  // Per-purpose onboarding explainer (D8 source text
+                  // for vacancy_matching  locked plan copy). Renders
+                  // as tap-to-expand on mobile, always visible on md+.
+                  const explainer = PURPOSE_ONBOARDING_EXPLAINER[purpose];
+                  return (
+                    <li
+                      key={purpose}
+                      className="rounded-[var(--radius-sm)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-4"
+                    >
+                      <Checkbox
+                        checked={state.consents[purpose]}
+                        disabled={required || pending}
+                        onChange={(v) =>
+                          setState({
+                            ...state,
+                            consents: {
+                              ...state.consents,
+                              [purpose]: v,
+                            },
+                          })
+                        }
+                        label={
                           <>
-                            <details className="mt-2 text-xs text-[color:var(--color-ink-soft)] md:hidden">
-                              <summary className="cursor-pointer select-none rounded-[var(--radius-pill)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface-sunk)] px-2.5 py-1 text-[0.7rem] uppercase tracking-[0.18em] text-[color:var(--color-ink)]">
-                                Read the full explainer
-                              </summary>
-                              <p className="mt-2">{explainer}</p>
-                            </details>
-                            <span className="mt-2 hidden text-xs text-[color:var(--color-ink-soft)] md:block">
-                              {explainer}
+                            <span className="font-medium text-[color:var(--color-ink)]">
+                              {tPurposes(purpose)}
                             </span>
+                            {required && (
+                              <span className="ml-2 inline-block rounded-[var(--radius-pill)] border border-[color:var(--color-brand)] bg-[color:var(--color-brand-tint)] px-2 py-0.5 text-[0.6rem] uppercase tracking-[0.18em] text-[color:var(--color-brand-strong)]">
+                                Required
+                              </span>
+                            )}
+                            <span className="mt-0.5 block text-xs text-[color:var(--color-ink-soft)]">
+                              {tDetails(purpose)}
+                            </span>
+                            {required && (
+                              <span className="mt-1 block text-xs text-[color:var(--color-ink-soft)]">
+                                {t("step2.required")}
+                              </span>
+                            )}
+                            {explainer && (
+                              <>
+                                <details className="mt-2 text-xs text-[color:var(--color-ink-soft)] md:hidden">
+                                  <summary className="cursor-pointer select-none rounded-[var(--radius-pill)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface-sunk)] px-2.5 py-1 text-[0.7rem] uppercase tracking-[0.18em] text-[color:var(--color-ink)]">
+                                    Read the full explainer
+                                  </summary>
+                                  <p className="mt-2">{explainer}</p>
+                                </details>
+                                <span className="mt-2 hidden text-xs text-[color:var(--color-ink-soft)] md:block">
+                                  {explainer}
+                                </span>
+                              </>
+                            )}
                           </>
-                        )}
-                      </>
-                    }
-                  />
-                </li>
-              );
-            })}
-          </ul>
+                        }
+                      />
+                    </li>
+                  );
+                })}
+              </ul>
+            </section>
+          ))}
+
+          {/* Terms-of-Service acceptance  a CONTRACT acceptance,
+              deliberately separate from the POPIA consents above.
+              Gates the Continue button; the server action re-checks
+              via z.literal(true). */}
+          <div className="rounded-[var(--radius-sm)] border-2 border-[color:var(--color-ink)] bg-[color:var(--color-surface)] p-4">
+            <Checkbox
+              checked={state.termsAccepted}
+              disabled={pending}
+              onChange={(v) => setState({ ...state, termsAccepted: v })}
+              label={
+                <>
+                  <span className="font-medium text-[color:var(--color-ink)]">
+                    {t("step2.terms.agreePrefix")}{" "}
+                    <Link
+                      href="/terms"
+                      target="_blank"
+                      rel="noopener"
+                      className="underline underline-offset-2 hover:text-[color:var(--color-brand-strong)]"
+                    >
+                      {t("step2.terms.termsLink")}
+                    </Link>{" "}
+                    {t("step2.terms.and")}{" "}
+                    <Link
+                      href="/privacy"
+                      target="_blank"
+                      rel="noopener"
+                      className="underline underline-offset-2 hover:text-[color:var(--color-brand-strong)]"
+                    >
+                      {t("step2.terms.privacyLink")}
+                    </Link>
+                  </span>
+                  <span className="mt-0.5 block text-xs text-[color:var(--color-ink-soft)]">
+                    {t("step2.terms.hint")}
+                  </span>
+                </>
+              }
+            />
+          </div>
+
           <p className="rounded-[var(--radius-sm)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface-sunk)] px-4 py-3 text-xs text-[color:var(--color-ink-soft)]">
             Granted consents are stored with the version of the consent text
             you saw and the timestamp. You can revoke any of them from your
@@ -704,7 +790,7 @@ export function SeekerSignUpForm({
               variant="primary"
               size="lg"
               onClick={() => goto(3)}
-              disabled={pending}
+              disabled={pending || !state.termsAccepted}
             >
               {t("step2.next")}
             </Button>

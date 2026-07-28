@@ -103,6 +103,12 @@ const seekerSignUpSchema = z.object({
   password: z.string().min(10).max(128),
   // Consent purposes the user granted in step 2.
   grantedConsents: z.array(z.enum(CONSENT_PURPOSES)).min(1),
+  /** Terms-of-Service + Privacy Policy acceptance  a CONTRACT
+   *  acceptance, distinct from the granular POPIA consents above
+   *  (see docs/SIGNUP_CONSENT_REGROUP_PLAN.md). z.literal(true)
+   *  means a bypassed-form payload without it is refused outright;
+   *  acceptance evidence lands in the auth.signup audit meta. */
+  termsAccepted: z.literal(true),
   // Step 3  first profile fields
   profession: z.string().min(2),
   province: z.string().min(2),
@@ -576,7 +582,13 @@ export async function signUpSeeker(
     await logAccess({
       kind: "auth.signup",
       actor: user.id,
-      meta: { role: "seeker", consents: v.grantedConsents },
+      meta: {
+        role: "seeker",
+        consents: v.grantedConsents,
+        // Contract-acceptance evidence (schema guarantees true; the
+        // timestamp is what future disputes need).
+        termsAcceptedAt: new Date().toISOString(),
+      },
     });
 
     return ok({ next: "/verify-email" });
