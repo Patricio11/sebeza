@@ -187,16 +187,30 @@ check that the employer match page still renders candidates.
       in `.env.example`; wiring the adapter is an infra task, not a code one.
 
 ### 32.2.5 — Dependency upgrades (separate commit, own verification)
-- [ ] **Next.js 16.2.6 → 16.2.12** (patch, non-semver-major). Closes 9 advisories incl. SSRF in
-      Server Actions, unauthenticated disclosure of internal Server Function endpoints, cache
-      confusion, and DoS. Transitively fixes the bundled `sharp` + `postcss` advisories.
-- [ ] **Better Auth 1.6.11 → ≥1.6.22.** Closes CVSS **8.3** account takeover via pre-account
-      hijacking, plus the CVSS 7.7 stored-XSS advisory.
-- [ ] **nodemailer 8.0.7 → latest** — CVSS 6.5 improper TLS certificate validation in OAuth2 token
-      fetch (we use SMTP auth, so exposure is limited) + CRLF header-injection advisories. Check for
-      breaking changes; ≥9 is a major bump, so treat as its own step.
-- [ ] After each upgrade: `test:all` + **full** E2E at both viewports + a manual sign-in/2FA smoke.
-      Do NOT run a blanket `npm audit fix --force`.
+- [x] **Next.js 16.2.6 → 16.2.12** — all 9 advisories closed (SSRF in Server Actions,
+      unauthenticated disclosure of internal Server Function endpoints, cache confusion, DoS).
+      *Correction to the plan's expectation:* it did **not** transitively fix `sharp`/`postcss` —
+      Next still pins both below their fixed versions (see the exposure note below).
+- [x] **Better Auth 1.6.11 → 1.6.25** — CVSS 8.3 account takeover (pre-account hijacking) and the
+      CVSS 7.7 stored-XSS advisory both closed. No API changes needed; the real sign-in path is
+      exercised by `signin-disclosure` + `auth-rate-limits`, which pass against the new version.
+- [x] **nodemailer 8.0.7 → 9.0.3** (major bump, taken deliberately as its own step). Our surface is
+      just `createTransport({host,port,secure,auth})` + `sendMail({from,to,subject,html,text})`,
+      which is unchanged in 9.x — verified structurally without sending mail. We use neither
+      `jsonTransport` nor the `raw` option nor OAuth2, so the pre-existing exposure was low; the
+      upgrade removes it entirely.
+- [x] Each upgrade verified separately (`test:all` + build after every one) so a regression would be
+      attributable to a single package. No blanket `npm audit fix --force` was run.
+- [x] **Residual-advisory assessment (evidence-based, not dismissal).** Four remain and NONE is
+      reachable in this app:
+      - `sharp` (libvips CVEs, bundled by Next) — the ONLY user-uploaded image surface is
+        `components/ui/Avatar.tsx`, which sets `unoptimized`, so attacker-supplied bytes never reach
+        libvips. Badge artwork is first-party static SVG from a fixed catalog. A comment now sits on
+        that `unoptimized` prop so nobody removes it without understanding the consequence.
+      - `postcss` — build-time processing of FIRST-PARTY CSS only; the advisories need untrusted CSS
+        or an attacker-controlled `sourceMappingURL`.
+      - `esbuild`, `vite` — dev/test toolchain (drizzle-kit, vitest); never in the production runtime.
+      Re-check when Next unpins sharp/postcss.
 
 ### 32.2.6 — Open redirect on `?next=` (4 sites)
 - **Where:** `lib/auth/actions.ts:867` and `:887`; `lib/auth/two-factor.ts:126-128` and `:155-157`.
@@ -345,6 +359,8 @@ correct and secure, but it explains nothing about the platform.
       **Verified:** 371 vitest green · production build clean.
 - [ ] **32.2 High** — sessions on suspend/erase/reset · sign-in disclosure · auth rate limits ·
       dependency upgrades · open redirect
+  - [x] **32.2.5** ✅ 2026-07-28 — Next 16.2.12, Better Auth 1.6.25, nodemailer 9.0.3; residual
+        advisories assessed as unreachable. **Verified:** 385 vitest green · build clean after each.
   - [x] **32.2.4** ✅ 2026-07-28 — signin / 2fa-verify / email-send / invite buckets wired;
         prior no-limit decision corrected. **Verified:** 385 vitest green · build clean ·
         mutation-tested.

@@ -90,6 +90,14 @@ export function Avatar({
           width={dims}
           height={dims}
           className="size-full object-cover"
+          // SECURITY (Phase 32.2.5)  keep `unoptimized`. This is the ONLY
+          // place user-uploaded image bytes are rendered, and removing
+          // this would route them through Next's image optimizer, i.e.
+          // through `sharp`/libvips  which carries open CVEs
+          // (GHSA-f88m-g3jw-g9cj) that Next has not yet unpinned. As long
+          // as we don't optimize attacker-supplied images, those CVEs are
+          // unreachable. If you ever need optimization here, upgrade
+          // sharp past 0.35.0 first.
           unoptimized
         />
       ) : (
