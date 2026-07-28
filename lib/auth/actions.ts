@@ -39,7 +39,7 @@ import {
 } from "@/lib/consent";
 import { validateDob } from "@/lib/auth/id-validation";
 import { safeInternalPath } from "@/lib/nav/safe-internal-path";
-import { enforce } from "@/lib/rate-limit";
+import { enforce, peek } from "@/lib/rate-limit";
 import { clientIpKey, emailKey } from "@/lib/rate-limit/client-ip";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -976,8 +976,15 @@ export async function signIn(
   // The DoS concern that motivated that decision was right, and is
   // preserved: the key is the CLIENT IP, never the email, so nobody can
   // lock a victim out of their own account by guessing at their address.
+  //
+  // 32.2.4b  the budget counts FAILED attempts only (`peek` here,
+  // `enforce` in the catch). Counting successes locked out honest
+  // users: one office, campus lab or CGNAT'd mobile network shares an
+  // IP, and 20 correct sign-ins in 10 minutes is a normal morning
+  // there  while a credential-stuffing run is nothing BUT failures,
+  // so the attacker's budget burns just as fast as before.
   const ipKey = await clientIpKey();
-  const signInLimit = await enforce("signin", ipKey);
+  const signInLimit = await peek("signin", ipKey);
   if (!signInLimit.ok) {
     return fail("Too many sign-in attempts. Please wait a few minutes and try again.");
   }
@@ -1063,6 +1070,8 @@ export async function signIn(
     // Phase 32.2.6  see above: protocol-relative targets must not pass.
     return ok({ next: safeInternalPath(v.next, home) });
   } catch (e) {
+    // A rejected credential is what the budget counts (32.2.4b).
+    await enforce("signin", ipKey);
     return fail("Email or password is incorrect.");
   }
 }

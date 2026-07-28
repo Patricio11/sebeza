@@ -45,4 +45,17 @@ export async function enforce(
   return limiter.check(bucket, key);
 }
 
+/**
+ * Phase 32.2.4b  read the budget without spending it. For buckets
+ * where only FAILURES should count (sign-in, 2FA): `peek` at the top
+ * of the action, `enforce` on the failure path. See RateLimiter.peek.
+ */
+export async function peek(
+  bucket: BucketName,
+  key: string,
+): Promise<RateLimitResult> {
+  const limiter = getRateLimiter();
+  return limiter.peek(bucket, key);
+}
+
 export type { RateLimitResult, BucketName } from "./types";

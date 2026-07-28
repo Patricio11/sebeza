@@ -84,6 +84,41 @@ describe("Phase 32.2.4  sign-in is throttled per IP", () => {
   });
 });
 
+describe("Phase 32.2.4b  the budget counts FAILURES, not sign-ins", () => {
+  test("successful sign-ins never consume the allowance (shared-IP offices, CGNAT)", async () => {
+    // The first shipped version of 32.2.4 consumed a slot on EVERY
+    // attempt, so the 21st person signing in correctly from one
+    // office / campus / CGNAT'd mobile IP inside 10 minutes was locked
+    // out. Full E2E caught it (serial suite = one IP = one budget).
+    // Correct sign-ins must be free; only rejected credentials spend.
+    for (let i = 0; i < BUCKETS.signin.limit + 3; i++) {
+      const r = await signIn({
+        email: "andile-z@example.co.za",
+        password: "sebenza-dev-2026",
+      });
+      expect(r.ok, `successful sign-in #${i + 1} must not be throttled`).toBe(
+        true,
+      );
+    }
+  });
+
+  test("failures still spend even when mixed with successes", async () => {
+    for (let i = 0; i < BUCKETS.signin.limit; i++) {
+      await signIn({ email: "andile-z@example.co.za", password: `x-${i}` });
+    }
+    // Budget gone: now even the correct password is refused from this
+    // IP — the attacker-slowdown property 32.2.4 exists for.
+    const blocked = await signIn({
+      email: "andile-z@example.co.za",
+      password: "sebenza-dev-2026",
+    });
+    expect(blocked.ok).toBe(false);
+    if (!blocked.ok) {
+      expect(blocked.message.toLowerCase()).toContain("too many");
+    }
+  });
+});
+
 describe("Phase 32.2.4  TOTP verification is throttled", () => {
   test("codes are refused once the (much tighter) budget is spent", async () => {
     const budget = BUCKETS["2fa-verify"].limit;

@@ -109,6 +109,31 @@ describe("isolation", () => {
   });
 });
 
+describe("peek (Phase 32.2.4b — read without spending)", () => {
+  test("peek never consumes: N peeks leave the full budget intact", async () => {
+    const key = freshKey();
+    for (let i = 0; i < BUCKETS.upload.limit * 3; i++) {
+      const p = await memoryRateLimiter.peek("upload", key);
+      expect(p.ok).toBe(true);
+      expect(p.remaining).toBe(BUCKETS.upload.limit);
+    }
+    // The budget is still whole for a real consumer.
+    const r = await memoryRateLimiter.check("upload", key);
+    expect(r.remaining).toBe(BUCKETS.upload.limit - 1);
+  });
+
+  test("peek reports exhaustion identically to check", async () => {
+    const key = freshKey();
+    for (let i = 0; i < BUCKETS.upload.limit; i++) {
+      await memoryRateLimiter.check("upload", key);
+    }
+    const p = await memoryRateLimiter.peek("upload", key);
+    expect(p.ok).toBe(false);
+    expect(p.remaining).toBe(0);
+    expect(p.resetAt).toBe(T0 + BUCKETS.upload.windowSeconds * 1000);
+  });
+});
+
 describe("bucket budget contract (DPIA R8 documented values)", () => {
   test("reveal 20/hour · upload 5/10min · search 30/min", () => {
     expect(BUCKETS.reveal).toEqual({ limit: 20, windowSeconds: 3600 });

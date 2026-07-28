@@ -30,6 +30,20 @@ export interface RateLimiter {
    * pre-registered budget by name.
    */
   check(bucket: BucketName, key: string): Promise<RateLimitResult>;
+  /**
+   * Phase 32.2.4b  report the remaining budget WITHOUT consuming any
+   * of it.
+   *
+   * Needed for the auth buckets, where the thing worth counting is a
+   * FAILED attempt. Counting successes too makes the limiter punish
+   * the honest case: every seeker at one employer, campus lab, library
+   * or internet café shares a public IP, and South African mobile
+   * networks put whole cities behind carrier-grade NAT  so a
+   * success-consuming counter locks out real users long before it
+   * inconveniences an attacker. Call sites `peek` first, then `check`
+   * only on the failure path.
+   */
+  peek(bucket: BucketName, key: string): Promise<RateLimitResult>;
 }
 
 export const BUCKETS = {

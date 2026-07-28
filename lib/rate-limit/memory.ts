@@ -31,35 +31,48 @@ function gc(now: number, windowMs: number, entry: Entry): void {
   }
 }
 
+function snapshot(
+  bucket: BucketName,
+  key: string,
+  consume: boolean,
+): RateLimitResult {
+  const cfg = BUCKETS[bucket];
+  const now = Date.now();
+  const windowMs = cfg.windowSeconds * 1000;
+  const compoundKey = `${bucket}:${key}`;
+  const entry = store.get(compoundKey) ?? { hits: [] };
+  gc(now, windowMs, entry);
+
+  const remainingBefore = cfg.limit - entry.hits.length;
+  if (remainingBefore <= 0) {
+    const oldest = entry.hits[0] ?? now;
+    return {
+      ok: false,
+      remaining: 0,
+      limit: cfg.limit,
+      resetAt: oldest + windowMs,
+    };
+  }
+
+  if (consume) {
+    entry.hits.push(now);
+    store.set(compoundKey, entry);
+  }
+  return {
+    ok: true,
+    remaining: consume ? remainingBefore - 1 : remainingBefore,
+    limit: cfg.limit,
+    resetAt: now + windowMs,
+  };
+}
+
 export const memoryRateLimiter: RateLimiter = {
   name: "memory",
   async check(bucket: BucketName, key: string): Promise<RateLimitResult> {
-    const cfg = BUCKETS[bucket];
-    const now = Date.now();
-    const windowMs = cfg.windowSeconds * 1000;
-    const compoundKey = `${bucket}:${key}`;
-    const entry = store.get(compoundKey) ?? { hits: [] };
-    gc(now, windowMs, entry);
-
-    const remainingBefore = cfg.limit - entry.hits.length;
-    if (remainingBefore <= 0) {
-      const oldest = entry.hits[0] ?? now;
-      return {
-        ok: false,
-        remaining: 0,
-        limit: cfg.limit,
-        resetAt: oldest + windowMs,
-      };
-    }
-
-    entry.hits.push(now);
-    store.set(compoundKey, entry);
-    return {
-      ok: true,
-      remaining: remainingBefore - 1,
-      limit: cfg.limit,
-      resetAt: now + windowMs,
-    };
+    return snapshot(bucket, key, true);
+  },
+  async peek(bucket: BucketName, key: string): Promise<RateLimitResult> {
+    return snapshot(bucket, key, false);
   },
 };
 

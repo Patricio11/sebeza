@@ -20,7 +20,7 @@ import { z } from "zod";
 import { auth } from "./server";
 import { roleHome } from "./guard";
 import { safeInternalPath } from "@/lib/nav/safe-internal-path";
-import { enforce } from "@/lib/rate-limit";
+import { enforce, peek } from "@/lib/rate-limit";
 import { clientIpKey } from "@/lib/rate-limit/client-ip";
 import { verifyAdmin } from "./dal";
 import { getDb } from "@/db/client";
@@ -127,7 +127,13 @@ export async function verifyTotp(
   // through `auth.handler`  this action calls `auth.api.verifyTOTP()`
   // directly, so it never applied. Keyed per IP (the pending-2FA cookie
   // identifies the account, but the IP is what an attacker must burn).
-  const limit = await enforce("2fa-verify", await clientIpKey());
+  // 32.2.4b  only FAILED attempts consume budget (`peek` here,
+  // `enforce` in the catch): a correct code is honest use, and several
+  // colleagues completing 2FA behind one office/CGNAT IP must not burn
+  // each other's allowance. Guessing is all failures, so the brute-force
+  // math is unchanged.
+  const ipKey = await clientIpKey();
+  const limit = await peek("2fa-verify", ipKey);
   if (!limit.ok) {
     return fail(
       "Too many attempts. Wait a few minutes, then try the next code your app shows.",
@@ -150,6 +156,7 @@ export async function verifyTotp(
     const next = safeInternalPath(parsed.data.next, roleHome(role));
     return ok({ next });
   } catch {
+    await enforce("2fa-verify", ipKey);
     return fail("That code didn't match. Try the next one your app shows.");
   }
 }
@@ -174,7 +181,13 @@ export async function verifyBackupCode(
   // through `auth.handler`  this action calls `auth.api.verifyTOTP()`
   // directly, so it never applied. Keyed per IP (the pending-2FA cookie
   // identifies the account, but the IP is what an attacker must burn).
-  const limit = await enforce("2fa-verify", await clientIpKey());
+  // 32.2.4b  only FAILED attempts consume budget (`peek` here,
+  // `enforce` in the catch): a correct code is honest use, and several
+  // colleagues completing 2FA behind one office/CGNAT IP must not burn
+  // each other's allowance. Guessing is all failures, so the brute-force
+  // math is unchanged.
+  const ipKey = await clientIpKey();
+  const limit = await peek("2fa-verify", ipKey);
   if (!limit.ok) {
     return fail(
       "Too many attempts. Wait a few minutes, then try the next code your app shows.",
@@ -197,6 +210,7 @@ export async function verifyBackupCode(
     const next = safeInternalPath(parsed.data.next, roleHome(role));
     return ok({ next });
   } catch {
+    await enforce("2fa-verify", ipKey);
     return fail("Backup code didn't match. Try again or contact support.");
   }
 }
