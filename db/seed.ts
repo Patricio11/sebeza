@@ -1295,6 +1295,36 @@ async function seedPhase9_8Vacancies() {
       createdAt: new Date(now - 60 * day),
       closedAt: new Date(now - 7 * day),
     },
+    // Phase 34  Self Apply showcase vacancy. Toggle ON with a FIXED
+    // (deliberately memorable, demo-only) token so the E2E suite and
+    // the showcase walkthrough have a stable public URL:
+    //   /apply/sa-demo-it-support-2026-fixed01
+    // Only reachable while `feature_flag_vacancy_self_apply` is also ON
+    // (ships dark), so seeding this row changes nothing user-visible
+    // until the admin flips the platform flag. Skills chosen so most
+    // seeded seekers lack at least one  the congrats skills-gap nudge
+    // has something honest to say.
+    {
+      id: id("vac", "it-support-technician"),
+      organizationId: orgId,
+      createdByUserId: recruiterUserId,
+      title: "IT Support Technician",
+      professionSlug: "help-desk",
+      provinceSlug: "gauteng",
+      citySlug: null,
+      skillSlugs: ["customer-service", "excel", "sql"],
+      seniority: "Intermediate",
+      salaryBand: "R 240k300k",
+      description:
+        "First-line IT support for the Sandton campus. You'll troubleshoot workstation + access issues, log and triage tickets, and walk non-technical colleagues through fixes with patience. Shift roster includes one Saturday a month.",
+      documentsRequired: [],
+      status: "open" as const,
+      inviteExpiryDays: 14,
+      selfApplyEnabled: true,
+      selfApplyToken: "sa-demo-it-support-2026-fixed01",
+      salaryVisibleToApplicants: true,
+      createdAt: new Date(now - 3 * day),
+    },
   ]);
 
   // Retroactively link the three BSc CS cohort placements (01, 02,

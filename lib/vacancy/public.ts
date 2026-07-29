@@ -1,5 +1,5 @@
 /**
- * Phase 34  Self Apply: the PUBLIC vacancy read seam
+ * Phase 34 — Self Apply: the PUBLIC vacancy read seam
  * (docs/PHASE_34_SELF_APPLY_PLAN.md).
  *
  * This module is the deliberate, documented carve-out of the 9.8.8
@@ -16,7 +16,7 @@
  *     be conflated by a refactor (D2).
  *   - Every read re-checks ALL THREE gates: platform flag, per-vacancy
  *     toggle, vacancy status = open. A typed `unavailable` reason comes
- *     back for every miss  and the page renders the SAME calm panel
+ *     back for every miss — and the page renders the SAME calm panel
  *     for all of them, so a probing client cannot distinguish
  *     bad-token from disabled from closed (no enumeration).
  *   - Plain module (NOT "use server"): these functions are only
@@ -39,7 +39,7 @@ export function mintSelfApplyToken(): string {
 }
 
 /**
- * D4  the exact disclosure the seeker confirms when applying. The
+ * D4 — the exact disclosure the seeker confirms when applying. The
  * dialog renders the i18n rendition; THIS canonical en string + version
  * go into the audit meta so we can always prove what was agreed to.
  * Bump the version whenever the wording materially changes.
@@ -49,22 +49,22 @@ export function selfApplyDisclosure(orgName: string): string {
   return `Applying shares your profile with ${orgName} for this role. They can view your profile and contact you about this vacancy through Sebenza.`;
 }
 
-/** The anonymous public subset. NO salaryBand field  see module doc. */
+/** The anonymous public subset. NO salaryBand field — see module doc. */
 export interface PublicVacancy {
   token: string;
   title: string;
   orgName: string;
-  /** Honest badge  organizations.verification as-is. */
+  /** Honest badge — organizations.verification as-is. */
   orgVerification: string;
   professionSlug: string;
-  /** Display-ready ("Chef")  resolved from the live professions table. */
+  /** Display-ready ("Chef") — resolved from the live professions table. */
   professionLabel: string;
   /** NULL = "Any province (remote / hybrid)". */
   provinceSlug: string | null;
   citySlug: string | null;
-  /** Display-ready location ("Cape Town, Western Cape" / "Any province  Remote"). */
+  /** Display-ready location ("Cape Town, Western Cape" / "Any province — Remote"). */
   locationLabel: string;
-  /** Display-ready skills  labels from the live skills table. */
+  /** Display-ready skills — labels from the live skills table. */
   skills: { slug: string; label: string }[];
   seniority: string | null;
   description: string | null;
@@ -174,10 +174,10 @@ export async function getPublicVacancyByToken(
 }
 
 /**
- * D2  salary band for a SIGNED-IN SEEKER viewing /apply/[token].
+ * D2 — salary band for a SIGNED-IN SEEKER viewing /apply/[token].
  * Returns null unless every gate is open AND the employer left
  * `salaryVisibleToApplicants` on. Callers must only invoke this after
- * establishing the viewer is an authenticated seeker  the page does.
+ * establishing the viewer is an authenticated seeker — the page does.
  */
 export async function getApplicantSalaryBand(
   token: string,
@@ -204,7 +204,7 @@ export async function getApplicantSalaryBand(
 /**
  * Viewer state for a signed-in seeker on /apply/[token]: do they
  * already hold a row on this vacancy? Drives the "already applied" /
- * "you're already invited  respond here" panels. Called from the RSC
+ * "you're already invited — respond here" panels. Called from the RSC
  * page only (session user id comes from the page's own auth read).
  */
 export type SeekerApplyState =

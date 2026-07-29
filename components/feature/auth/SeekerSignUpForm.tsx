@@ -905,7 +905,7 @@ export function SeekerSignUpForm({
               <p className="mb-3 text-xs leading-relaxed text-[color:var(--color-ink-soft)]">
                 {applyContext.orgName} asked for these skills on{" "}
                 <strong>{applyContext.vacancyTitle}</strong>. Tap the ones
-                you have  they&rsquo;re saved to your profile and help you
+                you have: they&rsquo;re saved to your profile and help you
                 rank for this role. You can refine them any time.
               </p>
               <div className="flex flex-wrap gap-2">

@@ -1,12 +1,12 @@
 "use client";
 
 /**
- * Phase 34  the employer's public-link panel on the vacancy detail
+ * Phase 34 — the employer's public-link panel on the vacancy detail
  * page (docs/PHASE_34_SELF_APPLY_PLAN.md §34.7). Renders only when the
  * platform flag AND the per-vacancy toggle are both on.
  *
  * The link is the recruiting poster: copy it, or share straight to
- * WhatsApp (the channel SA hiring actually happens on  the wa.me
+ * WhatsApp (the channel SA hiring actually happens on — the wa.me
  * share pre-fills role + link; the Phase 34 OG card renders the
  * preview). Honest state note: the link pauses automatically when the
  * vacancy is closed or filled.
@@ -20,7 +20,7 @@ export function SelfApplyLinkPanel({
   vacancyTitle,
   vacancyOpen,
 }: {
-  /** Absolute URL  built server-side from SITE_URL + the token. */
+  /** Absolute URL — built server-side from SITE_URL + the token. */
   applyUrl: string;
   vacancyTitle: string;
   vacancyOpen: boolean;
@@ -33,13 +33,13 @@ export function SelfApplyLinkPanel({
       setCopied(true);
       setTimeout(() => setCopied(false), 2500);
     } catch {
-      // Clipboard API unavailable (older WebView)  select-on-focus on
+      // Clipboard API unavailable (older WebView) — select-on-focus on
       // the input below remains the fallback.
     }
   }
 
   const waHref = `https://wa.me/?text=${encodeURIComponent(
-    `We're hiring: ${vacancyTitle}. Apply free on Sebenza  ${applyUrl}`,
+    `We're hiring: ${vacancyTitle}. Apply free on Sebenza: ${applyUrl}`,
   )}`;
 
   return (
@@ -52,7 +52,7 @@ export function SelfApplyLinkPanel({
       </div>
       <p className="mt-1.5 text-xs leading-relaxed text-[color:var(--color-ink-soft)]">
         {vacancyOpen
-          ? "Anyone with this link sees the role and can apply  applicants land in this pipeline with a “Self-applied” chip. Share it on WhatsApp, posters, anywhere."
+          ? "Anyone with this link sees the role and can apply — applicants land in this pipeline with a “Self-applied” chip. Share it on WhatsApp, posters, anywhere."
           : "The vacancy isn't open, so the link currently shows “not accepting applications.” It resumes automatically when you re-open the vacancy."}
       </p>
       <div className="mt-3 flex flex-wrap items-center gap-2">

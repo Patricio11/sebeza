@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * Phase 34  BrandDialog: the house modal primitive
+ * Phase 34 — BrandDialog: the house modal primitive
  * (docs/PHASE_34_SELF_APPLY_PLAN.md §34.4).
  *
  * Until now every dialog was hand-rolled (23 near-copies of the same
@@ -11,7 +11,7 @@
  *
  *   - bottom-sheet on mobile → centred card on md+ (360px-first)
  *   - paper/surface chrome, all-caps tracked eyebrow, Fraunces title,
- *     hairline rules  never a generic popup
+ *     hairline rules — never a generic popup
  *   - focus moves into the dialog on open and back to the previously
  *     focused element on close; Tab is trapped inside
  *   - Escape + backdrop-click close, both guarded while `pending`
@@ -19,7 +19,7 @@
  *
  * Composition: header (eyebrow + title) is built in; body is
  * `children`; sticky footer actions go in `footer`. Use for every new
- * dialog  and migrate old ones opportunistically.
+ * dialog — and migrate old ones opportunistically.
  */
 
 import { useEffect, useId, useRef } from "react";
@@ -105,7 +105,7 @@ export function BrandDialog({
         tabIndex={-1}
         className={`w-full ${widthClass} max-h-[88vh] overflow-y-auto rounded-t-[var(--radius-lg)] bg-[color:var(--color-surface)] shadow-xl outline-none motion-safe:animate-[brand-dialog-rise_220ms_cubic-bezier(0.22,1,0.36,1)] md:rounded-[var(--radius-lg)]`}
       >
-        {/* Signature top rule  the thick editorial line every Sebenza
+        {/* Signature top rule — the thick editorial line every Sebenza
             surface carries; quietly brands the sheet as ours. */}
         <div
           aria-hidden="true"

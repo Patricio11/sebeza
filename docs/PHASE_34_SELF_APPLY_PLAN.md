@@ -186,15 +186,19 @@ beautiful, branded, consistent — not generic popups."*
 
 ## 🧪 VERIFY
 
+*Flag-ON items verified 2026-07-29 via the Docker E2E harness — `tests/e2e/self-apply.spec.ts`, 8/8 green
+(desktop + 360px). Rides the seeded showcase vacancy "IT Support Technician" (fixed token
+`sa-demo-it-support-2026-fixed01`). Screenshots: `docs/screenshots/phase34-self-apply/`.*
+
 - [x] Migration applies clean from zero; journal contiguous at idx 62.
 - [x] Flag OFF: no employer toggle rendered, public /apply/{token} shows unavailable panel, action
    refuses — zero regression anywhere.
-- [ ] Flag ON: toggle → link appears; anonymous page renders full dossier WITHOUT salary; signed-in
+- [x] Flag ON: toggle → link appears; anonymous page renders full dossier WITHOUT salary; signed-in
    seeker sees salary (and not when employer hid it); apply → row lands `accepted` +
    `self_apply`, employer notified, chip renders, accept-rate unchanged by the self-apply row.
-- [ ] Already-invited seeker gets the redirect-to-invitation panel; duplicate apply blocked by the
+- [x] Already-invited seeker gets the redirect-to-invitation panel; duplicate apply blocked by the
    unique index at the action layer with honest copy.
-- [ ] New-user funnel: sign-up from the link pre-fills profession/province, skills chips save to
+- [x] New-user funnel: sign-up from the link pre-fills profession/province, skills chips save to
    profile, application row exists before email verification, congrats dialog fires, then
    /verify-email.
 - [x] OG card returns 200 image/png (curl), WhatsApp-shaped metadata absolute.

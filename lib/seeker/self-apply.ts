@@ -1,20 +1,20 @@
 "use server";
 
 /**
- * Phase 34  Self Apply Server Action for a SIGNED-IN seeker on
+ * Phase 34 — Self Apply Server Action for a SIGNED-IN seeker on
  * /apply/[token] (docs/PHASE_34_SELF_APPLY_PLAN.md §34.3).
  *
- * Gate order (every one re-checked server-side  the page's render
+ * Gate order (every one re-checked server-side — the page's render
  * state is advisory only):
  *   1. verifyRole("seeker")            authN + role
  *   2. platform flag                   feature_flag_vacancy_self_apply
  *   3. rate limit                      "self-apply" per user id
  *   4. vacancy by token                toggle ON + status open
  *   5. own profile exists, not deleted
- *   6. seeker hasn't blocked this org  refuse with honest copy (the
+ *   6. seeker hasn't blocked this org — refuse with honest copy (the
  *      inverse of the invite path's silent skip: HERE the seeker is
  *      the actor, so telling them the truth leaks nothing)
- *   7. no existing (vacancy, profile) row  typed outcomes so the UI
+ *   7. no existing (vacancy, profile) row — typed outcomes so the UI
  *      can route "already invited" to the invitation instead
  *
  * The write itself (row + notification + audit with D4 disclosure
@@ -39,7 +39,7 @@ export type SelfApplyResult =
       ok: true;
       outcome: "applied";
       invitationId: string;
-      /** Vacancy skills the seeker doesn't have yet  the congrats nudge. */
+      /** Vacancy skills the seeker doesn't have yet — the congrats nudge. */
       skillsGap: { slug: string; label: string }[];
     }
   | { ok: true; outcome: "already_applied"; invitationId: string }
@@ -64,7 +64,7 @@ export async function selfApplyToVacancy(
   const limit = await enforce("self-apply", session.id);
   if (!limit.ok) {
     return fail(
-      "You've applied to quite a few roles this hour  take a breather and try again a little later.",
+      "You've applied to quite a few roles this hour — take a breather and try again a little later.",
     );
   }
 
@@ -89,7 +89,7 @@ export async function selfApplyToVacancy(
     return fail("Finish creating your profile first, then apply.");
   }
 
-  // Honest refusal when the seeker blocked this org  they are the
+  // Honest refusal when the seeker blocked this org — they are the
   // actor here, so naming the reason discloses nothing they don't know.
   const blocked = await db
     .select({ id: schema.seekerBlockedEmployers.id })
@@ -134,7 +134,7 @@ export async function selfApplyToVacancy(
     source: "existing_account",
   });
   if (!recorded.ok) {
-    // Raced a concurrent apply/invite  re-read for the honest outcome.
+    // Raced a concurrent apply/invite — re-read for the honest outcome.
     const raced = await db
       .select({
         id: schema.vacancyInvitations.id,
@@ -154,7 +154,7 @@ export async function selfApplyToVacancy(
         ? { ok: true, outcome: "already_applied", invitationId: row.id }
         : { ok: true, outcome: "already_invited", invitationId: row.id };
     }
-    return fail("Something went wrong recording your application  try again.");
+    return fail("Something went wrong recording your application — try again.");
   }
 
   // The congrats nudge: which of the vacancy's asked-for skills is the
