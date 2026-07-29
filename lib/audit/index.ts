@@ -186,6 +186,13 @@ export type AuditKind =
   // an invite has already been nudged (cap: one per invite ever).
   | "vacancy.invite.followup"
   | "vacancy.response"
+  // Phase 34  seeker-initiated application via the public
+  // /apply/[token] link. Actor is the seeker; `subject` is the vacancy
+  // id; meta carries orgId, profileId, source (`existing_account` at
+  // apply time | `signup` when recorded during account creation) and
+  // the exact disclosure wording version the seeker confirmed (D4
+  // the audited confirmation IS the consent act for this disclosure).
+  | "vacancy.self_apply"
   // Phase 9.10  employer KYC / org-vetting lifecycle. Replaces the
   // dormant `feature_flag_kyc_provider` partnership path with admin-
   // mediated vetting. `subject` is the organisation id; meta carries

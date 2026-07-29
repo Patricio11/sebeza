@@ -24,6 +24,7 @@ import { getProfessions, getSkills } from "@/lib/taxonomy/query";
 import { PROVINCES } from "@/lib/mock/taxonomy";
 import { HelpLink } from "@/components/feature/help/HelpLink";
 import { safeInternalPath } from "@/lib/nav/safe-internal-path";
+import { getSetting } from "@/lib/admin/settings";
 
 export const revalidate = 0;
 
@@ -102,6 +103,11 @@ export default async function NewVacancyPage({
     getSkills(),
   ]);
 
+  // Phase 34  Self Apply (ship-dark master flag).
+  const selfApplyFeatureOn = await getSetting<boolean>(
+    "feature_flag_vacancy_self_apply",
+  );
+
   return (
     <DashboardMasthead
       role="employer"
@@ -124,6 +130,7 @@ export default async function NewVacancyPage({
           // Phase 9.19  scope the sessionStorage draft per source so
           // duplicating two different vacancies doesn't bleed drafts.
           draftId={duplicateFrom ? `duplicate-${duplicateFrom}` : "new"}
+          selfApplyFeatureOn={selfApplyFeatureOn}
           onSubmit={async (value) => {
             "use server";
             const res = await createVacancy(value);

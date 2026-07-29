@@ -33,29 +33,29 @@
 
 ### 33.1 Foundations — `lib/seo.ts` + root metadata + default OG image
 
-- **`lib/seo.ts`** (new): single source of truth — `SITE_URL` (`NEXT_PUBLIC_APP_URL ?? BETTER_AUTH_URL ?? "https://sebenzasa.com"`), brand constants, and `localeAlternates(path)` returning `{ canonical, languages }` honouring `localePrefix: "as-needed"` (en unprefixed; `/zu|/xh|/af` prefixed; `x-default` → en). Sitemap + robots + share card all migrate onto it so the domain lives in ONE place.
-- **Root layout (`app/[locale]/layout.tsx`)**: add `metadataBase` (THE WhatsApp fix — makes every OG URL absolute), full `openGraph` defaults (siteName, `locale: "en_ZA"`, type website, default image), `twitter: summary_large_image`, `robots` + `googleBot` block, `keywords`, `authors/creator/publisher`, `category: "employment"`, env-driven `verification` (Google + Bing). Existing PWA/title/icon config preserved.
-- **Default branded OG image** — instead of the playbook's "founder supplies `public/og.png`" manual step, generate it: new `app/og-image/route.tsx` (`next/og` `ImageResponse`, 1200×630, long revalidate) in the Civic-Editorial voice — paper background, SA-chevron motif, "Sebenza — South Africa's National Talent Platform", flag-band strip. Referenced from root `openGraph.images`. Landing, /search, /insights and legal pages all inherit it → WhatsApp previews everywhere.
-- **Fix the share card's hardcoded `sebenza.co.za`** → derive from `SITE_URL` (it's been rendering the wrong domain on every shared profile since Phase 11.4.1).
+- [x] **`lib/seo.ts`** (new): single source of truth — `SITE_URL` (`NEXT_PUBLIC_APP_URL ?? BETTER_AUTH_URL ?? "https://sebenzasa.com"`), brand constants, and `localeAlternates(path)` returning `{ canonical, languages }` honouring `localePrefix: "as-needed"` (en unprefixed; `/zu|/xh|/af` prefixed; `x-default` → en). Sitemap + robots + share card all migrate onto it so the domain lives in ONE place.
+- [x] **Root layout (`app/[locale]/layout.tsx`)**: add `metadataBase` (THE WhatsApp fix — makes every OG URL absolute), full `openGraph` defaults (siteName, `locale: "en_ZA"`, type website, default image), `twitter: summary_large_image`, `robots` + `googleBot` block, `keywords`, `authors/creator/publisher`, `category: "employment"`, env-driven `verification` (Google + Bing). Existing PWA/title/icon config preserved.
+- [x] **Default branded OG image** — instead of the playbook's "founder supplies `public/og.png`" manual step, generate it: new `app/og-image/route.tsx` (`next/og` `ImageResponse`, 1200×630, long revalidate) in the Civic-Editorial voice — paper background, SA-chevron motif, "Sebenza — South Africa's National Talent Platform", flag-band strip. Referenced from root `openGraph.images`. Landing, /search, /insights and legal pages all inherit it → WhatsApp previews everywhere.
+- [x] **Fix the share card's hardcoded `sebenza.co.za`** → derive from `SITE_URL` (it's been rendering the wrong domain on every shared profile since Phase 11.4.1).
 
 ### 33.2 Per-page metadata + hreflang
 
-- **Landing**: `generateMetadata` — keyword-led title (overrides template), marketing description, `alternates` (canonical + hreflang via helper).
-- **/search**: extend the existing title-only `generateMetadata` with description, alternates, OG override ("Search N skilled South Africans" style static copy — no per-query indexing).
-- **/insights**: add `generateMetadata` (title, description, alternates) — the public analytics page is a genuine ranking asset ("south africa employment statistics").
-- **Legal pages** (privacy/paia/terms/accessibility): add canonical + hreflang alternates to the existing title/description.
-- **/p/[handle]** — two changes:
+- [x] **Landing**: `generateMetadata` — keyword-led title (overrides template), marketing description, `alternates` (canonical + hreflang via helper).
+- [x] **/search**: extend the existing title-only `generateMetadata` with description, alternates, OG override ("Search N skilled South Africans" style static copy — no per-query indexing).
+- [x] **/insights**: add `generateMetadata` (title, description, alternates) — the public analytics page is a genuine ranking asset ("south africa employment statistics").
+- [x] **Legal pages** (privacy/paia/terms/accessibility): add canonical + hreflang alternates to the existing title/description.
+- [x] **/p/[handle]** — two changes:
   1. hreflang alternates (same content across locales).
   2. **Consent-aware indexing (the Sebenza-flavoured magic):** profiles WITHOUT granted `searchability` consent get `robots: { index: false }`. Today every profile page says `index: true` regardless — aligning Google's reach with the seeker's own consent is a privacy IMPROVEMENT shipped inside an SEO phase. Consented profiles keep index+follow (being found is the point).
 
 ### 33.3 Structured data (JSON-LD)
 
-- **`components/seo/StructuredData.tsx`** (new, server-rendered):
+- [x] **`components/seo/StructuredData.tsx`** (new, server-rendered):
   - `Organization` — Sebenza, `legalName` Yetotec (Pty) Ltd, logo, `contactPoint` (popia@…), `areaServed: ZA`, `sameAs: []` until profiles exist.
   - `WebSite` + `SearchAction` → `/search?q={search_term_string}` (Google sitelinks search box).
-- Mounted on the landing page.
-- **`Person` JSON-LD on `/p/[handle]`** — only when consented/indexable: name (already-redacted display name), `jobTitle`, `addressRegion` province, url. Strictly the fields the page already renders — Redaction Rule untouched.
-- BreadcrumbList: SKIPPED (flat IA, no benefit).
+- [x] Mounted on the landing page.
+- [x] **`Person` JSON-LD on `/p/[handle]`** — only when consented/indexable: name (already-redacted display name), `jobTitle`, `addressRegion` province, url. Strictly the fields the page already renders — Redaction Rule untouched.
+- [x] BreadcrumbList: SKIPPED (flat IA, no benefit).
 
 ### 33.4 Landing FAQ + FAQPage JSON-LD
 
@@ -63,8 +63,8 @@ Six questions in the Civic-Editorial voice (accordion `<details>` styling, `#faq
 
 ### 33.5 Sitemap + robots fixes
 
-- Sitemap: add missing `/terms` + `/accessibility`; **fix self-redirecting canonicals** (emit unprefixed URLs for `en` per `as-needed`); real `lastModified` for static routes via a maintained `CONTENT_UPDATED` constant instead of `new Date()`-always-now; migrate base URL to `lib/seo.ts`; keep the consented-profiles logic exactly as is (it's already right).
-- Robots: cover locale-prefixed private paths (`/zu/dashboard` etc.) by generating the disallow list × locale prefixes; migrate base URL.
+- [x] Sitemap: add missing `/terms` + `/accessibility`; **fix self-redirecting canonicals** (emit unprefixed URLs for `en` per `as-needed`); real `lastModified` for static routes via a maintained `CONTENT_UPDATED` constant instead of `new Date()`-always-now; migrate base URL to `lib/seo.ts`; keep the consented-profiles logic exactly as is (it's already right).
+- [x] Robots: cover locale-prefixed private paths (`/zu/dashboard` etc.) by generating the disallow list × locale prefixes; migrate base URL.
 
 ### 33.6 noindex belt-and-braces
 
@@ -92,10 +92,10 @@ Six questions in the Civic-Editorial voice (accordion `<details>` styling, `#faq
 
 ## 🧪 VERIFY
 
-1. `npm run build` clean; `curl` rendered HTML: landing/search/insights/p-handle all emit absolute `og:image`, `og:site_name`, twitter card, canonical + 5 hreflang links (en/zu/xh/af/x-default).
-2. Landing HTML contains 3 JSON-LD blocks (Organization, WebSite, FAQPage); consented profile contains Person; validator-clean structure.
-3. `/sitemap.xml` includes terms+accessibility, no `/en/`-prefixed self-redirecting URLs; `/robots.txt` covers localized private paths.
-4. `/og-image` returns a 1200×630 image; share card renders `sebenzasa.com`.
-5. Unconsented profile (or seeded profile with searchability revoked) emits `noindex`; dashboard layouts emit `noindex`.
-6. `test:all`-level: typecheck + vitest green.
-7. Post-deploy (founder manual): GSC verify via env var, submit sitemap, Bing import, Vercel Analytics toggle, WhatsApp-paste a landing + profile URL and see the branded card.
+- [x] `npm run build` clean; `curl` rendered HTML: landing/search/insights/p-handle all emit absolute `og:image`, `og:site_name`, twitter card, canonical + 5 hreflang links (en/zu/xh/af/x-default).
+- [x] Landing HTML contains 3 JSON-LD blocks (Organization, WebSite, FAQPage); consented profile contains Person; validator-clean structure.
+- [x] `/sitemap.xml` includes terms+accessibility, no `/en/`-prefixed self-redirecting URLs; `/robots.txt` covers localized private paths.
+- [x] `/og-image` returns a 1200×630 image; share card renders `sebenzasa.com`.
+- [x] Unconsented profile (or seeded profile with searchability revoked) emits `noindex`; dashboard layouts emit `noindex`.
+- [x] `test:all`-level: typecheck + vitest green.
+- [ ] Post-deploy (founder manual): GSC verify via env var, submit sitemap, Bing import, Vercel Analytics toggle, WhatsApp-paste a landing + profile URL and see the branded card.

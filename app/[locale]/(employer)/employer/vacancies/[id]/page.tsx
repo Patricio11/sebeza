@@ -46,6 +46,9 @@ import { getPlacementsForVacancy } from "@/lib/employer/placements";
 import { getProfessions, getSkills } from "@/lib/taxonomy/query";
 import { PROVINCES } from "@/lib/mock/taxonomy";
 import { formatVacancyLocation } from "@/lib/employer/vacancies-display";
+import { SelfApplyLinkPanel } from "@/components/feature/employer/vacancies/SelfApplyLinkPanel";
+import { getSetting } from "@/lib/admin/settings";
+import { SITE_URL } from "@/lib/seo";
 import { ChevronLeft, Lock, MapPin, Users } from "lucide-react";
 import type { WorkAvailabilityKind } from "@/lib/mock/types";
 import { HelpLink } from "@/components/feature/help/HelpLink";
@@ -95,6 +98,11 @@ export default async function VacancyDetailPage({
     getProfessions(),
     getSkills(),
   ]);
+
+  // Phase 34  Self Apply (ship-dark master flag).
+  const selfApplyFeatureOn = await getSetting<boolean>(
+    "feature_flag_vacancy_self_apply",
+  );
 
   const professionLabel =
     professions.find((p) => p.slug === vacancy.professionSlug)?.label ??
@@ -159,12 +167,29 @@ export default async function VacancyDetailPage({
           truth; blank = matcher ignores axis). */}
       <MatchRequirementsStrip vacancy={vacancy} />
 
+      {/* Phase 34  Self Apply public link. Every org member sees it
+          (Viewers share links too); the toggle itself lives in the
+          edit form below. */}
+      {selfApplyFeatureOn &&
+        vacancy.selfApplyEnabled &&
+        vacancy.selfApplyToken && (
+          <SelfApplyLinkPanel
+            applyUrl={`${SITE_URL}/apply/${vacancy.selfApplyToken}`}
+            vacancyTitle={vacancy.title}
+            vacancyOpen={vacancy.status === "open"}
+          />
+        )}
+
       {/* Phase 9.19 D9  per-vacancy accept-rate analytics. Vacancy-
           private, never cross-vacancy comparison, never per-seeker
-          breakdown. Hidden when there's nothing to show. */}
-      {invitations.length > 0 && (
+          breakdown. Hidden when there's nothing to show.
+          Phase 34: self-applied rows are EXCLUDED  they're born
+          accepted, so counting them would fake the acceptance rate. */}
+      {invitations.some((i) => i.origin === "employer_invite") && (
         <AcceptRateStrip
-          invitations={invitations}
+          invitations={invitations.filter(
+            (i) => i.origin === "employer_invite",
+          )}
           followUpNudgesEnabled={vacancy.followUpNudgesEnabled}
         />
       )}
@@ -300,6 +325,7 @@ export default async function VacancyDetailPage({
             provinces={PROVINCES}
             skills={skills}
             draftId={vacancy.id}
+            selfApplyFeatureOn={selfApplyFeatureOn}
             onSubmit={async (value) => {
               "use server";
               const res = await updateVacancy(vacancy.id, value);

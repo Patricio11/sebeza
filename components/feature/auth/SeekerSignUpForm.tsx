@@ -34,7 +34,8 @@ import {
   type ConsentPurpose,
 } from "@/lib/consent";
 import { signUpSeeker, acceptSeekerInvitation } from "@/lib/auth/actions";
-import { GraduationCap } from "lucide-react";
+import { GraduationCap, CheckCircle2, ArrowUpRight } from "lucide-react";
+import { BrandDialog } from "@/components/ui/BrandDialog";
 
 type Step = 1 | 2 | 3;
 
@@ -181,6 +182,12 @@ interface FormState {
   currentRoleStartedYear: string;
   currentRoleStartedMonth: string;
   currentRoleCity: string;
+  /**
+   * Phase 34  Self Apply funnel: the "Skills for this role" one-tap
+   * chips (slugs from the vacancy's own skill list). Saved onto the
+   * PROFILE server-side; empty when not arriving via /sign-up/apply.
+   */
+  applySkillSlugs: string[];
 }
 
 const initialState: FormState = {
@@ -223,6 +230,7 @@ const initialState: FormState = {
   currentRoleStartedYear: "",
   currentRoleStartedMonth: "",
   currentRoleCity: "",
+  applySkillSlugs: [],
 };
 
 interface Props {
@@ -258,6 +266,27 @@ interface Props {
     prefilledName: string | null;
     prefilledProfession: string | null;
   };
+  /**
+   * Phase 34  Self Apply funnel context from /sign-up/apply/[token].
+   * When present:
+   *   - profession + province pre-fill from the vacancy (editable
+   *     prefill, never lock)
+   *   - step 3 gains the "Skills for this role" one-tap chips
+   *   - submit passes applyToken + picked skills to `signUpSeeker`,
+   *     which records the application AT SIGN-UP
+   *   - success shows the congrats dialog (new-user variant) before
+   *     routing to /verify-email
+   * Mutually exclusive with `invitationContext` (the page never passes
+   * both).
+   */
+  applyContext?: {
+    token: string;
+    vacancyTitle: string;
+    orgName: string;
+    prefilledProfession: string | null;
+    prefilledProvince: string | null;
+    skills: { slug: string; label: string }[];
+  };
 }
 
 /** sessionStorage key for the public seeker sign-up draft. */
@@ -269,19 +298,36 @@ export function SeekerSignUpForm({
   professions,
   invitationContext,
   employerOptions,
+  applyContext,
 }: Props = {}) {
   const router = useRouter();
   const PROFESSIONS = professions && professions.length > 0 ? professions : MOCK_PROFESSIONS;
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  // Phase 34  post-sign-up congrats moment for the apply funnel. When
+  // set, the dialog renders instead of the immediate /verify-email
+  // push; dismissing continues there.
+  const [applyCongrats, setApplyCongrats] = useState<null | {
+    applied: boolean;
+  }>(null);
   const [state, setState] = useState<FormState>(() => {
-    if (!invitationContext) return initialState;
-    return {
-      ...initialState,
-      fullName: invitationContext.prefilledName ?? "",
-      email: invitationContext.prefilledEmail,
-      profession: invitationContext.prefilledProfession ?? "",
-    };
+    if (invitationContext) {
+      return {
+        ...initialState,
+        fullName: invitationContext.prefilledName ?? "",
+        email: invitationContext.prefilledEmail,
+        profession: invitationContext.prefilledProfession ?? "",
+      };
+    }
+    if (applyContext) {
+      // Phase 34  vacancy-tailored prefill (editable, never locked).
+      return {
+        ...initialState,
+        profession: applyContext.prefilledProfession ?? "",
+        province: applyContext.prefilledProvince ?? "",
+      };
+    }
+    return initialState;
   });
   const t = useTranslations("auth.seekerSignUp");
   const tCommon = useTranslations("auth.common");
@@ -314,6 +360,8 @@ export function SeekerSignUpForm({
       currentRoleStartedYear: state.currentRoleStartedYear,
       currentRoleStartedMonth: state.currentRoleStartedMonth,
       currentRoleCity: state.currentRoleCity,
+      // Phase 34  keep the one-tap skill picks across a locale switch.
+      applySkillSlugs: state.applySkillSlugs,
     }),
     [state],
   );
@@ -339,6 +387,16 @@ export function SeekerSignUpForm({
             merged.email = invitationContext.prefilledEmail;
             if (invitationContext.prefilledProfession) {
               merged.profession = invitationContext.prefilledProfession;
+            }
+          }
+          // Phase 34  a stale public draft must not blank the vacancy
+          // prefills; only fill the gaps (the draft's own values win).
+          if (applyContext) {
+            if (!merged.profession && applyContext.prefilledProfession) {
+              merged.profession = applyContext.prefilledProfession;
+            }
+            if (!merged.province && applyContext.prefilledProvince) {
+              merged.province = applyContext.prefilledProvince;
             }
           }
           return merged;
@@ -461,40 +519,55 @@ export function SeekerSignUpForm({
           }
         : null;
 
-      const result = invitationContext
-        ? await acceptSeekerInvitation({
-            token: invitationContext.token,
-            fullName: state.fullName,
-            phone: state.phone || undefined,
-            dateOfBirth: state.dateOfBirth,
-            nationality: state.nationality,
-            password: state.password,
-            grantedConsents,
-            termsAccepted: true,
-            profession: state.profession,
-            province: state.province,
-            status: state.status,
-            workAvailability: state.workAvailability,
-            academic,
-          })
-        : await signUpSeeker({
-            fullName: state.fullName,
-            email: state.email,
-            phone: state.phone || undefined,
-            dateOfBirth: state.dateOfBirth,
-            nationality: state.nationality,
-            password: state.password,
-            grantedConsents,
-            termsAccepted: true,
-            profession: state.profession,
-            province: state.province,
-            status: state.status,
-            workAvailability: state.workAvailability,
-            academic,
-            // Phase 9.22  current-employment block. NULL for non-
-            // employed / non-self-employed statuses.
-            ...employerBlock,
-          });
+      // Phase 34  the two token funnels are mutually exclusive; the
+      // public path optionally carries the Self Apply context.
+      let applied = false;
+      let result: { ok: true } | { ok: false; message: string };
+      if (invitationContext) {
+        result = await acceptSeekerInvitation({
+          token: invitationContext.token,
+          fullName: state.fullName,
+          phone: state.phone || undefined,
+          dateOfBirth: state.dateOfBirth,
+          nationality: state.nationality,
+          password: state.password,
+          grantedConsents,
+          termsAccepted: true,
+          profession: state.profession,
+          province: state.province,
+          status: state.status,
+          workAvailability: state.workAvailability,
+          academic,
+        });
+      } else {
+        const r = await signUpSeeker({
+          fullName: state.fullName,
+          email: state.email,
+          phone: state.phone || undefined,
+          dateOfBirth: state.dateOfBirth,
+          nationality: state.nationality,
+          password: state.password,
+          grantedConsents,
+          termsAccepted: true,
+          profession: state.profession,
+          province: state.province,
+          status: state.status,
+          workAvailability: state.workAvailability,
+          academic,
+          // Phase 9.22  current-employment block. NULL for non-
+          // employed / non-self-employed statuses.
+          ...employerBlock,
+          // Phase 34  Self Apply funnel payload.
+          ...(applyContext
+            ? {
+                applyToken: applyContext.token,
+                applySkillSlugs: state.applySkillSlugs,
+              }
+            : {}),
+        });
+        if (r.ok) applied = r.applied === true;
+        result = r;
+      }
 
       if (!result.ok) {
         setError(result.message);
@@ -503,6 +576,13 @@ export function SeekerSignUpForm({
       // Successful sign-up  wipe the draft so the next visitor on
       // this tab doesn't inherit half-typed data.
       clearDraft();
+      // Phase 34  the congrats moment: pause on the dialog before
+      // /verify-email so the application lands emotionally, not just
+      // technically. Non-apply sign-ups keep the direct route.
+      if (applyContext) {
+        setApplyCongrats({ applied });
+        return;
+      }
       router.push(
         `/verify-email?email=${encodeURIComponent(state.email)}` as never,
       );
@@ -811,6 +891,56 @@ export function SeekerSignUpForm({
             allowOther
             otherLabel="My profession isn't listed"
           />
+
+          {/* Phase 34  Self Apply funnel: the vacancy-tailored moment.
+              The role's asked-for skills as one-tap chips  select what
+              you have, it saves straight onto your profile (validated
+              server-side against the vacancy's own list). Optional +
+              skippable; zero free typing. */}
+          {applyContext && applyContext.skills.length > 0 && (
+            <fieldset className="rounded-[var(--radius-md)] border border-[color:var(--color-brand)]/30 bg-[color:var(--color-brand-tint)] p-5">
+              <legend className="px-1 font-display text-base">
+                Skills for this role
+              </legend>
+              <p className="mb-3 text-xs leading-relaxed text-[color:var(--color-ink-soft)]">
+                {applyContext.orgName} asked for these skills on{" "}
+                <strong>{applyContext.vacancyTitle}</strong>. Tap the ones
+                you have  they&rsquo;re saved to your profile and help you
+                rank for this role. You can refine them any time.
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {applyContext.skills.map((s) => {
+                  const selected = state.applySkillSlugs.includes(s.slug);
+                  return (
+                    <button
+                      key={s.slug}
+                      type="button"
+                      disabled={pending}
+                      aria-pressed={selected}
+                      onClick={() =>
+                        setState((prev) => ({
+                          ...prev,
+                          applySkillSlugs: selected
+                            ? prev.applySkillSlugs.filter(
+                                (x) => x !== s.slug,
+                              )
+                            : [...prev.applySkillSlugs, s.slug],
+                        }))
+                      }
+                      className={`rounded-[var(--radius-pill)] border px-4 py-1.5 text-sm transition-colors ${
+                        selected
+                          ? "border-[color:var(--color-brand-strong)] bg-[color:var(--color-brand-strong)] text-[color:var(--color-surface)]"
+                          : "border-[color:var(--color-brand)]/50 bg-[color:var(--color-surface)] text-[color:var(--color-ink)] hover:border-[color:var(--color-brand-strong)]"
+                      }`}
+                    >
+                      {selected ? "✓ " : ""}
+                      {s.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </fieldset>
+          )}
           <SelectField
             id="province"
             label={t("step3.locationLabel")}
@@ -1324,6 +1454,79 @@ export function SeekerSignUpForm({
             </Button>
           </div>
         </div>
+      )}
+
+      {/* Phase 34  Self Apply funnel: the congrats moment BEFORE the
+          verify-email routing, so the application lands emotionally.
+          Every path out of the dialog continues to /verify-email. */}
+      {applyContext && (
+        <BrandDialog
+          open={applyCongrats !== null}
+          onClose={() =>
+            router.push(
+              `/verify-email?email=${encodeURIComponent(state.email)}` as never,
+            )
+          }
+          eyebrow={applyCongrats?.applied ? "Application sent" : "Almost there"}
+          title={
+            applyCongrats?.applied
+              ? "Nicely done."
+              : "Your profile is created."
+          }
+          footer={
+            <button
+              type="button"
+              onClick={() =>
+                router.push(
+                  `/verify-email?email=${encodeURIComponent(state.email)}` as never,
+                )
+              }
+              className="inline-flex items-center gap-2 rounded-[var(--radius-pill)] border border-[color:var(--color-ink)] bg-[color:var(--color-ink)] px-6 py-2.5 text-sm font-medium text-[color:var(--color-surface)] shadow-press transition-transform hover:-translate-y-0.5"
+            >
+              Verify my email
+              <ArrowUpRight className="size-4" aria-hidden="true" />
+            </button>
+          }
+        >
+          <div className="flex items-start gap-3">
+            <CheckCircle2
+              className="mt-0.5 size-6 shrink-0 text-[color:var(--color-positive)]"
+              aria-hidden="true"
+            />
+            <p className="text-sm leading-relaxed text-[color:var(--color-ink)]">
+              {applyCongrats?.applied ? (
+                <>
+                  Your application for{" "}
+                  <strong>{applyContext.vacancyTitle}</strong> is with{" "}
+                  <strong>{applyContext.orgName}</strong>  and your Sebenza
+                  profile now exists for every other opportunity too.
+                </>
+              ) : (
+                <>
+                  Your Sebenza profile is created. This vacancy&rsquo;s link
+                  is no longer active, but your profile keeps you findable
+                  for every open role on the platform.
+                </>
+              )}
+            </p>
+          </div>
+          <div className="mt-4 rounded-[var(--radius-md)] border border-[color:var(--color-brand)]/30 bg-[color:var(--color-brand-tint)] p-4">
+            <p className="text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--color-brand-strong)]">
+              Two things to be considered
+            </p>
+            <ol className="mt-2 list-decimal space-y-1.5 pl-5 text-sm leading-relaxed text-[color:var(--color-ink)]">
+              <li>
+                <strong>Verify your email</strong>  we&rsquo;ve sent you a
+                link; your account activates the moment you tap it.
+              </li>
+              <li>
+                <strong>Complete your profile</strong>  add your skills,
+                experience and a short bio from your dashboard. That&rsquo;s
+                what {applyContext.orgName} reviews.
+              </li>
+            </ol>
+          </div>
+        </BrandDialog>
       )}
     </>
   );

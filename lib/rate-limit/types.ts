@@ -122,6 +122,15 @@ export const BUCKETS = {
    * that a genuine reporter filing about several profiles is unaffected.
    */
   "report": { limit: 5, windowSeconds: 10 * 60 },
+  /**
+   * Phase 34  Self Apply (`selfApplyToVacancy`), per SEEKER user id.
+   * A real person applies to a handful of roles in an hour; the unique
+   * (vacancy, profile) index already blocks duplicates per vacancy, so
+   * this ceiling only exists to stop scripted spraying across many
+   * vacancies (each apply notifies org members  unthrottled it is a
+   * notification cannon).
+   */
+  "self-apply": { limit: 10, windowSeconds: 60 * 60 },
 } as const;
 
 export type BucketName = keyof typeof BUCKETS;

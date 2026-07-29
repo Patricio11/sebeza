@@ -235,7 +235,13 @@ function InvitationCard({
   viewerCity: string | null;
   active: boolean;
 }) {
-  const stateMeta = STATE_COPY[inv.state] ?? STATE_COPY.invited!;
+  // Phase 34  a self-applied row is born accepted; "Accepted" would
+  // read as someone else's action. Frame it as the seeker's own.
+  const stateMeta =
+    inv.origin === "self_apply" &&
+    (inv.state === "accepted" || inv.state === "accepted_with_notice")
+      ? ({ label: "You applied", tone: "accent" } as const)
+      : (STATE_COPY[inv.state] ?? STATE_COPY.invited!);
   const professionLabel =
     PROFESSIONS.find((p) => p.slug === inv.professionSlug)?.label ??
     inv.professionSlug;
@@ -257,7 +263,7 @@ function InvitationCard({
     viewerCity.trim().toLowerCase() === invCityLabel.trim().toLowerCase();
   const urgency = urgencyChip(inv);
 
-  const stateLabel = STATE_COPY[inv.state]?.label ?? inv.state;
+  const stateLabel = stateMeta.label;
   return (
     <Link
       href={`/dashboard/invitations/${inv.id}` as never}

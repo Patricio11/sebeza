@@ -1302,6 +1302,26 @@ export const invitationState = pgEnum("invitation_state", [
 ]);
 
 /**
+ * Phase 34  who initiated the (vacancy × seeker) row.
+ *
+ * `employer_invite`  the classic pipeline: employer sends, seeker
+ *                     responds. `invitedByUserId` is set.
+ * `self_apply`       the seeker applied via the vacancy's public
+ *                     /apply/[token] link (D1). The row is born
+ *                     `state='accepted'` with `respondedAt` stamped
+ *                     the application IS the acceptance  and
+ *                     `invitedByUserId` is NULL. The employer's
+ *                     existing vet step (review / shortlist /
+ *                     mark-filled) applies unchanged; the UI renders a
+ *                     "Self-applied" chip so provenance stays honest
+ *                     in both directions.
+ */
+export const vacancyInvitationOrigin = pgEnum("vacancy_invitation_origin", [
+  "employer_invite",
+  "self_apply",
+]);
+
+/**
  * Phase 9.8.5  decline reason taxonomy.
  *
  * Six work-related reasons from the plan + `other` (which requires a
@@ -1324,13 +1344,24 @@ export const declineReason = pgEnum("decline_reason", [
 ]);
 
 /**
- * Vacancies are STRICTLY ORG-PRIVATE. No vacancy field is exposed on any
- * public route, /p/[handle], /search, sitemap, or to a non-member of
- * `organizationId`. Salary band, like Phase 5 placements, never leaves the
- * org workspace. Enforced by the read functions in
+ * Vacancies are ORG-PRIVATE BY DEFAULT. No vacancy field is exposed on
+ * any public route, /p/[handle], /search, sitemap, or to a non-member
+ * of `organizationId`. Enforced by the read functions in
  * `lib/employer/vacancies.ts` (every read filters by orgId) + a 9.8.8
  * compliance assertion that confirms no public/seeker surface imports
  * the table.
+ *
+ * Phase 34 carve-out (docs/PHASE_34_SELF_APPLY_PLAN.md, deliberate
+ * contract rewrite): a vacancy whose owner switched `selfApplyEnabled`
+ * ON exposes a DEFINED PUBLIC SUBSET at /apply/[selfApplyToken] via
+ * `lib/vacancy/public.ts` — title, org name + verification, profession,
+ * province/city (or national-remote), skills, seniority, min
+ * experience, work availability, positions, description. NEVER in the
+ * anonymous payload: salaryBand (shown only to signed-in seekers and
+ * only while `salaryVisibleToApplicants` is true — D2), invite expiry
+ * policy, nudge settings, org ids, or any pipeline statistic. Salary
+ * band otherwise keeps the Phase 5 placements rule: Owners + Recruiters
+ * inside the org; suppressed for Viewers.
  */
 export const vacancies = pgTable(
   "vacancies",
@@ -1460,6 +1491,34 @@ export const vacancies = pgTable(
     followUpNudgesEnabled: boolean("follow_up_nudges_enabled")
       .notNull()
       .default(false),
+    /**
+     * Phase 34  Self Apply. When true (and the platform flag
+     * `feature_flag_vacancy_self_apply` is ON), the vacancy's defined
+     * public subset renders at /apply/[selfApplyToken] and seekers can
+     * apply themselves. The toggle is the kill-switch: OFF (or vacancy
+     * closed/filled) renders the calm "not accepting" panel  the link
+     * dies with the switch. Default false; existing vacancies are
+     * untouched.
+     */
+    selfApplyEnabled: boolean("self_apply_enabled").notNull().default(false),
+    /**
+     * Phase 34  unguessable public-link token (24 random bytes,
+     * base64url  ~32 chars). Minted ONCE on first enable and stable
+     * across toggle flips (`selfApplyEnabled` is the gate, not the
+     * token). NULL until Self Apply is first switched on. Never derived
+     * from the vacancy id  the id must stay un-enumerable.
+     */
+    selfApplyToken: text("self_apply_token"),
+    /**
+     * Phase 34 D2  salary visibility on the apply page. The ANONYMOUS
+     * public payload NEVER carries salaryBand regardless of this flag;
+     * signed-in seekers viewing /apply/[token] see it while this is
+     * true. Default true (transparent-by-default; the employer opts
+     * out).
+     */
+    salaryVisibleToApplicants: boolean("salary_visible_to_applicants")
+      .notNull()
+      .default(true),
     createdAt: timestamp("created_at").notNull().defaultNow(),
     closedAt: timestamp("closed_at"),
   },
@@ -1491,13 +1550,19 @@ export const vacancies = pgTable(
  * seeker's view is filtered through `profileId` matching the caller's
  * own profile, so cross-seeker leakage is structurally impossible.
  *
- * Consent gate: a row is only ever written when the seeker had
- * `vacancy_matching` consent in `state='granted'` at write time. The
- * bulk-invite Server Action splits selections into eligible + skipped
- * via `hasVacancyMatchingConsent()`; skipped seekers get an
- * `vacancy.invite.skip` audit-log row each (with the actual reason
- * never exposed to the employer UI to avoid leaking consent state, per
- * D5). The compliance assertion (b) in 9.8.8 walks this contract.
+ * Consent gate: an EMPLOYER-INITIATED row is only ever written when
+ * the seeker had `vacancy_matching` consent in `state='granted'` at
+ * write time. The bulk-invite Server Action splits selections into
+ * eligible + skipped via `hasVacancyMatchingConsent()`; skipped
+ * seekers get an `vacancy.invite.skip` audit-log row each (with the
+ * actual reason never exposed to the employer UI to avoid leaking
+ * consent state, per D5). The compliance assertion (b) in 9.8.8 walks
+ * this contract. Phase 34 D4: `origin='self_apply'` rows are
+ * SEEKER-INITIATED  the audited apply confirmation (exact disclosure
+ * wording in the audit meta) is the specific, informed act;
+ * `vacancy_matching` consent is not required because that purpose
+ * governs employer-initiated matching, not the seeker's own
+ * application.
  *
  * Audit: every state transition fires a `vacancy.invite[.subkind]`
  * audit-log row through `lib/audit/index.ts` (reserved in 9.8.1).
@@ -1513,10 +1578,18 @@ export const vacancyInvitations = pgTable(
       .notNull()
       .references(() => profiles.id, { onDelete: "cascade" }),
     /** Org member who sent the invite. References app_user so the
-        attribution survives the member later leaving the org. */
-    invitedByUserId: text("invited_by_user_id")
+        attribution survives the member later leaving the org.
+        Phase 34: NULL on `origin='self_apply'` rows  nobody invited
+        the seeker; they walked in through the public link. */
+    invitedByUserId: text("invited_by_user_id").references(() => appUser.id),
+    /**
+     * Phase 34  row provenance (see `vacancyInvitationOrigin`).
+     * Default keeps every pre-Phase-34 row and every employer-side
+     * write honest without a backfill.
+     */
+    origin: vacancyInvitationOrigin("origin")
       .notNull()
-      .references(() => appUser.id),
+      .default("employer_invite"),
     invitedAt: timestamp("invited_at").notNull().defaultNow(),
     /**
      * D2  computed at send time from `vacancy.invite_expiry_days`:

@@ -332,6 +332,27 @@ export async function assertNoVacancyFieldOnPublicSurfaces(): Promise<AssertResu
     // filter input, never the output payload).
     "db\\queries\\profiles",
     "db/queries/profiles",
+    // ── Phase 34 (Self Apply)  the DELIBERATE public carve-out, per the
+    // rewritten contract on the `vacancies` schema doc-comment:
+    // lib/vacancy/public.ts exposes a DEFINED subset (no salaryBand in
+    // the anonymous payload, no org ids, no pipeline stats), addressed
+    // only by the unguessable self_apply_token and triple-gated (platform
+    // flag + per-vacancy toggle + status=open). self-apply-internal.ts is
+    // the seeker-initiated write path (D4-audited).
+    "lib\\vacancy",
+    "lib/vacancy",
+    // The public /apply/[token] page + OG card render exclusively
+    // through lib/vacancy/public.ts  they import the reader, never the
+    // schema. Listed defensively in case a future edit imports schema
+    // for a type; the salaryBand-free anonymous payload rule is
+    // asserted by the unit test in lib/vacancy/public.test.ts.
+    "app\\[locale]\\(public)\\apply",
+    "app/[locale]/(public)/apply",
+    // Phase 34  signUpSeeker records the application at sign-up via
+    // loadSelfApplyVacancyByToken + recordSelfApplication (both in
+    // lib/vacancy/); actions.ts itself only writes profile_skills.
+    "lib\\auth",
+    "lib/auth",
   ];
   const SCAN_ROOTS = ["app", "lib", "db/queries", "db/seed.ts", "components"];
   const PATTERN =

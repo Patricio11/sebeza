@@ -92,6 +92,8 @@ export async function listMyInvitations(): Promise<SeekerInvitationRow[]> {
     .select({
       id: schema.vacancyInvitations.id,
       state: schema.vacancyInvitations.state,
+      // Phase 34  provenance for the "You applied" framing.
+      origin: schema.vacancyInvitations.origin,
       invitedAt: schema.vacancyInvitations.invitedAt,
       expiresAt: schema.vacancyInvitations.expiresAt,
       respondedAt: schema.vacancyInvitations.respondedAt,
@@ -151,6 +153,8 @@ export async function getMyInvitation(
     .select({
       id: schema.vacancyInvitations.id,
       state: schema.vacancyInvitations.state,
+      // Phase 34  provenance for the "You applied" framing.
+      origin: schema.vacancyInvitations.origin,
       invitedAt: schema.vacancyInvitations.invitedAt,
       expiresAt: schema.vacancyInvitations.expiresAt,
       respondedAt: schema.vacancyInvitations.respondedAt,
@@ -205,6 +209,8 @@ export async function getMyInvitation(
 function toSeekerRow(r: {
   id: string;
   state: string;
+  /** Phase 34  provenance (employer_invite | self_apply). */
+  origin: string;
   invitedAt: Date | string;
   expiresAt: Date | string | null;
   respondedAt: Date | string | null;
@@ -234,6 +240,7 @@ function toSeekerRow(r: {
   return {
     id: r.id,
     state: r.state as InvitationStateSeeker,
+    origin: r.origin as SeekerInvitationRow["origin"],
     invitedAt: toIso(r.invitedAt),
     expiresAt: r.expiresAt ? toIso(r.expiresAt) : null,
     respondedAt: r.respondedAt ? toIso(r.respondedAt) : null,

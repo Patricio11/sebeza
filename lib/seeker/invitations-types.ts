@@ -40,6 +40,10 @@ export const DECLINE_REASON_LABEL: Record<DeclineReasonValue, string> = {
 export interface SeekerInvitationRow {
   id: string;
   state: InvitationStateSeeker;
+  /** Phase 34  provenance: an employer invited you, or you applied
+   *  yourself via a public Self Apply link. Drives the "You applied"
+   *  framing on the inbox + detail (honest both directions). */
+  origin: "employer_invite" | "self_apply";
   invitedAt: string;
   expiresAt: string | null;
   respondedAt: string | null;

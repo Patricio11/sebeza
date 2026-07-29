@@ -145,7 +145,13 @@ export type SettingKey =
   // Phase 24 ("Testimonials")  while ON, eligible seekers + employers see the
   // dismissible collection card. Managed from /admin/testimonials (not the
   // settings form) so curation + campaign live on one surface.
-  | "testimonial_campaign_active";
+  | "testimonial_campaign_active"
+  // Phase 34 ("Self Apply")  master switch over the per-vacancy public
+  // apply link. While OFF: the employer-side toggle is hidden, every
+  // /apply/[token] page renders the calm "not accepting" panel, and the
+  // apply actions refuse. Ships dark; the per-vacancy `selfApplyEnabled`
+  // toggle is the second gate (both must be open).
+  | "feature_flag_vacancy_self_apply";
 
 const DEFAULTS: Record<SettingKey, unknown> = {
   freshness_band_days_fresh: 30,
@@ -186,6 +192,8 @@ const DEFAULTS: Record<SettingKey, unknown> = {
   feature_flag_skill_prereqs: false,
   feature_flag_city_demand: false,
   testimonial_campaign_active: false,
+  // Phase 34  Self Apply ships dark.
+  feature_flag_vacancy_self_apply: false,
 };
 
 /**

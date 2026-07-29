@@ -41,6 +41,11 @@ import { validateDob } from "@/lib/auth/id-validation";
 import { safeInternalPath } from "@/lib/nav/safe-internal-path";
 import { enforce, peek } from "@/lib/rate-limit";
 import { clientIpKey, emailKey } from "@/lib/rate-limit/client-ip";
+import { getSetting } from "@/lib/admin/settings";
+import {
+  loadSelfApplyVacancyByToken,
+  recordSelfApplication,
+} from "@/lib/vacancy/self-apply-internal";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Shared helpers
@@ -183,6 +188,23 @@ const seekerSignUpSchema = z.object({
     .nullable()
     .optional(),
   currentRoleCity: z.string().trim().max(80).nullable().optional(),
+  /**
+   * Phase 34  Self Apply sign-up funnel (/sign-up/apply/[token]).
+   * When present + valid (flag ON, per-vacancy toggle ON, vacancy
+   * open), the application row is recorded AT SIGN-UP  the
+   * acceptSeekerInvitation precedent  so nothing is lost before
+   * email verification. Invalid/stale tokens degrade silently to a
+   * plain sign-up: the account matters more than the application.
+   */
+  applyToken: z.string().min(16).max(128).optional(),
+  /**
+   * Phase 34  the "Skills for this role" one-tap chips. Validated
+   * server-side against the vacancy's own skillSlugs (never a free
+   * write path into profile_skills) and stored on the PROFILE, not
+   * the application  the founder's "that info gets saved on their
+   * profile" requirement.
+   */
+  applySkillSlugs: z.array(z.string().min(1).max(80)).max(12).optional(),
 });
 
 /**
@@ -255,7 +277,7 @@ async function notifyExistingAccountHolder(email: string): Promise<void> {
 
 export async function signUpSeeker(
   input: z.infer<typeof seekerSignUpSchema>,
-): Promise<ActionResult> {
+): Promise<ActionResult<{ next: string; applied?: boolean }>> {
   const parsed = seekerSignUpSchema.safeParse(input);
   if (!parsed.success) return fail("Please check the form and try again.");
   const v = parsed.data;
@@ -288,7 +310,28 @@ export async function signUpSeeker(
   // must not be able to learn.
   if (await emailAlreadyRegistered(v.email)) {
     await notifyExistingAccountHolder(v.email);
-    return ok({ next: "/verify-email" });
+    // Phase 34  mirror the `applied` field a genuine sign-up with this
+    // token would return, or the Self Apply funnel becomes a fresh
+    // enumeration oracle (applied:undefined here vs applied:true on a
+    // real sign-up would distinguish registered addresses). No row is
+    // written; only the response SHAPE is mirrored.
+    let wouldApply = false;
+    if (v.applyToken) {
+      try {
+        const flagOn = await getSetting<boolean>(
+          "feature_flag_vacancy_self_apply",
+        );
+        const loaded = flagOn
+          ? await loadSelfApplyVacancyByToken(v.applyToken)
+          : null;
+        wouldApply = Boolean(
+          loaded && loaded.selfApplyEnabled && loaded.status === "open",
+        );
+      } catch {
+        // Shape-mirroring is best-effort; never let it change the path.
+      }
+    }
+    return ok({ next: "/verify-email", applied: wouldApply });
   }
 
   const db = getDb();
@@ -675,7 +718,62 @@ export async function signUpSeeker(
       },
     });
 
-    return ok({ next: "/verify-email" });
+    // Phase 34  Self Apply funnel: record the application + the
+    // vacancy-tailored skills NOW (before email verification  the
+    // acceptSeekerInvitation precedent). Auxiliary posture: any
+    // failure logs and degrades to a plain sign-up; the account is
+    // never tanked by a stale vacancy link.
+    let applied = false;
+    if (v.applyToken) {
+      try {
+        const flagOn = await getSetting<boolean>(
+          "feature_flag_vacancy_self_apply",
+        );
+        const loaded = flagOn
+          ? await loadSelfApplyVacancyByToken(v.applyToken)
+          : null;
+        if (loaded && loaded.selfApplyEnabled && loaded.status === "open") {
+          const vacancy = loaded.vacancy;
+          // One-tap skills: only slugs the vacancy itself asked for
+          // (chips are a subset picker, never a free write path).
+          const pickable = new Set(vacancy.skillSlugs);
+          const pickedSkills = Array.from(
+            new Set((v.applySkillSlugs ?? []).filter((s) => pickable.has(s))),
+          );
+          if (pickedSkills.length > 0) {
+            await db.insert(schema.profileSkills).values(
+              pickedSkills.map((slug) => ({
+                profileId,
+                skillSlug: slug,
+                // Mid-scale default; the seeker refines proficiency
+                // from the dashboard SkillsEditor later.
+                proficiency: 3,
+              })),
+            );
+            // Keep the stored completeness honest with the shared
+            // formula's skill term (6 per skill, capped at 30).
+            await db
+              .update(schema.profiles)
+              .set({
+                completeness: 20 + Math.min(30, pickedSkills.length * 6),
+              })
+              .where(eq(schema.profiles.id, profileId));
+          }
+          const recorded = await recordSelfApplication({
+            vacancy,
+            profileId,
+            seekerUserId: user.id,
+            source: "signup",
+          });
+          applied = recorded.ok;
+        }
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.error("[signup] self-apply record failed:", e);
+      }
+    }
+
+    return ok({ next: "/verify-email", applied });
   } catch (e) {
     return fail(toMessage(e));
   }

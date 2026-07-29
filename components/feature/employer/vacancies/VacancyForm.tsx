@@ -61,6 +61,12 @@ export interface VacancyFormValue {
   minNqfLevel?: number | null;
   /** Phase 9.19 D8  opt-in 7-day follow-up nudge cron (default off). */
   followUpNudgesEnabled?: boolean;
+  /** Phase 34  Self Apply public link (default off; first enable
+   *  mints the token server-side). */
+  selfApplyEnabled?: boolean;
+  /** Phase 34 D2  show salary band to signed-in applicants (default
+   *  on; anonymous visitors never see it regardless). */
+  salaryVisibleToApplicants?: boolean;
   /** Phase 9.21  vacancy-side season window. Flat fields rather than
    *  a nested object so the form value matches the Zod schema in
    *  `vacancies.ts` 1:1 (the server action accepts these three fields
@@ -106,6 +112,13 @@ export interface VacancyFormProps {
    * make B inherit A's unsaved draft.
    */
   draftId?: string;
+  /**
+   * Phase 34  platform flag `feature_flag_vacancy_self_apply`,
+   * resolved server-side. While false the Self Apply section doesn't
+   * render at all (ship-dark); the server action ignores the fields
+   * regardless, so this is purely a rendering gate.
+   */
+  selfApplyFeatureOn?: boolean;
 }
 
 interface VacancyDraft {
@@ -125,6 +138,9 @@ interface VacancyDraft {
   minYearsExperience: string;
   minNqfLevel: string;
   followUpNudgesEnabled: boolean;
+  // Phase 34  Self Apply toggles.
+  selfApplyEnabled: boolean;
+  salaryVisibleToApplicants: boolean;
   // Phase 9.21  season window as form strings so the JSON draft
   // round-trip is lossless. Empty strings = "no window" (D7); they
   // only get persisted when 'seasonal' is in the chip set.
@@ -293,6 +309,7 @@ export function VacancyForm({
   submitLabel = "Save vacancy",
   cancelHref = "/employer/vacancies",
   draftId = "new",
+  selfApplyFeatureOn = false,
 }: VacancyFormProps) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -349,6 +366,12 @@ export function VacancyForm({
   const [followUpNudgesEnabled, setFollowUpNudgesEnabled] = useState<boolean>(
     initial?.followUpNudgesEnabled ?? false,
   );
+  // Phase 34  Self Apply toggles.
+  const [selfApplyEnabled, setSelfApplyEnabled] = useState<boolean>(
+    initial?.selfApplyEnabled ?? false,
+  );
+  const [salaryVisibleToApplicants, setSalaryVisibleToApplicants] =
+    useState<boolean>(initial?.salaryVisibleToApplicants ?? true);
   // Phase 9.21  season window state. Strings so the draft round-trips
   // through JSON; only persisted when 'seasonal' is in the chip set.
   // Reads from either the nested `seasonalWindow` (when initial is a
@@ -411,6 +434,8 @@ export function VacancyForm({
       minYearsExperience,
       minNqfLevel,
       followUpNudgesEnabled,
+      selfApplyEnabled,
+      salaryVisibleToApplicants,
       seasonalWindowStartMonth,
       seasonalWindowEndMonth,
       seasonalWindowStartYear,
@@ -431,6 +456,8 @@ export function VacancyForm({
       minYearsExperience,
       minNqfLevel,
       followUpNudgesEnabled,
+      selfApplyEnabled,
+      salaryVisibleToApplicants,
       seasonalWindowStartMonth,
       seasonalWindowEndMonth,
       seasonalWindowStartYear,
@@ -461,6 +488,10 @@ export function VacancyForm({
         if (draft.minNqfLevel !== undefined) setMinNqfLevel(draft.minNqfLevel);
         if (typeof draft.followUpNudgesEnabled === "boolean")
           setFollowUpNudgesEnabled(draft.followUpNudgesEnabled);
+        if (typeof draft.selfApplyEnabled === "boolean")
+          setSelfApplyEnabled(draft.selfApplyEnabled);
+        if (typeof draft.salaryVisibleToApplicants === "boolean")
+          setSalaryVisibleToApplicants(draft.salaryVisibleToApplicants);
         if (draft.seasonalWindowStartMonth !== undefined)
           setSeasonalWindowStartMonth(draft.seasonalWindowStartMonth);
         if (draft.seasonalWindowEndMonth !== undefined)
@@ -585,6 +616,11 @@ export function VacancyForm({
       minYearsExperience: yearsNum,
       minNqfLevel: nqfNum,
       followUpNudgesEnabled,
+      // Phase 34  Self Apply. Always included: the update action's
+      // partial-payload guard only skips `undefined`, and this form
+      // always knows the current values.
+      selfApplyEnabled,
+      salaryVisibleToApplicants,
       // Phase 9.21  D7: only persist the window when 'seasonal' is
       // in the chip set; clearing the chip clears the window. The
       // refine() in the Zod schema also catches half-windows; the
@@ -1015,6 +1051,64 @@ export function VacancyForm({
             </span>
           </span>
         </label>
+
+        {/* Phase 34  Self Apply. Rendered only while the platform flag
+            is ON (ship-dark). Honest copy about exactly what the public
+            link shows  and what it never shows. */}
+        {selfApplyFeatureOn && (
+          <fieldset className="rounded-[var(--radius-md)] border border-[color:var(--color-brand)]/30 bg-[color:var(--color-brand-tint)] p-4">
+            <legend className="px-1 font-display text-base">
+              Self Apply  public link
+            </legend>
+            <label className="flex items-start gap-3">
+              <input
+                type="checkbox"
+                checked={selfApplyEnabled}
+                onChange={(e) => setSelfApplyEnabled(e.target.checked)}
+                disabled={pending}
+                className="mt-0.5 size-4 cursor-pointer accent-[color:var(--color-brand-strong)]"
+              />
+              <span className="flex-1 text-sm">
+                <span className="font-display text-base text-[color:var(--color-ink)]">
+                  Let seekers apply via a public link
+                </span>
+                <span className="mt-0.5 block text-xs leading-relaxed text-[color:var(--color-ink-soft)]">
+                  Generates a shareable page with the role, skills and
+                  description (never the salary band for visitors, never
+                  your pipeline). Applicants land in this vacancy&rsquo;s
+                  pipeline as accepted candidates with a
+                  &ldquo;Self-applied&rdquo; chip  you review and
+                  shortlist them like invited seekers. Untick any time to
+                  switch the link off; it also pauses automatically when
+                  the vacancy is closed or filled.
+                </span>
+              </span>
+            </label>
+            {selfApplyEnabled && (
+              <label className="mt-3 flex items-start gap-3 border-t border-[color:var(--color-brand)]/20 pt-3">
+                <input
+                  type="checkbox"
+                  checked={salaryVisibleToApplicants}
+                  onChange={(e) =>
+                    setSalaryVisibleToApplicants(e.target.checked)
+                  }
+                  disabled={pending}
+                  className="mt-0.5 size-4 cursor-pointer accent-[color:var(--color-brand-strong)]"
+                />
+                <span className="flex-1 text-sm">
+                  <span className="font-display text-base text-[color:var(--color-ink)]">
+                    Show the salary band to signed-in applicants
+                  </span>
+                  <span className="mt-0.5 block text-xs leading-relaxed text-[color:var(--color-ink-soft)]">
+                    Anonymous visitors never see it either way; this only
+                    controls what a signed-in seeker sees on the apply
+                    page.
+                  </span>
+                </span>
+              </label>
+            )}
+          </fieldset>
+        )}
       </section>
 
       <div className="flex flex-wrap items-center justify-end gap-3 border-t border-[color:var(--color-hairline)] pt-5">

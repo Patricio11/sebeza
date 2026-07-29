@@ -134,6 +134,10 @@ export interface InvitationRow {
   handle: string;
   displayName: string;
   state: InvitationState;
+  /** Phase 34  provenance: employer-invited vs self-applied via the
+   *  public link. Drives the "Self-applied" chip + the accept-rate
+   *  strip's exclusion (a self-apply would fake a 100% acceptance). */
+  origin: "employer_invite" | "self_apply";
   invitedAt: string;
   expiresAt: string | null;
   respondedAt: string | null;
@@ -184,6 +188,7 @@ export async function listInvitationsForVacancy(
       handle: schema.profiles.handle,
       displayName: schema.profiles.displayName,
       state: schema.vacancyInvitations.state,
+      origin: schema.vacancyInvitations.origin,
       invitedAt: schema.vacancyInvitations.invitedAt,
       expiresAt: schema.vacancyInvitations.expiresAt,
       respondedAt: schema.vacancyInvitations.respondedAt,
@@ -205,6 +210,7 @@ export async function listInvitationsForVacancy(
     handle: r.handle,
     displayName: r.displayName,
     state: r.state as InvitationState,
+    origin: r.origin,
     invitedAt: toIso(r.invitedAt),
     expiresAt: r.expiresAt ? toIso(r.expiresAt) : null,
     respondedAt: r.respondedAt ? toIso(r.respondedAt) : null,

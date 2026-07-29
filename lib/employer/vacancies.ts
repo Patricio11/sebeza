@@ -58,6 +58,7 @@ import type {
   VacancyStatus,
 } from "./vacancies-types";
 import { canEditVacancies } from "./vacancies-types";
+import { mintSelfApplyToken } from "@/lib/vacancy/public";
 
 export type ActionResult<T extends object = object> =
   | ({ ok: true } & T)
@@ -130,6 +131,13 @@ export interface VacancyRow {
    *  consumers never see a partial window. Only meaningful when
    *  workAvailability includes 'seasonal'. */
   seasonalWindow: SeasonalWindow | null;
+  /** Phase 34  Self Apply public link. Toggle is the kill-switch;
+   *  token is minted once on first enable and stable thereafter. */
+  selfApplyEnabled: boolean;
+  selfApplyToken: string | null;
+  /** Phase 34 D2  signed-in applicants see the salary band on the
+   *  apply page while true. Anonymous visitors NEVER see it. */
+  salaryVisibleToApplicants: boolean;
   createdAt: string; // ISO
   closedAt: string | null;
 }
@@ -156,6 +164,9 @@ function rowToVacancy(r: typeof schema.vacancies.$inferSelect): VacancyRow {
     minYearsExperience: r.minYearsExperience ?? null,
     minNqfLevel: r.minNqfLevel ?? null,
     followUpNudgesEnabled: r.followUpNudgesEnabled ?? false,
+    selfApplyEnabled: r.selfApplyEnabled ?? false,
+    selfApplyToken: r.selfApplyToken ?? null,
+    salaryVisibleToApplicants: r.salaryVisibleToApplicants ?? true,
     // Phase 9.21  fold "one month set, the other NULL" to NULL so
     // consumers never have to defend against half-windows. The action
     // layer never writes a partial window, but legacy / hand-edited
@@ -452,6 +463,13 @@ const vacancyInputSchema = z.object({
    *  current value alone (no surprise toggle on partial form payloads
    *  from older clients). */
   followUpNudgesEnabled: z.boolean().optional(),
+  /** Phase 34  Self Apply toggle. Omitted = leave current value alone
+   *  (same partial-payload posture as followUpNudgesEnabled). First
+   *  enable mints the public token inside the write action. */
+  selfApplyEnabled: z.boolean().optional(),
+  /** Phase 34 D2  show salary band to signed-in applicants on the
+   *  public apply page. Omitted = leave current value alone. */
+  salaryVisibleToApplicants: z.boolean().optional(),
   /**
    * Phase 9.21  optional season window when workAvailability
    * includes 'seasonal'. NULL = "seasonal work, timing TBD" per D0.
@@ -610,6 +628,12 @@ export async function createVacancy(
     minYearsExperience: v.minYearsExperience ?? null,
     minNqfLevel: v.minNqfLevel ?? null,
     followUpNudgesEnabled: v.followUpNudgesEnabled ?? false,
+    // Phase 34  a vacancy CAN be created with Self Apply pre-enabled
+    // (the form shows the toggle on create too); mint the public token
+    // right away so the link panel renders on first view.
+    selfApplyEnabled: v.selfApplyEnabled ?? false,
+    selfApplyToken: v.selfApplyEnabled ? mintSelfApplyToken() : null,
+    salaryVisibleToApplicants: v.salaryVisibleToApplicants ?? true,
     // Phase 9.21  the refine() above guarantees these are paired;
     // we still defensively null both together so an unrelated bug
     // can't write a half-window.
@@ -722,6 +746,20 @@ export async function updateVacancy(
       // overwrite the column when the form actually included a value.
       ...(v.followUpNudgesEnabled !== undefined
         ? { followUpNudgesEnabled: v.followUpNudgesEnabled }
+        : {}),
+      // Phase 34  same partial-payload posture. First enable mints
+      // the token ONCE; later flips never rotate it (the toggle, not
+      // the token, is the gate  a re-enabled link resumes working).
+      ...(v.selfApplyEnabled !== undefined
+        ? {
+            selfApplyEnabled: v.selfApplyEnabled,
+            ...(v.selfApplyEnabled && !existing.selfApplyToken
+              ? { selfApplyToken: mintSelfApplyToken() }
+              : {}),
+          }
+        : {}),
+      ...(v.salaryVisibleToApplicants !== undefined
+        ? { salaryVisibleToApplicants: v.salaryVisibleToApplicants }
         : {}),
       // Phase 9.21  paired-month guard mirrors the create insert.
       seasonalWindowStartMonth: pairedMonth(v.seasonalWindowStartMonth, v.seasonalWindowEndMonth),

@@ -167,9 +167,17 @@ export function VacancyInvitationsPanel({
                     <Icon className="size-3" aria-hidden="true" />
                     {STATE_LABEL[inv.state]}
                   </span>
+                  {/* Phase 34  honest provenance: they walked in via
+                      the public link, nobody on the team invited them. */}
+                  {inv.origin === "self_apply" && (
+                    <span className="inline-flex items-center gap-1 rounded-[var(--radius-pill)] border border-[color:var(--color-brand)]/50 bg-[color:var(--color-brand-tint)] px-2 py-0.5 text-[0.65rem] uppercase tracking-[0.18em] text-[color:var(--color-brand-strong)]">
+                      Self-applied
+                    </span>
+                  )}
                 </div>
                 <p className="mt-1 text-xs text-[color:var(--color-ink-soft)]">
-                  Invited {dfmt.format(new Date(inv.invitedAt))}
+                  {inv.origin === "self_apply" ? "Applied" : "Invited"}{" "}
+                  {dfmt.format(new Date(inv.invitedAt))}
                   {inv.expiresAt &&
                     inv.state === "invited" &&
                     `  responds-by ${dfmt.format(new Date(inv.expiresAt))}`}

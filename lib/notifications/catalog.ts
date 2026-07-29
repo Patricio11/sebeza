@@ -282,6 +282,19 @@ export const NOTIFICATION_CATALOG = {
       "The change-of-mind path: a declined seeker tapped \"Express interest again.\" Human workflow, not a dead end  re-open the conversation if the role is still open.",
     dedupeWindowSeconds: 0,
   },
+  // Phase 34  Self Apply. Fires per application (no dedupe: each
+  // applicant is their own event, like placements). Default ON both
+  // channels  an employer who switched the public link ON is asking
+  // for applicants; email still rides the platform-wide killswitch.
+  "vacancy.self_apply": {
+    defaultInApp: true,
+    defaultEmail: true,
+    audience: "org_members",
+    label: "Someone applied via your public vacancy link",
+    description:
+      "Fires when a seeker applies through a vacancy's public Self Apply link. They arrive in the vacancy pipeline as an accepted candidate with a \"Self-applied\" chip  review and shortlist them exactly like invited seekers.",
+    dedupeWindowSeconds: 0,
+  },
   // ──────────────────────────────────────────────────────────────────────
   // Phase 9.10  employer KYC / org-vetting lifecycle. Transactional
   // events; default ON like the vacancy + verification kinds.

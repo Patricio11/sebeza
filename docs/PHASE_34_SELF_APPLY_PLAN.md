@@ -49,57 +49,58 @@ beautiful, branded, consistent — not generic popups."*
 
 ---
 
-## 🧱 TASKS
+## 🧱 TASKS (tick as each lands — house rule from this phase forward)
 
 ### 34.1 Schema — migration `0062_phase34_self_apply.sql` (idempotent + journal idx 62)
 
-- `vacancy_invitation_origin` pgEnum: `employer_invite` | `self_apply`.
-- `vacancy_invitations`: `origin` NOT NULL DEFAULT `'employer_invite'`; **`invited_by_user_id`
+- [x] `vacancy_invitation_origin` pgEnum: `employer_invite` | `self_apply`.
+- [x] `vacancy_invitations`: `origin` NOT NULL DEFAULT `'employer_invite'`; **`invited_by_user_id`
   DROP NOT NULL** (null = self-applied). Existing unique `(vacancyId, profileId)` is the
   collision rule: already-invited seekers see "you're already invited — respond here"; duplicate
   applies are impossible. `expires_at` stays NULL on self-applies (already nullable; expiry cron
   only touches `state='invited'`).
-- `vacancies`: `self_apply_enabled boolean NOT NULL DEFAULT false`; `self_apply_token text`
+- [x] `vacancies`: `self_apply_enabled boolean NOT NULL DEFAULT false`; `self_apply_token text`
   UNIQUE (nullable — generated once on first enable, `crypto.randomBytes(24)` base64url,
   ~32 chars unguessable; stable across toggle flips, the enabled flag is the gate);
   `salary_visible_to_applicants boolean NOT NULL DEFAULT true` (D2).
+- [x] Migration applied to dev DB; columns + seeded flag verified; journal contiguous at idx 62.
 
 ### 34.2 Plumbing
 
-- Flag `feature_flag_vacancy_self_apply` (4 mechanical edits in settings/settings-actions;
+- [x] Flag `feature_flag_vacancy_self_apply` (4 mechanical edits in settings/settings-actions;
   revalidate list + the new public route).
-- Rate-limit bucket `self-apply` in `lib/rate-limit/types.ts`.
-- Audit kind `vacancy.self_apply` (meta: vacancyId, orgId, source `existing_account|signup`,
+- [x] Rate-limit bucket `self-apply` in `lib/rate-limit/types.ts`.
+- [x] Audit kind `vacancy.self_apply` (meta: vacancyId, orgId, source `existing_account|signup`,
   disclosure wording version). Notification kind `vacancy.self_apply` → org members ("New
   application for {title}"), catalog entry, default ON, link `/employer/vacancies/{id}`.
 
 ### 34.3 Server layer
 
-- **`lib/vacancy/public.ts`** (plain module): `getPublicVacancyByToken(token)` → flag ON +
+- [x] **`lib/vacancy/public.ts`** (plain module): `getPublicVacancyByToken(token)` → flag ON +
   `selfApplyEnabled` + `status='open'` + org join (name, verification) → public subset or a
   typed `unavailable` reason. Salary band included ONLY via a second viewer-aware helper for
   signed-in seekers when `salaryVisibleToApplicants` (D2).
-- **`lib/seeker/self-apply.ts`** (`"use server"`): `selfApplyToVacancy(token)` —
+- [x] **`lib/seeker/self-apply.ts`** (`"use server"`): `selfApplyToVacancy(token)` —
   `verifyRole("seeker")` → rate limit → re-validate flag/toggle/status → blocked-org check →
   existing-row check (`already_applied` / `already_invited` outcomes) → INSERT
   (`origin='self_apply'`, `state='accepted'`, `respondedAt=now`, `invitedByUserId=null`,
   `vacancySnapshot` frozen same as invites) → notify org + audit → returns outcome + the
   skills-gap payload (vacancy skillSlugs minus the seeker's current skills) for the congrats
   modal.
-- Employer toggle: `selfApplyEnabled` + `salaryVisibleToApplicants` join `vacancyInputSchema` +
+- [x] Employer toggle: `selfApplyEnabled` + `salaryVisibleToApplicants` join `vacancyInputSchema` +
   create/update writes (house pattern: `followUpNudgesEnabled`); token minted inside
   `updateVacancy`/`createVacancy` on first enable.
 
 ### 34.4 The branded dialog primitive + the two dialogs
 
-- **`components/ui/BrandDialog.tsx`** — extracted from the best hand-rolled instance
+- [x] **`components/ui/BrandDialog.tsx`** — extracted from the best hand-rolled instance
   (`InviteFromSearchButton`): bottom-sheet on mobile → centred card on desktop, paper/ink
   Civic-Editorial chrome (eyebrow slot, `font-display` title, hairline rules, pill CTAs),
   focus-trapped, Escape/backdrop-close guarded while pending, `useId` labelling, reduced-motion
   safe. This is the house modal from now on.
-- **`ApplyConfirmDialog`** — vacancy summary strip (title, org + verification chip, location,
+- [x] **`ApplyConfirmDialog`** — vacancy summary strip (title, org + verification chip, location,
   salary when permitted) + the D4 disclosure line + Apply pill.
-- **`ApplyCongratsDialog`** — celebration header (restrained, Civic-Editorial: big Fraunces
+- [x] **`ApplyCongratsDialog`** — celebration header (restrained, Civic-Editorial: big Fraunces
   "Application sent." + positive check, no confetti), then the SMART nudge: "This employer asked
   for {skills you don't have yet} — add the ones you have so you rank higher" with a one-tap
   link to `/dashboard/profile#skills`; completeness bar for context. New-user variant adds
@@ -107,70 +108,70 @@ beautiful, branded, consistent — not generic popups."*
 
 ### 34.5 Public page — `app/[locale]/(public)/apply/[token]/page.tsx`
 
-- Civic-Editorial vacancy dossier: eyebrow ("Open role · {province}"), Fraunces title, org line
+- [x] Civic-Editorial vacancy dossier: eyebrow ("Open role · {province}"), Fraunces title, org line
   with HONEST verification badge, chips (profession, seniority, work availability, min
   experience, positions when set), skills as chip rows, description, "Apply now" pill +
   "Powered by Sebenza" footer. 360px-first.
-- Viewer-aware: anonymous → Apply routes to `/sign-up/apply/{token}` (+ "Already on Sebenza?
+- [x] Viewer-aware: anonymous → Apply routes to `/sign-up/apply/{token}` (+ "Already on Sebenza?
   Sign in" → `/sign-in?next=/apply/{token}`); signed-in seeker → ApplyConfirmDialog island
   (salary line per D2); employer/admin viewer → read-only note ("You're signed in as an
   employer"); owner org members see a "this is your public link" banner.
-- All unavailable states (bad token, flag off, toggle off, closed/filled) → same calm panel.
-- `generateMetadata`: title "{title} — {org}", description from the vacancy, OG image → the new
+- [x] All unavailable states (bad token, flag off, toggle off, closed/filled) → same calm panel.
+- [x] `generateMetadata`: title "{title} — {org}", description from the vacancy, OG image → the new
   card, `robots: noindex` (D3), no sitemap entry.
-- **OG share card** `app/[locale]/(public)/apply/[token]/card/route.tsx` — 1200×630: eyebrow
+- [x] **OG share card** `app/[locale]/(public)/apply/[token]/card/route.tsx` — 1200×630: eyebrow
   "Open role · Sebenza", title, org + province, up to 3 skill chips, flag-band footer with
   `{SITE_HOST}/apply/…`. Satori-safe per Phase 33 lessons.
 
 ### 34.6 Sign-up funnel — `/sign-up/apply/[token]`
 
-- Page mirrors `sign-up/invited/[token]`: loads the public vacancy, renders `SeekerSignUpForm`
+- [x] Page mirrors `sign-up/invited/[token]`: loads the public vacancy, renders `SeekerSignUpForm`
   with a new `applyContext` prop `{token, vacancyTitle, orgName, vacancySkills,
   prefillProfession, prefillProvince}`; a slim vacancy context card stays pinned above the
   steps so the seeker never forgets what they're applying for.
-- Step 3 pre-fills profession + province from the vacancy (editable — prefill, never lock) and,
+- [x] Step 3 pre-fills profession + province from the vacancy (editable — prefill, never lock) and,
   when `applyContext` is present, adds the founder's tailored moment: **"Skills for this role"**
   — the vacancy's skills as one-tap chips (select what you have; saved onto the profile, not
   just the application). Optional, skippable, zero free-typing.
-- `seekerSignUpSchema` gains optional `applyToken` + `applySkillSlugs` (validated server-side
+- [x] `seekerSignUpSchema` gains optional `applyToken` + `applySkillSlugs` (validated server-side
   against the vacancy's skillSlugs ∩ canonical skills). `signUpSeeker`: after profile creation,
   a valid token → insert selected skills, create the application row (same helper as 34.3,
   source `signup`), audit. Application is recorded AT SIGN-UP (the `acceptSeekerInvitation`
   precedent) — email verification is not a race; nothing is lost if they wander off.
   **returnTo does NOT survive verification today; this design sidesteps it entirely.**
-- On submit success the form shows **ApplyCongratsDialog (new-user variant)** before routing to
+- [x] On submit success the form shows **ApplyCongratsDialog (new-user variant)** before routing to
   `/verify-email` — congratulations + "verify your email" + profile nudge, exactly the moment
   the founder described.
 
 ### 34.7 Employer UI
 
-- `VacancyForm`: "Self Apply" section — enable toggle + salary-visibility toggle (only rendered
+- [x] `VacancyForm`: "Self Apply" section — enable toggle + salary-visibility toggle (only rendered
   when the flag is ON; copy explains the public subset honestly).
-- Vacancy detail page: when enabled, a **Public link panel** — the URL, Copy button, WhatsApp
+- [x] Vacancy detail page: when enabled, a **Public link panel** — the URL, Copy button, WhatsApp
   share shortcut (`wa.me/?text=`), and honest state notes ("Link pauses automatically when the
   vacancy is closed or filled").
-- `VacancyInvitationsPanel`: **"Self-applied" chip** on `origin='self_apply'` rows (vs the
+- [x] `VacancyInvitationsPanel`: **"Self-applied" chip** on `origin='self_apply'` rows (vs the
   existing invited framing); no other pipeline change (D1).
-- `AcceptRateStrip` + accept-rate metrics: **exclude self-applies** — a self-application would
+- [x] `AcceptRateStrip` + accept-rate metrics: **exclude self-applies** — a self-application would
   inflate invite-acceptance to 100% and the strip's honesty is the point.
 
 ### 34.8 Seeker dashboard
 
-- `listMyInvitations` already returns accepted rows; self-applies get "You applied" framing
+- [x] `listMyInvitations` already returns accepted rows; self-applies get "You applied" framing
   (origin surfaced through the row shape) instead of "You accepted" — honest provenance both
   directions. Invitation detail page shows the same vacancy snapshot card.
 
 ### 34.9 Compliance + i18n + tests
 
-- `assertNoVacancyFieldOnPublicSurfaces` allowlist += `lib/vacancy`,
+- [x] `assertNoVacancyFieldOnPublicSurfaces` allowlist += `lib/vacancy`,
   `app/[locale]/(public)/apply` (+ documented justification); schema doc-comment updated to
   describe the carve-out. New assertion idea (cheap): grep that `salaryBand` never appears in
   `lib/vacancy/public.ts`'s anonymous payload type.
-- `messages/en.json`: `selfApply.*` namespace (public page, dialogs, employer panel, sign-up
+- [x] `messages/en.json`: `selfApply.*` namespace (public page, dialogs, employer panel, sign-up
   step). zu/xh/af deep-merge fallback (no legal/consent copy here beyond the disclosure line —
   which IS consent-adjacent, so keep it in en + flag for human translation like the Phase 25
   precedent).
-- Tests: unit — token validity/unguessability, public-subset shape (no salaryBand key
+- [x] Tests: unit — token validity/unguessability, public-subset shape (no salaryBand key
   anonymous), skills-slug validation, origin-aware accept-rate math. Compliance — allowlist
   still green. `typecheck + lint + vitest unit + build` before commit; full `test:all` + E2E
   (both flag states, desktop + 360px) before the flag ever goes ON.
@@ -185,16 +186,16 @@ beautiful, branded, consistent — not generic popups."*
 
 ## 🧪 VERIFY
 
-1. Migration applies clean from zero; journal contiguous at idx 62.
-2. Flag OFF: no employer toggle rendered, public /apply/{token} shows unavailable panel, action
+- [x] Migration applies clean from zero; journal contiguous at idx 62.
+- [x] Flag OFF: no employer toggle rendered, public /apply/{token} shows unavailable panel, action
    refuses — zero regression anywhere.
-3. Flag ON: toggle → link appears; anonymous page renders full dossier WITHOUT salary; signed-in
+- [ ] Flag ON: toggle → link appears; anonymous page renders full dossier WITHOUT salary; signed-in
    seeker sees salary (and not when employer hid it); apply → row lands `accepted` +
    `self_apply`, employer notified, chip renders, accept-rate unchanged by the self-apply row.
-4. Already-invited seeker gets the redirect-to-invitation panel; duplicate apply blocked by the
+- [ ] Already-invited seeker gets the redirect-to-invitation panel; duplicate apply blocked by the
    unique index at the action layer with honest copy.
-5. New-user funnel: sign-up from the link pre-fills profession/province, skills chips save to
+- [ ] New-user funnel: sign-up from the link pre-fills profession/province, skills chips save to
    profile, application row exists before email verification, congrats dialog fires, then
    /verify-email.
-6. OG card returns 200 image/png (curl), WhatsApp-shaped metadata absolute.
-7. typecheck + lint + unit vitest + production build green.
+- [x] OG card returns 200 image/png (curl), WhatsApp-shaped metadata absolute.
+- [x] typecheck + lint + unit vitest + production build green.
