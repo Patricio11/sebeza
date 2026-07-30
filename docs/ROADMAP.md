@@ -1180,6 +1180,70 @@ than patched.** Full plan + ledger: `docs/PHASE_32_SECURITY_HARDENING_PLAN.md`. 
 
 ---
 
+## 🔎 PHASE 33 — FULL SEO + SOCIAL SHARING PASS *(shipped 2026-07-28)*
+
+**Thesis: a national platform whose seeker acquisition motion is organic + WhatsApp forwarding had
+half-built SEO — and the founder's "no preview when I share the link on WhatsApp" bug had TWO root
+causes.** Full plan (all boxes ticked): `docs/PHASE_33_SEO_PLAN.md`.
+
+- [x] **33.1 Foundations.** `lib/seo.ts` = the single source of truth for SITE_URL / brand / locale
+  URL helpers (honours next-intl `as-needed`: en UNPREFIXED — emitting `/en/...` self-307s).
+  `metadataBase` in the root layout (THE WhatsApp fix — scrapers only render absolute og:image
+  URLs) + sitewide OpenGraph/twitter defaults + robots/googleBot + env-driven GSC/Bing verification.
+- [x] **33.1b Generated OG images.** Civic-Editorial default card at `/og-image` (next/og, SA flag
+  band) inherited by every public page; the profile share card's hardcoded WRONG domain
+  (`sebenza.co.za`) fixed — and BOTH image routes had been 500ing on Satori constraints
+  (`display:inline-block`; multi-child divs need explicit flex) since Phase 11.4.1. Fixed.
+- [x] **33.2 Per-page metadata + hreflang** (en/zu/xh/af + x-default) on every public surface;
+  **consent-aware profile indexing** (D3): `/p/[handle]` emits `noindex` unless the seeker's own
+  `searchability` consent is granted (fails closed) — Google's reach ≤ the seeker's grant.
+- [x] **33.3–33.4 First structured data**: Organization (legalName Yetotec) + WebSite/SearchAction
+  on the landing, Person on consented dossiers only, FAQPage + a 6-question honest FAQ section.
+- [x] **33.5–33.6 Sitemap/robots fixes** (self-redirecting `/en/` canonicals; missing /terms +
+  /accessibility; locale-prefixed private-path disallows) + `noindex` meta on all five private
+  route groups (new `(auth)/layout.tsx`).
+- [x] **33.7 Vercel Analytics + Speed Insights** — cookieless, mounted only when `VERCEL=1`.
+- [ ] **Founder manual steps:** GSC verify via `GOOGLE_SITE_VERIFICATION` env + submit sitemap,
+  Bing import, Vercel dashboard toggles, WhatsApp paste-test on prod.
+
+---
+
+## 📨 PHASE 34 — SELF APPLY: PUBLIC VACANCY LINK + SEEKER-INITIATED APPLICATIONS *(shipped 2026-07-29, ships DARK)*
+
+**Thesis: every vacancy can become its own recruiting channel — a beautiful public link a seeker
+can apply through — while the application rides the EXISTING invitation pipeline end to end.**
+Full plan (all boxes ticked, E2E 8/8 green): `docs/PHASE_34_SELF_APPLY_PLAN.md`. Screenshots:
+`docs/screenshots/phase34-self-apply/`.
+
+- [x] **Pipeline reuse (D1).** Migration `0062`: `origin` enum on `vacancy_invitations`
+  (`employer_invite` | `self_apply`) + nullable `invited_by_user_id`. A self-application lands
+  `state='accepted'` with a **"Self-applied" chip**; the employer's existing review / shortlist /
+  mark-filled vetting applies unchanged. Accept-rate analytics EXCLUDE self-applies (born-accepted
+  rows would fake the rate). Unique (vacancy, profile) index = the collision referee.
+- [x] **The public surface** — the FIRST public vacancy surface, a deliberate documented carve-out
+  of the 9.8.8 org-private contract: `/apply/[token]` (unguessable per-vacancy token, minted on
+  first enable; the toggle is the kill-switch) renders a Civic-Editorial dossier through
+  `lib/vacancy/public.ts`, whose anonymous payload type STRUCTURALLY cannot carry `salaryBand`
+  (D2 — signed-in seekers see salary unless the employer hides it; source-level unit test pins
+  this). Every unavailable state renders ONE identical calm panel (no enumeration). `noindex` v1
+  (D3 — indexed job pages / Google Jobs = its own future phase). OG share card per vacancy.
+- [x] **The apply flow.** Signed-in: BrandDialog confirm (the audited D4 disclosure IS the consent
+  act — no `vacancy_matching` requirement for a seeker-initiated application) → congrats dialog
+  with the skills-gap nudge. New user: `/sign-up/apply/[token]` pre-fills profession + province
+  from the vacancy, one-tap vacancy-skill chips save to the PROFILE, and the application is
+  recorded AT SIGN-UP (returnTo does not survive email verification — this sidesteps it).
+- [x] **`components/ui/BrandDialog.tsx`** — the house modal primitive (bottom-sheet → centred card,
+  focus-trapped, Civic-Editorial chrome). Use for every new dialog; migrate old ones opportunistically.
+- [x] **Employer side.** Flag-gated toggles in VacancyForm; public-link panel with Copy + WhatsApp
+  share on the vacancy detail page.
+- [x] **Verified** on the Docker harness (never the shared Neon DB): E2E 8/8 both viewports incl.
+  the new-user funnel with DB assertions; integration 140/140; compliance 30/30; showcase seed
+  vacancy "IT Support Technician" with the fixed demo token `sa-demo-it-support-2026-fixed01`.
+- **To launch:** flip `feature_flag_vacancy_self_apply` on /admin/settings, then enable Self Apply
+  per vacancy. Nothing else blocks it.
+
+---
+
 ## 🚀 DEPLOYMENT CHECKLIST
 
 ### Pre-Launch
@@ -1250,8 +1314,13 @@ HR Practitioner · Electrician · Plumber · Accountant · Nurse · Driver · Bo
 
 ---
 
-*Last Updated: 2026-07-21*
-*Version: 2.11  synced through **Phase 32** (security remediation: 2 critical + 6 high + 9 medium
+*Last Updated: 2026-07-30*
+*Version: 2.12  synced through **Phase 34** (Self Apply: public vacancy link + seeker-initiated
+applications riding the existing invitation pipeline via an `origin` column; BrandDialog house
+modal primitive; ships dark behind `feature_flag_vacancy_self_apply`; E2E 8/8 both viewports) and
+**Phase 33** (full SEO + social pass: metadataBase/OG/hreflang/JSON-LD, generated OG cards, the
+WhatsApp-preview double-bug fixed, consent-aware profile indexing; founder GSC/Bing/WhatsApp manual
+steps still open). Prior: v2.11 synced through **Phase 32** (security remediation: 2 critical + 6 high + 9 medium
 findings closed, build-failing Server-Action guard, welcome email; DPIA R-27). Prior: v2.10 synced
 through **Phase 31 final shape** (data minimisation: ID/passport collection
 dormant by default; ONE nationality picker for everyone with `is_citizen` DERIVED server-side — no

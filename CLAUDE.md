@@ -5,12 +5,22 @@
 **Working name:** Sebenza · South African National Talent-Intelligence Platform.
 **Companion docs (read together, always):**
 - `docs/TO_START_EVERY_SESSION.md`  non-negotiable rules + tone + current state.
-- `docs/ROADMAP.md`  phased build plan (Phase 0 → 33; all shipped except 14, which is partnership-gated).
+- `docs/ROADMAP.md`  phased build plan (Phase 0 → 34; all shipped except 14, which is partnership-gated).
 - `docs/UX_UI_SPEC.md`  design system + screen-by-screen.
 
-**Current state (2026-07): LIVE, DB-BACKED, shipped through Phase 33.** Postgres (Neon) + Drizzle,
-62 migrations (0000→0061), Better Auth sessions, ~425-test vitest suite (unit/integration/compliance)
-+ ~116-test Playwright E2E (desktop + 360px), 20 cron jobs.
+**Current state (2026-07): LIVE, DB-BACKED, shipped through Phase 34.** Postgres (Neon) + Drizzle,
+63 migrations (0000→0062), Better Auth sessions, ~429-test vitest suite (unit/integration/compliance)
++ ~124-test Playwright E2E (desktop + 360px), 20 cron jobs.
+Phase 34 (Self Apply, plan `docs/PHASE_34_SELF_APPLY_PLAN.md`): per-vacancy public apply link,
+SHIPS DARK behind `feature_flag_vacancy_self_apply` + per-vacancy toggle. Self-applications ride
+`vacancy_invitations` via the new `origin` column (born `accepted`, "Self-applied" chip; employer
+vets via existing review/shortlist; accept-rate strips EXCLUDE them). `lib/vacancy/public.ts` is
+the deliberate 9.8.8 public carve-out  its anonymous payload type structurally cannot carry
+salaryBand (source-level test). D4: the audited apply confirmation IS the consent act; no
+`vacancy_matching` requirement for seeker-initiated applications. New-user funnel records the
+application AT SIGN-UP. **`components/ui/BrandDialog.tsx` is the house modal primitive**  use it
+for every new dialog. E2E flag-ON verified on the Docker harness only  NEVER flip platform flags
+on the shared Neon DB (it IS prod).
 Phase 32 (security remediation, plan `docs/PHASE_32_SECURITY_HARDENING_PLAN.md`, DPIA addendum R-27):
 **a `"use server"` export is a PUBLIC HTTP endpoint**  `lib/security/server-action-guards.test.ts`
 fails the build on any unguarded Server Action (allowlist entries must justify being public).
@@ -54,7 +64,7 @@ Fraunces (display) × Hanken Grotesk (body); warm paper/ink + institutional teal
 Editorial layouts, thick rules, all-caps tracked eyebrows, tabular numerals. NOT a SaaS card grid.
 
 ## Stack (pinned)
-- Next.js 16.2.6 (App Router, no `src`, Turbopack) · React 19.2.4 · TS strict + noUncheckedIndexedAccess.
+- Next.js 16.2.12 (App Router, no `src`, Turbopack) · React 19.2.4 · TS strict + noUncheckedIndexedAccess.
 - Tailwind v4 (tokens in `app/globals.css` @theme) · next-intl 4.12 (en base; zu/xh/af deepMerge fallback).
 - Drizzle ORM 0.45 + Postgres (Neon serverless driver; `DATABASE_DRIVER=postgres-js` for local/Docker).
 - Better Auth 1.6 (sessions, email verification, 2FA TOTP; prod admins hard-require 2FA).

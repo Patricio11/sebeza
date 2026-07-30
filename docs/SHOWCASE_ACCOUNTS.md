@@ -19,6 +19,19 @@ Unlocks-next), `feature_flag_city_demand` (andile's Johannesburg hotspots). The 
 (`feature_flag_seeker_ai_coach`) is **safety-ack gated on `/admin/llm`**  see
 `docs/PHASE_22_AI_COACH_SAFETY_PLAN.md` before enabling anywhere real.
 
+## Self Apply demo (Phase 34)
+Flip `feature_flag_vacancy_self_apply` ON, then open the seeded showcase vacancy
+**"IT Support Technician"** (Discovery Bank, open, Self Apply pre-enabled) whose fixed
+demo link is **`/apply/sa-demo-it-support-2026-fixed01`**:
+- **Anonymous**  full Civic-Editorial vacancy dossier, NO salary band; "Apply now" routes into
+  the vacancy-tailored sign-up funnel (profession + province pre-filled, one-tap skills chips).
+- **As `andile-z@example.co.za`**  salary band visible; Apply → branded confirm dialog (the
+  audited POPIA disclosure) → congrats dialog with the skills-gap nudge; the row lands in
+  Naledi's pipeline with a **"Self-applied"** chip; the seeker inbox reads **"You applied"**.
+- **As `naledi.khumalo@discovery.co.za`**  the vacancy detail page shows the public-link panel
+  (copy + WhatsApp share) and the Self Apply toggles in the edit form.
+Screenshots of the whole arc: `docs/screenshots/phase34-self-apply/`.
+
 ## Honesty notes
 - The destinations table on andile's student lane is computed from **real seeded
   employer-confirmed placements** (11 across the Wits cohort  above the k-floor of 10).
