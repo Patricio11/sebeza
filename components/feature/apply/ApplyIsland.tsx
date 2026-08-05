@@ -1,17 +1,17 @@
 "use client";
 
 /**
- * Phase 34 — the signed-in seeker's Apply flow on /apply/[token]
+ * Phase 34 - the signed-in seeker's Apply flow on /apply/[token]
  * (docs/PHASE_34_SELF_APPLY_PLAN.md §34.4).
  *
  * Three-beat experience, all on BrandDialog so it feels like Sebenza,
  * never a generic popup:
  *   1. "Apply now" pill (or the honest already-applied / already-
  *      invited state the server computed).
- *   2. ApplyConfirm dialog — vacancy summary strip + the D4 disclosure
+ *   2. ApplyConfirm dialog - vacancy summary strip + the D4 disclosure
  *      line ("Applying shares your profile with {org} for this role").
  *      The confirm click is the audited consent act.
- *   3. Congrats dialog — restrained celebration + the SMART nudge: the
+ *   3. Congrats dialog - restrained celebration + the SMART nudge: the
  *      vacancy's asked-for skills the seeker doesn't have yet, one tap
  *      from adding them. "Complete your profile so you're considered."
  */
@@ -44,7 +44,7 @@ export function ApplyIsland({
   vacancyTitle: string;
   orgName: string;
   locationLabel: string;
-  /** Already viewer-filtered server-side (D2) — null = not shown. */
+  /** Already viewer-filtered server-side (D2) - null = not shown. */
   salaryBand: string | null;
   initialState: "can_apply" | "already_applied" | "already_invited";
   initialInvitationId: string | null;
@@ -89,7 +89,7 @@ export function ApplyIsland({
       <StatusPanel
         icon={<CheckCircle2 className="size-5" aria-hidden="true" />}
         title="You've applied for this role"
-        body={`Your application is with ${orgName}. Keep your profile fresh — that's what they review.`}
+        body={`Your application is with ${orgName}. Keep your profile fresh. That's what they review.`}
         cta={{ href: "/dashboard/invitations", label: "View my applications" }}
       />
     );
@@ -98,7 +98,7 @@ export function ApplyIsland({
     return (
       <StatusPanel
         icon={<Sparkles className="size-5" aria-hidden="true" />}
-        title="Good news — you're already invited"
+        title="Good news: you're already invited"
         body={`${orgName} already invited you to this role. Respond to the invitation instead of applying.`}
         cta={{
           href: `/dashboard/invitations/${phase.invitationId}`,
@@ -152,7 +152,7 @@ export function ApplyIsland({
           </>
         }
       >
-        {/* Vacancy summary strip — the seeker confirms against the facts. */}
+        {/* Vacancy summary strip - the seeker confirms against the facts. */}
         <dl className="grid gap-2 rounded-[var(--radius-md)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface-sunk)] p-4 text-sm">
           <SummaryRow label="Role" value={vacancyTitle} />
           <SummaryRow label="Employer" value={orgName} />
@@ -160,7 +160,7 @@ export function ApplyIsland({
           {salaryBand && <SummaryRow label="Salary band" value={salaryBand} />}
         </dl>
 
-        {/* D4 — the disclosure IS the consent moment; state it plainly. */}
+        {/* D4 - the disclosure IS the consent moment; state it plainly. */}
         <p className="mt-4 text-sm leading-relaxed text-[color:var(--color-ink-soft)]">
           {disclosure}
         </p>
@@ -216,7 +216,7 @@ export function ApplyIsland({
         {phase.kind === "done" && phase.skillsGap.length > 0 ? (
           <div className="mt-4 rounded-[var(--radius-md)] border border-[color:var(--color-brand)]/30 bg-[color:var(--color-brand-tint)] p-4">
             <p className="text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--color-brand-strong)]">
-              Be considered — complete your profile
+              Be considered · complete your profile
             </p>
             <p className="mt-1.5 text-sm leading-relaxed text-[color:var(--color-ink)]">
               This employer asked for skills you haven&rsquo;t added yet. Add
@@ -235,7 +235,7 @@ export function ApplyIsland({
           </div>
         ) : (
           <p className="mt-4 text-sm leading-relaxed text-[color:var(--color-ink-soft)]">
-            Keep your profile complete and your status fresh — employers see
+            Keep your profile complete and your status fresh. Employers see
             exactly what you&rsquo;ve shared, and fresher profiles rank
             higher.
           </p>

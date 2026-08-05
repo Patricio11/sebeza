@@ -1077,7 +1077,7 @@ export function VacancyForm({
                   description (never the salary band for visitors, never
                   your pipeline). Applicants land in this vacancy&rsquo;s
                   pipeline as accepted candidates with a
-                  &ldquo;Self-applied&rdquo; chip  you review and
+                  &ldquo;Self-applied&rdquo; chip. You review and
                   shortlist them like invited seekers. Untick any time to
                   switch the link off; it also pauses automatically when
                   the vacancy is closed or filled.

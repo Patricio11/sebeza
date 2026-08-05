@@ -4,7 +4,7 @@
  * These assertions are about PROMISES, not pixels. The email is the
  * POPIA §18 transparency moment for a seeker ("here is what you agreed
  * to, here is where to change it"), and the first thing a nervous user
- * reads from us — so the properties worth pinning are: it tells the
+ * reads from us - so the properties worth pinning are: it tells the
  * truth about their consents, it escapes user input, it links to the
  * privacy centre, it carries the anti-phishing line, and it stays
  * transactional (no tracking, no marketing opt-in).
@@ -15,7 +15,7 @@ import { seekerWelcomeEmail, employerWelcomeEmail } from "./welcome";
 describe("seeker welcome email (Phase 32.4)", () => {
   const base = { name: "Thandeka Mbeki", grantedConsents: [] as never[] };
 
-  it("greets by first name only — surnames are redacted everywhere else too", () => {
+  it("greets by first name only - surnames are redacted everywhere else too", () => {
     const html = seekerWelcomeEmail({ ...base });
     expect(html).toContain("Thandeka");
     expect(html).not.toContain("Mbeki");
@@ -107,7 +107,7 @@ describe("both emails stay transactional (Phase 32.4 guardrail)", () => {
     }
   });
 
-  it("smuggles in no marketing opt-in — a digest would need its own consent", () => {
+  it("smuggles in no marketing opt-in - a digest would need its own consent", () => {
     for (const html of samples) {
       expect(html).not.toMatch(/subscribe|newsletter|marketing/i);
     }

@@ -118,13 +118,13 @@ that registry  we win on **data quality, usability, and analytics.** The system 
 - [x] `/dashboard/account`  email, password, 2FA (optional for seekers), session management, sign out.
 - [x] `/dashboard/grow`  **Career compass.** Demand-driven skill recommendations, projected rank delta if learned (e.g. *"Add 2 skills → move from #4 to #2 in Software Developer · Gauteng"*), SA-grounded learning paths (SETA learnerships, TVET, INDLELA, SAQA-recognised programmes, free options first), adjacent-profession overlap. Anchored on the same `analytics.demandBySkill` that powers `/insights` so the Phase 6 skills-gap engine plugs straight in. **This is the wedge feature for retention on the seeker side: the platform that *also tells you what to learn next.*** *(Glance card also rendered on `/dashboard` overview for visibility.)*
 - [x] **Student mode**  when a seeker's profile carries an academic record (in-progress NQF qualification at a recognised SA institution), the platform shifts gear:
-  - [x] **Academic data captured** at sign-up step 3 (collapsible "I'm currently a student" toggle reveals institution / programme / NQF level / current year / expected graduation / NSFAS / internship-and-graduate intent) and in the profile editor (Studies section renders only when `academic` exists, always with a *Verification handled by* note  never a default-verified label).
-  - [x] **Public profile** shows *"Currently studying [programme] at [institution]"* honestly with an explicit verification chip, NQF band, year of study, graduation countdown, NSFAS flag, and the seeker's opt-in to internships / graduate programmes.
-  - [x] **Career compass  Student lane.** Sits on top of the demand-driven recommendations when academic data is present: *"Bridge your degree to the market"* hero with graduation countdown, recommended electives **inside the seeker's programme** mapped to province-level demand signal, real SA internships + graduate programmes (PwC SAICA, Deloitte, SARS, Discovery, Standard Bank, Yoco, MICT SETA, Stats SA) with public sector listed first, *"Where graduates from your programme go"* destinations table aggregated from confirmed placements, and supplementary free learning to plug the gaps every graduate has.
-  - [x] **Honesty rules carried through.** Verification state is never inflated; programme eligibility is shown openly so we don't waste people's time; SAQA-recognised programmes carry an explicit SAQA chip; the destinations table is aggregated, never per-person; the mock implementation matches the Phase 4 + Phase 6 interface exactly so the swap is a data plug.
-  - [ ] **Search side-effect (Phase 4):** employer filter for "open to internships / graduate programmes"  strictly opt-in by the seeker, never default. *(Schema fields present; UI filter wires in Phase 4 alongside the DB-backed search.)*
-  - [ ] **Government wedge (Phase 6):** materialise the *demand-vs-curriculum* dataset by programme + institution + province from `searchEvents × profiles.academic`. *(Mock shape lives in `lib/mock/academic.ts`; Phase 6 plugs the query layer in.)*
-  - [ ] **Verification (Phase 8):** SAQA + institution partnership to flip `academic.verification` from self-reported to authoritative.
+ - [x] **Academic data captured** at sign-up step 3 (collapsible "I'm currently a student" toggle reveals institution / programme / NQF level / current year / expected graduation / NSFAS / internship-and-graduate intent) and in the profile editor (Studies section renders only when `academic` exists, always with a *Verification handled by* note  never a default-verified label).
+ - [x] **Public profile** shows *"Currently studying [programme] at [institution]"* honestly with an explicit verification chip, NQF band, year of study, graduation countdown, NSFAS flag, and the seeker's opt-in to internships / graduate programmes.
+ - [x] **Career compass  Student lane.** Sits on top of the demand-driven recommendations when academic data is present: *"Bridge your degree to the market"* hero with graduation countdown, recommended electives **inside the seeker's programme** mapped to province-level demand signal, real SA internships + graduate programmes (PwC SAICA, Deloitte, SARS, Discovery, Standard Bank, Yoco, MICT SETA, Stats SA) with public sector listed first, *"Where graduates from your programme go"* destinations table aggregated from confirmed placements, and supplementary free learning to plug the gaps every graduate has.
+ - [x] **Honesty rules carried through.** Verification state is never inflated; programme eligibility is shown openly so we don't waste people's time; SAQA-recognised programmes carry an explicit SAQA chip; the destinations table is aggregated, never per-person; the mock implementation matches the Phase 4 + Phase 6 interface exactly so the swap is a data plug.
+ - [ ] **Search side-effect (Phase 4):** employer filter for "open to internships / graduate programmes"  strictly opt-in by the seeker, never default. *(Schema fields present; UI filter wires in Phase 4 alongside the DB-backed search.)*
+ - [ ] **Government wedge (Phase 6):** materialise the *demand-vs-curriculum* dataset by programme + institution + province from `searchEvents × profiles.academic`. *(Mock shape lives in `lib/mock/academic.ts`; Phase 6 plugs the query layer in.)*
+ - [ ] **Verification (Phase 8):** SAQA + institution partnership to flip `academic.verification` from self-reported to authoritative.
 
 ### Task 1.5.3: Employer dashboard (full workspace)
 - [x] `/employer` shell with sidebar; persistent org-verification banner if unverified.
@@ -1126,20 +1126,20 @@ Full detail: `docs/PHASE_29_SEATS_AND_SEARCH_INVITE_FUNNEL.md`.
 
 ---
 
-## 🛡️ PHASE 31 — DATA MINIMISATION: DORMANT ID COLLECTION + DERIVED NATIONALITY CLASS *(shipped 2026-07-19 → 21)*
+## 🛡️ PHASE 31 - DATA MINIMISATION: DORMANT ID COLLECTION + DERIVED NATIONALITY CLASS *(shipped 2026-07-19 → 21)*
 
 **Thesis: don't hold the heaviest POPIA liability in the system while nothing uses it.** Full plan:
-`docs/PHASE_9_19_PLAN.md` (drafted under that name; ships as Phase 31 — "9.19" was already taken by
+`docs/PHASE_9_19_PLAN.md` (drafted under that name; ships as Phase 31 - "9.19" was already taken by
 the shipped vacancy-enrichment phase). Responsible party: **Yetotec (Pty) Ltd**.
 
 - [x] **31.1 Dormant ID/passport collection.** `feature_flag_id_verification_enabled` (default OFF,
-  ack-gated switch on /admin/verifications). While OFF — the launch posture — no ID or passport is
+  ack-gated switch on /admin/verifications). While OFF - the launch posture - no ID or passport is
   requested anywhere: the profile editor shows Date-of-birth only and the collection Server Actions
   hard-refuse. Removal/revoke paths are NEVER gated (data-subject rights). Flipping ON restores the
-  full 9.16 opt-in KYC flow exactly as built — a toggle, not a rebuild.
-- [x] **31.2 Nationality capture — final shape (2026-07-21).** ONE familiar nationality picker for
+  full 9.16 opt-in KYC flow exactly as built - a toggle, not a rebuild.
+- [x] **31.2 Nationality capture - final shape (2026-07-21).** ONE familiar nationality picker for
   everyone (canonical ISO catalogue, defaults to South Africa); **no explicit "are you a citizen?"
-  question** — the operator judged a separate citizen toggle reads as separating users into kinds.
+  question** - the operator judged a separate citizen toggle reads as separating users into kinds.
   The two-class `is_citizen` the 9.7 analytics + Citizen-Visibility ranking consume is DERIVED
   server-side (`code === "ZA"`). Free text stays retired (labels always derive from the code);
   the label displays on the public profile + search rows; never a gate. (Journey for the record:
@@ -1150,68 +1150,68 @@ the shipped vacancy-enrichment phase). Responsible party: **Yetotec (Pty) Ltd**.
 
 ---
 
-## 🔐 PHASE 32 — SECURITY REMEDIATION + THE WELCOME EMAIL *(shipped 2026-07-28)*
+## 🔐 PHASE 32 - SECURITY REMEDIATION + THE WELCOME EMAIL *(shipped 2026-07-28)*
 
 **Thesis: a four-sweep audit of the whole codebase, then every finding fixed structurally rather
 than patched.** Full plan + ledger: `docs/PHASE_32_SECURITY_HARDENING_PLAN.md`. DPIA addendum R-27.
 
-- [x] **32.1 Critical — two unauthenticated Server Actions.** A function exported from a
+- [x] **32.1 Critical - two unauthenticated Server Actions.** A function exported from a
   `"use server"` module is a PUBLIC HTTP endpoint; two internal helpers had crossed that boundary
-  (`supersedeEmploymentVerifications` — anonymous + destructive; `matchVacancyCandidates` — anonymous
+  (`supersedeEmploymentVerifications` - anonymous + destructive; `matchVacancyCandidates` - anonymous
   nationality-split supply data + raw private storage keys). Both fixed structurally, plus a
   **build-failing guard test** that walks every Server Action and refuses any unguarded export.
 - [x] **32.2 High (6).** Suspension/erasure/password-reset/2FA-reset now revoke sessions (a suspended
   employer previously kept PII access for 30 days) · sign-in no longer discloses account state or
   admins' private moderation notes · **auth rate limits** (the prior "Better Auth handles it"
-  decision was false for Server Actions — unthrottled TOTP was brute-forceable) · dependency patches
+  decision was false for Server Actions - unthrottled TOTP was brute-forceable) · dependency patches
   (Next 16.2.12, Better Auth 1.6.25, nodemailer 9.0.3) · open redirect closed at all four `?next=`.
 - [x] **32.3 Medium (9).** Verified-org gate on invites · gov `ILIKE` employer-register enumeration
   closed · `SEBENZA_E2E_HTTP` now fails closed in deployed environments · CSP no longer falls back to
   a Supabase wildcard · API routes get security headers · `trustedOrigins` drops localhost in prod ·
   anonymous report flood throttled · sign-up enumeration closed. **32.3.5 deliberately made NO
   change**: `/p/{handle}` ignoring the searchability pause is correct, because the control promises
-  "your existing relationships carry on" — documented at the query.
+  "your existing relationships carry on" - documented at the query.
 - [x] **32.4 The welcome email.** New users heard nothing after verifying. Now a role-aware email
   fires from `afterEmailVerification`, restating in plain language exactly which consents the seeker
-  granted (read live from the DB) and where to withdraw them — the POPIA §18 moment. Transactional
+  granted (read live from the DB) and where to withdraw them - the POPIA §18 moment. Transactional
   only; no tracking pixel or marketing opt-in, enforced by test.
 - **Known gap recorded:** no user locale is persisted, so all transactional email is English
   regardless of the language used in the product. Follow-up phase.
 
 ---
 
-## 🔎 PHASE 33 — FULL SEO + SOCIAL SHARING PASS *(shipped 2026-07-28)*
+## 🔎 PHASE 33 - FULL SEO + SOCIAL SHARING PASS *(shipped 2026-07-28)*
 
 **Thesis: a national platform whose seeker acquisition motion is organic + WhatsApp forwarding had
-half-built SEO — and the founder's "no preview when I share the link on WhatsApp" bug had TWO root
+half-built SEO - and the founder's "no preview when I share the link on WhatsApp" bug had TWO root
 causes.** Full plan (all boxes ticked): `docs/PHASE_33_SEO_PLAN.md`.
 
 - [x] **33.1 Foundations.** `lib/seo.ts` = the single source of truth for SITE_URL / brand / locale
-  URL helpers (honours next-intl `as-needed`: en UNPREFIXED — emitting `/en/...` self-307s).
-  `metadataBase` in the root layout (THE WhatsApp fix — scrapers only render absolute og:image
+  URL helpers (honours next-intl `as-needed`: en UNPREFIXED - emitting `/en/...` self-307s).
+  `metadataBase` in the root layout (THE WhatsApp fix - scrapers only render absolute og:image
   URLs) + sitewide OpenGraph/twitter defaults + robots/googleBot + env-driven GSC/Bing verification.
 - [x] **33.1b Generated OG images.** Civic-Editorial default card at `/og-image` (next/og, SA flag
   band) inherited by every public page; the profile share card's hardcoded WRONG domain
-  (`sebenza.co.za`) fixed — and BOTH image routes had been 500ing on Satori constraints
+  (`sebenza.co.za`) fixed - and BOTH image routes had been 500ing on Satori constraints
   (`display:inline-block`; multi-child divs need explicit flex) since Phase 11.4.1. Fixed.
 - [x] **33.2 Per-page metadata + hreflang** (en/zu/xh/af + x-default) on every public surface;
   **consent-aware profile indexing** (D3): `/p/[handle]` emits `noindex` unless the seeker's own
-  `searchability` consent is granted (fails closed) — Google's reach ≤ the seeker's grant.
+  `searchability` consent is granted (fails closed) - Google's reach ≤ the seeker's grant.
 - [x] **33.3–33.4 First structured data**: Organization (legalName Yetotec) + WebSite/SearchAction
   on the landing, Person on consented dossiers only, FAQPage + a 6-question honest FAQ section.
 - [x] **33.5–33.6 Sitemap/robots fixes** (self-redirecting `/en/` canonicals; missing /terms +
   /accessibility; locale-prefixed private-path disallows) + `noindex` meta on all five private
   route groups (new `(auth)/layout.tsx`).
-- [x] **33.7 Vercel Analytics + Speed Insights** — cookieless, mounted only when `VERCEL=1`.
+- [x] **33.7 Vercel Analytics + Speed Insights** - cookieless, mounted only when `VERCEL=1`.
 - [ ] **Founder manual steps:** GSC verify via `GOOGLE_SITE_VERIFICATION` env + submit sitemap,
   Bing import, Vercel dashboard toggles, WhatsApp paste-test on prod.
 
 ---
 
-## 📨 PHASE 34 — SELF APPLY: PUBLIC VACANCY LINK + SEEKER-INITIATED APPLICATIONS *(shipped 2026-07-29, ships DARK)*
+## 📨 PHASE 34 - SELF APPLY: PUBLIC VACANCY LINK + SEEKER-INITIATED APPLICATIONS *(shipped 2026-07-29, ships DARK)*
 
-**Thesis: every vacancy can become its own recruiting channel — a beautiful public link a seeker
-can apply through — while the application rides the EXISTING invitation pipeline end to end.**
+**Thesis: every vacancy can become its own recruiting channel - a beautiful public link a seeker
+can apply through - while the application rides the EXISTING invitation pipeline end to end.**
 Full plan (all boxes ticked, E2E 8/8 green): `docs/PHASE_34_SELF_APPLY_PLAN.md`. Screenshots:
 `docs/screenshots/phase34-self-apply/`.
 
@@ -1220,19 +1220,19 @@ Full plan (all boxes ticked, E2E 8/8 green): `docs/PHASE_34_SELF_APPLY_PLAN.md`.
   `state='accepted'` with a **"Self-applied" chip**; the employer's existing review / shortlist /
   mark-filled vetting applies unchanged. Accept-rate analytics EXCLUDE self-applies (born-accepted
   rows would fake the rate). Unique (vacancy, profile) index = the collision referee.
-- [x] **The public surface** — the FIRST public vacancy surface, a deliberate documented carve-out
+- [x] **The public surface** - the FIRST public vacancy surface, a deliberate documented carve-out
   of the 9.8.8 org-private contract: `/apply/[token]` (unguessable per-vacancy token, minted on
   first enable; the toggle is the kill-switch) renders a Civic-Editorial dossier through
   `lib/vacancy/public.ts`, whose anonymous payload type STRUCTURALLY cannot carry `salaryBand`
-  (D2 — signed-in seekers see salary unless the employer hides it; source-level unit test pins
+  (D2 - signed-in seekers see salary unless the employer hides it; source-level unit test pins
   this). Every unavailable state renders ONE identical calm panel (no enumeration). `noindex` v1
-  (D3 — indexed job pages / Google Jobs = its own future phase). OG share card per vacancy.
+  (D3 - indexed job pages / Google Jobs = its own future phase). OG share card per vacancy.
 - [x] **The apply flow.** Signed-in: BrandDialog confirm (the audited D4 disclosure IS the consent
-  act — no `vacancy_matching` requirement for a seeker-initiated application) → congrats dialog
+  act - no `vacancy_matching` requirement for a seeker-initiated application) → congrats dialog
   with the skills-gap nudge. New user: `/sign-up/apply/[token]` pre-fills profession + province
   from the vacancy, one-tap vacancy-skill chips save to the PROFILE, and the application is
-  recorded AT SIGN-UP (returnTo does not survive email verification — this sidesteps it).
-- [x] **`components/ui/BrandDialog.tsx`** — the house modal primitive (bottom-sheet → centred card,
+  recorded AT SIGN-UP (returnTo does not survive email verification - this sidesteps it).
+- [x] **`components/ui/BrandDialog.tsx`** - the house modal primitive (bottom-sheet → centred card,
   focus-trapped, Civic-Editorial chrome). Use for every new dialog; migrate old ones opportunistically.
 - [x] **Employer side.** Flag-gated toggles in VacancyForm; public-link panel with Copy + WhatsApp
   share on the vacancy detail page.
@@ -1323,7 +1323,7 @@ WhatsApp-preview double-bug fixed, consent-aware profile indexing; founder GSC/B
 steps still open). Prior: v2.11 synced through **Phase 32** (security remediation: 2 critical + 6 high + 9 medium
 findings closed, build-failing Server-Action guard, welcome email; DPIA R-27). Prior: v2.10 synced
 through **Phase 31 final shape** (data minimisation: ID/passport collection
-dormant by default; ONE nationality picker for everyone with `is_citizen` DERIVED server-side — no
+dormant by default; ONE nationality picker for everyone with `is_citizen` DERIVED server-side - no
 explicit citizen question; DPIA R-26 + R-26.2a/b). Prior: v2.9 first Phase 31 cut (2026-07-19);
 v2.8 synced through Phase 29 (vacancy seats + the seamless /search invite funnel).
 Prior: v2.7 synced through Phase 28 (PWA installability + floating mobile bottom nav across

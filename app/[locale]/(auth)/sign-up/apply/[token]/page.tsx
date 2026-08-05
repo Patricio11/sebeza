@@ -1,5 +1,5 @@
 /**
- * Phase 34 — Self Apply sign-up landing
+ * Phase 34 - Self Apply sign-up landing
  * (docs/PHASE_34_SELF_APPLY_PLAN.md §34.6).
  *
  * URL: /sign-up/apply/[token]  where an anonymous visitor lands after
@@ -8,7 +8,7 @@
  * Server-component flow:
  *   1. Load the vacancy's public subset by token (flag + toggle +
  *      open status all re-checked). Any miss renders calm fallback
- *      copy + the plain sign-up path — the ACCOUNT matters more than
+ *      copy + the plain sign-up path - the ACCOUNT matters more than
  *      the application, so a dead link never dead-ends a willing
  *      sign-up.
  *   2. Pass `applyContext` into <SeekerSignUpForm>: profession +
@@ -18,7 +18,7 @@
  *      before /verify-email.
  *
  * The vacancy context card (right aside) keeps the role in view the
- * whole way — the seeker never forgets what they're applying for.
+ * whole way - the seeker never forgets what they're applying for.
  */
 
 import { setRequestLocale, getTranslations } from "next-intl/server";
@@ -49,14 +49,14 @@ export default async function ApplySignUpPage({
   const professions = await getProfessions();
 
   if (!result.ok) {
-    // Dead link — same calm copy as /apply/[token], but the sign-up
+    // Dead link - same calm copy as /apply/[token], but the sign-up
     // form stays: turning a dead vacancy link into a live profile is
     // strictly better than a dead end.
     return (
       <AuthShell
         eyebrow="Open role"
         heading="This role isn't accepting applications"
-        subhead="The link may have been switched off or the vacancy filled. You can still create your free Sebenza profile — it makes you findable for every open role on the platform."
+        subhead="The link may have been switched off or the vacancy filled. You can still create your free Sebenza profile. It makes you findable for every open role on the platform."
         rightAside={<ApplyDossier vacancy={null} />}
       >
         <SeekerSignUpForm professions={professions} />
@@ -73,7 +73,7 @@ export default async function ApplySignUpPage({
     <AuthShell
       eyebrow={`Applying · ${vacancy.orgName}`}
       heading={t("step1.heading")}
-      subhead={`You're applying for ${vacancy.title} at ${vacancy.orgName}. Create your free profile — it becomes your application.`}
+      subhead={`You're applying for ${vacancy.title} at ${vacancy.orgName}. Create your free profile. It becomes your application.`}
       rightAside={<ApplyDossier vacancy={vacancy} />}
     >
       <SeekerSignUpForm
@@ -92,7 +92,7 @@ export default async function ApplySignUpPage({
 }
 
 /**
- * Right-aside vacancy context card — the role stays in view through
+ * Right-aside vacancy context card - the role stays in view through
  * all three sign-up steps.
  */
 function ApplyDossier({ vacancy }: { vacancy: PublicVacancy | null }) {
@@ -107,7 +107,7 @@ function ApplyDossier({ vacancy }: { vacancy: PublicVacancy | null }) {
             {
               n: "01",
               title: "One profile, every role",
-              body: "Verified employers across all nine provinces search Sebenza daily. A single profile keeps you findable for all of them — not just the link that brought you here.",
+              body: "Verified employers across all nine provinces search Sebenza daily. A single profile keeps you findable for all of them, not just the link that brought you here.",
             },
             {
               n: "02",
@@ -165,12 +165,12 @@ function ApplyDossier({ vacancy }: { vacancy: PublicVacancy | null }) {
           {
             n: "01",
             title: "Your profile IS the application",
-            body: `Finish these three steps and your application lands with ${vacancy.orgName} immediately — then verify your email and keep building your profile.`,
+            body: `Finish these three steps and your application lands with ${vacancy.orgName} immediately, then verify your email and keep building your profile.`,
           },
           {
             n: "02",
             title: "One profile, every role",
-            body: "The same profile keeps you findable for every verified employer on the national platform — not just this one.",
+            body: "The same profile keeps you findable for every verified employer on the national platform, not just this one.",
           },
         ].map((item) => (
           <li

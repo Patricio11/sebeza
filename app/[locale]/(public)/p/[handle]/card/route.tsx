@@ -101,7 +101,7 @@ export async function GET(_request: Request, { params }: Params) {
               backgroundColor: BRAND,
             }}
           />
-          Sebenza  South African talent
+          Sebenza · South African talent
         </div>
 
         {/* Display name */}

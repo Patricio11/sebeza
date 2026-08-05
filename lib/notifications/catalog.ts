@@ -292,7 +292,7 @@ export const NOTIFICATION_CATALOG = {
     audience: "org_members",
     label: "Someone applied via your public vacancy link",
     description:
-      "Fires when a seeker applies through a vacancy's public Self Apply link. They arrive in the vacancy pipeline as an accepted candidate with a \"Self-applied\" chip  review and shortlist them exactly like invited seekers.",
+      "Fires when a seeker applies through a vacancy's public Self Apply link. They arrive in the vacancy pipeline as an accepted candidate with a \"Self-applied\" chip. Review and shortlist them exactly like invited seekers.",
     dedupeWindowSeconds: 0,
   },
   // ──────────────────────────────────────────────────────────────────────

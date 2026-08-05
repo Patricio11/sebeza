@@ -1,11 +1,11 @@
 /**
- * Phase 34 — the single write path for a self-application, shared by:
- *   - `lib/seeker/self-apply.ts` (signed-in seeker on /apply/[token])
- *   - `lib/auth/actions.ts` (application recorded during sign-up from
+ * Phase 34 - the single write path for a self-application, shared by:
+ * - `lib/seeker/self-apply.ts` (signed-in seeker on /apply/[token])
+ * - `lib/auth/actions.ts` (application recorded during sign-up from
  *     /sign-up/apply/[token]  the acceptSeekerInvitation precedent:
  *     record at sign-up so nothing is lost before email verification)
  *
- * Plain module (not "use server") — callers own authentication; this
+ * Plain module (not "use server") - callers own authentication; this
  * owns the invariant that a self-application row is ALWAYS written the
  * same way: origin='self_apply', state='accepted', respondedAt=now,
  * invitedByUserId=NULL, frozen vacancySnapshot, org notification, one
@@ -48,7 +48,7 @@ export type RecordSelfApplicationResult =
 /**
  * Insert the row + notify + audit. Assumes the caller already verified
  * every gate (flag, toggle, open status, seeker ownership, not blocked,
- * no existing row) — the unique (vacancyId, profileId) index is the
+ * no existing row) - the unique (vacancyId, profileId) index is the
  * final referee: a race collapses to `duplicate`, never a double row.
  */
 export async function recordSelfApplication(input: {
@@ -92,11 +92,11 @@ export async function recordSelfApplication(input: {
       vacancySnapshot,
     });
   } catch {
-    // Unique-index violation — concurrent duplicate; the first write won.
+    // Unique-index violation - concurrent duplicate; the first write won.
     return { ok: false, reason: "duplicate" };
   }
 
-  // Attributed, per-application notification (no dedupe — each
+  // Attributed, per-application notification (no dedupe - each
   // applicant is their own event). Display name only; the employer
   // opens the pipeline to review, same as an invite response.
   const seekerRow = await db
@@ -130,7 +130,7 @@ export async function recordSelfApplication(input: {
       orgId: vacancy.organizationId,
       profileId,
       source,
-      // D4 — the audited confirmation IS the consent act for this
+      // D4 - the audited confirmation IS the consent act for this
       // disclosure; keep the exact wording + version as evidence.
       disclosureVersion: SELF_APPLY_DISCLOSURE_VERSION,
       disclosure: selfApplyDisclosure(vacancy.orgName),

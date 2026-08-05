@@ -25,10 +25,10 @@ import {
 } from "lucide-react";
 
 /**
- * Phase 34 — the public Self Apply vacancy dossier
+ * Phase 34 - the public Self Apply vacancy dossier
  * (docs/PHASE_34_SELF_APPLY_PLAN.md §34.5).
  *
- * The FIRST public vacancy surface in the codebase — a deliberate,
+ * The FIRST public vacancy surface in the codebase - a deliberate,
  * documented carve-out of the 9.8.8 org-private contract, addressed
  * only by the vacancy's unguessable token. Everything renders through
  * `lib/vacancy/public.ts` (the defined public subset; anonymous
@@ -52,13 +52,13 @@ interface Props {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { token } = await params;
   const result = await getPublicVacancyByToken(token);
-  // D3 — v1 is link-sharing only; never indexed, never in the sitemap.
+  // D3 - v1 is link-sharing only; never indexed, never in the sitemap.
   const robots = { index: false, follow: false };
   if (!result.ok) {
     return { title: "Open role", robots };
   }
   const v = result.vacancy;
-  const title = `${v.title}  ${v.orgName}`;
+  const title = `${v.title} · ${v.orgName}`;
   const description = `${v.orgName} is hiring: ${v.title} · ${v.locationLabel}. Apply free on Sebenza, South Africa's national talent platform.`;
   return {
     title,
@@ -108,7 +108,7 @@ export default async function ApplyPage({ params }: Props) {
   const vacancy = result.vacancy;
   const viewer = await getSessionUser();
 
-  // D2 — salary only for signed-in seekers, only while the employer
+  // D2 - salary only for signed-in seekers, only while the employer
   // leaves it visible. Resolved server-side; the island just renders.
   const salaryBand =
     viewer?.role === "seeker" ? await getApplicantSalaryBand(token) : null;
@@ -141,7 +141,7 @@ export default async function ApplyPage({ params }: Props) {
               />
             </div>
 
-            {/* Fact chips — only what's actually set; nothing fabricated. */}
+            {/* Fact chips - only what's actually set; nothing fabricated. */}
             <ul className="mt-6 flex flex-wrap gap-2">
               <FactChip
                 icon={<Briefcase className="size-3.5" aria-hidden="true" />}
@@ -233,7 +233,7 @@ export default async function ApplyPage({ params }: Props) {
             {!viewer && (
               <div className="grid gap-4">
                 <p className="max-w-xl text-sm leading-relaxed text-[color:var(--color-ink-soft)]">
-                  Applying is free. Create your Sebenza profile once — this
+                  Applying is free. Create your Sebenza profile once. This
                   employer reviews it for this role, and you stay findable
                   for every other opportunity on the national platform.
                 </p>
@@ -281,14 +281,14 @@ export default async function ApplyPage({ params }: Props) {
             {viewer && viewer.role !== "seeker" && (
               <p className="max-w-xl text-sm leading-relaxed text-[color:var(--color-ink-soft)]">
                 You&rsquo;re signed in as{" "}
-                {viewer.role === "employer" ? "an employer" : `${viewer.role}`}
-                 only job seekers can apply. Share this link with someone
+                {viewer.role === "employer" ? "an employer" : viewer.role}.
+                Only job seekers can apply. Share this link with someone
                 looking for work.
               </p>
             )}
           </section>
 
-          {/* ── Trust strip — the same promises as the landing page ────── */}
+          {/* ── Trust strip - the same promises as the landing page ────── */}
           <div className="flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-[color:var(--color-hairline)] pt-5 text-[0.68rem] uppercase tracking-[0.22em] text-[color:var(--color-ink-soft)]">
             <span>Free for job seekers</span>
             <span aria-hidden="true">·</span>
@@ -337,7 +337,7 @@ function FactChip({
 
 /**
  * ONE calm panel for every unavailable state (bad token / flag off /
- * toggle off / closed / filled) — indistinguishable by design, so the
+ * toggle off / closed / filled) - indistinguishable by design, so the
  * URL space can't be probed. 200, never notFound (report-invite
  * precedent).
  */

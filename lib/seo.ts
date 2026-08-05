@@ -36,9 +36,9 @@ export const SITE_HOST = SITE_URL.replace(/^https?:\/\//, "");
 export const BRAND_NAME = "Sebenza";
 export const LEGAL_NAME = "Yetotec (Pty) Ltd";
 export const TAGLINE = "South Africa's National Talent Platform";
-export const SITE_TITLE = `${BRAND_NAME}  ${TAGLINE}`;
+export const SITE_TITLE = `${BRAND_NAME} · ${TAGLINE}`;
 export const SITE_DESCRIPTION =
-  "Find skilled people near you, or get found for the work you do. South Africa's POPIA-first talent platform  free for job seekers, honest by design.";
+  "Find skilled people near you, or get found for the work you do. South Africa's POPIA-first talent platform. Free for job seekers, honest by design.";
 export const SUPPORT_EMAIL = "popia@sebenzasa.com";
 
 /**

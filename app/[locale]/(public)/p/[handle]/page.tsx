@@ -51,7 +51,7 @@ export async function generateMetadata({ params }: Props) {
   ]);
   if (!p) return { title: "Profile" };
   const title = `${p.displayName} · ${p.profession}`;
-  const description = `${p.displayName}  ${p.profession} based in ${p.city}, ${p.province}. Trust-verified Sebenza profile.`;
+  const description = `${p.displayName}, ${p.profession} based in ${p.city}, ${p.province}. Trust-verified Sebenza profile.`;
   return {
     title,
     description,
@@ -71,7 +71,7 @@ export async function generateMetadata({ params }: Props) {
           url: `/p/${p.handle}/card`,
           width: 1200,
           height: 630,
-          alt: `${p.displayName}  ${p.profession}`,
+          alt: `${p.displayName} · ${p.profession}`,
         },
       ],
     },

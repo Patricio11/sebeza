@@ -32,7 +32,7 @@ import type { ConsentPurpose } from "@/lib/consent";
 const CONSENT_IN_PLAIN_WORDS: Record<ConsentPurpose, string> = {
   searchability: "Employers can find you by skill and location.",
   contact_reveal:
-    "Verified employers may request your contact details — and every single request is logged.",
+    "Verified employers may request your contact details, and every single request is logged.",
   document_sharing:
     "Verified employers may request the qualification documents you upload.",
   analytics_aggregate:
@@ -97,14 +97,14 @@ export function seekerWelcomeEmail(input: {
 
   const consentBlock = consentRows
     ? `<ul style="font-size:14px;line-height:1.6;color:#14110d;margin:0 0 12px;padding-left:20px;">${consentRows}</ul>`
-    : `<p style="${SMALL}">You haven't switched any sharing options on yet — your profile stays private until you do.</p>`;
+    : `<p style="${SMALL}">You haven't switched any sharing options on yet. Your profile stays private until you do.</p>`;
 
   return emailShell(`
     <p style="${EYEBROW}">Welcome to Sebenza</p>
     <h1 style="${H1}">You're in, ${name}.</h1>
     <p style="${P}">
       Sebenza is South Africa's talent register. Employers search it by
-      <strong>skill and place</strong> — so the work finds you, rather than you
+      <strong>skill and place</strong>, so the work finds you, rather than you
       refreshing a job board. It's free for job seekers, always.
     </p>
 
@@ -113,9 +113,9 @@ export function seekerWelcomeEmail(input: {
       Profiles that carry real detail get found far more often than empty ones:
     </p>
     <ol style="font-size:15px;line-height:1.7;color:#14110d;margin:0 0 20px;padding-left:20px;">
-      <li><a href="${origin()}/dashboard/profile" style="color:#006b3c;"><strong>Add your skills</strong></a> — this is what employers actually search on.</li>
-      <li><a href="${origin()}/dashboard/experience" style="color:#006b3c;"><strong>Add your experience</strong></a> — even informal, piece and seasonal work counts.</li>
-      <li><a href="${origin()}/dashboard" style="color:#006b3c;"><strong>Confirm you're available</strong></a> — fresh statuses rank higher, and stale ones are marked honestly.</li>
+      <li><a href="${origin()}/dashboard/profile" style="color:#006b3c;"><strong>Add your skills</strong></a>. This is what employers actually search on.</li>
+      <li><a href="${origin()}/dashboard/experience" style="color:#006b3c;"><strong>Add your experience</strong></a>. Even informal, piece and seasonal work counts.</li>
+      <li><a href="${origin()}/dashboard" style="color:#006b3c;"><strong>Confirm you're available</strong></a>. Fresh statuses rank higher, and stale ones are marked honestly.</li>
     </ol>
     <p style="margin:0 0 24px;">
       <a href="${origin()}/dashboard" style="${BTN}">Finish my profile</a>
@@ -134,7 +134,7 @@ export function seekerWelcomeEmail(input: {
     <div style="${CARD}">
       <p style="${SMALL}margin-bottom:6px;"><strong style="color:#14110d;">What we promise</strong></p>
       <p style="${SMALL}margin-bottom:0;">
-        Your contact details are never shown in search results — an employer must
+        Your contact details are never shown in search results. An employer must
         be verified and you must consent, and every reveal is recorded.
         We don't ask for your ID number, and we never count a hire unless it's
         confirmed on the platform.
@@ -163,8 +163,8 @@ export function employerWelcomeEmail(input: {
 
     <p style="${EYEBROW}">Two things before you can reach candidates</p>
     <ol style="font-size:15px;line-height:1.7;color:#14110d;margin:0 0 20px;padding-left:20px;">
-      <li><a href="${origin()}/employer/onboarding" style="color:#006b3c;"><strong>Verify your organisation</strong></a> — contact details and documents stay locked until this is done. It protects seekers, and it's quick.</li>
-      <li><a href="${origin()}/employer/account" style="color:#006b3c;"><strong>Set up two-factor authentication</strong></a> — required for accounts that can reach personal information.</li>
+      <li><a href="${origin()}/employer/onboarding" style="color:#006b3c;"><strong>Verify your organisation</strong></a>. Contact details and documents stay locked until this is done. It protects seekers, and it's quick.</li>
+      <li><a href="${origin()}/employer/account" style="color:#006b3c;"><strong>Set up two-factor authentication</strong></a>. Required for accounts that can reach personal information.</li>
     </ol>
     <p style="margin:0 0 24px;">
       <a href="${origin()}/employer" style="${BTN}">Open my workspace</a>
@@ -175,7 +175,7 @@ export function employerWelcomeEmail(input: {
       <p style="${SMALL}margin-bottom:0;">
         Search results never include contact details, ID numbers or documents.
         Revealing a candidate's contact details requires their active consent, and
-        <strong>every reveal is permanently audit-logged</strong> — visible to platform
+        <strong>every reveal is permanently audit-logged</strong>, visible to platform
         administrators. Invitations only reach seekers who opted in to receiving them.
         This is what makes candidates willing to be here.
       </p>

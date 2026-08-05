@@ -1498,7 +1498,7 @@ export function SeekerSignUpForm({
                 <>
                   Your application for{" "}
                   <strong>{applyContext.vacancyTitle}</strong> is with{" "}
-                  <strong>{applyContext.orgName}</strong>  and your Sebenza
+                  <strong>{applyContext.orgName}</strong>, and your Sebenza
                   profile now exists for every other opportunity too.
                 </>
               ) : (
@@ -1516,11 +1516,11 @@ export function SeekerSignUpForm({
             </p>
             <ol className="mt-2 list-decimal space-y-1.5 pl-5 text-sm leading-relaxed text-[color:var(--color-ink)]">
               <li>
-                <strong>Verify your email</strong>  we&rsquo;ve sent you a
-                link; your account activates the moment you tap it.
+                <strong>Verify your email</strong>. We&rsquo;ve sent you a
+                link, and your account activates the moment you tap it.
               </li>
               <li>
-                <strong>Complete your profile</strong>  add your skills,
+                <strong>Complete your profile</strong>. Add your skills,
                 experience and a short bio from your dashboard. That&rsquo;s
                 what {applyContext.orgName} reviews.
               </li>
