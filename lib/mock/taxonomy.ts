@@ -438,6 +438,29 @@ export const INSTITUTIONS: InstitutionEntry[] = [
   { slug: "vut", label: "Vaal University of Technology", kind: "uot", city: "Vanderbijlpark", province: "Gauteng" },
   // Distance
   { slug: "unisa", label: "University of South Africa (UNISA)", kind: "distance", city: "Pretoria", province: "Gauteng" },
+  // Private colleges  founder request 2026-07-30 (docs/PRIVATE_COLLEGES_
+  // TAXONOMY_PLAN.md): a large share of SA qualifications come from
+  // private providers; without these, every Damelin/Rosebank student
+  // fell through to the free-text "isn't listed" path. Main-campus
+  // city/province; multi-campus nationals anchored at their HQ.
+  // MUST stay in sync with migration 0063 (FK on academic_profiles).
+  { slug: "damelin", label: "Damelin", kind: "private", city: "Johannesburg", province: "Gauteng" },
+  { slug: "rosebank-college", label: "Rosebank College (IIE)", kind: "private", city: "Johannesburg", province: "Gauteng" },
+  { slug: "varsity-college", label: "Varsity College (IIE)", kind: "private", city: "Johannesburg", province: "Gauteng" },
+  { slug: "vega-school", label: "Vega School (IIE)", kind: "private", city: "Johannesburg", province: "Gauteng" },
+  { slug: "iie-msa", label: "IIE MSA", kind: "private", city: "Johannesburg", province: "Gauteng" },
+  { slug: "boston-city-campus", label: "Boston City Campus", kind: "private", city: "Johannesburg", province: "Gauteng" },
+  { slug: "eduvos", label: "Eduvos", kind: "private", city: "Midrand", province: "Gauteng" },
+  { slug: "richfield", label: "Richfield Graduate Institute of Technology", kind: "private", city: "Durban", province: "KwaZulu-Natal" },
+  { slug: "mancosa", label: "MANCOSA", kind: "private", city: "Durban", province: "KwaZulu-Natal" },
+  { slug: "milpark", label: "Milpark Education", kind: "private", city: "Johannesburg", province: "Gauteng" },
+  { slug: "stadio", label: "STADIO Higher Education", kind: "private", city: "Centurion", province: "Gauteng" },
+  { slug: "regenesys", label: "Regenesys Business School", kind: "private", city: "Johannesburg", province: "Gauteng" },
+  { slug: "regent", label: "Regent Business School", kind: "private", city: "Durban", province: "KwaZulu-Natal" },
+  { slug: "imm", label: "IMM Graduate School", kind: "private", city: "Johannesburg", province: "Gauteng" },
+  { slug: "afda", label: "AFDA (School of the Creative Economy)", kind: "private", city: "Johannesburg", province: "Gauteng" },
+  { slug: "ctu", label: "CTU Training Solutions", kind: "private", city: "Pretoria", province: "Gauteng" },
+  { slug: "oxbridge-academy", label: "Oxbridge Academy", kind: "private", city: "Stellenbosch", province: "Western Cape" },
   // Public TVET (representative)
   { slug: "tvet-ekurhuleni-west", label: "Ekurhuleni West TVET College", kind: "tvet", city: "Germiston", province: "Gauteng" },
   { slug: "tvet-tshwane-north", label: "Tshwane North TVET College", kind: "tvet", city: "Pretoria", province: "Gauteng" },
@@ -452,7 +475,7 @@ export const INSTITUTION_KIND_LABEL: Record<InstitutionKind, string> = {
   tvet: "Public TVET",
   distance: "Distance university",
   indlela: "Artisan training (INDLELA)",
-  private: "Private",
+  private: "Private college",
 };
 
 export const NQF_LEVELS: { level: NqfLevel; label: string; band: string }[] = [
