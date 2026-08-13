@@ -60,6 +60,16 @@ export default function GlobalError({
             {t("home")}
           </Link>
         </div>
+        {/* Support reference: the digest is what our logs are keyed by,
+            so a stuck user can quote it instead of describing symptoms. */}
+        {error.digest && (
+          <p className="mt-6 text-xs text-[color:var(--color-ink-soft)]">
+            {t("errorDigestHint")}{" "}
+            <code className="rounded-[var(--radius-sm)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] px-1.5 py-0.5 font-mono">
+              {error.digest}
+            </code>
+          </p>
+        )}
       </div>
     </main>
   );

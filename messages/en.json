@@ -752,12 +752,22 @@
     "exportNote": "Exports are aggregate only. No personal data leaves the system. Every export is logged."
   },
   "errors": {
-    "notFoundTitle": "Page not found",
-    "notFoundBody": "We couldn't find that page. It may have moved, or it never existed.",
+    "notFoundTitle": "This page isn't in the register.",
+    "notFoundBody": "The link may be old, mistyped, or the page may have moved. The people are still here though, so search for what you actually came for.",
     "errorTitle": "Something went wrong",
     "errorBody": "An unexpected error occurred. Please try again.",
     "home": "Go to home",
-    "retry": "Try again"
+    "retry": "Try again",
+    "notFoundEyebrow": "404 · Not in the register",
+    "notFoundSearchLabel": "Search the talent register",
+    "notFoundSearchPlaceholder": "Try a profession, like chef or electrician",
+    "notFoundSearchCta": "Search",
+    "notFoundLinksLabel": "Or head to",
+    "notFoundLinkSearch": "Find talent",
+    "notFoundLinkInsights": "National insights",
+    "notFoundLinkSignUp": "Create a free profile",
+    "notFoundLinkAbout": "How Sebenza works",
+    "errorDigestHint": "If you contact us about this, mention the code"
   },
   "common": {
     "loading": "Loading…",
