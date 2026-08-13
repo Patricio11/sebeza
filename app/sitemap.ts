@@ -53,6 +53,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { path: "/", priority: 1.0, changeFrequency: "weekly" },
     { path: "/search", priority: 0.9, changeFrequency: "daily" },
     { path: "/insights", priority: 0.8, changeFrequency: "daily" },
+    // The copy-led explainer funnel (docs/MARKETING_PAGE_COPY.md).
+    { path: "/marketing", priority: 0.7, changeFrequency: "monthly" },
     { path: "/privacy", priority: 0.5, changeFrequency: "monthly" },
     { path: "/paia", priority: 0.5, changeFrequency: "monthly" },
     { path: "/terms", priority: 0.5, changeFrequency: "monthly" },
