@@ -282,6 +282,22 @@ export const NOTIFICATION_CATALOG = {
       "The change-of-mind path: a declined seeker tapped \"Express interest again.\" Human workflow, not a dead end  re-open the conversation if the role is still open.",
     dedupeWindowSeconds: 0,
   },
+  // Suggestion approval loop (docs/SUGGESTION_APPROVAL_LOOP_PLAN.md):
+  // fires to the SUBMITTER when an admin promotes or merges their
+  // "Other" taxonomy suggestion (skill / profession / organisation /
+  // institution) or canonicalizes their custom skill. The body says
+  // exactly what happened - including, for seekers, that the approved
+  // skill now sits on their profile. Contribution deserves closure;
+  // rejection stays deliberately quiet.
+  "taxonomy.suggestion.approved": {
+    defaultInApp: true,
+    defaultEmail: false,
+    audience: "self",
+    label: "A suggestion you made was approved",
+    description:
+      "Fires when something you added as “not listed” (a skill, profession, employer, or institution) is approved into the official register. If it was a skill you suggested for your own profile, it is added there automatically.",
+    dedupeWindowSeconds: 0,
+  },
   // Phase 34  Self Apply. Fires per application (no dedupe: each
   // applicant is their own event, like placements). Default ON both
   // channels  an employer who switched the public link ON is asking

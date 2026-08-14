@@ -13,13 +13,15 @@
  * action operates on a label, never on a named seeker).
  */
 
-import { and, eq, isNull } from "drizzle-orm";
+import { and, eq, inArray, isNull } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { getDb } from "@/db/client";
 import * as schema from "@/db/schema";
 import { verifyAdmin } from "@/lib/auth/dal";
 import { logAccess } from "@/lib/audit";
+import { createNotification } from "@/lib/notifications/server";
+import { refreshProfileCompleteness } from "@/lib/profile/completeness-internal";
 
 export type CanonicalizeResult =
   | { ok: true; slug: string; migrated: number }
@@ -107,6 +109,35 @@ export async function canonicalizeCustomSkill(
     subject: slug,
     meta: { labelNormalized, migrated: customRows.length },
   });
+
+  // Approval loop (docs/SUGGESTION_APPROVAL_LOOP_PLAN.md): every
+  // migrated holder gets their completeness refreshed (the skill moved
+  // from the self-described bucket into real profile_skills, and the
+  // stored number feeds ranking) and a closure notification. The skill
+  // is now SEARCHABLE, which is the moment worth telling them about.
+  if (customRows.length > 0) {
+    const holderProfileIds = Array.from(
+      new Set(customRows.map((r) => r.profileId)),
+    );
+    const holders = await db
+      .select({
+        profileId: schema.profiles.id,
+        userId: schema.profiles.userId,
+      })
+      .from(schema.profiles)
+      .where(inArray(schema.profiles.id, holderProfileIds));
+    for (const holder of holders) {
+      await refreshProfileCompleteness(db, holder.profileId);
+      await createNotification({
+        userId: holder.userId,
+        kind: "taxonomy.suggestion.approved",
+        title: `Your skill is now official: ${label}`,
+        body: "The skill you described in your own words was approved into the register. It stays on your profile with your proficiency, and employers can now find you by it in search.",
+        link: "/dashboard/profile",
+        meta: { label, slug },
+      });
+    }
+  }
 
   revalidatePath("/admin/custom-skills");
   revalidatePath("/admin/taxonomy");

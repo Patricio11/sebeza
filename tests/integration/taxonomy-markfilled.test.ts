@@ -120,6 +120,103 @@ describe("taxonomy suggestion lifecycle (9.15)", () => {
     )) as unknown as { rows: Array<{ state: string }> };
     expect(state.rows[0]?.state).toBe("promoted");
   });
+
+  test("SKILL promote closes the loop: backfilled onto the suggester's profile, completeness refreshed, notified; same-text dupe auto-resolved", async () => {
+    // Approval loop contract (docs/SUGGESTION_APPROVAL_LOOP_PLAN.md).
+    const LABEL = "Phase12 Solar Rigging";
+    const SLUG = "phase12-solar-rigging";
+    const SEEKER_PROFILE = "prof_andile-z";
+
+    // Clean slate for reruns.
+    await db.execute(
+      sql`DELETE FROM profile_skills WHERE skill_slug = ${SLUG}`,
+    );
+    await db.execute(sql`DELETE FROM skills WHERE slug = ${SLUG}`);
+    await db.execute(
+      sql`DELETE FROM notifications WHERE kind = 'taxonomy.suggestion.approved'
+          AND meta->>'label' = ${LABEL}`,
+    );
+
+    const before = (await db.execute(
+      sql`SELECT completeness FROM profiles WHERE id = ${SEEKER_PROFILE}`,
+    )) as unknown as { rows: Array<{ completeness: number }> };
+
+    // The suggester (mocked session = andile) asks for the skill.
+    const submitted = await submitTaxonomySuggestion({
+      kind: "skill",
+      customText: LABEL,
+    });
+    expect(submitted.ok, JSON.stringify(submitted)).toBe(true);
+    if (!submitted.ok) return;
+
+    // A same-text dupe from "someone else" (hand-inserted so we don't
+    // fight the per-user daily submission cap): must auto-resolve.
+    const dupeId = `tx_${randomUUID()}`;
+    await db.execute(
+      sql`INSERT INTO taxonomy_suggestions (id, kind, custom_text, submitted_by_user_id)
+          VALUES (${dupeId}, 'skill', ${LABEL.toLowerCase()}, ${"user_lerato-n"})`,
+    );
+
+    const promoted = await promoteTaxonomySuggestion({
+      suggestionId: submitted.suggestionId,
+    });
+    expect(promoted.ok, JSON.stringify(promoted)).toBe(true);
+    if (!promoted.ok) return;
+
+    // 1. Canonical skill exists.
+    const skill = (await db.execute(
+      sql`SELECT slug FROM skills WHERE slug = ${SLUG}`,
+    )) as unknown as { rows: Array<{ slug: string }> };
+    expect(skill.rows).toHaveLength(1);
+
+    // 2. Backfilled onto the suggester's profile (self-attested).
+    const onProfile = (await db.execute(
+      sql`SELECT proficiency, provenance FROM profile_skills
+          WHERE profile_id = ${SEEKER_PROFILE} AND skill_slug = ${SLUG}`,
+    )) as unknown as {
+      rows: Array<{ proficiency: number; provenance: string }>;
+    };
+    expect(onProfile.rows, "suggester's profile must gain the skill").toHaveLength(1);
+    expect(onProfile.rows[0]?.provenance).toBe("self_attested");
+    expect(promoted.backfilledRows).toBeGreaterThanOrEqual(1);
+
+    // 3. Completeness recomputed upward (skills add 6 each, capped).
+    const after = (await db.execute(
+      sql`SELECT completeness FROM profiles WHERE id = ${SEEKER_PROFILE}`,
+    )) as unknown as { rows: Array<{ completeness: number }> };
+    expect(after.rows[0]!.completeness).toBeGreaterThanOrEqual(
+      before.rows[0]!.completeness,
+    );
+
+    // 4. Both submitters notified with the approved kind.
+    const notified = (await db.execute(
+      sql`SELECT user_id FROM notifications
+          WHERE kind = 'taxonomy.suggestion.approved' AND meta->>'label' = ${LABEL}`,
+    )) as unknown as { rows: Array<{ user_id: string }> };
+    const notifiedIds = notified.rows.map((r) => r.user_id).sort();
+    expect(notifiedIds).toEqual([SEEKER.id, "user_lerato-n"].sort());
+
+    // 5. The dupe resolved as merged into the promoted slug.
+    const dupe = (await db.execute(
+      sql`SELECT state, target_slug FROM taxonomy_suggestions WHERE id = ${dupeId}`,
+    )) as unknown as { rows: Array<{ state: string; target_slug: string }> };
+    expect(dupe.rows[0]?.state).toBe("merged");
+    expect(dupe.rows[0]?.target_slug).toBe(SLUG);
+
+    // Cleanup (skills FK: profile_skills first).
+    await db.execute(
+      sql`DELETE FROM profile_skills WHERE skill_slug = ${SLUG}`,
+    );
+    await db.execute(sql`DELETE FROM taxonomy_suggestions WHERE id = ${dupeId}`);
+    await db.execute(
+      sql`DELETE FROM taxonomy_suggestions WHERE id = ${submitted.suggestionId}`,
+    );
+    await db.execute(sql`DELETE FROM skills WHERE slug = ${SLUG}`);
+    await db.execute(
+      sql`DELETE FROM notifications WHERE kind = 'taxonomy.suggestion.approved'
+          AND meta->>'label' = ${LABEL}`,
+    );
+  });
 });
 
 describe("mark-as-filled (9.11)", () => {

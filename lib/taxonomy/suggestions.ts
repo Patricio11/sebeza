@@ -34,7 +34,7 @@
  */
 
 import { randomUUID } from "node:crypto";
-import { and, desc, eq, isNull, sql, ne } from "drizzle-orm";
+import { and, desc, eq, inArray, isNull, sql, ne } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
@@ -42,8 +42,12 @@ import { getDb } from "@/db/client";
 import * as schema from "@/db/schema";
 import { verifySession, verifyAdmin } from "@/lib/auth/dal";
 import { logAccess } from "@/lib/audit";
-import { notifyAllAdmins } from "@/lib/notifications/server";
+import {
+  createNotification,
+  notifyAllAdmins,
+} from "@/lib/notifications/server";
 import { slug as slugify } from "@/lib/mock/helpers";
+import { refreshProfileCompleteness } from "@/lib/profile/completeness-internal";
 
 export type ActionResult<T extends object = object> =
   | ({ ok: true } & T)
@@ -54,6 +58,74 @@ function ok<T extends object>(extra?: T): { ok: true } & T {
 }
 function fail(message: string): { ok: false; message: string } {
   return { ok: false, message };
+}
+
+/**
+ * Approval loop (docs/SUGGESTION_APPROVAL_LOOP_PLAN.md): when an
+ * admin approves a SKILL suggestion, the approved skill is added to
+ * the submitter's live profile automatically (default proficiency,
+ * self-attested provenance; the seeker refines it from the editor),
+ * and their completeness is refreshed so ranking stays honest.
+ * Returns true when the profile actually gained the skill; false when
+ * the submitter has no live profile (employer submitters) or already
+ * holds the skill.
+ */
+async function addSkillToSubmitterProfile(
+  db: ReturnType<typeof getDb>,
+  submitterUserId: string,
+  skillSlug: string,
+): Promise<boolean> {
+  const profileRows = await db
+    .select({ id: schema.profiles.id })
+    .from(schema.profiles)
+    .where(
+      and(
+        eq(schema.profiles.userId, submitterUserId),
+        isNull(schema.profiles.deletedAt),
+      ),
+    )
+    .limit(1);
+  const profileId = profileRows[0]?.id;
+  if (!profileId) return false;
+
+  const existing = await db
+    .select({ slug: schema.profileSkills.skillSlug })
+    .from(schema.profileSkills)
+    .where(
+      and(
+        eq(schema.profileSkills.profileId, profileId),
+        eq(schema.profileSkills.skillSlug, skillSlug),
+      ),
+    )
+    .limit(1);
+  if (existing.length > 0) return false;
+
+  await db.insert(schema.profileSkills).values({
+    profileId,
+    skillSlug,
+    proficiency: 3,
+  });
+  await refreshProfileCompleteness(db, profileId);
+  return true;
+}
+
+/** One approved-skill notification, copy varying on whether the skill
+ *  landed on a profile (seeker) or is simply available now (employer). */
+async function notifySkillApproved(
+  userId: string,
+  label: string,
+  addedToProfile: boolean,
+): Promise<void> {
+  await createNotification({
+    userId,
+    kind: "taxonomy.suggestion.approved",
+    title: `Your suggested skill was approved: ${label}`,
+    body: addedToProfile
+      ? "We added it to your profile automatically, and it now counts in search. You can adjust the proficiency any time from your profile editor."
+      : "It is now available in every skill picker. Add it wherever it applies.",
+    ...(addedToProfile ? { link: "/dashboard/profile" } : {}),
+    meta: { label },
+  });
 }
 
 // ─────────────────────────────────────────────────────────────────────
@@ -407,6 +479,9 @@ export async function promoteTaxonomySuggestion(
 
   let backfilledRows = 0;
   let targetSlug = finalSlug;
+  // The skill branch runs its own per-submitter closure (backfill +
+  // notify, incl. same-text dupes); other kinds notify once below.
+  let skillLoopClosed = false;
 
   if (row.kind === "profession") {
     // Insert into canonical professions (idempotent  if slug already
@@ -514,19 +589,66 @@ export async function promoteTaxonomySuggestion(
 
     targetSlug = row.pendingOrganisationId;
   } else if (row.kind === "skill") {
-    // Phase 10 follow-up  promote a skill suggestion. The suggested
-    // slug never persisted to profile_skills or vacancy.skill_slugs
-    // (the seeker / employer save paths filter non-canonical entries
-    // out at write time), so there's no backfill on this branch  the
-    // promote is pure "add to canonical skills + close the
-    // suggestion." After promotion the submitting user has to re-add
-    // the skill via the picker; the resolved suggestion stays on
-    // record so the admin can see who asked.
+    // Approval loop (docs/SUGGESTION_APPROVAL_LOOP_PLAN.md): promote
+    // the skill into the canonical taxonomy AND close the loop for the
+    // people who asked. The suggested slug never persisted anywhere
+    // (save paths filter non-canonical entries at write time), so the
+    // backfill is explicit: the submitter's live profile gains the
+    // skill (default proficiency, self-attested), completeness is
+    // refreshed, and they are notified. Same-text pending suggestions
+    // from OTHER users resolve as merged (the house dupe pattern from
+    // organisations/institutions) with the same backfill + closure.
     await db
       .insert(schema.skills)
       .values({ slug: finalSlug, label: finalLabel })
       .onConflictDoNothing();
-    backfilledRows = 0;
+
+    const dupes = await db
+      .select({
+        id: schema.taxonomySuggestions.id,
+        submittedByUserId: schema.taxonomySuggestions.submittedByUserId,
+      })
+      .from(schema.taxonomySuggestions)
+      .where(
+        and(
+          eq(schema.taxonomySuggestions.kind, "skill"),
+          eq(schema.taxonomySuggestions.state, "pending"),
+          sql`lower(${schema.taxonomySuggestions.customText}) = lower(${row.customText})`,
+          ne(schema.taxonomySuggestions.id, row.id),
+        ),
+      );
+    if (dupes.length > 0) {
+      await db
+        .update(schema.taxonomySuggestions)
+        .set({
+          state: "merged",
+          targetSlug: finalSlug,
+          resolvedByUserId: session.id,
+          resolvedAt: new Date(),
+          adminNote: `Auto-merged into ${finalLabel} during promote of #${row.id}.`,
+        })
+        .where(
+          inArray(
+            schema.taxonomySuggestions.id,
+            dupes.map((d) => d.id),
+          ),
+        );
+    }
+
+    // One backfill + one notification per distinct submitter.
+    const submitterIds = Array.from(
+      new Set(
+        [row.submittedByUserId, ...dupes.map((d) => d.submittedByUserId)].filter(
+          (id): id is string => Boolean(id),
+        ),
+      ),
+    );
+    for (const userId of submitterIds) {
+      const added = await addSkillToSubmitterProfile(db, userId, finalSlug);
+      if (added) backfilledRows++;
+      await notifySkillApproved(userId, finalLabel, added);
+    }
+    skillLoopClosed = true;
   } else {
     // Institution: flip is_pending=false on the existing pending row.
     // Also update label if the admin corrected it.
@@ -592,6 +714,37 @@ export async function promoteTaxonomySuggestion(
     },
   });
 
+  // Approval loop: tell the submitter their contribution made it in.
+  // Profession/organisation/institution backfills already ran above
+  // (their profiles point at the approved entry); this is the closure.
+  if (!skillLoopClosed && row.submittedByUserId) {
+    const copy: Record<string, { title: string; body: string }> = {
+      profession: {
+        title: `Your suggested profession was approved: ${finalLabel}`,
+        body: "It is now part of the official register, and your profile shows the approved label.",
+      },
+      organisation: {
+        title: `The employer you added was approved: ${finalLabel}`,
+        body: "It is now a verified organisation on the register, and your profile's employer entry points at it.",
+      },
+      institution: {
+        title: `Your institution was approved: ${finalLabel}`,
+        body: "It is now officially listed. Your academic profile already points at it, so nothing else to do.",
+      },
+    };
+    const c = copy[row.kind];
+    if (c) {
+      await createNotification({
+        userId: row.submittedByUserId,
+        kind: "taxonomy.suggestion.approved",
+        title: c.title,
+        body: c.body,
+        link: "/dashboard/profile",
+        meta: { kind: row.kind, label: finalLabel },
+      });
+    }
+  }
+
   revalidatePath("/admin/taxonomy");
   return ok({ backfilledRows });
 }
@@ -623,6 +776,10 @@ export async function mergeTaxonomySuggestion(
     return fail("This suggestion has already been resolved.");
 
   let backfilledRows = 0;
+  // Same closure pattern as promote: the skill branch handles its own
+  // notification; other kinds notify once below with the target label.
+  let skillLoopClosed = false;
+  let approvedLabel: string | null = null;
 
   if (row.kind === "profession") {
     const targetRows = await db
@@ -632,6 +789,7 @@ export async function mergeTaxonomySuggestion(
       .limit(1);
     const targetLabel = targetRows[0]?.label;
     if (!targetLabel) return fail("Target profession not found.");
+    approvedLabel = targetLabel;
     const result = await db
       .update(schema.profiles)
       .set({ profession: targetLabel })
@@ -646,6 +804,7 @@ export async function mergeTaxonomySuggestion(
     const targetRows = await db
       .select({
         id: schema.organizations.id,
+        name: schema.organizations.name,
         origin: schema.organizations.origin,
         verification: schema.organizations.verification,
       })
@@ -663,6 +822,7 @@ export async function mergeTaxonomySuggestion(
         "Target organisation is not picker-visible (must be Sebenza-registered or verified seeker-named).",
       );
     }
+    approvedLabel = target.name;
     // Re-point seeker profiles using the pending org id  target.
     const result = await db
       .update(schema.profiles)
@@ -689,26 +849,40 @@ export async function mergeTaxonomySuggestion(
       .delete(schema.organizations)
       .where(eq(schema.organizations.id, row.pendingOrganisationId));
   } else if (row.kind === "skill") {
-    // Phase 10 follow-up  merge skill suggestion into existing
-    // canonical skill. Verify the target exists; no backfill needed
-    // (non-canonical skills never persisted to profile_skills /
-    // vacancy.skill_slugs). The targetSlug stamp on the resolved
-    // suggestion lets the admin retrace which canonical entry the
-    // merge pointed to.
+    // Approval loop: merging a skill suggestion into an existing
+    // canonical skill still means the submitter's ask was ACCEPTED,
+    // their wording was just a variant. So the closure is identical to
+    // promote: the target skill lands on their live profile (skip if
+    // already there), completeness refreshes, and they are told. The
+    // targetSlug stamp on the resolved suggestion lets the admin
+    // retrace which canonical entry the merge pointed to.
     const targetRows = await db
-      .select({ slug: schema.skills.slug })
+      .select({ slug: schema.skills.slug, label: schema.skills.label })
       .from(schema.skills)
       .where(eq(schema.skills.slug, parsed.data.targetSlug))
       .limit(1);
-    if (!targetRows[0]) return fail("Target skill not found.");
-    backfilledRows = 0;
+    const target = targetRows[0];
+    if (!target) return fail("Target skill not found.");
+    if (row.submittedByUserId) {
+      const added = await addSkillToSubmitterProfile(
+        db,
+        row.submittedByUserId,
+        target.slug,
+      );
+      if (added) backfilledRows++;
+      await notifySkillApproved(row.submittedByUserId, target.label, added);
+    }
+    skillLoopClosed = true;
   } else {
     if (!row.pendingInstitutionSlug) {
       return fail("Suggestion is missing its pending institution slug.");
     }
     // Verify the target exists + is not soft-deleted + not pending.
     const targetRows = await db
-      .select({ slug: schema.institutions.slug })
+      .select({
+        slug: schema.institutions.slug,
+        label: schema.institutions.label,
+      })
       .from(schema.institutions)
       .where(
         and(
@@ -719,6 +893,7 @@ export async function mergeTaxonomySuggestion(
       )
       .limit(1);
     if (!targetRows[0]) return fail("Target institution not found or not active.");
+    approvedLabel = targetRows[0].label;
     // Re-point any academic_profiles using the pending slug → target.
     const result = await db
       .update(schema.academicProfiles)
@@ -761,6 +936,36 @@ export async function mergeTaxonomySuggestion(
       note: parsed.data.note ?? null,
     },
   });
+
+  // Approval loop: a merge is still an acceptance. Tell the submitter
+  // their entry now maps to the approved one (backfills ran above).
+  if (!skillLoopClosed && row.submittedByUserId && approvedLabel) {
+    const copy: Record<string, { title: string; body: string }> = {
+      profession: {
+        title: `Your suggested profession was matched: ${approvedLabel}`,
+        body: `"${row.customText}" is already in the register under this name, and your profile now shows the approved label.`,
+      },
+      organisation: {
+        title: `The employer you added was matched: ${approvedLabel}`,
+        body: `"${row.customText}" is already on the register under this name, and your profile's employer entry now points at it.`,
+      },
+      institution: {
+        title: `Your institution was matched: ${approvedLabel}`,
+        body: `"${row.customText}" is already listed under this name, and your academic profile now points at it.`,
+      },
+    };
+    const c = copy[row.kind];
+    if (c) {
+      await createNotification({
+        userId: row.submittedByUserId,
+        kind: "taxonomy.suggestion.approved",
+        title: c.title,
+        body: c.body,
+        link: "/dashboard/profile",
+        meta: { kind: row.kind, label: approvedLabel },
+      });
+    }
+  }
 
   revalidatePath("/admin/taxonomy");
   return ok({ backfilledRows });
