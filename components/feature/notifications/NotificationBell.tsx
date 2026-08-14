@@ -1,5 +1,7 @@
 "use client";
 
+import { formatDateZA } from "@/lib/utils";
+
 /**
  * Phase 7 (Task 7.6)  Bell icon + unread badge + dropdown panel.
  *
@@ -202,5 +204,5 @@ function relativeTime(iso: string): string {
   if (hrs < 24) return `${hrs}h ago`;
   const days = Math.round(hrs / 24);
   if (days < 30) return `${days}d ago`;
-  return new Date(iso).toLocaleDateString();
+  return formatDateZA(iso);
 }

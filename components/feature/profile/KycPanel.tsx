@@ -1,5 +1,7 @@
 "use client";
 
+import { formatDateZA } from "@/lib/utils";
+
 /**
  * KYC panel on /dashboard/profile.
  *
@@ -119,7 +121,7 @@ export function KycPanel({
         </div>
         <div className="mt-1 font-display text-2xl">Verified</div>
         <p className="mt-2 text-sm text-[color:var(--color-ink-soft)]">
-          Verified {new Date(kycVerifiedAt).toLocaleDateString()}. Employer
+          Verified {formatDateZA(kycVerifiedAt)}. Employer
           searches now treat your identity as confirmed.
         </p>
         <Button
@@ -208,7 +210,7 @@ export function KycPanel({
         <div className="mt-1 font-display text-2xl">Submitted</div>
         <p className="mt-2 text-sm text-[color:var(--color-ink-soft)]">
           {idDocumentUploadedAt
-            ? `Uploaded ${new Date(idDocumentUploadedAt).toLocaleDateString()}. `
+            ? `Uploaded ${formatDateZA(idDocumentUploadedAt)}. `
             : ""}
           A Sebenza administrator will review your {docLabel} and notify you
           here once it's approved. You'll usually hear back within a working day.

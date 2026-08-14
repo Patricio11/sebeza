@@ -1,5 +1,7 @@
 "use client";
 
+import { formatDateZA } from "@/lib/utils";
+
 import { useState, useTransition } from "react";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/Button";
@@ -206,5 +208,5 @@ function relativeTime(iso: string): string {
   if (hrs < 24) return `${hrs}h ago`;
   const days = Math.round(hrs / 24);
   if (days < 30) return `${days}d ago`;
-  return new Date(iso).toLocaleDateString();
+  return formatDateZA(iso);
 }

@@ -38,3 +38,26 @@ export function daysSince(iso: string, reference: Date = new Date()): number {
     (reference.getTime() - new Date(iso).getTime()) / (1000 * 60 * 60 * 24),
   );
 }
+
+/**
+ * Hydration-safe date display (admin audit finding, 2026-08-15).
+ *
+ * `date.toLocaleDateString()` with NO locale argument formats with the
+ * runtime's default ICU locale, and the server's default and the
+ * visitor's browser default can disagree - which is a React #418
+ * hydration text mismatch on any server-rendered client component
+ * (found live on /admin/taxonomy/suggestions by the admin smoke walk).
+ * Explicit locale + timezone + options make the output identical on
+ * both sides. en-ZA + Johannesburg is the platform's home context;
+ * pass a locale explicitly where a translated surface needs one.
+ */
+const ZA_DATE = new Intl.DateTimeFormat("en-ZA", {
+  year: "numeric",
+  month: "short",
+  day: "numeric",
+  timeZone: "Africa/Johannesburg",
+});
+
+export function formatDateZA(iso: string | Date): string {
+  return ZA_DATE.format(typeof iso === "string" ? new Date(iso) : iso);
+}

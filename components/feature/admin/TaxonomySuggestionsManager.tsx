@@ -1,5 +1,7 @@
 "use client";
 
+import { formatDateZA } from "@/lib/utils";
+
 /**
  * Phase 9.15  Admin queue for the "Other" taxonomy suggestions.
  *
@@ -248,7 +250,7 @@ function SuggestionRowCard({
             <Users className="mr-1 inline size-3" aria-hidden="true" />
             {row.submitterCount} submitter{row.submitterCount === 1 ? "" : "s"}
             {" · first "}
-            {new Date(row.submittedAt).toLocaleDateString()}
+            {formatDateZA(row.submittedAt)}
             {isOrgKind && row.pendingOrganisationCity && (
               <> · seeker said city: <strong>{row.pendingOrganisationCity}</strong></>
             )}

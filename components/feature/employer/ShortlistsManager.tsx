@@ -1,5 +1,7 @@
 "use client";
 
+import { formatDateZA } from "@/lib/utils";
+
 /**
  * Talent pools (shortlists) CRUD client island.
  *
@@ -209,7 +211,7 @@ export function ShortlistsManager({ initial }: Props) {
                 </p>
               )}
               <p className="mt-1 text-xs text-[color:var(--color-ink-soft)]">
-                Created {new Date(p.createdAt).toLocaleDateString()}
+                Created {formatDateZA(p.createdAt)}
               </p>
 
               {p.members.length > 0 ? (
