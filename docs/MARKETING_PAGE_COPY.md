@@ -206,8 +206,7 @@ Accessibility) is part of the pitch.
 - **Every claim maps to something shipped.** If the build can't back it, the page can't say it.
 - **Button labels match what they do.** "Search talent" opens /search; "Create a free profile"
   opens sign-up; "Talk to us" opens email.
-- **`info@sebenzasa.com` must exist as a mailbox or alias** (founder action; until it does,
-  point the mailtos at the published `popia@sebenzasa.com`).
+- **`info@sebenzasa.com` is live** (created 2026-08-15). All Talk-to-us mailtos point at it.
 - **Two public story surfaces:** `/` is the visual, product-led landing; `/marketing` is this
   copy-led explainer. Keep them consistent; both are indexed with their own canonicals.
 - **Free-for-seekers is a permanent promise** on this page; changing that is a product decision
