@@ -69,6 +69,8 @@ export type AuditKind =
   // Phase 3  self-edit events on the seeker dashboard.
   | "profile.update"
   | "profile.skills.update"
+  // Languages editor (docs/PROFILE_LANGUAGES_PLAN.md).
+  | "profile.languages.update"
   | "profile.status.update"
   | "profile.status.reconfirm"
   | "profile.national_id.update"

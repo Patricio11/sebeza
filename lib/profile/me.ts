@@ -23,6 +23,7 @@ import type {
   Seniority,
   VerificationStatus,
   SkillRef,
+  LanguageRef,
   ExperienceItem,
   QualificationItem,
   WorkAvailabilityKind,
@@ -30,7 +31,7 @@ import type {
 } from "@/lib/mock/types";
 import { isOpenToTag } from "@/lib/mock/types";
 import { getSessionUser } from "@/lib/auth/guard";
-import { INSTITUTIONS } from "@/lib/mock/taxonomy";
+import { INSTITUTIONS, findLanguageBySlug } from "@/lib/mock/taxonomy";
 
 export type MyProfile = PublicProfile & {
   /** Row id (text/uuid in DB). Lets actions reference the profile without an extra lookup. */
@@ -120,8 +121,8 @@ export async function loadProfileForUser(userId: string): Promise<MyProfile | nu
     .limit(1);
   const u = userRows[0];
 
-  // Parallel: skills, experience, qualifications, academic.
-  const [skillRows, expRows, qualRows, acadRows] = await Promise.all([
+  // Parallel: skills, languages, experience, qualifications, academic.
+  const [skillRows, langRows, expRows, qualRows, acadRows] = await Promise.all([
     db
       .select({
         skillSlug: schema.profileSkills.skillSlug,
@@ -132,6 +133,15 @@ export async function loadProfileForUser(userId: string): Promise<MyProfile | nu
       .from(schema.profileSkills)
       .innerJoin(schema.skills, eq(schema.profileSkills.skillSlug, schema.skills.slug))
       .where(eq(schema.profileSkills.profileId, p.id)),
+    // Languages (docs/PROFILE_LANGUAGES_PLAN.md).
+    db
+      .select({
+        languageSlug: schema.profileLanguages.languageSlug,
+        spokenLevel: schema.profileLanguages.spokenLevel,
+        writtenLevel: schema.profileLanguages.writtenLevel,
+      })
+      .from(schema.profileLanguages)
+      .where(eq(schema.profileLanguages.profileId, p.id)),
     db
       .select()
       .from(schema.experiences)
@@ -153,6 +163,13 @@ export async function loadProfileForUser(userId: string): Promise<MyProfile | nu
     name: s.label,
     proficiency: clampProficiency(s.proficiency),
     yearsOfExperience: s.yearsOfExperience,
+  }));
+
+  const languages: LanguageRef[] = langRows.map((l) => ({
+    slug: l.languageSlug,
+    label: findLanguageBySlug(l.languageSlug)?.label ?? l.languageSlug,
+    spoken: l.spokenLevel,
+    written: l.writtenLevel,
   }));
 
   const experience: ExperienceItem[] = expRows.map((e) => ({
@@ -253,6 +270,7 @@ export async function loadProfileForUser(userId: string): Promise<MyProfile | nu
     yearsExperience: p.yearsExperience,
     memberSince: p.memberSince.toISOString(),
     topSkills,
+    languages,
     experience,
     qualifications,
     academic,

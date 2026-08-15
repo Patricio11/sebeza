@@ -36,7 +36,7 @@ export async function refreshProfileCompleteness(
     const basics = profileRows[0];
     if (!basics) return null;
 
-    const [skillsRows, customSkillRows, expRows, qualsRows] =
+    const [skillsRows, customSkillRows, expRows, qualsRows, langRows] =
       await Promise.all([
         db
           .select({ slug: schema.profileSkills.skillSlug })
@@ -59,6 +59,10 @@ export async function refreshProfileCompleteness(
           .select({ id: schema.qualifications.id })
           .from(schema.qualifications)
           .where(eq(schema.qualifications.profileId, profileId)),
+        db
+          .select({ slug: schema.profileLanguages.languageSlug })
+          .from(schema.profileLanguages)
+          .where(eq(schema.profileLanguages.profileId, profileId)),
       ]);
 
     const completeness = computeCompleteness({
@@ -83,6 +87,12 @@ export async function refreshProfileCompleteness(
         institution: "",
         awardedYear: null,
         verification: "unverified",
+      })),
+      languages: langRows.map((r) => ({
+        slug: r.slug,
+        label: r.slug,
+        spoken: "basic" as const,
+        written: "basic" as const,
       })),
     });
 

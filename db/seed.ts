@@ -669,6 +669,20 @@ async function seedProfileChildren() {
     await db.insert(schema.profileSkills).values(profileSkillRows);
   }
 
+  // Languages (docs/PROFILE_LANGUAGES_PLAN.md) - realistic multilingual
+  // showcase data for the flagship seekers so the public dossier's
+  // Languages section, the editor, and E2E all have real rows.
+  await db.insert(schema.profileLanguages).values([
+    { profileId: id("prof", "andile-z"), languageSlug: "isizulu", spokenLevel: "native", writtenLevel: "fluent" },
+    { profileId: id("prof", "andile-z"), languageSlug: "english", spokenLevel: "fluent", writtenLevel: "fluent" },
+    { profileId: id("prof", "andile-z"), languageSlug: "sesotho", spokenLevel: "intermediate", writtenLevel: "basic" },
+    { profileId: id("prof", "lerato-n"), languageSlug: "setswana", spokenLevel: "native", writtenLevel: "native" },
+    { profileId: id("prof", "lerato-n"), languageSlug: "english", spokenLevel: "fluent", writtenLevel: "fluent" },
+    { profileId: id("prof", "thandeka-m"), languageSlug: "isixhosa", spokenLevel: "native", writtenLevel: "fluent" },
+    { profileId: id("prof", "thandeka-m"), languageSlug: "english", spokenLevel: "fluent", writtenLevel: "intermediate" },
+    { profileId: id("prof", "thandeka-m"), languageSlug: "afrikaans", spokenLevel: "intermediate", writtenLevel: "basic" },
+  ]);
+
   // Experiences
   const expRows = mockProfiles.flatMap((p, pi) =>
     (p.experience ?? []).map((e, ei) => ({

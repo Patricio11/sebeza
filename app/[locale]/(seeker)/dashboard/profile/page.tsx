@@ -14,6 +14,7 @@ import { getSkills } from "@/lib/taxonomy/query";
 import { GraduationCap } from "lucide-react";
 import { ProfileBasicsForm } from "@/components/feature/profile/ProfileBasicsForm";
 import { SkillsEditor } from "@/components/feature/profile/SkillsEditor";
+import { LanguagesEditor } from "@/components/feature/profile/LanguagesEditor";
 import { CustomSkillsEditor } from "@/components/feature/profile/CustomSkillsEditor";
 import {
   listCustomSkills,
@@ -297,6 +298,18 @@ export default async function ProfileEditorPage({
                 max={MAX_CUSTOM_SKILLS}
               />
             )}
+          </section>
+
+          {/* Languages (docs/PROFILE_LANGUAGES_PLAN.md)  spoken +
+              written levels, review-time info for recruiters; counts
+              toward completeness. */}
+          <section id="languages">
+            <SectionHeading
+              eyebrow="04b"
+              title="Languages"
+              hint="Self-declared  employers see these when reviewing you. Many roles need a specific language."
+            />
+            <LanguagesEditor initial={me.languages ?? []} />
           </section>
 
           {/* Work availability (Phase 7.5) */}

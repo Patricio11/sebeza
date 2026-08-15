@@ -25,6 +25,8 @@ import { validateSaIdNumber } from "@/lib/id-number";
 import { isValidCountryCode, countryLabel } from "@/lib/taxonomy/countries";
 import { validateDob } from "@/lib/auth/id-validation";
 import { computeCompleteness } from "@/lib/mock/helpers";
+import { LANGUAGES, LANGUAGE_LEVELS } from "@/lib/mock/taxonomy";
+import { refreshProfileCompleteness } from "@/lib/profile/completeness-internal";
 import { SKILLS, PROFESSIONS } from "@/lib/mock/taxonomy";
 import type { EmploymentStatus } from "@/lib/mock/types";
 import { OPEN_TO_TAGS, type OpenToTag } from "@/lib/mock/types";
@@ -823,7 +825,7 @@ async function recomputeCompleteness(
   basics: { city: string; bio: string },
 ): Promise<number | null> {
   try {
-    const [skillsRows, customSkillRows, expRows, qualsRows] = await Promise.all([
+    const [skillsRows, customSkillRows, expRows, qualsRows, langRows] = await Promise.all([
       db
         .select({ slug: schema.profileSkills.skillSlug })
         .from(schema.profileSkills)
@@ -848,6 +850,13 @@ async function recomputeCompleteness(
         .select({ id: schema.qualifications.id })
         .from(schema.qualifications)
         .where(eq(schema.qualifications.profileId, profileId)),
+      // Languages (docs/PROFILE_LANGUAGES_PLAN.md) count too - this
+      // recompute and completeness-internal.ts MUST stay in parity or
+      // saving one section silently drops another section's points.
+      db
+        .select({ slug: schema.profileLanguages.languageSlug })
+        .from(schema.profileLanguages)
+        .where(eq(schema.profileLanguages.profileId, profileId)),
     ]);
     return computeCompleteness({
       city: basics.city,
@@ -872,8 +881,99 @@ async function recomputeCompleteness(
         awardedYear: null,
         verification: "unverified",
       })),
+      languages: langRows.map((r) => ({
+        slug: r.slug,
+        label: r.slug,
+        spoken: "basic" as const,
+        written: "basic" as const,
+      })),
     });
   } catch {
     return null;
   }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Languages (docs/PROFILE_LANGUAGES_PLAN.md)
+// ─────────────────────────────────────────────────────────────────────────────
+
+const languageLevelEnum = z.enum(
+  LANGUAGE_LEVELS.map((l) => l.value) as ["basic", "intermediate", "fluent", "native"],
+);
+
+const languagesSchema = z.object({
+  languages: z
+    .array(
+      z.object({
+        slug: z.string().min(2).max(40),
+        spoken: languageLevelEnum,
+        written: languageLevelEnum,
+      }),
+    )
+    // Cap 6: enough for real multilingual South Africans, short enough
+    // to stay honest review-time information rather than a keyword wall.
+    .max(6),
+});
+
+/**
+ * Replace the seeker's language list (delete-then-insert, the
+ * updateSkills idiom). Slugs validate against the LANGUAGES constant
+ * (unknown entries are refused, not silently dropped - the picker only
+ * offers the constant, so an unknown slug is a tampered payload).
+ * Levels are self-declared review-time information for recruiters
+ * (never "verified", never a gate). Completeness recomputes so the
+ * stored number that feeds ranking stays honest.
+ */
+export async function updateLanguages(
+  input: z.infer<typeof languagesSchema>,
+): Promise<ActionResult> {
+  const session = await getSessionUser();
+  if (!session) return fail("Not signed in.");
+  const parsed = languagesSchema.safeParse(input);
+  if (!parsed.success) return fail("Language list invalid. Try again.");
+  const db = getDb();
+  const profile = await loadOwnedProfile(db, session.id);
+  if (!profile) return fail("Profile not found.");
+
+  const validSlugs = new Set(LANGUAGES.map((l) => l.slug));
+  const seen = new Set<string>();
+  for (const l of parsed.data.languages) {
+    if (!validSlugs.has(l.slug)) {
+      return fail("One of those languages isn't in the list. Pick from the dropdown.");
+    }
+    if (seen.has(l.slug)) {
+      return fail("Each language can only appear once.");
+    }
+    seen.add(l.slug);
+  }
+
+  await db.transaction(async (tx) => {
+    await tx
+      .delete(schema.profileLanguages)
+      .where(eq(schema.profileLanguages.profileId, profile.id));
+    if (parsed.data.languages.length > 0) {
+      await tx.insert(schema.profileLanguages).values(
+        parsed.data.languages.map((l) => ({
+          profileId: profile.id,
+          languageSlug: l.slug,
+          spokenLevel: l.spoken,
+          writtenLevel: l.written,
+        })),
+      );
+    }
+  });
+
+  await refreshProfileCompleteness(db, profile.id);
+
+  await logAccess({
+    kind: "profile.languages.update",
+    actor: session.id,
+    subject: profile.id,
+    meta: { count: parsed.data.languages.length },
+  });
+
+  revalidatePath("/dashboard");
+  revalidatePath("/dashboard/profile");
+  revalidatePath(`/p/${profile.handle}`);
+  return ok();
 }

@@ -321,6 +321,43 @@ export default async function EmployerDossierPage({
             )}
           </section>
 
+          {/* Languages (docs/PROFILE_LANGUAGES_PLAN.md)  the review-time
+              surface the feature exists for: spoken + written levels at
+              a glance while assessing the candidate. Self-declared. */}
+          {profile.languages && profile.languages.length > 0 && (
+            <section aria-labelledby="langs-h">
+              <h2
+                id="langs-h"
+                className="mb-3 border-b border-[color:var(--color-hairline)] pb-2 font-display text-xl"
+              >
+                Languages
+              </h2>
+              <ul className="grid gap-2 md:grid-cols-2">
+                {profile.languages.map((l) => (
+                  <li
+                    key={l.slug}
+                    className="flex items-center justify-between gap-3 rounded-[var(--radius-sm)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] px-4 py-3"
+                  >
+                    <span className="text-sm font-medium">{l.label}</span>
+                    <span className="text-xs text-[color:var(--color-ink-soft)]">
+                      Spoken:{" "}
+                      <span className="text-[color:var(--color-ink)] capitalize">
+                        {l.spoken}
+                      </span>
+                      {" · "}Written:{" "}
+                      <span className="text-[color:var(--color-ink)] capitalize">
+                        {l.written}
+                      </span>
+                    </span>
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-2 text-xs text-[color:var(--color-ink-soft)]">
+                Language levels are self-declared by the seeker.
+              </p>
+            </section>
+          )}
+
           {/* Experience */}
           {profile.experience && profile.experience.length > 0 && (
             <section aria-labelledby="exp-h">

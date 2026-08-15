@@ -608,6 +608,39 @@ export const skillProvenance = pgEnum("skill_provenance", [
   "verified_provider",
 ]);
 
+/**
+ * Languages a seeker speaks / writes (docs/PROFILE_LANGUAGES_PLAN.md).
+ * Self-declared, plain four-step level per dimension - review-time
+ * information for recruiters, never a search gate and never rendered
+ * as "verified" (Verification-Honesty). Slugs come from the LANGUAGES
+ * constant in lib/mock/taxonomy.ts; the action layer validates against
+ * it and caps at 6 languages per profile.
+ */
+export const languageLevel = pgEnum("language_level", [
+  "basic",
+  "intermediate",
+  "fluent",
+  "native",
+]);
+
+export const profileLanguages = pgTable(
+  "profile_languages",
+  {
+    profileId: text("profile_id")
+      .notNull()
+      .references(() => profiles.id, { onDelete: "cascade" }),
+    languageSlug: text("language_slug").notNull(),
+    spokenLevel: languageLevel("spoken_level").notNull(),
+    writtenLevel: languageLevel("written_level").notNull(),
+  },
+  (t) => ({
+    uq: uniqueIndex("profile_languages_profile_language_uq").on(
+      t.profileId,
+      t.languageSlug,
+    ),
+  }),
+);
+
 export const profileSkills = pgTable("profile_skills", {
   profileId: text("profile_id")
     .notNull()

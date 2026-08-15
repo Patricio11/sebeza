@@ -7,7 +7,7 @@ export { freshnessBand, freshnessConfidence };
 /** Deterministic completeness score  shared between client + server. */
 export function computeCompleteness(p: Pick<
   PublicProfile,
-  "bio" | "topSkills" | "experience" | "qualifications" | "city"
+  "bio" | "topSkills" | "experience" | "qualifications" | "city" | "languages"
 >): number {
   let score = 0;
   if (p.city) score += 10;
@@ -15,6 +15,9 @@ export function computeCompleteness(p: Pick<
   score += Math.min(30, (p.topSkills?.length ?? 0) * 6);
   score += Math.min(25, (p.experience?.length ?? 0) * 10);
   score += Math.min(15, (p.qualifications?.length ?? 0) * 8);
+  // Languages (docs/PROFILE_LANGUAGES_PLAN.md): +3 each, capped at +6
+  // (two languages = full marks). The min(100) keeps the scale honest.
+  score += Math.min(6, (p.languages?.length ?? 0) * 3);
   return Math.min(100, score);
 }
 

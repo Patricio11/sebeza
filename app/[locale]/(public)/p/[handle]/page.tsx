@@ -34,6 +34,7 @@ import { getSessionUser } from "@/lib/auth/dal";
 import { getMyProfile } from "@/lib/profile/me";
 import { getSetting } from "@/lib/admin/settings";
 import { isProfileIndexableQuery } from "@/db/queries/profiles";
+import type { LanguageRef } from "@/lib/mock/types";
 import { localeAlternates } from "@/lib/seo";
 import { PersonJsonLd } from "@/components/seo/StructuredData";
 
@@ -636,6 +637,13 @@ async function ProfileBody({
 
           <SkillsSection skills={profile.topSkills} />
 
+          {/* Languages (docs/PROFILE_LANGUAGES_PLAN.md)  self-declared
+              spoken/written levels, review-time info for recruiters.
+              Hidden entirely when the seeker hasn't added any. */}
+          {profile.languages && profile.languages.length > 0 && (
+            <LanguagesSection languages={profile.languages} />
+          )}
+
           {profile.experience && profile.experience.length > 0 && (
             <ExperienceTimeline experience={profile.experience} t={t} />
           )}
@@ -887,6 +895,81 @@ function MetaTile({
 // ─────────────────────────────────────────────────────────────────────────────
 // SKILLS
 // ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Languages with spoken/written levels (docs/PROFILE_LANGUAGES_PLAN.md).
+ * Two level chips per language, dot-scaled 1-4 so the eye compares at a
+ * glance; the label spells the level out. Self-declared: the copy under
+ * the section says so honestly (Verification-Honesty).
+ */
+const LANGUAGE_LEVEL_META: Record<
+  NonNullable<LanguageRef["spoken"]>,
+  { label: string; dots: number }
+> = {
+  basic: { label: "Basic", dots: 1 },
+  intermediate: { label: "Intermediate", dots: 2 },
+  fluent: { label: "Fluent", dots: 3 },
+  native: { label: "Native", dots: 4 },
+};
+
+function LanguageLevelChip({
+  dimension,
+  level,
+}: {
+  dimension: "Spoken" | "Written";
+  level: LanguageRef["spoken"];
+}) {
+  const meta = LANGUAGE_LEVEL_META[level];
+  return (
+    <div className="flex items-center justify-between gap-3 text-xs">
+      <span className="uppercase tracking-[0.16em] text-[color:var(--color-ink-soft)]">
+        {dimension}
+      </span>
+      <span className="flex items-center gap-1.5">
+        <span className="flex gap-0.5" aria-hidden="true">
+          {[1, 2, 3, 4].map((i) => (
+            <span
+              key={i}
+              className={
+                "size-1.5 rounded-full " +
+                (i <= meta.dots
+                  ? "bg-[color:var(--color-brand)]"
+                  : "bg-[color:var(--color-surface-sunk)]")
+              }
+            />
+          ))}
+        </span>
+        <span className="text-[color:var(--color-ink)]">{meta.label}</span>
+      </span>
+    </div>
+  );
+}
+
+function LanguagesSection({ languages }: { languages: LanguageRef[] }) {
+  return (
+    <Section eyebrow="Communication" title="Languages">
+      <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {languages.map((l) => (
+          <li
+            key={l.slug}
+            className="rounded-xl border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-4 transition-colors hover:border-[color:var(--color-brand)]"
+          >
+            <div className="font-medium text-[color:var(--color-ink)]">
+              {l.label}
+            </div>
+            <div className="mt-3 grid gap-1.5">
+              <LanguageLevelChip dimension="Spoken" level={l.spoken} />
+              <LanguageLevelChip dimension="Written" level={l.written} />
+            </div>
+          </li>
+        ))}
+      </ul>
+      <p className="mt-3 text-xs text-[color:var(--color-ink-soft)]">
+        Language levels are self-declared by the seeker.
+      </p>
+    </Section>
+  );
+}
 
 function SkillsSection({
   skills,

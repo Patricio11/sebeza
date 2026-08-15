@@ -32,6 +32,7 @@ import type {
   VerificationStatus,
   EmploymentStatus,
   SkillRef,
+  LanguageRef,
   ExperienceItem,
   QualificationItem,
   AcademicProfile,
@@ -39,7 +40,7 @@ import type {
   OpenToTag,
 } from "@/lib/mock/types";
 import { isOpenToTag } from "@/lib/mock/types";
-import { INSTITUTIONS, PROVINCES } from "@/lib/mock/taxonomy";
+import { INSTITUTIONS, PROVINCES, findLanguageBySlug } from "@/lib/mock/taxonomy";
 import { randomUUID } from "node:crypto";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -711,9 +712,12 @@ export async function findProfileByHandleQuery(
   const p = rows[0];
   if (!p) return null;
 
-  const [topSkills, experience, qualifications, academic, verifiedAtIso] =
+  const [topSkills, languages, experience, qualifications, academic, verifiedAtIso] =
     await Promise.all([
       loadTopSkills(p.id),
+      // Languages (docs/PROFILE_LANGUAGES_PLAN.md) - public payload,
+      // same redaction posture as skills (self-declared, never PII).
+      loadLanguages(p.id),
       loadExperience(p.id),
       loadQualifications(p.id),
       loadAcademic(p.id),
@@ -754,6 +758,7 @@ export async function findProfileByHandleQuery(
     yearsExperience: p.yearsExperience,
     memberSince: p.memberSince.toISOString(),
     topSkills,
+    languages,
     experience,
     qualifications,
     academic,
@@ -913,6 +918,29 @@ export async function recentProfilesQuery(limit = 6): Promise<PublicProfile[]> {
 // ─────────────────────────────────────────────────────────────────────────────
 // Helpers  child-table loaders
 // ─────────────────────────────────────────────────────────────────────────────
+
+/** Languages with labels resolved from the taxonomy constant
+ *  (docs/PROFILE_LANGUAGES_PLAN.md). Native-first, then fluency. */
+async function loadLanguages(profileId: string): Promise<LanguageRef[]> {
+  const db = getDb();
+  const rows = await db
+    .select({
+      languageSlug: schema.profileLanguages.languageSlug,
+      spokenLevel: schema.profileLanguages.spokenLevel,
+      writtenLevel: schema.profileLanguages.writtenLevel,
+    })
+    .from(schema.profileLanguages)
+    .where(eq(schema.profileLanguages.profileId, profileId));
+  const order = { native: 0, fluent: 1, intermediate: 2, basic: 3 } as const;
+  return rows
+    .map((r) => ({
+      slug: r.languageSlug,
+      label: findLanguageBySlug(r.languageSlug)?.label ?? r.languageSlug,
+      spoken: r.spokenLevel,
+      written: r.writtenLevel,
+    }))
+    .sort((a, b) => order[a.spoken] - order[b.spoken]);
+}
 
 async function loadTopSkills(profileId: string): Promise<SkillRef[]> {
   const db = getDb();

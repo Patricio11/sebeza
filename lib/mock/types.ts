@@ -82,6 +82,18 @@ export interface SeasonalWindow {
   recurringAnnually: boolean;
 }
 
+/**
+ * Languages a seeker speaks/writes (docs/PROFILE_LANGUAGES_PLAN.md).
+ * Self-declared plain levels, review-time information for recruiters.
+ * Slug + display label carried together so renderers never re-resolve.
+ */
+export interface LanguageRef {
+  slug: string;
+  label: string;
+  spoken: "basic" | "intermediate" | "fluent" | "native";
+  written: "basic" | "intermediate" | "fluent" | "native";
+}
+
 export interface SkillRef {
   name: string;
   proficiency: 1 | 2 | 3 | 4 | 5;
@@ -130,6 +142,12 @@ export interface PublicProfile {
   /** Drives optional "highlight" UI only. Never used to exclude. */
   isCitizen: boolean;
   topSkills: SkillRef[];
+  /**
+   * Languages with self-declared spoken/written levels. OPTIONAL so
+   * mock fixtures + older payload shapes stay valid; absent renders
+   * as no Languages section.
+   */
+  languages?: LanguageRef[];
   /** One-paragraph bio for the profile page (still PII-light). */
   bio?: string;
   status: EmploymentStatus;

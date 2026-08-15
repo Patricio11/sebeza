@@ -497,3 +497,56 @@ export function nqfLabel(level: NqfLevel): string {
   const entry = NQF_LEVELS.find((n) => n.level === level);
   return entry ? `${entry.label} · ${entry.band}` : `NQF ${level}`;
 }
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Languages (docs/PROFILE_LANGUAGES_PLAN.md). The 12 official languages
+// first (incl. South African Sign Language, official since 2023), then
+// common regional / migrant / business languages. Self-declared with a
+// plain four-step level for spoken + written, review-time information
+// for recruiters (never a gate, never "verified"). Extending the list
+// is a constant + migration change (the private-colleges precedent).
+
+export const LANGUAGE_LEVELS = [
+  { value: "basic", label: "Basic" },
+  { value: "intermediate", label: "Intermediate" },
+  { value: "fluent", label: "Fluent" },
+  { value: "native", label: "Native" },
+] as const;
+
+export type LanguageLevel = (typeof LANGUAGE_LEVELS)[number]["value"];
+
+export const LANGUAGES: TaxonomyEntry[] = [
+  // The 12 official languages
+  { slug: "english", label: "English" },
+  { slug: "isizulu", label: "isiZulu" },
+  { slug: "isixhosa", label: "isiXhosa" },
+  { slug: "afrikaans", label: "Afrikaans" },
+  { slug: "sepedi", label: "Sepedi (Northern Sotho)" },
+  { slug: "setswana", label: "Setswana" },
+  { slug: "sesotho", label: "Sesotho" },
+  { slug: "xitsonga", label: "Xitsonga" },
+  { slug: "siswati", label: "siSwati" },
+  { slug: "tshivenda", label: "Tshivenda" },
+  { slug: "isindebele", label: "isiNdebele" },
+  { slug: "sasl", label: "South African Sign Language" },
+  // Common additional languages
+  { slug: "portuguese", label: "Portuguese" },
+  { slug: "french", label: "French" },
+  { slug: "swahili", label: "Swahili" },
+  { slug: "shona", label: "Shona" },
+  { slug: "chichewa", label: "Chichewa (Nyanja)" },
+  { slug: "lingala", label: "Lingala" },
+  { slug: "somali", label: "Somali" },
+  { slug: "amharic", label: "Amharic" },
+  { slug: "arabic", label: "Arabic" },
+  { slug: "german", label: "German" },
+  { slug: "spanish", label: "Spanish" },
+  { slug: "mandarin", label: "Mandarin" },
+  { slug: "hindi", label: "Hindi" },
+  { slug: "urdu", label: "Urdu" },
+];
+
+export function findLanguageBySlug(slug: string | null | undefined) {
+  if (!slug) return null;
+  return LANGUAGES.find((l) => l.slug === slug) ?? null;
+}
