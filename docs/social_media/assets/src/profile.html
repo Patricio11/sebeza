@@ -1,0 +1,41 @@
+<!doctype html>
+<!--
+  Sebenza Facebook profile picture. 1080x1080.
+  Matches the shipped PWA icon identity (Fraunces "S" on cream) but is
+  circle-crop-safe: the flag stripe is a short centred band under the S
+  instead of a full-bleed bottom bar, so the circle never clips it.
+-->
+<html>
+<head>
+<meta charset="utf-8" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900&display=block" rel="stylesheet" />
+<style>
+  :root { --paper: #fbf8f0; --green: #006b3c; --gold: #c98214; --red: #de3831; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 100%; height: 100%; }
+  body { background: var(--paper); }
+  .card {
+    width: 100vw; height: 100vh;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+  }
+  .s {
+    font-family: "Fraunces", Georgia, serif; font-weight: 600;
+    font-size: 660px; line-height: 0.94; color: var(--green);
+    font-variation-settings: "opsz" 144;
+  }
+  .stripe { display: flex; height: 26px; width: 348px; margin-top: 42px; }
+  .stripe .g { flex: 3; background: var(--green); }
+  .stripe .a { flex: 2; background: var(--gold); }
+  .stripe .r { flex: 1; background: var(--red); }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="s">S</div>
+    <div class="stripe"><div class="g"></div><div class="a"></div><div class="r"></div></div>
+  </div>
+</body>
+</html>

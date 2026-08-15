@@ -1,0 +1,118 @@
+<!doctype html>
+<!--
+  Sebenza social quote card (1080x1350 default).
+  Themes via body class: theme-light | theme-dark | theme-alert.
+  Slots filled by render.mjs: [data-slot=eyebrow], [data-slot=headline],
+  [data-slot=sub], [data-mark] (chevron mark SVG injected).
+  The flag stripe (green 3 : gold 2 : red 1) is the house law: every
+  Sebenza social graphic carries it at the very bottom, full bleed.
+-->
+<html>
+<head>
+<meta charset="utf-8" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=Hanken+Grotesk:ital,wght@0,400..700;1,400..700&display=block" rel="stylesheet" />
+<style>
+  :root {
+    --paper: #fbf8f0;
+    --ink: #14110d;
+    --ink-soft: #5a5249;
+    --green: #006b3c;
+    --green-deep: #003d1f;
+    --green-soft: #0a8c50;
+    --gold: #c98214;
+    --gold-bright: #f5a623;
+    --red: #de3831;
+    --hairline: #e4ded4;
+    --headline-size: 100px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 100%; height: 100%; }
+  body {
+    font-family: "Hanken Grotesk", system-ui, sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+  }
+  .card {
+    width: 100vw; height: 100vh;
+    display: flex; flex-direction: column;
+    padding: 104px 96px 0;
+    position: relative;
+  }
+  .toprule { height: 8px; width: 148px; background: var(--green); margin-bottom: 44px; }
+  .eyebrow {
+    font-weight: 700; font-size: 27px; letter-spacing: 0.24em;
+    text-transform: uppercase; color: var(--ink-soft);
+  }
+  .body {
+    flex: 1; display: flex; flex-direction: column;
+    justify-content: center; padding-bottom: 120px;
+  }
+  .headline {
+    font-family: "Fraunces", Georgia, serif;
+    font-weight: 560; font-size: var(--headline-size);
+    line-height: 1.08; letter-spacing: -0.015em;
+    max-width: 880px;
+    font-variation-settings: "opsz" 144;
+  }
+  .headline em { font-style: italic; color: var(--gold); font-weight: 540; }
+  .sub {
+    margin-top: 44px; font-size: 36px; line-height: 1.45;
+    color: var(--ink-soft); max-width: 780px; font-weight: 400;
+  }
+  .sub:empty { display: none; }
+  .spacer { flex: 1; }
+  .footer {
+    display: flex; align-items: center; gap: 22px;
+    padding-bottom: 58px;
+  }
+  .footer .mark { width: 52px; height: 47px; display: block; }
+  .footer .mark svg { width: 100%; height: 100%; display: block; }
+  .wordmark {
+    font-family: "Fraunces", Georgia, serif; font-weight: 700;
+    font-size: 44px; color: var(--green-deep); letter-spacing: -0.01em;
+  }
+  .site {
+    font-size: 27px; color: var(--ink-soft); font-weight: 500;
+    letter-spacing: 0.02em; margin-left: auto;
+  }
+  .stripe { display: flex; height: 18px; width: 100vw; position: absolute; left: 0; bottom: 0; }
+  .stripe .g { flex: 3; background: var(--green); }
+  .stripe .a { flex: 2; background: var(--gold); }
+  .stripe .r { flex: 1; background: var(--red); }
+
+  /* Dark theme: deep flag-green surface, cream ink, gold lifted for contrast */
+  body.theme-dark { background: var(--green-deep); color: var(--paper); }
+  body.theme-dark .toprule { background: var(--gold); }
+  body.theme-dark .eyebrow { color: rgba(251, 248, 240, 0.62); }
+  body.theme-dark .headline em { color: var(--gold-bright); }
+  body.theme-dark .sub { color: rgba(251, 248, 240, 0.78); }
+  body.theme-dark .wordmark { color: var(--paper); }
+  body.theme-dark .site { color: rgba(251, 248, 240, 0.62); }
+  body.theme-dark .stripe { border-top: 1px solid rgba(251, 248, 240, 0.25); }
+  body.theme-dark .stripe .g { background: var(--green-soft); }
+
+  /* Alert theme: cream surface, red accents. Red is for warnings only. */
+  body.theme-alert .toprule { background: var(--red); }
+  body.theme-alert .eyebrow { color: var(--red); }
+  body.theme-alert .headline em { color: var(--red); }
+</style>
+</head>
+<body class="theme-light">
+  <div class="card">
+    <div class="toprule"></div>
+    <div class="eyebrow" data-slot="eyebrow"></div>
+    <div class="body">
+      <div class="headline" data-slot="headline"></div>
+      <div class="sub" data-slot="sub"></div>
+    </div>
+    <div class="footer">
+      <span class="mark" data-mark></span>
+      <span class="wordmark">Sebenza</span>
+      <span class="site">sebenzasa.com</span>
+    </div>
+    <div class="stripe"><div class="g"></div><div class="a"></div><div class="r"></div></div>
+  </div>
+</body>
+</html>

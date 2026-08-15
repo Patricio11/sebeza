@@ -1,0 +1,72 @@
+<!doctype html>
+<!--
+  Sebenza promise checklist card (post 30). 1080x1350, light theme.
+-->
+<html>
+<head>
+<meta charset="utf-8" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=Hanken+Grotesk:ital,wght@0,400..700;1,400..700&display=block" rel="stylesheet" />
+<style>
+  :root {
+    --paper: #fbf8f0; --ink: #14110d; --ink-soft: #5a5249;
+    --green: #006b3c; --green-deep: #003d1f; --gold: #c98214;
+    --red: #de3831; --hairline: #e4ded4;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 100%; height: 100%; }
+  body { font-family: "Hanken Grotesk", system-ui, sans-serif; background: var(--paper); color: var(--ink); }
+  .card { width: 100vw; height: 100vh; display: flex; flex-direction: column; padding: 104px 96px 0; position: relative; }
+  .toprule { height: 8px; width: 148px; background: var(--green); margin-bottom: 44px; }
+  .eyebrow { font-weight: 700; font-size: 27px; letter-spacing: 0.24em; text-transform: uppercase; color: var(--ink-soft); }
+  .title {
+    font-family: "Fraunces", Georgia, serif; font-weight: 560; font-size: 88px;
+    line-height: 1.06; margin-top: 44px; letter-spacing: -0.015em;
+    font-variation-settings: "opsz" 144;
+  }
+  .title em { font-style: italic; color: var(--gold); }
+  .list { margin-top: 64px; display: flex; flex-direction: column; gap: 42px; }
+  .item { display: flex; align-items: flex-start; gap: 30px; }
+  .tick {
+    width: 52px; height: 52px; flex: none; background: var(--green);
+    display: flex; align-items: center; justify-content: center; margin-top: 4px;
+  }
+  .tick svg { width: 30px; height: 30px; }
+  .item p { font-size: 39px; line-height: 1.3; color: var(--ink); }
+  .item p strong { font-weight: 700; }
+  .item p span { color: var(--ink-soft); }
+  .spacer { flex: 1; }
+  .footer { display: flex; align-items: center; gap: 22px; padding-bottom: 58px; }
+  .footer .mark { width: 52px; height: 47px; }
+  .footer .mark svg { width: 100%; height: 100%; display: block; }
+  .wordmark { font-family: "Fraunces", Georgia, serif; font-weight: 700; font-size: 44px; color: var(--green-deep); }
+  .site { font-size: 27px; color: var(--ink-soft); font-weight: 500; margin-left: auto; }
+  .stripe { display: flex; height: 18px; width: 100vw; position: absolute; left: 0; bottom: 0; }
+  .stripe .g { flex: 3; background: var(--green); }
+  .stripe .a { flex: 2; background: var(--gold); }
+  .stripe .r { flex: 1; background: var(--red); }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="toprule"></div>
+    <div class="eyebrow">Our promise, as we build</div>
+    <div class="title">Built the <em>right</em> way.</div>
+    <div class="list">
+      <div class="item"><div class="tick"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12.5 L10 18.5 L20 6.5" stroke="#fbf8f0" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div><p><strong>Free for job-seekers.</strong> <span>Always.</span></p></div>
+      <div class="item"><div class="tick"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12.5 L10 18.5 L20 6.5" stroke="#fbf8f0" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div><p><strong>Honest.</strong> <span>No fake profiles, no fake numbers.</span></p></div>
+      <div class="item"><div class="tick"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12.5 L10 18.5 L20 6.5" stroke="#fbf8f0" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div><p><strong>Fair.</strong> <span>Matched by skill and location.</span></p></div>
+      <div class="item"><div class="tick"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12.5 L10 18.5 L20 6.5" stroke="#fbf8f0" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div><p><strong>Private.</strong> <span>Your data protected and respected.</span></p></div>
+      <div class="item"><div class="tick"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12.5 L10 18.5 L20 6.5" stroke="#fbf8f0" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div><p><strong>Proudly South African.</strong> <span>Built here, for here.</span></p></div>
+    </div>
+    <div class="spacer"></div>
+    <div class="footer">
+      <span class="mark" data-mark></span>
+      <span class="wordmark">Sebenza</span>
+      <span class="site">sebenzasa.com</span>
+    </div>
+    <div class="stripe"><div class="g"></div><div class="a"></div><div class="r"></div></div>
+  </div>
+</body>
+</html>
