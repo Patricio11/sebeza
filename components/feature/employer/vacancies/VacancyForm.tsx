@@ -747,7 +747,7 @@ export function VacancyForm({
         <MultiSelectComboboxField
           id="skillSlugs"
           label="Required skills"
-          helpText="Pick the skills this vacancy needs. The matcher uses them to rank candidates; suggested skills are the ones common for this profession."
+          helpText="Pick the skills this vacancy needs. The matcher uses them to rank candidates. Can't find one? Type it anyway and add it - our team reviews new skills and it becomes available platform-wide."
           values={Array.from(skillSet)}
           onChange={(next) => setSkillSet(new Set(next))}
           options={skills.map((s) => ({ value: s.slug, label: s.label }))}
@@ -758,6 +758,7 @@ export function VacancyForm({
           disabled={pending}
           allowOther
           otherLabel="Skill not listed?"
+          otherHint="Can't find a skill? Just keep typing it and add it - our team reviews new skills."
           splitOtherOnComma
         />
 

@@ -78,6 +78,10 @@ interface Props {
   allowOther?: boolean;
   /** Label for the suggest footer. Default: "Suggest a new entry". */
   otherLabel?: string;
+  /** Quiet, non-interactive footer shown while the "Suggest" row is
+   *  NOT yet visible (empty/short/matching query) - makes the
+   *  suggest-your-own affordance discoverable before typing. */
+  otherHint?: string;
   /** Called when the user picks the suggest footer. The parent is
    *  responsible for firing whatever server action records the
    *  suggestion. The typed text is also added to `values` as a
@@ -115,6 +119,7 @@ export function MultiSelectComboboxField({
   disabled,
   allowOther,
   otherLabel = "Suggest a new entry",
+  otherHint,
   onOtherSubmit,
   splitOtherOnComma,
   className,
@@ -479,23 +484,36 @@ export function MultiSelectComboboxField({
                 <Plus className="size-3.5 shrink-0" aria-hidden="true" />
                 {otherParts.length > 1 ? (
                   <span>
-                    Suggest{" "}
+                    Add{" "}
                     <strong className="font-semibold">
                       {otherParts.length} entries
-                    </strong>{" "}
-                    for admin review
+                    </strong>
                     <span className="mt-0.5 block text-[0.7rem] font-normal text-[color:var(--color-ink-soft)]">
                       {otherParts.join(" · ")}
                     </span>
                   </span>
                 ) : (
                   <span>
-                    Suggest <strong className="font-semibold">{qTrim}</strong> for
-                    admin review
+                    Add <strong className="font-semibold">{qTrim}</strong>
                   </span>
                 )}
               </button>
             </>
+          )}
+
+          {/* Discoverability (docs/SKILL_SUGGEST_DISCOVERABILITY_PLAN.md):
+              before the actionable "Suggest {query}" row earns its
+              place, tell the user the door exists. Non-interactive,
+              excluded from keyboard navigation; swaps to the real row
+              the moment their query stops matching the catalogue. */}
+          {allowOther && !showOther && otherHint && (
+            <p className="sticky bottom-0 border-t border-dashed border-[color:var(--color-hairline)] bg-[color:var(--color-surface-sunk)] px-3 py-2 text-xs text-[color:var(--color-ink-soft)]">
+              <Plus
+                className="mr-1 inline size-3 text-[color:var(--color-accent)]"
+                aria-hidden="true"
+              />
+              {otherHint}
+            </p>
           )}
         </div>
       )}

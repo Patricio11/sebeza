@@ -17,13 +17,13 @@ const lang = (slug: string): LanguageRef => ({
   written: "intermediate",
 });
 
-const base = {
+const base: Parameters<typeof computeCompleteness>[0] = {
   city: "",
   bio: "",
   topSkills: [],
   experience: [],
   qualifications: [],
-} as const;
+};
 
 describe("computeCompleteness - languages term", () => {
   test("+3 per language, capped at +6", () => {

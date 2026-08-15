@@ -208,7 +208,7 @@ export function SkillsEditor({ initial, professionSlug, skillOptions }: Props) {
         <MultiSelectComboboxField
           id="skill-picker"
           label="Add skills"
-          helpText="Type to search the catalogue. Suggested skills are common for your profession; you can pick any of them."
+          helpText="Type to search the catalogue. Can't find a skill? Type it anyway and add it - it goes to our team for review, shows as pending on your profile, and you'll be notified the moment it's approved."
           values={items.map((i) => i.slug)}
           onChange={handlePickerChange}
           options={catalogue.map((s) => ({ value: s.slug, label: s.label }))}
@@ -218,6 +218,7 @@ export function SkillsEditor({ initial, professionSlug, skillOptions }: Props) {
           placeholder="Type to search skills…"
           allowOther
           otherLabel="Skill not listed?"
+          otherHint="Can't find your skill? Just keep typing it and add it - our team reviews new skills."
           splitOtherOnComma
         />
         <div className="mt-3 flex justify-end">
