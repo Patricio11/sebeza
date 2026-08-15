@@ -32,6 +32,14 @@ demo link is **`/apply/sa-demo-it-support-2026-fixed01`**:
   (copy + WhatsApp share) and the Self Apply toggles in the edit form.
 Screenshots of the whole arc: `docs/screenshots/phase34-self-apply/`.
 
+## Languages demo (post-34)
+The flagship seekers ship with realistic multilingual profiles: **andile-z** (isiZulu native /
+English fluent / Sesotho intermediate), **lerato-n** (Setswana native / English fluent),
+**thandeka-m** (isiXhosa native / English fluent / Afrikaans intermediate). See them on the
+public profile (Communication · Languages section), the employer dossier (compact list after
+Skills), and the seeker editor (spoken + written level pills). Levels are self-declared and
+count toward completeness.
+
 ## Honesty notes
 - The destinations table on andile's student lane is computed from **real seeded
   employer-confirmed placements** (11 across the Wits cohort  above the k-floor of 10).

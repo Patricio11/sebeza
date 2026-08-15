@@ -1244,6 +1244,32 @@ Full plan (all boxes ticked, E2E 8/8 green): `docs/PHASE_34_SELF_APPLY_PLAN.md`.
 
 ---
 
+## 🧽 POST-34 POLISH WAVE *(shipped 2026-07-30 → 08-15; plan docs at the top of `docs/`)*
+
+Not a numbered phase: a founder-driven continuous-improvement wave, each item with its own
+checkbox plan doc, all boxes ticked.
+
+- [x] **Profile languages** - spoken + written levels (plain 4-step scale), editor + public
+  profile + employer dossier display, counts in completeness. Migration 0064.
+  `docs/PROFILE_LANGUAGES_PLAN.md`
+- [x] **Suggestion approval loop** - promote/merge backfills the suggester's profile (skills were
+  the gap) + notifies via `taxonomy.suggestion.approved`; custom-skill canonicalization notifies
+  every migrated holder. `docs/SUGGESTION_APPROVAL_LOOP_PLAN.md`
+- [x] **/marketing explainer funnel** - the send-this-instead-of-explaining page; live register
+  stats, honest proof, copy-of-record at `docs/MARKETING_PAGE_COPY.md`. Founder action open:
+  create the hello@sebenzasa.com mailbox.
+- [x] **Error surfaces** - branded 404 (zero-JS search + quick links), `[...rest]` catch-all,
+  global-error boundary, digest-as-support-code; perf-budget gate re-verified 10/10.
+  `docs/ERROR_PAGES_404_PLAN.md`
+- [x] **Admin audit** - permanent smoke gate over all 22 admin surfaces; React #418 hydration
+  crash found + fixed (`formatDateZA()` rule). `docs/ADMIN_AUDIT_2026_08.md`
+- [x] **Taxonomy** - 17 major private colleges (migration 0063,
+  `docs/PRIVATE_COLLEGES_TAXONOMY_PLAN.md`); skill-suggest discoverability
+  (`docs/SKILL_SUGGEST_DISCOVERABILITY_PLAN.md`).
+- [x] **House copy rule** - no em-dashes anywhere users or the founder read.
+
+---
+
 ## 🚀 DEPLOYMENT CHECKLIST
 
 ### Pre-Launch
@@ -1314,8 +1340,11 @@ HR Practitioner · Electrician · Plumber · Accountant · Nurse · Driver · Bo
 
 ---
 
-*Last Updated: 2026-07-30*
-*Version: 2.12  synced through **Phase 34** (Self Apply: public vacancy link + seeker-initiated
+*Last Updated: 2026-08-15*
+*Version: 2.13  synced through the **post-34 polish wave** (profile languages in completeness;
+suggestion approval loop with backfill + notify; /marketing funnel; branded 404/catch-all/
+global-error; admin smoke gate + formatDateZA hydration rule; private colleges; skill-suggest
+discoverability; no-em-dash copy rule). Prior: v2.12 synced through **Phase 34** (Self Apply: public vacancy link + seeker-initiated
 applications riding the existing invitation pipeline via an `origin` column; BrandDialog house
 modal primitive; ships dark behind `feature_flag_vacancy_self_apply`; E2E 8/8 both viewports) and
 **Phase 33** (full SEO + social pass: metadataBase/OG/hreflang/JSON-LD, generated OG cards, the

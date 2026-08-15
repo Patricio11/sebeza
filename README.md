@@ -81,7 +81,7 @@ Background decisions in [docs/popia/DPIA.md](docs/popia/DPIA.md) (R8, R-27).
 - **Tailwind v4** (design tokens in `app/globals.css` via `@theme`); Fraunces
   display + Hanken Grotesk body via `next/font`.
 - **Drizzle ORM 0.45** + **Neon serverless** Postgres (EU, Phase 9; AWS Cape
-  Town `af-south-1` migration deferred). 63 migrations through 0062.
+  Town `af-south-1` migration deferred). 65 migrations through 0064.
 - **Better Auth 1.6.25** with `nextCookies()` + `twoFactor` plugins
   (TOTP + backup codes).
 - **next-intl 4.12**  Tier-1 locales `en` / `zu` / `xh` / `af`; deep-merge
@@ -161,6 +161,7 @@ Background decisions in [docs/popia/DPIA.md](docs/popia/DPIA.md) (R8, R-27).
 | 32 | Security remediation + welcome email (build-failing Server-Action guard, session revocation, auth rate limits, open-redirect closure, POPIA §18 welcome email) | ✅ | Shipped 2026-07-28 · [plan](docs/PHASE_32_SECURITY_HARDENING_PLAN.md) · DPIA R-27 |
 | 33 | Full SEO + social sharing (metadataBase, generated OG cards, hreflang, JSON-LD, consent-aware profile indexing, sitemap/robots fixes, Vercel Analytics) | ✅ | Shipped 2026-07-28 · [plan](docs/PHASE_33_SEO_PLAN.md) · founder GSC/Bing steps open |
 | 34 | Self Apply (public vacancy link + seeker-initiated applications; BrandDialog house modal; ships dark) | ✅ | Shipped 2026-07-29 · [plan](docs/PHASE_34_SELF_APPLY_PLAN.md) · [screenshots](docs/screenshots/phase34-self-apply/) |
+| 34+ | Post-34 polish wave: profile languages (spoken + written levels, in completeness), suggestion approval loop (backfill + notify), /marketing explainer funnel, branded 404 + catch-all + global-error, admin smoke gate + hydration fix, 17 private colleges, skill-suggest discoverability | ✅ | Shipped 2026-07-30 → 08-15 · plan docs in `docs/` |
 
 ---
 
@@ -168,7 +169,7 @@ Background decisions in [docs/popia/DPIA.md](docs/popia/DPIA.md) (R8, R-27).
 
 | Role | Home | Highlights |
 |---|---|---|
-| **seeker** | `/dashboard` | Talent Pulse confirm, profile editor with years-of-experience (9.9), self-reported placement, KYC panel, §23 data export, §24 self-erase, TOTP 2FA, **vacancy invitations** with accept/decline-with-reason (9.8), **learning loop** on `/dashboard/grow`  accept → start → complete → skill lands on profile honestly as `self_attested_learning` (9.12), **honest closure** when a vacancy is filled with someone else + curriculum-vs-market view for students (9.11 + 9.13), **module/elective/project capture** + skills inferred from current studies (13.1 + 13.2), **private progression timeline** with auto-derived events + self-declared milestones (13.4) |
+| **seeker** | `/dashboard` | Talent Pulse confirm, profile editor with years-of-experience (9.9), self-reported placement, KYC panel, §23 data export, §24 self-erase, TOTP 2FA, **vacancy invitations** with accept/decline-with-reason (9.8), **learning loop** on `/dashboard/grow`  accept → start → complete → skill lands on profile honestly as `self_attested_learning` (9.12), **honest closure** when a vacancy is filled with someone else + curriculum-vs-market view for students (9.11 + 9.13), **module/elective/project capture** + skills inferred from current studies (13.1 + 13.2), **private progression timeline** with auto-derived events + self-declared milestones (13.4), **languages** with spoken + written levels (count toward completeness; shown to recruiters on the dossier) |
 | **employer** | `/employer` | Saved searches, candidate reveals (30-day window, audit-logged), **vacancies** (create / reverse-match / invite / withdraw / mark-as-filled in one action) (9.8 + 9.11), **admin-mediated KYC** at `/employer/onboarding` with 4 SA-standard docs (9.10), placement nudge banner, hire confirmation |
 | **admin** | `/admin` | Moderation queue, settings, feature flags, audit log + CSV export, **29+ compliance assertions** on `/api/admin/outcomes-compliance`, **organisation review** queue with signed-URL inline document access (9.10), **`/admin/llm`** provider configuration with at-most-one-active partial unique index + cross-border s.72 acknowledgement (13.3), **`/admin/curriculum`** editorial curation queue + bulk-import + provenance ledger (13.3) |
 | **gov** | `/gov` | Sebenza LMI hero, province deep-dives, **Skills-Shortage Justification Index** (9.7), **Local-Hiring Opportunity Map** (9.7), **Why roles go unfilled** (9.8.7) + **Why learners stall** (9.13) on `/gov/shortage`, **Curriculum vs demand** at `/gov/curriculum` (9.13) with module-grain gap panel (13.6), per-employer lookup dormant behind flag (9.7.6), printable policy brief, exports surface, 2FA panel |
@@ -198,7 +199,7 @@ cp .env.example .env.local
 
 # 3. Database
 npm run db:generate     # generate Drizzle migration (only if you changed schema)
-npm run db:migrate      # apply all migrations (0000 → 0062) to your Neon DB
+npm run db:migrate      # apply all migrations (0000 → 0064) to your Neon DB
 npm run db:seed         # TRUNCATING seed  dev/test databases ONLY, never a live DB
                         # (taxonomy + fixture cohort + lifecycle fixtures + showcase accounts)
 # If migrate exits silently but the seed fails on a missing column, the
@@ -217,9 +218,9 @@ npm run dev             # http://localhost:3000
 npm run build           # production build (4 locales × every route)
 npm run typecheck       # tsc --noEmit
 npm run lint
-npm test                # vitest unit project (259 tests / 21 files)
-npm run test:all        # typecheck + lint + full vitest (unit/integration/compliance, ~429 tests)
-npm run test:e2e        # Playwright (124 tests / 25 files, desktop + mobile-360 projects;
+npm test                # vitest unit project (263 tests / 22 files)
+npm run test:all        # typecheck + lint + full vitest (unit/integration/compliance, ~434 tests)
+npm run test:e2e        # Playwright (126 tests / 26 files, desktop + mobile-360 projects;
                         # needs the Docker test Postgres + .env.test.local)
 ```
 

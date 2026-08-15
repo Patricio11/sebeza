@@ -8,9 +8,19 @@
 - `docs/ROADMAP.md`  phased build plan (Phase 0 → 34; all shipped except 14, which is partnership-gated).
 - `docs/UX_UI_SPEC.md`  design system + screen-by-screen.
 
-**Current state (2026-07): LIVE, DB-BACKED, shipped through Phase 34.** Postgres (Neon) + Drizzle,
-63 migrations (0000→0062), Better Auth sessions, ~429-test vitest suite (unit/integration/compliance)
-+ ~124-test Playwright E2E (desktop + 360px), 20 cron jobs.
+**Current state (2026-08): LIVE, DB-BACKED, shipped through Phase 34 + the post-34 polish wave.**
+Postgres (Neon) + Drizzle, 65 migrations (0000→0064), Better Auth sessions, ~434-test vitest suite
+(unit/integration/compliance) + ~126-test Playwright E2E (desktop + 360px), 20 cron jobs.
+Post-34 wave (2026-07-30 → 08-15, plan docs in docs/): profile LANGUAGES (spoken + written levels,
+migration 0064, counts in completeness via the ONE shared engine - keep recompute paths in parity);
+suggestion APPROVAL LOOP (promote/merge backfills the suggester's profile + notifies via
+`taxonomy.suggestion.approved`; skills were the gap); /marketing explainer funnel
+(docs/MARKETING_PAGE_COPY.md is copy-of-record; live stats only); branded 404 + `[...rest]`
+catch-all + global-error; admin smoke gate `tests/e2e/admin-smoke.spec.ts` (extend its route list
+when adding admin pages); 17 private colleges in the institutions taxonomy.
+**House rules added: NO em-dashes anywhere users or the founder read (AI tell); never call
+`toLocaleDateString()` without an explicit locale in SSR'd components - use `formatDateZA()`
+(lib/utils; React #418 class); plan docs use `- [ ]` checkbox TASKS/VERIFY ticked as they land.**
 Phase 34 (Self Apply, plan `docs/PHASE_34_SELF_APPLY_PLAN.md`): per-vacancy public apply link,
 SHIPS DARK behind `feature_flag_vacancy_self_apply` + per-vacancy toggle. Self-applications ride
 `vacancy_invitations` via the new `origin` column (born `accepted`, "Self-applied" chip; employer
