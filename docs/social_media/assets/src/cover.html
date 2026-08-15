@@ -25,27 +25,27 @@
   /* Oversized signature chevron ghosted in the background, off to the right */
   .bgchev { position: absolute; right: -150px; top: -140px; width: 900px; height: 900px; opacity: 0.06; }
   .bgchev svg { width: 100%; height: 100%; }
+  /* The page's profile-picture circle overlaps the centre-bottom of the
+     cover on both desktop and mobile, so ALL content lives in the upper
+     half: the flex column is padded hard at the bottom to lift it clear. */
   .card {
     width: 100vw; height: 100vh; position: relative;
     display: flex; flex-direction: column; align-items: center;
     justify-content: center; text-align: center;
+    padding-bottom: 300px;
   }
-  .lockup { display: flex; align-items: center; gap: 34px; }
-  .mark { width: 132px; height: 119px; }
+  .lockup { display: flex; align-items: center; gap: 30px; }
+  .mark { width: 118px; height: 106px; }
   .mark svg { width: 100%; height: 100%; display: block; }
   .wordmark {
     font-family: "Fraunces", Georgia, serif; font-weight: 700;
-    font-size: 148px; letter-spacing: -0.015em; line-height: 1;
+    font-size: 132px; letter-spacing: -0.015em; line-height: 1;
     font-variation-settings: "opsz" 144;
   }
   .tagline {
-    margin-top: 34px; font-weight: 700; font-size: 29px;
+    margin-top: 30px; font-weight: 700; font-size: 27px;
     letter-spacing: 0.32em; text-transform: uppercase;
     color: var(--gold-bright);
-  }
-  .site {
-    margin-top: 26px; font-size: 26px; font-weight: 500;
-    color: rgba(251, 248, 240, 0.6); letter-spacing: 0.04em;
   }
   .stripe {
     display: flex; height: 14px; width: 100vw;
@@ -70,7 +70,6 @@
       <span class="wordmark">Sebenza</span>
     </div>
     <div class="tagline">South Africa&rsquo;s National Talent Platform</div>
-    <div class="site">sebenzasa.com</div>
     <div class="stripe"><div class="g"></div><div class="a"></div><div class="r"></div></div>
   </div>
 </body>

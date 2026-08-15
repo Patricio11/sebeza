@@ -29,8 +29,12 @@ gets it.* Never force it.
 ---
 
 ## VOICE
-- **Warm, honest, human, hopeful. Never corporate, never hype.** You're a solo builder who cares, not a
-  faceless startup. That authenticity is your entire edge over a polished competitor.
+- **The page speaks as "we."** House decision (2026-08-15): the founder stays off-camera and out of the
+  first person for now. "We" is honest (Sebenza is built by a company), but never invent a team size or
+  fake staff. When the founder chooses to appear one day, that reveal becomes the strongest post the
+  page ever makes.
+- **Warm, honest, human, hopeful. Never corporate, never hype.** A small builder that cares, not a
+  faceless startup. That authenticity is the entire edge over a polished competitor.
 - **Plain language.** If a matric-leaver on a R1500 phone wouldn't understand it, rewrite it.
 - **Proud South African, without kitsch.** Green/gold Mzansi identity, real local references.
 - **Show the person behind it.** People follow founders and missions, not logos. Behind-the-scenes is gold.
@@ -57,8 +61,9 @@ Ignore their webinar/feature-sell model entirely. Wrong stage for you.
 Rotate these so the feed never gets repetitive. Rough target mix per week:
 
 1. **Mission & Why** (~30%): the unemployment problem, why Sebenza exists, dignity, being seen.
-2. **Behind-the-scenes / Founder story** (~25%): building it solo, the journey, honest and human.
-   *This is your highest-engagement pillar. People connect to the person.*
+2. **Behind-the-scenes / The build** (~25%): the journey of building it, honest and human, told as "we."
+   *This is your highest-engagement pillar. People connect to the story of the work* (the face stays
+   off-camera for now).
 3. **What it does / Vision** (~20%): features as *benefits* ("get found for what you can do,"
    "it tells you what to learn next"), the future you're building toward.
 4. **Education & value** (~15%): genuinely useful content (CV tips, interview prep, the SA job market)
@@ -94,7 +99,8 @@ Don't exceed ~5-7 total; Facebook isn't Instagram. A wall of tags reads as spam.
   `assets/src/render.mjs`, never a Canva job. Ask Claude for new cards as posts come up.
 - **Real screenshots** of the actual product (the dashboard, the search, the Career Compass) are strong
   behind-the-scenes proof it's real. Blur/avoid any real personal data.
-- **Selfie-style / founder photos** for behind-the-scenes. Authenticity beats polish.
+- **Behind-the-scenes photos show the work, not the face**: workspace, code on screen, the late-night
+  desk. (Founder off-camera for now, per the voice rule.) Authenticity beats polish.
 - **Short screen-recordings** (15-30s) of a feature working = high engagement, low effort.
 
 ---

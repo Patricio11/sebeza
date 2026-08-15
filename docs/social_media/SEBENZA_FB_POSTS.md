@@ -27,14 +27,16 @@ This is the beginning. Follow along. 🇿🇦
 
 ### 2. [BTS] · Who's behind this
 **Caption:**
-Hi. 👋 I'm the person building Sebenza.
+Who's behind Sebenza? 👋
 
-I'm a software developer, and like most people in this country, I know how heavy the unemployment problem is. So instead of just talking about it, I've spent months building something that might help. Quietly, line by line, on nights and weekends.
+A small South African company with one belief: this country's talent deserves to be seen.
 
-No big company. No funding. Just an idea I couldn't put down, and a belief that South Africa's talent deserves to be seen.
+Like most people here, we know how heavy the unemployment problem is. So instead of just talking about it, we've spent months quietly building something that might help. Line by line, on nights and weekends.
 
-I'll be sharing the journey here. The wins, the hard parts, all of it.
-**Visual:** Founder photo (real, natural) or a workspace shot. Authenticity > polish.
+No hype. No shortcuts. Just steady work on a problem that matters to all of us.
+
+We'll be sharing the journey here. The wins, the hard parts, all of it.
+**Visual:** Workspace or code-on-screen shot. No faces: the page speaks as "we" for now.
 **Tags:** #Sebenza #BuildInPublic #SAtech #Mzansi
 
 ---
@@ -107,21 +109,21 @@ Talent is talent. We help it get found. 🇿🇦
 
 ## 🟢 BEHIND-THE-SCENES / FOUNDER
 
-### 8. [BTS] · Why I started
+### 8. [BTS] · Why we started
 **Caption:**
-People ask why I'm building this alone instead of just applying for jobs like everyone else.
+People ask why we're building this ourselves instead of leaving it to the big players.
 
-Honestly? Because I kept meeting talented people who couldn't catch a break. Not because they lacked skill, but because no one could *find* them.
+Honestly? Because we kept meeting talented people who couldn't catch a break. Not because they lacked skill, but because no one could *find* them.
 
-I'm a developer. Building things is what I can do. So this is my contribution to a problem that's bigger than all of us.
-**Visual:** Founder photo or a "months of work" screenshot montage.
+Building things is what we can do. So this is our contribution to a problem that's bigger than all of us.
+**Visual:** A "months of work" screenshot montage (no faces).
 **Tags:** #Sebenza #BuildInPublic #SAtech #Mzansi
 
 ---
 
 ### 9. [BTS] · Built for a cheap phone on a slow connection
 **Caption:**
-A design rule I refused to break while building Sebenza:
+A design rule we refused to break while building Sebenza:
 
 **It has to work on a cheap phone, on slow data.**
 
@@ -135,11 +137,11 @@ Fast and fair beats flashy. Every time.
 
 ### 10. [BTS] · The honesty principle
 **Caption:**
-A small thing I'm weirdly proud of: Sebenza never *pretends.*
+A small thing we're weirdly proud of: Sebenza never *pretends.*
 
 If a skill isn't verified, it doesn't show a fake "verified" badge. If someone's availability might be out of date, the system says so. No inflated numbers, no fake profiles.
 
-In a world of exaggeration, I wanted to build something honest. Trust is the whole product.
+In a world of exaggeration, we wanted to build something honest. Trust is the whole product.
 **Graphic:** `assets/post-10-trust.png`
 **Tags:** #Sebenza #BuildInPublic #Trust #SAtech
 
@@ -147,21 +149,21 @@ In a world of exaggeration, I wanted to build something honest. Trust is the who
 
 ### 11. [BTS] · The hard parts
 **Caption:**
-Building alone isn't glamorous.
+Building something like this isn't glamorous.
 
-Some nights it's exciting: a feature finally works and it feels like magic. Other nights it's just me, a bug that won't die, and a lot of coffee. ☕
+Some nights it's exciting: a feature finally works and it feels like magic. Other nights it's just a bug that won't die, and a lot of coffee. ☕
 
-But every time I imagine one person getting hired because of this, it's worth it. That's the fuel.
+But every time we imagine one person getting hired because of this, it's worth it. That's the fuel.
 
-To anyone building something hard and lonely right now: keep going. 💪
-**Visual:** Late-night workspace photo, honest and relatable.
+To anyone building something hard right now: keep going. 💪
+**Visual:** Late-night workspace photo (the screen and the coffee, no faces).
 **Tags:** #Sebenza #BuildInPublic #Founder #SAtech
 
 ---
 
-### 12. [BTS] · A feature I love: "what to learn next"
+### 12. [BTS] · A feature we love: "what to learn next"
 **Caption:**
-My favourite thing we've built isn't the job search. It's the part that tells you *what to learn next.*
+Our favourite thing in Sebenza isn't the job search. It's the part that tells you *what to learn next.*
 
 Sebenza looks at what employers in your area actually want, compares it to your skills, and shows you the gap. Plus real South African ways to close it (SETA, TVET, free courses).
 
@@ -367,7 +369,7 @@ Share Sebenza with one person who's looking for work, or one employer who's hiri
 **Caption:**
 Little progress update from behind the scenes: ⚙️
 
-This week I've been working on making sure Sebenza is safe, private, and protects your personal information properly. Not the exciting part to talk about, but for a platform handling people's real data, it's the part that matters most.
+This week we've been working on making sure Sebenza is safe, private, and protects your personal information properly. Not the exciting part to talk about, but for a platform handling people's real data, it's the part that matters most.
 
 Doing it right, not just fast. 🔒
 **Visual:** Abstract "security/privacy" graphic or a screenshot.

@@ -2,6 +2,11 @@
 **Your voice, narrating the build. Personal, uneven, real. NOT finished captions. Scaffolding YOU finish.**
 *The whole point of this file: these only work if the specific details are yours. I give the angle; you give the life.*
 
+> **House decision (2026-08-15): the page speaks as "we" and the founder stays off-camera for now.**
+> These prompts are written in "I" because they're personal scaffolding. Until that changes, either park
+> a prompt that only works face-to-camera, or recast it to "we" and swap face photos for workspace shots.
+> The moment the founder chooses to appear, THIS file becomes the launch sequence for that reveal.
+
 > **Read the de-AI checklist at the bottom before posting ANYTHING.** The fastest way to look AI-made is to
 > paste something smooth. The fastest way to look real is one weirdly specific true detail + your actual voice.
 

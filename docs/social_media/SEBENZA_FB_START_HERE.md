@@ -14,7 +14,8 @@ dip into when you write in your own words.*
 
 | Setting | Value |
 |---|---|
-| **Page name** | `Sebenza` |
+| **Page name** | `Sebenza SA` (live). On graphics the wordmark stays `Sebenza`: that is the brand; "SA" is the page's disambiguator. |
+| **Voice** | The page speaks as **"we"** (the company). The founder stays off-camera for now (house decision, 2026-08-15). "We" is honest because Sebenza is built by a company; never invent a team size or fake staff. |
 | **Username / handle** | `@sebenzasa` (matches the domain; also the handle to claim later on Instagram, X, TikTok, LinkedIn so the brand is one name everywhere). Fallbacks if taken: `@sebenza.sa`, `@sebenzasouthafrica`. |
 | **Primary category** | `Software company` |
 | **Secondary category** | `Employment agency` (add it in Settings after creation; it helps search inside Facebook) |
@@ -52,8 +53,8 @@ dip into when you write in your own words.*
       account is hijacked, the page goes with it. This is the Facebook version of our
       security posture.
 - [ ] 3. Menu → Pages → **Create new page**.
-- [ ] 4. Name: `Sebenza`. Category: type and pick `Software company`. Bio: paste from
-      the table above. Create.
+- [ ] 4. Name: `Sebenza SA`. Category: type and pick `Software company`. Bio: paste
+      from the table above. Create.
 - [ ] 5. Contact: add `https://sebenzasa.com` and `info@sebenzasa.com`. Location:
       South Africa. Skip phone and hours.
 - [ ] 6. Upload `assets/profile-picture.png` (profile) and `assets/cover-photo.png`
@@ -72,9 +73,9 @@ dip into when you write in your own words.*
       it look alive. Warm it first.
 - [ ] 2. Publish **Post 1** (the introduction) with `assets/post-01-intro.png`.
       **Pin it** (three dots on the post → Pin to top of page).
-- [ ] 3. Two days later, publish **Post 2** (who is behind this) with a real photo of
-      you. Phone camera, natural light, no polish. This is the highest-trust post the
-      page will ever make; the founder-raw VOICE file has the scaffolding.
+- [ ] 3. Two days later, publish **Post 2** (who is behind this) with a workspace or
+      code-on-screen shot. No faces: the page speaks as "we" for now. The post bank
+      has the we-voice caption ready.
 - [ ] 4. Two days after that, publish **Post 3** (the one-liner) with a clean product
       screenshot (ask Claude for a branded screenshot frame when needed; never show
       real personal data).
@@ -131,11 +132,14 @@ location, never nationality.
 The kit covers every designed graphic. Three things need the founder, not the design
 system:
 
-1. **Your face** (posts 2, 8, 11): phone selfies and workspace shots. Rough beats
-   polished; that is the whole point of the behind-the-scenes pillar.
+1. **Behind-the-scenes photos** (posts 2, 8, 11): workspace, code on screen, the
+   late-night desk, the coffee. **No faces for now**: the founder stays off-camera
+   until they choose otherwise. (When that day comes, a "meet the person who's been
+   building this" post will be the strongest post the page ever makes. Keep it in
+   the pocket.)
 2. **Your voice in the captions**: the bank's drafts are solid, but the VOICE files
-   exist so the best posts sound like you. One weirdly specific true detail beats any
-   polish.
+   exist so the best posts sound human. One weirdly specific true detail beats any
+   polish. Recast any "I" in them to "we".
 3. **Product screenshots** (posts 3, 12, 15, 16, 18): ask Claude to produce branded
    screenshot frames from the live product when each post comes up, so they are
    current and PII-free.

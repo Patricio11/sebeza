@@ -2,6 +2,9 @@
 **Hooks built to make people STOP, comment, argue, tag, and share. Scaffolding you finish, not paste-ready.**
 *This voice provokes response. Every post has a built-in engagement mechanic: a question, a poll, a hot take, a "share yours."*
 
+> **House decision (2026-08-15): the page speaks as "we."** Recast any "I" in these hooks to "we"
+> before posting; the conviction still has to be genuinely yours.
+
 > **Read the de-AI checklist at the bottom first.** Provocative + generic = still ignored. Provocative +
 > specific + a real opinion people can argue with = comments. The opinion has to be genuinely YOURS.
 
