@@ -92,7 +92,7 @@ export default async function MarketingPage({
               </PillLink>
               <PillLink href="/sign-up/seeker">Create a free profile</PillLink>
               <a
-                href="mailto:hello@sebenzasa.com"
+                href="mailto:info@sebenzasa.com"
                 className="text-sm font-medium text-[color:var(--color-brand-strong)] hover:underline"
               >
                 Talk to us
@@ -408,7 +408,7 @@ export default async function MarketingPage({
             reporting they need.
           </p>
           <a
-            href="mailto:hello@sebenzasa.com"
+            href="mailto:info@sebenzasa.com"
             className="mt-6 inline-flex items-center gap-2 rounded-[var(--radius-pill)] border-2 border-[color:var(--color-ink)] px-6 py-3 text-sm font-medium text-[color:var(--color-ink)] transition-colors hover:bg-[color:var(--color-ink)] hover:text-[color:var(--color-surface)]"
           >
             Talk to us about a partnership
@@ -437,7 +437,7 @@ export default async function MarketingPage({
               </PillLink>
               <PillLink href="/sign-up/seeker">Create a free profile</PillLink>
               <a
-                href="mailto:hello@sebenzasa.com"
+                href="mailto:info@sebenzasa.com"
                 className="text-sm font-medium text-[color:var(--color-brand-strong)] hover:underline"
               >
                 Talk to us

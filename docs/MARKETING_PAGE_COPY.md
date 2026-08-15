@@ -32,7 +32,7 @@ follows becomes real labour-market intelligence, not guesswork.
 
 **Primary CTA:** Search the talent register → `/search`
 **Secondary CTA:** Create a free profile → `/sign-up/seeker`
-**Tertiary (quiet):** Talk to us → `mailto:hello@sebenzasa.com`
+**Tertiary (quiet):** Talk to us → `mailto:info@sebenzasa.com`
 **Microcopy under the buttons:** Free for job seekers, always. Works on any phone, in English,
 isiZulu, isiXhosa and Afrikaans.
 
@@ -171,7 +171,7 @@ named quotes exist.)*
 seeker side is free, permanently. Employer and government partnerships are priced to the size of
 the team and the reporting they need.
 
-**CTA:** Talk to us about a partnership → `mailto:hello@sebenzasa.com`
+**CTA:** Talk to us about a partnership → `mailto:info@sebenzasa.com`
 
 *(Build note: there is no self-serve billing in the product today; do not invent tiers or
 numbers. When billing ships, prices render live, never hand-typed.)*
@@ -185,7 +185,7 @@ numbers. When billing ships, prices render live, never hand-typed.)*
 through the employer and analytics sides with your own use case in mind. No pressure, no jargon.
 **Primary CTA:** Search talent → `/search`
 **Secondary CTA:** Create a free profile → `/sign-up/seeker`
-**Tertiary:** Talk to us → `mailto:hello@sebenzasa.com`
+**Tertiary:** Talk to us → `mailto:info@sebenzasa.com`
 
 ---
 
@@ -206,7 +206,7 @@ Accessibility) is part of the pitch.
 - **Every claim maps to something shipped.** If the build can't back it, the page can't say it.
 - **Button labels match what they do.** "Search talent" opens /search; "Create a free profile"
   opens sign-up; "Talk to us" opens email.
-- **`hello@sebenzasa.com` must exist as a mailbox or alias** (founder action; until it does,
+- **`info@sebenzasa.com` must exist as a mailbox or alias** (founder action; until it does,
   point the mailtos at the published `popia@sebenzasa.com`).
 - **Two public story surfaces:** `/` is the visual, product-led landing; `/marketing` is this
   copy-led explainer. Keep them consistent; both are indexed with their own canonicals.

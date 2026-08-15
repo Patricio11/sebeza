@@ -1257,7 +1257,7 @@ checkbox plan doc, all boxes ticked.
   every migrated holder. `docs/SUGGESTION_APPROVAL_LOOP_PLAN.md`
 - [x] **/marketing explainer funnel** - the send-this-instead-of-explaining page; live register
   stats, honest proof, copy-of-record at `docs/MARKETING_PAGE_COPY.md`. Founder action open:
-  create the hello@sebenzasa.com mailbox.
+  create the info@sebenzasa.com mailbox.
 - [x] **Error surfaces** - branded 404 (zero-JS search + quick links), `[...rest]` catch-all,
   global-error boundary, digest-as-support-code; perf-budget gate re-verified 10/10.
   `docs/ERROR_PAGES_404_PLAN.md`
