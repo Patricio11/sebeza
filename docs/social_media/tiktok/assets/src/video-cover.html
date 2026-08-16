@@ -1,0 +1,93 @@
+<!doctype html>
+<!--
+  Sebenza TikTok video cover (1080x1920). Set as each video's cover so the
+  profile grid stays branded. TikTok crops grid tiles to roughly 3:4, so
+  the title block sits in the vertical middle band. Slots:
+  [data-slot=eyebrow], [data-slot=title], [data-mark].
+-->
+<html>
+<head>
+<meta charset="utf-8" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=Hanken+Grotesk:ital,wght@0,400..700;1,400..700&display=block" rel="stylesheet" />
+<style>
+  :root {
+    --paper: #fbf8f0; --green-deep: #003d1f; --green-soft: #0a8c50;
+    --gold: #c98214; --gold-bright: #f5a623; --red: #de3831;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 100%; height: 100%; }
+  body {
+    font-family: "Hanken Grotesk", system-ui, sans-serif;
+    background: var(--green-deep); color: var(--paper);
+    overflow: hidden;
+  }
+  .bgchev { position: absolute; right: -260px; bottom: -200px; width: 1000px; height: 1000px; opacity: 0.05; }
+  .bgchev svg { width: 100%; height: 100%; }
+  .card {
+    width: 100vw; height: 100vh; position: relative;
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; text-align: center; padding: 0 96px;
+  }
+  .play {
+    width: 130px; height: 130px; border-radius: 50%;
+    background: rgba(251, 248, 240, 0.1);
+    border: 3px solid rgba(251, 248, 240, 0.4);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 64px;
+  }
+  .play svg { width: 54px; height: 54px; margin-left: 8px; }
+  .eyebrow {
+    font-weight: 700; font-size: 30px; letter-spacing: 0.3em;
+    text-transform: uppercase; color: var(--gold-bright);
+    margin-bottom: 44px;
+  }
+  .title {
+    font-family: "Fraunces", Georgia, serif; font-weight: 560;
+    font-size: 118px; line-height: 1.08; letter-spacing: -0.015em;
+    max-width: 880px; font-variation-settings: "opsz" 144;
+  }
+  .title em { font-style: italic; color: var(--gold-bright); font-weight: 540; }
+  .footer {
+    position: absolute; bottom: 150px; left: 96px; right: 96px;
+    display: flex; align-items: center; gap: 22px;
+  }
+  .footer .mark { width: 56px; height: 50px; }
+  .footer .mark svg { width: 100%; height: 100%; display: block; }
+  .wordmark { font-family: "Fraunces", Georgia, serif; font-weight: 700; font-size: 46px; color: var(--paper); }
+  .site { font-size: 29px; color: rgba(251,248,240,0.62); font-weight: 500; margin-left: auto; }
+  .stripe {
+    display: flex; height: 20px; width: 100vw;
+    position: absolute; left: 0; bottom: 0;
+    border-top: 1px solid rgba(251, 248, 240, 0.25);
+  }
+  .stripe .g { flex: 3; background: var(--green-soft); }
+  .stripe .a { flex: 2; background: var(--gold); }
+  .stripe .r { flex: 1; background: var(--red); }
+</style>
+</head>
+<body>
+  <div class="bgchev">
+    <svg viewBox="0 0 600 600">
+      <path d="M 60 60 L 360 300 L 60 540 Z" fill="#fbf8f0" />
+      <path d="M 180 200 L 360 300 L 180 400 L 260 300 Z" fill="#f5a623" />
+    </svg>
+  </div>
+  <div class="card">
+    <div class="play">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M4 2 L22 12 L4 22 Z" fill="#fbf8f0" />
+      </svg>
+    </div>
+    <div class="eyebrow" data-slot="eyebrow"></div>
+    <div class="title" data-slot="title"></div>
+    <div class="footer">
+      <span class="mark" data-mark></span>
+      <span class="wordmark">Sebenza</span>
+      <span class="site">sebenzasa.com</span>
+    </div>
+    <div class="stripe"><div class="g"></div><div class="a"></div><div class="r"></div></div>
+  </div>
+</body>
+</html>

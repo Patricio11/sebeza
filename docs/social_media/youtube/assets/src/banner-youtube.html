@@ -1,0 +1,69 @@
+<!doctype html>
+<!--
+  Sebenza YouTube channel banner, 2560x1440. YouTube crops brutally by
+  device: only the central 1546x423 "safe area" is visible everywhere
+  (mobile + desktop). ALL content lives inside that box; the rest is flat
+  deep green with the ghost chevron, visible only on TV screens.
+-->
+<html>
+<head>
+<meta charset="utf-8" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=Hanken+Grotesk:ital,wght@0,400..700;1,400..700&display=block" rel="stylesheet" />
+<style>
+  :root {
+    --paper: #fbf8f0; --green-deep: #003d1f; --green-soft: #0a8c50;
+    --gold: #c98214; --gold-bright: #f5a623; --red: #de3831;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 100%; height: 100%; }
+  body {
+    font-family: "Hanken Grotesk", system-ui, sans-serif;
+    background: var(--green-deep); color: var(--paper);
+    overflow: hidden;
+  }
+  .bgchev { position: absolute; right: 40px; top: 120px; width: 1200px; height: 1200px; opacity: 0.05; }
+  .bgchev svg { width: 100%; height: 100%; }
+  /* The universally-visible safe area: 1546x423 centred */
+  .safe {
+    position: absolute; left: 507px; top: 508.5px; width: 1546px; height: 423px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center;
+  }
+  .lockup { display: flex; align-items: center; gap: 26px; }
+  .mark { width: 104px; height: 94px; }
+  .mark svg { width: 100%; height: 100%; display: block; }
+  .wordmark {
+    font-family: "Fraunces", Georgia, serif; font-weight: 700;
+    font-size: 118px; letter-spacing: -0.015em; line-height: 1;
+    font-variation-settings: "opsz" 144;
+  }
+  .tagline {
+    margin-top: 26px; font-weight: 700; font-size: 24px;
+    letter-spacing: 0.32em; text-transform: uppercase;
+    color: var(--gold-bright);
+  }
+  .stripe { display: flex; height: 12px; width: 420px; margin-top: 34px; }
+  .stripe .g { flex: 3; background: var(--green-soft); }
+  .stripe .a { flex: 2; background: var(--gold); }
+  .stripe .r { flex: 1; background: var(--red); }
+</style>
+</head>
+<body>
+  <div class="bgchev">
+    <svg viewBox="0 0 600 600">
+      <path d="M 60 60 L 360 300 L 60 540 Z" fill="#fbf8f0" />
+      <path d="M 180 200 L 360 300 L 180 400 L 260 300 Z" fill="#f5a623" />
+    </svg>
+  </div>
+  <div class="safe">
+    <div class="lockup">
+      <span class="mark" data-mark></span>
+      <span class="wordmark">Sebenza</span>
+    </div>
+    <div class="tagline">South Africa&rsquo;s National Talent Platform</div>
+    <div class="stripe"><div class="g"></div><div class="a"></div><div class="r"></div></div>
+  </div>
+</body>
+</html>
