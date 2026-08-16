@@ -45,7 +45,7 @@ uncropped in feed, so the cards take maximum screen space on a phone.
 
 ```bash
 # from the repo root (sebenza_v1). Uses the repo's own Playwright.
-node docs/social_media/assets/src/render.mjs
+node docs/social_media/facebook/assets/src/render.mjs
 ```
 
 To mint a new quote card, add one entry to the `CARDS` manifest in

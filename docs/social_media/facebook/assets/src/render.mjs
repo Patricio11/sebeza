@@ -15,7 +15,7 @@ import path from "node:path";
 
 const srcDir = path.dirname(fileURLToPath(import.meta.url));
 const outDir = path.dirname(srcDir);
-const repoRoot = path.resolve(outDir, "..", "..", "..");
+const repoRoot = path.resolve(outDir, "..", "..", "..", "..");
 
 // ---- Extract the mark's three paths from the shipped logo ----
 const logoSvg = readFileSync(path.join(repoRoot, "public", "sebenza-logo.svg"), "utf8");

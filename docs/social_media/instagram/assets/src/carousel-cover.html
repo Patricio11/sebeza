@@ -1,0 +1,69 @@
+<!doctype html>
+<!--
+  Sebenza Instagram carousel cover slide (1080x1350, dark).
+  The first slide of the promise carousel: title + swipe cue.
+-->
+<html>
+<head>
+<meta charset="utf-8" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=Hanken+Grotesk:ital,wght@0,400..700;1,400..700&display=block" rel="stylesheet" />
+<style>
+  :root {
+    --paper: #fbf8f0; --green-deep: #003d1f; --green-soft: #0a8c50;
+    --gold: #c98214; --gold-bright: #f5a623; --red: #de3831;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 100%; height: 100%; }
+  body { font-family: "Hanken Grotesk", system-ui, sans-serif; background: var(--green-deep); color: var(--paper); }
+  .card { width: 100vw; height: 100vh; display: flex; flex-direction: column; padding: 104px 96px 0; position: relative; }
+  .toprule { height: 8px; width: 148px; background: var(--gold); margin-bottom: 44px; }
+  .eyebrow { font-weight: 700; font-size: 27px; letter-spacing: 0.24em; text-transform: uppercase; color: rgba(251,248,240,0.62); }
+  .body { flex: 1; display: flex; flex-direction: column; justify-content: center; padding-bottom: 120px; }
+  .headline {
+    font-family: "Fraunces", Georgia, serif; font-weight: 560;
+    font-size: 128px; line-height: 1.06; letter-spacing: -0.015em;
+    max-width: 880px; font-variation-settings: "opsz" 144;
+  }
+  .headline em { font-style: italic; color: var(--gold-bright); font-weight: 540; }
+  .swipe {
+    margin-top: 56px; display: flex; align-items: center; gap: 20px;
+    font-weight: 700; font-size: 30px; letter-spacing: 0.24em;
+    text-transform: uppercase; color: var(--gold-bright);
+  }
+  .swipe svg { width: 40px; height: 40px; }
+  .footer { display: flex; align-items: center; gap: 22px; padding-bottom: 58px; }
+  .footer .mark { width: 52px; height: 47px; }
+  .footer .mark svg { width: 100%; height: 100%; display: block; }
+  .wordmark { font-family: "Fraunces", Georgia, serif; font-weight: 700; font-size: 44px; color: var(--paper); }
+  .site { font-size: 27px; color: rgba(251,248,240,0.62); font-weight: 500; margin-left: auto; }
+  .stripe { display: flex; height: 18px; width: 100vw; position: absolute; left: 0; bottom: 0; border-top: 1px solid rgba(251,248,240,0.25); }
+  .stripe .g { flex: 3; background: var(--green-soft); }
+  .stripe .a { flex: 2; background: var(--gold); }
+  .stripe .r { flex: 1; background: var(--red); }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="toprule"></div>
+    <div class="eyebrow">Our promise, as we build</div>
+    <div class="body">
+      <div class="headline">Five things we will <em>never</em> compromise.</div>
+      <div class="swipe">
+        Swipe
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M2 3 L13 12 L2 21 Z" fill="#0a8c50" />
+          <path d="M6 9 L13 12 L6 15 L9 12 Z" fill="#f5a623" />
+        </svg>
+      </div>
+    </div>
+    <div class="footer">
+      <span class="mark" data-mark></span>
+      <span class="wordmark">Sebenza</span>
+      <span class="site">sebenzasa.com</span>
+    </div>
+    <div class="stripe"><div class="g"></div><div class="a"></div><div class="r"></div></div>
+  </div>
+</body>
+</html>

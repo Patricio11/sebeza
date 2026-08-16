@@ -1,0 +1,70 @@
+<!doctype html>
+<!--
+  Sebenza Instagram intro story (1080x1920): the light lockup on deep
+  flag-green, story-sized. Content stays inside the 250px top/bottom
+  safe zones.
+-->
+<html>
+<head>
+<meta charset="utf-8" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=Hanken+Grotesk:ital,wght@0,400..700;1,400..700&display=block" rel="stylesheet" />
+<style>
+  :root {
+    --paper: #fbf8f0; --green-deep: #003d1f; --green-soft: #0a8c50;
+    --gold: #c98214; --gold-bright: #f5a623; --red: #de3831;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 100%; height: 100%; }
+  body {
+    font-family: "Hanken Grotesk", system-ui, sans-serif;
+    background: var(--green-deep); color: var(--paper);
+  }
+  .card {
+    width: 100vw; height: 100vh; position: relative;
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; text-align: center; padding: 250px 90px;
+  }
+  .mark { width: 260px; height: 234px; margin-bottom: 10px; }
+  .mark svg { width: 100%; height: 100%; display: block; }
+  .wordmark {
+    font-family: "Fraunces", Georgia, serif; font-weight: 700;
+    font-size: 172px; letter-spacing: -0.015em; line-height: 1;
+    font-variation-settings: "opsz" 144;
+  }
+  .meaning {
+    font-family: "Fraunces", Georgia, serif; font-style: italic;
+    font-weight: 480; font-size: 66px; color: var(--gold-bright);
+    margin-top: 52px;
+  }
+  .langs {
+    margin-top: 38px; font-weight: 700; font-size: 29px;
+    letter-spacing: 0.3em; text-transform: uppercase;
+    color: rgba(251, 248, 240, 0.6);
+  }
+  .site {
+    position: absolute; bottom: 300px; left: 0; right: 0;
+    font-size: 30px; font-weight: 500; color: rgba(251, 248, 240, 0.62);
+  }
+  .stripe {
+    display: flex; height: 20px; width: 100vw;
+    position: absolute; left: 0; bottom: 0;
+    border-top: 1px solid rgba(251, 248, 240, 0.25);
+  }
+  .stripe .g { flex: 3; background: var(--green-soft); }
+  .stripe .a { flex: 2; background: var(--gold); }
+  .stripe .r { flex: 1; background: var(--red); }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="mark" data-mark></div>
+    <div class="wordmark">Sebenza</div>
+    <div class="meaning">&ldquo;to work.&rdquo;</div>
+    <div class="langs">isiZulu &middot; isiXhosa</div>
+    <div class="site">sebenzasa.com</div>
+    <div class="stripe"><div class="g"></div><div class="a"></div><div class="r"></div></div>
+  </div>
+</body>
+</html>
