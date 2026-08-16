@@ -1,6 +1,732 @@
 {
-  "__notice": "Afrikaans (af) catalog  TRANSLATION PENDING. Awaiting professional human translation. Missing keys fall back to English via i18n/request.ts deepMerge. NEVER machine-translate POPIA/consent/legal copy.",
+  "__notice": "Afrikaans (af) catalog. AI-DRAFTED 2026-08-16, PENDING HUMAN REVIEW (docs/TRANSLATION_REVIEW_GUIDE.md). Consent / POPIA / legal strings are DELIBERATELY OMITTED so they fall back to English until the reviewer signs them off; their drafts live in the review guide.",
   "meta": {
-    "siteName": "Sebenza"
+    "siteName": "Sebenza",
+    "tagline": "Suid-Afrika se talentplatform",
+    "description": "Vind bekwame mense naby jou. Word gevind vir die werk wat jy doen."
+  },
+  "nav": {
+    "findTalent": "Vind talent",
+    "signIn": "Meld aan",
+    "signUp": "Begin",
+    "insights": "Insigte",
+    "menu": "Kieslys",
+    "skipToContent": "Spring na hoofinhoud"
+  },
+  "landing": {
+    "hero": {
+      "lineOne": "Vind bekwame mense.",
+      "lineTwo": "Naby jou.",
+      "lineThree": "Regtig.",
+      "subhead": "Sebenza verbind Suid-Afrikaanse talent met werk volgens vaardigheid en plek, met indiensnemingsdata wat jy werklik kan vertrou."
+    },
+    "search": {
+      "professionLabel": "Beroep of vaardigheid",
+      "professionPlaceholder": "bv. Sjef, Elektrisiën, Ontwikkelaar",
+      "locationLabel": "Ligging",
+      "locationPlaceholder": "Provinsie of stad",
+      "submit": "Soek",
+      "recentChips": "Gewilde soektogte"
+    },
+    "pulseStrip": {
+      "heading": "Nasionale polsslag",
+      "subheading": "Lewendig, geweeg volgens varsheid. Nooit verouderd, nooit verdraai nie.",
+      "totalActive": "Aktiewe profiele",
+      "confirmedHires": "Bevestigde aanstellings dié maand",
+      "skillsInDemand": "Vaardighede in aanvraag"
+    },
+    "valueCards": {
+      "trusted": {
+        "title": "Betroubare profiele",
+        "body": "Elke kwalifikasie dra 'n eerlike verifikasiestatus. Nooit by verstek \"Geverifieer\" nie."
+      },
+      "live": {
+        "title": "Lewendige beskikbaarheid",
+        "body": "Ons Talent Pulse hou indiensnemingstatus vars. Verouderde inskrywings sak in die ranglys, maar word nie weggesteek nie."
+      },
+      "real": {
+        "title": "Werklike indiensnemingsdata",
+        "body": "Aanstellings word slegs getel wanneer dit op die platform bevestig is. Statistiek waarop jy kan reageer."
+      }
+    },
+    "split": {
+      "employer": {
+        "eyebrow": "Werkgewers en werwers",
+        "heading": "Vind geverifieerde, beskikbare talent in jou stad.",
+        "body": "Soek volgens vaardigheid en ligging. Kontakbesonderhede word eers onthul nadat die kandidaat toegestem het, en elke toegang word aangeteken.",
+        "cta": "Begin aanstel"
+      },
+      "government": {
+        "eyebrow": "Regering en beleid",
+        "heading": "Arbeidsmarkintelligensie in reële tyd.",
+        "body": "Lewendige indiensnemingstatistiek volgens vaardigheid, ligging en varsheid. Uitvoerbaar, saamgestel, nooit persoonlik nie.",
+        "cta": "Sien die insigte"
+      }
+    },
+    "footer": {
+      "privacy": "Privaatheid en POPIA",
+      "paia": "PAIA-handleiding",
+      "terms": "Bepalings",
+      "accessibility": "Toeganklikheid",
+      "language": "Taal",
+      "rights": "© {year} Sebenza. 'n Nasionale talentplatform vir Suid-Afrika."
+    }
+  },
+  "auth": {
+    "common": {
+      "email": "E-posadres",
+      "password": "Wagwoord",
+      "confirmPassword": "Bevestig wagwoord",
+      "fullName": "Volle naam",
+      "phone": "Selfoonnommer",
+      "showPassword": "Wys wagwoord",
+      "hidePassword": "Versteek wagwoord",
+      "rememberMe": "Onthou my op hierdie toestel",
+      "or": "of",
+      "back": "Terug"
+    },
+    "signIn": {
+      "eyebrow": "Welkom terug",
+      "heading": "Meld aan by jou rekening",
+      "subhead": "Werksoekers, werkgewers en administrateurs meld almal hier aan. Ons stuur jou na die regte beheerpaneel.",
+      "submit": "Meld aan",
+      "forgot": "Wagwoord vergeet?",
+      "noAccount": "Nog nie 'n rekening nie?",
+      "createOne": "Skep een",
+      "twoFactor": "Tweefaktor-verifikasie word vereis vir werkgewers en administrateurs.",
+      "rolePicker": "Meld aan as",
+      "asSeeker": "Werksoeker",
+      "asEmployer": "Werkgewer",
+      "asAdmin": "Administrateur"
+    },
+    "signUp": {
+      "eyebrow": "Begin",
+      "heading": "Sluit by Sebenza aan",
+      "subhead": "By watter kant van die platform sluit jy aan?",
+      "seekerCard": {
+        "eyebrow": "Ek is 'n",
+        "title": "Werksoeker",
+        "body": "Bou 'n geverifieerde profiel, hou 'n lewendige indiensnemingstatus, en word gevind vir die werk wat jy doen.",
+        "cta": "Skep 'n werksoekerprofiel"
+      },
+      "employerCard": {
+        "eyebrow": "Ek is 'n",
+        "title": "Werkgewer of werwer",
+        "body": "Soek geverifieerde talent volgens vaardigheid en ligging. Tweefaktor-verifikasie word vereis. Jou organisasie moet geverifieer wees voordat kontakbesonderhede oopsluit.",
+        "cta": "Registreer 'n organisasie"
+      },
+      "adminNotice": "Administrateurrekeninge word deur Sebenza uitgereik en kan nie self geregistreer word nie. As jy genooi is, meld aan met die besonderhede in jou uitnodigings-e-pos.",
+      "haveAccount": "Het jy reeds 'n rekening?",
+      "signInLink": "Meld aan"
+    },
+    "seekerSignUp": {
+      "stepLabel": "Stap {n} van 3",
+      "step1": {
+        "heading": "Vertel ons wie jy is",
+        "subhead": "Net hierdie basiese besonderhede. Ons voeg die res van jou profiel by ná toestemming.",
+        "next": "Gaan voort",
+        "citizenQuestion": "Is jy 'n Suid-Afrikaanse burger?",
+        "citizenYes": "Ja",
+        "citizenNo": "Nee",
+        "citizenHelp": "Word slegs gebruik vir arbeidsmarkstatistiek en die SA-burger-kenmerk in werkgewersoektogte. Dit raak nooit of jy Sebenza kan gebruik of gevind kan word nie. Almal word volgens ligging en vaardigheid verbind.",
+        "nationalityLabel": "Van watter land kom jy?",
+        "nationalityHelp": "Word op jou profiel en in soekresultate gewys sodat werkgewers weet waar jy vandaan kom. Sebenza verbind volgens ligging en vaardigheid. Waar jy vandaan kom, is nooit 'n hek nie."
+      },
+      "step3": {
+        "heading": "Jou eerste profielvelde",
+        "subhead": "Jy kan enige hiervan later in jou profielredigeerder wysig.",
+        "next": "Skep my profiel",
+        "professionLabel": "Beroep",
+        "locationLabel": "Waar woon jy / wil jy werk?",
+        "statusLabel": "Wat is jou indiensnemingstatus vandag?",
+        "studentToggle": "Ek is tans 'n student",
+        "studentToggleHint": "Merk dit as jy ingeskryf is by 'n SA-universiteit, universiteit van tegnologie, TVET, UNISA of 'n INDLELA-program. Ons neem jou akademiese besonderhede sodat Sebenza keusevakke, internskappe en gegradueerde-programme kan aanbeveel, nie net voltydse aanstellings nie.",
+        "academic": {
+          "heading": "Jou studies",
+          "institutionLabel": "Instansie",
+          "programmeLabel": "Studieprogram",
+          "fieldLabel": "Studierigting",
+          "nqfLabel": "NQF-vlak",
+          "yearLabel": "Huidige studiejaar",
+          "graduationLabel": "Verwagte gradedag",
+          "nsfasLabel": "Ek word deur NSFAS befonds",
+          "openToInternships": "Oop vir internskappe tydens studies",
+          "openToGraduateProgrammes": "Oop vir gegradueerde- / klerkskapprogramme ná graduering"
+        }
+      },
+      "stepHints": {
+        "name": "Verskyn by verstek op jou profiel as \"Naam L.\". Jou volle van verskyn eers nadat jy kontaktoestemming gegee het."
+      }
+    },
+    "employerSignUp": {
+      "heading": "Registreer jou organisasie",
+      "subhead": "Jou organisasie begin in die \"ongeverifieer\"-status. Jy kan talent soek, maar kontakbesonderhede en dokumente bly gesluit totdat verifikasie voltooi is.",
+      "orgName": "Geregistreerde organisasienaam",
+      "registrationNumber": "CIPC-registrasienommer",
+      "industry": "Bedryf",
+      "size": "Grootte van organisasie",
+      "country": "Land van bedryf",
+      "youAs": "Oor jou",
+      "yourRole": "Jou rol by die organisasie",
+      "submit": "Registreer organisasie",
+      "twoFactorNote": "Tweefaktor-verifikasie is verpligtend vir werkgewerrekeninge. Jy word deur die TOTP-opstelling gelei met jou eerste aanmelding."
+    },
+    "verify": {
+      "heading": "Gaan kyk in jou posbus",
+      "subhead": "Ons het 'n verifikasieskakel na {email} gestuur. Klik daarop om jou e-posadres te bevestig.",
+      "resend": "Stuur die e-pos weer",
+      "wrongEmail": "Verkeerde e-pos?",
+      "wrongEmailLink": "Begin oor"
+    },
+    "forgot": {
+      "heading": "Herstel jou wagwoord",
+      "subhead": "Voer jou rekening se e-pos in en ons stuur jou 'n eenmalige skakel om 'n nuwe wagwoord te stel.",
+      "submit": "Stuur herstelskakel",
+      "back": "Terug na aanmelding"
+    }
+  },
+  "search": {
+    "heading": "{count, plural, =0 {Geen resultate} =1 {# {role}} other {# {role}}} in {location}",
+    "headingFallback": "Talentsoektog",
+    "filters": {
+      "title": "Filters",
+      "open": "Maak filters oop",
+      "close": "Maak toe",
+      "apply": "Pas toe",
+      "clear": "Vee alles uit",
+      "skill": "Vaardigheid",
+      "location": "Ligging",
+      "province": "Provinsie",
+      "city": "Stad",
+      "status": "Indiensnemingstatus",
+      "seniority": "Senioriteit",
+      "verification": "Verifikasie",
+      "nationality": "Nasionaliteit (opsioneel)",
+      "highlightCitizens": "Beklemtoon SA-burgers",
+      "nationalityHelp": "Sebenza verbind volgens ligging en vaardigheid. Nasionaliteit word gewys, maar is nooit 'n hindernis nie."
+    },
+    "states": {
+      "loading": "Laai talent…",
+      "empty": "Nog geen resultate nie",
+      "emptyBody": "Probeer die ligging verbreed of 'n filter verwyder. Jou soektog word ook aangeteken, geanonimiseer, sodat ons vir beleidmakers kan wys waar die vaardigheidsgapings is.",
+      "error": "Iets het verkeerd geloop",
+      "errorBody": "Ons kon nie die talentindeks bereik nie. Probeer asseblief weer.",
+      "retry": "Probeer weer"
+    },
+    "loadMore": "Laai meer",
+    "rosterItem": {
+      "viewProfile": "Bekyk profiel",
+      "completeness": "Profielvolledigheid",
+      "topSkills": "Topvaardighede",
+      "sameCity": "Dieselfde stad"
+    }
+  },
+  "status": {
+    "employed": "In diens",
+    "unemployed": "Werkloos",
+    "self_employed": "Self in diens",
+    "studying": "Studeer",
+    "open_to_work": "Oop vir werk",
+    "confirmedRelative": "Bevestig {when}",
+    "neverConfirmed": "Status nie bevestig nie",
+    "freshness": {
+      "fresh": "Vars",
+      "ageing": "Verouderend",
+      "stale": "Verouderd",
+      "freshHelp": "Bevestig binne die afgelope 30 dae.",
+      "ageingHelp": "30 tot 90 dae oud. Sak effens in die ranglys; 'n herinnering word gestuur.",
+      "staleHelp": "Ouer as 90 dae. Sak sterk in die ranglys en word in statistiek gemerk."
+    }
+  },
+  "verification": {
+    "unverified": "Ongeverifieer",
+    "pending": "Verifikasie hangende",
+    "verified": "Geverifieer",
+    "rejected": "Afgekeur",
+    "selfReported": "Self gerapporteer"
+  },
+  "profile": {
+    "headerVerification": "Verifikasie",
+    "headerStatus": "Indiensnemingstatus",
+    "memberSince": "Op Sebenza sedert {date}",
+    "skills": "Vaardighede",
+    "experience": "Ervaring",
+    "qualifications": "Kwalifikasies",
+    "bio": "Oor",
+    "studies": "Studeer tans",
+    "studiesSub": "Self gerapporteer totdat dit deur die instansie en SAQA in Fase 8 geverifieer word.",
+    "studiesGraduation": "Verwagte gradedag",
+    "studiesNsfas": "NSFAS-befonds",
+    "studiesOpenInternships": "Oop vir internskappe",
+    "studiesOpenGraduateProgrammes": "Oop vir gegradueerde-programme",
+    "locked": {
+      "contact": "Kontakbesonderhede",
+      "documents": "Dokumente en sertifikate",
+      "lockedBody": "Geverifieerde werkgewers kan versoek om dit te sien. Elke toegang word teen toestemming gekontroleer en aangeteken.",
+      "lockedCta": "Meld aan as 'n geverifieerde werkgewer",
+      "seekerHint": "Ons wys nooit jou ID-nommer, dokumente of kontakbesonderhede in soekresultate nie, selfs nie vir geverifieerde werkgewers nie, totdat jy toestem."
+    },
+    "report": "Rapporteer hierdie profiel",
+    "redacted": "(Jou van word in openbare soektogte versteek totdat jy tot kontak toestem.)"
+  },
+  "seekerDash": {
+    "title": "Jou beheerpaneel",
+    "nav": {
+      "overview": "Oorsig",
+      "profile": "Profielredigeerder",
+      "experience": "Ervaring",
+      "qualifications": "Kwalifikasies",
+      "grow": "Loopbaankompas",
+      "activity": "Aktiwiteit",
+      "privacy": "Privaatheid en toestemming",
+      "account": "Rekening"
+    },
+    "overview": {
+      "greeting": "Hallo, {name}. Jou private werkruimte",
+      "completeness": "Profielvolledigheid",
+      "nextAction": "Voeg nog {n, plural, =1 {een vaardigheid} other {# vaardighede}} by om hoër in soektogte te rangskik.",
+      "pulse": "Talent Pulse",
+      "pulseQuestion": "Is jy nog oop vir werk?",
+      "confirmFresh": "Ja, bevestig",
+      "lastConfirmed": "Laas bevestig {when}",
+      "publicLink": "Bekyk my openbare profiel →",
+      "viewedBy": "Wie het jou bekyk",
+      "contactedBy": "Wie het jou gekontak",
+      "noViewers": "Niemand het nog jou profiel bekyk nie.",
+      "noContacts": "Geen werkgewers het jou nog gekontak nie.",
+      "rankInSearch": "Waar jy in soektogte verskyn",
+      "rankExplain": "Jou posisie in die sjefs · Wes-Kaap-poel, volgens varsheid × volledigheid.",
+      "nextSteps": "Aanbevole volgende stappe"
+    },
+    "profileEditor": {
+      "title": "Profielredigeerder",
+      "subtitle": "Alles hier vloei na jou openbare dossier en die nasionale statistiek. Ons wys nooit jou ID-nommer nie. Dit word by berging geënkripteer.",
+      "sections": {
+        "identity": "Identiteitsbasis",
+        "professional": "Professionele opsomming",
+        "skillsTitle": "Vaardighede",
+        "locationTitle": "Ligging",
+        "academicTitle": "Studies"
+      },
+      "academic": {
+        "heading": "Jou studies",
+        "subhead": "Vertel ons waar en wat jy studeer. Sebenza stem jou loopbaankompas af op jou program en die tyd wat oorbly voor graduering.",
+        "institution": "Instansie",
+        "kindHint": "Slegs erkende SA-instansies: openbare universiteite, universiteite van tegnologie, TVET-kolleges, UNISA, INDLELA.",
+        "programme": "Studieprogram",
+        "field": "Studierigting",
+        "nqfLevel": "NQF-vlak",
+        "year": "Huidige jaar",
+        "graduation": "Verwagte gradedag",
+        "nsfas": "NSFAS-befonds",
+        "verificationNote": "Ons wys nooit 'n 'geverifieer'-kenteken vir self gerapporteerde inskrywing nie. Verifikasie kom via SAQA- en instansievennootskappe in Fase 8.",
+        "openToInternships": "Oop vir internskappe tydens studies",
+        "openToGraduateProgrammes": "Oop vir gegradueerde- / klerkskapprogramme ná graduering"
+      },
+      "fields": {
+        "fullName": "Volle naam",
+        "displayName": "Openbare vertoonnaam",
+        "displayNameHelp": "Hoe jy in openbare soektogte verskyn (bv. \"Thandeka M.\"). Jou van word eers ná kontaktoestemming onthul.",
+        "nationalId": "Suid-Afrikaanse ID-nommer (of paspoort)",
+        "dob": "Geboortedatum",
+        "nationality": "Nasionaliteit",
+        "citizen": "Ek is 'n Suid-Afrikaanse burger",
+        "city": "Stad",
+        "province": "Provinsie",
+        "willingToRelocate": "Oop om te verhuis vir die regte rol",
+        "profession": "Beroep",
+        "seniority": "Senioriteit",
+        "headline": "Openbare opskrif",
+        "bio": "Oor",
+        "bioHelp": "Twee of drie sinne: waarin jy goed is, en waarna jy soek.",
+        "addSkill": "Voeg 'n vaardigheid by",
+        "removeSkill": "Verwyder",
+        "proficiency": "Self-beoordeelde vaardigheidsvlak"
+      },
+      "saveButton": "Stoor veranderinge",
+      "savedHint": "Stoor outomaties terwyl jy tik. Geënkripteerde velde word gestoor wanneer jy die veld verlaat.",
+      "completenessLive": "Lewendige volledigheid:",
+      "encryptedBadge": "Geënkripteer by stoor"
+    },
+    "experience": {
+      "title": "Ervaring",
+      "subtitle": "Rolle, datums, prestasies. Rangskik enige tyd.",
+      "add": "Voeg ervaring by",
+      "current": "Huidig",
+      "to": "tot",
+      "empty": "Jy het nog geen ervaring bygevoeg nie. Drie of meer rolle verbeter jou posisie aansienlik."
+    },
+    "qualifications": {
+      "title": "Kwalifikasies en dokumente",
+      "subtitle": "Laai sertifikate op as PDF's of beelde. Lêers word in 'n private omgewing gestoor. Slegs geverifieerde werkgewers kan versoek om dit te sien, en elke toegang word aangeteken.",
+      "add": "Voeg 'n kwalifikasie by",
+      "uploadCert": "Laai sertifikaat op",
+      "empty": "Nog geen kwalifikasies nie. Minstens een ambagsertifikaat of diploma bou werkgewervertroue.",
+      "verificationBy": "Verifikasie hanteer deur"
+    },
+    "activity": {
+      "title": "Aktiwiteit",
+      "subtitle": "Elke interaksie met jou profiel, aangeteken vir jou deursigtigheid.",
+      "viewers": "Profielbesigtigings",
+      "contacts": "Kontakversoeke",
+      "reveals": "Dokumentonthullings",
+      "downloads": "Dokumentaflaaie"
+    },
+    "account": {
+      "title": "Rekening",
+      "subtitle": "E-pos, wagwoord, toestelle, afmelding.",
+      "email": "E-pos",
+      "password": "Wagwoord",
+      "changePassword": "Verander wagwoord",
+      "twoFactor": "Tweefaktor-verifikasie",
+      "twoFactorOptionalSeeker": "Opsioneel vir werksoekers (aanbeveel).",
+      "sessions": "Aktiewe sessies",
+      "signOutAll": "Meld af op alle ander toestelle",
+      "signOut": "Meld af"
+    },
+    "grow": {
+      "title": "Loopbaankompas",
+      "subtitle": "Wat om volgende te leer, gegrond op werklike werkgewervraag naby jou. Ons verkoop nie kursusse nie; ons wys wat werk.",
+      "eyebrow": "Vaardigheidsgroei · vraaggedrewe",
+      "headline": "Leer {n, plural, =1 {# vaardigheid} other {# vaardighede}} → beweeg van #{from} na #{to}",
+      "headlineSub": "Geprojekteerde posisie in jou plaaslike poel: {pool}",
+      "recommendationsTitle": "Aanbevole vaardighede",
+      "recommendationsSub": "Gekies uit die grootste gapings tussen wat werkgewers soek en wat hulle kry.",
+      "reason": {
+        "demand_high": "Hoë vraag · lae aanbod",
+        "common_among_top_ranked": "Algemeen aan die bopunt van jou poel",
+        "missing_for_role": "Sluit 'n aangrensende rol oop",
+        "adjacent_role": "Bou op wat jy reeds het"
+      },
+      "demandSignal": "{searches} soektogte teenoor {matches} resultate dié maand",
+      "rankIfLearned": "As jy dit byvoeg: posisie → #{projected} in {pool}",
+      "openProfileEditor": "Voeg by my profiel →",
+      "pathsTitle": "Leerpaaie",
+      "pathsSub": "Gratis en gesubsidieerde opsies eerste. Slegs SA-erkende programme: SETA, TVET, INDLELA, SAQA-erken, en oopbronhulpbronne.",
+      "duration": "{weeks, plural, =1 {# week} other {# weke}}",
+      "national": "Nasionaal",
+      "providerKind": "Verskaffertipe",
+      "cost": "Koste",
+      "outcome": "Uitkoms",
+      "adjacentTitle": "Aangrensende beroepe",
+      "adjacentSub": "Rolle waarmee jou huidige vaardighede oorvleuel, gewoonlik een of twee vaardighede ver.",
+      "overlap": "{percent}% vaardigheidsoorvleueling",
+      "missing": "Ontbreek",
+      "cityDemandTitle": "Waarna werkgewers in jou provinsie soek",
+      "cityDemandSub": "Waar die gaping die grootste is, oortref vraag die aanbod. Die vaardighede wat jou naby jou laat uitstaan. Tik op 'n vaardigheid om te sien wie nog daarvoor in jou provinsie gelys is.",
+      "cityDemandColSkill": "Vaardigheid",
+      "cityDemandColSearches": "Soektogte",
+      "cityDemandColMatches": "Resultate",
+      "cityDemandColGap": "Gaping",
+      "honestNote": "Eerlikheidsnota",
+      "honestBody": "Sebenza aanvaar nie geld van leerverskaffers nie. Ons lys openbare, SA-erkende paaie eerste omdat hulle eg en bereikbaar is. As 'n kursus nie hier is nie, is dit nie noodwendig sleg nie, maar ons sal dit nie sonder bewyse van sukses vertoon nie.",
+      "student": {
+        "lane": "Studentemodus",
+        "headline": "Verbind jou graad met die mark",
+        "subhead": "Jy {months, plural, =0 {gradueer dié maand} =1 {is een maand van graduering af} other {is # maande van graduering af}}. Sebenza stem die aanbevelings af op wat {programme}-gegradueerdes werklik volgende nodig het.",
+        "graduating": "Gradueer",
+        "electivesTitle": "Keusevakke in jou program",
+        "electivesSub": "Vakke wat jy nog kan kies, gekies omdat die mark daarvoor skree in jou provinsie.",
+        "curriculumHint": "Waar in die kurrikulum",
+        "demandSignal": "{searches} soektogte teenoor {matches} resultate dié maand",
+        "programmesTitle": "Internskappe en gegradueerde-programme",
+        "programmesSub": "Werklike SA-programme: openbare sektor eerste, dan korporatiewe maatskappye en nuwe ondernemings. Vereistes word eerlik gewys. Ons sê eerder vooraf as jy nie kwalifiseer nie as om jou tyd te mors.",
+        "duration": "{months, plural, =1 {# maand} other {# maande}}",
+        "eligibility": "Vereistes",
+        "applicationOpen": "Oop",
+        "applicationClosingSoon": "Sluit binnekort",
+        "applicationClosed": "Gesluit",
+        "saqaChip": "SAQA-erken",
+        "destinationsTitle": "Waarheen {programme}-gegradueerdes gaan",
+        "destinationsSub": "Saamgestel uit bevestigde plasings op Sebenza. Geen persoonlike data word blootgestel nie, slegs die bestemmingstipe en aandeel.",
+        "medianMonths": "{months, plural, =1 {≈1 maand tot plasing} other {≈# maande tot plasing}}",
+        "notPlaced": "Nog nie geplaas nie",
+        "supplementaryTitle": "Aanvullende gratis leer",
+        "supplementarySub": "Gapings wat byna elke CS- / rekeningkunde-gegradueerde na hul eerste rol saamdra. Alles gratis.",
+        "openToToggle": "Oop vir",
+        "openToInternships": "Internskappe",
+        "openToGraduateProgrammes": "Gegradueerde-programme"
+      }
+    },
+    "cv": {
+      "pageEyebrow": "Werksoeker · CV-bouer",
+      "pageTitle": "Bou jou CV",
+      "pageHelp": "Dit bou uit die profiel wat jy reeds ingevul het. Kies 'n uitleg en stoor dit as 'n PDF. Privaat aan jou. Niks hier word met werkgewers gedeel nie.",
+      "back": "Terug na beheerpaneel",
+      "print": "Druk / stoor as PDF",
+      "printHint": "Stoor as 'n PDF: tik op die knoppie (of File → Print) en kies \"Save as PDF\".",
+      "layout": "Uitleg",
+      "templateClassic": "Klassiek",
+      "templateCompact": "Kompak",
+      "templateClassicHint": "Een skoon kolom. Die veiligste vir werkgewerstelsels.",
+      "templateCompactHint": "Twee kolomme op 'n groter skerm; een kolom op jou foon en in druk.",
+      "sectionAbout": "Oor",
+      "sectionSkills": "Vaardighede",
+      "sectionExperience": "Ervaring",
+      "sectionQualifications": "Kwalifikasies",
+      "sectionStudies": "Studies",
+      "alsoExperiencedIn": "Ook ervare in",
+      "present": "Hede",
+      "skillYears": "{years} jr",
+      "skillYearsPlural": "{years} jr",
+      "skillSelfRated": "self beoordeel",
+      "qualVerified": "Geverifieer",
+      "qualPending": "Hangende",
+      "qualSelfListed": "Self gelys",
+      "studyingAt": "{programme} by {institution}",
+      "nqfLevel": "NQF {level}",
+      "expectedGrad": "Verwag {date}",
+      "emptyTitle": "Jou CV is skraal omdat jou profiel skraal is",
+      "emptyBody": "Voeg jou vaardighede, werkgeskiedenis en kwalifikasies op jou profiel by, en kom dan terug. Jou CV vul homself in.",
+      "emptyCta": "Voltooi jou profiel",
+      "backupNoteTitle": "Hou 'n veilige kopie",
+      "backupNoteBody": "'n PDF gestoor? Laai dit op na jou private CV-rugsteun sodat jy dit op enige toestel weer kan aflaai.",
+      "backupNoteCta": "Maak CV-rugsteun oop",
+      "generatedWith": "Lewendige profiel: {url}",
+      "honestNote": "Vaardighede wys jou eie beoordeling, dieselfde as op jou openbare profiel. Word nooit as \"geverifieer\" gemerk tensy 'n werkgewer of instansie dit bevestig het nie."
+    },
+    "workReady": {
+      "eyebrow": "Word werkgereed",
+      "title": "Maak gereed vir die werk, nie net om dit te vind nie",
+      "lead": "Kort, praktiese gidse, en 'n CV wat met een tik uit jou profiel gebou word.",
+      "seeAll": "Sien alle werkgereed-gidse",
+      "prepareTitle": "Berei voor vir hierdie rol",
+      "prepareLead": "Jy het hierdie uitnodiging aanvaar. Só maak jy gereed.",
+      "prepareInterview": "Hoe om vir die onderhoud voor te berei",
+      "prepareCv": "Bou jou CV",
+      "prepareScams": "Herken 'n werkskelm"
+    },
+    "nearYou": {
+      "eyebrow": "Werk naby jou",
+      "beFoundTitle": "Word gevind vir {profession}-werk naby {city}",
+      "beFoundBody": "Op Sebenza kom werkgewers na jou toe. Hoe varser en vollediger jou profiel, hoe makliker vind hulle jou naby {city}.",
+      "completeness": "{percent}% voltooi",
+      "completeProfile": "Voltooi jou profiel",
+      "demandHeading": "Vraag na {profession}",
+      "demand": "{count, plural, =0 {Nog geen soektogte nie} one {# soektog} other {# soektogte}} in {province} in die afgelope {days} dae",
+      "demandEmpty": "Stil in {province} op die oomblik. Hou jou status vars sodat jy eerste is wanneer dit optel.",
+      "remote": "Jy is ook oop vir afstandwerk: {count, plural, one {# soektog} other {# soektogte}} vir {profession} oor die hele Suid-Afrika.",
+      "poolLink": "Sien teen wie jy in {province} vergelyk word",
+      "notHere": "Nie in {city} nie? Werk jou ligging by"
+    }
+  },
+  "employerDash": {
+    "title": "Werkgewerwerkruimte",
+    "nav": {
+      "overview": "Oorsig",
+      "search": "Soek talent",
+      "savedSearches": "Gestoorde soektogte",
+      "shortlists": "Talentpoele",
+      "placements": "Plasings",
+      "organisation": "Organisasie",
+      "team": "Span",
+      "account": "Rekening"
+    },
+    "orgUnverifiedBanner": "Jou organisasie is nog nie geverifieer nie. Jy kan talent soek en kortlyste bou, maar kontakbesonderhede en dokumente bly gesluit totdat verifikasie voltooi is.",
+    "orgUnverifiedCta": "Begin verifikasie",
+    "overview": {
+      "kpis": {
+        "openSearches": "Gestoorde soektogte",
+        "talentPools": "Talentpoele",
+        "revealsThisMonth": "Kontakonthullings (dié maand)",
+        "placements": "Bevestigde plasings"
+      },
+      "recent": "Onlangse resultate",
+      "refineInSearch": "Verfyn in soektog →",
+      "placementNudge": "Hierdie kandidaat aangestel? Bevestigde aanstellings hou nasionale data eerlik, en verdien jou organisasie 'n klein statistiekkrediet.",
+      "markHired": "Merk as aangestel",
+      "noMatches": "Geen resultate in hierdie gestoorde soektog nie",
+      "broadenHelp": "Verbreed jou filters, of stoor die gaping. Ons voer dit in die nasionale vaardigheidsgaping-statistiek in."
+    },
+    "savedSearches": {
+      "title": "Gestoorde soektogte",
+      "subtitle": "Herbruikbare filterstelle. Nuwe resultate stel jou per e-pos in kennis. Jy besluit hoe gereeld.",
+      "add": "Stoor 'n nuwe soektog",
+      "lastRun": "Laas uitgevoer {when}",
+      "newMatches": "{n, plural, =1 {# nuwe resultaat} other {# nuwe resultate}} sedert jou laaste besoek",
+      "edit": "Wysig",
+      "delete": "Skrap"
+    },
+    "shortlists": {
+      "title": "Talentpoele",
+      "subtitle": "Saamgestelde kortlyste per rol of veldtog. Deel intern; voer nooit persoonlike inligting uit nie.",
+      "add": "Skep 'n talentpoel",
+      "members": "{n, plural, =1 {# kandidaat} other {# kandidate}}",
+      "open": "Maak oop",
+      "share": "Deel intern"
+    },
+    "placements": {
+      "title": "Plasings",
+      "subtitle": "Elke aanstelling wat jou organisasie op Sebenza bevestig het. Voer die nasionale plasingstatistiek (Fase 6).",
+      "add": "Teken 'n plasing aan",
+      "noPlacements": "Nog geen plasings aangeteken nie. Teken jou eerste aanstelling aan om 'n klein statistiekkrediet te verdien.",
+      "fields": {
+        "candidate": "Kandidaat",
+        "role": "Rol",
+        "city": "Stad",
+        "hiredAt": "Aangestel op",
+        "salaryBand": "Salarisband (opsioneel, word nooit openbaar gewys nie)"
+      }
+    },
+    "organisation": {
+      "title": "Organisasie",
+      "subtitle": "Jou geregistreerde profiel. Verifikasiestatus bepaal wat jy kan oopsluit.",
+      "verification": "Verifikasiestatus",
+      "details": "Geregistreerde besonderhede",
+      "company": "Maatskappynaam",
+      "registration": "CIPC-registrasie",
+      "industry": "Bedryf",
+      "size": "Grootte",
+      "country": "Land",
+      "submitForVerification": "Dien in vir verifikasie",
+      "kycSlot": "Verifikasie hanteer deur KYC-vennoot (Fase 8)."
+    },
+    "team": {
+      "title": "Span",
+      "subtitle": "Voeg kollegas by jou werkruimte. Elke lid se toegang word afsonderlik aangeteken.",
+      "invite": "Nooi lid",
+      "role": "Werkruimte-rol",
+      "owner": "Eienaar",
+      "recruiter": "Werwer",
+      "viewer": "Kyker"
+    },
+    "account": {
+      "title": "Rekening",
+      "subtitle": "Aanmelding, tweefaktor, sessies.",
+      "twoFactor": "Tweefaktor-verifikasie",
+      "twoFactorRequired": "Vereis vir werkgewerrekeninge.",
+      "active": "Aktief",
+      "configure": "Stel op"
+    }
+  },
+  "adminDash": {
+    "title": "Administrasie",
+    "subtitle": "Die integriteitslaag. Tweefaktor vereis.",
+    "nav": {
+      "overview": "Oorsig",
+      "verifications": "Verifikasietou",
+      "moderation": "Moderering",
+      "taxonomy": "Verwysingsdata",
+      "auditLog": "Ouditlog",
+      "users": "Gebruikers",
+      "settings": "Instellings"
+    },
+    "overview": {
+      "kpis": {
+        "pendingVerifications": "Hangende verifikasies",
+        "openReports": "Oop verslae",
+        "newUsersWeek": "Nuwe gebruikers (7 dae)",
+        "auditEvents24h": "Ouditgebeure (24 uur)"
+      },
+      "queues": "Aktiewe toue",
+      "recent": "Onlangse admin-aksies"
+    },
+    "verifications": {
+      "title": "Verifikasietou",
+      "subtitle": "Hersien kwalifikasies en organisasies. Keur goed, keur af met rede, of eskaleer.",
+      "tabs": {
+        "qualifications": "Kwalifikasies",
+        "organisations": "Organisasies"
+      },
+      "approve": "Keur goed",
+      "reject": "Keur af",
+      "viewEvidence": "Bekyk bewyse",
+      "submittedBy": "Ingedien deur",
+      "submittedWhen": "Ingedien {when}"
+    },
+    "moderation": {
+      "title": "Modereringstou",
+      "subtitle": "Gerapporteerde profiele en inhoud. Skors, herstel, of sluit sonder aksie.",
+      "reasons": {
+        "fakeIdentity": "Vermoedelike vals identiteit",
+        "inappropriate": "Onvanpaste inhoud",
+        "harassment": "Teistering",
+        "spam": "Strooipos"
+      },
+      "reportedWhen": "Gerapporteer {when}",
+      "suspend": "Skors",
+      "restore": "Herstel",
+      "closeNoAction": "Sluit, geen aksie"
+    },
+    "taxonomy": {
+      "title": "Verwysingsdata",
+      "subtitle": "Beheerde woordeskatte. Geen vrye teks in soektogte nie.",
+      "tabs": {
+        "professions": "Beroepe",
+        "skills": "Vaardighede",
+        "provinces": "Provinsies",
+        "cities": "Stede"
+      },
+      "add": "Voeg inskrywing by"
+    },
+    "auditLog": {
+      "title": "Ouditlog",
+      "subtitle": "Elke PII-toegang, in chronologiese volgorde. POPIA-voldoenende bewaring geld.",
+      "filterKind": "Soort",
+      "filterActor": "Akteur",
+      "noEvents": "Nog geen PII-toegang in hierdie sessie nie. Besoek /search of maak 'n profiel oop en herlaai. Elke gebeurtenis sal hier verskyn."
+    },
+    "users": {
+      "title": "Gebruikers",
+      "subtitle": "Soek volgens gebruikersnaam, e-pos of rol. Rekeningaksies word aangeteken.",
+      "role": "Rol",
+      "joined": "Aangesluit",
+      "status": "Status",
+      "active": "Aktief",
+      "suspended": "Geskors",
+      "deleted": "Geskrap"
+    },
+    "settings": {
+      "title": "Platforminstellings",
+      "subtitle": "Kenmerkvlaggies, varsheidsbande, ranggewigte."
+    }
+  },
+  "insights": {
+    "title": "Indiensnemingsinsigte",
+    "subtitle": "Geweeg volgens varsheid. Slegs saamgestel. Word deurlopend bygewerk.",
+    "stat": {
+      "totalActive": "Aktiewe profiele",
+      "confirmedHires": "Bevestigde aanstellings (dié maand)",
+      "openToWork": "Oop vir werk"
+    },
+    "byStatus": "Volgens indiensnemingstatus",
+    "trend": "Registrasies en plasings",
+    "skillsGap": "Vaardighede in aanvraag teenoor resultate",
+    "skillsGapHelp": "Wanneer soektogte die resultate ver oortref, het ons 'n vaardigheidsgaping. Dit is die beleidshefboom.",
+    "confidence": "Vertroue {percent}%",
+    "confidenceHelp": "Varsheidsvertroue: hoe hoër die aandeel onlangs bevestigde statusse, hoe hoër die vertroue.",
+    "export": "Voer saamgestelde data uit (CSV)",
+    "exportNote": "Uitvoere is slegs saamgestel. Geen persoonlike data verlaat die stelsel nie. Elke uitvoer word aangeteken."
+  },
+  "errors": {
+    "notFoundTitle": "Hierdie bladsy is nie in die register nie.",
+    "notFoundBody": "Die skakel is dalk oud, verkeerd getik, of die bladsy het geskuif. Die mense is egter nog hier, so soek waarvoor jy werklik gekom het.",
+    "errorTitle": "Iets het verkeerd geloop",
+    "errorBody": "'n Onverwagte fout het voorgekom. Probeer asseblief weer.",
+    "home": "Gaan huis toe",
+    "retry": "Probeer weer",
+    "notFoundEyebrow": "404 · Nie in die register nie",
+    "notFoundSearchLabel": "Deursoek die talentregister",
+    "notFoundSearchPlaceholder": "Probeer 'n beroep, soos sjef of elektrisiën",
+    "notFoundSearchCta": "Soek",
+    "notFoundLinksLabel": "Of gaan na",
+    "notFoundLinkSearch": "Vind talent",
+    "notFoundLinkInsights": "Nasionale insigte",
+    "notFoundLinkSignUp": "Skep 'n gratis profiel",
+    "notFoundLinkAbout": "Hoe Sebenza werk",
+    "errorDigestHint": "As jy ons hieroor kontak, noem die kode"
+  },
+  "common": {
+    "loading": "Laai tans…",
+    "viewAll": "Bekyk alles",
+    "close": "Maak toe",
+    "save": "Stoor",
+    "cancel": "Kanselleer",
+    "edit": "Wysig",
+    "delete": "Skrap",
+    "yes": "Ja",
+    "no": "Nee",
+    "required": "Vereis",
+    "optional": "Opsioneel"
   }
 }

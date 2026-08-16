@@ -1,9 +1,732 @@
 {
-  "__notice": "isiZulu (zu) catalog  TRANSLATION PENDING. Awaiting professional human translation. Missing keys fall back to English via i18n/request.ts deepMerge. NEVER machine-translate POPIA/consent/legal copy.",
+  "__notice": "isiZulu (zu) catalog. AI-DRAFTED 2026-08-16, PENDING HUMAN REVIEW (docs/TRANSLATION_REVIEW_GUIDE.md). Consent / POPIA / legal strings are DELIBERATELY OMITTED so they fall back to English until the reviewer signs them off; their drafts live in the review guide.",
   "meta": {
-    "siteName": "Sebenza"
+    "siteName": "Sebenza",
+    "tagline": "Iplatifomu yethalente laseNingizimu Afrika",
+    "description": "Thola abantu abanamakhono eduze kwakho. Tholakala ngomsebenzi owaziyo."
   },
   "nav": {
-    "menu": "Imenyu"
+    "findTalent": "Thola ithalente",
+    "signIn": "Ngena",
+    "signUp": "Qalisa",
+    "insights": "Imininingwane",
+    "menu": "Imenyu",
+    "skipToContent": "Yeqela kokuqukethwe"
+  },
+  "landing": {
+    "hero": {
+      "lineOne": "Thola abantu abanamakhono.",
+      "lineTwo": "Eduze kwakho.",
+      "lineThree": "Ngempela.",
+      "subhead": "USebenza uhlanganisa ithalente laseNingizimu Afrika nomsebenzi ngekhono nangendawo, ngedatha yezomsebenzi ongayethemba ngempela."
+    },
+    "search": {
+      "professionLabel": "Umsebenzi noma ikhono",
+      "professionPlaceholder": "isb. Umpheki, Ugesi, Unjiniyela wesoftware",
+      "locationLabel": "Indawo",
+      "locationPlaceholder": "Isifundazwe noma idolobha",
+      "submit": "Sesha",
+      "recentChips": "Okuseshwa kakhulu"
+    },
+    "pulseStrip": {
+      "heading": "Isigqi sikazwelonke",
+      "subheading": "Bukhoma, kukalwa ngokusha kwedatha. Akulokothi kube ndala, akulokothi kusontwe.",
+      "totalActive": "Amaphrofayela asebenzayo",
+      "confirmedHires": "Abaqashiwe abaqinisekisiwe kule nyanga",
+      "skillsInDemand": "Amakhono adingeka kakhulu"
+    },
+    "valueCards": {
+      "trusted": {
+        "title": "Amaphrofayela athembekile",
+        "body": "Zonke iziqu zinesimo sokuqinisekiswa esiqotho. Akukho okuthi \"Kuqinisekisiwe\" ngokuzenzakalela."
+      },
+      "live": {
+        "title": "Ukutholakala kwamanje",
+        "body": "I-Talent Pulse yethu igcina isimo somsebenzi sisha njalo. Okudala kwehliswa ohlwini, akufihlwa."
+      },
+      "real": {
+        "title": "Idatha yangempela yezomsebenzi",
+        "body": "Ukuqashwa kubalwa kuphela uma kuqinisekisiwe kuplatifomu. Izibalo ongazisebenzisa ngokwethemba."
+      }
+    },
+    "split": {
+      "employer": {
+        "eyebrow": "Abaqashi nabaqashi bethalente",
+        "heading": "Thola ithalente eliqinisekisiwe, elitholakalayo edolobheni lakho.",
+        "body": "Sesha ngekhono nangendawo. Imininingwane yokuxhumana ivela kuphela uma umuntu evumile, futhi konke ukuvulwa kuyarekhodwa.",
+        "cta": "Qala ukuqasha"
+      },
+      "government": {
+        "eyebrow": "Uhulumeni nenqubomgomo",
+        "heading": "Ulwazi lwabasebenzi ngesikhathi sangempela.",
+        "body": "Izibalo zezomsebenzi ezibukhoma ngekhono, ngendawo nangokusha kwedatha. Ziyakhishwa, zihlanganisiwe, azilokothi zibe ngezomuntu.",
+        "cta": "Bona imininingwane"
+      }
+    },
+    "footer": {
+      "privacy": "Ubumfihlo ne-POPIA",
+      "paia": "Incwadi ye-PAIA",
+      "terms": "Imigomo",
+      "accessibility": "Ukufinyeleleka",
+      "language": "Ulimi",
+      "rights": "© {year} Sebenza. Iplatifomu kazwelonke yethalente yaseNingizimu Afrika."
+    }
+  },
+  "auth": {
+    "common": {
+      "email": "Ikheli le-imeyili",
+      "password": "Iphasiwedi",
+      "confirmPassword": "Qinisekisa iphasiwedi",
+      "fullName": "Amagama aphelele",
+      "phone": "Inombolo yeselula",
+      "showPassword": "Bonisa iphasiwedi",
+      "hidePassword": "Fihla iphasiwedi",
+      "rememberMe": "Ngikhumbule kule divayisi",
+      "or": "noma",
+      "back": "Emuva"
+    },
+    "signIn": {
+      "eyebrow": "Siyakwamukela futhi",
+      "heading": "Ngena ku-akhawunti yakho",
+      "subhead": "Abafuni bomsebenzi, abaqashi nabaphathi bangena lapha. Sizokuyisa kwideshibhodi efanele.",
+      "submit": "Ngena",
+      "forgot": "Ukhohlwe iphasiwedi yakho?",
+      "noAccount": "Awunayo i-akhawunti okwamanje?",
+      "createOne": "Yakha eyodwa",
+      "twoFactor": "Ukuqinisekisa ngezinyathelo ezimbili kuyadingeka kubaqashi nakubaphathi.",
+      "rolePicker": "Ngena njengo",
+      "asSeeker": "Umfuni womsebenzi",
+      "asEmployer": "Umqashi",
+      "asAdmin": "Umphathi"
+    },
+    "signUp": {
+      "eyebrow": "Qalisa",
+      "heading": "Joyina uSebenza",
+      "subhead": "Ujoyina luphi uhlangothi lweplatifomu?",
+      "seekerCard": {
+        "eyebrow": "Ngingu",
+        "title": "Mfuni womsebenzi",
+        "body": "Yakha iphrofayela eqinisekisiwe, gcina isimo somsebenzi sisha, futhi utholakale ngomsebenzi owaziyo.",
+        "cta": "Yakha iphrofayela yomfuni womsebenzi"
+      },
+      "employerCard": {
+        "eyebrow": "Ngingu",
+        "title": "Mqashi noma umqashi wethalente",
+        "body": "Sesha ithalente eliqinisekisiwe ngekhono nangendawo. Kudingeka ukuqinisekisa ngezinyathelo ezimbili. Inhlangano yakho kumele iqinisekiswe ngaphambi kokuvuleka kwemininingwane yokuxhumana.",
+        "cta": "Bhalisa inhlangano"
+      },
+      "adminNotice": "Ama-akhawunti abaphathi akhishwa nguSebenza, awazibhalisi. Uma umenyiwe, ngena ngemininingwane esencwadini yakho yesimemo.",
+      "haveAccount": "Usunayo i-akhawunti?",
+      "signInLink": "Ngena"
+    },
+    "seekerSignUp": {
+      "stepLabel": "Isinyathelo {n} kwezi-3",
+      "step1": {
+        "heading": "Sitshele ukuthi ungubani",
+        "subhead": "Lokhu okuyisisekelo kuphela. Sizokwengeza okunye kwephrofayela yakho ngemva kwemvume.",
+        "next": "Qhubeka",
+        "citizenQuestion": "Ingabe uyisakhamuzi saseNingizimu Afrika?",
+        "citizenYes": "Yebo",
+        "citizenNo": "Cha",
+        "citizenHelp": "Kusetshenziselwa kuphela izibalo zezomsebenzi nokugqanyiswa kwezakhamuzi zaseNingizimu Afrika ekusesheni kwabaqashi. Akulokothi kuthinte ukuthi ungamsebenzisa yini uSebenza noma utholakale. Wonke umuntu uhlanganiswa ngendawo nangekhono.",
+        "nationalityLabel": "Uvela kuliphi izwe?",
+        "nationalityHelp": "Kuboniswa kwiphrofayela yakho nasemiphumeleni yokusesha ukuze abaqashi bazi ukuthi uvelaphi. USebenza uhlanganisa ngendawo nangekhono. Lapho uvela khona akulokothi kube yisivimbelo."
+      },
+      "step3": {
+        "heading": "Amasimu okuqala ephrofayela yakho",
+        "subhead": "Ungahlela noma yikuphi kwalokhu kamuva kusihleli sephrofayela yakho.",
+        "next": "Yakha iphrofayela yami",
+        "professionLabel": "Umsebenzi",
+        "locationLabel": "Uhlala kuphi / ufuna ukusebenza kuphi?",
+        "statusLabel": "Sithini isimo sakho somsebenzi namuhla?",
+        "studentToggle": "Ngingumfundi njengamanje",
+        "studentToggleHint": "Khetha lokhu uma ubhalisile enyuvesi yaseNingizimu Afrika, enyuvesi yezobuchwepheshe, e-TVET, e-UNISA noma ohlelweni lwe-INDLELA. Sizothatha imininingwane yezifundo zakho ukuze uSebenza akwazi ukukuncomela izifundo ezikhethwayo, ama-internship nezinhlelo zabaphothule, hhayi ukuqashwa okugcwele kuphela.",
+        "academic": {
+          "heading": "Izifundo zakho",
+          "institutionLabel": "Isikhungo",
+          "programmeLabel": "Uhlelo lokufunda",
+          "fieldLabel": "Umkhakha wokufunda",
+          "nqfLabel": "Izinga le-NQF",
+          "yearLabel": "Unyaka wamanje wokufunda",
+          "graduationLabel": "Ukuphothula okulindelekile",
+          "nsfasLabel": "Ngixhaswa yi-NSFAS",
+          "openToInternships": "Ngivulekele ama-internship ngesikhathi ngifunda",
+          "openToGraduateProgrammes": "Ngivulekele izinhlelo zabaphothule ngemva kokuphothula"
+        }
+      },
+      "stepHints": {
+        "name": "Kuvela kwiphrofayela yakho njengo \"Gama L.\" ngokuzenzakalela. Isibongo sakho esiphelele sivela kuphela uma unikeze imvume yokuxhunywa."
+      }
+    },
+    "employerSignUp": {
+      "heading": "Bhalisa inhlangano yakho",
+      "subhead": "Inhlangano yakho iqala isesimeni esithi \"akuqinisekisiwe\". Ungasesha ithalente, kodwa imininingwane yokuxhumana namadokhumenti kuhlala kukhiyiwe kuze kuphele ukuqinisekiswa.",
+      "orgName": "Igama lenhlangano elibhalisiwe",
+      "registrationNumber": "Inombolo yokubhaliswa ye-CIPC",
+      "industry": "Imboni",
+      "size": "Ubukhulu benhlangano",
+      "country": "Izwe okusetshenzwa kulo",
+      "youAs": "Mayelana nawe",
+      "yourRole": "Indima yakho enhlanganweni",
+      "submit": "Bhalisa inhlangano",
+      "twoFactorNote": "Ukuqinisekisa ngezinyathelo ezimbili kuyaphoqeleka kuma-akhawunti abaqashi. Uzoholwa ekusetheni i-TOTP lapho ungena okokuqala."
+    },
+    "verify": {
+      "heading": "Bheka ibhokisi lakho le-imeyili",
+      "subhead": "Sithumele isixhumanisi sokuqinisekisa ku-{email}. Sichofoze ukuze uqinisekise ikheli lakho le-imeyili.",
+      "resend": "Phinda uthumele i-imeyili",
+      "wrongEmail": "I-imeyili engalungile?",
+      "wrongEmailLink": "Qala phansi"
+    },
+    "forgot": {
+      "heading": "Setha kabusha iphasiwedi yakho",
+      "subhead": "Faka i-imeyili ye-akhawunti yakho, sizokuthumelela isixhumanisi sokusetha iphasiwedi entsha.",
+      "submit": "Thumela isixhumanisi",
+      "back": "Buyela ekungeneni"
+    }
+  },
+  "search": {
+    "heading": "{count, plural, =0 {Akukho okutholakele} =1 {# {role}} other {# {role}}} e-{location}",
+    "headingFallback": "Ukusesha ithalente",
+    "filters": {
+      "title": "Izihlungi",
+      "open": "Vula izihlungi",
+      "close": "Vala",
+      "apply": "Sebenzisa",
+      "clear": "Sula konke",
+      "skill": "Ikhono",
+      "location": "Indawo",
+      "province": "Isifundazwe",
+      "city": "Idolobha",
+      "status": "Isimo somsebenzi",
+      "seniority": "Izinga lesipiliyoni",
+      "verification": "Ukuqinisekiswa",
+      "nationality": "Ubuzwe (okuzikhethelayo)",
+      "highlightCitizens": "Gqamisa izakhamuzi zaseNingizimu Afrika",
+      "nationalityHelp": "USebenza uhlanganisa ngendawo nangekhono. Ubuzwe buyaboniswa, kodwa abulokothi bube yisivimbelo."
+    },
+    "states": {
+      "loading": "Ilayisha ithalente…",
+      "empty": "Akukho okutholakele okwamanje",
+      "emptyBody": "Zama ukwandisa indawo noma ususe isihlungi. Ukusesha kwakho kuyarekhodwa, kungenamagama, ukuze sikhombise abenzi benqubomgomo ukuthi amakhono ashodayo akuphi.",
+      "error": "Kukhona okungahambanga kahle",
+      "errorBody": "Asikwazanga ukufinyelela uhlu lwethalente. Sicela uzame futhi.",
+      "retry": "Zama futhi"
+    },
+    "loadMore": "Layisha okwengeziwe",
+    "rosterItem": {
+      "viewProfile": "Buka iphrofayela",
+      "completeness": "Ukuphelela kwephrofayela",
+      "topSkills": "Amakhono aphambili",
+      "sameCity": "Idolobha elifanayo"
+    }
+  },
+  "status": {
+    "employed": "Uyasebenza",
+    "unemployed": "Akasebenzi",
+    "self_employed": "Uziqashile",
+    "studying": "Uyafunda",
+    "open_to_work": "Uvulekele umsebenzi",
+    "confirmedRelative": "Kuqinisekiswe {when}",
+    "neverConfirmed": "Isimo asiqinisekisiwe",
+    "freshness": {
+      "fresh": "Kusha",
+      "ageing": "Kuyaguga",
+      "stale": "Kudala",
+      "freshHelp": "Kuqinisekiswe ezinsukwini ezingama-30 ezedlule.",
+      "ageingHelp": "Kusukela ezinsukwini ezingama-30 kuya kwezingama-90. Kwehliswa kancane ohlwini, kuthunyelwa isikhumbuzo.",
+      "staleHelp": "Kudlule izinsuku ezingama-90. Kwehliswa kakhulu ohlwini, kuyavezwa ezibalweni."
+    }
+  },
+  "verification": {
+    "unverified": "Akuqinisekisiwe",
+    "pending": "Ukuqinisekiswa kusalindile",
+    "verified": "Kuqinisekisiwe",
+    "rejected": "Kunqatshiwe",
+    "selfReported": "Kubikwe nguwe"
+  },
+  "profile": {
+    "headerVerification": "Ukuqinisekiswa",
+    "headerStatus": "Isimo somsebenzi",
+    "memberSince": "UkuSebenza kusukela ngo-{date}",
+    "skills": "Amakhono",
+    "experience": "Isipiliyoni",
+    "qualifications": "Iziqu",
+    "bio": "Mayelana",
+    "studies": "Ufunda njengamanje",
+    "studiesSub": "Kubikwe nguwe kuze kuqinisekiswe yisikhungo ne-SAQA kuSigaba 8.",
+    "studiesGraduation": "Ukuphothula okulindelekile",
+    "studiesNsfas": "Uxhaswa yi-NSFAS",
+    "studiesOpenInternships": "Uvulekele ama-internship",
+    "studiesOpenGraduateProgrammes": "Uvulekele izinhlelo zabaphothule",
+    "locked": {
+      "contact": "Imininingwane yokuxhumana",
+      "documents": "Amadokhumenti nezitifiketi",
+      "lockedBody": "Abaqashi abaqinisekisiwe bangacela ukubuka lokhu. Konke ukuvulwa kuhlolwa ngemvume futhi kuyarekhodwa.",
+      "lockedCta": "Ngena njengomqashi oqinisekisiwe",
+      "seekerHint": "Asilokothi sibonise inombolo yakho kamazisi, amadokhumenti noma imininingwane yokuxhumana emiphumeleni yokusesha, ngisho nakubaqashi abaqinisekisiwe, uze uvume."
+    },
+    "report": "Bika le phrofayela",
+    "redacted": "(Isibongo sifihliwe ekusesheni komphakathi uze uvume ukuxhunywa.)"
+  },
+  "seekerDash": {
+    "title": "Ideshibhodi yakho",
+    "nav": {
+      "overview": "Uhlolojikelele",
+      "profile": "Isihleli sephrofayela",
+      "experience": "Isipiliyoni",
+      "qualifications": "Iziqu",
+      "grow": "Ikhampasi yomsebenzi",
+      "activity": "Umsebenzi wakamuva",
+      "privacy": "Ubumfihlo nemvume",
+      "account": "I-akhawunti"
+    },
+    "overview": {
+      "greeting": "Sawubona, {name}. Indawo yakho yangasese",
+      "completeness": "Ukuphelela kwephrofayela",
+      "nextAction": "Engeza {n, plural, =1 {ikhono elilodwa} other {amakhono angu-#}} ukuze ukhuphuke ekusesheni.",
+      "pulse": "Talent Pulse",
+      "pulseQuestion": "Usavulekele umsebenzi?",
+      "confirmFresh": "Yebo, qinisekisa",
+      "lastConfirmed": "Kugcine ukuqinisekiswa {when}",
+      "publicLink": "Buka iphrofayela yami yomphakathi →",
+      "viewedBy": "Obuke iphrofayela yakho",
+      "contactedBy": "Okuthintile",
+      "noViewers": "Akekho osebuke iphrofayela yakho okwamanje.",
+      "noContacts": "Akukho baqashi abakuthintile okwamanje.",
+      "rankInSearch": "Lapho uvela khona ekusesheni",
+      "rankExplain": "Indawo yakho ohlwini lwabapheki · Western Cape, ngokusha kwedatha × ukuphelela.",
+      "nextSteps": "Izinyathelo ezilandelayo ezinconyiwe"
+    },
+    "profileEditor": {
+      "title": "Isihleli sephrofayela",
+      "subtitle": "Konke okulapha kungena kwidokhumenti yakho yomphakathi nasezibalweni zikazwelonke. Asilokothi sibonise inombolo yakho kamazisi. Ibethelwa uma ilondolozwa.",
+      "sections": {
+        "identity": "Isisekelo sobuwena",
+        "professional": "Isifinyezo somsebenzi",
+        "skillsTitle": "Amakhono",
+        "locationTitle": "Indawo",
+        "academicTitle": "Izifundo"
+      },
+      "academic": {
+        "heading": "Izifundo zakho",
+        "subhead": "Sitshele ukuthi ufunda kuphi nokuthi ufundani. USebenza uzolungisa ikhampasi yakho yomsebenzi ngokohlelo lwakho nangesikhathi esisele ngaphambi kokuphothula.",
+        "institution": "Isikhungo",
+        "kindHint": "Izikhungo zaseNingizimu Afrika ezamukelwayo kuphela: amanyuvesi kahulumeni, amanyuvesi ezobuchwepheshe, amakolishi e-TVET, i-UNISA, i-INDLELA.",
+        "programme": "Uhlelo lokufunda",
+        "field": "Umkhakha wokufunda",
+        "nqfLevel": "Izinga le-NQF",
+        "year": "Unyaka wamanje",
+        "graduation": "Ukuphothula okulindelekile",
+        "nsfas": "Uxhaswa yi-NSFAS",
+        "verificationNote": "Asilokothi sibonise ibheji elithi 'kuqinisekisiwe' ekubhaliseni okubikwe nguwe. Ukuqinisekiswa kufika ngobambiswano ne-SAQA nezikhungo kuSigaba 8.",
+        "openToInternships": "Ngivulekele ama-internship ngesikhathi ngifunda",
+        "openToGraduateProgrammes": "Ngivulekele izinhlelo zabaphothule ngemva kokuphothula"
+      },
+      "fields": {
+        "fullName": "Amagama aphelele",
+        "displayName": "Igama elivela emphakathini",
+        "displayNameHelp": "Indlela ovela ngayo ekusesheni komphakathi (isb. \"Thandeka M.\"). Isibongo sakho sivela kuphela ngemva kwemvume yokuxhunywa.",
+        "nationalId": "Inombolo kamazisi waseNingizimu Afrika (noma ipasipoti)",
+        "dob": "Usuku lokuzalwa",
+        "nationality": "Ubuzwe",
+        "citizen": "Ngiyisakhamuzi saseNingizimu Afrika",
+        "city": "Idolobha",
+        "province": "Isifundazwe",
+        "willingToRelocate": "Ngivulekele ukuthutha ngenxa yomsebenzi ofanele",
+        "profession": "Umsebenzi",
+        "seniority": "Izinga lesipiliyoni",
+        "headline": "Isihloko somphakathi",
+        "bio": "Mayelana",
+        "bioHelp": "Imisho emibili noma emithathu: okwenza kahle, nokufunayo.",
+        "addSkill": "Engeza ikhono",
+        "removeSkill": "Susa",
+        "proficiency": "Izinga ozibeke lona"
+      },
+      "saveButton": "Londoloza izinguquko",
+      "savedHint": "Kuzilondoloza njengoba ubhala. Amasimu abethelwe alondolozwa uma usuka kuwo.",
+      "completenessLive": "Ukuphelela kwamanje:",
+      "encryptedBadge": "Kubethelwa uma kulondolozwa"
+    },
+    "experience": {
+      "title": "Isipiliyoni",
+      "subtitle": "Izikhundla, izinsuku, impumelelo. Hlela kabusha noma nini.",
+      "add": "Engeza isipiliyoni",
+      "current": "Okwamanje",
+      "to": "kuya",
+      "empty": "Awukengezi sipiliyoni okwamanje. Ukwengeza izikhundla ezintathu noma ngaphezulu kukhuphula indawo yakho kakhulu."
+    },
+    "qualifications": {
+      "title": "Iziqu namadokhumenti",
+      "subtitle": "Layisha izitifiketi njengama-PDF noma izithombe. Amafayela agcinwa endaweni yangasese. Abaqashi abaqinisekisiwe kuphela abangacela ukuwabuka, futhi konke ukuvulwa kuyarekhodwa.",
+      "add": "Engeza isiqu",
+      "uploadCert": "Layisha isitifiketi",
+      "empty": "Azikho iziqu okwamanje. Ukwengeza okungenani isitifiketi somsebenzi wezandla noma idiploma kwakha ukwethenjwa ngabaqashi.",
+      "verificationBy": "Ukuqinisekiswa kwenziwa ngu"
+    },
+    "activity": {
+      "title": "Umsebenzi wakamuva",
+      "subtitle": "Konke ukusetshenziswa kwephrofayela yakho, kurekhodiwe ukuze ubone konke ngokusobala.",
+      "viewers": "Ukubukwa kwephrofayela",
+      "contacts": "Izicelo zokuxhumana",
+      "reveals": "Ukuvulwa kwamadokhumenti",
+      "downloads": "Ukulandwa kwamadokhumenti"
+    },
+    "account": {
+      "title": "I-akhawunti",
+      "subtitle": "I-imeyili, iphasiwedi, amadivayisi, ukuphuma.",
+      "email": "I-imeyili",
+      "password": "Iphasiwedi",
+      "changePassword": "Shintsha iphasiwedi",
+      "twoFactor": "Ukuqinisekisa ngezinyathelo ezimbili",
+      "twoFactorOptionalSeeker": "Okuzikhethelayo kubafuni bomsebenzi (kunconyiwe).",
+      "sessions": "Amaseshini asebenzayo",
+      "signOutAll": "Phuma kuwo wonke amanye amadivayisi",
+      "signOut": "Phuma"
+    },
+    "grow": {
+      "title": "Ikhampasi yomsebenzi",
+      "subtitle": "Okufanele ukufunde ngokulandelayo, kusekelwe esidingweni sangempela sabaqashi eduze kwakho. Asithengisi izifundo; sikhomba okusebenzayo.",
+      "eyebrow": "Ukukhula kwamakhono · kuholwa yisidingo",
+      "headline": "Funda {n, plural, =1 {ikhono elingu-#} other {amakhono angu-#}} → suka ku-#{from} uye ku-#{to}",
+      "headlineSub": "Indawo ehlosiwe ohlwini lwendawo yakho: {pool}",
+      "recommendationsTitle": "Amakhono anconyiwe",
+      "recommendationsSub": "Akhethwe emikhawulweni emikhulu phakathi kwalokho abaqashi abakuseshayo nalokho abakutholayo.",
+      "reason": {
+        "demand_high": "Isidingo esiphezulu · ukutholakala okuphansi",
+        "common_among_top_ranked": "Kuvamile phezulu ohlwini lwakho",
+        "missing_for_role": "Kuvula isikhundla esiseduze",
+        "adjacent_role": "Kwakhela phezu kwalokho osunakho"
+      },
+      "demandSignal": "Ukusesha okungu-{searches} kuqhathaniswa nokutholakala okungu-{matches} kule nyanga",
+      "rankIfLearned": "Uma ungeza lokhu: indawo → #{projected} ku-{pool}",
+      "openProfileEditor": "Engeza kwiphrofayela yami →",
+      "pathsTitle": "Izindlela zokufunda",
+      "pathsSub": "Okumahhala nokuxhasiwe kuvela kuqala. Izinhlelo ezamukelwa eNingizimu Afrika kuphela: i-SETA, i-TVET, i-INDLELA, ezamukelwa yi-SAQA, nezinsiza ezivulekile.",
+      "duration": "{weeks, plural, =1 {iviki elingu-#} other {amaviki angu-#}}",
+      "national": "Kuzwelonke",
+      "providerKind": "Uhlobo lomhlinzeki",
+      "cost": "Izindleko",
+      "outcome": "Umphumela",
+      "adjacentTitle": "Imisebenzi eseduze",
+      "adjacentSub": "Izikhundla amakhono akho ahlangana nazo, ngokuvamile ngekhono elilodwa noma amabili.",
+      "overlap": "{percent}% wokuhlangana kwamakhono",
+      "missing": "Okushodayo",
+      "cityDemandTitle": "Abaqashi abakuseshayo esifundazweni sakho",
+      "cityDemandSub": "Lapho umkhawulo umkhulu khona, isidingo sidlula ukutholakala. Amakhono akwenza uqhame eduze kwakho. Thepha ikhono ubone ukuthi obani abanye abasohlwini lwalo esifundazweni sakho.",
+      "cityDemandColSkill": "Ikhono",
+      "cityDemandColSearches": "Ukusesha",
+      "cityDemandColMatches": "Ukutholakala",
+      "cityDemandColGap": "Umkhawulo",
+      "honestNote": "Iphuzu lobuqotho",
+      "honestBody": "USebenza akamukeli imali kubahlinzeki bezifundo. Sibeka izindlela zomphakathi ezamukelwa eNingizimu Afrika kuqala ngoba zingezangempela futhi ziyafinyeleleka. Uma isifundo singekho lapha, akusho ukuthi sibi, kodwa ngeke sisiveze ngaphandle kobufakazi bokuthi siyasebenza.",
+      "student": {
+        "lane": "Imodi yomfundi",
+        "headline": "Xhumanisa iziqu zakho nemakethe",
+        "subhead": "U-{months, plural, =0 {phothula kule nyanga} =1 {senyangeni eyodwa ngaphambi kokuphothula} other {sezinyangeni ezingu-# ngaphambi kokuphothula}}. USebenza ulungisa kabusha izincomo ngalokho abaphothule be-{programme} abakudinga ngempela ngokulandelayo.",
+        "graduating": "Uyaphothula",
+        "electivesTitle": "Izifundo ezikhethwayo ohlelweni lwakho",
+        "electivesSub": "Izifundo osengazikhetha, zikhethwe ngoba imakethe izidinga kakhulu esifundazweni sakho.",
+        "curriculumHint": "Lapho zikhona kwikharikhulamu",
+        "demandSignal": "Ukusesha okungu-{searches} kuqhathaniswa nokutholakala okungu-{matches} kule nyanga",
+        "programmesTitle": "Ama-internship nezinhlelo zabaphothule",
+        "programmesSub": "Izinhlelo zangempela zaseNingizimu Afrika: umkhakha kahulumeni kuqala, bese kulandela izinkampani nama-startup. Imibandela iboniswa ngobuqotho. Sincamela ukukutshela kusengaphambili uma ungafaneleki kunokuchitha isikhathi sakho.",
+        "duration": "{months, plural, =1 {inyanga engu-#} other {izinyanga ezingu-#}}",
+        "eligibility": "Imibandela",
+        "applicationOpen": "Kuvuliwe",
+        "applicationClosingSoon": "Kuzovalwa maduze",
+        "applicationClosed": "Kuvaliwe",
+        "saqaChip": "Kwamukelwa yi-SAQA",
+        "destinationsTitle": "Lapho abaphothule be-{programme} beya khona",
+        "destinationsSub": "Kuhlanganiswe ekubekweni okuqinisekisiwe kuSebenza. Akukho datha yomuntu evezwayo, uhlobo lwendawo nesabelo kuphela.",
+        "medianMonths": "{months, plural, =1 {≈inyanga eyodwa kuze kubekwe} other {≈izinyanga ezingu-# kuze kubekwe}}",
+        "notPlaced": "Abakabekwa",
+        "supplementaryTitle": "Ukufunda kwamahhala okwengeziwe",
+        "supplementarySub": "Amagebe acishe wonke umphothuli we-CS / we-accounting angena nawo esikhundleni sokuqala. Konke kumahhala.",
+        "openToToggle": "Uvulekele",
+        "openToInternships": "Ama-internship",
+        "openToGraduateProgrammes": "Izinhlelo zabaphothule"
+      }
+    },
+    "cv": {
+      "pageEyebrow": "Umfuni womsebenzi · Umakhi we-CV",
+      "pageTitle": "Yakha i-CV yakho",
+      "pageHelp": "Yakhiwa kusukela kwiphrofayela osuyigcwalisile. Khetha isakhiwo bese uyilondoloza njenge-PDF. Ngeyakho wedwa. Akukho lapha okwabiwa nabaqashi.",
+      "back": "Buyela kwideshibhodi",
+      "print": "Phrinta / londoloza njenge-PDF",
+      "printHint": "Londoloza njenge-PDF: thepha inkinobho (noma File → Print) bese ukhetha \"Save as PDF\".",
+      "layout": "Isakhiwo",
+      "templateClassic": "Okwakudala",
+      "templateCompact": "Okuminyene",
+      "templateClassicHint": "Ikholomu eyodwa ehlanzekile. Ephephe kakhulu ezinhlelweni zabaqashi.",
+      "templateCompactHint": "Amakholomu amabili esikrinini esikhulu; ikholomu eyodwa efonini yakho nasekuphrinteni.",
+      "sectionAbout": "Mayelana",
+      "sectionSkills": "Amakhono",
+      "sectionExperience": "Isipiliyoni",
+      "sectionQualifications": "Iziqu",
+      "sectionStudies": "Izifundo",
+      "alsoExperiencedIn": "Unesipiliyoni futhi ku",
+      "present": "Kuze kube manje",
+      "skillYears": "{years} unyaka",
+      "skillYearsPlural": "{years} iminyaka",
+      "skillSelfRated": "ozibeke lona",
+      "qualVerified": "Kuqinisekisiwe",
+      "qualPending": "Kusalindile",
+      "qualSelfListed": "Okuzifakele",
+      "studyingAt": "{programme} e-{institution}",
+      "nqfLevel": "NQF {level}",
+      "expectedGrad": "Kulindeleke ngo-{date}",
+      "emptyTitle": "I-CV yakho incane ngoba iphrofayela yakho incane",
+      "emptyBody": "Engeza amakhono akho, umlando womsebenzi neziqu kwiphrofayela yakho, bese ubuya. I-CV yakho izigcwalisa yona.",
+      "emptyCta": "Gcwalisa iphrofayela yakho",
+      "backupNoteTitle": "Gcina ikhophi ephephile",
+      "backupNoteBody": "Ulondoloze i-PDF? Yilayishe endaweni yakho yangasese yokugcina i-CV ukuze ukwazi ukuyilanda kunoma iyiphi idivayisi.",
+      "backupNoteCta": "Vula indawo yokugcina i-CV",
+      "generatedWith": "Iphrofayela ebukhoma: {url}",
+      "honestNote": "Amakhono abonisa izinga ozibeke lona, njengakwiphrofayela yakho yomphakathi. Akulokothi kuthiwe \"kuqinisekisiwe\" ngaphandle kokuqinisekiswa ngumqashi noma yisikhungo."
+    },
+    "workReady": {
+      "eyebrow": "Zilungiselele umsebenzi",
+      "title": "Zilungiselele umsebenzi, hhayi ukuwuthola kuphela",
+      "lead": "Imihlahlandlela emifushane esebenzayo, ne-CV eyakhiwa kwiphrofayela yakho ngokuthepha kanye.",
+      "seeAll": "Bona yonke imihlahlandlela",
+      "prepareTitle": "Zilungiselele lesi sikhundla",
+      "prepareLead": "Usamukele lesi simemo. Nakhu ongazilungiselela ngakho.",
+      "prepareInterview": "Ukuzilungiselela inhlolokhono",
+      "prepareCv": "Yakha i-CV yakho",
+      "prepareScams": "Bona umkhonyovu womsebenzi"
+    },
+    "nearYou": {
+      "eyebrow": "Umsebenzi eduze kwakho",
+      "beFoundTitle": "Tholakala ngomsebenzi we-{profession} eduze kwase-{city}",
+      "beFoundBody": "KuSebenza, abaqashi beza kuwe. Uma iphrofayela yakho isha futhi iphelele, bakuthola kalula eduze kwase-{city}.",
+      "completeness": "Iphelele ngo-{percent}%",
+      "completeProfile": "Gcwalisa iphrofayela yakho",
+      "demandHeading": "Isidingo se-{profession}",
+      "demand": "{count, plural, =0 {Akukho ukusesha okwamanje} one {ukusesha okungu-#} other {ukusesha okungu-#}} e-{province} ezinsukwini ezingu-{days} ezedlule",
+      "demandEmpty": "Kuthulekile e-{province} njengamanje. Gcina isimo sakho sisha ukuze ube ngowokuqala uma kuvuka.",
+      "remote": "Uvulekele nokusebenza ukude: {count, plural, one {ukusesha okungu-#} other {ukusesha okungu-#}} kwe-{profession} kulo lonke elaseNingizimu Afrika.",
+      "poolLink": "Bona oqhathaniswa nabo e-{province}",
+      "notHere": "Awukho e-{city}? Buyekeza indawo yakho"
+    }
+  },
+  "employerDash": {
+    "title": "Indawo yokusebenza yomqashi",
+    "nav": {
+      "overview": "Uhlolojikelele",
+      "search": "Sesha ithalente",
+      "savedSearches": "Ukusesha okulondoloziwe",
+      "shortlists": "Amaqoqo ethalente",
+      "placements": "Ukubekwa",
+      "organisation": "Inhlangano",
+      "team": "Ithimba",
+      "account": "I-akhawunti"
+    },
+    "orgUnverifiedBanner": "Inhlangano yakho ayikaqinisekiswa. Ungasesha ithalente wakhe amaqoqo, kodwa imininingwane yokuxhumana namadokhumenti kuhlala kukhiyiwe kuze kuphele ukuqinisekiswa.",
+    "orgUnverifiedCta": "Qala ukuqinisekiswa",
+    "overview": {
+      "kpis": {
+        "openSearches": "Ukusesha okulondoloziwe",
+        "talentPools": "Amaqoqo ethalente",
+        "revealsThisMonth": "Ukuvulwa kokuxhumana (kule nyanga)",
+        "placements": "Ukubekwa okuqinisekisiwe"
+      },
+      "recent": "Ukutholakala kwakamuva",
+      "refineInSearch": "Cwenga ekusesheni →",
+      "placementNudge": "Umqashile lo muntu? Ukuqinisekisa ukuqasha kugcina idatha kazwelonke iqotho, futhi inhlangano yakho ithola ikhredithi encane yezibalo.",
+      "markHired": "Maka njengoqashiwe",
+      "noMatches": "Akukho okutholakele kulokhu kusesha okulondoloziwe",
+      "broadenHelp": "Yandisa izihlungi zakho, noma ulondoloze igebe. Silifaka ezibalweni zikazwelonke zamakhono ashodayo."
+    },
+    "savedSearches": {
+      "title": "Ukusesha okulondoloziwe",
+      "subtitle": "Amasethi ezihlungi asetshenziswa kaninginingi. Okutholakele okusha kukwazisa nge-imeyili. Wena onquma ukuthi kangaki.",
+      "add": "Londoloza ukusesha okusha",
+      "lastRun": "Kugcine ukusetshenziswa {when}",
+      "newMatches": "{n, plural, =1 {okutholakele okusha okungu-#} other {okutholakele okusha okungu-#}} kusukela ekuvakasheni kwakho kokugcina",
+      "edit": "Hlela",
+      "delete": "Susa"
+    },
+    "shortlists": {
+      "title": "Amaqoqo ethalente",
+      "subtitle": "Amaqoqo akhethiwe ngesikhundla noma ngomkhankaso. Yabelana ngaphakathi; ungalokothi ukhiphe imininingwane yomuntu.",
+      "add": "Yakha iqoqo lethalente",
+      "members": "{n, plural, =1 {umuntu ongu-#} other {abantu abangu-#}}",
+      "open": "Vula",
+      "share": "Yabelana ngaphakathi"
+    },
+    "placements": {
+      "title": "Ukubekwa",
+      "subtitle": "Konke ukuqasha inhlangano yakho ekuqinisekisile kuSebenza. Kungena ezibalweni zikazwelonke zokubekwa (Isigaba 6).",
+      "add": "Faka ukubekwa",
+      "noPlacements": "Akukho ukubekwa okufakiwe okwamanje. Faka ukuqasha kwakho kokuqala ukuze uthole ikhredithi encane yezibalo.",
+      "fields": {
+        "candidate": "Umuntu",
+        "role": "Isikhundla",
+        "city": "Idolobha",
+        "hiredAt": "Uqashwe ngo",
+        "salaryBand": "Ibhande lomholo (okuzikhethelayo, akulokothi kuboniswe emphakathini)"
+      }
+    },
+    "organisation": {
+      "title": "Inhlangano",
+      "subtitle": "Iphrofayela yakho ebhalisiwe. Isimo sokuqinisekiswa sinquma ongakuvula.",
+      "verification": "Isimo sokuqinisekiswa",
+      "details": "Imininingwane ebhalisiwe",
+      "company": "Igama lenkampani",
+      "registration": "Ukubhaliswa kwe-CIPC",
+      "industry": "Imboni",
+      "size": "Ubukhulu",
+      "country": "Izwe",
+      "submitForVerification": "Thumela ukuze kuqinisekiswe",
+      "kycSlot": "Ukuqinisekiswa kwenziwa ngumhlinzeki we-KYC (Isigaba 8)."
+    },
+    "team": {
+      "title": "Ithimba",
+      "subtitle": "Engeza ozakwenu endaweni yakho yokusebenza. Ukufinyelela kwelungu ngalinye kurekhodwa ngakunye.",
+      "invite": "Mema ilungu",
+      "role": "Indima endaweni yokusebenza",
+      "owner": "Umnikazi",
+      "recruiter": "Umqashi wethalente",
+      "viewer": "Umbukeli"
+    },
+    "account": {
+      "title": "I-akhawunti",
+      "subtitle": "Ukungena, izinyathelo ezimbili, amaseshini.",
+      "twoFactor": "Ukuqinisekisa ngezinyathelo ezimbili",
+      "twoFactorRequired": "Kuyadingeka kuma-akhawunti abaqashi.",
+      "active": "Kuyasebenza",
+      "configure": "Lungisa"
+    }
+  },
+  "adminDash": {
+    "title": "Ukuphatha",
+    "subtitle": "Isendlalelo sobuqotho. Kudingeka izinyathelo ezimbili.",
+    "nav": {
+      "overview": "Uhlolojikelele",
+      "verifications": "Ulayini wokuqinisekisa",
+      "moderation": "Ukulawulwa kokuqukethwe",
+      "taxonomy": "Idatha eyisisekelo",
+      "auditLog": "Ilogu yokuhlola",
+      "users": "Abasebenzisi",
+      "settings": "Izilungiselelo"
+    },
+    "overview": {
+      "kpis": {
+        "pendingVerifications": "Ukuqinisekiswa okulindile",
+        "openReports": "Imibiko evulekile",
+        "newUsersWeek": "Abasebenzisi abasha (izinsuku ezingu-7)",
+        "auditEvents24h": "Izehlakalo zokuhlola (amahora angu-24)"
+      },
+      "queues": "Olayini abasebenzayo",
+      "recent": "Izenzo zakamuva zabaphathi"
+    },
+    "verifications": {
+      "title": "Ulayini wokuqinisekisa",
+      "subtitle": "Buyekeza iziqu nezinhlangano. Vuma, nqaba ngesizathu, noma udlulisele phezulu.",
+      "tabs": {
+        "qualifications": "Iziqu",
+        "organisations": "Izinhlangano"
+      },
+      "approve": "Vuma",
+      "reject": "Nqaba",
+      "viewEvidence": "Buka ubufakazi",
+      "submittedBy": "Kuthunyelwe ngu",
+      "submittedWhen": "Kuthunyelwe {when}"
+    },
+    "moderation": {
+      "title": "Ulayini wokulawula",
+      "subtitle": "Amaphrofayela nokuqukethwe okubikiwe. Misa, buyisela, noma vala ngaphandle kwesinyathelo.",
+      "reasons": {
+        "fakeIdentity": "Ubuwena obusolisayo",
+        "inappropriate": "Okuqukethwe okungafanele",
+        "harassment": "Ukuhlukumeza",
+        "spam": "Ugaxekile"
+      },
+      "reportedWhen": "Kubikwe {when}",
+      "suspend": "Misa",
+      "restore": "Buyisela",
+      "closeNoAction": "Vala, akukho sinyathelo"
+    },
+    "taxonomy": {
+      "title": "Idatha eyisisekelo",
+      "subtitle": "Amagama alawuliwe. Akukho mbhalo okhululekile ekusesheni.",
+      "tabs": {
+        "professions": "Imisebenzi",
+        "skills": "Amakhono",
+        "provinces": "Izifundazwe",
+        "cities": "Amadolobha"
+      },
+      "add": "Engeza okufakwayo"
+    },
+    "auditLog": {
+      "title": "Ilogu yokuhlola",
+      "subtitle": "Konke ukufinyelela kwe-PII, ngokulandelana kwesikhathi. Ukugcinwa okuhambisana ne-POPIA kuyasebenza.",
+      "filterKind": "Uhlobo",
+      "filterActor": "Umenzi",
+      "noEvents": "Akukho kufinyelela kwe-PII okwamanje kule seshini. Vakashela ku-/search noma uvule iphrofayela bese ulayisha kabusha. Zonke izehlakalo zizovela lapha."
+    },
+    "users": {
+      "title": "Abasebenzisi",
+      "subtitle": "Sesha ngesibambo, nge-imeyili noma ngendima. Izenzo ze-akhawunti ziyarekhodwa.",
+      "role": "Indima",
+      "joined": "Ujoyine",
+      "status": "Isimo",
+      "active": "Kuyasebenza",
+      "suspended": "Kumisiwe",
+      "deleted": "Kususiwe"
+    },
+    "settings": {
+      "title": "Izilungiselelo zeplatifomu",
+      "subtitle": "Izimpawu zezici, amabhande okusha kwedatha, izisindo zokuhlela."
+    }
+  },
+  "insights": {
+    "title": "Imininingwane yezomsebenzi",
+    "subtitle": "Kukalwa ngokusha kwedatha. Kuhlanganisiwe kuphela. Kubuyekezwa njalo.",
+    "stat": {
+      "totalActive": "Amaphrofayela asebenzayo",
+      "confirmedHires": "Ukuqashwa okuqinisekisiwe (kule nyanga)",
+      "openToWork": "Abavulekele umsebenzi"
+    },
+    "byStatus": "Ngesimo somsebenzi",
+    "trend": "Ukubhaliswa nokubekwa",
+    "skillsGap": "Amakhono adingekayo kuqhathaniswa nokutholakala",
+    "skillsGapHelp": "Uma ukusesha kudlula ukutholakala kakhulu, sinegebe lamakhono. Yilona thuluzi lenqubomgomo.",
+    "confidence": "Ukwethemba {percent}%",
+    "confidenceHelp": "Ukwethemba kokusha kwedatha: uma isabelo sezimo eziqinisekiswe kamuva siphezulu, nokwethemba kuphezulu.",
+    "export": "Khipha okuhlanganisiwe (CSV)",
+    "exportNote": "Okukhishwayo kuhlanganisiwe kuphela. Akukho datha yomuntu ephuma ohlelweni. Konke ukukhishwa kuyarekhodwa."
+  },
+  "errors": {
+    "notFoundTitle": "Leli khasi alikho kuhlu.",
+    "notFoundBody": "Isixhumanisi kungenzeka sidala, sibhalwe kabi, noma ikhasi selithuthile. Abantu basekhona nokho, ngakho sesha lokho oze ngakho ngempela.",
+    "errorTitle": "Kukhona okungahambanga kahle",
+    "errorBody": "Kwenzeke iphutha elingalindelekile. Sicela uzame futhi.",
+    "home": "Iya ekhaya",
+    "retry": "Zama futhi",
+    "notFoundEyebrow": "404 · Akukho kuhlu",
+    "notFoundSearchLabel": "Sesha uhlu lwethalente",
+    "notFoundSearchPlaceholder": "Zama umsebenzi, njengompheki noma ugesi",
+    "notFoundSearchCta": "Sesha",
+    "notFoundLinksLabel": "Noma iya ku",
+    "notFoundLinkSearch": "Thola ithalente",
+    "notFoundLinkInsights": "Imininingwane kazwelonke",
+    "notFoundLinkSignUp": "Yakha iphrofayela yamahhala",
+    "notFoundLinkAbout": "Indlela uSebenza asebenza ngayo",
+    "errorDigestHint": "Uma usithinta ngalokhu, sho le khodi"
+  },
+  "common": {
+    "loading": "Iyalayisha…",
+    "viewAll": "Buka konke",
+    "close": "Vala",
+    "save": "Londoloza",
+    "cancel": "Khansela",
+    "edit": "Hlela",
+    "delete": "Susa",
+    "yes": "Yebo",
+    "no": "Cha",
+    "required": "Kuyadingeka",
+    "optional": "Okuzikhethelayo"
   }
 }
