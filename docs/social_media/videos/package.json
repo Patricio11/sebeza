@@ -1,0 +1,8 @@
+{
+  "name": "sebenza-video-pipeline",
+  "private": true,
+  "type": "module",
+  "devDependencies": {
+    "ffmpeg-static": "^5.2.0"
+  }
+}

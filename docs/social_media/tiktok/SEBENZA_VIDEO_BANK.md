@@ -2,6 +2,15 @@
 **12 scripted shorts, 15-40s each. Every video posts to TikTok, YouTube Shorts, AND Instagram
 Reels from the same file. Write once, publish three times.**
 
+> **Five are already produced** by the machine pipeline in `../videos/` (see its README):
+> V1 `v1-search-live.mp4` · V5 `v5-to-work.mp4` · V6 `v6-cv-pile.mp4` ·
+> V8 `v8-verified-honesty.mp4` · V12 `v12-free-means-free.mp4`. They are silent by design:
+> add a calm instrumental in the TikTok/IG editor when posting, and set each video's cover
+> from `assets/`. **V9 is ON HOLD** until the zu/xh/af catalogs carry real human
+> translations (today they fall back to English); we do not film claims that are not true
+> yet. V2/V3/V10 need product surfaces or a physical phone; V11 needs real build moments;
+> V7 can be produced next (text-driven) on request.
+
 *Production rules for all of them: vertical 9:16, phone or screen-recording, captioned on-screen
 (most people watch muted), our palette for text overlays (cream/gold on dark, ink on cream), no
 faces for now, no meme audio, no dancing. Calm instrumental sound beds are fine; the honesty IS
