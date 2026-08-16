@@ -70,14 +70,6 @@ export async function SiteHeader({ variant = "default" }: Props) {
               >
                 {t("insights")}
               </Link>
-              {!viewer && (
-                <Link
-                  href="/dashboard"
-                  className="rounded-sm transition-colors hover:text-[color:var(--color-brand)]"
-                >
-                  {t("createProfile")}
-                </Link>
-              )}
             </nav>
           )}
 
