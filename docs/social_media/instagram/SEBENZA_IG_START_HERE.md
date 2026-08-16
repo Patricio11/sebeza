@@ -29,18 +29,18 @@ now. No em-dashes anywhere. Never name the incumbent registry. Never invent trac
 
 ## 2 · Create the account, step by step
 
-- [ ] 1. In the Instagram app: create a new account with `info@sebenzasa.com`.
+- [x] 1. In the Instagram app: create a new account with `info@sebenzasa.com`.
       Username `@sebenzasa`, display name `Sebenza SA`.
-- [ ] 2. **Turn on two-factor authentication immediately** (Settings → Accounts Centre →
+- [x] 2. **Turn on two-factor authentication immediately** (Settings → Accounts Centre →
       Password and security). Same rule as Facebook: the account is only as safe as its login.
-- [ ] 3. Switch to a professional account: Settings → Account type and tools →
+- [x] 3. Switch to a professional account: Settings → Account type and tools →
       Switch to professional account → **Business** → category `Software company`.
-- [ ] 4. Add the bio (table above), the link `https://sebenzasa.com`, and the contact
+- [x] 4. Add the bio (table above), the link `https://sebenzasa.com`, and the contact
       email. Upload `assets/profile-picture.png`.
-- [ ] 5. **Connect it to the Facebook Page**: Accounts Centre → Accounts → add both
+- [x] 5. **Connect it to the Facebook Page**: Accounts Centre → Accounts → add both
       Sebenza SA accounts. This unlocks cross-posting, the shared inbox, and
       scheduling from Meta Business Suite.
-- [ ] 6. Set the page region/language expectations by simply posting SA content;
+- [x] 6. Set the page region/language expectations by simply posting SA content;
       Instagram has no region setting to configure.
 
 ---

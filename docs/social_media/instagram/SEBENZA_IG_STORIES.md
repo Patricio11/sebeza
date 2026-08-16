@@ -7,7 +7,12 @@ engagement work.
 
 ## THE CARDS (1080x1920, safe-zoned, stripe at the bottom)
 
-| File | What it is | How to use |
+**How to post any of these:** get the PNG onto your phone (WhatsApp/email it to yourself),
+open Instagram → tap "Your story" → pick the image from your gallery → share. **Add no text of
+your own**: the card is the whole story. The middle column below just describes what the image
+shows; the right column says if a sticker gets added before sharing.
+
+| File | What the image shows | How to use |
 |---|---|---|
 | `assets/story-intro.png` | The lockup + "to work" | Day one, and again whenever new followers arrive in a wave. |
 | `assets/story-question.png` | "If you could change one thing about job-hunting in SA?" with an empty panel | Post it, then **place Instagram's QUESTION sticker directly over the dashed panel**. Reshare the best answers (they arrive anonymous-to-viewers; never reshare anything identifying). |
