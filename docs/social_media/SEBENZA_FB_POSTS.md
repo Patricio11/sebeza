@@ -7,6 +7,19 @@ card waiting in `assets/`. Core tags: #Sebenza #SebenzaSA #Mzansi + 2-3 topical.
 > Pillars: **[MISSION]** · **[BTS]** behind-the-scenes/founder · **[VISION]** what-it-does/future ·
 > **[VALUE]** useful content · **[SA]** community. Mix them; don't post two of the same in a row.
 
+## HOW TO PUBLISH ONE OF THESE (the caption and the graphic are two halves of ONE post)
+
+1. Open Facebook as the page → **Create post**.
+2. **Paste the whole Caption into the text box**, hashtags on the last line.
+3. **Attach the Graphic as the image** on that same post.
+4. Post. The feed shows your caption text on top and the card below it.
+
+The card deliberately carries only the post's ONE key idea, never the full caption. At feed size
+(~350px wide on a phone) a paragraph on an image is unreadable squint-text; one big line stops the
+scroll. Facebook also buries text-crammed images, and text baked into a picture can't be read by
+screen readers or translated. Card = the stop. Caption = the story. Never duplicate the whole
+caption onto the graphic.
+
 ---
 
 ## 🟢 LAUNCH / INTRODUCTION POSTS (start here, in this order)
