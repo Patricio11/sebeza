@@ -148,6 +148,9 @@ export type AuditKind =
   // changes). Both carry before/after in meta.
   | "account.admin.create"
   | "account.edit"
+  // 2026-08 org onboarding  admin edits to the configured KYC document
+  // requirement list (create / edit / toggle / reorder; meta carries what).
+  | "org.requirements.update"
   // Phase 8  nightly cron tombstones (system-of-record proof of erasure).
   | "account.hard_delete"
   // Phase 8  self-service erasure path (seeker /dashboard/privacy).

@@ -1107,12 +1107,35 @@ export const orgDocumentKind = pgEnum("org_document_kind", [
   "other",              // optional supporting doc
 ]);
 
+/**
+ * 2026-08 (migration 0066)  admin-managed onboarding document
+ * requirements, per the SRS blueprint's locked decision: "Required docs
+ * hardcoded? No. Different jurisdictions, different document sets.
+ * Hardcoding traps you." Soft-delete via `active` so in-flight orgs keep
+ * their uploaded documents attached to retired requirements.
+ */
+export const orgDocumentRequirements = pgTable("org_document_requirements", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description"),
+  required: boolean("required").notNull().default(true),
+  sortOrder: integer("sort_order").notNull().default(0),
+  active: boolean("active").notNull().default(true),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
 export const organizationDocuments = pgTable("organization_documents", {
   id: text("id").primaryKey(),
   organizationId: text("organization_id")
     .notNull()
     .references((): AnyPgColumn => organizations.id, { onDelete: "cascade" }),
   kind: orgDocumentKind("kind").notNull(),
+  /** 2026-08 (0066): which configured requirement this upload satisfies.
+   *  Legacy rows are backfilled from `kind`; "other" uploads stay null. */
+  requirementId: text("requirement_id").references(
+    (): AnyPgColumn => orgDocumentRequirements.id,
+  ),
   originalName: text("original_name").notNull(),
   /** Supabase Storage object key: `{userId}/org-documents/{id}.{ext}` */
   storageKey: text("storage_key").notNull(),

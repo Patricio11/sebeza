@@ -34,7 +34,7 @@
 
 import { getDb } from "@/db/client";
 import * as schema from "@/db/schema";
-import { and, eq } from "drizzle-orm";
+import { and, eq, isNull } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
@@ -44,6 +44,11 @@ import { logAccess } from "@/lib/audit";
 import { uploadOrgDocument, deleteStorageObject } from "@/lib/storage/upload";
 import { StorageError } from "@/lib/storage/supabase";
 import { createNotification, notifyAllAdmins } from "@/lib/notifications/server";
+import { sendEmail } from "@/lib/email/send";
+import {
+  orgSubmittedAdminEmail,
+  orgSubmittedOwnerEmail,
+} from "@/lib/email/templates/org-vetting-updates";
 import { getMyOrgRole } from "./vacancies";
 import { canEditVacancies } from "./vacancies-types";
 
@@ -52,9 +57,8 @@ import { canEditVacancies } from "./vacancies-types";
 // dragging a "use server" boundary. Server Actions below use them
 // via type-only imports.
 import {
-  ORG_DOCUMENT_LABEL,
-  REQUIRED_DOC_KINDS,
   type OrgDocumentKind,
+  type OrgRequirementRow,
   type OrgVettingState,
 } from "./vetting-types";
 
@@ -120,6 +124,7 @@ export async function getMyOrgVettingState(): Promise<OrgVettingState | null> {
     .select({
       id: schema.organizationDocuments.id,
       kind: schema.organizationDocuments.kind,
+      requirementId: schema.organizationDocuments.requirementId,
       originalName: schema.organizationDocuments.originalName,
       storageKey: schema.organizationDocuments.storageKey,
       mimeType: schema.organizationDocuments.mimeType,
@@ -128,6 +133,8 @@ export async function getMyOrgVettingState(): Promise<OrgVettingState | null> {
     })
     .from(schema.organizationDocuments)
     .where(eq(schema.organizationDocuments.organizationId, session.orgId));
+
+  const requirements = await activeRequirements(db);
 
   return {
     orgId: org.id,
@@ -143,9 +150,11 @@ export async function getMyOrgVettingState(): Promise<OrgVettingState | null> {
     adminNote: org.adminNote,
     emailVerified,
     isOwner,
+    requirements,
     documents: docs.map((d) => ({
       id: d.id,
       kind: d.kind as OrgDocumentKind,
+      requirementId: d.requirementId,
       originalName: d.originalName,
       storageKey: d.storageKey,
       mimeType: d.mimeType,
@@ -187,13 +196,11 @@ export async function uploadOrgDocumentFile(
   const guard = await requireOwner();
   if (!guard.ok) return guard;
 
-  const kindRaw = String(formData.get("kind") ?? "");
+  // 2026-08 (0066): uploads are keyed by the admin-configured
+  // requirement. Empty requirementId = the optional "other" extras slot.
+  const requirementIdRaw = String(formData.get("requirementId") ?? "");
   const file = formData.get("file");
-  if (!ORG_DOCUMENT_KINDS.includes(kindRaw as OrgDocumentKind)) {
-    return fail("Unknown document kind.");
-  }
   if (!(file instanceof File)) return fail("Missing file.");
-  const kind = kindRaw as OrgDocumentKind;
 
   // Refuse uploads when the org has already submitted (`pending`)
   // or has been approved/rejected  the workflow is editable only
@@ -207,8 +214,30 @@ export async function uploadOrgDocumentFile(
 
   const db = getDb();
 
-  // Capacity check for `other`  prevent unbounded growth.
-  if (kind === "other") {
+  let requirementId: string | null = null;
+  let kind: OrgDocumentKind = "other";
+  if (requirementIdRaw) {
+    const reqRows = await db
+      .select({
+        id: schema.orgDocumentRequirements.id,
+        active: schema.orgDocumentRequirements.active,
+      })
+      .from(schema.orgDocumentRequirements)
+      .where(eq(schema.orgDocumentRequirements.id, requirementIdRaw))
+      .limit(1);
+    if (!reqRows[0] || !reqRows[0].active) {
+      return fail("Unknown document requirement.");
+    }
+    requirementId = reqRows[0].id;
+    // Legacy enum compatibility: the four seeded requirements keep their
+    // enum kind; admin-created ones store as "other" + requirementId.
+    kind = ORG_DOCUMENT_KINDS.includes(requirementId as OrgDocumentKind)
+      ? (requirementId as OrgDocumentKind)
+      : "other";
+  }
+
+  // Capacity check for the optional extras slot  prevent unbounded growth.
+  if (!requirementId) {
     const existing = await db
       .select({ id: schema.organizationDocuments.id })
       .from(schema.organizationDocuments)
@@ -216,6 +245,7 @@ export async function uploadOrgDocumentFile(
         and(
           eq(schema.organizationDocuments.organizationId, guard.orgId),
           eq(schema.organizationDocuments.kind, "other"),
+          isNull(schema.organizationDocuments.requirementId),
         ),
       );
     if (existing.length >= OTHER_DOC_CAP) {
@@ -241,10 +271,10 @@ export async function uploadOrgDocumentFile(
     );
   }
 
-  // For non-`other` kinds: delete any existing row + its storage
-  // object first (the unique partial index would refuse the insert
-  // otherwise; cleanup avoids orphans).
-  if (kind !== "other") {
+  // One document per requirement: delete any existing row + its storage
+  // object first (for the four legacy enum kinds the unique partial index
+  // would refuse the insert otherwise; cleanup avoids orphans either way).
+  if (requirementId) {
     const previous = await db
       .select({
         id: schema.organizationDocuments.id,
@@ -254,7 +284,7 @@ export async function uploadOrgDocumentFile(
       .where(
         and(
           eq(schema.organizationDocuments.organizationId, guard.orgId),
-          eq(schema.organizationDocuments.kind, kind),
+          eq(schema.organizationDocuments.requirementId, requirementId),
         ),
       )
       .limit(1);
@@ -274,6 +304,7 @@ export async function uploadOrgDocumentFile(
     id: documentId,
     organizationId: guard.orgId,
     kind,
+    requirementId,
     originalName: file.name,
     storageKey: uploaded.key,
     mimeType: uploaded.mime,
@@ -380,16 +411,23 @@ export async function submitOrgOnboarding(
 
   const db = getDb();
 
-  // Required-doc check: one row per required kind must exist.
+  // Required-doc check against the ADMIN-CONFIGURED requirement list
+  // (2026-08, 0066): every active required requirement needs a document.
   const docs = await db
-    .select({ kind: schema.organizationDocuments.kind })
+    .select({
+      kind: schema.organizationDocuments.kind,
+      requirementId: schema.organizationDocuments.requirementId,
+    })
     .from(schema.organizationDocuments)
     .where(eq(schema.organizationDocuments.organizationId, guard.orgId));
-  const haveKinds = new Set(docs.map((d) => d.kind as OrgDocumentKind));
-  const missing = REQUIRED_DOC_KINDS.filter((k) => !haveKinds.has(k));
+  const requirements = await activeRequirements(db);
+  const covered = new Set(
+    docs.map((d) => d.requirementId).filter((r): r is string => r !== null),
+  );
+  const missing = requirements.filter((r) => r.required && !covered.has(r.id));
   if (missing.length > 0) {
     return fail(
-      `Still missing: ${missing.map((k) => ORG_DOCUMENT_LABEL[k]).join(", ")}.`,
+      `Still missing: ${missing.map((r) => r.name).join(", ")}.`,
     );
   }
 
@@ -431,6 +469,46 @@ export async function submitOrgOnboarding(
     link: "/employer/onboarding",
     meta: { orgId: guard.orgId },
   });
+
+  // 2026-08 (SRS fan-out): unconditional transactional emails  a receipt
+  // to the Owner, an out-of-band nudge to every admin. Deliberately outside
+  // the per-kind notification email preferences.
+  try {
+    const ownerRows = await db
+      .select({ email: schema.appUser.email, name: schema.appUser.name })
+      .from(schema.appUser)
+      .where(eq(schema.appUser.id, guard.userId))
+      .limit(1);
+    const owner = ownerRows[0];
+    if (owner) {
+      await sendEmail({
+        to: owner.email,
+        subject: `We received ${guard.orgName}'s verification application`,
+        html: orgSubmittedOwnerEmail({ name: owner.name, orgName: guard.orgName }),
+      });
+      const admins = await db
+        .select({ email: schema.appUser.email })
+        .from(schema.appUser)
+        .where(
+          and(eq(schema.appUser.role, "admin"), isNull(schema.appUser.deletedAt)),
+        );
+      await Promise.all(
+        admins.map((a) =>
+          sendEmail({
+            to: a.email,
+            subject: `KYC review: ${guard.orgName} submitted documents`,
+            html: orgSubmittedAdminEmail({
+              orgName: guard.orgName,
+              ownerEmail: owner.email,
+            }),
+          }),
+        ),
+      );
+    }
+  } catch (e) {
+    // Non-fatal: the in-app notifications above already carry the event.
+    console.error("[vetting] submission emails failed:", e);
+  }
 
   revalidatePath("/employer/onboarding");
   revalidatePath("/employer");
@@ -489,4 +567,25 @@ async function requireOwner(): Promise<
 
 function toIso(d: Date | string): string {
   return d instanceof Date ? d.toISOString() : new Date(d).toISOString();
+}
+
+
+// 2026-08 (0066)  the active, admin-configured document checklist, in
+// display order. Shared by the state loader and the submit validator.
+async function activeRequirements(
+  db: ReturnType<typeof getDb>,
+): Promise<OrgRequirementRow[]> {
+  const rows = await db
+    .select({
+      id: schema.orgDocumentRequirements.id,
+      name: schema.orgDocumentRequirements.name,
+      description: schema.orgDocumentRequirements.description,
+      required: schema.orgDocumentRequirements.required,
+      sortOrder: schema.orgDocumentRequirements.sortOrder,
+    })
+    .from(schema.orgDocumentRequirements)
+    .where(eq(schema.orgDocumentRequirements.active, true));
+  return rows
+    .sort((a, b) => a.sortOrder - b.sortOrder)
+    .map(({ sortOrder: _s, ...r }) => r);
 }

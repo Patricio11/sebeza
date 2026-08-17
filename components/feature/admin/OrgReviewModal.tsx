@@ -340,7 +340,7 @@ export function OrgReviewModal({ detail, onClose }: Props) {
                   >
                     <div className="min-w-0">
                       <p className="font-display text-sm text-[color:var(--color-ink)]">
-                        {ORG_DOCUMENT_LABEL[d.kind as OrgDocumentKind] ?? d.kind}
+                        {d.label ?? ORG_DOCUMENT_LABEL[d.kind as OrgDocumentKind] ?? d.kind}
                       </p>
                       <p className="text-[0.7rem] text-[color:var(--color-ink-soft)]">
                         <FileText

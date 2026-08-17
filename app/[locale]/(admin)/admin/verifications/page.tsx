@@ -4,6 +4,8 @@ import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
 import { verifyAdmin } from "@/lib/auth/dal";
 import { listPendingQualifications } from "@/lib/admin/verifications-query";
 import { listOrgsForReview } from "@/lib/admin/org-vetting";
+import { listDocumentRequirementsAdmin } from "@/lib/admin/org-requirements";
+import { OrgRequirementsManager } from "@/components/feature/admin/OrgRequirementsManager";
 import { listKycSubmissions, type KycReviewRow } from "@/lib/admin/kyc-review";
 import { VerificationActions } from "@/components/feature/admin/VerificationActions";
 import { OrgReviewLauncher } from "@/components/feature/admin/OrgReviewLauncher";
@@ -52,6 +54,8 @@ export default async function VerificationsPage({
   // Default org sub-view = pending (the actionable queue); drafts are
   // pre-submission, rejected + verified are history.
   const orgsActionable = orgGroups.pending.length + orgGroups.unverified.length;
+  const docRequirements =
+    tab === "organisations" ? await listDocumentRequirementsAdmin() : [];
 
   const relTime = new Intl.RelativeTimeFormat(locale, { numeric: "auto" });
   function relative(d: Date | string | null | undefined): string {
@@ -203,6 +207,9 @@ export default async function VerificationsPage({
         )
       ) : (
         <div className="space-y-8">
+          {/* 2026-08  the admin-managed checklist driving the onboarding form */}
+          <OrgRequirementsManager rows={docRequirements} />
+
           {/* Pending review  the actionable queue */}
           <OrgGroup
             title={`Pending review · ${orgGroups.pending.length}`}

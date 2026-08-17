@@ -30,9 +30,19 @@ export const REQUIRED_DOC_KINDS: OrgDocumentKind[] = [
   "bank_confirmation",
 ];
 
+/** 2026-08 (0066)  one configured, admin-managed requirement. */
+export interface OrgRequirementRow {
+  id: string;
+  name: string;
+  description: string | null;
+  required: boolean;
+}
+
 export interface OrgDocumentRow {
   id: string;
   kind: OrgDocumentKind;
+  /** Which configured requirement this upload satisfies; null = optional extra. */
+  requirementId: string | null;
   originalName: string;
   storageKey: string;
   mimeType: string;
@@ -57,4 +67,6 @@ export interface OrgVettingState {
    *  Recruiter / Viewer can read the state but not submit. */
   isOwner: boolean;
   documents: OrgDocumentRow[];
+  /** Active, admin-configured document requirements, in display order. */
+  requirements: OrgRequirementRow[];
 }

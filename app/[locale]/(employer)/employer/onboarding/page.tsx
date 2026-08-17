@@ -302,6 +302,7 @@ export default async function EmployerOnboardingPage({
           vatNumber: state.vatNumber,
           city: state.city,
           documents: state.documents,
+          requirements: state.requirements,
           adminNote: state.adminNote,
         }}
       />

@@ -34,10 +34,8 @@ import {
   uploadOrgDocumentFile,
 } from "@/lib/employer/vetting";
 import {
-  ORG_DOCUMENT_LABEL,
-  REQUIRED_DOC_KINDS,
-  type OrgDocumentKind,
   type OrgDocumentRow,
+  type OrgRequirementRow,
 } from "@/lib/employer/vetting-types";
 import {
   AlertTriangle,
@@ -54,9 +52,14 @@ interface Props {
     vatNumber: string | null;
     city: string | null;
     documents: OrgDocumentRow[];
+    /** Active, admin-configured document requirements (2026-08, 0066). */
+    requirements: OrgRequirementRow[];
     adminNote: string | null;
   };
 }
+
+/** Slot key for the optional extras uploader. */
+const EXTRA = "";
 
 const KB = 1024;
 const MB = 1024 * KB;
@@ -80,9 +83,7 @@ export function OrgOnboardingForm({ initial }: Props) {
   // router.refresh() after upload completion.
   const [docs, setDocs] = useState<OrgDocumentRow[]>(initial.documents);
 
-  const [uploadingKind, setUploadingKind] = useState<OrgDocumentKind | null>(
-    null,
-  );
+  const [uploadingReq, setUploadingReq] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
@@ -108,19 +109,22 @@ export function OrgOnboardingForm({ initial }: Props) {
     },
   );
 
-  const docsByKind = new Map<OrgDocumentKind, OrgDocumentRow[]>();
+  // Grouped by the requirement each upload satisfies; EXTRA ("") holds the
+  // optional supporting documents.
+  const docsByReq = new Map<string, OrgDocumentRow[]>();
   for (const d of docs) {
-    const list = docsByKind.get(d.kind) ?? [];
+    const key = d.requirementId ?? EXTRA;
+    const list = docsByReq.get(key) ?? [];
     list.push(d);
-    docsByKind.set(d.kind, list);
+    docsByReq.set(key, list);
   }
 
-  async function handlePick(kind: OrgDocumentKind, file: File) {
+  async function handlePick(requirementId: string, file: File) {
     setError(null);
-    setUploadingKind(kind);
+    setUploadingReq(requirementId);
     try {
       const fd = new FormData();
-      fd.set("kind", kind);
+      fd.set("requirementId", requirementId);
       fd.set("file", file);
       const res = await uploadOrgDocumentFile(fd);
       if (!res.ok) {
@@ -131,7 +135,8 @@ export function OrgOnboardingForm({ initial }: Props) {
       // canonical state from the server next tick.
       const next: OrgDocumentRow = {
         id: res.documentId,
-        kind,
+        kind: "other",
+        requirementId: requirementId || null,
         originalName: file.name,
         storageKey: res.storageKey,
         mimeType: file.type,
@@ -139,12 +144,12 @@ export function OrgOnboardingForm({ initial }: Props) {
         uploadedAt: new Date().toISOString(),
       };
       setDocs((prev) => {
-        if (kind === "other") return [...prev, next];
-        return [...prev.filter((d) => d.kind !== kind), next];
+        if (!requirementId) return [...prev, next];
+        return [...prev.filter((d) => d.requirementId !== requirementId), next];
       });
       router.refresh();
     } finally {
-      setUploadingKind(null);
+      setUploadingReq(null);
     }
   }
 
@@ -178,7 +183,9 @@ export function OrgOnboardingForm({ initial }: Props) {
     });
   }
 
-  const haveAllRequired = REQUIRED_DOC_KINDS.every((k) => docsByKind.has(k));
+  const requiredReqs = initial.requirements.filter((r) => r.required);
+  const missingCount = requiredReqs.filter((r) => !docsByReq.has(r.id)).length;
+  const haveAllRequired = missingCount === 0;
   const submitDisabled =
     pending ||
     !haveAllRequired ||
@@ -209,13 +216,16 @@ export function OrgOnboardingForm({ initial }: Props) {
           </p>
         </header>
         <ul className="flex flex-col gap-3">
-          {REQUIRED_DOC_KINDS.map((kind) => (
-            <li key={kind}>
+          {initial.requirements.map((req) => (
+            <li key={req.id}>
               <DocSlot
-                kind={kind}
-                files={docsByKind.get(kind) ?? []}
-                uploading={uploadingKind === kind}
-                onPick={(f) => handlePick(kind, f)}
+                slotId={req.id}
+                label={req.name}
+                description={req.description}
+                requiredMark={req.required}
+                files={docsByReq.get(req.id) ?? []}
+                uploading={uploadingReq === req.id}
+                onPick={(f) => handlePick(req.id, f)}
                 onDelete={handleDelete}
                 disabled={pending}
               />
@@ -236,10 +246,13 @@ export function OrgOnboardingForm({ initial }: Props) {
           </p>
         </header>
         <DocSlot
-          kind="other"
-          files={docsByKind.get("other") ?? []}
-          uploading={uploadingKind === "other"}
-          onPick={(f) => handlePick("other", f)}
+          slotId="extra"
+          label="Other supporting document (optional)"
+          description={null}
+          requiredMark={false}
+          files={docsByReq.get(EXTRA) ?? []}
+          uploading={uploadingReq === EXTRA}
+          onPick={(f) => handlePick(EXTRA, f)}
           onDelete={handleDelete}
           disabled={pending}
           appendOnly
@@ -295,7 +308,7 @@ export function OrgOnboardingForm({ initial }: Props) {
         <p className="text-xs text-[color:var(--color-ink-soft)]">
           {haveAllRequired
             ? "All required documents are in place. Submit when you're ready."
-            : `${REQUIRED_DOC_KINDS.length - (docsByKind.size > REQUIRED_DOC_KINDS.length ? REQUIRED_DOC_KINDS.length : Array.from(docsByKind.keys()).filter((k) => REQUIRED_DOC_KINDS.includes(k)).length)} of ${REQUIRED_DOC_KINDS.length} required documents still missing.`}
+            : `${missingCount} of ${requiredReqs.length} required ${requiredReqs.length === 1 ? "document" : "documents"} still missing.`}
         </p>
         <Button
           type="submit"
@@ -315,18 +328,24 @@ export function OrgOnboardingForm({ initial }: Props) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 interface DocSlotProps {
-  kind: OrgDocumentKind;
+  slotId: string;
+  label: string;
+  description: string | null;
+  requiredMark: boolean;
   files: OrgDocumentRow[];
   uploading: boolean;
   onPick: (file: File) => void;
   onDelete: (documentId: string) => void;
   disabled?: boolean;
-  /** For `other`  show multiple existing files + an add slot. */
+  /** For the extras slot  show multiple existing files + an add slot. */
   appendOnly?: boolean;
 }
 
 function DocSlot({
-  kind,
+  slotId,
+  label,
+  description,
+  requiredMark,
   files,
   uploading,
   onPick,
@@ -334,7 +353,7 @@ function DocSlot({
   disabled,
   appendOnly,
 }: DocSlotProps) {
-  const inputId = `doc-${kind}`;
+  const inputId = `doc-${slotId}`;
   const haveOne = files.length > 0;
   const showAddSlot = appendOnly || !haveOne;
 
@@ -343,8 +362,8 @@ function DocSlot({
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="font-display text-sm text-[color:var(--color-ink)]">
-            {ORG_DOCUMENT_LABEL[kind]}
-            {kind !== "other" && (
+            {label}
+            {requiredMark && (
               <span
                 aria-hidden="true"
                 className="ml-1 text-[color:var(--color-danger)]"
@@ -353,6 +372,11 @@ function DocSlot({
               </span>
             )}
           </p>
+          {description && (
+            <p className="mt-0.5 text-xs text-[color:var(--color-ink-soft)]">
+              {description}
+            </p>
+          )}
         </div>
         {haveOne && !appendOnly && (
           <span className="inline-flex items-center gap-1 rounded-[var(--radius-pill)] border border-[color:var(--color-accent)] bg-[color:var(--color-accent)]/10 px-2 py-0.5 text-[0.65rem] uppercase tracking-[0.18em] text-[color:var(--color-accent)]">

@@ -50,6 +50,12 @@ import { auth as betterAuth } from "@/lib/auth/server";
 import { verifyAdmin } from "@/lib/auth/dal";
 import { logAccess } from "@/lib/audit";
 import { createNotification, notifyOrgMembers } from "@/lib/notifications/server";
+import { sendEmail } from "@/lib/email/send";
+import { orgVerifiedEmail } from "@/lib/email/templates/org-verified";
+import {
+  orgChangesRequestedEmail,
+  orgRejectedEmail,
+} from "@/lib/email/templates/org-vetting-updates";
 import { signedDocumentUrl } from "@/lib/storage/signed";
 
 export type ActionResult<T extends object = object> =
@@ -196,6 +202,8 @@ export async function listOrgsForReview(): Promise<{
 export interface OrgReviewDocument {
   id: string;
   kind: string;
+  /** Admin-configured requirement name this upload satisfies (0066). */
+  label: string | null;
   originalName: string;
   mimeType: string;
   sizeBytes: number;
@@ -228,6 +236,7 @@ export async function getOrgReviewDetail(
     .select({
       id: schema.organizationDocuments.id,
       kind: schema.organizationDocuments.kind,
+      requirementId: schema.organizationDocuments.requirementId,
       originalName: schema.organizationDocuments.originalName,
       storageKey: schema.organizationDocuments.storageKey,
       mimeType: schema.organizationDocuments.mimeType,
@@ -239,6 +248,14 @@ export async function getOrgReviewDetail(
     .orderBy(desc(schema.organizationDocuments.uploadedAt));
 
   // Sign each storage key for inline preview / download.
+  const reqRows = await db
+    .select({
+      id: schema.orgDocumentRequirements.id,
+      name: schema.orgDocumentRequirements.name,
+    })
+    .from(schema.orgDocumentRequirements);
+  const reqNames = new Map(reqRows.map((r) => [r.id, r.name]));
+
   const documents: OrgReviewDocument[] = [];
   for (const d of docRows) {
     let signedUrl: string | null = null;
@@ -250,6 +267,8 @@ export async function getOrgReviewDetail(
     documents.push({
       id: d.id,
       kind: d.kind,
+      label:
+        (d.requirementId ? reqNames.get(d.requirementId) : undefined) ?? null,
       originalName: d.originalName,
       mimeType: d.mimeType,
       sizeBytes: d.sizeBytes,
@@ -336,6 +355,40 @@ export async function approveOrg(
     meta: { orgId: row.id, orgName: row.name },
   });
 
+  // 2026-08 (founder): the decision also lands as a branded email with a
+  // sign-in CTA, to every active member. Approval is the moment the
+  // workspace gate opens; an in-app notification alone is invisible to
+  // someone who has no reason to sign in while under review.
+  const members = await db
+    .select({
+      email: schema.appUser.email,
+      name: schema.appUser.name,
+    })
+    .from(schema.organizationMembers)
+    .innerJoin(
+      schema.appUser,
+      eq(schema.organizationMembers.userId, schema.appUser.id),
+    )
+    .where(
+      and(
+        eq(schema.organizationMembers.organizationId, row.id),
+        isNull(schema.organizationMembers.suspendedAt),
+        isNull(schema.appUser.deletedAt),
+      ),
+    );
+  await Promise.all(
+    members.map((m) =>
+      sendEmail({
+        to: m.email,
+        subject: `${row.name} is verified on Sebenza  your workspace is open`,
+        html: orgVerifiedEmail({ name: m.name, orgName: row.name }),
+      }).catch((e) => {
+        // Non-fatal: the in-app notification already carries the decision.
+        console.error("[org-vetting] verified email failed:", m.email, e);
+      }),
+    ),
+  );
+
   revalidatePath("/admin/verifications");
   revalidatePath("/admin/organisations");
   revalidatePath("/employer");
@@ -395,6 +448,24 @@ export async function rejectOrg(
     link: "/employer/onboarding",
     meta: { orgId: row.id, orgName: row.name, reason: parsed.data.reason },
   });
+
+  // Unconditional decision email to the Owner (SRS fan-out).
+  try {
+    const owner = await orgOwnerFor(db, row.id);
+    if (owner) {
+      await sendEmail({
+        to: owner.email,
+        subject: `Verification decision for ${row.name}`,
+        html: orgRejectedEmail({
+          name: owner.name,
+          orgName: row.name,
+          reason: parsed.data.reason,
+        }),
+      });
+    }
+  } catch (e) {
+    console.error("[org-vetting] rejection email failed:", e);
+  }
 
   revalidatePath("/admin/verifications");
   revalidatePath("/admin/organisations");
@@ -457,6 +528,24 @@ export async function requestChangesOnOrg(
     link: "/employer/onboarding",
     meta: { orgId: row.id, orgName: row.name, note: parsed.data.note },
   });
+
+  // Unconditional email to the Owner with the note + resubmit CTA.
+  try {
+    const owner = await orgOwnerFor(db, row.id);
+    if (owner) {
+      await sendEmail({
+        to: owner.email,
+        subject: `One more step for ${row.name}'s verification`,
+        html: orgChangesRequestedEmail({
+          name: owner.name,
+          orgName: row.name,
+          note: parsed.data.note,
+        }),
+      });
+    }
+  } catch (e) {
+    console.error("[org-vetting] changes email failed:", e);
+  }
 
   revalidatePath("/admin/verifications");
   revalidatePath("/admin/organisations");
@@ -582,4 +671,28 @@ export async function markOrgEmailVerified(
   revalidatePath("/admin/verifications");
   revalidatePath("/admin/organisations");
   return ok();
+}
+
+
+// 2026-08 (SRS fan-out)  the Owner's user row for decision emails.
+async function orgOwnerFor(
+  db: ReturnType<typeof getDb>,
+  orgId: string,
+): Promise<{ email: string; name: string } | null> {
+  const rows = await db
+    .select({ email: schema.appUser.email, name: schema.appUser.name })
+    .from(schema.organizationMembers)
+    .innerJoin(
+      schema.appUser,
+      eq(schema.organizationMembers.userId, schema.appUser.id),
+    )
+    .where(
+      and(
+        eq(schema.organizationMembers.organizationId, orgId),
+        eq(schema.organizationMembers.role, "owner"),
+        isNull(schema.organizationMembers.suspendedAt),
+      ),
+    )
+    .limit(1);
+  return rows[0] ?? null;
 }
