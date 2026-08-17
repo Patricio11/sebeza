@@ -2,7 +2,7 @@
   "__notice": "Afrikaans (af) catalog. AI-DRAFTED 2026-08-16, PENDING HUMAN REVIEW (docs/TRANSLATION_REVIEW_GUIDE.md). Consent / POPIA / legal strings are DELIBERATELY OMITTED so they fall back to English until the reviewer signs them off; their drafts live in the review guide.",
   "meta": {
     "siteName": "Sebenza",
-    "tagline": "Suid-Afrika se talentplatform",
+    "tagline": "South Africa se talentplatform",
     "description": "Vind bekwame mense naby jou. Word gevind vir die werk wat jy doen."
   },
   "nav": {
@@ -17,7 +17,7 @@
     "hero": {
       "subhead": "Sebenza verbind Suid-Afrikaanse talent met werk volgens vaardigheid en plek, met indiensnemingsdata wat jy werklik kan vertrou.",
       "eyebrow": "'n Nasionale talentregister · 2026",
-      "h1a": "Suid-Afrika se",
+      "h1a": "South Africa se",
       "h1b": "talent.",
       "h1cItalic": "Sigbaar.",
       "h1cRest": "In reële tyd.",
@@ -65,7 +65,7 @@
       "terms": "Bepalings",
       "accessibility": "Toeganklikheid",
       "language": "Taal",
-      "rights": "© {year} Sebenza. 'n Nasionale talentplatform vir Suid-Afrika."
+      "rights": "© {year} Sebenza. 'n Nasionale talentplatform vir South Africa."
     },
     "chips": {
       "chefs": "Sjefs",
@@ -89,7 +89,7 @@
     },
     "pulse": {
       "bulletin": "Bulletin",
-      "h2a": "Suid-Afrika,",
+      "h2a": "South Africa,",
       "h2bItalic": "in beweging.",
       "h2c": "Nou dadelik.",
       "lead": "Drie lewendige, varsheid-geweegde lesings van die Suid-Afrikaanse arbeidsmag. Deurlopend bygewerk, nooit verdraai nie.",
@@ -135,12 +135,12 @@
       "q4": "Het ek matriek of 'n graad nodig om aan te sluit?",
       "a4": "Nee. Sebenza is vir elke vaardigheidsvlak: van algemene werkers, ambagslui en bestuurders tot gegradueerdes en professionele persone. Huidige studente kan 'n studenteprofiel registreer met hul verwagte voltooiingsdatum. Wat saak maak, is 'n waarheidsgetroue profiel, nie 'n spesifieke kwalifikasie nie.",
       "q5": "Hoe word my persoonlike inligting beskerm?",
-      "a5": "Sebenza is om POPIA gebou, Suid-Afrika se databeskermingswet. Jy gee spesifieke toestemming vir elke manier waarop jou inligting gebruik word, en jy kan jou sigbaarheid onderbreek of toestemming te eniger tyd terugtrek. Sensitiewe velde word geënkripteer, openbare bladsye word verkort, en elke toegang tot jou persoonlike inligting word aangeteken.",
+      "a5": "Sebenza is om POPIA gebou, South Africa se databeskermingswet. Jy gee spesifieke toestemming vir elke manier waarop jou inligting gebruik word, en jy kan jou sigbaarheid onderbreek of toestemming te eniger tyd terugtrek. Sensitiewe velde word geënkripteer, openbare bladsye word verkort, en elke toegang tot jou persoonlike inligting word aangeteken.",
       "q6": "Wat beteken “geverifieer” op 'n profiel?",
       "a6": "'n Verifikasiekenteken beteken die platform het werklik iets geverifieer, byvoorbeeld 'n werkgewer wat 'n werksrekord bevestig. Elke profiel begin as “ongeverifieer” en ons sê dit eerlik; kentekens word nooit gekoop of aangeneem nie. Statistiek tel 'n aanstelling slegs wanneer dit deur die platform bevestig is."
     },
     "finalCta": {
-      "eyebrow": "Gebou vir Suid-Afrika · deur Suid-Afrika",
+      "eyebrow": "Gebou vir South Africa · deur South Africa",
       "h2a": "Word gevind.",
       "h2bItalic": "Of vind iemand.",
       "lead": "Of jy nou werk soek of mense soek, die vinnigste pad na 'n regte, geverifieerde, huidige resultaat is een soektog ver.",
@@ -585,7 +585,7 @@
       "demandHeading": "Vraag na {profession}",
       "demand": "{count, plural, =0 {Nog geen soektogte nie} one {# soektog} other {# soektogte}} in {province} in die afgelope {days} dae",
       "demandEmpty": "Stil in {province} op die oomblik. Hou jou status vars sodat jy eerste is wanneer dit optel.",
-      "remote": "Jy is ook oop vir afstandwerk: {count, plural, one {# soektog} other {# soektogte}} vir {profession} oor die hele Suid-Afrika.",
+      "remote": "Jy is ook oop vir afstandwerk: {count, plural, one {# soektog} other {# soektogte}} vir {profession} oor die hele South Africa.",
       "poolLink": "Sien teen wie jy in {province} vergelyk word",
       "notHere": "Nie in {city} nie? Werk jou ligging by"
     }
@@ -812,10 +812,10 @@
   "marketing": {
     "meta": {
       "title": "Hoe Sebenza werk",
-      "description": "Sebenza is Suid-Afrika se POPIA-eerste nasionale talentregister. Werksoekers bou een gratis profiel en word gevind; werkgewers deursoek lewendige, eerlik-geverifieerde talent; bevestigde aanstellings word werklike arbeidsmarkintelligensie."
+      "description": "Sebenza is South Africa se POPIA-eerste nasionale talentregister. Werksoekers bou een gratis profiel en word gevind; werkgewers deursoek lewendige, eerlik-geverifieerde talent; bevestigde aanstellings word werklike arbeidsmarkintelligensie."
     },
     "hero": {
-      "eyebrow": "Suid-Afrika se nasionale talentplatform",
+      "eyebrow": "South Africa se nasionale talentplatform",
       "h1a": "Vind die persoon.",
       "h1bItalic": "Vertrou die profiel.",
       "h1c": "Tel die aanstelling.",
@@ -827,13 +827,13 @@
     },
     "problem": {
       "eyebrow": "Die werklikheid",
-      "heading": "Aanstellings in Suid-Afrika loop op geraas",
+      "heading": "Aanstellings in South Africa loop op geraas",
       "item1": "'n Honderd CV's in 'n WhatsApp-groep, en geen manier om te weet wie eg is nie.",
       "item2": "Databasisse waar die helfte van die “beskikbare” mense maande gelede werk gekry het.",
       "item3": "Kentekens wat sê geverifieer terwyl niemand ooit iets geverifieer het nie.",
       "item4": "Werksoekers wat betaal om gesien te word, of geld verloor aan vals werwers.",
       "item5": "Beleid geskryf uit opnames wat oud was voordat hulle gepubliseer is.",
-      "closeA": "Suid-Afrika het nie 'n talenttekort nie. Dit het 'n tekort aan betroubare seine.",
+      "closeA": "South Africa het nie 'n talenttekort nie. Dit het 'n tekort aan betroubare seine.",
       "closeItalic": "Dit is die probleem wat Sebenza oplos."
     },
     "who": {
@@ -892,7 +892,7 @@
       "promise1": "Gratis vir werksoekers. Geen fooie, ooit, en geen betaling om hoër te rangskik nie.",
       "promise2": "POPIA-eerste van die eerste reël kode af: fyn toestemming, veldvlak-enkripsie, 'n permanente ouditlog, uitvoer en uitvee ingebou.",
       "promise3": "Eerlike kentekens, eerlike varsheid, eerlike plasingsyfers. Die register lyk eerder kleiner as om te lieg.",
-      "promise4": "Gebou vir die regte Suid-Afrika: 'n goedkoop Android op 3G is ons verwysingstoestel, vier bekendstellingstale, installeerbaar soos 'n app."
+      "promise4": "Gebou vir die regte South Africa: 'n goedkoop Android op 3G is ons verwysingstoestel, vier bekendstellingstale, installeerbaar soos 'n app."
     },
     "why": {
       "eyebrow": "Hoekom Sebenza",
@@ -915,7 +915,7 @@
       "cta": "Praat met ons oor 'n vennootskap"
     },
     "finalCta": {
-      "eyebrow": "Gebou vir Suid-Afrika · deur Suid-Afrika",
+      "eyebrow": "Gebou vir South Africa · deur South Africa",
       "heading": "Sien self die register.",
       "lead": "Deursoek dit as 'n besoeker, sluit aan as 'n werksoeker, of skryf vir ons en ons stap saam met jou deur die werkgewer- en statistiekkante met jou eie behoefte in gedagte. Geen druk, geen jargon nie.",
       "ctaSearch": "Soek talent",

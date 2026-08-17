@@ -2,7 +2,7 @@
   "__notice": "isiZulu (zu) catalog. AI-DRAFTED 2026-08-16, PENDING HUMAN REVIEW (docs/TRANSLATION_REVIEW_GUIDE.md). Consent / POPIA / legal strings are DELIBERATELY OMITTED so they fall back to English until the reviewer signs them off; their drafts live in the review guide.",
   "meta": {
     "siteName": "Sebenza",
-    "tagline": "Iplatifomu yethalente laseNingizimu Afrika",
+    "tagline": "Iplatifomu yethalente lase-South Africa",
     "description": "Thola abantu abanamakhono eduze kwakho. Tholakala ngomsebenzi owaziyo."
   },
   "nav": {
@@ -15,10 +15,10 @@
   },
   "landing": {
     "hero": {
-      "subhead": "USebenza uhlanganisa ithalente laseNingizimu Afrika nomsebenzi ngekhono nangendawo, ngedatha yezomsebenzi ongayethemba ngempela.",
+      "subhead": "USebenza uhlanganisa ithalente lase-South Africa nomsebenzi ngekhono nangendawo, ngedatha yezomsebenzi ongayethemba ngempela.",
       "eyebrow": "Uhlu lwethalente lukazwelonke · 2026",
       "h1a": "Ithalente",
-      "h1b": "laseNingizimu Afrika.",
+      "h1b": "lase-South Africa.",
       "h1cItalic": "Liyabonakala.",
       "h1cRest": "Khona manje.",
       "scrollCue": "Skrola · ibhulethini"
@@ -65,7 +65,7 @@
       "terms": "Imigomo",
       "accessibility": "Ukufinyeleleka",
       "language": "Ulimi",
-      "rights": "© {year} Sebenza. Iplatifomu kazwelonke yethalente yaseNingizimu Afrika."
+      "rights": "© {year} Sebenza. Iplatifomu kazwelonke yethalente yase-South Africa."
     },
     "chips": {
       "chefs": "Abapheki",
@@ -89,10 +89,10 @@
     },
     "pulse": {
       "bulletin": "Ibhulethini",
-      "h2a": "INingizimu Afrika,",
+      "h2a": "I-South Africa,",
       "h2bItalic": "iyanyakaza.",
       "h2c": "Njengamanje.",
-      "lead": "Izilinganiso ezintathu ezibukhoma zabasebenzi baseNingizimu Afrika, ezikalwa ngokusha kwedatha. Zibuyekezwa njalo, azisontwa.",
+      "lead": "Izilinganiso ezintathu ezibukhoma zabasebenzi base-South Africa, ezikalwa ngokusha kwedatha. Zibuyekezwa njalo, azisontwa.",
       "statActive": "Amaphrofayela asebenzayo",
       "statHires": "Abaqashiwe abaqinisekisiwe · {month}",
       "statSkills": "Amakhono alandelelwayo",
@@ -114,7 +114,7 @@
       "c3": "Izimo eziqotho: “akuqinisekisiwe” kuyisimo sokuqala.",
       "d4": "Yakhelwe",
       "c4": "I-Android engu-360 px, i-3G, izilimi ezine zokwethulwa.",
-      "quote": "Isendlalelo esithembekile, sesikhathi sangempela somsebenzi waseNingizimu Afrika.",
+      "quote": "Isendlalelo esithembekile, sesikhathi sangempela somsebenzi wase-South Africa.",
       "cite": "Sebenza · umbiko wesu, 2026"
     },
     "pillarsHeader": {
@@ -127,7 +127,7 @@
       "h2a": "Imibuzo, iphendulwe",
       "h2bItalic": "ngobuqotho",
       "q1": "Uyini uSebenza?",
-      "a1": "USebenza uyiplatifomu kazwelonke yethalente yaseNingizimu Afrika. Abafuni bomsebenzi bakha iphrofayela kanye futhi bangatholwa ngabaqashi abaqinisekisiwe kuzo zonke izifundazwe eziyisi-9. Abaqashi basesha amaphrofayela abukhoma, akalwa ngokusha, ngomsebenzi, ngesifundazwe nangamakhono. Iphethwe yi-Yetotec (Pty) Ltd futhi yakhiwe nge-POPIA kuqala.",
+      "a1": "USebenza uyiplatifomu kazwelonke yethalente yase-South Africa. Abafuni bomsebenzi bakha iphrofayela kanye futhi bangatholwa ngabaqashi abaqinisekisiwe kuzo zonke izifundazwe eziyisi-9. Abaqashi basesha amaphrofayela abukhoma, akalwa ngokusha, ngomsebenzi, ngesifundazwe nangamakhono. Iphethwe yi-Yetotec (Pty) Ltd futhi yakhiwe nge-POPIA kuqala.",
       "q2": "Ingabe uSebenza umahhala kubafuni bomsebenzi?",
       "a2": "Yebo. Ukwakha iphrofayela, ukutholwa, ukwamukela izimemo nokwamukela umsebenzi kumahhala kubafuni bomsebenzi. USebenza akayona i-ejensi yomsebenzi. Asilokothi sithathe imali emholweni wakho.",
       "q3": "Abaqashi bangithola kanjani?",
@@ -135,12 +135,12 @@
       "q4": "Ingabe ngidinga umatikuletsheni noma iziqu ukuze ngijoyine?",
       "a4": "Cha. USebenza ungowawo wonke amazinga amakhono: kusukela kubasebenzi jikelele, ezingcweti nakubashayeli kuya kubaphothule nakochwepheshe. Abafundi bamanje bangabhalisa iphrofayela yomfundi nosuku lokuphothula olulindelekile. Okubalulekile yiphrofayela eneqiniso, hhayi isiqu esithile.",
       "q5": "Ulwazi lwami lomuntu siqu luvikelwa kanjani?",
-      "a5": "USebenza wakhiwe ngokuzungeza i-POPIA, umthetho waseNingizimu Afrika wokuvikela idatha. Unikeza imvume ethile ngendlela ngayinye ulwazi lwakho olusetshenziswa ngayo, futhi ungamisa ukubonakala kwakho noma uhoxise imvume noma nini. Amasimu abucayi ayabethelwa, amakhasi omphakathi ayafihlwa, futhi konke ukufinyelela kulwazi lwakho kuyarekhodwa.",
+      "a5": "USebenza wakhiwe ngokuzungeza i-POPIA, umthetho wase-South Africa wokuvikela idatha. Unikeza imvume ethile ngendlela ngayinye ulwazi lwakho olusetshenziswa ngayo, futhi ungamisa ukubonakala kwakho noma uhoxise imvume noma nini. Amasimu abucayi ayabethelwa, amakhasi omphakathi ayafihlwa, futhi konke ukufinyelela kulwazi lwakho kuyarekhodwa.",
       "q6": "Kusho ukuthini “kuqinisekisiwe” kwiphrofayela?",
       "a6": "Ibheji lokuqinisekisa lisho ukuthi iplatifomu iqinisekise into ngempela, isibonelo umqashi eqinisekisa irekhodi lomsebenzi. Yonke iphrofayela iqala ithi “akuqinisekisiwe” futhi sikusho lokho ngobuqotho; amabheji awathengwa futhi awacatshangelwa. Izibalo zibala ukuqashwa kuphela uma kuqinisekisiwe ngeplatifomu."
     },
     "finalCta": {
-      "eyebrow": "Yakhelwe iNingizimu Afrika · yiNingizimu Afrika",
+      "eyebrow": "Yakhelwe i-South Africa · yi-South Africa",
       "h2a": "Tholakala.",
       "h2bItalic": "Noma uthole umuntu.",
       "lead": "Noma ufuna umsebenzi noma ufuna abantu, indlela esheshayo eya kokutholakala kwangempela, okuqinisekisiwe, kwamanje iwukusesha okukodwa nje.",
@@ -205,10 +205,10 @@
         "heading": "Sitshele ukuthi ungubani",
         "subhead": "Lokhu okuyisisekelo kuphela. Sizokwengeza okunye kwephrofayela yakho ngemva kwemvume.",
         "next": "Qhubeka",
-        "citizenQuestion": "Ingabe uyisakhamuzi saseNingizimu Afrika?",
+        "citizenQuestion": "Ingabe uyisakhamuzi sase-South Africa?",
         "citizenYes": "Yebo",
         "citizenNo": "Cha",
-        "citizenHelp": "Kusetshenziselwa kuphela izibalo zezomsebenzi nokugqanyiswa kwezakhamuzi zaseNingizimu Afrika ekusesheni kwabaqashi. Akulokothi kuthinte ukuthi ungamsebenzisa yini uSebenza noma utholakale. Wonke umuntu uhlanganiswa ngendawo nangekhono.",
+        "citizenHelp": "Kusetshenziselwa kuphela izibalo zezomsebenzi nokugqanyiswa kwezakhamuzi zase-South Africa ekusesheni kwabaqashi. Akulokothi kuthinte ukuthi ungamsebenzisa yini uSebenza noma utholakale. Wonke umuntu uhlanganiswa ngendawo nangekhono.",
         "nationalityLabel": "Uvela kuliphi izwe?",
         "nationalityHelp": "Kuboniswa kwiphrofayela yakho nasemiphumeleni yokusesha ukuze abaqashi bazi ukuthi uvelaphi. USebenza uhlanganisa ngendawo nangekhono. Lapho uvela khona akulokothi kube yisivimbelo."
       },
@@ -220,7 +220,7 @@
         "locationLabel": "Uhlala kuphi / ufuna ukusebenza kuphi?",
         "statusLabel": "Sithini isimo sakho somsebenzi namuhla?",
         "studentToggle": "Ngingumfundi njengamanje",
-        "studentToggleHint": "Khetha lokhu uma ubhalisile enyuvesi yaseNingizimu Afrika, enyuvesi yezobuchwepheshe, e-TVET, e-UNISA noma ohlelweni lwe-INDLELA. Sizothatha imininingwane yezifundo zakho ukuze uSebenza akwazi ukukuncomela izifundo ezikhethwayo, ama-internship nezinhlelo zabaphothule, hhayi ukuqashwa okugcwele kuphela.",
+        "studentToggleHint": "Khetha lokhu uma ubhalisile enyuvesi yase-South Africa, enyuvesi yezobuchwepheshe, e-TVET, e-UNISA noma ohlelweni lwe-INDLELA. Sizothatha imininingwane yezifundo zakho ukuze uSebenza akwazi ukukuncomela izifundo ezikhethwayo, ama-internship nezinhlelo zabaphothule, hhayi ukuqashwa okugcwele kuphela.",
         "academic": {
           "heading": "Izifundo zakho",
           "institutionLabel": "Isikhungo",
@@ -282,7 +282,7 @@
       "seniority": "Izinga lesipiliyoni",
       "verification": "Ukuqinisekiswa",
       "nationality": "Ubuzwe (okuzikhethelayo)",
-      "highlightCitizens": "Gqamisa izakhamuzi zaseNingizimu Afrika",
+      "highlightCitizens": "Gqamisa izakhamuzi zase-South Africa",
       "nationalityHelp": "USebenza uhlanganisa ngendawo nangekhono. Ubuzwe buyaboniswa, kodwa abulokothi bube yisivimbelo."
     },
     "states": {
@@ -392,7 +392,7 @@
         "heading": "Izifundo zakho",
         "subhead": "Sitshele ukuthi ufunda kuphi nokuthi ufundani. USebenza uzolungisa ikhampasi yakho yomsebenzi ngokohlelo lwakho nangesikhathi esisele ngaphambi kokuphothula.",
         "institution": "Isikhungo",
-        "kindHint": "Izikhungo zaseNingizimu Afrika ezamukelwayo kuphela: amanyuvesi kahulumeni, amanyuvesi ezobuchwepheshe, amakolishi e-TVET, i-UNISA, i-INDLELA.",
+        "kindHint": "Izikhungo zase-South Africa ezamukelwayo kuphela: amanyuvesi kahulumeni, amanyuvesi ezobuchwepheshe, amakolishi e-TVET, i-UNISA, i-INDLELA.",
         "programme": "Uhlelo lokufunda",
         "field": "Umkhakha wokufunda",
         "nqfLevel": "Izinga le-NQF",
@@ -407,10 +407,10 @@
         "fullName": "Amagama aphelele",
         "displayName": "Igama elivela emphakathini",
         "displayNameHelp": "Indlela ovela ngayo ekusesheni komphakathi (isb. \"Thandeka M.\"). Isibongo sakho sivela kuphela ngemva kwemvume yokuxhunywa.",
-        "nationalId": "Inombolo kamazisi waseNingizimu Afrika (noma ipasipoti)",
+        "nationalId": "Inombolo kamazisi wase-South Africa (noma ipasipoti)",
         "dob": "Usuku lokuzalwa",
         "nationality": "Ubuzwe",
-        "citizen": "Ngiyisakhamuzi saseNingizimu Afrika",
+        "citizen": "Ngiyisakhamuzi sase-South Africa",
         "city": "Idolobha",
         "province": "Isifundazwe",
         "willingToRelocate": "Ngivulekele ukuthutha ngenxa yomsebenzi ofanele",
@@ -482,7 +482,7 @@
       "rankIfLearned": "Uma ungeza lokhu: indawo → #{projected} ku-{pool}",
       "openProfileEditor": "Engeza kwiphrofayela yami →",
       "pathsTitle": "Izindlela zokufunda",
-      "pathsSub": "Okumahhala nokuxhasiwe kuvela kuqala. Izinhlelo ezamukelwa eNingizimu Afrika kuphela: i-SETA, i-TVET, i-INDLELA, ezamukelwa yi-SAQA, nezinsiza ezivulekile.",
+      "pathsSub": "Okumahhala nokuxhasiwe kuvela kuqala. Izinhlelo ezamukelwa e-South Africa kuphela: i-SETA, i-TVET, i-INDLELA, ezamukelwa yi-SAQA, nezinsiza ezivulekile.",
       "duration": "{weeks, plural, =1 {iviki elingu-#} other {amaviki angu-#}}",
       "national": "Kuzwelonke",
       "providerKind": "Uhlobo lomhlinzeki",
@@ -499,7 +499,7 @@
       "cityDemandColMatches": "Ukutholakala",
       "cityDemandColGap": "Umkhawulo",
       "honestNote": "Iphuzu lobuqotho",
-      "honestBody": "USebenza akamukeli imali kubahlinzeki bezifundo. Sibeka izindlela zomphakathi ezamukelwa eNingizimu Afrika kuqala ngoba zingezangempela futhi ziyafinyeleleka. Uma isifundo singekho lapha, akusho ukuthi sibi, kodwa ngeke sisiveze ngaphandle kobufakazi bokuthi siyasebenza.",
+      "honestBody": "USebenza akamukeli imali kubahlinzeki bezifundo. Sibeka izindlela zomphakathi ezamukelwa e-South Africa kuqala ngoba zingezangempela futhi ziyafinyeleleka. Uma isifundo singekho lapha, akusho ukuthi sibi, kodwa ngeke sisiveze ngaphandle kobufakazi bokuthi siyasebenza.",
       "student": {
         "lane": "Imodi yomfundi",
         "headline": "Xhumanisa iziqu zakho nemakethe",
@@ -510,7 +510,7 @@
         "curriculumHint": "Lapho zikhona kwikharikhulamu",
         "demandSignal": "Ukusesha okungu-{searches} kuqhathaniswa nokutholakala okungu-{matches} kule nyanga",
         "programmesTitle": "Ama-internship nezinhlelo zabaphothule",
-        "programmesSub": "Izinhlelo zangempela zaseNingizimu Afrika: umkhakha kahulumeni kuqala, bese kulandela izinkampani nama-startup. Imibandela iboniswa ngobuqotho. Sincamela ukukutshela kusengaphambili uma ungafaneleki kunokuchitha isikhathi sakho.",
+        "programmesSub": "Izinhlelo zangempela zase-South Africa: umkhakha kahulumeni kuqala, bese kulandela izinkampani nama-startup. Imibandela iboniswa ngobuqotho. Sincamela ukukutshela kusengaphambili uma ungafaneleki kunokuchitha isikhathi sakho.",
         "duration": "{months, plural, =1 {inyanga engu-#} other {izinyanga ezingu-#}}",
         "eligibility": "Imibandela",
         "applicationOpen": "Kuvuliwe",
@@ -585,7 +585,7 @@
       "demandHeading": "Isidingo se-{profession}",
       "demand": "{count, plural, =0 {Akukho ukusesha okwamanje} one {ukusesha okungu-#} other {ukusesha okungu-#}} e-{province} ezinsukwini ezingu-{days} ezedlule",
       "demandEmpty": "Kuthulekile e-{province} njengamanje. Gcina isimo sakho sisha ukuze ube ngowokuqala uma kuvuka.",
-      "remote": "Uvulekele nokusebenza ukude: {count, plural, one {ukusesha okungu-#} other {ukusesha okungu-#}} kwe-{profession} kulo lonke elaseNingizimu Afrika.",
+      "remote": "Uvulekele nokusebenza ukude: {count, plural, one {ukusesha okungu-#} other {ukusesha okungu-#}} kwe-{profession} kulo lonke elase-South Africa.",
       "poolLink": "Bona oqhathaniswa nabo e-{province}",
       "notHere": "Awukho e-{city}? Buyekeza indawo yakho"
     }
@@ -812,10 +812,10 @@
   "marketing": {
     "meta": {
       "title": "Indlela uSebenza asebenza ngayo",
-      "description": "USebenza uwuhlu kazwelonke lwethalente lwaseNingizimu Afrika olwakhiwe nge-POPIA kuqala. Abafuni bomsebenzi bakha iphrofayela eyodwa yamahhala batholakale; abaqashi basesha ithalente elibukhoma eliqinisekiswe ngobuqotho; ukuqashwa okuqinisekisiwe kuba ulwazi lwangempela lwemakethe yezomsebenzi."
+      "description": "USebenza uwuhlu kazwelonke lwethalente lwase-South Africa olwakhiwe nge-POPIA kuqala. Abafuni bomsebenzi bakha iphrofayela eyodwa yamahhala batholakale; abaqashi basesha ithalente elibukhoma eliqinisekiswe ngobuqotho; ukuqashwa okuqinisekisiwe kuba ulwazi lwangempela lwemakethe yezomsebenzi."
     },
     "hero": {
-      "eyebrow": "Iplatifomu kazwelonke yethalente yaseNingizimu Afrika",
+      "eyebrow": "Iplatifomu kazwelonke yethalente yase-South Africa",
       "h1a": "Thola umuntu.",
       "h1bItalic": "Themba iphrofayela.",
       "h1c": "Bala ukuqashwa.",
@@ -827,13 +827,13 @@
     },
     "problem": {
       "eyebrow": "Iqiniso",
-      "heading": "Ukuqasha eNingizimu Afrika kusebenza ngomsindo",
+      "heading": "Ukuqasha e-South Africa kusebenza ngomsindo",
       "item1": "Ama-CV ayikhulu eqenjini le-WhatsApp, kungekho ndlela yokwazi ukuthi ubani ongowangempela.",
       "item2": "Izinqolobane lapho uhhafu wabantu “abatholakalayo” bathola umsebenzi ezinyangeni ezedlule.",
       "item3": "Amabheji athi kuqinisekisiwe kanti akekho oqinisekise lutho ngempela.",
       "item4": "Abafuni bomsebenzi bekhokha ukuze babonakale, noma belahlekelwa yimali ngabaqashi bamanga.",
       "item5": "Inqubomgomo ebhalwe ngezinhlolovo ezazindala zingakashicilelwa.",
-      "closeA": "INingizimu Afrika ayinakushoda kwethalente. Inokushoda kwesignali ethembekile.",
+      "closeA": "I-South Africa ayinakushoda kwethalente. Inokushoda kwesignali ethembekile.",
       "closeItalic": "Yileyo nkinga uSebenza ayilungisayo."
     },
     "who": {
@@ -892,7 +892,7 @@
       "promise1": "Kumahhala kubafuni bomsebenzi. Azikho izimali, nanini, futhi akukho ukukhokha ukuze ukhuphuke.",
       "promise2": "I-POPIA kuqala kusukela emgqeni wokuqala wekhodi: imvume ehlukanisiwe, ukubethelwa kwamasimu, ilogu yokuhlola engunaphakade, ukukhipha nokusula kwakhelwe ngaphakathi.",
       "promise3": "Amabheji aqotho, ukusha okuqotho, izibalo zokubekwa eziqotho. Uhlu luncamela ukubukeka luncane kunokuqamba amanga.",
-      "promise4": "Yakhelwe iNingizimu Afrika yangempela: i-Android ephansi ku-3G iyidivayisi yethu yereferensi, izilimi ezine zokwethulwa, iyafakwa njengohlelo lokusebenza."
+      "promise4": "Yakhelwe i-South Africa yangempela: i-Android ephansi ku-3G iyidivayisi yethu yereferensi, izilimi ezine zokwethulwa, iyafakwa njengohlelo lokusebenza."
     },
     "why": {
       "eyebrow": "Kungani uSebenza",
@@ -911,11 +911,11 @@
     "pricing": {
       "eyebrow": "Amanani",
       "heading": "Kumahhala kubafuni bomsebenzi. Kulula kwabanye bonke.",
-      "lead": "Uhlu lukazwelonke lusebenza kuphela uma wonke umuntu waseNingizimu Afrika ekwazi ukuba kulo, ngakho uhlangothi lomfuni womsebenzi lumahhala, unomphela. Ubambiswano lwabaqashi nohulumeni lubizwa ngokobukhulu bethimba nemibiko abayidingayo.",
+      "lead": "Uhlu lukazwelonke lusebenza kuphela uma wonke umuntu wase-South Africa ekwazi ukuba kulo, ngakho uhlangothi lomfuni womsebenzi lumahhala, unomphela. Ubambiswano lwabaqashi nohulumeni lubizwa ngokobukhulu bethimba nemibiko abayidingayo.",
       "cta": "Khuluma nathi ngobambiswano"
     },
     "finalCta": {
-      "eyebrow": "Yakhelwe iNingizimu Afrika · yiNingizimu Afrika",
+      "eyebrow": "Yakhelwe i-South Africa · yi-South Africa",
       "heading": "Zibonele uhlu ngokwakho.",
       "lead": "Sesha njengomvakashi, joyina njengomfuni womsebenzi, noma usibhalele sikuhambise ohlangothini lwabaqashi nolwezibalo ngokwesimo sakho. Akukho ukucindezela, akukho ulimi olunzima.",
       "ctaSearch": "Sesha ithalente",

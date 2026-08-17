@@ -53,6 +53,13 @@ async function injectOverlaySystem(page) {
   await page.addStyleTag({ content: OVERLAY_CSS });
 }
 
+// For choreography that starts BEFORE the app loads (V3's throttled load):
+// paint a brand-green stage on about:blank and mount the overlay system.
+async function injectBlankBrand(page) {
+  await page.setContent('<body style="margin:0;background:#003d1f;width:100vw;height:100vh"></body>');
+  await page.addStyleTag({ content: OVERLAY_CSS });
+}
+
 async function showHookStart(page, html) {
   await page.evaluate((h) => {
     const d = document.createElement("div");
@@ -153,9 +160,11 @@ async function record(name, choreography) {
 }
 
 const browser = await chromium.launch();
+const ONLY = process.env.ONLY?.split(",");
+const want = (n) => !ONLY || ONLY.some((o) => n.includes(o));
 
 // ---- V1 · The search, live (~20s) ----
-await record("v1-search-live.mp4", async (page, markLead) => {
+if (want("v1")) await record("v1-search-live.mp4", async (page, markLead) => {
   await page.goto(`${BASE}/search`, { waitUntil: "load" });
   await page.waitForTimeout(900);
   await injectOverlaySystem(page);
@@ -181,10 +190,7 @@ await record("v1-search-live.mp4", async (page, markLead) => {
 });
 
 // ---- V8 · What "verified" actually means (~19s) ----
-// V9 (four languages) is ON HOLD: the zu/xh/af catalogs are still
-// placeholder fallbacks to English, so that video cannot honestly be
-// filmed yet. Verification-Honesty applies to our own marketing.
-await record("v8-verified-honesty.mp4", async (page, markLead) => {
+if (want("v8")) await record("v8-verified-honesty.mp4", async (page, markLead) => {
   await page.goto(`${BASE}/search?q=developer`, { waitUntil: "load" });
   await page.waitForTimeout(1100);
   await injectOverlaySystem(page);
@@ -203,6 +209,111 @@ await record("v8-verified-honesty.mp4", async (page, markLead) => {
   await smoothScroll(page, 900, 5000);
   await note2;
   await showNote(page, "<em>Trust</em> is the whole product.", 2600);
+  await showEndCard(page, 2800);
+});
+
+// ---- V2 · It tells you what to learn next (~23s) ----
+// Signed in as the seeded showcase student (andile-z) on the TEST DB,
+// whose Career Compass runs on real seeded demand + programme data.
+if (want("v2")) await record("v2-learn-next.mp4", async (page, markLead) => {
+  await page.goto(`${BASE}/sign-in`, { waitUntil: "load" });
+  await page.fill('input[type="email"]', "andile-z@example.co.za");
+  await page.fill('input[type="password"]', "sebenza-dev-2026");
+  await page.getByRole("button", { name: /sign in/i }).click();
+  await page.waitForURL("**/dashboard**", { timeout: 30000 });
+  await page.goto(`${BASE}/dashboard/grow`, { waitUntil: "load" });
+  await page.waitForTimeout(1400);
+  await injectOverlaySystem(page);
+  await showHookStart(page, "No one tells you <em>which</em> skill gets you hired. This does.");
+  markLead();
+  await dismissConsent(page);
+  await showHookEnd(page, 2700);
+  const n1 = showNote(page, "What employers near you <em>actually</em> want.", 3400);
+  await smoothScroll(page, 900, 4200);
+  await n1;
+  const n2 = showNote(page, "The gap between you and the role, honestly shown.", 3400);
+  await smoothScroll(page, 1100, 4200);
+  await n2;
+  const n3 = showNote(page, "Real SA routes to close it: SETA, TVET, free courses.", 3400);
+  await smoothScroll(page, 1100, 4200);
+  await n3;
+  await showEndCard(page, 2800);
+});
+
+// ---- V3 · Built for slow data (~17s, REAL 3G throttle via CDP) ----
+if (want("v3")) await record("v3-slow-data.mp4", async (page, markLead) => {
+  await page.goto("about:blank");
+  await injectBlankBrand(page);
+  await showHookStart(page, "We built this for <em>slow data</em>. On purpose.");
+  markLead();
+  await showHookEnd(page, 2600);
+  // Regular 3G: 750kbps down, 250kbps up, 100ms RTT. The load the viewer
+  // watches is genuinely throttled.
+  const cdp = await page.context().newCDPSession(page);
+  await cdp.send("Network.enable");
+  await cdp.send("Network.emulateNetworkConditions", {
+    offline: false, latency: 100,
+    downloadThroughput: (750 * 1024) / 8, uploadThroughput: (250 * 1024) / 8,
+  });
+  await page.goto(`${BASE}/`, { waitUntil: "load" });
+  await page.waitForTimeout(600);
+  await injectOverlaySystem(page);
+  await dismissConsent(page);
+  const n1 = showNote(page, "That load you just watched: <em>real 3G speeds</em>, throttled live.", 3600);
+  await smoothScroll(page, 700, 4000);
+  await n1;
+  const n2 = showNote(page, "No heavy graphics. No airtime-eating animations.", 3000);
+  await smoothScroll(page, 700, 3600);
+  await n2;
+  await showNote(page, "Fast and fair beats flashy. <em>Every time.</em>", 2600);
+  await showEndCard(page, 2800);
+});
+
+// ---- V9 · One platform, four languages (~21s, now REALLY translated) ----
+if (want("v9")) await record("v9-four-languages.mp4", async (page, markLead) => {
+  const stops = [
+    { path: "/", label: "English" },
+    { path: "/zu", label: "isiZulu" },
+    { path: "/xh", label: "isiXhosa" },
+    { path: "/af", label: "Afrikaans" },
+  ];
+  await page.goto(`${BASE}/`, { waitUntil: "load" });
+  await page.waitForTimeout(900);
+  await injectOverlaySystem(page);
+  await showHookStart(page, "Your platform. In <em>your</em> language.");
+  markLead();
+  await dismissConsent(page);
+  await showHookEnd(page, 2500);
+  for (const stop of stops) {
+    await page.goto(`${BASE}${stop.path}`, { waitUntil: "load" });
+    await page.waitForTimeout(500);
+    await injectOverlaySystem(page);
+    const note = showNote(page, `<em>${stop.label}</em>`, 2400);
+    await smoothScroll(page, 420, 2600);
+    await note;
+  }
+  await injectOverlaySystem(page);
+  await showNote(page, "English &middot; isiZulu &middot; isiXhosa &middot; Afrikaans. Built for the real South Africa.", 3000);
+  await showEndCard(page, 2800);
+});
+
+// ---- V10 · The live skills map (~19s) ----
+if (want("v10")) await record("v10-skills-map.mp4", async (page, markLead) => {
+  await page.goto(`${BASE}/insights`, { waitUntil: "load" });
+  await page.waitForTimeout(1400);
+  await injectOverlaySystem(page);
+  await showHookStart(page, "South Africa can't see its own <em>skills gaps</em>. Until now.");
+  markLead();
+  await dismissConsent(page);
+  await showHookEnd(page, 2700);
+  const n1 = showNote(page, "Live, aggregate, anonymised. <em>Never a person.</em>", 3400);
+  await smoothScroll(page, 2100, 4200);
+  await n1;
+  // Land on the skills-gap table: real searches-vs-matches data, the money shot.
+  const n2 = showNote(page, "Which skills employers want but <em>can't find</em>. And where.", 3600);
+  await smoothScroll(page, 1500, 4400);
+  await n2;
+  await showNote(page, "Not last year's survey. <em>Right now.</em>", 2800);
   await showEndCard(page, 2800);
 });
 

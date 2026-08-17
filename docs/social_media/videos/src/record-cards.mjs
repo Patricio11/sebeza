@@ -39,12 +39,16 @@ const VIDEOS = [
   { template: "card-v5-anthem.html", out: "v5-to-work.mp4", durationMs: 11_500 },
   { template: "card-v6-cvpile.html", out: "v6-cv-pile.mp4", durationMs: 19_500 },
   { template: "card-v12-free.html", out: "v12-free-means-free.mp4", durationMs: 15_000 },
+  { template: "card-v4-tests.html", out: "v4-boring-work.mp4", durationMs: 17_500 },
+  { template: "card-v7-scams.html", out: "v7-scam-signs.mp4", durationMs: 19_000 },
 ];
+const ONLY = process.env.ONLY?.split(",");
+const RUN = ONLY ? VIDEOS.filter((v) => ONLY.some((o) => v.out.includes(o))) : VIDEOS;
 
 const W = 1080, H = 1920;
 const browser = await chromium.launch();
 
-for (const video of VIDEOS) {
+for (const video of RUN) {
   const context = await browser.newContext({
     viewport: { width: W, height: H },
     recordVideo: { dir: outDir, size: { width: W, height: H } },
@@ -73,4 +77,4 @@ for (const video of VIDEOS) {
 }
 
 await browser.close();
-console.log("done:", VIDEOS.length, "videos in", outDir);
+console.log("done:", RUN.length, "videos in", outDir);

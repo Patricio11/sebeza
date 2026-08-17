@@ -1,0 +1,63 @@
+<!doctype html>
+<!-- V7 · "3 signs a job offer is a scam" · ~19s. 1080x1920.
+     Light alert scenes with red accents (red does its real job here),
+     dark closing promise, end lockup. -->
+<html>
+<head>
+<meta charset="utf-8" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=Hanken+Grotesk:ital,wght@0,400..700;1,400..700&display=block" rel="stylesheet" />
+<style>
+  :root {
+    --paper: #fbf8f0; --ink: #14110d; --ink-soft: #5a5249;
+    --green: #006b3c; --green-deep: #003d1f; --green-soft: #0a8c50;
+    --gold: #c98214; --gold-bright: #f5a623; --red: #de3831;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 100%; height: 100%; }
+  body { font-family: "Fraunces", Georgia, serif; background: var(--paper); overflow: hidden; }
+  .scene { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 0 96px; opacity: 0; }
+  .light { color: var(--ink); }
+  .dark { background: var(--green-deep); color: var(--paper); }
+  .line { font-weight: 560; font-size: 104px; line-height: 1.12; letter-spacing: -0.015em; font-variation-settings: "opsz" 144; }
+  .light .line em { font-style: italic; color: var(--red); }
+  .dark .line em { font-style: italic; color: var(--gold-bright); }
+  .num { font-weight: 620; font-style: italic; font-size: 300px; line-height: 1; color: var(--red); }
+  .flagline { margin-top: 56px; font-weight: 560; font-size: 88px; line-height: 1.14; letter-spacing: -0.015em; }
+  .small { font-family: "Hanken Grotesk", sans-serif; font-weight: 500; font-size: 30px; color: rgba(251,248,240,0.62); margin-top: 48px; }
+  .eyebrow { font-family: "Hanken Grotesk", sans-serif; font-weight: 700; font-size: 28px; letter-spacing: 0.26em; text-transform: uppercase; color: var(--red); margin-bottom: 46px; }
+  .stripe { display: flex; height: 20px; width: 100vw; position: absolute; left: 0; bottom: 0; z-index: 9; }
+  .stripe .g { flex: 3; background: var(--green); }
+  .stripe .a { flex: 2; background: var(--gold); }
+  .stripe .r { flex: 1; background: var(--red); }
+
+  @keyframes hookOut { 0% { opacity: 1; } 88% { opacity: 1; } 100% { opacity: 0; } }
+  @keyframes hold { 0% { opacity: 0; transform: translateY(20px); } 9% { opacity: 1; transform: translateY(0); } 88% { opacity: 1; } 100% { opacity: 0; } }
+  @keyframes holdEnd { 0% { opacity: 0; transform: translateY(20px); } 14% { opacity: 1; transform: translateY(0); } 100% { opacity: 1; } }
+
+  .s1 { opacity: 1; }
+  body.play .s1 { animation: hookOut 3.0s ease 0s forwards; }
+  body.play .s2 { animation: hold 3.1s ease 3.1s forwards; }
+  body.play .s3 { animation: hold 3.1s ease 6.3s forwards; }
+  body.play .s4 { animation: hold 3.1s ease 9.5s forwards; }
+  body.play .s5 { animation: hold 3.4s ease 12.7s forwards; }
+  body.play .s6 { animation: holdEnd 1.4s ease 16.2s forwards; }
+</style>
+</head>
+<body>
+  <div class="scene light s1">
+    <div class="eyebrow">Protect yourself</div>
+    <div class="line">3 signs a job offer is a <em>scam</em>.</div>
+  </div>
+  <div class="scene light s2"><div class="num">1</div><div class="flagline">They ask for a &ldquo;registration fee.&rdquo;</div></div>
+  <div class="scene light s3"><div class="num">2</div><div class="flagline">Payment before training.</div></div>
+  <div class="scene light s4"><div class="num">3</div><div class="flagline">Pressure to pay <em style="font-style:italic;color:var(--red)">today</em>.</div></div>
+  <div class="scene dark s5"><div class="line">A real employer will <em>never</em> ask you to pay.</div></div>
+  <div class="scene dark s6">
+    <div class="line" style="font-size:96px">Share this with someone job-hunting.</div>
+    <div class="small">Sebenza &middot; sebenzasa.com &middot; Free for job-seekers. Always.</div>
+  </div>
+  <div class="stripe"><div class="g"></div><div class="a"></div><div class="r"></div></div>
+</body>
+</html>

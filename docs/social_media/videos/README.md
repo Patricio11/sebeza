@@ -18,10 +18,17 @@ cards, the flag stripe) is baked in.
 | `v6-cv-pile.mp4` (~20s) | V6 | The text-driven CV-pile story ("number 347" → "You get found"). |
 | `v8-verified-honesty.mp4` (~19s) | V8 | The real register: Unverified badges shown honestly, a real profile with status date + audit strip. |
 | `v12-free-means-free.mp4` (~15s) | V12 | The R0 slam + the promise end-card. |
+| `v2-learn-next.mp4` (~19s) | V2 | The real Career Compass, signed in as the seeded showcase student: demand-ranked skills, the gap, real SA routes (SETA/TVET), the student lane. |
+| `v3-slow-data.mp4` (~23s) | V3 | The landing loading under a REAL 3G throttle (CDP-emulated live, and the overlay says so honestly). |
+| `v4-boring-work.mp4` (~18s) | V4 | A real vitest run (23 files / 275 tests, captured verbatim) replayed in a branded terminal. |
+| `v7-scam-signs.mp4` (~19s) | V7 | The three scam red flags, red alert cards. |
+| `v9-four-languages.mp4` (~25s) | V9 | The REAL translated landing: English → isiZulu → isiXhosa → Afrikaans, "South Africa" kept untranslated per the house rule. |
+| `v10-skills-map.mp4` (~18s) | V10 | /insights live: status mix, the province × profession supply heatmap, skill-level demand. |
 
-**V9 (four languages) is ON HOLD**: the zu/xh/af catalogs are still placeholder fallbacks to
-English (3/2/2 strings vs 606 in en), so that demo cannot honestly be filmed yet. It unblocks
-the day real human translations land. Verification-Honesty applies to our own marketing.
+**V9 is now filmed for real**: the zu/xh/af catalogs are full translations (pending human
+review) and the landing is catalog-driven, so the demo shows the genuine product. Recommended:
+publish V9 after the reviewer signs off the catalogs. Still open: V11 (the repeatable build-log
+series; film an episode whenever something real ships).
 
 ## Safety rule
 

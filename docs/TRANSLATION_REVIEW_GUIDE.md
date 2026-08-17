@@ -24,6 +24,11 @@ that are deliberately NOT live yet**: they stay English in the product until you
 - **Consistency:** the same term for the same concept everywhere (glossary below).
 - **Never translate:** Sebenza, Talent Pulse, NQF, NSFAS, SETA, TVET, UNISA, INDLELA, SAQA,
   CIPC, POPIA, PAIA, CV, PDF, CSV, KYC, TOTP.
+- **"South Africa" is NEVER translated** (founder decision, 2026-08-17). The country name stays
+  "South Africa" in every language. isiZulu/isiXhosa attach connectives with a hyphen, the way
+  SA media writes foreign names: e-South Africa, i-South Africa, lase-South Africa,
+  wase-South Africa, base-South Africa. Afrikaans keeps grammatical derivatives (Suid-Afrikaanse,
+  Suid-Afrikaner) but the standalone name is South Africa.
 - **Code stays code:** `{name}`, `{count, plural, =1 {...} other {...}}` structures keep their
   braces and argument names exactly; only the human words inside translate.
 - **No em-dashes** anywhere (house rule).
