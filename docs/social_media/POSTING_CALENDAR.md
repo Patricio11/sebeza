@@ -27,14 +27,14 @@ Post mornings 6-8am or evenings 7-9pm. Reply to every comment, every day, ten mi
 ## WEEK 0 · Setup (any pace)
 
 - [x] Facebook page created (Sebenza SA, live).
-- [ ] Instagram account finished per `instagram/SEBENZA_IG_START_HERE.md` (avatar, bio, link
+- [x] Instagram account finished per `instagram/SEBENZA_IG_START_HERE.md` (avatar, bio, link
       to the FB page in Accounts Centre).
 - [ ] TikTok + YouTube created per their START_HEREs (same avatar, same handle).
 - [ ] X + LinkedIn created per their START_HEREs (can also wait until Week 3; do not rush).
 
 ## WEEK 1 · Launch week (the intro sequence)
 
-- [ ] **Day 1**: FB post 1 (intro caption + `facebook/assets/post-01-intro.png`). **Pin it.**
+- [x] **Day 1**: FB post 1 (intro caption + `facebook/assets/post-01-intro.png`). **Pin it.**
       Same day on IG (IG-1 caption). Same day: IG story `instagram/assets/story-intro.png`.
 - [ ] **Day 1, TikTok + YouTube Shorts + IG Reels**: video `videos/v5-to-work.mp4` (the
       anthem; add a calm instrumental in-app; set cover `tiktok/assets/cover-v5-towork.png`).
