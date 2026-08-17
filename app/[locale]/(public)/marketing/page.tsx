@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { setRequestLocale } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { SAChevron } from "@/components/ui/SAChevron";
@@ -35,12 +35,19 @@ import {
  * branded card.
  */
 
-export const metadata: Metadata = {
-  title: "How Sebenza Works",
-  description:
-    "Sebenza is South Africa's POPIA-first national talent register. Job seekers build one free profile and get found; employers search live, honestly-verified talent; confirmed hiring becomes real labour-market intelligence.",
-  alternates: localeAlternates("/marketing"),
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "marketing.meta" });
+  return {
+    title: t("title"),
+    description: t("description"),
+    alternates: localeAlternates("/marketing"),
+  };
+}
 
 // Re-prerender every 5 minutes: the proof section renders live register
 // numbers and shouldn't be frozen at build time. Same ISR posture as
@@ -54,6 +61,7 @@ export default async function MarketingPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
+  const t = await getTranslations("marketing");
 
   // Live numbers only (copy rule): the same snapshot the landing pulse
   // and dashboards run on. Nothing on this page is hard-typed.
@@ -70,52 +78,47 @@ export default async function MarketingPage({
         {/* ── 1 · Hero ─────────────────────────────────────────────────── */}
         <section className="border-b-2 border-[color:var(--color-ink)] bg-[color:var(--color-surface)]">
           <div className="mx-auto max-w-[880px] px-5 py-14 md:py-20">
-            <Eyebrow>South Africa&rsquo;s national talent platform</Eyebrow>
+            <Eyebrow>{t("hero.eyebrow")}</Eyebrow>
             <h1 className="mt-4 font-display text-4xl leading-[1.02] tracking-[-0.02em] md:text-6xl">
-              Find the person.
+              {t("hero.h1a")}
               <br />
               <span className="italic text-[color:var(--color-brand-strong)]">
-                Trust the profile.
+                {t("hero.h1bItalic")}
               </span>{" "}
-              Count the hire.
+              {t("hero.h1c")}
             </h1>
             <p className="mt-6 max-w-2xl text-lg leading-relaxed text-[color:var(--color-ink-soft)]">
-              Sebenza is a POPIA-first national talent register. Job seekers
-              build one free profile and get found. Employers search live,
-              freshness-weighted, honestly-verified talent. And the hiring
-              that follows becomes real labour-market intelligence, not
-              guesswork.
+              {t("hero.lead")}
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-3">
               <PillLink href="/search" primary>
-                Search the talent register
+                {t("hero.ctaSearch")}
               </PillLink>
-              <PillLink href="/sign-up/seeker">Create a free profile</PillLink>
+              <PillLink href="/sign-up/seeker">{t("hero.ctaCreate")}</PillLink>
               <a
                 href="mailto:info@sebenzasa.com"
                 className="text-sm font-medium text-[color:var(--color-brand-strong)] hover:underline"
               >
-                Talk to us
+                {t("hero.ctaTalk")}
               </a>
             </div>
             <p className="mt-4 text-xs text-[color:var(--color-ink-soft)]">
-              Free for job seekers, always. Works on any phone, in English,
-              isiZulu, isiXhosa and Afrikaans.
+              {t("hero.microcopy")}
             </p>
           </div>
         </section>
 
         {/* ── 2 · The problem ──────────────────────────────────────────── */}
         <section className="mx-auto max-w-[880px] px-5 py-14 md:py-20">
-          <Eyebrow>The reality</Eyebrow>
-          <SectionHeading>Hiring in South Africa runs on noise</SectionHeading>
+          <Eyebrow>{t("problem.eyebrow")}</Eyebrow>
+          <SectionHeading>{t("problem.heading")}</SectionHeading>
           <ul className="mt-6 max-w-2xl space-y-3">
             {[
-              "A hundred CVs in a WhatsApp group, and no way to tell who is real.",
-              "Databases where half the “available” people found work months ago.",
-              "Badges that say verified when nobody actually verified anything.",
-              "Job seekers paying to be seen, or losing money to fake recruiters.",
-              "Policy written from surveys that were old before they were published.",
+              t("problem.item1"),
+              t("problem.item2"),
+              t("problem.item3"),
+              t("problem.item4"),
+              t("problem.item5"),
             ].map((line) => (
               <li
                 key={line}
@@ -126,10 +129,9 @@ export default async function MarketingPage({
             ))}
           </ul>
           <p className="mt-8 max-w-2xl font-display text-xl leading-snug text-[color:var(--color-ink)]">
-            South Africa does not have a talent shortage. It has a
-            trustworthy-signal shortage.{" "}
+            {t("problem.closeA")}{" "}
             <span className="italic text-[color:var(--color-brand-strong)]">
-              That is the problem Sebenza fixes.
+              {t("problem.closeItalic")}
             </span>
           </p>
         </section>
@@ -137,24 +139,24 @@ export default async function MarketingPage({
         {/* ── 3 · Who it's for ─────────────────────────────────────────── */}
         <section className="border-y border-[color:var(--color-hairline)] bg-[color:var(--color-surface)]">
           <div className="mx-auto max-w-[1100px] px-5 py-14 md:py-20">
-            <Eyebrow>Who it&rsquo;s for</Eyebrow>
-            <SectionHeading>One register, three sides</SectionHeading>
+            <Eyebrow>{t("who.eyebrow")}</Eyebrow>
+            <SectionHeading>{t("who.heading")}</SectionHeading>
             <div className="mt-8 grid gap-px overflow-hidden rounded-[var(--radius-lg)] bg-[color:var(--color-hairline)] md:grid-cols-3">
               {[
                 {
-                  title: "Job seekers",
-                  tag: "free, always",
-                  body: "Build one profile: your skills, experience, availability, and where you are. Get found by verified employers, get invited to real named roles, apply through public vacancy links, and control every bit of your information under POPIA. From general workers and artisans to graduates and professionals. Students too.",
+                  title: t("who.seekersTitle"),
+                  tag: t("who.seekersTag"),
+                  body: t("who.seekersBody"),
                 },
                 {
-                  title: "Employers",
-                  tag: "from spaza to enterprise",
-                  body: "Search by skill, place and availability, not by luck. See honest verification states and how fresh each profile is. Run vacancies: reverse-match candidates, invite them to named roles, share a public apply link on WhatsApp, and log the hire when it happens.",
+                  title: t("who.employersTitle"),
+                  tag: t("who.employersTag"),
+                  body: t("who.employersBody"),
                 },
                 {
-                  title: "Government & institutions",
-                  tag: "aggregate only",
-                  body: "A privacy-floored, read-only analytics portal: where demand is, where supply is, why roles go unfilled, why learners stall, and how curriculum lines up with the market. Every figure is k-anonymised and aggregate. Never an identifiable person.",
+                  title: t("who.governmentTitle"),
+                  tag: t("who.governmentTag"),
+                  body: t("who.governmentBody"),
                 },
               ].map((col) => (
                 <article
@@ -178,34 +180,34 @@ export default async function MarketingPage({
 
         {/* ── 4 · What changes ─────────────────────────────────────────── */}
         <section className="mx-auto max-w-[880px] px-5 py-14 md:py-20">
-          <Eyebrow>The difference</Eyebrow>
-          <SectionHeading>Honesty is the feature</SectionHeading>
+          <Eyebrow>{t("difference.eyebrow")}</Eyebrow>
+          <SectionHeading>{t("difference.heading")}</SectionHeading>
           <dl className="mt-8 space-y-6">
             {[
               {
                 icon: <BadgeCheck className="size-5" aria-hidden="true" />,
-                term: "“Unverified” is the default.",
-                body: "A badge only says verified when something was actually verified. We never dress up self-reported data.",
+                term: t("difference.t1"),
+                body: t("difference.b1"),
               },
               {
                 icon: <Clock className="size-5" aria-hidden="true" />,
-                term: "Freshness is ranked.",
-                body: "Every employment status carries a confirmation date. Stale profiles fall honestly down the list instead of wasting your calls.",
+                term: t("difference.t2"),
+                body: t("difference.b2"),
               },
               {
                 icon: <ShieldCheck className="size-5" aria-hidden="true" />,
-                term: "A hire only counts when it's confirmed.",
-                body: "Our placement numbers are logged through the platform, never self-reported into a spreadsheet.",
+                term: t("difference.t3"),
+                body: t("difference.b3"),
               },
               {
                 icon: <Lock className="size-5" aria-hidden="true" />,
-                term: "Public profiles are redacted.",
-                body: "No ID numbers, no documents, no contact details in search. Contact is revealed only to verified employers, with consent, and every reveal is logged where the seeker can see it.",
+                term: t("difference.t4"),
+                body: t("difference.b4"),
               },
               {
                 icon: <MapPin className="size-5" aria-hidden="true" />,
-                term: "Location, never nationality.",
-                body: "People are matched by where they are and what they can do. Nationality is shown, never a gate.",
+                term: t("difference.t5"),
+                body: t("difference.b5"),
               },
             ].map((row) => (
               <div key={row.term} className="flex gap-4">
@@ -228,37 +230,36 @@ export default async function MarketingPage({
         {/* ── 5 · How it works ─────────────────────────────────────────── */}
         <section className="border-y border-[color:var(--color-hairline)] bg-[color:var(--color-surface)]">
           <div className="mx-auto max-w-[880px] px-5 py-14 md:py-20">
-            <Eyebrow>How it works</Eyebrow>
-            <SectionHeading>One loop, from profile to policy</SectionHeading>
+            <Eyebrow>{t("how.eyebrow")}</Eyebrow>
+            <SectionHeading>{t("how.heading")}</SectionHeading>
             <p className="mt-3 max-w-2xl text-[color:var(--color-ink-soft)]">
-              The hiring is the product. The analytics fall out of it
-              honestly.
+              {t("how.lead")}
             </p>
             <ol className="mt-8 space-y-5">
               {[
                 {
-                  title: "A seeker builds one profile.",
-                  body: "Skills, experience, availability, place. Free, in four languages, on any phone.",
+                  title: t("how.s1t"),
+                  body: t("how.s1b"),
                 },
                 {
-                  title: "Employers search or match.",
-                  body: "Live filters by skill, province and availability, or reverse-matching against a specific vacancy.",
+                  title: t("how.s2t"),
+                  body: t("how.s2b"),
                 },
                 {
-                  title: "Roles reach people two ways.",
-                  body: "The employer invites a seeker to a named role, or shares the vacancy's public Self Apply link anywhere, including WhatsApp, and seekers walk in themselves.",
+                  title: t("how.s3t"),
+                  body: t("how.s3b"),
                 },
                 {
-                  title: "Contact is revealed with consent.",
-                  body: "Verified employers only. Audited every time. The seeker sees who reached them.",
+                  title: t("how.s4t"),
+                  body: t("how.s4b"),
                 },
                 {
-                  title: "The hire is confirmed.",
-                  body: "Logged through the platform, so it counts once and counts true.",
+                  title: t("how.s5t"),
+                  body: t("how.s5b"),
                 },
                 {
-                  title: "The nation learns.",
-                  body: "Confirmed hiring rolls up into k-anonymised analytics: demand, supply, shortages, outcomes. Live, not last year.",
+                  title: t("how.s6t"),
+                  body: t("how.s6b"),
                 },
               ].map((step, i) => (
                 <li
@@ -284,37 +285,32 @@ export default async function MarketingPage({
 
         {/* ── 6 · Proof: live numbers, no invented quotes ─────────────── */}
         <section className="mx-auto max-w-[880px] px-5 py-14 md:py-20">
-          <Eyebrow>Proof</Eyebrow>
-          <SectionHeading>We&rsquo;d rather show you the live numbers</SectionHeading>
+          <Eyebrow>{t("proof.eyebrow")}</Eyebrow>
+          <SectionHeading>{t("proof.heading")}</SectionHeading>
           <p className="mt-3 max-w-2xl text-[color:var(--color-ink-soft)]">
-            These figures render straight from the register the moment you
-            load this page. They are the same numbers our own dashboards run
-            on. Freshness-weighted, never inflated.
+            {t("proof.lead")}
           </p>
           <div className="mt-8 grid gap-px overflow-hidden rounded-[var(--radius-lg)] bg-[color:var(--color-ink)] sm:grid-cols-3">
             <LiveStat
-              label="Active profiles"
+              label={t("proof.statActive")}
               value={nfmt.format(analytics.totalActive)}
               icon={<Users className="size-4" aria-hidden="true" />}
             />
             <LiveStat
-              label={`Confirmed hires · ${currentMonth}`}
+              label={t("proof.statHires", { month: currentMonth })}
               value={nfmt.format(analytics.confirmedHiresThisMonth)}
               icon={<ShieldCheck className="size-4" aria-hidden="true" />}
               accent
             />
             <LiveStat
-              label="Skills tracked"
+              label={t("proof.statSkills")}
               value={nfmt.format(analytics.demandBySkill.length)}
               icon={<BadgeCheck className="size-4" aria-hidden="true" />}
             />
           </div>
 
           <p className="mt-10 max-w-2xl text-sm leading-relaxed text-[color:var(--color-ink-soft)]">
-            Sebenza is young and we won&rsquo;t pretend otherwise. We
-            don&rsquo;t invent five-star quotes: as real people and employers
-            say real things, their words appear here with their names
-            attached, and only with their consent.
+            {t("proof.honest")}
           </p>
 
           {/* Real, admin-curated, consented testimonials. Renders nothing
@@ -324,27 +320,13 @@ export default async function MarketingPage({
 
           <div className="mt-10 rounded-[var(--radius-md)] border-2 border-[color:var(--color-ink)] bg-[color:var(--color-surface)] p-6">
             <p className="text-[0.7rem] uppercase tracking-[0.24em] text-[color:var(--color-brand-strong)]">
-              What we can promise today
+              {t("proof.promiseTitle")}
             </p>
             <ul className="mt-3 space-y-2 text-sm leading-relaxed text-[color:var(--color-ink)]">
-              <li>
-                Free for job seekers. No fees, ever, and no paying to rank
-                higher.
-              </li>
-              <li>
-                POPIA-first from the first line of code: granular consent,
-                field-level encryption, a permanent audit log, export and
-                erasure built in.
-              </li>
-              <li>
-                Honest badges, honest freshness, honest placement counts. The
-                register would rather look smaller than lie.
-              </li>
-              <li>
-                Built for the real South Africa: a low-end Android on 3G is
-                our reference device, four launch languages, installable like
-                an app.
-              </li>
+              <li>{t("proof.promise1")}</li>
+              <li>{t("proof.promise2")}</li>
+              <li>{t("proof.promise3")}</li>
+              <li>{t("proof.promise4")}</li>
             </ul>
           </div>
         </section>
@@ -352,31 +334,29 @@ export default async function MarketingPage({
         {/* ── 7 · Why Sebenza ──────────────────────────────────────────── */}
         <section className="border-y border-[color:var(--color-hairline)] bg-[color:var(--color-surface)]">
           <div className="mx-auto max-w-[880px] px-5 py-14 md:py-20">
-            <Eyebrow>Why Sebenza</Eyebrow>
-            <SectionHeading>
-              Why Sebenza, and not another job board
-            </SectionHeading>
+            <Eyebrow>{t("why.eyebrow")}</Eyebrow>
+            <SectionHeading>{t("why.heading")}</SectionHeading>
             <dl className="mt-8 space-y-6">
               {[
                 {
-                  term: "It's a register, not a pinboard.",
-                  body: "Job boards list adverts. Sebenza maintains a living, freshness-weighted register of people, and roles come to them.",
+                  term: t("why.t1"),
+                  body: t("why.b1"),
                 },
                 {
-                  term: "Trust is engineered, not claimed.",
-                  body: "Verification states, consent gates, audited reveals and redaction are enforced in code, on every read.",
+                  term: t("why.t2"),
+                  body: t("why.b2"),
                 },
                 {
-                  term: "The analytics nobody else has.",
-                  body: "Because hires are confirmed in-platform, the aggregate picture is real: live shortage signals, placement outcomes, curriculum-versus-demand. All k-anonymised.",
+                  term: t("why.t3"),
+                  body: t("why.b3"),
                 },
                 {
-                  term: "Hiring flows both directions.",
-                  body: "Employers pull with search and invitations; seekers walk in through public Self Apply links shared anywhere. One pipeline, honestly labelled.",
+                  term: t("why.t4"),
+                  body: t("why.b4"),
                 },
                 {
-                  term: "Your data stays yours.",
-                  body: "Seekers can pause visibility, block an employer, export everything, or erase themselves. Consent is per-purpose, never a blanket tick-box.",
+                  term: t("why.t5"),
+                  body: t("why.b5"),
                 },
               ].map((row) => (
                 <div
@@ -397,21 +377,16 @@ export default async function MarketingPage({
 
         {/* ── 8 · Pricing ──────────────────────────────────────────────── */}
         <section className="mx-auto max-w-[880px] px-5 py-14 md:py-20">
-          <Eyebrow>Pricing</Eyebrow>
-          <SectionHeading>
-            Free for job seekers. Simple for everyone else.
-          </SectionHeading>
+          <Eyebrow>{t("pricing.eyebrow")}</Eyebrow>
+          <SectionHeading>{t("pricing.heading")}</SectionHeading>
           <p className="mt-3 max-w-2xl leading-relaxed text-[color:var(--color-ink-soft)]">
-            A national register only works if every South African can afford
-            to be on it, so the seeker side is free, permanently. Employer and
-            government partnerships are priced to the size of the team and the
-            reporting they need.
+            {t("pricing.lead")}
           </p>
           <a
             href="mailto:info@sebenzasa.com"
             className="mt-6 inline-flex items-center gap-2 rounded-[var(--radius-pill)] border-2 border-[color:var(--color-ink)] px-6 py-3 text-sm font-medium text-[color:var(--color-ink)] transition-colors hover:bg-[color:var(--color-ink)] hover:text-[color:var(--color-surface)]"
           >
-            Talk to us about a partnership
+            {t("pricing.cta")}
             <ArrowUpRight className="size-4" aria-hidden="true" />
           </a>
         </section>
@@ -421,26 +396,24 @@ export default async function MarketingPage({
           <div className="mx-auto max-w-[880px] px-5 py-14 text-center md:py-20">
             <div className="flex items-center justify-center gap-2 text-[0.72rem] uppercase tracking-[0.28em] text-[color:var(--color-brand-strong)]">
               <SAChevron variant="mark" className="size-3" />
-              Built for South Africa · by South Africa
+              {t("finalCta.eyebrow")}
             </div>
             <h2 className="mt-4 font-display text-3xl leading-[1.05] tracking-[-0.02em] md:text-5xl">
-              See the register for yourself.
+              {t("finalCta.heading")}
             </h2>
             <p className="mx-auto mt-4 max-w-xl leading-relaxed text-[color:var(--color-ink-soft)]">
-              Search it as a visitor, join it as a seeker, or write to us and
-              we&rsquo;ll walk you through the employer and analytics sides
-              with your own use case in mind. No pressure, no jargon.
+              {t("finalCta.lead")}
             </p>
             <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
               <PillLink href="/search" primary>
-                Search talent
+                {t("finalCta.ctaSearch")}
               </PillLink>
-              <PillLink href="/sign-up/seeker">Create a free profile</PillLink>
+              <PillLink href="/sign-up/seeker">{t("finalCta.ctaCreate")}</PillLink>
               <a
                 href="mailto:info@sebenzasa.com"
                 className="text-sm font-medium text-[color:var(--color-brand-strong)] hover:underline"
               >
-                Talk to us
+                {t("finalCta.ctaTalk")}
               </a>
             </div>
           </div>

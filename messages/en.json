@@ -14,10 +14,97 @@
   },
   "landing": {
     "hero": {
-      "lineOne": "Find skilled people.",
-      "lineTwo": "Near you.",
-      "lineThree": "For real.",
-      "subhead": "Sebenza matches South African talent to work by skill and place  with employment data you can actually trust."
+      "subhead": "Sebenza matches South African talent to work by skill and place  with employment data you can actually trust.",
+      "eyebrow": "A national talent register · 2026",
+      "h1a": "South Africa's",
+      "h1b": "talent.",
+      "h1cItalic": "Visible.",
+      "h1cRest": "In real time.",
+      "scrollCue": "Scroll · the bulletin"
+    },
+    "chips": {
+      "chefs": "Chefs",
+      "developers": "Developers",
+      "electricians": "Electricians",
+      "nurses": "Nurses",
+      "capeTown": "Cape Town",
+      "johannesburg": "Johannesburg",
+      "pretoria": "Pretoria",
+      "durban": "Durban"
+    },
+    "dossier": {
+      "live": "Live · National pulse",
+      "today": "Today on Sebenza",
+      "activeProfiles": "Active profiles",
+      "confirmedHires": "Confirmed hires · {month}",
+      "trackedSkills": "Tracked skills",
+      "freshnessConfidence": "Freshness confidence",
+      "freshnessBody": "Weighted share of statuses confirmed in the last 30 days. Stale data is honestly down-ranked  never spun.",
+      "insightsLink": "See the national insights"
+    },
+    "pulse": {
+      "bulletin": "Bulletin",
+      "h2a": "South Africa,",
+      "h2bItalic": "in motion.",
+      "h2c": "Right now.",
+      "lead": "Three live, freshness-weighted readings of the South African workforce. Updated continuously, never spun.",
+      "statActive": "Active profiles",
+      "statHires": "Confirmed hires · {month}",
+      "statSkills": "Skills tracked",
+      "footConfidence": "{percent}% confidence · 30-day",
+      "footLogged": "Logged via the platform · not self-reported",
+      "footProvinces": "Across 9 provinces"
+    },
+    "principles": {
+      "eyebrow": "How we work",
+      "h2a": "Built on four",
+      "h2bItalic": "honest",
+      "h2c": "principles.",
+      "lead": "A national platform is judged by what its data shows  and by what it refuses to show. Sebenza commits to these four.",
+      "d1": "Employment data",
+      "c1": "Live, status-time-stamped, freshness-weighted.",
+      "d2": "Skills gap visibility",
+      "c2": "Derived from real-time employer searches.",
+      "d3": "Verification",
+      "c3": "Honest states  “unverified” is the default.",
+      "d4": "Built for",
+      "c4": "360 px Android, 3G, four launch languages.",
+      "quote": "The trustworthy, real-time layer for South African work.",
+      "cite": "Sebenza · strategy brief, 2026"
+    },
+    "pillarsHeader": {
+      "eyebrow": "What we do",
+      "h2a": "Three things, done",
+      "h2bItalic": "honestly"
+    },
+    "faq": {
+      "eyebrow": "Straight answers",
+      "h2a": "Questions, answered",
+      "h2bItalic": "honestly",
+      "q1": "What is Sebenza?",
+      "a1": "Sebenza is a South African national talent platform. Job seekers create a professional profile once and can be found by verified employers across all nine provinces. Employers search live, freshness-weighted profiles by profession, province and skills. It is operated by Yetotec (Pty) Ltd and built POPIA-first.",
+      "q2": "Is Sebenza free for job seekers?",
+      "a2": "Yes. Creating a profile, being found, receiving invitations and accepting work are free for job seekers. Sebenza is not an employment agency  we never take a fee from your wages.",
+      "q3": "How do employers find me?",
+      "a3": "Verified employers search by profession, province and skills. Your public profile shows a redacted name and never shows your contact details, ID number or documents. An employer only reaches you through the platform, with your consent, and every contact reveal is recorded in an audit log you can review.",
+      "q4": "Do I need matric or a degree to join?",
+      "a4": "No. Sebenza is for every skill level  from general workers, artisans and drivers to graduates and professionals. Current students can register a student profile with their expected completion date. What matters is a truthful profile, not a specific qualification.",
+      "q5": "How is my personal information protected?",
+      "a5": "Sebenza is built around POPIA, South Africa's data protection law. You give specific consent for each way your information is used, and you can pause your visibility or withdraw consent at any time. Sensitive fields are encrypted, public pages are redacted, and every access to your personal information is logged.",
+      "q6": "What does “verified” mean on a profile?",
+      "a6": "A verification badge means the platform actually verified something  for example an employer confirming a work record. Every profile starts as “unverified” and we say so honestly; badges are never bought or assumed. Statistics count a hire only when it is confirmed through the platform."
+    },
+    "finalCta": {
+      "eyebrow": "Built for South Africa · by South Africa",
+      "h2a": "Get found.",
+      "h2bItalic": "Or find someone.",
+      "lead": "Whether you're looking for work or looking for people  the fastest way to a real, verified, current match is one search away.",
+      "ctaCreate": "Create a profile",
+      "ctaFind": "Find talent",
+      "trust1": "POPIA-first",
+      "trust2": "WCAG 2.2 AA",
+      "trust3": "Works on 3G",
+      "trust4": "4 launch languages"
     },
     "search": {
       "professionLabel": "Profession or skill",
@@ -26,13 +113,6 @@
       "locationPlaceholder": "Province or city",
       "submit": "Search",
       "recentChips": "Popular searches"
-    },
-    "pulseStrip": {
-      "heading": "National pulse",
-      "subheading": "Live, freshness-weighted  never stale, never spun.",
-      "totalActive": "Active profiles",
-      "confirmedHires": "Confirmed hires this month",
-      "skillsInDemand": "Skills in active demand"
     },
     "valueCards": {
       "trusted": {
@@ -69,6 +149,120 @@
       "accessibility": "Accessibility",
       "language": "Language",
       "rights": "© {year} Sebenza. A national talent platform for South Africa."
+    }
+  },
+  "marketing": {
+    "meta": {
+      "title": "How Sebenza Works",
+      "description": "Sebenza is South Africa's POPIA-first national talent register. Job seekers build one free profile and get found; employers search live, honestly-verified talent; confirmed hiring becomes real labour-market intelligence."
+    },
+    "hero": {
+      "eyebrow": "South Africa’s national talent platform",
+      "h1a": "Find the person.",
+      "h1bItalic": "Trust the profile.",
+      "h1c": "Count the hire.",
+      "lead": "Sebenza is a POPIA-first national talent register. Job seekers build one free profile and get found. Employers search live, freshness-weighted, honestly-verified talent. And the hiring that follows becomes real labour-market intelligence, not guesswork.",
+      "ctaSearch": "Search the talent register",
+      "ctaCreate": "Create a free profile",
+      "ctaTalk": "Talk to us",
+      "microcopy": "Free for job seekers, always. Works on any phone, in English, isiZulu, isiXhosa and Afrikaans."
+    },
+    "problem": {
+      "eyebrow": "The reality",
+      "heading": "Hiring in South Africa runs on noise",
+      "item1": "A hundred CVs in a WhatsApp group, and no way to tell who is real.",
+      "item2": "Databases where half the “available” people found work months ago.",
+      "item3": "Badges that say verified when nobody actually verified anything.",
+      "item4": "Job seekers paying to be seen, or losing money to fake recruiters.",
+      "item5": "Policy written from surveys that were old before they were published.",
+      "closeA": "South Africa does not have a talent shortage. It has a trustworthy-signal shortage.",
+      "closeItalic": "That is the problem Sebenza fixes."
+    },
+    "who": {
+      "eyebrow": "Who it’s for",
+      "heading": "One register, three sides",
+      "seekersTitle": "Job seekers",
+      "seekersTag": "free, always",
+      "seekersBody": "Build one profile: your skills, experience, availability, and where you are. Get found by verified employers, get invited to real named roles, apply through public vacancy links, and control every bit of your information under POPIA. From general workers and artisans to graduates and professionals. Students too.",
+      "employersTitle": "Employers",
+      "employersTag": "from spaza to enterprise",
+      "employersBody": "Search by skill, place and availability, not by luck. See honest verification states and how fresh each profile is. Run vacancies: reverse-match candidates, invite them to named roles, share a public apply link on WhatsApp, and log the hire when it happens.",
+      "governmentTitle": "Government & institutions",
+      "governmentTag": "aggregate only",
+      "governmentBody": "A privacy-floored, read-only analytics portal: where demand is, where supply is, why roles go unfilled, why learners stall, and how curriculum lines up with the market. Every figure is k-anonymised and aggregate. Never an identifiable person."
+    },
+    "difference": {
+      "eyebrow": "The difference",
+      "heading": "Honesty is the feature",
+      "t1": "“Unverified” is the default.",
+      "b1": "A badge only says verified when something was actually verified. We never dress up self-reported data.",
+      "t2": "Freshness is ranked.",
+      "b2": "Every employment status carries a confirmation date. Stale profiles fall honestly down the list instead of wasting your calls.",
+      "t3": "A hire only counts when it's confirmed.",
+      "b3": "Our placement numbers are logged through the platform, never self-reported into a spreadsheet.",
+      "t4": "Public profiles are redacted.",
+      "b4": "No ID numbers, no documents, no contact details in search. Contact is revealed only to verified employers, with consent, and every reveal is logged where the seeker can see it.",
+      "t5": "Location, never nationality.",
+      "b5": "People are matched by where they are and what they can do. Nationality is shown, never a gate."
+    },
+    "how": {
+      "eyebrow": "How it works",
+      "heading": "One loop, from profile to policy",
+      "lead": "The hiring is the product. The analytics fall out of it honestly.",
+      "s1t": "A seeker builds one profile.",
+      "s1b": "Skills, experience, availability, place. Free, in four languages, on any phone.",
+      "s2t": "Employers search or match.",
+      "s2b": "Live filters by skill, province and availability, or reverse-matching against a specific vacancy.",
+      "s3t": "Roles reach people two ways.",
+      "s3b": "The employer invites a seeker to a named role, or shares the vacancy's public Self Apply link anywhere, including WhatsApp, and seekers walk in themselves.",
+      "s4t": "Contact is revealed with consent.",
+      "s4b": "Verified employers only. Audited every time. The seeker sees who reached them.",
+      "s5t": "The hire is confirmed.",
+      "s5b": "Logged through the platform, so it counts once and counts true.",
+      "s6t": "The nation learns.",
+      "s6b": "Confirmed hiring rolls up into k-anonymised analytics: demand, supply, shortages, outcomes. Live, not last year."
+    },
+    "proof": {
+      "eyebrow": "Proof",
+      "heading": "We’d rather show you the live numbers",
+      "lead": "These figures render straight from the register the moment you load this page. They are the same numbers our own dashboards run on. Freshness-weighted, never inflated.",
+      "statActive": "Active profiles",
+      "statHires": "Confirmed hires · {month}",
+      "statSkills": "Skills tracked",
+      "honest": "Sebenza is young and we won’t pretend otherwise. We don’t invent five-star quotes: as real people and employers say real things, their words appear here with their names attached, and only with their consent.",
+      "promiseTitle": "What we can promise today",
+      "promise1": "Free for job seekers. No fees, ever, and no paying to rank higher.",
+      "promise2": "POPIA-first from the first line of code: granular consent, field-level encryption, a permanent audit log, export and erasure built in.",
+      "promise3": "Honest badges, honest freshness, honest placement counts. The register would rather look smaller than lie.",
+      "promise4": "Built for the real South Africa: a low-end Android on 3G is our reference device, four launch languages, installable like an app."
+    },
+    "why": {
+      "eyebrow": "Why Sebenza",
+      "heading": "Why Sebenza, and not another job board",
+      "t1": "It's a register, not a pinboard.",
+      "b1": "Job boards list adverts. Sebenza maintains a living, freshness-weighted register of people, and roles come to them.",
+      "t2": "Trust is engineered, not claimed.",
+      "b2": "Verification states, consent gates, audited reveals and redaction are enforced in code, on every read.",
+      "t3": "The analytics nobody else has.",
+      "b3": "Because hires are confirmed in-platform, the aggregate picture is real: live shortage signals, placement outcomes, curriculum-versus-demand. All k-anonymised.",
+      "t4": "Hiring flows both directions.",
+      "b4": "Employers pull with search and invitations; seekers walk in through public Self Apply links shared anywhere. One pipeline, honestly labelled.",
+      "t5": "Your data stays yours.",
+      "b5": "Seekers can pause visibility, block an employer, export everything, or erase themselves. Consent is per-purpose, never a blanket tick-box."
+    },
+    "pricing": {
+      "eyebrow": "Pricing",
+      "heading": "Free for job seekers. Simple for everyone else.",
+      "lead": "A national register only works if every South African can afford to be on it, so the seeker side is free, permanently. Employer and government partnerships are priced to the size of the team and the reporting they need.",
+      "cta": "Talk to us about a partnership"
+    },
+    "finalCta": {
+      "eyebrow": "Built for South Africa · by South Africa",
+      "heading": "See the register for yourself.",
+      "lead": "Search it as a visitor, join it as a seeker, or write to us and we’ll walk you through the employer and analytics sides with your own use case in mind. No pressure, no jargon.",
+      "ctaSearch": "Search talent",
+      "ctaCreate": "Create a free profile",
+      "ctaTalk": "Talk to us"
     }
   },
   "auth": {

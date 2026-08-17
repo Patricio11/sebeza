@@ -15,10 +15,13 @@
   },
   "landing": {
     "hero": {
-      "lineOne": "Thola abantu abanamakhono.",
-      "lineTwo": "Eduze kwakho.",
-      "lineThree": "Ngempela.",
-      "subhead": "USebenza uhlanganisa ithalente laseNingizimu Afrika nomsebenzi ngekhono nangendawo, ngedatha yezomsebenzi ongayethemba ngempela."
+      "subhead": "USebenza uhlanganisa ithalente laseNingizimu Afrika nomsebenzi ngekhono nangendawo, ngedatha yezomsebenzi ongayethemba ngempela.",
+      "eyebrow": "Uhlu lwethalente lukazwelonke · 2026",
+      "h1a": "Ithalente",
+      "h1b": "laseNingizimu Afrika.",
+      "h1cItalic": "Liyabonakala.",
+      "h1cRest": "Khona manje.",
+      "scrollCue": "Skrola · ibhulethini"
     },
     "search": {
       "professionLabel": "Umsebenzi noma ikhono",
@@ -27,13 +30,6 @@
       "locationPlaceholder": "Isifundazwe noma idolobha",
       "submit": "Sesha",
       "recentChips": "Okuseshwa kakhulu"
-    },
-    "pulseStrip": {
-      "heading": "Isigqi sikazwelonke",
-      "subheading": "Bukhoma, kukalwa ngokusha kwedatha. Akulokothi kube ndala, akulokothi kusontwe.",
-      "totalActive": "Amaphrofayela asebenzayo",
-      "confirmedHires": "Abaqashiwe abaqinisekisiwe kule nyanga",
-      "skillsInDemand": "Amakhono adingeka kakhulu"
     },
     "valueCards": {
       "trusted": {
@@ -70,6 +66,90 @@
       "accessibility": "Ukufinyeleleka",
       "language": "Ulimi",
       "rights": "© {year} Sebenza. Iplatifomu kazwelonke yethalente yaseNingizimu Afrika."
+    },
+    "chips": {
+      "chefs": "Abapheki",
+      "developers": "Onjiniyela",
+      "electricians": "Ogesi",
+      "nurses": "Abahlengikazi",
+      "capeTown": "Cape Town",
+      "johannesburg": "Johannesburg",
+      "pretoria": "Pretoria",
+      "durban": "Durban"
+    },
+    "dossier": {
+      "live": "Bukhoma · Isigqi sikazwelonke",
+      "today": "Namuhla kuSebenza",
+      "activeProfiles": "Amaphrofayela asebenzayo",
+      "confirmedHires": "Abaqashiwe abaqinisekisiwe · {month}",
+      "trackedSkills": "Amakhono alandelelwayo",
+      "freshnessConfidence": "Ukwethemba kokusha",
+      "freshnessBody": "Isabelo sezimo eziqinisekiswe ezinsukwini ezingama-30 ezedlule. Idatha endala yehliswa ngobuqotho ohlwini, ayisontwa.",
+      "insightsLink": "Bona imininingwane kazwelonke"
+    },
+    "pulse": {
+      "bulletin": "Ibhulethini",
+      "h2a": "INingizimu Afrika,",
+      "h2bItalic": "iyanyakaza.",
+      "h2c": "Njengamanje.",
+      "lead": "Izilinganiso ezintathu ezibukhoma zabasebenzi baseNingizimu Afrika, ezikalwa ngokusha kwedatha. Zibuyekezwa njalo, azisontwa.",
+      "statActive": "Amaphrofayela asebenzayo",
+      "statHires": "Abaqashiwe abaqinisekisiwe · {month}",
+      "statSkills": "Amakhono alandelelwayo",
+      "footConfidence": "Ukwethemba okungu-{percent}% · izinsuku ezingama-30",
+      "footLogged": "Kurekhodwe kuplatifomu · akuzibikelwa",
+      "footProvinces": "Kuzo zonke izifundazwe eziyisi-9"
+    },
+    "principles": {
+      "eyebrow": "Indlela esisebenza ngayo",
+      "h2a": "Izimiso ezine",
+      "h2bItalic": "eziqotho",
+      "h2c": "esizilandelayo.",
+      "lead": "Iplatifomu kazwelonke yahlulelwa ngalokho idatha yayo ekubonisayo, nangalokho enqaba ukukubonisa. USebenza uzibophezela kulezi ezine.",
+      "d1": "Idatha yezomsebenzi",
+      "c1": "Ibukhoma, inosuku lwesimo, ikalwa ngokusha.",
+      "d2": "Ukubonakala kwegebe lamakhono",
+      "c2": "Kususelwa ekusesheni kwabaqashi kwesikhathi sangempela.",
+      "d3": "Ukuqinisekiswa",
+      "c3": "Izimo eziqotho: “akuqinisekisiwe” kuyisimo sokuqala.",
+      "d4": "Yakhelwe",
+      "c4": "I-Android engu-360 px, i-3G, izilimi ezine zokwethulwa.",
+      "quote": "Isendlalelo esithembekile, sesikhathi sangempela somsebenzi waseNingizimu Afrika.",
+      "cite": "Sebenza · umbiko wesu, 2026"
+    },
+    "pillarsHeader": {
+      "eyebrow": "Esikwenzayo",
+      "h2a": "Izinto ezintathu, ezenziwa",
+      "h2bItalic": "ngobuqotho"
+    },
+    "faq": {
+      "eyebrow": "Izimpendulo eziqondile",
+      "h2a": "Imibuzo, iphendulwe",
+      "h2bItalic": "ngobuqotho",
+      "q1": "Uyini uSebenza?",
+      "a1": "USebenza uyiplatifomu kazwelonke yethalente yaseNingizimu Afrika. Abafuni bomsebenzi bakha iphrofayela kanye futhi bangatholwa ngabaqashi abaqinisekisiwe kuzo zonke izifundazwe eziyisi-9. Abaqashi basesha amaphrofayela abukhoma, akalwa ngokusha, ngomsebenzi, ngesifundazwe nangamakhono. Iphethwe yi-Yetotec (Pty) Ltd futhi yakhiwe nge-POPIA kuqala.",
+      "q2": "Ingabe uSebenza umahhala kubafuni bomsebenzi?",
+      "a2": "Yebo. Ukwakha iphrofayela, ukutholwa, ukwamukela izimemo nokwamukela umsebenzi kumahhala kubafuni bomsebenzi. USebenza akayona i-ejensi yomsebenzi. Asilokothi sithathe imali emholweni wakho.",
+      "q3": "Abaqashi bangithola kanjani?",
+      "a3": "Abaqashi abaqinisekisiwe basesha ngomsebenzi, ngesifundazwe nangamakhono. Iphrofayela yakho yomphakathi ibonisa igama elifihliwe futhi ayilokothi ibonise imininingwane yakho yokuxhumana, inombolo kamazisi noma amadokhumenti. Umqashi ufinyelela kuwe kuphela ngeplatifomu, ngemvume yakho, futhi konke ukuvezwa kokuxhumana kurekhodwa kwilogu yokuhlola ongayibuka.",
+      "q4": "Ingabe ngidinga umatikuletsheni noma iziqu ukuze ngijoyine?",
+      "a4": "Cha. USebenza ungowawo wonke amazinga amakhono: kusukela kubasebenzi jikelele, ezingcweti nakubashayeli kuya kubaphothule nakochwepheshe. Abafundi bamanje bangabhalisa iphrofayela yomfundi nosuku lokuphothula olulindelekile. Okubalulekile yiphrofayela eneqiniso, hhayi isiqu esithile.",
+      "q5": "Ulwazi lwami lomuntu siqu luvikelwa kanjani?",
+      "a5": "USebenza wakhiwe ngokuzungeza i-POPIA, umthetho waseNingizimu Afrika wokuvikela idatha. Unikeza imvume ethile ngendlela ngayinye ulwazi lwakho olusetshenziswa ngayo, futhi ungamisa ukubonakala kwakho noma uhoxise imvume noma nini. Amasimu abucayi ayabethelwa, amakhasi omphakathi ayafihlwa, futhi konke ukufinyelela kulwazi lwakho kuyarekhodwa.",
+      "q6": "Kusho ukuthini “kuqinisekisiwe” kwiphrofayela?",
+      "a6": "Ibheji lokuqinisekisa lisho ukuthi iplatifomu iqinisekise into ngempela, isibonelo umqashi eqinisekisa irekhodi lomsebenzi. Yonke iphrofayela iqala ithi “akuqinisekisiwe” futhi sikusho lokho ngobuqotho; amabheji awathengwa futhi awacatshangelwa. Izibalo zibala ukuqashwa kuphela uma kuqinisekisiwe ngeplatifomu."
+    },
+    "finalCta": {
+      "eyebrow": "Yakhelwe iNingizimu Afrika · yiNingizimu Afrika",
+      "h2a": "Tholakala.",
+      "h2bItalic": "Noma uthole umuntu.",
+      "lead": "Noma ufuna umsebenzi noma ufuna abantu, indlela esheshayo eya kokutholakala kwangempela, okuqinisekisiwe, kwamanje iwukusesha okukodwa nje.",
+      "ctaCreate": "Yakha iphrofayela",
+      "ctaFind": "Thola ithalente",
+      "trust1": "I-POPIA kuqala",
+      "trust2": "WCAG 2.2 AA",
+      "trust3": "Isebenza ku-3G",
+      "trust4": "Izilimi ezi-4 zokwethulwa"
     }
   },
   "auth": {
@@ -728,5 +808,119 @@
     "no": "Cha",
     "required": "Kuyadingeka",
     "optional": "Okuzikhethelayo"
+  },
+  "marketing": {
+    "meta": {
+      "title": "Indlela uSebenza asebenza ngayo",
+      "description": "USebenza uwuhlu kazwelonke lwethalente lwaseNingizimu Afrika olwakhiwe nge-POPIA kuqala. Abafuni bomsebenzi bakha iphrofayela eyodwa yamahhala batholakale; abaqashi basesha ithalente elibukhoma eliqinisekiswe ngobuqotho; ukuqashwa okuqinisekisiwe kuba ulwazi lwangempela lwemakethe yezomsebenzi."
+    },
+    "hero": {
+      "eyebrow": "Iplatifomu kazwelonke yethalente yaseNingizimu Afrika",
+      "h1a": "Thola umuntu.",
+      "h1bItalic": "Themba iphrofayela.",
+      "h1c": "Bala ukuqashwa.",
+      "lead": "USebenza uwuhlu kazwelonke lwethalente olwakhiwe nge-POPIA kuqala. Abafuni bomsebenzi bakha iphrofayela eyodwa yamahhala batholakale. Abaqashi basesha ithalente elibukhoma, elikalwa ngokusha, eliqinisekiswe ngobuqotho. Ukuqashwa okulandelayo kuba ulwazi lwangempela lwemakethe yezomsebenzi, hhayi ukuqagela.",
+      "ctaSearch": "Sesha uhlu lwethalente",
+      "ctaCreate": "Yakha iphrofayela yamahhala",
+      "ctaTalk": "Khuluma nathi",
+      "microcopy": "Kumahhala kubafuni bomsebenzi, njalo. Isebenza kunoma iyiphi ifoni, ngesiNgisi, ngesiZulu, ngesiXhosa nangesiBhunu."
+    },
+    "problem": {
+      "eyebrow": "Iqiniso",
+      "heading": "Ukuqasha eNingizimu Afrika kusebenza ngomsindo",
+      "item1": "Ama-CV ayikhulu eqenjini le-WhatsApp, kungekho ndlela yokwazi ukuthi ubani ongowangempela.",
+      "item2": "Izinqolobane lapho uhhafu wabantu “abatholakalayo” bathola umsebenzi ezinyangeni ezedlule.",
+      "item3": "Amabheji athi kuqinisekisiwe kanti akekho oqinisekise lutho ngempela.",
+      "item4": "Abafuni bomsebenzi bekhokha ukuze babonakale, noma belahlekelwa yimali ngabaqashi bamanga.",
+      "item5": "Inqubomgomo ebhalwe ngezinhlolovo ezazindala zingakashicilelwa.",
+      "closeA": "INingizimu Afrika ayinakushoda kwethalente. Inokushoda kwesignali ethembekile.",
+      "closeItalic": "Yileyo nkinga uSebenza ayilungisayo."
+    },
+    "who": {
+      "eyebrow": "Ngeyobani",
+      "heading": "Uhlu olulodwa, izinhlangothi ezintathu",
+      "seekersTitle": "Abafuni bomsebenzi",
+      "seekersTag": "mahhala, njalo",
+      "seekersBody": "Yakha iphrofayela eyodwa: amakhono akho, isipiliyoni, ukutholakala, nalapho ukhona. Tholwa ngabaqashi abaqinisekisiwe, menywe ezikhundleni zangempela ezinamagama, faka isicelo ngezixhumanisi zomphakathi zezikhala, futhi ulawule lonke ulwazi lwakho ngaphansi kwe-POPIA. Kusukela kubasebenzi jikelele nezingcweti kuya kubaphothule nakochwepheshe. Nabafundi futhi.",
+      "employersTitle": "Abaqashi",
+      "employersTag": "kusukela kwispaza kuya enkampanini enkulu",
+      "employersBody": "Sesha ngekhono, ngendawo nangokutholakala, hhayi ngenhlanhla. Bona izimo zokuqinisekiswa eziqotho nokuthi iphrofayela ngayinye isha kangakanani. Phatha izikhala: hlanganisa abantu ngokubuyela emuva, bameme ezikhundleni ezinamagama, wabelane ngesixhumanisi sokufaka isicelo ku-WhatsApp, futhi urekhode ukuqashwa uma kwenzeka.",
+      "governmentTitle": "Uhulumeni nezikhungo",
+      "governmentTag": "okuhlanganisiwe kuphela",
+      "governmentBody": "Iphothali yezibalo efundwa kuphela, enomkhawulo wobumfihlo: lapho isidingo sikhona, lapho ukutholakala kukhona, kungani izikhundla zingagcwaliswa, kungani abafundi bebambeka, nokuthi ikharikhulamu ihambisana kanjani nemakethe. Zonke izibalo zi-k-anonymised futhi zihlanganisiwe. Akulokothi kube umuntu obonakalayo."
+    },
+    "difference": {
+      "eyebrow": "Umehluko",
+      "heading": "Ubuqotho buyisici",
+      "t1": "“Akuqinisekisiwe” kuyisimo sokuqala.",
+      "b1": "Ibheji lithi kuqinisekisiwe kuphela uma kukhona okuqinisekisiwe ngempela. Asilokothi sihlobise idatha ezibikelwe.",
+      "t2": "Ukusha kuyakalwa.",
+      "b2": "Sonke isimo somsebenzi sinosuku lokuqinisekiswa. Amaphrofayela amadala ehla ohlwini ngobuqotho esikhundleni sokuchitha izingcingo zakho.",
+      "t3": "Ukuqashwa kubalwa kuphela uma kuqinisekisiwe.",
+      "b3": "Izibalo zethu zokubekwa zirekhodwa ngeplatifomu, azilokothi zizibikelwe kwispredishithi.",
+      "t4": "Amaphrofayela omphakathi ayafihlwa.",
+      "b4": "Azikho izinombolo zomazisi, awekho amadokhumenti, ayikho imininingwane yokuxhumana ekusesheni. Ukuxhumana kuvezwa kuphela kubaqashi abaqinisekisiwe, ngemvume, futhi konke ukuvezwa kurekhodwa lapho umfuni womsebenzi angakubona khona.",
+      "t5": "Indawo, hhayi ubuzwe.",
+      "b5": "Abantu bahlanganiswa ngalapho bekhona nangalokho abangakwenza. Ubuzwe buyaboniswa, abulokothi bube yisango."
+    },
+    "how": {
+      "eyebrow": "Indlela esebenza ngayo",
+      "heading": "Iluphu eyodwa, kusukela kwiphrofayela kuya kwinqubomgomo",
+      "lead": "Ukuqasha kuwumkhiqizo. Izibalo ziphuma kukho ngobuqotho.",
+      "s1t": "Umfuni womsebenzi wakha iphrofayela eyodwa.",
+      "s1b": "Amakhono, isipiliyoni, ukutholakala, indawo. Mahhala, ngezilimi ezine, kunoma iyiphi ifoni.",
+      "s2t": "Abaqashi bayasesha noma bahlanganise.",
+      "s2b": "Izihlungi ezibukhoma ngekhono, ngesifundazwe nangokutholakala, noma ukuhlanganisa okubuyela emuva esikhaleni esithile.",
+      "s3t": "Izikhundla zifinyelela kubantu ngezindlela ezimbili.",
+      "s3b": "Umqashi umema umfuni womsebenzi esikhundleni esinegama, noma abelane ngesixhumanisi somphakathi se-Self Apply sesikhala noma kuphi, kubandakanya i-WhatsApp, abafuni bomsebenzi bangene ngokwabo.",
+      "s4t": "Ukuxhumana kuvezwa ngemvume.",
+      "s4b": "Abaqashi abaqinisekisiwe kuphela. Kuhlolwa njalo. Umfuni womsebenzi uyabona ukuthi ubani omfinyelele.",
+      "s5t": "Ukuqashwa kuyaqinisekiswa.",
+      "s5b": "Kurekhodwa ngeplatifomu, ngakho kubalwa kanye futhi kubalwa ngeqiniso.",
+      "s6t": "Isizwe siyafunda.",
+      "s6b": "Ukuqashwa okuqinisekisiwe kuhlanganiswa ezibalweni ezi-k-anonymised: isidingo, ukutholakala, ukushoda, imiphumela. Kubukhoma, hhayi okonyaka odlule."
+    },
+    "proof": {
+      "eyebrow": "Ubufakazi",
+      "heading": "Sincamela ukukubonisa izibalo ezibukhoma",
+      "lead": "Lezi zibalo zivela ngqo kuhlu ngomzuzu ovula ngawo leli khasi. Ziyizibalo ezifanayo amadeshibhodi ethu asebenza ngazo. Zikalwa ngokusha, azilokothi zikhukhunyezwe.",
+      "statActive": "Amaphrofayela asebenzayo",
+      "statHires": "Abaqashiwe abaqinisekisiwe · {month}",
+      "statSkills": "Amakhono alandelelwayo",
+      "honest": "USebenza usemusha futhi ngeke sizenze sengathi akunjalo. Asiqambi izilinganiso zezinkanyezi ezinhlanu: njengoba abantu bangempela nabaqashi besho izinto zangempela, amazwi abo avela lapha namagama abo, futhi ngemvume yabo kuphela.",
+      "promiseTitle": "Esingakwethembisa namuhla",
+      "promise1": "Kumahhala kubafuni bomsebenzi. Azikho izimali, nanini, futhi akukho ukukhokha ukuze ukhuphuke.",
+      "promise2": "I-POPIA kuqala kusukela emgqeni wokuqala wekhodi: imvume ehlukanisiwe, ukubethelwa kwamasimu, ilogu yokuhlola engunaphakade, ukukhipha nokusula kwakhelwe ngaphakathi.",
+      "promise3": "Amabheji aqotho, ukusha okuqotho, izibalo zokubekwa eziqotho. Uhlu luncamela ukubukeka luncane kunokuqamba amanga.",
+      "promise4": "Yakhelwe iNingizimu Afrika yangempela: i-Android ephansi ku-3G iyidivayisi yethu yereferensi, izilimi ezine zokwethulwa, iyafakwa njengohlelo lokusebenza."
+    },
+    "why": {
+      "eyebrow": "Kungani uSebenza",
+      "heading": "Kungani uSebenza, hhayi elinye ibhodi lemisebenzi",
+      "t1": "Uwuhlu, hhayi ibhodi lezaziso.",
+      "b1": "Amabhodi emisebenzi afaka izikhangiso. USebenza ugcina uhlu oluphilayo, olukalwa ngokusha lwabantu, futhi izikhundla ziza kubo.",
+      "t2": "Ukwethenjwa kwakhiwe, akumenyezelwa.",
+      "b2": "Izimo zokuqinisekiswa, amasango emvume, ukuvezwa okuhlolwayo nokufihlwa kuphoqelelwa ngekhodi, kukho konke ukufundwa.",
+      "t3": "Izibalo okungekho omunye onazo.",
+      "b3": "Ngoba ukuqashwa kuqinisekiswa kuplatifomu, isithombe esihlanganisiwe singesangempela: izignali zokushoda ezibukhoma, imiphumela yokubekwa, ikharikhulamu eqhathaniswa nesidingo. Konke ku-k-anonymised.",
+      "t4": "Ukuqasha kugeleza nhlangothi zombili.",
+      "b4": "Abaqashi badonsa ngokusesha nangezimemo; abafuni bomsebenzi bangena ngezixhumanisi zomphakathi ze-Self Apply ezabiwe noma kuphi. Ipayipi elilodwa, elimakwe ngobuqotho.",
+      "t5": "Idatha yakho ihlala ingeyakho.",
+      "b5": "Abafuni bomsebenzi bangamisa ukubonakala, bavimbe umqashi, bakhiphe konke, noma bazisule. Imvume ingeyenjongo ngayinye, akulokothi kube yibhokisi elilodwa elivumela konke."
+    },
+    "pricing": {
+      "eyebrow": "Amanani",
+      "heading": "Kumahhala kubafuni bomsebenzi. Kulula kwabanye bonke.",
+      "lead": "Uhlu lukazwelonke lusebenza kuphela uma wonke umuntu waseNingizimu Afrika ekwazi ukuba kulo, ngakho uhlangothi lomfuni womsebenzi lumahhala, unomphela. Ubambiswano lwabaqashi nohulumeni lubizwa ngokobukhulu bethimba nemibiko abayidingayo.",
+      "cta": "Khuluma nathi ngobambiswano"
+    },
+    "finalCta": {
+      "eyebrow": "Yakhelwe iNingizimu Afrika · yiNingizimu Afrika",
+      "heading": "Zibonele uhlu ngokwakho.",
+      "lead": "Sesha njengomvakashi, joyina njengomfuni womsebenzi, noma usibhalele sikuhambise ohlangothini lwabaqashi nolwezibalo ngokwesimo sakho. Akukho ukucindezela, akukho ulimi olunzima.",
+      "ctaSearch": "Sesha ithalente",
+      "ctaCreate": "Yakha iphrofayela yamahhala",
+      "ctaTalk": "Khuluma nathi"
+    }
   }
 }

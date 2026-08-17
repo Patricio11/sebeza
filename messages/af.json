@@ -15,10 +15,13 @@
   },
   "landing": {
     "hero": {
-      "lineOne": "Vind bekwame mense.",
-      "lineTwo": "Naby jou.",
-      "lineThree": "Regtig.",
-      "subhead": "Sebenza verbind Suid-Afrikaanse talent met werk volgens vaardigheid en plek, met indiensnemingsdata wat jy werklik kan vertrou."
+      "subhead": "Sebenza verbind Suid-Afrikaanse talent met werk volgens vaardigheid en plek, met indiensnemingsdata wat jy werklik kan vertrou.",
+      "eyebrow": "'n Nasionale talentregister · 2026",
+      "h1a": "Suid-Afrika se",
+      "h1b": "talent.",
+      "h1cItalic": "Sigbaar.",
+      "h1cRest": "In reële tyd.",
+      "scrollCue": "Rol af · die bulletin"
     },
     "search": {
       "professionLabel": "Beroep of vaardigheid",
@@ -27,13 +30,6 @@
       "locationPlaceholder": "Provinsie of stad",
       "submit": "Soek",
       "recentChips": "Gewilde soektogte"
-    },
-    "pulseStrip": {
-      "heading": "Nasionale polsslag",
-      "subheading": "Lewendig, geweeg volgens varsheid. Nooit verouderd, nooit verdraai nie.",
-      "totalActive": "Aktiewe profiele",
-      "confirmedHires": "Bevestigde aanstellings dié maand",
-      "skillsInDemand": "Vaardighede in aanvraag"
     },
     "valueCards": {
       "trusted": {
@@ -70,6 +66,90 @@
       "accessibility": "Toeganklikheid",
       "language": "Taal",
       "rights": "© {year} Sebenza. 'n Nasionale talentplatform vir Suid-Afrika."
+    },
+    "chips": {
+      "chefs": "Sjefs",
+      "developers": "Ontwikkelaars",
+      "electricians": "Elektrisiëns",
+      "nurses": "Verpleegsters",
+      "capeTown": "Kaapstad",
+      "johannesburg": "Johannesburg",
+      "pretoria": "Pretoria",
+      "durban": "Durban"
+    },
+    "dossier": {
+      "live": "Lewendig · Nasionale polsslag",
+      "today": "Vandag op Sebenza",
+      "activeProfiles": "Aktiewe profiele",
+      "confirmedHires": "Bevestigde aanstellings · {month}",
+      "trackedSkills": "Nagevolgde vaardighede",
+      "freshnessConfidence": "Varsheidsvertroue",
+      "freshnessBody": "Geweegde aandeel statusse wat in die afgelope 30 dae bevestig is. Verouderde data sak eerlik in die ranglys, dit word nooit verdraai nie.",
+      "insightsLink": "Sien die nasionale insigte"
+    },
+    "pulse": {
+      "bulletin": "Bulletin",
+      "h2a": "Suid-Afrika,",
+      "h2bItalic": "in beweging.",
+      "h2c": "Nou dadelik.",
+      "lead": "Drie lewendige, varsheid-geweegde lesings van die Suid-Afrikaanse arbeidsmag. Deurlopend bygewerk, nooit verdraai nie.",
+      "statActive": "Aktiewe profiele",
+      "statHires": "Bevestigde aanstellings · {month}",
+      "statSkills": "Vaardighede nagevolg",
+      "footConfidence": "{percent}% vertroue · 30 dae",
+      "footLogged": "Via die platform aangeteken · nie self gerapporteer nie",
+      "footProvinces": "Oor 9 provinsies"
+    },
+    "principles": {
+      "eyebrow": "Hoe ons werk",
+      "h2a": "Gebou op vier",
+      "h2bItalic": "eerlike",
+      "h2c": "beginsels.",
+      "lead": "'n Nasionale platform word beoordeel aan wat sy data wys, en aan wat dit weier om te wys. Sebenza verbind hom tot hierdie vier.",
+      "d1": "Indiensnemingsdata",
+      "c1": "Lewendig, status-tydgestempel, varsheid-geweeg.",
+      "d2": "Sigbaarheid van vaardigheidsgapings",
+      "c2": "Afgelei uit intydse werkgewersoektogte.",
+      "d3": "Verifikasie",
+      "c3": "Eerlike state: “ongeverifieer” is die verstek.",
+      "d4": "Gebou vir",
+      "c4": "360 px Android, 3G, vier bekendstellingstale.",
+      "quote": "Die betroubare, intydse laag vir Suid-Afrikaanse werk.",
+      "cite": "Sebenza · strategie-opsomming, 2026"
+    },
+    "pillarsHeader": {
+      "eyebrow": "Wat ons doen",
+      "h2a": "Drie dinge,",
+      "h2bItalic": "eerlik gedoen"
+    },
+    "faq": {
+      "eyebrow": "Reguit antwoorde",
+      "h2a": "Vrae,",
+      "h2bItalic": "eerlik beantwoord",
+      "q1": "Wat is Sebenza?",
+      "a1": "Sebenza is 'n Suid-Afrikaanse nasionale talentplatform. Werksoekers skep een keer 'n professionele profiel en kan deur geverifieerde werkgewers in al nege provinsies gevind word. Werkgewers deursoek lewendige, varsheid-geweegde profiele volgens beroep, provinsie en vaardighede. Dit word deur Yetotec (Pty) Ltd bedryf en is POPIA-eerste gebou.",
+      "q2": "Is Sebenza gratis vir werksoekers?",
+      "a2": "Ja. Om 'n profiel te skep, gevind te word, uitnodigings te ontvang en werk te aanvaar, is gratis vir werksoekers. Sebenza is nie 'n arbeidsagentskap nie. Ons neem nooit 'n fooi uit jou loon nie.",
+      "q3": "Hoe vind werkgewers my?",
+      "a3": "Geverifieerde werkgewers soek volgens beroep, provinsie en vaardighede. Jou openbare profiel wys 'n verkorte naam en wys nooit jou kontakbesonderhede, ID-nommer of dokumente nie. 'n Werkgewer bereik jou slegs deur die platform, met jou toestemming, en elke kontakonthulling word in 'n ouditlog aangeteken wat jy kan nagaan.",
+      "q4": "Het ek matriek of 'n graad nodig om aan te sluit?",
+      "a4": "Nee. Sebenza is vir elke vaardigheidsvlak: van algemene werkers, ambagslui en bestuurders tot gegradueerdes en professionele persone. Huidige studente kan 'n studenteprofiel registreer met hul verwagte voltooiingsdatum. Wat saak maak, is 'n waarheidsgetroue profiel, nie 'n spesifieke kwalifikasie nie.",
+      "q5": "Hoe word my persoonlike inligting beskerm?",
+      "a5": "Sebenza is om POPIA gebou, Suid-Afrika se databeskermingswet. Jy gee spesifieke toestemming vir elke manier waarop jou inligting gebruik word, en jy kan jou sigbaarheid onderbreek of toestemming te eniger tyd terugtrek. Sensitiewe velde word geënkripteer, openbare bladsye word verkort, en elke toegang tot jou persoonlike inligting word aangeteken.",
+      "q6": "Wat beteken “geverifieer” op 'n profiel?",
+      "a6": "'n Verifikasiekenteken beteken die platform het werklik iets geverifieer, byvoorbeeld 'n werkgewer wat 'n werksrekord bevestig. Elke profiel begin as “ongeverifieer” en ons sê dit eerlik; kentekens word nooit gekoop of aangeneem nie. Statistiek tel 'n aanstelling slegs wanneer dit deur die platform bevestig is."
+    },
+    "finalCta": {
+      "eyebrow": "Gebou vir Suid-Afrika · deur Suid-Afrika",
+      "h2a": "Word gevind.",
+      "h2bItalic": "Of vind iemand.",
+      "lead": "Of jy nou werk soek of mense soek, die vinnigste pad na 'n regte, geverifieerde, huidige resultaat is een soektog ver.",
+      "ctaCreate": "Skep 'n profiel",
+      "ctaFind": "Vind talent",
+      "trust1": "POPIA-eerste",
+      "trust2": "WCAG 2.2 AA",
+      "trust3": "Werk op 3G",
+      "trust4": "4 bekendstellingstale"
     }
   },
   "auth": {
@@ -728,5 +808,119 @@
     "no": "Nee",
     "required": "Vereis",
     "optional": "Opsioneel"
+  },
+  "marketing": {
+    "meta": {
+      "title": "Hoe Sebenza werk",
+      "description": "Sebenza is Suid-Afrika se POPIA-eerste nasionale talentregister. Werksoekers bou een gratis profiel en word gevind; werkgewers deursoek lewendige, eerlik-geverifieerde talent; bevestigde aanstellings word werklike arbeidsmarkintelligensie."
+    },
+    "hero": {
+      "eyebrow": "Suid-Afrika se nasionale talentplatform",
+      "h1a": "Vind die persoon.",
+      "h1bItalic": "Vertrou die profiel.",
+      "h1c": "Tel die aanstelling.",
+      "lead": "Sebenza is 'n POPIA-eerste nasionale talentregister. Werksoekers bou een gratis profiel en word gevind. Werkgewers deursoek lewendige, varsheid-geweegde, eerlik-geverifieerde talent. En die aanstellings wat volg, word werklike arbeidsmarkintelligensie, nie raaiwerk nie.",
+      "ctaSearch": "Deursoek die talentregister",
+      "ctaCreate": "Skep 'n gratis profiel",
+      "ctaTalk": "Praat met ons",
+      "microcopy": "Gratis vir werksoekers, altyd. Werk op enige foon, in Engels, isiZulu, isiXhosa en Afrikaans."
+    },
+    "problem": {
+      "eyebrow": "Die werklikheid",
+      "heading": "Aanstellings in Suid-Afrika loop op geraas",
+      "item1": "'n Honderd CV's in 'n WhatsApp-groep, en geen manier om te weet wie eg is nie.",
+      "item2": "Databasisse waar die helfte van die “beskikbare” mense maande gelede werk gekry het.",
+      "item3": "Kentekens wat sê geverifieer terwyl niemand ooit iets geverifieer het nie.",
+      "item4": "Werksoekers wat betaal om gesien te word, of geld verloor aan vals werwers.",
+      "item5": "Beleid geskryf uit opnames wat oud was voordat hulle gepubliseer is.",
+      "closeA": "Suid-Afrika het nie 'n talenttekort nie. Dit het 'n tekort aan betroubare seine.",
+      "closeItalic": "Dit is die probleem wat Sebenza oplos."
+    },
+    "who": {
+      "eyebrow": "Vir wie dit is",
+      "heading": "Een register, drie kante",
+      "seekersTitle": "Werksoekers",
+      "seekersTag": "gratis, altyd",
+      "seekersBody": "Bou een profiel: jou vaardighede, ervaring, beskikbaarheid, en waar jy is. Word gevind deur geverifieerde werkgewers, word genooi na regte benoemde rolle, doen aansoek deur openbare vakatureskakels, en beheer elke stukkie van jou inligting onder POPIA. Van algemene werkers en ambagslui tot gegradueerdes en professionele persone. Studente ook.",
+      "employersTitle": "Werkgewers",
+      "employersTag": "van spaza tot onderneming",
+      "employersBody": "Soek volgens vaardigheid, plek en beskikbaarheid, nie volgens geluk nie. Sien eerlike verifikasiestate en hoe vars elke profiel is. Bestuur vakatures: pas kandidate omgekeerd, nooi hulle na benoemde rolle, deel 'n openbare aansoekskakel op WhatsApp, en teken die aanstelling aan wanneer dit gebeur.",
+      "governmentTitle": "Regering en instansies",
+      "governmentTag": "slegs saamgestel",
+      "governmentBody": "'n Privaatheid-begrensde, lees-alleen statistiekportaal: waar vraag is, waar aanbod is, hoekom rolle onvervuld bly, hoekom leerders vashaak, en hoe die kurrikulum met die mark belyn. Elke syfer is k-geanonimiseer en saamgestel. Nooit 'n identifiseerbare persoon nie."
+    },
+    "difference": {
+      "eyebrow": "Die verskil",
+      "heading": "Eerlikheid is die kenmerk",
+      "t1": "“Ongeverifieer” is die verstek.",
+      "b1": "'n Kenteken sê slegs geverifieer wanneer iets werklik geverifieer is. Ons vermom nooit self gerapporteerde data nie.",
+      "t2": "Varsheid word gerangskik.",
+      "b2": "Elke indiensnemingstatus dra 'n bevestigingsdatum. Verouderde profiele sak eerlik in die lys af in plaas daarvan om jou oproepe te mors.",
+      "t3": "'n Aanstelling tel eers wanneer dit bevestig is.",
+      "b3": "Ons plasingsyfers word deur die platform aangeteken, nooit self in 'n sigblad gerapporteer nie.",
+      "t4": "Openbare profiele is verkort.",
+      "b4": "Geen ID-nommers, geen dokumente, geen kontakbesonderhede in soektogte nie. Kontak word slegs aan geverifieerde werkgewers onthul, met toestemming, en elke onthulling word aangeteken waar die werksoeker dit kan sien.",
+      "t5": "Ligging, nooit nasionaliteit nie.",
+      "b5": "Mense word verbind volgens waar hulle is en wat hulle kan doen. Nasionaliteit word gewys, nooit 'n hek nie."
+    },
+    "how": {
+      "eyebrow": "Hoe dit werk",
+      "heading": "Een lus, van profiel tot beleid",
+      "lead": "Die aanstelling is die produk. Die statistiek volg eerlik daaruit.",
+      "s1t": "'n Werksoeker bou een profiel.",
+      "s1b": "Vaardighede, ervaring, beskikbaarheid, plek. Gratis, in vier tale, op enige foon.",
+      "s2t": "Werkgewers soek of pas.",
+      "s2b": "Lewendige filters volgens vaardigheid, provinsie en beskikbaarheid, of omgekeerde passing teen 'n spesifieke vakature.",
+      "s3t": "Rolle bereik mense op twee maniere.",
+      "s3b": "Die werkgewer nooi 'n werksoeker na 'n benoemde rol, of deel die vakature se openbare Self Apply-skakel enige plek, insluitend WhatsApp, en werksoekers stap self in.",
+      "s4t": "Kontak word met toestemming onthul.",
+      "s4b": "Slegs geverifieerde werkgewers. Elke keer geouditeer. Die werksoeker sien wie hulle bereik het.",
+      "s5t": "Die aanstelling word bevestig.",
+      "s5b": "Deur die platform aangeteken, sodat dit een keer tel en eg tel.",
+      "s6t": "Die nasie leer.",
+      "s6b": "Bevestigde aanstellings vloei saam in k-geanonimiseerde statistiek: vraag, aanbod, tekorte, uitkomste. Lewendig, nie verlede jaar nie."
+    },
+    "proof": {
+      "eyebrow": "Bewys",
+      "heading": "Ons wys jou eerder die lewendige syfers",
+      "lead": "Hierdie syfers kom direk uit die register die oomblik wat jy hierdie bladsy laai. Dit is dieselfde syfers waarop ons eie paneelborde loop. Varsheid-geweeg, nooit opgeblaas nie.",
+      "statActive": "Aktiewe profiele",
+      "statHires": "Bevestigde aanstellings · {month}",
+      "statSkills": "Vaardighede nagevolg",
+      "honest": "Sebenza is jonk en ons sal nie anders voorgee nie. Ons versin nie vyfster-aanhalings nie: soos regte mense en werkgewers regte dinge sê, verskyn hul woorde hier met hul name daarby, en slegs met hul toestemming.",
+      "promiseTitle": "Wat ons vandag kan belowe",
+      "promise1": "Gratis vir werksoekers. Geen fooie, ooit, en geen betaling om hoër te rangskik nie.",
+      "promise2": "POPIA-eerste van die eerste reël kode af: fyn toestemming, veldvlak-enkripsie, 'n permanente ouditlog, uitvoer en uitvee ingebou.",
+      "promise3": "Eerlike kentekens, eerlike varsheid, eerlike plasingsyfers. Die register lyk eerder kleiner as om te lieg.",
+      "promise4": "Gebou vir die regte Suid-Afrika: 'n goedkoop Android op 3G is ons verwysingstoestel, vier bekendstellingstale, installeerbaar soos 'n app."
+    },
+    "why": {
+      "eyebrow": "Hoekom Sebenza",
+      "heading": "Hoekom Sebenza, en nie nog 'n werksbord nie",
+      "t1": "Dit is 'n register, nie 'n plakbord nie.",
+      "b1": "Werksborde lys advertensies. Sebenza onderhou 'n lewende, varsheid-geweegde register van mense, en rolle kom na hulle toe.",
+      "t2": "Vertroue word gebou, nie beweer nie.",
+      "b2": "Verifikasiestate, toestemmingshekke, geouditeerde onthullings en verkorting word in kode afgedwing, by elke lees.",
+      "t3": "Die statistiek wat niemand anders het nie.",
+      "b3": "Omdat aanstellings op die platform bevestig word, is die saamgestelde prentjie eg: lewendige tekortseine, plasingsuitkomste, kurrikulum-teenoor-vraag. Alles k-geanonimiseer.",
+      "t4": "Aanstellings vloei in albei rigtings.",
+      "b4": "Werkgewers trek met soektogte en uitnodigings; werksoekers stap in deur openbare Self Apply-skakels wat enige plek gedeel word. Een pyplyn, eerlik gemerk.",
+      "t5": "Jou data bly joune.",
+      "b5": "Werksoekers kan sigbaarheid onderbreek, 'n werkgewer blokkeer, alles uitvoer, of hulself uitvee. Toestemming is per doel, nooit een alles-insluitende regmerkie nie."
+    },
+    "pricing": {
+      "eyebrow": "Pryse",
+      "heading": "Gratis vir werksoekers. Eenvoudig vir almal anders.",
+      "lead": "'n Nasionale register werk net as elke Suid-Afrikaner kan bekostig om daarop te wees, daarom is die werksoekerkant gratis, permanent. Werkgewer- en regeringsvennootskappe word geprys volgens die grootte van die span en die verslagdoening wat hulle nodig het.",
+      "cta": "Praat met ons oor 'n vennootskap"
+    },
+    "finalCta": {
+      "eyebrow": "Gebou vir Suid-Afrika · deur Suid-Afrika",
+      "heading": "Sien self die register.",
+      "lead": "Deursoek dit as 'n besoeker, sluit aan as 'n werksoeker, of skryf vir ons en ons stap saam met jou deur die werkgewer- en statistiekkante met jou eie behoefte in gedagte. Geen druk, geen jargon nie.",
+      "ctaSearch": "Soek talent",
+      "ctaCreate": "Skep 'n gratis profiel",
+      "ctaTalk": "Praat met ons"
+    }
   }
 }

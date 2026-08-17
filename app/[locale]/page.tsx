@@ -63,13 +63,20 @@ export default async function LandingPage({
   ]);
   const confidence = overallFreshnessConfidence(analytics);
 
+  // The FAQ strings feed BOTH the visible accordion and the FAQPage
+  // JSON-LD, from the catalog, so the two can never drift.
+  const faqItems = ([1, 2, 3, 4, 5, 6] as const).map((i) => ({
+    question: t(`faq.q${i}`),
+    answer: t(`faq.a${i}`),
+  }));
+
   return (
     <div className="bg-[color:var(--color-sa-cream)] text-[color:var(--color-sa-charcoal)]">
       {/* Phase 33  structured data: who we are, that the site is
           searchable (sitelinks search box), and the FAQ below. */}
       <OrganizationJsonLd />
       <WebSiteJsonLd />
-      <FaqJsonLd items={FAQ_ITEMS} />
+      <FaqJsonLd items={faqItems} />
       <LandingHeader />
       <main id="main">
         <Hero
@@ -81,20 +88,22 @@ export default async function LandingPage({
           professions={professions}
         />
         <PulseStrip t={t} analytics={analytics} confidence={confidence} locale={locale} />
-        <Principles />
+        <Principles t={t} />
         <Pillars t={t} />
         {/* Phase 24  REAL, admin-curated, consented testimonials (replaces the
             fabricated cards 23.2 removed; renders nothing until any are
             approved). */}
         <TestimonialsRail />
         <DualSplit t={t} />
-        <FAQ />
-        <FinalCTA />
+        <FAQ t={t} items={faqItems} />
+        <FinalCTA t={t} />
       </main>
       <SiteFooter />
     </div>
   );
 }
+
+type LandingT = Awaited<ReturnType<typeof getTranslations<"landing">>>;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // HERO
@@ -163,7 +172,7 @@ async function Hero({
           {/* Eyebrow */}
           <div className="anim-rise anim-delay-1 flex items-center gap-3 text-[0.72rem] uppercase tracking-[0.28em] text-[color:var(--color-sa-green-deep)]">
             <SAChevron variant="mark" className="size-3" />
-            A national talent register · 2026
+            {t("hero.eyebrow")}
             <span
               aria-hidden="true"
               className="ml-1 inline-block h-px w-10 bg-[color:var(--color-sa-charcoal)]"
@@ -173,17 +182,17 @@ async function Hero({
           {/* Headline  broken on purpose, last line italic in gold */}
           <h1 className="mt-7 font-display text-[color:var(--color-sa-charcoal)]">
             <span className="anim-rise-soft anim-delay-2 block leading-[0.95] tracking-[-0.025em] text-[clamp(2.25rem,9vw,7.2rem)]">
-              South Africa&apos;s
+              {t("hero.h1a")}
             </span>
             <span className="anim-rise-soft anim-delay-3 block leading-[0.95] tracking-[-0.025em] text-[clamp(2.25rem,9vw,7.2rem)]">
-              talent.
+              {t("hero.h1b")}
             </span>
             <span className="anim-rise-soft anim-delay-4 block leading-[0.95] tracking-[-0.025em] text-[clamp(2.25rem,9vw,7.2rem)]">
               <span className="italic font-light text-[color:var(--color-sa-gold-deep)]">
-                Visible.
+                {t("hero.h1cItalic")}
               </span>{" "}
               <span className="text-[color:var(--color-sa-green-deep)]">
-                In real time.
+                {t("hero.h1cRest")}
               </span>
             </span>
           </h1>
@@ -203,10 +212,10 @@ async function Hero({
               {t("search.recentChips")}
             </span>
             {[
-              ["Chefs", "Cape Town", "chef", "western-cape"],
-              ["Developers", "Johannesburg", "developer", "gauteng"],
-              ["Electricians", "Pretoria", "electrician", "gauteng"],
-              ["Nurses", "Durban", "nurse", "kwazulu-natal"],
+              [t("chips.chefs"), t("chips.capeTown"), "chef", "western-cape"],
+              [t("chips.developers"), t("chips.johannesburg"), "developer", "gauteng"],
+              [t("chips.electricians"), t("chips.pretoria"), "electrician", "gauteng"],
+              [t("chips.nurses"), t("chips.durban"), "nurse", "kwazulu-natal"],
             ].map(([role, city, q, p]) => (
               <Link
                 key={role}
@@ -238,16 +247,16 @@ async function Hero({
                   <span className="absolute inline-flex size-2 animate-ping rounded-full bg-[color:var(--color-sa-green)] opacity-60" />
                   <span className="relative inline-flex size-2 rounded-full bg-[color:var(--color-sa-green)]" />
                 </span>
-                Live · National pulse
+                {t("dossier.live")}
               </div>
 
               <h2 className="mt-2 font-display text-2xl leading-tight">
-                Today on Sebenza
+                {t("dossier.today")}
               </h2>
 
               <dl className="mt-6 space-y-4">
                 <DossierStat
-                  label="Active profiles"
+                  label={t("dossier.activeProfiles")}
                   value={
                     <AnimatedCount
                       value={analytics.totalActive}
@@ -258,7 +267,7 @@ async function Hero({
                   trend={trends.activesTrend ?? undefined}
                 />
                 <DossierStat
-                  label={`Confirmed hires · ${currentMonth}`}
+                  label={t("dossier.confirmedHires", { month: currentMonth })}
                   value={
                     <AnimatedCount
                       value={analytics.confirmedHiresThisMonth}
@@ -269,7 +278,7 @@ async function Hero({
                   trend={trends.hiresTrend ?? undefined}
                 />
                 <DossierStat
-                  label="Tracked skills"
+                  label={t("dossier.trackedSkills")}
                   value={
                     <span className="font-display tabular text-3xl">
                       {analytics.demandBySkill.length}
@@ -280,7 +289,7 @@ async function Hero({
 
               <div className="mt-6 rounded-xl bg-[color:var(--color-sa-green-tint)] p-4">
                 <div className="flex items-baseline justify-between text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--color-sa-green-deep)]">
-                  <span>Freshness confidence</span>
+                  <span>{t("dossier.freshnessConfidence")}</span>
                   <AnimatedCount
                     value={Math.round(confidence * 100)}
                     locale={locale}
@@ -298,8 +307,7 @@ async function Hero({
                   />
                 </div>
                 <p className="mt-2 text-[0.7rem] leading-snug text-[color:var(--color-sa-green-deep)]/85">
-                  Weighted share of statuses confirmed in the last 30 days.
-                  Stale data is honestly down-ranked  never spun.
+                  {t("dossier.freshnessBody")}
                 </p>
               </div>
 
@@ -307,7 +315,7 @@ async function Hero({
                 href="/insights"
                 className="mt-5 inline-flex items-center gap-1.5 text-sm font-medium text-[color:var(--color-sa-green-deep)] hover:underline"
               >
-                See the national insights
+                {t("dossier.insightsLink")}
                 <ArrowUpRight className="size-3.5" aria-hidden="true" />
               </Link>
             </div>
@@ -323,7 +331,7 @@ async function Hero({
 
       {/* Scroll cue */}
       <div className="anim-fade anim-delay-7 absolute bottom-8 left-1/2 hidden -translate-x-1/2 text-[0.62rem] uppercase tracking-[0.32em] text-[color:var(--color-ink-soft)] md:block">
-        Scroll · the bulletin
+        {t("hero.scrollCue")}
       </div>
     </section>
   );
@@ -391,7 +399,7 @@ async function PulseStrip({
           <div>
             <div className="flex flex-wrap items-center gap-3 text-[0.72rem] uppercase tracking-[0.28em] text-[color:var(--color-sa-gold)]">
               <SAChevron variant="mark" className="size-3" />
-              Bulletin · {new Date().toISOString().slice(0, 10)}
+              {t("pulse.bulletin")} · {new Date().toISOString().slice(0, 10)}
               <span className="rounded-[var(--radius-pill)] border border-[color:var(--color-sa-gold)]/40 px-2 py-0.5 text-[0.6rem] normal-case tracking-normal text-[color:var(--color-sa-cream)]/90">
                 Sebenza LMI{" "}
                 <span className="font-mono tabular text-[color:var(--color-sa-gold)]">
@@ -418,22 +426,21 @@ async function PulseStrip({
               id="pulse-h"
               className="mt-3 max-w-3xl font-display text-[clamp(2.4rem,5vw,4.2rem)] leading-[0.98] tracking-[-0.02em]"
             >
-              South Africa,{" "}
+              {t("pulse.h2a")}{" "}
               <span className="italic text-[color:var(--color-sa-gold)]">
-                in motion.
+                {t("pulse.h2bItalic")}
               </span>{" "}
-              Right now.
+              {t("pulse.h2c")}
             </h2>
           </div>
           <p className="max-w-sm text-[color:var(--color-sa-cream)]/80">
-            Three live, freshness-weighted readings of the South African
-            workforce. Updated continuously, never spun.
+            {t("pulse.lead")}
           </p>
         </div>
 
         <div className="mt-14 grid gap-px overflow-hidden rounded-2xl bg-[color:var(--color-sa-green)]/40 md:grid-cols-3">
           <BigStat
-            label="Active profiles"
+            label={t("pulse.statActive")}
             value={
               <AnimatedCount
                 value={analytics.totalActive}
@@ -442,11 +449,11 @@ async function PulseStrip({
               />
             }
             spark={analytics.trend.map((m) => m.registrations)}
-            footnote={`${Math.round(confidence * 100)}% confidence · 30-day`}
+            footnote={t("pulse.footConfidence", { percent: Math.round(confidence * 100) })}
             iconRight={<MapPin className="size-4" aria-hidden="true" />}
           />
           <BigStat
-            label={`Confirmed hires · ${currentMonth}`}
+            label={t("pulse.statHires", { month: currentMonth })}
             value={
               <AnimatedCount
                 value={analytics.confirmedHiresThisMonth}
@@ -455,18 +462,18 @@ async function PulseStrip({
               />
             }
             spark={analytics.trend.map((m) => m.placements)}
-            footnote="Logged via the platform · not self-reported"
+            footnote={t("pulse.footLogged")}
             iconRight={<Clock className="size-4" aria-hidden="true" />}
             accent
           />
           <BigStat
-            label="Skills tracked"
+            label={t("pulse.statSkills")}
             value={
               <span className="font-display tabular text-[clamp(3.2rem,6vw,5.2rem)] leading-none">
                 {analytics.demandBySkill.length}
               </span>
             }
-            footnote="Across 9 provinces"
+            footnote={t("pulse.footProvinces")}
             iconRight={<Sparkles className="size-4" aria-hidden="true" />}
           />
         </div>
@@ -554,26 +561,11 @@ function BigStat({
 // PRINCIPLES  what Sebenza commits to, in its own voice
 // ─────────────────────────────────────────────────────────────────────────────
 
-const PRINCIPLES: { dimension: string; commitment: string }[] = [
-  {
-    dimension: "Employment data",
-    commitment: "Live, status-time-stamped, freshness-weighted.",
-  },
-  {
-    dimension: "Skills gap visibility",
-    commitment: "Derived from real-time employer searches.",
-  },
-  {
-    dimension: "Verification",
-    commitment: "Honest states  “unverified” is the default.",
-  },
-  {
-    dimension: "Built for",
-    commitment: "360 px Android, 3G, four launch languages.",
-  },
-];
-
-function Principles() {
+function Principles({ t }: { t: LandingT }) {
+  const principles = ([1, 2, 3, 4] as const).map((i) => ({
+    dimension: t(`principles.d${i}`),
+    commitment: t(`principles.c${i}`),
+  }));
   return (
     <section
       aria-labelledby="prin-h"
@@ -583,27 +575,26 @@ function Principles() {
         <header className="mb-12 md:mb-16">
           <div className="flex items-center gap-3 text-[0.72rem] uppercase tracking-[0.28em] text-[color:var(--color-sa-green-deep)]">
             <SAChevron variant="mark" className="size-3" />
-            How we work
+            {t("principles.eyebrow")}
           </div>
           <h2
             id="prin-h"
             className="mt-3 max-w-3xl font-display text-[clamp(2.2rem,5vw,3.6rem)] leading-[1.02] tracking-[-0.02em]"
           >
-            Built on four
+            {t("principles.h2a")}
             <br />
             <span className="italic text-[color:var(--color-sa-green-deep)]">
-              honest
+              {t("principles.h2bItalic")}
             </span>{" "}
-            principles.
+            {t("principles.h2c")}
           </h2>
           <p className="mt-4 max-w-2xl text-[color:var(--color-ink-soft)]">
-            A national platform is judged by what its data shows  and by
-            what it refuses to show. Sebenza commits to these four.
+            {t("principles.lead")}
           </p>
         </header>
 
         <ol className="grid gap-px overflow-hidden rounded-2xl bg-[color:var(--color-sa-charcoal)]/10 md:grid-cols-2">
-          {PRINCIPLES.map((p, i) => (
+          {principles.map((p, i) => (
             <li
               key={p.dimension}
               className="group flex flex-col gap-3 bg-[color:var(--color-sa-cream)] p-7 transition-colors hover:bg-[color:var(--color-sa-green-tint)] md:p-10"
@@ -630,10 +621,10 @@ function Principles() {
             aria-hidden="true"
           />
           <p className="font-display text-2xl italic leading-snug text-[color:var(--color-sa-charcoal)] md:text-3xl">
-            The trustworthy, real-time layer for South African work.
+            {t("principles.quote")}
           </p>
           <cite className="mt-3 block text-[0.72rem] uppercase not-italic tracking-[0.24em] text-[color:var(--color-ink-soft)]">
-             Sebenza · strategy brief, 2026
+            {t("principles.cite")}
           </cite>
         </blockquote>
       </div>
@@ -683,15 +674,15 @@ function Pillars({
         <header className="mb-12 max-w-3xl md:mb-16">
           <div className="flex items-center gap-3 text-[0.72rem] uppercase tracking-[0.28em] text-[color:var(--color-sa-gold)]">
             <SAChevron variant="mark" className="size-3" />
-            What we do
+            {t("pillarsHeader.eyebrow")}
           </div>
           <h2
             id="pillars-h"
             className="mt-3 font-display text-[clamp(2.2rem,5vw,3.6rem)] leading-[1.02] tracking-[-0.02em]"
           >
-            Three things, done{" "}
+            {t("pillarsHeader.h2a")}{" "}
             <span className="italic text-[color:var(--color-sa-gold)]">
-              honestly
+              {t("pillarsHeader.h2bItalic")}
             </span>
             .
           </h2>
@@ -809,40 +800,7 @@ function DualSplit({
 // No-Flash compliant.
 // ─────────────────────────────────────────────────────────────────────────────
 
-const FAQ_ITEMS: { question: string; answer: string }[] = [
-  {
-    question: "What is Sebenza?",
-    answer:
-      "Sebenza is a South African national talent platform. Job seekers create a professional profile once and can be found by verified employers across all nine provinces. Employers search live, freshness-weighted profiles by profession, province and skills. It is operated by Yetotec (Pty) Ltd and built POPIA-first.",
-  },
-  {
-    question: "Is Sebenza free for job seekers?",
-    answer:
-      "Yes. Creating a profile, being found, receiving invitations and accepting work are free for job seekers. Sebenza is not an employment agency  we never take a fee from your wages.",
-  },
-  {
-    question: "How do employers find me?",
-    answer:
-      "Verified employers search by profession, province and skills. Your public profile shows a redacted name and never shows your contact details, ID number or documents. An employer only reaches you through the platform, with your consent, and every contact reveal is recorded in an audit log you can review.",
-  },
-  {
-    question: "Do I need matric or a degree to join?",
-    answer:
-      "No. Sebenza is for every skill level  from general workers, artisans and drivers to graduates and professionals. Current students can register a student profile with their expected completion date. What matters is a truthful profile, not a specific qualification.",
-  },
-  {
-    question: "How is my personal information protected?",
-    answer:
-      "Sebenza is built around POPIA, South Africa's data protection law. You give specific consent for each way your information is used, and you can pause your visibility or withdraw consent at any time. Sensitive fields are encrypted, public pages are redacted, and every access to your personal information is logged.",
-  },
-  {
-    question: "What does “verified” mean on a profile?",
-    answer:
-      "A verification badge means the platform actually verified something  for example an employer confirming a work record. Every profile starts as “unverified” and we say so honestly; badges are never bought or assumed. Statistics count a hire only when it is confirmed through the platform.",
-  },
-];
-
-function FAQ() {
+function FAQ({ t, items }: { t: LandingT; items: { question: string; answer: string }[] }) {
   return (
     <section
       id="faq"
@@ -853,22 +811,22 @@ function FAQ() {
         <header className="mb-10 md:mb-14">
           <div className="flex items-center gap-3 text-[0.72rem] uppercase tracking-[0.28em] text-[color:var(--color-sa-green-deep)]">
             <SAChevron variant="mark" className="size-3" />
-            Straight answers
+            {t("faq.eyebrow")}
           </div>
           <h2
             id="faq-h"
             className="mt-3 max-w-3xl font-display text-[clamp(2.2rem,5vw,3.6rem)] leading-[1.02] tracking-[-0.02em]"
           >
-            Questions, answered{" "}
+            {t("faq.h2a")}{" "}
             <span className="italic text-[color:var(--color-sa-green-deep)]">
-              honestly
+              {t("faq.h2bItalic")}
             </span>
             .
           </h2>
         </header>
 
         <div className="divide-y divide-[color:var(--color-sa-charcoal)]/10 border-y border-[color:var(--color-sa-charcoal)]/10">
-          {FAQ_ITEMS.map((item) => (
+          {items.map((item) => (
             <details key={item.question} className="group">
               <summary className="flex cursor-pointer list-none items-baseline justify-between gap-6 py-5 text-left md:py-6 [&::-webkit-details-marker]:hidden">
                 <span className="font-display text-xl leading-snug text-[color:var(--color-sa-charcoal)] md:text-2xl">
@@ -896,7 +854,7 @@ function FAQ() {
 // FINAL CTA
 // ─────────────────────────────────────────────────────────────────────────────
 
-function FinalCTA() {
+function FinalCTA({ t }: { t: LandingT }) {
   return (
     <section
       aria-labelledby="cta-h"
@@ -909,47 +867,46 @@ function FinalCTA() {
 
       <div className="relative mx-auto max-w-[1320px] px-5 text-center md:px-10">
         <div className="text-[0.72rem] uppercase tracking-[0.28em] text-[color:var(--color-sa-green-deep)]">
-          Built for South Africa · by South Africa
+          {t("finalCta.eyebrow")}
         </div>
         <h2
           id="cta-h"
           className="mt-4 font-display text-[clamp(2.4rem,6vw,4.6rem)] leading-[0.98] tracking-[-0.025em]"
         >
-          Get found.
+          {t("finalCta.h2a")}
           <br />
           <span className="italic text-[color:var(--color-sa-green-deep)]">
-            Or find someone.
+            {t("finalCta.h2bItalic")}
           </span>
         </h2>
         <p className="mx-auto mt-5 max-w-xl text-lg text-[color:var(--color-ink-soft)]">
-          Whether you&apos;re looking for work or looking for people  the
-          fastest way to a real, verified, current match is one search away.
+          {t("finalCta.lead")}
         </p>
         <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
           <Link
             href="/sign-up/seeker"
             className="inline-flex items-center gap-2 rounded-full bg-[color:var(--color-sa-charcoal)] px-7 py-3.5 text-sm font-medium text-[color:var(--color-sa-cream)] shadow-press transition-transform hover:-translate-y-0.5"
           >
-            Create a profile
+            {t("finalCta.ctaCreate")}
             <span aria-hidden="true">↗</span>
           </Link>
           <Link
             href="/search"
             className="inline-flex items-center gap-2 rounded-full border-2 border-[color:var(--color-sa-charcoal)] px-7 py-3.5 text-sm font-medium text-[color:var(--color-sa-charcoal)] transition-colors hover:bg-[color:var(--color-sa-charcoal)] hover:text-[color:var(--color-sa-cream)]"
           >
-            Find talent
+            {t("finalCta.ctaFind")}
           </Link>
         </div>
 
         {/* Trust strip */}
         <div className="mt-14 flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-[0.7rem] uppercase tracking-[0.24em] text-[color:var(--color-ink-soft)]">
-          <span>POPIA-first</span>
+          <span>{t("finalCta.trust1")}</span>
           <span aria-hidden="true">·</span>
-          <span>WCAG 2.2 AA</span>
+          <span>{t("finalCta.trust2")}</span>
           <span aria-hidden="true">·</span>
-          <span>Works on 3G</span>
+          <span>{t("finalCta.trust3")}</span>
           <span aria-hidden="true">·</span>
-          <span>4 launch languages</span>
+          <span>{t("finalCta.trust4")}</span>
         </div>
       </div>
     </section>
