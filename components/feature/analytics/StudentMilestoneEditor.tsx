@@ -14,6 +14,7 @@
  */
 
 import { useState, useTransition } from "react";
+import { CustomSelect } from "@/components/ui/CustomSelect";
 import { X, Plus, Loader2 } from "lucide-react";
 import {
   addStudentMilestone,
@@ -144,26 +145,20 @@ function AddForm({
           <span className="uppercase tracking-[0.14em] text-[color:var(--color-ink-soft)]">
             Milestone
           </span>
-          <select
+          <CustomSelect
+            ariaLabel="Milestone"
             value={kind}
-            onChange={(e) => setKind(e.target.value as MilestoneKind)}
-            className="rounded-[var(--radius-sm)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] px-2 py-1.5 text-sm"
-          >
-            {KIND_OPTIONS.map((opt) => {
+            onChange={(v) => setKind(v as MilestoneKind)}
+            options={KIND_OPTIONS.map((opt) => {
               const already =
                 ONE_SHOT_KINDS.has(opt.value) && existingKinds.has(opt.value);
-              return (
-                <option
-                  key={opt.value}
-                  value={opt.value}
-                  disabled={already}
-                >
-                  {opt.label}
-                  {already ? " · already on timeline" : ""}
-                </option>
-              );
+              return {
+                value: opt.value,
+                label: opt.label + (already ? " · already on timeline" : ""),
+                disabled: already,
+              };
             })}
-          </select>
+          />
         </label>
         <label className="grid gap-1">
           <span className="uppercase tracking-[0.14em] text-[color:var(--color-ink-soft)]">

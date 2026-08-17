@@ -65,21 +65,27 @@ test("cycle is rejected and a valid prerequisite is added", async ({ page }) => 
     main.getByRole("heading", { name: /^Prerequisites/ }),
   ).toBeVisible();
 
+  // ComboboxField (house searchable picker): the label resolves to the
+  // trigger button; options render in the popover panel.
   const skillSel = main.getByLabel("Skill", { exact: true });
   const prereqSel = main.getByLabel("Prerequisite", { exact: true });
+  const pick = async (trigger: typeof skillSel, optionName: string) => {
+    await trigger.click();
+    await page.getByRole("option", { name: optionName, exact: true }).first().click();
+  };
   const reason = main.getByPlaceholder("Why this ordering?");
   const addBtn = main.getByRole("button", { name: "Add prerequisite" });
 
   // 1. Cycle: postgres already requires sql, so sql → postgres must be refused.
-  await skillSel.selectOption("sql");
-  await prereqSel.selectOption("postgres");
+  await pick(skillSel, "SQL");
+  await pick(prereqSel, "PostgreSQL");
   await reason.fill("should fail");
   await addBtn.click();
   await expect(main.getByText(/cycle/i)).toBeVisible({ timeout: 30_000 });
 
   // 2. Valid: node → typescript is accepted and listed.
-  await skillSel.selectOption("node");
-  await prereqSel.selectOption("typescript");
+  await pick(skillSel, "Node.js");
+  await pick(prereqSel, "TypeScript");
   await reason.fill(REASON);
   await addBtn.click();
   await expect(main.getByText(REASON)).toBeVisible({ timeout: 30_000 });

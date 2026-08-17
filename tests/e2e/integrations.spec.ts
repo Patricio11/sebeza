@@ -115,7 +115,8 @@ test("hub renders health + configure/enable SMS + consent-gated announcement", a
     .filter({ has: page.getByText("SMS", { exact: true }) })
     .first();
   await main.getByRole("button", { name: /^Configure$/ }).first().click();
-  await main.getByLabel("SMS provider").selectOption("console");
+  await main.getByLabel("SMS provider").click();
+  await page.getByRole("option", { name: /console/ }).first().click();
   await main
     .getByRole("button", { name: /Save \(encrypted\)/ })
     .first()

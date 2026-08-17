@@ -12,6 +12,7 @@
  */
 
 import { useState, useTransition } from "react";
+import { CustomSelect } from "@/components/ui/CustomSelect";
 import { useRouter } from "@/i18n/navigation";
 import { Plus, X, Info, Loader2 } from "lucide-react";
 import { addCustomSkill, removeCustomSkill } from "@/lib/profile/custom-skills";
@@ -141,18 +142,12 @@ export function CustomSkillsEditor({
             >
               Level
             </label>
-            <select
+            <CustomSelect
               id="custom-skill-prof"
-              value={proficiency}
-              onChange={(e) => setProficiency(Number(e.target.value))}
-              className="h-10 rounded-[var(--radius-md)] border border-[color:var(--color-line)] bg-[color:var(--color-paper)] px-2 text-sm outline-none focus:border-[color:var(--color-brand)]"
-            >
-              {LEVELS.map((l) => (
-                <option key={l.value} value={l.value}>
-                  {l.label}
-                </option>
-              ))}
-            </select>
+              value={String(proficiency)}
+              onChange={(v) => setProficiency(Number(v))}
+              options={LEVELS.map((l) => ({ value: String(l.value), label: l.label }))}
+            />
           </div>
           <div className="w-20">
             <label

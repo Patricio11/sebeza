@@ -27,6 +27,7 @@
  */
 
 import { useMemo, useState, useTransition, type ReactNode } from "react";
+import { CustomSelect } from "@/components/ui/CustomSelect";
 import { useRouter } from "@/i18n/navigation";
 
 import { bulkInviteToVacancy } from "@/lib/employer/invitations";
@@ -447,18 +448,13 @@ export function BulkInviteIsland({
           </div>
           <label className="inline-flex items-center gap-2 text-xs text-[color:var(--color-ink-soft)]">
             Sort
-            <select
+            <CustomSelect
+              variant="compact"
+              ariaLabel="Sort candidates"
               value={sortKey}
-              onChange={(e) => setSortKey(e.target.value as SortKey)}
-              className="h-8 rounded-[var(--radius-sm)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] px-2 text-xs text-[color:var(--color-ink)] outline-none focus:border-[color:var(--color-ink)]"
-              aria-label="Sort candidates"
-            >
-              {SORT_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
+              onChange={(v) => setSortKey(v as SortKey)}
+              options={SORT_OPTIONS.map((opt) => ({ value: opt.value, label: opt.label }))}
+            />
           </label>
         </div>
 

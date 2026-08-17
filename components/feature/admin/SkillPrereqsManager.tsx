@@ -9,6 +9,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "@/i18n/navigation";
 import { Plus, Trash2, ArrowRight, Loader2 } from "lucide-react";
+import { ComboboxField } from "@/components/ui/ComboboxField";
 import { addSkillPrereq, removeSkillPrereq } from "@/lib/admin/skill-prereqs";
 import type { AdminPrereqRow } from "@/db/queries/skill-prereqs";
 
@@ -69,44 +70,28 @@ export function SkillPrereqsManager({
           Add a prerequisite
         </h2>
         <div className="flex flex-wrap items-end gap-2">
-          <div>
-            <label className="mb-1 block text-[0.6rem] uppercase tracking-[0.18em] text-[color:var(--color-ink-soft)]">
-              Skill
-            </label>
-            <select
+          <div className="w-56">
+            <ComboboxField
+              id="prereq-skill"
+              label="Skill"
               value={skill}
-              onChange={(e) => setSkill(e.target.value)}
-              className={`${field} w-48`}
-              aria-label="Skill"
-            >
-              <option value="">Select…</option>
-              {skills.map((s) => (
-                <option key={s.slug} value={s.slug}>
-                  {s.label}
-                </option>
-              ))}
-            </select>
+              onChange={setSkill}
+              options={skills.map((s) => ({ value: s.slug, label: s.label }))}
+              placeholder="Select…"
+            />
           </div>
           <span className="pb-2 text-xs uppercase tracking-[0.18em] text-[color:var(--color-ink-soft)]">
             requires
           </span>
-          <div>
-            <label className="mb-1 block text-[0.6rem] uppercase tracking-[0.18em] text-[color:var(--color-ink-soft)]">
-              Prerequisite
-            </label>
-            <select
+          <div className="w-56">
+            <ComboboxField
+              id="prereq-prereq"
+              label="Prerequisite"
               value={prereq}
-              onChange={(e) => setPrereq(e.target.value)}
-              className={`${field} w-48`}
-              aria-label="Prerequisite"
-            >
-              <option value="">Select…</option>
-              {skills.map((s) => (
-                <option key={s.slug} value={s.slug}>
-                  {s.label}
-                </option>
-              ))}
-            </select>
+              onChange={setPrereq}
+              options={skills.map((s) => ({ value: s.slug, label: s.label }))}
+              placeholder="Select…"
+            />
           </div>
           <div className="flex-1">
             <label className="mb-1 block text-[0.6rem] uppercase tracking-[0.18em] text-[color:var(--color-ink-soft)]">

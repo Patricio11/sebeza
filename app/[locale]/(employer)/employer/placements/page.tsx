@@ -23,6 +23,7 @@ import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
 import { OrgVerificationBanner } from "@/components/layout/OrgVerificationBanner";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Avatar } from "@/components/ui/Avatar";
+import { CustomSelect } from "@/components/ui/CustomSelect";
 import { Link } from "@/i18n/navigation";
 import { verifyEmployer } from "@/lib/auth/dal";
 import {
@@ -178,19 +179,17 @@ export default async function EmployeesListPage({
               >
                 <input type="hidden" name="tab" value={tab} />
                 <label htmlFor="employees-sort">Sort</label>
-                <select
+                <CustomSelect
                   id="employees-sort"
                   name="sort"
                   defaultValue={sort}
-                  className="h-8 rounded-[var(--radius-sm)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] px-2 text-xs text-[color:var(--color-ink)] outline-none focus:border-[color:var(--color-ink)]"
-                  aria-label="Sort employees"
-                >
-                  {SORT_OPTIONS.map((opt) => (
-                    <option key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </option>
-                  ))}
-                </select>
+                  variant="compact"
+                  ariaLabel="Sort employees"
+                  options={SORT_OPTIONS.map((opt) => ({
+                    value: opt.value,
+                    label: opt.label,
+                  }))}
+                />
                 <button
                   type="submit"
                   className="rounded-[var(--radius-pill)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] px-2.5 py-1 hover:border-[color:var(--color-ink)] hover:text-[color:var(--color-ink)]"

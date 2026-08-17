@@ -10,6 +10,7 @@
  */
 
 import { useState, useTransition } from "react";
+import { CustomSelect } from "@/components/ui/CustomSelect";
 import { useRouter } from "@/i18n/navigation";
 import { CheckCircle2, Pencil, Trash2, RotateCcw, Plus, AlertTriangle } from "lucide-react";
 import {
@@ -310,11 +311,16 @@ function PathForm({
         <input className={field} placeholder="Title" value={form.title} onChange={(e) => set("title", e.target.value)} required />
         <input className={field} placeholder="Provider" value={form.provider} onChange={(e) => set("provider", e.target.value)} required />
         <input className={field} placeholder="Provider kind (seta/tvet/university/open…)" value={form.providerKind} onChange={(e) => set("providerKind", e.target.value)} required />
-        <select className={field} value={form.cost} onChange={(e) => set("cost", e.target.value as typeof form.cost)}>
-          <option value="free">free</option>
-          <option value="subsidised">subsidised</option>
-          <option value="paid">paid</option>
-        </select>
+        <CustomSelect
+          ariaLabel="Cost"
+          value={form.cost}
+          onChange={(v) => set("cost", v as typeof form.cost)}
+          options={[
+            { value: "free", label: "free" },
+            { value: "subsidised", label: "subsidised" },
+            { value: "paid", label: "paid" },
+          ]}
+        />
         <input className={field} type="number" min={0} placeholder="Duration (weeks)" value={form.durationWeeks} onChange={(e) => set("durationWeeks", Number(e.target.value))} />
         <input className={field} placeholder="Cost note (optional)" value={form.costNote} onChange={(e) => set("costNote", e.target.value)} />
         <input className={`${field} sm:col-span-2`} placeholder="Outcome" value={form.outcome} onChange={(e) => set("outcome", e.target.value)} required />

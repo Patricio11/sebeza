@@ -16,6 +16,7 @@
  */
 
 import { useState, useTransition } from "react";
+import { ComboboxField } from "@/components/ui/ComboboxField";
 import { Loader2, Check, X, Pencil, Plus } from "lucide-react";
 import {
   approveModuleSkillSuggestion,
@@ -155,18 +156,11 @@ function BulkImportPanel({
             <span className="uppercase tracking-[0.14em] text-[color:var(--color-ink-soft)]">
               Institution (optional)
             </span>
-            <select
+            <InstitutionScopePicker
               value={institutionSlug}
-              onChange={(e) => setInstitutionSlug(e.target.value)}
-              className="rounded-[var(--radius-sm)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] px-2 py-1.5 text-sm"
-            >
-              <option value="">Canonical (cross-institution)</option>
-              {institutions.map((i) => (
-                <option key={i.slug} value={i.slug}>
-                  {i.label}
-                </option>
-              ))}
-            </select>
+              onChange={setInstitutionSlug}
+              institutions={institutions}
+            />
           </label>
         </div>
         <label className="grid gap-1 text-xs">
@@ -400,18 +394,11 @@ function QueueRowCard({
             <span className="uppercase tracking-[0.14em] text-[color:var(--color-ink-soft)]">
               Institution scope
             </span>
-            <select
+            <InstitutionScopePicker
               value={institutionSlug}
-              onChange={(e) => setInstitutionSlug(e.target.value)}
-              className="rounded-[var(--radius-sm)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] px-2 py-1.5 text-sm"
-            >
-              <option value="">Canonical (cross-institution)</option>
-              {institutions.map((i) => (
-                <option key={i.slug} value={i.slug}>
-                  {i.label}
-                </option>
-              ))}
-            </select>
+              onChange={setInstitutionSlug}
+              institutions={institutions}
+            />
           </label>
           <button
             type="button"
@@ -492,18 +479,7 @@ function ManualAddForm({
           <span className="uppercase tracking-[0.14em] text-[color:var(--color-ink-soft)]">
             Skill
           </span>
-          <select
-            value={skillSlug}
-            onChange={(e) => setSkillSlug(e.target.value)}
-            className="rounded-[var(--radius-sm)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] px-2 py-1.5 text-sm"
-          >
-            <option value=""></option>
-            {skills.map((s) => (
-              <option key={s.slug} value={s.slug}>
-                {s.label} ({s.slug})
-              </option>
-            ))}
-          </select>
+          <SkillScopePicker value={skillSlug} onChange={setSkillSlug} skills={skills} />
         </label>
         <label className="grid gap-1">
           <span className="uppercase tracking-[0.14em] text-[color:var(--color-ink-soft)]">
@@ -526,18 +502,11 @@ function ManualAddForm({
           <span className="uppercase tracking-[0.14em] text-[color:var(--color-ink-soft)]">
             Institution scope
           </span>
-          <select
-            value={institutionSlug}
-            onChange={(e) => setInstitutionSlug(e.target.value)}
-            className="rounded-[var(--radius-sm)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] px-2 py-1.5 text-sm"
-          >
-            <option value="">Canonical (cross-institution)</option>
-            {institutions.map((i) => (
-              <option key={i.slug} value={i.slug}>
-                {i.label}
-              </option>
-            ))}
-          </select>
+          <InstitutionScopePicker
+              value={institutionSlug}
+              onChange={setInstitutionSlug}
+              institutions={institutions}
+            />
         </label>
       </div>
       <div className="flex gap-2">
@@ -604,5 +573,56 @@ function ProvenancePanel({ rows }: { rows: ApprovedRow[] }) {
         </ul>
       )}
     </section>
+  );
+}
+
+
+// House pickers for the queue: searchable, branded, never a native select.
+// "Canonical (cross-institution)" is the empty-slug state, modelled as a
+// sentinel option so the choice is always visible and reversible.
+const CANONICAL = "__canonical__";
+function InstitutionScopePicker({
+  value,
+  onChange,
+  institutions,
+}: {
+  value: string;
+  onChange: (slug: string) => void;
+  institutions: { slug: string; label: string }[];
+}) {
+  return (
+    <ComboboxField
+      label=""
+      value={value || CANONICAL}
+      onChange={(v) => onChange(v === CANONICAL ? "" : v)}
+      options={[
+        { value: CANONICAL, label: "Canonical (cross-institution)" },
+        ...institutions.map((i) => ({ value: i.slug, label: i.label })),
+      ]}
+      placeholder="Canonical (cross-institution)"
+    />
+  );
+}
+function SkillScopePicker({
+  value,
+  onChange,
+  skills,
+}: {
+  value: string;
+  onChange: (slug: string) => void;
+  skills: { slug: string; label: string }[];
+}) {
+  return (
+    <ComboboxField
+      label=""
+      value={value}
+      onChange={onChange}
+      options={skills.map((s) => ({
+        value: s.slug,
+        label: s.label,
+        description: s.slug,
+      }))}
+      placeholder="Select…"
+    />
   );
 }

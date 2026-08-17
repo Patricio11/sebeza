@@ -8,6 +8,7 @@
  */
 
 import { useState, useTransition } from "react";
+import { CustomSelect } from "@/components/ui/CustomSelect";
 import { useRouter } from "@/i18n/navigation";
 import {
   MessageSquare,
@@ -227,16 +228,16 @@ function ChannelCard({
         <div className="mt-3 space-y-2 border-t border-dashed border-[color:var(--color-hairline)] pt-3">
           {view.channel !== "email" && (
             <>
-              <select
-                aria-label={`${meta.title} provider`}
+              <CustomSelect
+                ariaLabel={`${meta.title} provider`}
                 value={form.provider ?? "console"}
-                onChange={(e) => set("provider", e.target.value)}
-                className={field}
-              >
-                <option value="console">console (dev  logs only)</option>
-                <option value="twilio">twilio</option>
-                {view.channel === "sms" && <option value="sns">sns (AWS)</option>}
-              </select>
+                onChange={(v) => set("provider", v)}
+                options={[
+                  { value: "console", label: "console (dev  logs only)" },
+                  { value: "twilio", label: "twilio" },
+                  ...(view.channel === "sms" ? [{ value: "sns", label: "sns (AWS)" }] : []),
+                ]}
+              />
               <input className={field} placeholder="From number (+27…)" value={form.fromNumber ?? ""} onChange={(e) => set("fromNumber", e.target.value)} />
               <input className={field} placeholder="Twilio Account SID" value={form.twilioSid ?? ""} onChange={(e) => set("twilioSid", e.target.value)} />
               <input className={field} type="password" placeholder="Twilio Auth Token" value={form.twilioToken ?? ""} onChange={(e) => set("twilioToken", e.target.value)} />
