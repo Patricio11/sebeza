@@ -34,7 +34,7 @@ export function SignInForm({ next }: Props) {
     const password = String(fd.get("password") ?? "");
 
     startTransition(async () => {
-      const result = await signIn({ email, password, next });
+      const result = await signIn({ email, password, next, remember });
       if (!result.ok) {
         setError(result.message);
         return;

@@ -998,6 +998,10 @@ const signInSchema = z.object({
   email: z.string().email(),
   password: z.string().min(1).max(128),
   next: z.string().optional(),
+  // "Remember me on this device". Absent/false = session cookie that dies
+  // with the browser; true = the persistent 30-day session. On a platform
+  // used from shared phones, opt-IN persistence is the honest default.
+  remember: z.boolean().optional(),
 });
 
 /**
@@ -1092,6 +1096,10 @@ export async function signIn(
       body: {
         email: v.email,
         password: v.password,
+        // Better Auth: rememberMe=false marks the session so the cookie is
+        // issued WITHOUT Max-Age (gone on browser close); the flag also
+        // carries through the two-factor handshake to the final session.
+        rememberMe: v.remember ?? false,
       },
       asResponse: false,
     })) as {
