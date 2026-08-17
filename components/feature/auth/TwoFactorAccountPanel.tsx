@@ -10,7 +10,7 @@
 import { useState, useTransition } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
-import { TextField } from "@/components/ui/FormField";
+import { PasswordField } from "@/components/ui/PasswordField";
 import { ShieldCheck, ShieldOff } from "lucide-react";
 import { disableTwoFactor } from "@/lib/auth/two-factor";
 
@@ -73,10 +73,9 @@ export function TwoFactorAccountPanel({ enabled, enforced }: Props) {
                 </>
               )}
             </p>
-            <TextField
+            <PasswordField
               id="disable-pw"
               label="Current password"
-              type="password"
               autoComplete="current-password"
               required
               value={password}

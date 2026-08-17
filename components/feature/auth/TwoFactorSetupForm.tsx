@@ -14,6 +14,7 @@
 import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/Button";
 import { TextField } from "@/components/ui/FormField";
+import { PasswordField } from "@/components/ui/PasswordField";
 import { Copy, ShieldCheck } from "lucide-react";
 import {
   confirmTwoFactor,
@@ -73,10 +74,9 @@ export function TwoFactorSetupForm({ email, postSetupHref }: Props) {
           Confirm your password to generate a TOTP secret and backup codes for
           <span className="font-medium text-[color:var(--color-ink)]"> {email}</span>.
         </p>
-        <TextField
+        <PasswordField
           id="setup-pw"
           label="Current password"
-          type="password"
           required
           minLength={10}
           autoComplete="current-password"
