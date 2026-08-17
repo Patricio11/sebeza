@@ -65,9 +65,24 @@ export async function enableTwoFactor(
     })) as { totpURI: string; backupCodes: string[] };
 
     return ok({ totpURI: res.totpURI, backupCodes: res.backupCodes });
-  } catch {
-    return fail("That password didn't match. Try again.");
+  } catch (e) {
+    // Never blame the password for a non-password failure: surface the
+    // real cause in the server log and answer honestly to the client.
+    console.error("[2fa] enableTwoFactor failed:", e);
+    return fail(
+      isPasswordError(e)
+        ? "That password didn't match. Try again."
+        : "Something went wrong starting 2FA setup. Please try again; if it keeps happening, contact support.",
+    );
   }
+}
+
+// Better Auth throws APIError with a body.code / message; only a genuine
+// INVALID_PASSWORD should be reported to the user as a password problem.
+function isPasswordError(e: unknown): boolean {
+  const body = (e as { body?: { code?: string; message?: string } })?.body;
+  const text = `${body?.code ?? ""} ${body?.message ?? ""} ${(e as Error)?.message ?? ""}`;
+  return /password/i.test(text);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -242,8 +257,13 @@ export async function disableTwoFactor(
     revalidatePath("/admin/account");
     revalidatePath("/dashboard/account");
     return ok();
-  } catch {
-    return fail("That password didn't match. Try again.");
+  } catch (e) {
+    console.error("[2fa] disableTwoFactor failed:", e);
+    return fail(
+      isPasswordError(e)
+        ? "That password didn't match. Try again."
+        : "Something went wrong. Please try again; if it keeps happening, contact support.",
+    );
   }
 }
 

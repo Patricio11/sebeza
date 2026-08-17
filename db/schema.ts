@@ -351,6 +351,14 @@ export const twoFactor = pgTable("two_factor", {
   secret: text("secret").notNull(),
   backupCodes: text("backup_codes").notNull(),
   verified: boolean("verified").notNull().default(true),
+  // Better Auth 1.6.25 added TOTP-lockout tracking to the twoFactor model
+  // (migration 0065). Without these two columns the Drizzle adapter throws
+  // on EVERY twoFactor write, which broke 2FA enrolment entirely (the old
+  // error mapping then mis-blamed the user's password).
+  failedVerificationCount: integer("failed_verification_count")
+    .notNull()
+    .default(0),
+  lockedUntil: timestamp("locked_until"),
 });
 
 // ---------- Profiles ----------
