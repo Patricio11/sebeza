@@ -2,11 +2,17 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
 import { verifyAdmin } from "@/lib/auth/dal";
-import { listUsersQuery, type AdminUserRow } from "@/lib/admin/users";
+import {
+  directoryCounts,
+  listUsersQuery,
+  type AdminUserRow,
+} from "@/lib/admin/users";
 import { CustomSelect } from "@/components/ui/CustomSelect";
 import { UserRowActions } from "@/components/feature/admin/UserRowActions";
+import { CreateAdminDialog } from "@/components/feature/admin/CreateAdminDialog";
 import type { UserRole } from "@/lib/mock/types";
 import { HelpLink } from "@/components/feature/help/HelpLink";
+import { Users, Briefcase, ShieldCheck, Sparkles, PauseCircle } from "lucide-react";
 
 export default async function UsersPage({
   params,
@@ -31,7 +37,10 @@ export default async function UsersPage({
       ? sp.status
       : null;
 
-  const rows = await listUsersQuery({ search: q, role, status, limit: 200 });
+  const [rows, counts] = await Promise.all([
+    listUsersQuery({ search: q, role, status, limit: 200 }),
+    directoryCounts(),
+  ]);
 
   return (
     <DashboardMasthead
@@ -41,11 +50,60 @@ export default async function UsersPage({
       pageSubtitle={t("subtitle")}
     >
       {/* Phase 10.3  help deep-links (D6). */}
-      <div className="mb-4 flex flex-wrap items-center gap-2">
-        <HelpLink role="admin" slug="when-to-suspend-an-account" label="When to suspend" />
-        <HelpLink role="admin" slug="suspension-appeals-and-restoration" label="Appeals + restoration" />
-        <HelpLink role="admin" slug="handling-data-subject-requests" label="POPIA DSRs" />
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <HelpLink role="admin" slug="when-to-suspend-an-account" label="When to suspend" />
+          <HelpLink role="admin" slug="suspension-appeals-and-restoration" label="Appeals + restoration" />
+          <HelpLink role="admin" slug="handling-data-subject-requests" label="POPIA DSRs" />
+        </div>
+        <CreateAdminDialog />
       </div>
+
+      {/* Directory pulse  every tile is a filter. */}
+      <section className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-5">
+        <DirectoryStat
+          icon={<Users className="size-4" aria-hidden="true" />}
+          label="All accounts"
+          value={counts.total}
+          sub={`${counts.new7d} new · 7 days`}
+          href="/admin/users"
+          active={!role && !status}
+          tone="ink"
+        />
+        <DirectoryStat
+          icon={<Sparkles className="size-4" aria-hidden="true" />}
+          label="Seekers"
+          value={counts.seekers}
+          href="/admin/users?role=seeker"
+          active={role === "seeker"}
+          tone="brand"
+        />
+        <DirectoryStat
+          icon={<Briefcase className="size-4" aria-hidden="true" />}
+          label="Employers"
+          value={counts.employers}
+          href="/admin/users?role=employer"
+          active={role === "employer"}
+          tone="accent"
+        />
+        <DirectoryStat
+          icon={<ShieldCheck className="size-4" aria-hidden="true" />}
+          label="Admins"
+          value={counts.admins}
+          href="/admin/users?role=admin"
+          active={role === "admin"}
+          tone="ink"
+        />
+        <DirectoryStat
+          icon={<PauseCircle className="size-4" aria-hidden="true" />}
+          label="Suspended"
+          value={counts.suspended}
+          sub={counts.deleted > 0 ? `${counts.deleted} erased` : undefined}
+          href="/admin/users?status=suspended"
+          active={status === "suspended"}
+          tone="danger"
+        />
+      </section>
 
       <form
         method="get"
@@ -90,6 +148,12 @@ export default async function UsersPage({
           Search
         </button>
       </form>
+
+      <p className="mb-3 text-xs uppercase tracking-[0.18em] text-[color:var(--color-ink-soft)]">
+        {rows.length === 200
+          ? "Showing the first 200 matches · refine the search to narrow down"
+          : `${rows.length} ${rows.length === 1 ? "account" : "accounts"}`}
+      </p>
 
       {rows.length === 0 ? (
         <p className="rounded-[var(--radius-md)] border border-dashed border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-6 text-sm text-[color:var(--color-ink-soft)]">
@@ -170,6 +234,8 @@ export default async function UsersPage({
                     userId={u.id}
                     status={u.status}
                     isAdmin={u.role === "admin"}
+                    name={u.name}
+                    email={u.email}
                   />
                 </div>
               </li>
@@ -226,6 +292,8 @@ function UserRow({
           userId={user.id}
           status={user.status}
           isAdmin={user.role === "admin"}
+          name={user.name}
+          email={user.email}
         />
       </td>
     </tr>
@@ -269,5 +337,53 @@ function StatusLabel({
     >
       {label}
     </span>
+  );
+}
+
+function DirectoryStat({
+  icon,
+  label,
+  value,
+  sub,
+  href,
+  active,
+  tone,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: number;
+  sub?: string;
+  href: string;
+  active: boolean;
+  tone: "ink" | "brand" | "accent" | "danger";
+}) {
+  const stripe = {
+    ink: "border-l-[color:var(--color-ink)]",
+    brand: "border-l-[color:var(--color-brand)]",
+    accent: "border-l-[color:var(--color-accent)]",
+    danger: "border-l-[color:var(--color-danger)]",
+  }[tone];
+  return (
+    <Link
+      href={href as never}
+      aria-current={active ? "true" : undefined}
+      className={
+        `flex flex-col gap-1.5 rounded-[var(--radius-md)] border border-l-4 ${stripe} bg-[color:var(--color-surface)] p-4 transition-colors hover:border-[color:var(--color-ink)]/40 ` +
+        (active
+          ? "border-[color:var(--color-ink)]"
+          : "border-[color:var(--color-hairline)]")
+      }
+    >
+      <span className="flex items-center gap-1.5 text-[0.66rem] uppercase tracking-[0.2em] text-[color:var(--color-ink-soft)]">
+        {icon}
+        {label}
+      </span>
+      <span className="font-display tabular text-2xl leading-none text-[color:var(--color-ink)]">
+        {value}
+      </span>
+      {sub && (
+        <span className="text-[0.68rem] text-[color:var(--color-ink-soft)]">{sub}</span>
+      )}
+    </Link>
   );
 }

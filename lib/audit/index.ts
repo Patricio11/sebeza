@@ -142,6 +142,12 @@ export type AuditKind =
   | "setting.update"
   // Phase 7 (Task 7.2)  admin escape hatch when a user loses device + codes.
   | "account.2fa.reset"
+  // 2026-08 account directory  admin-issued administrator accounts (admins
+  // are never self-registered) + admin corrections to a user's name/email
+  // (support cases: typo'd address that can never verify, married-name
+  // changes). Both carry before/after in meta.
+  | "account.admin.create"
+  | "account.edit"
   // Phase 8  nightly cron tombstones (system-of-record proof of erasure).
   | "account.hard_delete"
   // Phase 8  self-service erasure path (seeker /dashboard/privacy).

@@ -526,3 +526,44 @@ export async function adminOverviewCounts(): Promise<{
   };
 }
 
+/**
+ * 2026-08 account directory widgets: one round-trip of FILTERed counts.
+ * Feeds the clickable KPI strip on /admin/users.
+ */
+export async function directoryCounts(): Promise<{
+  total: number;
+  seekers: number;
+  employers: number;
+  admins: number;
+  active: number;
+  suspended: number;
+  deleted: number;
+  new7d: number;
+}> {
+  await verifyAdmin();
+  const db = getDb();
+  const since7d = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+  const rows = await db
+    .select({
+      total: sql<number>`COUNT(*)::int`,
+      seekers: sql<number>`COUNT(*) FILTER (WHERE ${schema.appUser.role} = 'seeker')::int`,
+      employers: sql<number>`COUNT(*) FILTER (WHERE ${schema.appUser.role} = 'employer')::int`,
+      admins: sql<number>`COUNT(*) FILTER (WHERE ${schema.appUser.role} = 'admin')::int`,
+      active: sql<number>`COUNT(*) FILTER (WHERE ${schema.appUser.suspendedAt} IS NULL AND ${schema.appUser.deletedAt} IS NULL)::int`,
+      suspended: sql<number>`COUNT(*) FILTER (WHERE ${schema.appUser.suspendedAt} IS NOT NULL AND ${schema.appUser.deletedAt} IS NULL)::int`,
+      deleted: sql<number>`COUNT(*) FILTER (WHERE ${schema.appUser.deletedAt} IS NOT NULL)::int`,
+      new7d: sql<number>`COUNT(*) FILTER (WHERE ${schema.appUser.createdAt} >= ${since7d})::int`,
+    })
+    .from(schema.appUser);
+  const r = rows[0];
+  return {
+    total: r?.total ?? 0,
+    seekers: r?.seekers ?? 0,
+    employers: r?.employers ?? 0,
+    admins: r?.admins ?? 0,
+    active: r?.active ?? 0,
+    suspended: r?.suspended ?? 0,
+    deleted: r?.deleted ?? 0,
+    new7d: r?.new7d ?? 0,
+  };
+}
