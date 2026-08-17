@@ -74,8 +74,8 @@ the palette, and the flag stripe. Two rules keep it that way:
 
 ## 4 · The first week
 
-- [ ] 1. Post 1 (intro card) the day the account exists; the grid must never be empty.
-- [ ] 2. Same day: run `assets/story-intro.png` as the first **story**.
+- [x] 1. Post 1 (intro card) the day the account exists; the grid must never be empty.
+- [x] 2. Same day: run `assets/story-intro.png` as the first **story**.
 - [ ] 3. Follow ~20 relevant SA accounts (youth orgs, TVET colleges, SA tech, careers
       pages). Follow, don't spam-comment.
 - [ ] 4. Two days later: post 2 (workspace photo) + the question **story**
