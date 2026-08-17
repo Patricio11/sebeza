@@ -1,6 +1,6 @@
 # Sebenza social media
 
-One brand, one voice, per-platform kits. Everything visual comes from the product's own design
+One brand, one voice, per-platform kits. **Start here: `POSTING_CALENDAR.md` is the single what-to-post-when schedule across all six platforms** (weekly rhythm + a ticked week-by-week runway); the per-platform docs hold the captions and assets it references. Everything visual comes from the product's own design
 system: Fraunces + Hanken Grotesk, the Mzansi palette, the chevron mark (extracted live from
 `public/sebenza-logo.svg` at render time), and the **flag stripe** (green : gold : red at
 3 : 2 : 1) on every graphic.
