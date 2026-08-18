@@ -27,7 +27,7 @@ llm_providers posture; audit kind `catalog.draft` + `catalog.approve`.
 - [x] A2: national fallback below MIN_LOCAL_SIGNALS + `demandBasis: "local" | "national"`
       in the compass payload
 - [x] A3: UI label on /dashboard/grow when basis = national (4 locales)
-- [ ] A4: unit/integration tests  weight math, floor trigger, national fallback
+- [x] A4: unit/integration tests  weight math, floor trigger, national fallback
 - [ ] B1: `catalog_drafts` table (or reuse curriculum-queue shape) + migration
 - [ ] B2: admin draft action (LLM, admin-only, audited) + review/approve/reject UI on
       /admin/learning-paths
