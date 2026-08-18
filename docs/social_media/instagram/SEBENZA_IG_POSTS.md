@@ -11,6 +11,13 @@ top (IG truncates at ~125 chars, the first line must hook), cut a third, drop an
 Caption in the text box, graphic attached, 3-5 hashtags on the last line. Never a URL in the
 caption; "link in bio" instead. For carousels: add all slides in order, cover first.
 
+**CROP RULE (learned the hard way on IG-2):** on the photo-select screen, ALWAYS tap the
+**expand icon (⤢, bottom-left of the preview)** before hitting Next, so the full 4:5 card is
+kept. Instagram's composer defaults to a zoomed crop that cuts off the brand mark, the footer,
+and the flag stripe  and it cannot be fixed after publishing (delete + repost is the only
+cure). The profile grid trims a thin sliver off the sides of every thumbnail; that is normal
+and our cards keep all text inside the safe zone.
+
 ---
 
 ## THE INTRO SEQUENCE (IG captions, ready to paste)
