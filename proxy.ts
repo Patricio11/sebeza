@@ -57,8 +57,10 @@ function isProtected(pathname: string): boolean {
  *   - base-uri 'self' (anti-injection)
  *
  * HSTS sticks at 2 years with includeSubDomains + preload  once we
- * cut over to production this is one-way. Permissions-Policy disables
- * camera / microphone / geolocation by default (we don't use them).
+ * cut over to production this is one-way. Permissions-Policy allows
+ * camera for OUR OWN origin only (2026-08: the live-selfie check uses
+ * getUserMedia on /dashboard/profile; embedded third-party content
+ * still can't touch it) and disables microphone / geolocation.
  *
  * NOTE: `'unsafe-inline'` on `script-src` is the standard Next.js
  * starting position because Next emits inline bootstrap scripts. The
@@ -115,7 +117,7 @@ function securityHeaders(): Record<string, string> {
     "X-Content-Type-Options": "nosniff",
     "Referrer-Policy": "strict-origin-when-cross-origin",
     "Permissions-Policy":
-      "camera=(), microphone=(), geolocation=(), interest-cohort=()",
+      "camera=(self), microphone=(), geolocation=(), interest-cohort=()",
     "Cross-Origin-Opener-Policy": "same-origin",
   };
 }
