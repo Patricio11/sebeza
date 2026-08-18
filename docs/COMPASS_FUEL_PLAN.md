@@ -22,11 +22,11 @@ provider on /admin/llm; the draft action is admin-only (no seeker-facing AI). Fo
 llm_providers posture; audit kind `catalog.draft` + `catalog.approve`.
 
 ## TASKS
-- [ ] A1: `db/queries/career-compass.ts`  blended demand CTE (searches + vacancies +
+- [x] A1: `db/queries/career-compass.ts`  blended demand CTE (searches + vacancies +
       placements, weighted), province+profession scoped, 180-day window
-- [ ] A2: national fallback below MIN_LOCAL_SIGNALS + `demandBasis: "local" | "national"`
+- [x] A2: national fallback below MIN_LOCAL_SIGNALS + `demandBasis: "local" | "national"`
       in the compass payload
-- [ ] A3: UI label on /dashboard/grow when basis = national (4 locales)
+- [x] A3: UI label on /dashboard/grow when basis = national (4 locales)
 - [ ] A4: unit/integration tests  weight math, floor trigger, national fallback
 - [ ] B1: `catalog_drafts` table (or reuse curriculum-queue shape) + migration
 - [ ] B2: admin draft action (LLM, admin-only, audited) + review/approve/reject UI on
