@@ -477,6 +477,13 @@
       "when": 1787270401000,
       "tag": "0067_selfie_verification",
       "breakpoints": false
+    },
+    {
+      "idx": 68,
+      "version": "7",
+      "when": 1787270402000,
+      "tag": "0068_catalog_drafts",
+      "breakpoints": false
     }
   ]
 }

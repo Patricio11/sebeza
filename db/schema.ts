@@ -1015,6 +1015,28 @@ export const learningPathReviews = pgTable(
 );
 
 /**
+ * 2026-08 (0068)  AI-drafted, admin-approved catalogue growth
+ * (docs/COMPASS_FUEL_PLAN.md B). Staging only: approval copies a draft
+ * into `learning_paths`; seekers never read this table.
+ */
+export const catalogDrafts = pgTable("catalog_drafts", {
+  id: text("id").primaryKey(),
+  skillSlugs: text("skill_slugs").array().notNull(),
+  /** The drafted learning_paths fields (title, provider, providerKind,
+   *  cost, costNote, outcome, durationWeeks, unlocksSkills, national, url). */
+  payload: jsonb("payload").notNull().$type<Record<string, unknown>>(),
+  state: text("state").notNull().default("pending"),
+  rawModel: text("raw_model"),
+  createdByUserId: text("created_by_user_id")
+    .notNull()
+    .references(() => appUser.id),
+  resolvedByUserId: text("resolved_by_user_id").references(() => appUser.id),
+  resolvedAt: timestamp("resolved_at"),
+  adminNote: text("admin_note"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+/**
  * 2026-08 (0067)  one-time gesture challenges for the live-selfie flow.
  * Server-minted so a replayed/pre-recorded capture can't reuse a
  * challenge; 5-minute expiry; marked used on completion. Rows are

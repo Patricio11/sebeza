@@ -6,6 +6,10 @@ import {
   LearningPathsManager,
   type AdminPathDto,
 } from "@/components/feature/admin/LearningPathsManager";
+import { CatalogDraftsPanel } from "@/components/feature/admin/CatalogDraftsPanel";
+import { listCatalogDrafts } from "@/lib/admin/catalog-drafts";
+import { getDb } from "@/db/client";
+import * as schema from "@/db/schema";
 
 /**
  * Phase 18.2 ("Living Learning Catalog")  the editorial admin surface. Curate
@@ -50,6 +54,13 @@ export default async function AdminLearningPathsPage({
       pageTitle="Learning paths"
       pageSubtitle="Curate the learning-path catalog seekers see on the Career Compass. Re-verify paths so links don't rot, edit details, and remove ones that have closed."
     >
+      {/* 2026-08 (COMPASS_FUEL_PLAN B)  AI-drafted, admin-approved growth. */}
+      <CatalogDraftsPanel
+        skills={await getDb()
+          .select({ slug: schema.skills.slug, label: schema.skills.label })
+          .from(schema.skills)}
+        drafts={await listCatalogDrafts()}
+      />
       <LearningPathsManager paths={paths} />
     </DashboardMasthead>
   );

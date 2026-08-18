@@ -28,17 +28,34 @@ llm_providers posture; audit kind `catalog.draft` + `catalog.approve`.
       in the compass payload
 - [x] A3: UI label on /dashboard/grow when basis = national (4 locales)
 - [x] A4: unit/integration tests  weight math, floor trigger, national fallback
-- [ ] B1: `catalog_drafts` table (or reuse curriculum-queue shape) + migration
-- [ ] B2: admin draft action (LLM, admin-only, audited) + review/approve/reject UI on
+- [x] B1: `catalog_drafts` table (or reuse curriculum-queue shape) + migration
+- [x] B2: admin draft action (LLM, admin-only, audited) + review/approve/reject UI on
       /admin/learning-paths
-- [ ] B3: approved rows insert into the living catalog; E2E admin-smoke route intact
-- [ ] B4: tests + typecheck + suites green; TO_START + memory updates
+- [x] B3: approved rows insert into the living catalog; E2E admin-smoke route intact
+- [x] B4: tests + typecheck + suites green; TO_START + memory updates
 
 ## VERIFY
 - [ ] Harness: seeker in a low-signal province sees national-basis label; high-signal
       (seeded Gauteng) sees local suggestions ranked by blended weight
-- [ ] Admin drafts → approve → entry appears in a seeker's compass learning paths
+- [x] Admin drafts → approve → entry appears in a seeker's compass learning paths
 - [ ] role-arcs + admin-smoke green desktop + 360px
+
+## B implementation anchors (surveyed 2026-08-18)
+- `learning_paths` columns to draft: title, provider, providerKind (seta|tvet|university|open…),
+  cost (free|subsidised|paid), costNote, outcome, durationWeeks, unlocksSkills (LABELS
+  jsonb), national, url (null honest), sortOrder. Approved drafts insert with
+  `sebenzaReviewed: false` + `lastVerifiedAt: null` until the admin verifies links.
+- LLM posture: mirror `lib/llm/curriculum.ts` `suggestModuleSkills` gates (admin caller,
+  kill-switch `feature_flag_llm_curriculum_enabled` REUSED  same admin drafting family,
+  no new flag; provider infra from llm_providers; telemetry skip() pattern). Input = skill
+  labels only (no PII surface).
+- New table `catalog_drafts` (migration 0068): id, skillSlugs text[], payload jsonb (the
+  drafted entry fields), state pending|approved|rejected, rawModel text, createdByUserId,
+  resolvedByUserId, resolvedAt, adminNote, createdAt. Audit kinds `catalog.draft` +
+  `catalog.approve` + `catalog.reject`.
+- UI: section atop /admin/learning-paths (LearningPathsManager page)  "Draft with AI"
+  (ComboboxField multi skill pick → action) + pending drafts list with inline edit of
+  payload fields before Approve.
 
 ## Notes
 - Phase 22 (coach safety) is SHIPPED  unrelated gate; coach ON needs founder to verify

@@ -57,7 +57,7 @@ export interface CoachInput {
   roleTitle: string;
 }
 
-type LlmCredentials = {
+export type LlmCredentials = {
   apiKey: string;
   modelId: string;
   endpointUrl?: string;
@@ -274,7 +274,10 @@ function parseCoachOutput(raw: string): CoachOutput {
 const ZAR_PER_INPUT_TOKEN = 0.001;
 const ZAR_PER_OUTPUT_TOKEN = 0.004;
 
-async function coachChat(
+// 2026-08: exported for reuse by lib/llm/catalog-drafts.ts (the admin
+// catalogue-drafting pipeline)  it's the one generic chat transport
+// across all four provider kinds.
+export async function coachChat(
   providerId: string,
   creds: LlmCredentials,
   system: string,
