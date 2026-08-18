@@ -322,6 +322,11 @@ export async function assertNoVacancyFieldOnPublicSurfaces(): Promise<AssertResu
     // schema import for the audit_log table; no vacancy field reads).
     "lib\\audit",
     "lib/audit",
+    // 2026-08  admin org hard-delete: COUNTs the org's vacancies for the
+    // audit meta + relies on the org→vacancies cascade. Admin-only
+    // surface (verifyAdmin), no vacancy field ever leaves the server.
+    "lib\\admin\\org-vetting",
+    "lib/admin/org-vetting",
     // Phase 11.4.5  recommended-employers leaderboard: k=10-floored
     // aggregates over employer-confirmed placements; no vacancy fields
     // reach the seeker beyond suppressed counts.

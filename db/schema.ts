@@ -433,6 +433,15 @@ export const profiles = pgTable("profiles", {
    * the roll-up drifting from this column.
    */
   verification: verificationStatus("verification").notNull().default("unverified"),
+  /**
+   * 2026-08 (0067)  set when the seeker completed the in-browser live
+   * selfie (MediaPipe gesture liveness; docs/SELFIE_VERIFICATION_PLAN.md).
+   * A non-null value grants `verified` in the 9.14 roll-up. NO biometric
+   * data is stored anywhere: the passing frame just becomes the profile
+   * photo (WebP pipeline, metadata stripped); this timestamp is the
+   * entire server-side record.
+   */
+  selfieVerifiedAt: timestamp("selfie_verified_at"),
   completeness: integer("completeness").notNull().default(0),
   /**
    * Phase 9.9  Total years of professional experience. Nullable;
@@ -1004,6 +1013,23 @@ export const learningPathReviews = pgTable(
     ),
   }),
 );
+
+/**
+ * 2026-08 (0067)  one-time gesture challenges for the live-selfie flow.
+ * Server-minted so a replayed/pre-recorded capture can't reuse a
+ * challenge; 5-minute expiry; marked used on completion. Rows are
+ * short-lived working data, swept opportunistically on each mint.
+ */
+export const selfieChallenges = pgTable("selfie_challenges", {
+  id: text("id").primaryKey(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => appUser.id, { onDelete: "cascade" }),
+  gestures: text("gestures").array().notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  expiresAt: timestamp("expires_at").notNull(),
+  usedAt: timestamp("used_at"),
+});
 
 export const qualifications = pgTable("qualifications", {
   id: text("id").primaryKey(),

@@ -68,7 +68,7 @@ export default async function QualificationsPage({
             How verification works
           </div>
           <h2 className="mt-2 font-display text-xl">
-            Default state is unverified.
+            Qualifications are self-declared.
           </h2>
           <ul className="mt-4 space-y-3 text-sm">
             <li className="flex items-start gap-2">
@@ -76,26 +76,26 @@ export default async function QualificationsPage({
                 className="mt-0.5 size-4 shrink-0 text-[color:var(--color-brand)]"
                 aria-hidden="true"
               />
-              <span>Upload an original certificate (PDF, JPEG or PNG; max 10 MB).</span>
+              <span>List what you hold. Employers see it exactly as you entered it, honestly labelled <strong>unverified</strong>.</span>
             </li>
             <li className="flex items-start gap-2">
               <ShieldCheck
                 className="mt-0.5 size-4 shrink-0 text-[color:var(--color-brand)]"
                 aria-hidden="true"
               />
-              <span>Upload flips state to <strong>pending</strong>; the admin queue or a SAQA partner verifies authenticity.</span>
+              <span>No certificate uploads needed. We don&rsquo;t store your documents.</span>
             </li>
             <li className="flex items-start gap-2">
               <ShieldCheck
                 className="mt-0.5 size-4 shrink-0 text-[color:var(--color-brand)]"
                 aria-hidden="true"
               />
-              <span>Files live in a private Supabase Storage bucket  every reveal is audit-logged.</span>
+              <span>The <strong>Verified</strong> profile badge comes from the live selfie check on your profile page.</span>
             </li>
           </ul>
           <p className="mt-5 text-xs text-[color:var(--color-ink-soft)]">
-            {t("verificationBy")} <strong>Sebenza admin (Phase 7)</strong> ·
-            partner SAQA integration in Phase 8.
+            Badges already earned through document review stay. Credential
+            verification via SAQA partnership may return later.
           </p>
         </section>
 

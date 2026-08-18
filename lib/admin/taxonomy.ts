@@ -80,9 +80,9 @@ export async function addSkill(
   return ok({ slug: parsed.data.slug });
 }
 
-/** 2026-08  label edits. The slug is the PK referenced by profiles /
- *  vacancies as text, so it is immutable from this surface; only the
- *  display label changes (and, for cities, the parent province). */
+/** 2026-08  label edits. The slug is the PK referenced as text across
+ *  profiles and vacancy rows, so it is immutable from this surface; only
+ *  the display label changes (and, for cities, the parent province). */
 export async function updateSkill(
   input: z.infer<typeof skillSchema>,
 ): Promise<ActionResult> {

@@ -22,11 +22,7 @@ import { revalidatePath } from "next/cache";
 import { randomUUID } from "node:crypto";
 import { getSessionUser } from "@/lib/auth/guard";
 import { logAccess } from "@/lib/audit";
-import {
-  uploadDocument,
-  deleteStorageObject,
-} from "@/lib/storage/upload";
-import { StorageError } from "@/lib/storage/supabase";
+import { deleteStorageObject } from "@/lib/storage/upload";
 import { recomputeProfileVerification } from "./verification-rollup";
 
 export type ActionResult<T extends object = object> =
@@ -88,71 +84,15 @@ export async function uploadQualificationDocument(
   const session = await getSessionUser();
   if (!session) return fail("Not signed in.");
 
-  const qualificationId = String(formData.get("qualificationId") ?? "");
-  const file = formData.get("file");
-  if (!qualificationId) return fail("Missing qualification id.");
-  if (!(file instanceof File)) return fail("Missing file.");
-
-  const db = getDb();
-  const profile = await ownedProfileId(db, session.id);
-  if (!profile) return fail("Profile not found.");
-
-  // Ownership check: the qualification row must belong to this profile.
-  const rows = await db
-    .select({
-      id: schema.qualifications.id,
-      old: schema.qualifications.documentStorageKey,
-    })
-    .from(schema.qualifications)
-    .where(
-      and(
-        eq(schema.qualifications.id, qualificationId),
-        eq(schema.qualifications.profileId, profile),
-      ),
-    )
-    .limit(1);
-  const row = rows[0];
-  if (!row) return fail("Qualification not found.");
-
-  try {
-    const { key } = await uploadDocument({
-      userId: session.id,
-      id: qualificationId,
-      file,
-    });
-
-    await db
-      .update(schema.qualifications)
-      .set({ documentStorageKey: key, verification: "pending" })
-      .where(eq(schema.qualifications.id, qualificationId));
-
-    // Best-effort cleanup of the old object if the path changed (e.g. different ext).
-    if (row.old && row.old !== key) {
-      try {
-        await deleteStorageObject(row.old);
-      } catch {
-        // Not fatal  Phase 8 cron sweeps orphans.
-      }
-    }
-
-    // Phase 9.14  the qualification just flipped to `pending`. If the
-    // profile was `unverified`, this elevates it to `pending` (admin
-    // queue). No-op if the profile was already `verified` from another
-    // qualification.
-    await recomputeProfileVerification(profile);
-
-    await logAccess({
-      kind: "profile.qualification.document.upload",
-      actor: session.id,
-      subject: qualificationId,
-    });
-
-    revalidatePath("/dashboard/qualifications");
-    return ok({ key });
-  } catch (e) {
-    if (e instanceof StorageError) return fail(e.message);
-    return fail("Upload failed. Please try again.");
-  }
+  // 2026-08 (founder decision, docs/SELFIE_VERIFICATION_PLAN.md):
+  // evidence collection is RETIRED. Qualifications are self-declared
+  // and honestly labelled unverified; the Verified badge is earned via
+  // the live selfie. Existing evidence + already-earned badges stay;
+  // this endpoint simply refuses new uploads (kept exported so any
+  // stale client gets a clear message instead of a 404).
+  return fail(
+    "Certificate uploads are no longer needed. Qualifications are listed as self-declared, and you can verify your profile with a live selfie instead.",
+  );
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

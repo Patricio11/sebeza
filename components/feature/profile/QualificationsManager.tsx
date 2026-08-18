@@ -1,35 +1,21 @@
 "use client";
 
 /**
- * Qualifications list + add + upload + delete (Phase 3).
+ * Qualifications list + add + delete (Phase 3; evidence uploads RETIRED
+ * 2026-08 per docs/SELFIE_VERIFICATION_PLAN.md).
  *
- * - "Add qualification" creates the row in `unverified` state with no document yet.
- * - Each row gets an "Upload document" button that pops a file picker;
- *   sending the file via FormData to `uploadQualificationDocument` flips the
- *   row to `pending` and stores the storage key.
- * - "Delete" removes the row and the storage object.
- *
- * Documents themselves are NEVER linked directly. Only the admin verification
- * queue (Phase 7) and the audit-logged employer reveal flow (Phase 5) can read
- * them, via short-lived signed URLs from `lib/storage/signed.ts`.
+ * Qualifications are self-declared and honestly labelled unverified; the
+ * profile Verified badge is earned via the live selfie. Rows that already
+ * have a document keep their "Document on file" note + earned badges.
  */
 
-import { useRef, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 import { TextField } from "@/components/ui/FormField";
 import { Button } from "@/components/ui/Button";
 import { VerificationBadge } from "@/components/ui/VerificationBadge";
-import {
-  FileText,
-  FileUp,
-  Plus,
-  Trash2,
-  X,
-  Check,
-  Loader2,
-} from "lucide-react";
+import { FileText, Plus, Trash2, X, Check } from "lucide-react";
 import {
   addQualification,
-  uploadQualificationDocument,
   deleteQualification,
 } from "@/lib/profile/qualifications";
 import type { VerificationStatus } from "@/lib/mock/types";
@@ -77,7 +63,6 @@ export function QualificationsManager({
   });
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
-  const [uploadingId, setUploadingId] = useState<string | null>(null);
 
   function handleAdd() {
     setError(null);
@@ -221,30 +206,6 @@ export function QualificationsManager({
               <div className="flex flex-col items-end gap-2">
                 <VerificationBadge state={q.verification} visible={verificationVisible} />
                 <div className="flex gap-1">
-                  <UploadButton
-                    qualificationId={q.id}
-                    busy={uploadingId === q.id}
-                    onUploading={() => setUploadingId(q.id)}
-                    onResult={(result) => {
-                      setUploadingId(null);
-                      if (result.ok) {
-                        setItems((prev) =>
-                          prev.map((row) =>
-                            row.id === q.id
-                              ? {
-                                  ...row,
-                                  hasDocument: true,
-                                  verification: "pending",
-                                }
-                              : row,
-                          ),
-                        );
-                      } else {
-                        setError(result.message);
-                      }
-                    }}
-                    hasDocument={q.hasDocument}
-                  />
                   <button
                     type="button"
                     aria-label={`Delete ${q.title}`}
@@ -267,74 +228,5 @@ export function QualificationsManager({
         </p>
       )}
     </div>
-  );
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-
-interface UploadButtonProps {
-  qualificationId: string;
-  busy: boolean;
-  hasDocument: boolean;
-  onUploading: () => void;
-  onResult: (
-    result: { ok: true; key: string } | { ok: false; message: string },
-  ) => void;
-}
-
-function UploadButton({
-  qualificationId,
-  busy,
-  hasDocument,
-  onUploading,
-  onResult,
-}: UploadButtonProps) {
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  function onChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    e.target.value = "";
-    if (!file) return;
-    onUploading();
-    const fd = new FormData();
-    fd.append("qualificationId", qualificationId);
-    fd.append("file", file);
-    void (async () => {
-      try {
-        const r = await uploadQualificationDocument(fd);
-        onResult(r);
-      } catch (err) {
-        onResult({
-          ok: false,
-          message: err instanceof Error ? err.message : "Upload failed.",
-        });
-      }
-    })();
-  }
-
-  return (
-    <>
-      <input
-        ref={inputRef}
-        type="file"
-        accept="application/pdf,image/jpeg,image/png"
-        className="hidden"
-        onChange={onChange}
-      />
-      <button
-        type="button"
-        onClick={() => inputRef.current?.click()}
-        disabled={busy}
-        aria-label={hasDocument ? "Replace document" : "Upload document"}
-        className="inline-flex items-center gap-1 rounded-[var(--radius-pill)] border border-[color:var(--color-brand)] px-3 py-2 text-xs font-medium text-[color:var(--color-brand)] hover:bg-[color:var(--color-brand-tint)] disabled:opacity-60"
-      >
-        {busy ? (
-          <Loader2 className="size-4 animate-spin" aria-hidden="true" />
-        ) : (
-          <FileUp className="size-4" aria-hidden="true" />
-        )}
-        {busy ? "Uploading…" : hasDocument ? "Replace" : "Upload"}
-      </button>
-    </>
   );
 }

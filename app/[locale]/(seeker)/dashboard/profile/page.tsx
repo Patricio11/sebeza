@@ -30,6 +30,8 @@ import { KycPanel } from "@/components/feature/profile/KycPanel";
 import { DateOfBirthEditor } from "@/components/feature/profile/DateOfBirthEditor";
 import { getSetting } from "@/lib/admin/settings";
 import { AvatarEditor } from "@/components/feature/profile/AvatarEditor";
+import { SelfieVerification } from "@/components/feature/profile/SelfieVerification";
+import { getMySelfieVerifiedAt } from "@/lib/profile/selfie-status";
 import { ShareProfileLink } from "@/components/feature/profile/ShareProfileLink";
 import { ShareMyProfileModal } from "@/components/feature/profile/ShareMyProfileModal";
 import { OpenToTagsEditor } from "@/components/feature/profile/OpenToTagsEditor";
@@ -69,6 +71,11 @@ export default async function ProfileEditorPage({
   const customSkillsEnabled = await getSetting<boolean>(
     "feature_flag_seeker_custom_skills",
   );
+  // 2026-08  live-selfie verification (ships dark; SELFIE_VERIFICATION_PLAN).
+  const selfieEnabled = await getSetting<boolean>(
+    "feature_flag_selfie_verification",
+  );
+  const selfieVerifiedAt = await getMySelfieVerifiedAt(me.profileId);
   const customSkills = customSkillsEnabled
     ? await listCustomSkills(me.profileId)
     : [];
@@ -202,6 +209,11 @@ export default async function ProfileEditorPage({
               </p>
             </header>
             <AvatarEditor name={me.displayName} initialUrl={photoUrl} />
+            <SelfieVerification
+              enabled={selfieEnabled ?? false}
+              verifiedAt={selfieVerifiedAt}
+              locale={locale}
+            />
           </section>
 
           {/* Phase 8  surface the user's email (read-only, from session)

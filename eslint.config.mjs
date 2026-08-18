@@ -12,6 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // 2026-08  vendored MediaPipe wasm loader (self-hosted for the
+    // live-selfie check; third-party generated code, not ours to lint).
+    "public/mediapipe/**",
   ]),
   {
     // Phase 12 lint-debt triage (2026-06-12)  `npm run lint` is back in

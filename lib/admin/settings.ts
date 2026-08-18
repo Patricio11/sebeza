@@ -151,7 +151,10 @@ export type SettingKey =
   // /apply/[token] page renders the calm "not accepting" panel, and the
   // apply actions refuse. Ships dark; the per-vacancy `selfApplyEnabled`
   // toggle is the second gate (both must be open).
-  | "feature_flag_vacancy_self_apply";
+  | "feature_flag_vacancy_self_apply"
+  // 2026-08  live-selfie verification (docs/SELFIE_VERIFICATION_PLAN.md).
+  // Browser-side MediaPipe liveness earns the Verified badge; ships dark.
+  | "feature_flag_selfie_verification";
 
 const DEFAULTS: Record<SettingKey, unknown> = {
   freshness_band_days_fresh: 30,
@@ -194,6 +197,7 @@ const DEFAULTS: Record<SettingKey, unknown> = {
   testimonial_campaign_active: false,
   // Phase 34  Self Apply ships dark.
   feature_flag_vacancy_self_apply: false,
+  feature_flag_selfie_verification: false,
 };
 
 /**

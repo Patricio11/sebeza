@@ -153,6 +153,7 @@ export type AuditKind =
   | "org.requirements.update"
   | "org.delete"
   | "taxonomy.edit"
+  | "profile.selfie.verified"
   // Phase 8  nightly cron tombstones (system-of-record proof of erasure).
   | "account.hard_delete"
   // Phase 8  self-service erasure path (seeker /dashboard/privacy).
