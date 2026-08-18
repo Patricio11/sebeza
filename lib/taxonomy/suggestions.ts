@@ -579,7 +579,7 @@ export async function promoteTaxonomySuggestion(
       const backfill = await db
         .update(schema.profiles)
         .set({ currentEmployerOrgId: row.pendingOrganisationId })
-        .where(sql`${schema.profiles.currentEmployerOrgId} = ANY(${dupeIds})`);
+        .where(inArray(schema.profiles.currentEmployerOrgId, dupeIds));
       backfilledRows =
         (backfill as unknown as { rowCount?: number }).rowCount ?? 0;
       // Mark the dupe suggestions as merged into this one (so they
@@ -600,12 +600,12 @@ export async function promoteTaxonomySuggestion(
           and(
             eq(schema.taxonomySuggestions.kind, "organisation"),
             eq(schema.taxonomySuggestions.state, "pending"),
-            sql`${schema.taxonomySuggestions.pendingOrganisationId} = ANY(${dupeIds})`,
+            inArray(schema.taxonomySuggestions.pendingOrganisationId, dupeIds),
           ),
         );
       await db
         .delete(schema.organizations)
-        .where(sql`${schema.organizations.id} = ANY(${dupeIds})`);
+        .where(inArray(schema.organizations.id, dupeIds));
     }
     // Recompute the canonical org's seeker count. Done as a single
     // COUNT(*) read so the denormalised column stays honest after the
