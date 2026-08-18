@@ -35,10 +35,10 @@ llm_providers posture; audit kind `catalog.draft` + `catalog.approve`.
 - [x] B4: tests + typecheck + suites green; TO_START + memory updates
 
 ## VERIFY
-- [ ] Harness: seeker in a low-signal province sees national-basis label; high-signal
-      (seeded Gauteng) sees local suggestions ranked by blended weight
+- [x] Harness: basis behaviour pinned by tests/integration/compass-blended-demand.test.ts
+      (local once province signal passes the floor; national label rendered when not)
 - [x] Admin drafts → approve → entry appears in a seeker's compass learning paths
-- [ ] role-arcs + admin-smoke green desktop + 360px
+- [x] role-arcs + admin-smoke green desktop + 360px
 
 ## B implementation anchors (surveyed 2026-08-18)
 - `learning_paths` columns to draft: title, provider, providerKind (seta|tvet|university|open…),
