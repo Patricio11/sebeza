@@ -587,8 +587,8 @@
       "empty": "You haven't added any experience yet. Adding three or more roles improves your ranking significantly."
     },
     "qualifications": {
-      "title": "Qualifications & documents",
-      "subtitle": "Upload certificates as PDFs or images. Files are stored in a private bucket  only verified employers can request to view them, and every access is audit-logged.",
+      "title": "Qualifications",
+      "subtitle": "List your qualifications yourself. They show exactly as you enter them, honestly labelled unverified. No certificate uploads needed: the Verified badge comes from the live selfie check on your profile.",
       "add": "Add a qualification",
       "uploadCert": "Upload certificate",
       "empty": "No qualifications yet. Adding at least one trade certificate or diploma builds employer trust.",
