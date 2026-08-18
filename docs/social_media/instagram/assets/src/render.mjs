@@ -61,8 +61,9 @@ const CARDS = [
   },
   {
     template: "story.html", out: "story-question.png", ...STORY,
-    theme: "dark", size: 96, eyebrow: "Your turn", sticker: true,
-    headline: "If you could change <em>one thing</em> about job-hunting in South Africa?",
+    theme: "dark", size: 92, eyebrow: "Your turn",
+    headline: "If you could change <em>one thing</em> about job-hunting in South Africa, what would it be?",
+    sub: "Answer with the sticker below. We read every reply.",
   },
   // The promise carousel (cover + 5 slides)
   { template: "carousel-cover.html", out: "carousel-promise-1-cover.png", ...FEED, markTone: "dark" },

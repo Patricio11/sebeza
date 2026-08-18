@@ -15,7 +15,7 @@ shows; the right column says if a sticker gets added before sharing.
 | File | What the image shows | How to use |
 |---|---|---|
 | `assets/story-intro.png` | The lockup + "to work" | Day one, and again whenever new followers arrive in a wave. |
-| `assets/story-question.png` | "If you could change one thing about job-hunting in SA?" with an empty panel | Post it, then **place Instagram's QUESTION sticker directly over the dashed panel**. Reshare the best answers (they arrive anonymous-to-viewers; never reshare anything identifying). |
+| `assets/story-question.png` | "If you could change one thing about job-hunting in South Africa, what would it be?" | Post it, then **place Instagram's QUESTION sticker in the open space below the text**. Reshare the best answers (they arrive anonymous-to-viewers; never reshare anything identifying). |
 | `assets/story-free-always.png` | "Free for job-seekers. Always." | Pair with a POLL sticker: "Should job platforms ever charge seekers?" Yes/Never. |
 | `assets/story-trust.png` | "Trust is the whole product." | Pair with a QUIZ sticker: "What does an unverified badge mean on Sebenza?" (Answer: exactly that. We never fake it.) |
 | `assets/story-scam-warning.png` | The scam PSA | Run it, then add the "Add yours" / share nudge in the caption line. This one is genuinely worth resharing monthly. |
