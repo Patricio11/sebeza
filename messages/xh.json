@@ -478,7 +478,7 @@
         "missing_for_role": "Kuvula isikhundla esikufutshane",
         "adjacent_role": "Kwakhela phezu koko sele unako"
       },
-      "demandSignal": "Ukhangelo olungu-{searches} xa kuthelekiswa nokufunyanwa okungu-{matches} kule nyanga",
+      "demandSignal": "{searches} iimpawu zemfuno xa kuthelekiswa nokufana okungu-{matches} kufuphi nawe",
       "rankIfLearned": "Ukuba wongeza oku: indawo → #{projected} ku-{pool}",
       "openProfileEditor": "Yongeza kwiprofayile yam →",
       "pathsTitle": "Iindlela zokufunda",
@@ -508,7 +508,7 @@
         "electivesTitle": "Izifundo ezikhethwayo kwinkqubo yakho",
         "electivesSub": "Izifundo osenokuzikhetha, zikhethwe kuba imarike izifuna kakhulu kwiphondo lakho.",
         "curriculumHint": "Apho zikhona kwikharityhulam",
-        "demandSignal": "Ukhangelo olungu-{searches} xa kuthelekiswa nokufunyanwa okungu-{matches} kule nyanga",
+        "demandSignal": "{searches} iimpawu zemfuno xa kuthelekiswa nokufana okungu-{matches} kufuphi nawe",
         "programmesTitle": "Ii-internship neenkqubo zabaphumeleleyo",
         "programmesSub": "Iinkqubo zokwenene zase-South Africa: icandelo likarhulumente kuqala, kulandele iinkampani nee-startup. Imiqathango iboniswa ngokunyanisekileyo. Sikhetha ukukuxelela kwangaphambili ukuba awufaneleki kunokuchitha ixesha lakho.",
         "duration": "{months, plural, =1 {inyanga engu-#} other {iinyanga ezingu-#}}",
@@ -532,7 +532,8 @@
         "step1": "Sijonga oko abaqeshi kwindawo yakho abakukhangelayo nabaqesha ngako, ngexesha langempela.",
         "step2": "Sikuthelekisa oko nezakhono esele zikwiprofayile yakho.",
         "step3": "Ufumana uluhlu olufutshane: zeziphi izakhono omawuzifunde ngokulandelayo, kutheni zibalulekile kufuphi nawe, neendlela zase-South Africa zasimahla okanye ezingabizi kakhulu zokuzifunda (SETA, TVET, online)."
-      }
+      },
+      "nationalBasis": "Akukabikho msebenzi waneleyo wabaqeshi kwiphondo lakho okwangoku, ngoko ikhampasi yakho isebenzisa iipatheni zikazwelonke. Iya kuzenzela eyengingqi ngokuzenzekelayo njengoko abaqeshi abakufuphi nawe bengena."
     },
     "cv": {
       "pageEyebrow": "Umfuni womsebenzi · Umakhi we-CV",

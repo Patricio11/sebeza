@@ -302,6 +302,13 @@ export default async function CareerCompassPage({
         </ol>
       </section>
 
+      {/* A2  honest basis label: national fallback until local signal. */}
+      {compass.demandBasis === "national" && (
+        <p className="mb-4 rounded-[var(--radius-sm)] border-l-2 border-[color:var(--color-accent)] bg-[color:var(--color-accent-tint)] px-4 py-2.5 text-sm text-[color:var(--color-ink)]">
+          {t("nationalBasis")}
+        </p>
+      )}
+
       {/* Phase 10.2  help deep-links (D6). */}
       <div className="mb-4 flex flex-wrap items-center gap-2">
         <HelpLink role="seeker" slug="career-compass-recommendations" label="How recommendations work" />

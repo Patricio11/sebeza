@@ -478,7 +478,7 @@
         "missing_for_role": "Kuvula isikhundla esiseduze",
         "adjacent_role": "Kwakhela phezu kwalokho osunakho"
       },
-      "demandSignal": "Ukusesha okungu-{searches} kuqhathaniswa nokutholakala okungu-{matches} kule nyanga",
+      "demandSignal": "{searches} izimpawu zesidingo uma kuqhathaniswa nokufana okungu-{matches} eduze kwakho",
       "rankIfLearned": "Uma ungeza lokhu: indawo → #{projected} ku-{pool}",
       "openProfileEditor": "Engeza kwiphrofayela yami →",
       "pathsTitle": "Izindlela zokufunda",
@@ -508,7 +508,7 @@
         "electivesTitle": "Izifundo ezikhethwayo ohlelweni lwakho",
         "electivesSub": "Izifundo osengazikhetha, zikhethwe ngoba imakethe izidinga kakhulu esifundazweni sakho.",
         "curriculumHint": "Lapho zikhona kwikharikhulamu",
-        "demandSignal": "Ukusesha okungu-{searches} kuqhathaniswa nokutholakala okungu-{matches} kule nyanga",
+        "demandSignal": "{searches} izimpawu zesidingo uma kuqhathaniswa nokufana okungu-{matches} eduze kwakho",
         "programmesTitle": "Ama-internship nezinhlelo zabaphothule",
         "programmesSub": "Izinhlelo zangempela zase-South Africa: umkhakha kahulumeni kuqala, bese kulandela izinkampani nama-startup. Imibandela iboniswa ngobuqotho. Sincamela ukukutshela kusengaphambili uma ungafaneleki kunokuchitha isikhathi sakho.",
         "duration": "{months, plural, =1 {inyanga engu-#} other {izinyanga ezingu-#}}",
@@ -532,7 +532,8 @@
         "step1": "Sibheka lokho abaqashi endaweni yakho abakusesha nabakuqashayo, ngesikhathi sangempela.",
         "step2": "Sikuqhathanisa nesidingo samakhono asevele kwiphrofayela yakho.",
         "step3": "Uthola uhlu olufushane: yimaphi amakhono okufanele uwafunde ngokulandelayo, kungani ebalulekile eduze kwakho, nezindlela zase-South Africa zamahhala noma ezingabizi zokuwafunda (SETA, TVET, online)."
-      }
+      },
+      "nationalBasis": "Akukabi nomsebenzi owanele wabaqashi esifundazweni sakho okwamanje, ngakho ikhampasi yakho isebenzisa amaphethini kazwelonke. Izozenzela eyendawo ngokuzenzakalela njengoba abaqashi abaseduze kwakho bejoyina."
     },
     "cv": {
       "pageEyebrow": "Umfuni womsebenzi · Umakhi we-CV",

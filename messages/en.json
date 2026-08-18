@@ -644,7 +644,7 @@
         "missing_for_role": "Unlocks an adjacent role",
         "adjacent_role": "Builds on what you already have"
       },
-      "demandSignal": "{searches} searches vs {matches} matches this month",
+      "demandSignal": "{searches} demand signals vs {matches} matches near you",
       "rankIfLearned": "If you add this: rank → #{projected} in {pool}",
       "openProfileEditor": "Add to my profile →",
       "pathsTitle": "Learning paths",
@@ -674,7 +674,7 @@
         "electivesTitle": "Electives in your programme",
         "electivesSub": "Subjects you can still pick  chosen because the market is screaming for them in your province.",
         "curriculumHint": "Where in the curriculum",
-        "demandSignal": "{searches} searches vs {matches} matches this month",
+        "demandSignal": "{searches} demand signals vs {matches} matches near you",
         "programmesTitle": "Internships & graduate programmes",
         "programmesSub": "Real SA programmes  public sector first, then corporates and startups. Eligibility is shown honestly  we'd rather tell you upfront if you don't qualify than waste your time.",
         "duration": "{months, plural, =1 {# month} other {# months}}",
@@ -698,7 +698,8 @@
         "step1": "We watch what employers in your area search and hire for, live.",
         "step2": "We compare that demand with the skills already on your profile.",
         "step3": "You get a short list: which skills to learn next, why they matter near you, and free or low-cost SA ways to learn them (SETA, TVET, online)."
-      }
+      },
+      "nationalBasis": "Not enough employer activity in your province yet, so your compass is using national patterns for now. It localises automatically as employers near you join."
     },
     "cv": {
       "pageEyebrow": "Seeker · CV builder",

@@ -478,7 +478,7 @@
         "missing_for_role": "Sluit 'n aangrensende rol oop",
         "adjacent_role": "Bou op wat jy reeds het"
       },
-      "demandSignal": "{searches} soektogte teenoor {matches} resultate dié maand",
+      "demandSignal": "{searches} aanvraagseine teenoor {matches} passings naby jou",
       "rankIfLearned": "As jy dit byvoeg: posisie → #{projected} in {pool}",
       "openProfileEditor": "Voeg by my profiel →",
       "pathsTitle": "Leerpaaie",
@@ -508,7 +508,7 @@
         "electivesTitle": "Keusevakke in jou program",
         "electivesSub": "Vakke wat jy nog kan kies, gekies omdat die mark daarvoor skree in jou provinsie.",
         "curriculumHint": "Waar in die kurrikulum",
-        "demandSignal": "{searches} soektogte teenoor {matches} resultate dié maand",
+        "demandSignal": "{searches} aanvraagseine teenoor {matches} passings naby jou",
         "programmesTitle": "Internskappe en gegradueerde-programme",
         "programmesSub": "Werklike SA-programme: openbare sektor eerste, dan korporatiewe maatskappye en nuwe ondernemings. Vereistes word eerlik gewys. Ons sê eerder vooraf as jy nie kwalifiseer nie as om jou tyd te mors.",
         "duration": "{months, plural, =1 {# maand} other {# maande}}",
@@ -532,7 +532,8 @@
         "step1": "Ons hou dop waarvoor werkgewers in jou omgewing soek en aanstel, intyds.",
         "step2": "Ons vergelyk daardie aanvraag met die vaardighede reeds op jou profiel.",
         "step3": "Jy kry 'n kort lys: watter vaardighede om volgende te leer, hoekom hulle naby jou saak maak, en gratis of bekostigbare SA-maniere om hulle te leer (SETA, TVET, aanlyn)."
-      }
+      },
+      "nationalBasis": "Daar is nog nie genoeg werkgewer-aktiwiteit in jou provinsie nie, so jou kompas gebruik tans nasionale patrone. Dit lokaliseer outomaties soos werkgewers naby jou aansluit."
     },
     "cv": {
       "pageEyebrow": "Werksoeker · CV-bouer",

@@ -108,6 +108,13 @@ export interface CompassSnapshot {
   adjacentProfessions: AdjacentProfession[];
   /** Skills with the biggest demand vs match gap in the seeker's province. */
   cityDemand: { skill: string; searches: number; matches: number; gap: number }[];
+  /**
+   * 2026-08 (COMPASS_FUEL_PLAN A2)  which pool fed the vacancy/placement
+   * demand legs. "national" = not enough employer activity in the seeker's
+   * province yet, so the whole country's signal is used and the UI says so.
+   * Optional so the mock + older fixtures stay valid ("local" assumed).
+   */
+  demandBasis?: "local" | "national";
 }
 
 // ──────────────────────────────────────────────────────────────────────────────

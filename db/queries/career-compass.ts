@@ -78,8 +78,45 @@ export async function getCompassForProfile(
   const db = getDb();
 
   // ── 1. Live demand for skills the seeker doesn't have ────────────────────
-  // Search terms (last 90 days) matched against skill labels via ILIKE so
-  // "react developer" search → matches "React" skill.
+  // 2026-08 (COMPASS_FUEL_PLAN A1/A2): demand is now a BLEND of three real
+  // signals, weighted by intent strength:
+  //   searches (90d, ILIKE label match)      × 1.0  freshest
+  //   open vacancies requiring the skill     × 1.5  concrete intent
+  //   placements via those vacancies (180d)  × 2.0  proven hiring
+  // Vacancy/placement legs are scoped to the seeker's province (plus
+  // remote/national vacancies) when there's enough local signal;
+  // otherwise the whole country feeds them and the payload says so
+  // (demandBasis: "national")  honest label over fabricated precision.
+  const provinceSlugRows = unwrap<{ slug: string }>(
+    await db.execute(sql`
+      SELECT slug FROM provinces
+      WHERE LOWER(label) = LOWER(${profile.province}) OR slug = LOWER(${profile.province})
+      LIMIT 1
+    `),
+  );
+  const provinceSlug = provinceSlugRows[0]?.slug ?? null;
+
+  const MIN_LOCAL_SIGNALS = 5;
+  const localSignalRows = unwrap<{ n: number }>(
+    await db.execute(sql`
+      SELECT (
+        (SELECT COUNT(*)::int FROM vacancies v
+          WHERE v.status = 'open'
+            AND (v.province_slug = ${provinceSlug} OR v.province_slug IS NULL))
+        +
+        (SELECT COUNT(*)::int FROM placements p
+          JOIN vacancies v ON v.id = p.vacancy_id
+          WHERE p.hired_at >= now() - interval '180 days'
+            AND v.province_slug = ${provinceSlug})
+      ) AS n
+    `),
+  );
+  const demandBasis: "local" | "national" =
+    provinceSlug && (localSignalRows[0]?.n ?? 0) >= MIN_LOCAL_SIGNALS
+      ? "local"
+      : "national";
+  const scopeProvince = demandBasis === "local";
+
   const demandRows = unwrap<DemandRow>(
     await db.execute(sql`
       WITH recent_searches AS (
@@ -90,24 +127,53 @@ export async function getCompassForProfile(
           AND at >= now() - (${DEMAND_WINDOW_DAYS} || ' days')::interval
         GROUP BY LOWER(terms)
       ),
+      open_vacancy_skills AS (
+        SELECT skill, COUNT(*)::int AS n
+        FROM vacancies v, unnest(v.skill_slugs) AS skill
+        WHERE v.status = 'open'
+          AND (
+            ${scopeProvince} = false
+            OR v.province_slug = ${provinceSlug}
+            OR v.province_slug IS NULL
+          )
+        GROUP BY skill
+      ),
+      placement_skills AS (
+        SELECT skill, COUNT(*)::int AS n
+        FROM placements p
+        JOIN vacancies v ON v.id = p.vacancy_id, unnest(v.skill_slugs) AS skill
+        WHERE p.hired_at >= now() - interval '180 days'
+          AND (${scopeProvince} = false OR v.province_slug = ${provinceSlug})
+        GROUP BY skill
+      ),
       skill_match AS (
         SELECT
           s.slug   AS skill_slug,
           s.label  AS skill_label,
-          COALESCE(SUM(rs.hits), 0)::int AS searches,
+          COALESCE(SUM(rs.hits), 0)::int AS search_hits,
+          COALESCE(MAX(ov.n), 0)::int AS vacancy_hits,
+          COALESCE(MAX(pl.n), 0)::int AS placement_hits,
           (SELECT COUNT(*)::int FROM profile_skills ps WHERE ps.skill_slug = s.slug) AS matches
         FROM skills s
         LEFT JOIN recent_searches rs ON rs.term LIKE '%' || LOWER(s.label) || '%'
+        LEFT JOIN open_vacancy_skills ov ON ov.skill = s.slug
+        LEFT JOIN placement_skills pl ON pl.skill = s.slug
         WHERE s.slug NOT IN (
           SELECT skill_slug FROM profile_skills
           WHERE profile_id = (SELECT id FROM profiles WHERE handle = ${profile.handle} LIMIT 1)
         )
         GROUP BY s.slug, s.label
       )
-      SELECT skill_slug, skill_label, searches, matches
+      SELECT
+        skill_slug,
+        skill_label,
+        -- The payload's "searches" is the blended demand-signal count,
+        -- rounded; the UI copy says "demand signals" (not "searches").
+        ROUND(search_hits * 1.0 + vacancy_hits * 1.5 + placement_hits * 2.0)::int AS searches,
+        matches
       FROM skill_match
-      WHERE searches > 0
-      ORDER BY searches DESC, matches ASC
+      WHERE (search_hits + vacancy_hits + placement_hits) > 0
+      ORDER BY (search_hits * 1.0 + vacancy_hits * 1.5 + placement_hits * 2.0) DESC, matches ASC
       LIMIT ${MAX_RECOMMENDATIONS}
     `),
   );
@@ -267,6 +333,7 @@ export async function getCompassForProfile(
     learningPaths,
     adjacentProfessions,
     cityDemand,
+    demandBasis,
   };
 }
 
