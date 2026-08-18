@@ -466,7 +466,7 @@
     },
     "grow": {
       "title": "Ikhampasi yomsebenzi",
-      "subtitle": "Okufanele ukufunde ngokulandelayo, kusekelwe esidingweni sangempela sabaqashi eduze kwakho. Asithengisi izifundo; sikhomba okusebenzayo.",
+      "subtitle": "Umhlahlandlela wakho wokuthi ufunde ini ngokulandelayo. Ubheka lokho abaqashi abaseduze kwakho abakufunayo ngempela, akuqhathanise namakhono asevele kwiphrofayela yakho, bese ukukhombisa indlela emfushane yokutholakala kaningi.",
       "eyebrow": "Ukukhula kwamakhono · kuholwa yisidingo",
       "headline": "Funda {n, plural, =1 {ikhono elingu-#} other {amakhono angu-#}} → suka ku-#{from} uye ku-#{to}",
       "headlineSub": "Indawo ehlosiwe ohlwini lwendawo yakho: {pool}",
@@ -526,6 +526,12 @@
         "openToToggle": "Uvulekele",
         "openToInternships": "Ama-internship",
         "openToGraduateProgrammes": "Izinhlelo zabaphothule"
+      },
+      "how": {
+        "title": "Isebenza kanjani ikhampasi yakho",
+        "step1": "Sibheka lokho abaqashi endaweni yakho abakusesha nabakuqashayo, ngesikhathi sangempela.",
+        "step2": "Sikuqhathanisa nesidingo samakhono asevele kwiphrofayela yakho.",
+        "step3": "Uthola uhlu olufushane: yimaphi amakhono okufanele uwafunde ngokulandelayo, kungani ebalulekile eduze kwakho, nezindlela zase-South Africa zamahhala noma ezingabizi zokuwafunda (SETA, TVET, online)."
       }
     },
     "cv": {

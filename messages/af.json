@@ -466,7 +466,7 @@
     },
     "grow": {
       "title": "Loopbaankompas",
-      "subtitle": "Wat om volgende te leer, gegrond op werklike werkgewervraag naby jou. Ons verkoop nie kursusse nie; ons wys wat werk.",
+      "subtitle": "Jou persoonlike gids oor wat om volgende te leer. Dit lees waarvoor werkgewers naby jou werklik soek, vergelyk dit met die vaardighede op jou profiel, en wys die kortste pad om meer dikwels gevind te word.",
       "eyebrow": "Vaardigheidsgroei · vraaggedrewe",
       "headline": "Leer {n, plural, =1 {# vaardigheid} other {# vaardighede}} → beweeg van #{from} na #{to}",
       "headlineSub": "Geprojekteerde posisie in jou plaaslike poel: {pool}",
@@ -526,6 +526,12 @@
         "openToToggle": "Oop vir",
         "openToInternships": "Internskappe",
         "openToGraduateProgrammes": "Gegradueerde-programme"
+      },
+      "how": {
+        "title": "Hoe jou kompas werk",
+        "step1": "Ons hou dop waarvoor werkgewers in jou omgewing soek en aanstel, intyds.",
+        "step2": "Ons vergelyk daardie aanvraag met die vaardighede reeds op jou profiel.",
+        "step3": "Jy kry 'n kort lys: watter vaardighede om volgende te leer, hoekom hulle naby jou saak maak, en gratis of bekostigbare SA-maniere om hulle te leer (SETA, TVET, aanlyn)."
       }
     },
     "cv": {

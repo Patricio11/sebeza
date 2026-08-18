@@ -280,6 +280,28 @@ export default async function CareerCompassPage({
       pageTitle={t("title")}
       pageSubtitle={t("subtitle")}
     >
+      {/* 2026-08  plain-language explainer (real-user feedback: "unclear
+          what is meant by career compass or its function"). Three steps,
+          always visible, above everything else on the page. */}
+      <section
+        aria-label={t("how.title")}
+        className="mb-6 rounded-[var(--radius-md)] border-2 border-dashed border-[color:var(--color-ink)] bg-[color:var(--color-surface)] p-5"
+      >
+        <div className="text-[0.72rem] uppercase tracking-[0.22em] text-[color:var(--color-ink)]">
+          {t("how.title")}
+        </div>
+        <ol className="mt-3 grid gap-3 text-sm text-[color:var(--color-ink)] md:grid-cols-3">
+          {(["step1", "step2", "step3"] as const).map((step, i) => (
+            <li key={step} className="flex items-start gap-2.5">
+              <span className="mt-0.5 inline-flex size-6 shrink-0 items-center justify-center rounded-full bg-[color:var(--color-ink)] font-display text-xs text-[color:var(--color-paper)]">
+                {i + 1}
+              </span>
+              <span>{t(`how.${step}`)}</span>
+            </li>
+          ))}
+        </ol>
+      </section>
+
       {/* Phase 10.2  help deep-links (D6). */}
       <div className="mb-4 flex flex-wrap items-center gap-2">
         <HelpLink role="seeker" slug="career-compass-recommendations" label="How recommendations work" />

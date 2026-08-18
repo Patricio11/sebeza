@@ -632,7 +632,7 @@
     },
     "grow": {
       "title": "Career compass",
-      "subtitle": "What to learn next  grounded in real employer demand near you. We don't sell courses; we point at what's working.",
+      "subtitle": "Your personal guide to what to learn next. It reads what employers near you are actually searching for, compares that with the skills on your profile, and shows the shortest path to being found more often.",
       "eyebrow": "Skills growth · demand-driven",
       "headline": "Learn {n, plural, =1 {# skill} other {# skills}} → move from #{from} to #{to}",
       "headlineSub": "Projected rank in your local pool: {pool}",
@@ -692,6 +692,12 @@
         "openToToggle": "Open to",
         "openToInternships": "Internships",
         "openToGraduateProgrammes": "Graduate programmes"
+      },
+      "how": {
+        "title": "How your compass works",
+        "step1": "We watch what employers in your area search and hire for, live.",
+        "step2": "We compare that demand with the skills already on your profile.",
+        "step3": "You get a short list: which skills to learn next, why they matter near you, and free or low-cost SA ways to learn them (SETA, TVET, online)."
       }
     },
     "cv": {
