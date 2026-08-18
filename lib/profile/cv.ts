@@ -9,8 +9,9 @@
  * D3 invariant: CV is private to the seeker. Never returned in any
  * public projection, never indexed for search, never exposed to
  * employer-facing surfaces. The storage object lives under
- * `{userId}/cvs/{id}.pdf` in the existing private bucket; admin
- * access only via the POPIA data-export flow.
+ * `{userId}/cvs/{id}.{pdf|doc|docx}` in the private bucket (Word
+ * formats joined PDF 2026-08); admin access only via the POPIA
+ * data-export flow.
  */
 
 import { randomUUID } from "node:crypto";
@@ -55,7 +56,7 @@ export async function uploadCv(form: FormData): Promise<ActionResult> {
 
   const file = form.get("file");
   if (!(file instanceof File)) {
-    return { ok: false, message: "Pick a PDF file to upload." };
+    return { ok: false, message: "Pick a PDF or Word file to upload." };
   }
   const filename = sanitiseFilename(
     (form.get("filename") as string | null) ?? file.name ?? "cv.pdf",

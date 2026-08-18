@@ -14,8 +14,10 @@
  */
 
 import "server-only";
+import sharp from "sharp";
 import { StorageError } from "./supabase";
 import { getStorageBackend } from "./backend";
+import { photoThumbKey, hasPhotoThumb } from "./keys";
 
 const MB = 1024 * 1024;
 const DOC_MAX_BYTES = 10 * MB;
@@ -73,6 +75,28 @@ function sniffMime(buffer: Uint8Array): string | null {
   if (buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff) {
     return "image/jpeg";
   }
+  // Legacy Word .doc  OLE compound file, D0 CF 11 E0 A1 B1 1A E1
+  if (
+    buffer[0] === 0xd0 &&
+    buffer[1] === 0xcf &&
+    buffer[2] === 0x11 &&
+    buffer[3] === 0xe0 &&
+    buffer[4] === 0xa1 &&
+    buffer[5] === 0xb1
+  ) {
+    return "application/msword";
+  }
+  // Word .docx  ZIP container, PK 03 04. Any ZIP matches this  for the
+  // private CV backup (never parsed, never served to others, claimed
+  // type must ALSO be docx) that's a proportionate check.
+  if (
+    buffer[0] === 0x50 &&
+    buffer[1] === 0x4b &&
+    buffer[2] === 0x03 &&
+    buffer[3] === 0x04
+  ) {
+    return "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+  }
   // PNG  89 50 4E 47 0D 0A 1A 0A
   if (
     buffer[0] === 0x89 &&
@@ -102,6 +126,10 @@ function extFor(mime: string): string {
   switch (mime) {
     case "application/pdf":
       return "pdf";
+    case "application/msword":
+      return "doc";
+    case "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+      return "docx";
     case "image/jpeg":
       return "jpg";
     case "image/png":
@@ -180,14 +208,20 @@ export async function uploadIdDocument(
 }
 
 /**
- * Phase 11.5.2  personal CV backup upload. PDF only (D2 keeps the
- * scope tight). Same magic-byte sniff + rate limit; smaller 5MB cap
- * so seekers can re-upload often without hitting storage quotas.
- * Lives under `{userId}/cvs/...`  the seeker's own folder, never
- * surfaced to employers.
+ * Phase 11.5.2  personal CV backup upload. PDF or Word (founder
+ * decision 2026-08: .doc/.docx joined PDF; photo/scan uploads stay
+ * rejected  a CV should be a document, not a picture of one). Same
+ * magic-byte sniff + rate limit; smaller 5MB cap so seekers can
+ * re-upload often without hitting storage quotas. Lives under
+ * `{userId}/cvs/...`  the seeker's own folder, never surfaced to
+ * employers.
  */
 const CV_MAX_BYTES = 5 * MB;
-const CV_ALLOWED = new Set<string>(["application/pdf"]);
+const CV_ALLOWED = new Set<string>([
+  "application/pdf",
+  "application/msword",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+]);
 
 export async function uploadCv(
   opts: UploadOpts,
@@ -244,14 +278,64 @@ async function upload(opts: {
     );
   }
 
-  const key = `${opts.userId}/${opts.kind}/${opts.id}.${extFor(sniffed)}`;
   const backend = await getStorageBackend();
+
+  // 2026-08  photos are RE-ENCODED to WebP before storage (founder
+  // decision). Three wins: 30-50% smaller files (No-Flash rule),
+  // EXIF/GPS metadata stripped (phone photos geotag  POPIA), and we
+  // never store the user's original bytes (a re-encode neutralises
+  // malformed images). A 256px thumb ships alongside so S3  which has
+  // no transform service  still serves small avatars cheaply.
+  // Documents are deliberately untouched: KYC/qualification files are
+  // evidentiary and must stay byte-for-byte as submitted.
+  if (opts.kind === "photos") {
+    const key = `${opts.userId}/photos/${opts.id}.webp`;
+    let main: Buffer;
+    let thumb: Buffer;
+    try {
+      // .rotate() applies the EXIF orientation BEFORE metadata is
+      // dropped, so portrait phone shots don't land sideways.
+      const base = sharp(bytes, { limitInputPixels: 50_000_000 }).rotate();
+      main = await base
+        .clone()
+        .resize({ width: PHOTO_MAX_DIM, height: PHOTO_MAX_DIM, fit: "inside", withoutEnlargement: true })
+        .webp({ quality: 82 })
+        .toBuffer();
+      thumb = await base
+        .clone()
+        .resize({ width: PHOTO_THUMB_DIM, height: PHOTO_THUMB_DIM, fit: "inside", withoutEnlargement: true })
+        .webp({ quality: 78 })
+        .toBuffer();
+    } catch {
+      throw new StorageError(
+        "bad_content",
+        "That image couldn't be processed  please try a different photo.",
+      );
+    }
+    await backend.upload(key, new Uint8Array(main), "image/webp");
+    await backend.upload(photoThumbKey(key), new Uint8Array(thumb), "image/webp");
+    return { key, mime: "image/webp" };
+  }
+
+  const key = `${opts.userId}/${opts.kind}/${opts.id}.${extFor(sniffed)}`;
   await backend.upload(key, bytes, sniffed);
 
   return { key, mime: sniffed };
 }
 
+/** Longest edge stored for the main photo  profile display never needs more. */
+const PHOTO_MAX_DIM = 1600;
+const PHOTO_THUMB_DIM = 256;
+
 export async function deleteStorageObject(key: string): Promise<void> {
   const backend = await getStorageBackend();
   await backend.remove(key);
+  // Photos carry a derived thumb  sweep it with the main object.
+  if (hasPhotoThumb(key)) {
+    try {
+      await backend.remove(photoThumbKey(key));
+    } catch {
+      // Best-effort: legacy keys have no thumb; an orphan is harmless.
+    }
+  }
 }

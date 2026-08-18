@@ -38,6 +38,16 @@ interface Props {
 
 const MAX_BYTES = 5 * 1024 * 1024;
 
+// PDF or Word only (founder decision 2026-08). Photos/scans of a CV are
+// deliberately rejected  employers and future parsing need a document,
+// not a picture of one.
+const CV_TYPES = new Set([
+  "application/pdf",
+  "application/msword",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+]);
+const CV_ACCEPT = [...CV_TYPES, ".pdf", ".doc", ".docx"].join(",");
+
 export function CvBackupEditor({ filename, uploadedAt, locale }: Props) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -59,8 +69,10 @@ export function CvBackupEditor({ filename, uploadedAt, locale }: Props) {
     setError(null);
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.type !== "application/pdf") {
-      setError("CV must be a PDF.");
+    if (!CV_TYPES.has(file.type)) {
+      setError(
+        "Your CV must be a PDF or Word document (.pdf, .doc, .docx). Photos or scans of a CV aren't accepted.",
+      );
       return;
     }
     if (file.size > MAX_BYTES) {
@@ -126,9 +138,14 @@ export function CvBackupEditor({ filename, uploadedAt, locale }: Props) {
           />
           <div className="flex-1">
             <p className="text-sm text-[color:var(--color-ink)]">
-              Upload a PDF of your CV. It stays <strong>private to you</strong>
-                we don&rsquo;t share it with employers and never index it for
-              search. It&rsquo;s your backup copy.
+              Upload your CV as a PDF or Word document. It stays{" "}
+              <strong>private to you</strong>: we don&rsquo;t share it with
+              employers and never index it for search. It&rsquo;s your backup
+              copy.
+            </p>
+            <p className="mt-1.5 text-xs text-[color:var(--color-ink-soft)]">
+              Accepted: .pdf, .doc, .docx · max 5 MB. Please don&rsquo;t upload
+              a photo or scan of your CV. The document itself works best.
             </p>
             <div className="mt-3">
               <Button
@@ -139,12 +156,12 @@ export function CvBackupEditor({ filename, uploadedAt, locale }: Props) {
                 disabled={pending}
               >
                 <Upload className="mr-1.5 size-3.5" aria-hidden="true" />
-                {pending ? "Uploading" : "Upload CV (PDF, max 5 MB)"}
+                {pending ? "Uploading" : "Upload CV (PDF or Word)"}
               </Button>
               <input
                 ref={fileInputRef}
                 type="file"
-                accept="application/pdf"
+                accept={CV_ACCEPT}
                 onChange={onFileSelected}
                 hidden
               />
@@ -220,7 +237,7 @@ export function CvBackupEditor({ filename, uploadedAt, locale }: Props) {
         <input
           ref={fileInputRef}
           type="file"
-          accept="application/pdf"
+          accept={CV_ACCEPT}
           onChange={onFileSelected}
           hidden
         />

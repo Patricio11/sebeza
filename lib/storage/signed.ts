@@ -11,6 +11,7 @@
 import "server-only";
 import { DOCUMENT_URL_TTL, PHOTO_URL_TTL } from "./supabase";
 import { getStorageBackend } from "./backend";
+import { photoThumbKey, hasPhotoThumb } from "./keys";
 
 export async function signedDocumentUrl(key: string): Promise<string | null> {
   try {
@@ -33,6 +34,14 @@ export async function signedPhotoUrl(
 ): Promise<string | null> {
   try {
     const backend = await getStorageBackend();
+    // 2026-08  small renders serve the pre-built 256px WebP thumb
+    // (exists for every photo minted by the WebP pipeline). Works the
+    // same on S3 and Supabase; legacy jpg/png keys fall through to the
+    // main object (with Supabase's on-the-fly transform when available).
+    if (options?.width && options.width <= 256 && hasPhotoThumb(key)) {
+      const thumb = await backend.signedUrl(photoThumbKey(key), PHOTO_URL_TTL);
+      if (thumb) return thumb;
+    }
     return await backend.signedUrl(key, PHOTO_URL_TTL, options);
   } catch {
     return null;
