@@ -818,9 +818,10 @@ export const testimonialPromptState = pgTable("testimonial_prompt_state", {
  * Phase 25 ("Integrations Hub")  admin-managed channel integrations (SMS,
  * WhatsApp, Email), following the llm_providers posture: credentials live
  * ENCRYPTED in the DB, configured + tested + enabled from /admin/integrations,
- * with env vars as the legacy fallback when no row is enabled. DB + Storage
- * are deliberately NOT here  the app can't bootstrap its own DB creds from
- * the DB; those stay platform-env and the hub shows health only.
+ * with env vars as the legacy fallback when no row is enabled. 2026-08:
+ * "storage" joined the channels (S3 / Supabase, lib/storage/backend seam).
+ * Only DB creds are deliberately NOT here  the app can't bootstrap its own
+ * DB connection from the DB; those stay platform-env (health card only).
  */
 export const integrationSettings = pgTable("integration_settings", {
   /** "sms" | "whatsapp" | "email"  one row per channel. */

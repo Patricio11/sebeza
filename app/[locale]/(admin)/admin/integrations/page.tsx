@@ -7,6 +7,7 @@ import { getDb } from "@/db/client";
 import * as schema from "@/db/schema";
 import { getSetting } from "@/lib/admin/settings";
 import { integrationSource } from "@/lib/integrations/resolve";
+import { storageStatus } from "@/lib/storage/backend";
 import {
   IntegrationsHub,
   type ChannelView,
@@ -39,7 +40,7 @@ export default async function AdminIntegrationsPage({
   const rows = await db.select().from(schema.integrationSettings);
   const byChannel = new Map(rows.map((r) => [r.channel, r]));
   const channels: ChannelView[] = [];
-  for (const channel of ["sms", "whatsapp", "email"] as const) {
+  for (const channel of ["sms", "whatsapp", "email", "storage"] as const) {
     const row = byChannel.get(channel);
     channels.push({
       channel,
@@ -62,11 +63,9 @@ export default async function AdminIntegrationsPage({
   ).rows;
   const migrationCount = migrationRows[0]?.n ?? 0;
 
-  // Phase 32.3.4  was `NEXT_PUBLIC_SUPABASE_URL`, which is defined
-  // nowhere, so this card read "Not configured" permanently even with
-  // storage working. `lib/storage/supabase.ts` reads `SUPABASE_URL`.
-  const storageConfigured =
-    !!process.env.SUPABASE_URL && !!process.env.SUPABASE_SERVICE_ROLE_KEY;
+  // 2026-08  storage is now admin-configurable (S3 or Supabase) via the
+  // hub card below; the health card reports which source is live.
+  const storage = await storageStatus();
 
   const [llmActive] = await db
     .select({ displayName: schema.llmProviders.displayName })
@@ -87,7 +86,7 @@ export default async function AdminIntegrationsPage({
       role="admin"
       pageEyebrow="Platform"
       pageTitle="Integrations"
-      pageSubtitle="Every external integration on one surface. Channel credentials are encrypted at rest and managed here; Database and Storage credentials stay platform-env (the app can't bootstrap its own DB connection from the DB)  their health shows below."
+      pageSubtitle="Every external integration on one surface. Channel and storage credentials are encrypted at rest and managed here; only Database credentials stay platform-env (the app can't bootstrap its own DB connection from the DB)."
     >
       {/* Read-only health row */}
       <section aria-label="Infrastructure health" className="mb-8 grid gap-4 md:grid-cols-4">
@@ -100,10 +99,16 @@ export default async function AdminIntegrationsPage({
         />
         <HealthCard
           icon={<HardDrive className="size-4" aria-hidden="true" />}
-          title="Storage (Supabase)"
-          value={storageConfigured ? "Configured" : "Not configured"}
-          detail="Documents, photos, CVs · credentials: platform env"
-          ok={storageConfigured}
+          title="Storage"
+          value={
+            storage.source === "admin"
+              ? `Admin config · ${storage.provider === "s3" ? "S3" : "Supabase"}`
+              : storage.source === "env"
+                ? "Env fallback · Supabase"
+                : "Not configured"
+          }
+          detail="Documents, photos, CVs · configure in the Storage card below"
+          ok={storage.source !== "none"}
         />
         <HealthCard
           icon={<Sparkles className="size-4" aria-hidden="true" />}

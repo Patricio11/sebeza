@@ -15,12 +15,15 @@ import {
   MessageCircle,
   Mail,
   Megaphone,
+  HardDrive,
   Loader2,
   Power,
+  PlugZap,
 } from "lucide-react";
 import {
   saveIntegration,
   setIntegrationEnabled,
+  testStorageIntegration,
 } from "@/lib/admin/integrations";
 import { sendAnnouncement } from "@/lib/admin/announcements";
 import type { IntegrationChannel, IntegrationSource } from "@/lib/integrations/resolve";
@@ -55,6 +58,12 @@ const CHANNEL_META: Record<
     icon: <Mail className="size-4" aria-hidden="true" />,
     blurb:
       "Transactional email. When configured + enabled here, these credentials replace the SMTP_* env vars.",
+  },
+  storage: {
+    title: "Storage (files)",
+    icon: <HardDrive className="size-4" aria-hidden="true" />,
+    blurb:
+      "Documents, photos, and CVs. S3 (or any S3-compatible host) or Supabase Storage. When enabled here, it replaces the SUPABASE_* env vars. Save, then Test, then Enable.",
   },
 };
 
@@ -123,6 +132,10 @@ function ChannelCard({
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<Record<string, string>>({});
   const [error, setError] = useState<string | null>(null);
+  const [testResult, setTestResult] = useState<{
+    ok: boolean;
+    message: string;
+  } | null>(null);
 
   function set(k: string, v: string) {
     setForm((f) => ({ ...f, [k]: v }));
@@ -148,6 +161,15 @@ function ChannelCard({
       config.fromNumber = form.fromNumber ?? "";
       secrets.twilioSid = form.twilioSid ?? "";
       secrets.twilioToken = form.twilioToken ?? "";
+    } else if (view.channel === "storage") {
+      config.provider = form.provider ?? "s3";
+      config.bucket = form.bucket ?? "";
+      config.region = form.region ?? "";
+      config.endpoint = form.endpoint ?? "";
+      config.url = form.url ?? "";
+      secrets.accessKeyId = form.accessKeyId ?? "";
+      secrets.secretAccessKey = form.secretAccessKey ?? "";
+      secrets.serviceKey = form.serviceKey ?? "";
     } else {
       config.host = form.host ?? "";
       config.port = form.port ?? "587";
@@ -209,6 +231,22 @@ function ChannelCard({
         >
           {view.configured ? "Reconfigure" : "Configure"}
         </button>
+        {view.channel === "storage" && view.configured && (
+          <button
+            type="button"
+            disabled={pending}
+            onClick={() => {
+              setTestResult(null);
+              run(async () => {
+                setTestResult(await testStorageIntegration());
+              });
+            }}
+            className="inline-flex h-8 items-center gap-1 rounded-[var(--radius-pill)] border border-[color:var(--color-hairline)] px-3 text-xs hover:border-[color:var(--color-ink)] disabled:opacity-50"
+          >
+            <PlugZap className="size-3.5" aria-hidden="true" />
+            Test connection
+          </button>
+        )}
         {view.configured && (
           <button
             type="button"
@@ -224,9 +262,22 @@ function ChannelCard({
         )}
       </div>
 
+      {testResult && (
+        <p
+          role={testResult.ok ? "status" : "alert"}
+          className={`mt-2 text-xs ${
+            testResult.ok
+              ? "text-[color:var(--color-brand-strong)]"
+              : "text-[color:var(--color-danger)]"
+          }`}
+        >
+          {testResult.message}
+        </p>
+      )}
+
       {open && (
         <div className="mt-3 space-y-2 border-t border-dashed border-[color:var(--color-hairline)] pt-3">
-          {view.channel !== "email" && (
+          {(view.channel === "sms" || view.channel === "whatsapp") && (
             <>
               <CustomSelect
                 ariaLabel={`${meta.title} provider`}
@@ -257,6 +308,33 @@ function ChannelCard({
               <input className={field} placeholder="From (Sebenza <noreply@…>)" value={form.from ?? ""} onChange={(e) => set("from", e.target.value)} />
               <input className={field} placeholder="SMTP user" value={form.user ?? ""} onChange={(e) => set("user", e.target.value)} />
               <input className={field} type="password" placeholder="SMTP password" value={form.pass ?? ""} onChange={(e) => set("pass", e.target.value)} />
+            </>
+          )}
+          {view.channel === "storage" && (
+            <>
+              <CustomSelect
+                ariaLabel="Storage provider"
+                value={form.provider ?? "s3"}
+                onChange={(v) => set("provider", v)}
+                options={[
+                  { value: "s3", label: "S3 / S3-compatible" },
+                  { value: "supabase", label: "Supabase Storage" },
+                ]}
+              />
+              <input className={field} placeholder="Bucket (e.g. sebenza-private)" value={form.bucket ?? ""} onChange={(e) => set("bucket", e.target.value)} />
+              {(form.provider ?? "s3") === "s3" ? (
+                <>
+                  <input className={field} placeholder="Region (af-south-1)" value={form.region ?? ""} onChange={(e) => set("region", e.target.value)} />
+                  <input className={field} placeholder="Endpoint URL (blank for AWS; set for R2/MinIO…)" value={form.endpoint ?? ""} onChange={(e) => set("endpoint", e.target.value)} />
+                  <input className={field} placeholder="Access key ID" value={form.accessKeyId ?? ""} onChange={(e) => set("accessKeyId", e.target.value)} />
+                  <input className={field} type="password" placeholder="Secret access key" value={form.secretAccessKey ?? ""} onChange={(e) => set("secretAccessKey", e.target.value)} />
+                </>
+              ) : (
+                <>
+                  <input className={field} placeholder="Supabase project URL (https://…supabase.co)" value={form.url ?? ""} onChange={(e) => set("url", e.target.value)} />
+                  <input className={field} type="password" placeholder="Service-role key" value={form.serviceKey ?? ""} onChange={(e) => set("serviceKey", e.target.value)} />
+                </>
+              )}
             </>
           )}
           {error && (

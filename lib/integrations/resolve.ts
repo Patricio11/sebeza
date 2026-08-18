@@ -13,7 +13,7 @@ import { getDb } from "@/db/client";
 import * as schema from "@/db/schema";
 import { decryptField } from "@/lib/crypto";
 
-export type IntegrationChannel = "sms" | "whatsapp" | "email";
+export type IntegrationChannel = "sms" | "whatsapp" | "email" | "storage";
 
 export interface ResolvedIntegration {
   /** Non-secret config merged for display + transport use. */
@@ -61,6 +61,8 @@ export async function integrationSource(
       ? !!process.env.SMS_PROVIDER
       : channel === "whatsapp"
         ? !!process.env.WHATSAPP_PROVIDER
-        : !!process.env.EMAIL_TRANSPORT || !!process.env.SMTP_HOST;
+        : channel === "storage"
+          ? !!process.env.SUPABASE_URL && !!process.env.SUPABASE_SERVICE_ROLE_KEY
+          : !!process.env.EMAIL_TRANSPORT || !!process.env.SMTP_HOST;
   return envConfigured ? "env" : "none";
 }

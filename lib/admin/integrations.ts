@@ -13,13 +13,18 @@ import { z } from "zod";
 import { getDb } from "@/db/client";
 import * as schema from "@/db/schema";
 import { verifyAdmin } from "@/lib/auth/dal";
-import { encryptField } from "@/lib/crypto";
+import { encryptField, decryptField } from "@/lib/crypto";
 import { logAccess } from "@/lib/audit";
 import type { IntegrationChannel } from "@/lib/integrations/resolve";
+import {
+  buildStorageBackend,
+  invalidateStorageBackendCache,
+  type StorageProvider,
+} from "@/lib/storage/backend";
 
 export type IntegrationResult = { ok: true } | { ok: false; error: string };
 
-const channelSchema = z.enum(["sms", "whatsapp", "email"]);
+const channelSchema = z.enum(["sms", "whatsapp", "email", "storage"]);
 
 const configSchemas = {
   sms: z.object({
@@ -36,6 +41,32 @@ const configSchemas = {
     port: z.string().trim().regex(/^\d+$/),
     from: z.string().trim().max(200).optional().or(z.literal("")),
     secure: z.enum(["true", "false"]).optional(),
+  }),
+  // 2026-08  file storage (documents / photos / CVs). S3 is the primary
+  // target; Supabase remains available. Secrets: accessKeyId +
+  // secretAccessKey (s3) or serviceKey (supabase).
+  storage: z.object({
+    provider: z.enum(["s3", "supabase"]),
+    bucket: z.string().trim().min(2).max(100),
+    region: z.string().trim().max(40).optional().or(z.literal("")),
+    endpoint: z
+      .string()
+      .trim()
+      .max(300)
+      .optional()
+      .or(z.literal(""))
+      .refine((v) => !v || /^https?:\/\//.test(v), {
+        message: "Endpoint must be an http(s) URL.",
+      }),
+    url: z
+      .string()
+      .trim()
+      .max(300)
+      .optional()
+      .or(z.literal(""))
+      .refine((v) => !v || /^https?:\/\//.test(v), {
+        message: "Supabase URL must be an http(s) URL.",
+      }),
   }),
 } as const;
 
@@ -85,6 +116,7 @@ export async function saveIntegration(
     subject: ch.data,
     meta: { action: "configure" },
   });
+  if (ch.data === "storage") invalidateStorageBackendCache();
   revalidatePath("/admin/integrations");
   return { ok: true };
 }
@@ -118,6 +150,54 @@ export async function setIntegrationEnabled(
     subject: ch.data,
     meta: { action: enabled ? "enable" : "disable" },
   });
+  if (ch.data === "storage") invalidateStorageBackendCache();
   revalidatePath("/admin/integrations");
   return { ok: true };
+}
+
+/**
+ * 2026-08  round-trip probe for the SAVED storage configuration
+ * (write → read → delete under `__connection_test__/`). Runs against
+ * the stored row even while disabled, so the flow is: Save → Test →
+ * Enable. Secrets never leave the server; the result is a message.
+ */
+export async function testStorageIntegration(): Promise<
+  { ok: boolean; message: string }
+> {
+  const admin = await verifyAdmin();
+  const db = getDb();
+  const [row] = await db
+    .select()
+    .from(schema.integrationSettings)
+    .where(eq(schema.integrationSettings.channel, "storage"))
+    .limit(1);
+  if (!row?.credentialsEnc) {
+    return { ok: false, message: "Save the storage configuration first, then test it." };
+  }
+
+  let result: { ok: boolean; message: string };
+  try {
+    const config = (row.config ?? {}) as Record<string, string>;
+    const secrets = JSON.parse(decryptField(row.credentialsEnc)) as Record<
+      string,
+      string
+    >;
+    const provider: StorageProvider =
+      config.provider === "supabase" ? "supabase" : "s3";
+    const backend = buildStorageBackend(provider, config, secrets);
+    result = await backend.test();
+  } catch (e) {
+    result = {
+      ok: false,
+      message: e instanceof Error ? e.message : "Storage test failed.",
+    };
+  }
+
+  await logAccess({
+    kind: "admin.integration.edit",
+    actor: admin.id,
+    subject: "storage",
+    meta: { action: "test", ok: result.ok },
+  });
+  return result;
 }

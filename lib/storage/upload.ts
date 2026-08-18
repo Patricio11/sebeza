@@ -14,7 +14,8 @@
  */
 
 import "server-only";
-import { getStorageClient, BUCKET, StorageError } from "./supabase";
+import { StorageError } from "./supabase";
+import { getStorageBackend } from "./backend";
 
 const MB = 1024 * 1024;
 const DOC_MAX_BYTES = 10 * MB;
@@ -244,23 +245,13 @@ async function upload(opts: {
   }
 
   const key = `${opts.userId}/${opts.kind}/${opts.id}.${extFor(sniffed)}`;
-  const supabase = getStorageClient();
-
-  const { error } = await supabase.storage.from(BUCKET).upload(key, bytes, {
-    contentType: sniffed,
-    upsert: true,
-  });
-  if (error) {
-    throw new StorageError("upload_failed", error.message);
-  }
+  const backend = await getStorageBackend();
+  await backend.upload(key, bytes, sniffed);
 
   return { key, mime: sniffed };
 }
 
 export async function deleteStorageObject(key: string): Promise<void> {
-  const supabase = getStorageClient();
-  const { error } = await supabase.storage.from(BUCKET).remove([key]);
-  if (error) {
-    throw new StorageError("delete_failed", error.message);
-  }
+  const backend = await getStorageBackend();
+  await backend.remove(key);
 }
