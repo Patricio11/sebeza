@@ -97,6 +97,12 @@ const CARDS = [
     sub: "Tell us in the comments. We read every answer.",
   },
   { template: "checklist.html", out: "post-30-promise.png", w: 1080, h: 1350 },
+  {
+    template: "quote.html", out: "post-02-who.png", w: 1080, h: 1350,
+    theme: "light", size: 92, eyebrow: "Who's behind this",
+    headline: "A small South African company with one belief: this country's talent deserves to be <em>seen</em>.",
+    sub: "Built quietly, line by line, on nights and weekends. No hype. No shortcuts.",
+  },
 ];
 
 const browser = await chromium.launch();

@@ -31,7 +31,7 @@ This is the beginning. Follow along. 🇿🇦
 ---
 
 ### IG-2 · Who's behind this
-**Visual:** workspace / code-on-screen photo (no faces)
+**Visual:** `facebook/assets/post-02-who.png` (branded card; nothing from the real workspace is shown yet, founder decision 2026-08)
 **Caption:**
 Who's behind Sebenza? 👋
 

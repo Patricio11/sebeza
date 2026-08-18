@@ -49,7 +49,7 @@ Like most people here, we know how heavy the unemployment problem is. So instead
 No hype. No shortcuts. Just steady work on a problem that matters to all of us.
 
 We'll be sharing the journey here. The wins, the hard parts, all of it.
-**Visual:** Workspace or code-on-screen shot. No faces: the page speaks as "we" for now.
+**Visual:** `assets/post-02-who.png` (branded card). Founder decision 2026-08: nothing from the real workspace is shown yet, so all "photo" posts use branded cards until further notice.
 **Tags:** #Sebenza #BuildInPublic #SAtech #Mzansi
 
 ---
@@ -169,7 +169,7 @@ Some nights it's exciting: a feature finally works and it feels like magic. Othe
 But every time we imagine one person getting hired because of this, it's worth it. That's the fuel.
 
 To anyone building something hard right now: keep going. 💪
-**Visual:** Late-night workspace photo (the screen and the coffee, no faces).
+**Visual:** Branded card (ask Claude to mint one when this post comes up; no workspace photos yet, per the founder's 2026-08 decision).
 **Tags:** #Sebenza #BuildInPublic #Founder #SAtech
 
 ---

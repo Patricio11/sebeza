@@ -39,7 +39,7 @@ Post mornings 6-8am or evenings 7-9pm. Reply to every comment, every day, ten mi
 - [ ] **Day 1, TikTok + YouTube Shorts + IG Reels**: video `videos/v5-to-work.mp4` (the
       anthem; add a calm instrumental in-app; set cover `tiktok/assets/cover-v5-towork.png`).
       **Pin it on TikTok.**
-- [ ] **Day 3**: FB post 2 (who's behind this; workspace photo, no faces) + IG-2.
+- [ ] **Day 3**: FB post 2 (who's behind this; card `facebook/assets/post-02-who.png`) + IG-2.
 - [ ] **Day 4**: IG story `story-question.png` with the question sticker over the panel.
 - [ ] **Day 5**: FB post 3 (the one-liner, product screenshot) + IG-3. Video day:
       `videos/v1-search-live.mp4` to TikTok + Shorts + Reels.
@@ -59,7 +59,7 @@ Post mornings 6-8am or evenings 7-9pm. Reply to every comment, every day, ten mi
 
 - [ ] Mon: FB post 6 (free always, card) + IG.
 - [ ] Tue: IG story `story-trust.png` + quiz sticker.
-- [ ] Wed: FB post 11 (the hard parts; late-night workspace photo) + IG. Video:
+- [ ] Wed: FB post 11 (the hard parts; branded card, minted when due) + IG. Video:
       `videos/v12-free-means-free.mp4`.
 - [ ] Thu: X launch: post X-1 (intro, pin it), then X-2 an hour later. Follow ~30 accounts.
 - [ ] Fri: FB post 15 (for employers, soft) + IG. LinkedIn post LI-1 (pin/feature it).

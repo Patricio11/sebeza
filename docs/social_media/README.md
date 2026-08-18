@@ -6,7 +6,8 @@ system: Fraunces + Hanken Grotesk, the Mzansi palette, the chevron mark (extract
 3 : 2 : 1) on every graphic.
 
 **Standing rules across all platforms:** the account speaks as "we" (founder off-camera for
-now); no em-dashes anywhere; no sign-up CTAs or paid ads until the launch gates clear
+now); nothing from the real workspace is shown yet (founder decision 2026-08: every "photo"
+slot uses a branded card until he says otherwise); no em-dashes anywhere; no sign-up CTAs or paid ads until the launch gates clear
 (immigration consult + Information Officer registration; see the Facebook playbook's gate);
 never name the incumbent registry; never invent traction; no real PII in screenshots or
 videos. Handle everywhere: **@sebenzasa**. Name everywhere: **Sebenza SA**. Same avatar file

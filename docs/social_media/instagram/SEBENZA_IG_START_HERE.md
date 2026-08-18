@@ -61,7 +61,7 @@ the palette, and the flag stripe. Two rules keep it that way:
 | # | Post | Tile |
 |---|---|---|
 | 1 | Intro ("to work") | dark card `../facebook/assets/post-01-intro.png` |
-| 2 | Who's behind this | photo (workspace / code on screen, no faces) |
+| 2 | Who's behind this | light card (`facebook/assets/post-02-who.png`; no workspace photos yet) |
 | 3 | The one-liner | product screenshot (branded frame) |
 | 4 | Talent is invisible | light card `../facebook/assets/post-04-talent-invisible.png` |
 | 5 | **The promise carousel** | dark cover `assets/carousel-promise-1-cover.png` (+ 5 slides) |
@@ -78,7 +78,7 @@ the palette, and the flag stripe. Two rules keep it that way:
 - [x] 2. Same day: run `assets/story-intro.png` as the first **story**.
 - [ ] 3. Follow ~20 relevant SA accounts (youth orgs, TVET colleges, SA tech, careers
       pages). Follow, don't spam-comment.
-- [ ] 4. Two days later: post 2 (workspace photo) + the question **story**
+- [ ] 4. Two days later: post 2 (post-02-who card) + the question **story**
       (`assets/story-question.png` with Instagram's question sticker placed over the
       panel; see `SEBENZA_IG_STORIES.md`).
 - [ ] 5. Two days after: post 3 (product screenshot). From then on, the playbook
