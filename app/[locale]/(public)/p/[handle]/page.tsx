@@ -916,7 +916,7 @@ function LanguageLevelChip({
   dimension,
   level,
 }: {
-  dimension: "Spoken" | "Written";
+  dimension: "Spoken" | "Written" | "Signing";
   level: LanguageRef["spoken"];
 }) {
   const meta = LANGUAGE_LEVEL_META[level];
@@ -958,8 +958,15 @@ function LanguagesSection({ languages }: { languages: LanguageRef[] }) {
               {l.label}
             </div>
             <div className="mt-3 grid gap-1.5">
-              <LanguageLevelChip dimension="Spoken" level={l.spoken} />
-              <LanguageLevelChip dimension="Written" level={l.written} />
+              {l.slug === "sasl" ? (
+                // SASL is signed  one proficiency, no written dimension.
+                <LanguageLevelChip dimension="Signing" level={l.spoken} />
+              ) : (
+                <>
+                  <LanguageLevelChip dimension="Spoken" level={l.spoken} />
+                  <LanguageLevelChip dimension="Written" level={l.written} />
+                </>
+              )}
             </div>
           </li>
         ))}

@@ -74,7 +74,13 @@ export function LanguagesEditor({ initial }: { initial: LanguageRow[] }) {
       ...prev,
       // Sensible starting point: most people adding a language speak it
       // at least conversationally; they tune both levels right here.
-      { slug: entry.slug, label: entry.label, spoken: "fluent", written: "intermediate" },
+      {
+        slug: entry.slug,
+        label: entry.label,
+        spoken: "fluent",
+        // SASL has ONE proficiency (signing); both columns carry it.
+        written: entry.slug === "sasl" ? "fluent" : "intermediate",
+      },
     ]);
     setPickerValue("");
   }
@@ -85,7 +91,13 @@ export function LanguagesEditor({ initial }: { initial: LanguageRow[] }) {
     level: LanguageLevel,
   ) {
     setItems((prev) =>
-      prev.map((i) => (i.slug === slug ? { ...i, [dimension]: level } : i)),
+      prev.map((i) =>
+        i.slug !== slug
+          ? i
+          : slug === "sasl"
+            ? { ...i, spoken: level, written: level }
+            : { ...i, [dimension]: level },
+      ),
     );
   }
 
@@ -147,13 +159,17 @@ export function LanguagesEditor({ initial }: { initial: LanguageRow[] }) {
                 </button>
               </div>
               <div className="mt-2 grid gap-2 sm:grid-cols-2">
-                {(["spoken", "written"] as const).map((dimension) => (
+                {/* SASL is signed, not spoken/written  one "signing" level. */}
+                {(item.slug === "sasl"
+                  ? (["spoken"] as const)
+                  : (["spoken", "written"] as const)
+                ).map((dimension) => (
                   <div key={dimension}>
                     <span
                       id={`lang-${item.slug}-${dimension}`}
                       className="block text-[0.65rem] uppercase tracking-[0.18em] text-[color:var(--color-ink-soft)]"
                     >
-                      {dimension}
+                      {item.slug === "sasl" ? "signing" : dimension}
                     </span>
                     <div
                       role="group"

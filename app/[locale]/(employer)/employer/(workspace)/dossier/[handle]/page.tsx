@@ -340,14 +340,25 @@ export default async function EmployerDossierPage({
                   >
                     <span className="text-sm font-medium">{l.label}</span>
                     <span className="text-xs text-[color:var(--color-ink-soft)]">
-                      Spoken:{" "}
-                      <span className="text-[color:var(--color-ink)] capitalize">
-                        {l.spoken}
-                      </span>
-                      {" · "}Written:{" "}
-                      <span className="text-[color:var(--color-ink)] capitalize">
-                        {l.written}
-                      </span>
+                      {l.slug === "sasl" ? (
+                        <>
+                          Signing:{" "}
+                          <span className="text-[color:var(--color-ink)] capitalize">
+                            {l.spoken}
+                          </span>
+                        </>
+                      ) : (
+                        <>
+                          Spoken:{" "}
+                          <span className="text-[color:var(--color-ink)] capitalize">
+                            {l.spoken}
+                          </span>
+                          {" · "}Written:{" "}
+                          <span className="text-[color:var(--color-ink)] capitalize">
+                            {l.written}
+                          </span>
+                        </>
+                      )}
                     </span>
                   </li>
                 ))}
