@@ -9,6 +9,7 @@ import { OrgRequirementsManager } from "@/components/feature/admin/OrgRequiremen
 import { listKycSubmissions, type KycReviewRow } from "@/lib/admin/kyc-review";
 import { VerificationActions } from "@/components/feature/admin/VerificationActions";
 import { OrgReviewLauncher } from "@/components/feature/admin/OrgReviewLauncher";
+import { OrgDeleteButton } from "@/components/feature/admin/OrgDeleteButton";
 import { KycReviewActions } from "@/components/feature/admin/KycReviewActions";
 import { IdVerificationSwitch } from "@/components/feature/admin/IdVerificationSwitch";
 import { getSetting } from "@/lib/admin/settings";
@@ -27,12 +28,12 @@ export default async function VerificationsPage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ tab?: string }>;
+  searchParams: Promise<{ tab?: string; q?: string }>;
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
   await verifyAdmin();
-  const { tab } = await searchParams;
+  const { tab, q } = await searchParams;
   const active =
     tab === "organisations"
       ? "organisations"
@@ -56,6 +57,24 @@ export default async function VerificationsPage({
   const orgsActionable = orgGroups.pending.length + orgGroups.unverified.length;
   const docRequirements =
     tab === "organisations" ? await listDocumentRequirementsAdmin() : [];
+
+  // 2026-08  server-side filter across all four org groups. The queue
+  // is capped at 500 rows, so an in-process match on name / id / owner
+  // email / CIPC number is exact and cheap.
+  const orgQuery = (q ?? "").trim().toLowerCase();
+  const matchesOrg = (o: (typeof orgGroups.pending)[number]) =>
+    !orgQuery ||
+    o.name.toLowerCase().includes(orgQuery) ||
+    o.id.toLowerCase().includes(orgQuery) ||
+    (o.ownerEmail ?? "").toLowerCase().includes(orgQuery) ||
+    (o.ownerName ?? "").toLowerCase().includes(orgQuery) ||
+    (o.registrationNumber ?? "").toLowerCase().includes(orgQuery);
+  const filteredOrgGroups = {
+    pending: orgGroups.pending.filter(matchesOrg),
+    unverified: orgGroups.unverified.filter(matchesOrg),
+    rejected: orgGroups.rejected.filter(matchesOrg),
+    verified: orgGroups.verified.filter(matchesOrg),
+  };
 
   const relTime = new Intl.RelativeTimeFormat(locale, { numeric: "auto" });
   function relative(d: Date | string | null | undefined): string {
@@ -210,47 +229,87 @@ export default async function VerificationsPage({
           {/* 2026-08  the admin-managed checklist driving the onboarding form */}
           <OrgRequirementsManager rows={docRequirements} />
 
+          {/* 2026-08  find an org across every state group. Plain GET
+              form: the whole tab is server-rendered, no client JS. */}
+          <form
+            method="get"
+            className="flex flex-wrap items-center gap-2"
+            role="search"
+          >
+            <input type="hidden" name="tab" value="organisations" />
+            <input
+              type="search"
+              name="q"
+              defaultValue={q ?? ""}
+              placeholder="Search name, owner email, org ID, CIPC…"
+              aria-label="Search organisations"
+              className="h-10 w-full max-w-md rounded-[var(--radius-pill)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] px-4 text-sm"
+            />
+            <button
+              type="submit"
+              className="h-10 rounded-[var(--radius-pill)] border-2 border-[color:var(--color-ink)] px-4 text-xs uppercase tracking-[0.18em] text-[color:var(--color-ink)] transition-colors hover:bg-[color:var(--color-ink)] hover:text-[color:var(--color-paper)]"
+            >
+              Search
+            </button>
+            {orgQuery && (
+              <Link
+                href={{ pathname: "/admin/verifications", query: { tab: "organisations" } }}
+                className="text-xs uppercase tracking-[0.18em] text-[color:var(--color-ink-soft)] hover:text-[color:var(--color-ink)]"
+              >
+                Clear
+              </Link>
+            )}
+          </form>
+
           {/* Pending review  the actionable queue */}
           <OrgGroup
-            title={`Pending review · ${orgGroups.pending.length}`}
+            title={`Pending review · ${filteredOrgGroups.pending.length}`}
             tone="brand"
             icon={Clock}
-            emptyTitle="Nothing pending."
-            emptyNote="Submitted onboarding applications will appear here. Drafts (not yet submitted) live in the section below."
-            orgs={orgGroups.pending}
+            emptyTitle={orgQuery ? "No matches." : "Nothing pending."}
+            emptyNote={
+              orgQuery
+                ? "No pending organisation matches your search."
+                : "Submitted onboarding applications will appear here. Drafts (not yet submitted) live in the section below."
+            }
+            orgs={filteredOrgGroups.pending}
             relative={relative}
           />
           {/* Drafts  Owner hasn't submitted yet */}
           <OrgGroup
-            title={`Drafts · ${orgGroups.unverified.length}`}
+            title={`Drafts · ${filteredOrgGroups.unverified.length}`}
             tone="muted"
             icon={ShieldOff}
-            emptyTitle="No drafts."
-            emptyNote="New employers go here after signup, before they submit documents."
-            orgs={orgGroups.unverified}
+            emptyTitle={orgQuery ? "No matches." : "No drafts."}
+            emptyNote={
+              orgQuery
+                ? "No draft organisation matches your search."
+                : "New employers go here after signup, before they submit documents."
+            }
+            orgs={filteredOrgGroups.unverified}
             relative={relative}
           />
           {/* Rejected  history */}
-          {orgGroups.rejected.length > 0 && (
+          {filteredOrgGroups.rejected.length > 0 && (
             <OrgGroup
-              title={`Rejected · ${orgGroups.rejected.length}`}
+              title={`Rejected · ${filteredOrgGroups.rejected.length}`}
               tone="danger"
               icon={XCircle}
               emptyTitle=""
               emptyNote=""
-              orgs={orgGroups.rejected}
+              orgs={filteredOrgGroups.rejected}
               relative={relative}
             />
           )}
           {/* Verified  history */}
-          {orgGroups.verified.length > 0 && (
+          {filteredOrgGroups.verified.length > 0 && (
             <OrgGroup
-              title={`Verified · ${orgGroups.verified.length}`}
+              title={`Verified · ${filteredOrgGroups.verified.length}`}
               tone="accent"
               icon={CheckCircle2}
               emptyTitle=""
               emptyNote=""
-              orgs={orgGroups.verified}
+              orgs={filteredOrgGroups.verified}
               relative={relative}
             />
           )}
@@ -367,7 +426,14 @@ function OrgGroup({
                   )}
                 </div>
               </div>
-              <OrgReviewLauncher orgId={o.id} />
+              <div className="flex items-center gap-2 md:justify-end">
+                <OrgReviewLauncher orgId={o.id} />
+                <OrgDeleteButton
+                  orgId={o.id}
+                  orgName={o.name}
+                  documentCount={o.documentCount}
+                />
+              </div>
             </li>
           ))}
         </ul>

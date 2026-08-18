@@ -1,16 +1,19 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { Plus, Trash2 } from "lucide-react";
+import { useMemo, useState, useTransition } from "react";
+import { Pencil, Plus, Search, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { CustomSelect } from "@/components/ui/CustomSelect";
 import {
   addSkill,
   removeSkill,
+  updateSkill,
   addProfession,
   removeProfession,
+  updateProfession,
   addCity,
   removeCity,
+  updateCity,
 } from "@/lib/admin/taxonomy";
 
 export type TaxonomyKind = "skills" | "professions" | "cities" | "provinces";
@@ -35,18 +38,55 @@ interface Props {
 export function TaxonomyManager({ kind, rows, provinces }: Props) {
   const [pending, startTransition] = useTransition();
   const [showAdd, setShowAdd] = useState(false);
+  // Non-null while the panel edits an existing row (its immutable slug).
+  const [editingSlug, setEditingSlug] = useState<string | null>(null);
   const [slug, setSlug] = useState("");
   const [label, setLabel] = useState("");
   const [provinceSlug, setProvinceSlug] = useState(provinces?.[0]?.slug ?? "");
   const [error, setError] = useState<string | null>(null);
+  const [query, setQuery] = useState("");
 
   const readOnlyKind = kind === "provinces";
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return rows;
+    return rows.filter(
+      (r) =>
+        r.label.toLowerCase().includes(q) ||
+        r.slug.includes(q) ||
+        (r.provinceLabel ?? "").toLowerCase().includes(q),
+    );
+  }, [rows, query]);
+
+  function openAdd() {
+    setEditingSlug(null);
+    setSlug("");
+    setLabel("");
+    setProvinceSlug(provinces?.[0]?.slug ?? "");
+    setShowAdd(true);
+    setError(null);
+  }
+
+  function openEdit(row: TaxonomyRow) {
+    setEditingSlug(row.slug);
+    setSlug(row.slug);
+    setLabel(row.label);
+    setProvinceSlug(row.provinceSlug ?? provinces?.[0]?.slug ?? "");
+    setShowAdd(true);
+    setError(null);
+  }
 
   function submitAdd() {
     setError(null);
     startTransition(async () => {
-      const res =
-        kind === "skills"
+      const res = editingSlug
+        ? kind === "skills"
+          ? await updateSkill({ slug: editingSlug, label })
+          : kind === "professions"
+            ? await updateProfession({ slug: editingSlug, label })
+            : await updateCity({ slug: editingSlug, label, provinceSlug })
+        : kind === "skills"
           ? await addSkill({ slug, label })
           : kind === "professions"
             ? await addProfession({ slug, label })
@@ -56,6 +96,7 @@ export function TaxonomyManager({ kind, rows, provinces }: Props) {
         return;
       }
       setShowAdd(false);
+      setEditingSlug(null);
       setSlug("");
       setLabel("");
     });
@@ -78,23 +119,34 @@ export function TaxonomyManager({ kind, rows, provinces }: Props) {
 
   return (
     <div>
-      {!readOnlyKind && (
-        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-3">
+          <label className="relative">
+            <Search
+              className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[color:var(--color-ink-soft)]"
+              aria-hidden="true"
+            />
+            <input
+              type="search"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder={`Search ${kind}…`}
+              aria-label={`Search ${kind}`}
+              className="h-10 w-64 max-w-full rounded-[var(--radius-pill)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] pl-9 pr-4 text-sm"
+            />
+          </label>
           <span className="text-xs text-[color:var(--color-ink-soft)]">
-            {rows.length} {kind}
+            {query
+              ? `${filtered.length} of ${rows.length} ${kind}`
+              : `${rows.length} ${kind}`}
           </span>
-          {!showAdd && (
-            <Button
-              type="button"
-              variant="primary"
-              size="sm"
-              onClick={() => setShowAdd(true)}
-            >
-              <Plus className="size-4" aria-hidden="true" /> Add {kind.slice(0, -1)}
-            </Button>
-          )}
         </div>
-      )}
+        {!readOnlyKind && !showAdd && (
+          <Button type="button" variant="primary" size="sm" onClick={openAdd}>
+            <Plus className="size-4" aria-hidden="true" /> Add {kind.slice(0, -1)}
+          </Button>
+        )}
+      </div>
 
       {showAdd && !readOnlyKind && (
         <form
@@ -116,10 +168,22 @@ export function TaxonomyManager({ kind, rows, provinces }: Props) {
             value={slug}
             onChange={(e) => setSlug(e.target.value.toLowerCase())}
             placeholder="slug-kebab-case"
-            className="h-10 rounded-[var(--radius-sm)] border border-[color:var(--color-hairline)] bg-[color:var(--color-paper)] px-3 font-mono text-xs"
+            readOnly={editingSlug !== null}
+            title={
+              editingSlug !== null
+                ? "Slugs are referenced by profiles and vacancies, so they cannot change."
+                : undefined
+            }
+            className={
+              "h-10 rounded-[var(--radius-sm)] border border-[color:var(--color-hairline)] px-3 font-mono text-xs " +
+              (editingSlug !== null
+                ? "bg-[color:var(--color-surface-sunk,#efece3)] text-[color:var(--color-ink-soft)]"
+                : "bg-[color:var(--color-paper)]")
+            }
           />
           {kind === "cities" && provinces ? (
             <CustomSelect
+              key={editingSlug ?? "new"}
               ariaLabel="Province"
               variant="compact"
               name="province"
@@ -132,7 +196,7 @@ export function TaxonomyManager({ kind, rows, provinces }: Props) {
           )}
           <div className="flex items-center gap-2">
             <Button type="submit" variant="primary" size="sm" disabled={pending}>
-              {pending ? "Saving…" : "Add"}
+              {pending ? "Saving…" : editingSlug ? "Save" : "Add"}
             </Button>
             <Button
               type="button"
@@ -140,6 +204,7 @@ export function TaxonomyManager({ kind, rows, provinces }: Props) {
               size="sm"
               onClick={() => {
                 setShowAdd(false);
+                setEditingSlug(null);
                 setError(null);
               }}
             >
@@ -160,6 +225,12 @@ export function TaxonomyManager({ kind, rows, provinces }: Props) {
         </p>
       )}
 
+      {filtered.length === 0 ? (
+        <p className="rounded-[var(--radius-md)] border border-dashed border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-6 text-sm text-[color:var(--color-ink-soft)]">
+          No {kind} match &ldquo;{query}&rdquo;.
+        </p>
+      ) : (
+        <>
       <div className="hidden overflow-hidden rounded-[var(--radius-md)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] md:block">
         <table className="w-full text-sm">
           <thead>
@@ -173,7 +244,7 @@ export function TaxonomyManager({ kind, rows, provinces }: Props) {
             </tr>
           </thead>
           <tbody>
-            {rows.map((row) => (
+            {filtered.map((row) => (
               <tr
                 key={row.slug}
                 className="border-t border-[color:var(--color-hairline)]"
@@ -189,15 +260,26 @@ export function TaxonomyManager({ kind, rows, provinces }: Props) {
                 )}
                 <td className="px-5 py-2.5 text-right">
                   {!readOnlyKind && (
-                    <button
-                      type="button"
-                      aria-label={`Remove ${row.label}`}
-                      disabled={pending}
-                      onClick={() => submitRemove(row.slug)}
-                      className="rounded-[var(--radius-pill)] border border-[color:var(--color-hairline)] p-1.5 text-[color:var(--color-ink-soft)] hover:border-[color:var(--color-danger)] hover:text-[color:var(--color-danger)] disabled:opacity-60"
-                    >
-                      <Trash2 className="size-3.5" aria-hidden="true" />
-                    </button>
+                    <span className="inline-flex items-center gap-1.5">
+                      <button
+                        type="button"
+                        aria-label={`Edit ${row.label}`}
+                        disabled={pending}
+                        onClick={() => openEdit(row)}
+                        className="rounded-[var(--radius-pill)] border border-[color:var(--color-hairline)] p-1.5 text-[color:var(--color-ink-soft)] hover:border-[color:var(--color-ink)] hover:text-[color:var(--color-ink)] disabled:opacity-60"
+                      >
+                        <Pencil className="size-3.5" aria-hidden="true" />
+                      </button>
+                      <button
+                        type="button"
+                        aria-label={`Remove ${row.label}`}
+                        disabled={pending}
+                        onClick={() => submitRemove(row.slug)}
+                        className="rounded-[var(--radius-pill)] border border-[color:var(--color-hairline)] p-1.5 text-[color:var(--color-ink-soft)] hover:border-[color:var(--color-danger)] hover:text-[color:var(--color-danger)] disabled:opacity-60"
+                      >
+                        <Trash2 className="size-3.5" aria-hidden="true" />
+                      </button>
+                    </span>
                   )}
                 </td>
               </tr>
@@ -207,7 +289,7 @@ export function TaxonomyManager({ kind, rows, provinces }: Props) {
       </div>
 
       <ul className="space-y-2 md:hidden">
-        {rows.map((row) => (
+        {filtered.map((row) => (
           <li
             key={row.slug}
             className="flex items-center justify-between gap-3 rounded-xl border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-3"
@@ -226,19 +308,32 @@ export function TaxonomyManager({ kind, rows, provinces }: Props) {
               </div>
             </div>
             {!readOnlyKind && (
-              <button
-                type="button"
-                aria-label={`Remove ${row.label}`}
-                disabled={pending}
-                onClick={() => submitRemove(row.slug)}
-                className="inline-flex size-11 shrink-0 items-center justify-center rounded-full border border-[color:var(--color-hairline)] text-[color:var(--color-ink-soft)] hover:border-[color:var(--color-danger)] hover:text-[color:var(--color-danger)] disabled:opacity-60"
-              >
-                <Trash2 className="size-4" aria-hidden="true" />
-              </button>
+              <span className="flex shrink-0 items-center gap-2">
+                <button
+                  type="button"
+                  aria-label={`Edit ${row.label}`}
+                  disabled={pending}
+                  onClick={() => openEdit(row)}
+                  className="inline-flex size-11 items-center justify-center rounded-full border border-[color:var(--color-hairline)] text-[color:var(--color-ink-soft)] hover:border-[color:var(--color-ink)] hover:text-[color:var(--color-ink)] disabled:opacity-60"
+                >
+                  <Pencil className="size-4" aria-hidden="true" />
+                </button>
+                <button
+                  type="button"
+                  aria-label={`Remove ${row.label}`}
+                  disabled={pending}
+                  onClick={() => submitRemove(row.slug)}
+                  className="inline-flex size-11 items-center justify-center rounded-full border border-[color:var(--color-hairline)] text-[color:var(--color-ink-soft)] hover:border-[color:var(--color-danger)] hover:text-[color:var(--color-danger)] disabled:opacity-60"
+                >
+                  <Trash2 className="size-4" aria-hidden="true" />
+                </button>
+              </span>
             )}
           </li>
         ))}
       </ul>
+        </>
+      )}
     </div>
   );
 }

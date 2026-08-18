@@ -57,6 +57,7 @@ import {
   orgRejectedEmail,
 } from "@/lib/email/templates/org-vetting-updates";
 import { signedDocumentUrl } from "@/lib/storage/signed";
+import { deleteStorageObject } from "@/lib/storage/upload";
 
 export type ActionResult<T extends object = object> =
   | ({ ok: true } & T)
@@ -673,6 +674,108 @@ export async function markOrgEmailVerified(
   return ok();
 }
 
+
+/**
+ * 2026-08  hard delete for junk / duplicate organisations (the queue
+ * had no way to remove a double registration).
+ *
+ * Guard-rails:
+ *  - Refused while the org has placements. Placement-Truth: confirmed
+ *    hires feed national statistics and never disappear with an org.
+ *  - The caller must re-type the org name; re-checked server-side.
+ *  - Document storage objects are removed best-effort BEFORE the rows
+ *    (a dangling storage object is recoverable; a dangling row is not).
+ *  - seeker_invitations has no FK cascade, so its rows go explicitly;
+ *    members / vacancies / invitations / documents / saved searches /
+ *    shortlists all cascade from the org row.
+ *  - Member USER accounts are untouched. An orphaned employer sees the
+ *    "not linked to an organisation" page; manage them on /admin/users.
+ */
+const deleteOrgSchema = z.object({
+  orgId: z.string().min(1),
+  confirmName: z.string().min(1),
+});
+
+export async function deleteOrganization(
+  input: z.infer<typeof deleteOrgSchema>,
+): Promise<ActionResult> {
+  const session = await verifyAdmin();
+  const parsed = deleteOrgSchema.safeParse(input);
+  if (!parsed.success) return fail("Invalid input.");
+  const db = getDb();
+
+  const orgs = await db
+    .select({
+      id: schema.organizations.id,
+      name: schema.organizations.name,
+      verification: schema.organizations.verification,
+    })
+    .from(schema.organizations)
+    .where(eq(schema.organizations.id, parsed.data.orgId))
+    .limit(1);
+  const org = orgs[0];
+  if (!org) return fail("Organisation not found.");
+  if (parsed.data.confirmName.trim() !== org.name) {
+    return fail("The name you typed does not match the organisation.");
+  }
+
+  const [placementCount] = await db
+    .select({ c: sql<number>`COUNT(*)::int` })
+    .from(schema.placements)
+    .where(eq(schema.placements.organizationId, org.id));
+  if ((placementCount?.c ?? 0) > 0) {
+    return fail(
+      `This organisation has ${placementCount?.c} confirmed placement(s). ` +
+        "Placement records are permanent, so the organisation cannot be deleted.",
+    );
+  }
+
+  const docs = await db
+    .select({ storageKey: schema.organizationDocuments.storageKey })
+    .from(schema.organizationDocuments)
+    .where(eq(schema.organizationDocuments.organizationId, org.id));
+  const [memberCount] = await db
+    .select({ c: sql<number>`COUNT(*)::int` })
+    .from(schema.organizationMembers)
+    .where(eq(schema.organizationMembers.organizationId, org.id));
+  const [vacancyCount] = await db
+    .select({ c: sql<number>`COUNT(*)::int` })
+    .from(schema.vacancies)
+    .where(eq(schema.vacancies.organizationId, org.id));
+
+  for (const d of docs) {
+    try {
+      await deleteStorageObject(d.storageKey);
+    } catch {
+      // Best-effort: an orphaned storage object is harmless; the row
+      // deletion below is what matters.
+    }
+  }
+
+  await db.transaction(async (tx) => {
+    await tx
+      .delete(schema.seekerInvitations)
+      .where(eq(schema.seekerInvitations.organizationId, org.id));
+    await tx.delete(schema.organizations).where(eq(schema.organizations.id, org.id));
+  });
+
+  await logAccess({
+    kind: "org.delete",
+    actor: session.id,
+    subject: org.id,
+    meta: {
+      name: org.name,
+      verification: org.verification,
+      documents: docs.length,
+      members: memberCount?.c ?? 0,
+      vacancies: vacancyCount?.c ?? 0,
+    },
+  });
+
+  revalidatePath("/admin/verifications");
+  revalidatePath("/admin/organisations");
+  return ok();
+}
 
 // 2026-08 (SRS fan-out)  the Owner's user row for decision emails.
 async function orgOwnerFor(

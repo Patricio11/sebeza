@@ -80,6 +80,36 @@ export async function addSkill(
   return ok({ slug: parsed.data.slug });
 }
 
+/** 2026-08  label edits. The slug is the PK referenced by profiles /
+ *  vacancies as text, so it is immutable from this surface; only the
+ *  display label changes (and, for cities, the parent province). */
+export async function updateSkill(
+  input: z.infer<typeof skillSchema>,
+): Promise<ActionResult> {
+  const session = await verifyAdmin();
+  const parsed = skillSchema.safeParse(input);
+  if (!parsed.success) {
+    return fail(parsed.error.issues[0]?.message ?? "Invalid input.");
+  }
+  const db = getDb();
+  const updated = await db
+    .update(schema.skills)
+    .set({ label: parsed.data.label })
+    .where(eq(schema.skills.slug, parsed.data.slug))
+    .returning({ slug: schema.skills.slug });
+  if (updated.length === 0) return fail("Skill not found.");
+
+  await logAccess({
+    kind: "taxonomy.edit",
+    actor: session.id,
+    subject: parsed.data.slug,
+    meta: { kind: "skill", label: parsed.data.label },
+  });
+
+  revalidatePath("/admin/taxonomy");
+  return ok();
+}
+
 export async function removeSkill(input: { slug: string }): Promise<ActionResult> {
   const session = await verifyAdmin();
   if (!input?.slug) return fail("Missing slug.");
@@ -146,6 +176,33 @@ export async function addProfession(
 
   revalidatePath("/admin/taxonomy");
   return ok({ slug: parsed.data.slug });
+}
+
+export async function updateProfession(
+  input: z.infer<typeof professionSchema>,
+): Promise<ActionResult> {
+  const session = await verifyAdmin();
+  const parsed = professionSchema.safeParse(input);
+  if (!parsed.success) {
+    return fail(parsed.error.issues[0]?.message ?? "Invalid input.");
+  }
+  const db = getDb();
+  const updated = await db
+    .update(schema.professions)
+    .set({ label: parsed.data.label })
+    .where(eq(schema.professions.slug, parsed.data.slug))
+    .returning({ slug: schema.professions.slug });
+  if (updated.length === 0) return fail("Profession not found.");
+
+  await logAccess({
+    kind: "taxonomy.edit",
+    actor: session.id,
+    subject: parsed.data.slug,
+    meta: { kind: "profession", label: parsed.data.label },
+  });
+
+  revalidatePath("/admin/taxonomy");
+  return ok();
 }
 
 export async function removeProfession(input: {
@@ -234,6 +291,45 @@ export async function addCity(
 
   revalidatePath("/admin/taxonomy");
   return ok({ slug: parsed.data.slug });
+}
+
+export async function updateCity(
+  input: z.infer<typeof citySchema>,
+): Promise<ActionResult> {
+  const session = await verifyAdmin();
+  const parsed = citySchema.safeParse(input);
+  if (!parsed.success) {
+    return fail(parsed.error.issues[0]?.message ?? "Invalid input.");
+  }
+  const db = getDb();
+
+  const province = await db
+    .select({ slug: schema.provinces.slug })
+    .from(schema.provinces)
+    .where(eq(schema.provinces.slug, parsed.data.provinceSlug))
+    .limit(1);
+  if (province.length === 0) return fail("Unknown province.");
+
+  const updated = await db
+    .update(schema.cities)
+    .set({ label: parsed.data.label, provinceSlug: parsed.data.provinceSlug })
+    .where(eq(schema.cities.slug, parsed.data.slug))
+    .returning({ slug: schema.cities.slug });
+  if (updated.length === 0) return fail("City not found.");
+
+  await logAccess({
+    kind: "taxonomy.edit",
+    actor: session.id,
+    subject: parsed.data.slug,
+    meta: {
+      kind: "city",
+      label: parsed.data.label,
+      province: parsed.data.provinceSlug,
+    },
+  });
+
+  revalidatePath("/admin/taxonomy");
+  return ok();
 }
 
 export async function removeCity(input: { slug: string }): Promise<ActionResult> {

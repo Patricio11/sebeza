@@ -151,6 +151,8 @@ export type AuditKind =
   // 2026-08 org onboarding  admin edits to the configured KYC document
   // requirement list (create / edit / toggle / reorder; meta carries what).
   | "org.requirements.update"
+  | "org.delete"
+  | "taxonomy.edit"
   // Phase 8  nightly cron tombstones (system-of-record proof of erasure).
   | "account.hard_delete"
   // Phase 8  self-service erasure path (seeker /dashboard/privacy).
