@@ -177,6 +177,38 @@ export async function submitTaxonomySuggestion(
 
   const db = getDb();
 
+  // 2026-08  idempotency guard (founder-reported bug: profile autosave
+  // re-submitted the same "Other" entries on every save, so one person
+  // showed as "2 submitters"). Same user + same kind + same text with a
+  // PENDING row → return the existing row instead of inserting again.
+  const dupe = await db
+    .select({
+      id: schema.taxonomySuggestions.id,
+      pendingInstitutionSlug: schema.taxonomySuggestions.pendingInstitutionSlug,
+      pendingOrganisationId: schema.taxonomySuggestions.pendingOrganisationId,
+    })
+    .from(schema.taxonomySuggestions)
+    .where(
+      and(
+        eq(schema.taxonomySuggestions.submittedByUserId, session.id),
+        eq(schema.taxonomySuggestions.kind, parsed.data.kind),
+        eq(schema.taxonomySuggestions.state, "pending"),
+        sql`lower(${schema.taxonomySuggestions.customText}) = lower(${customText})`,
+      ),
+    )
+    .limit(1);
+  if (dupe[0]) {
+    return ok({
+      suggestionId: dupe[0].id,
+      ...(dupe[0].pendingInstitutionSlug
+        ? { pendingInstitutionSlug: dupe[0].pendingInstitutionSlug }
+        : {}),
+      ...(dupe[0].pendingOrganisationId
+        ? { pendingOrganisationId: dupe[0].pendingOrganisationId }
+        : {}),
+    });
+  }
+
   // Anti-spam: max SUBMIT_CAP_PER_DAY suggestions per user in 24h.
   const since = new Date(Date.now() - 24 * 60 * 60 * 1000);
   const recent = await db
@@ -379,6 +411,7 @@ export async function listPendingSuggestions(
       id: schema.taxonomySuggestions.id,
       kind: schema.taxonomySuggestions.kind,
       customText: schema.taxonomySuggestions.customText,
+      submittedByUserId: schema.taxonomySuggestions.submittedByUserId,
       submittedAt: schema.taxonomySuggestions.submittedAt,
       state: schema.taxonomySuggestions.state,
       targetSlug: schema.taxonomySuggestions.targetSlug,
@@ -406,12 +439,17 @@ export async function listPendingSuggestions(
     .orderBy(desc(schema.taxonomySuggestions.submittedAt))
     .limit(200);
 
-  // Compute submitterCount for each unique customText.
-  const counts = new Map<string, number>();
+  // Compute submitterCount for each unique customText  DISTINCT people,
+  // not rows (2026-08: autosave used to duplicate rows for one person).
+  const submitters = new Map<string, Set<string>>();
   for (const r of rows) {
     const key = r.customText.toLowerCase();
-    counts.set(key, (counts.get(key) ?? 0) + 1);
+    const set = submitters.get(key) ?? new Set<string>();
+    set.add(r.submittedByUserId);
+    submitters.set(key, set);
   }
+  const counts = new Map<string, number>();
+  for (const [key, set] of submitters) counts.set(key, set.size);
 
   // Deduplicate by customText, keep the oldest id, sum the submitterCount.
   const seen = new Set<string>();
