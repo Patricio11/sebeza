@@ -1,86 +1,84 @@
 import {
   HelpProse,
   Callout,
-  Steps,
-  Step,
   DashboardLink,
 } from "@/components/feature/help/HelpProse";
 import type { HelpArticleMeta } from "@/content/help/types";
 
 export const meta: HelpArticleMeta = {
+  // Slug kept so existing links and HelpLink chips keep working. The
+  // article was rewritten on 2026-08-19: the certificate-upload bridge
+  // it described no longer exists.
   slug: "upgrading-to-verified",
-  title: "Upgrading a self-attested skill to verified",
+  title: "What finishing a course does to your profile",
   shortDescription:
-    "Completing a learning item adds the skill as self-attested. Upload the certificate to upgrade it to verified  one click from the completed row.",
+    "Completing a learning item adds the skill to your profile as self-attested via learning, which is stronger than a plain claim. There is no certificate to upload any more.",
   category: "growth",
   keywords: [
     "verified",
-    "certificate",
-    "upgrade",
     "self-attested",
     "learning",
     "completed",
     "qualification",
+    "skill",
+    "proficiency",
   ],
   related: [
     "uploading-certificates-and-verification",
     "learning-paths-and-proficiency",
   ],
   surfaceLink: "/dashboard/grow",
-  updatedAt: "2026-05-31",
+  updatedAt: "2026-08-19",
 };
 
 export default function Article() {
   return (
     <HelpProse>
       <p>
-        When you mark a learning item complete, the skill lands on
-        your profile as <em>self-attested  via learning</em>. That
-        carries more weight than a plain self-attestation but
-        less than a verified credential. Upgrading to verified
-        takes one upload.
+        When you mark a learning item complete, the skill lands on your
+        profile as <em>self-attested via learning</em>. That carries more
+        weight than a plain self-attestation, because it records that you
+        set out to learn something on a real route and finished it.
       </p>
 
-      <h2>The bridge</h2>
-      <Steps>
-        <Step number={1}>
-          <p>
-            Open your <em>My Learning</em> section. Any completed
-            row carries a small secondary link: &ldquo;Got a
-            certificate? Upload it for the verified badge&rdquo;.
-          </p>
-        </Step>
-        <Step number={2}>
-          <p>
-            Tap the link. You land on the Qualifications page with
-            the Add panel pre-filled  the skill name in the title
-            field, the learning provider in the institution field.
-            Both stay editable; what you actually upload + label is
-            up to you.
-          </p>
-        </Step>
-        <Step number={3}>
-          <p>
-            Upload the PDF / JPG / PNG. The qualification lands as{" "}
-            <em>unverified</em>. Admin (or the SAQA partner once
-            that lands) reviews + flips to <em>verified</em>. On
-            verification, your profile_skills row upgrades from{" "}
-            <em>self-attested  via learning</em> to{" "}
-            <em>verified</em>.
-          </p>
-        </Step>
-      </Steps>
+      <h2>There is nothing to upload</h2>
+      <p>
+        We used to ask for the certificate so an administrator could
+        review it and mark the qualification verified. That step is gone.
+        Qualifications are now self-declared, we hold no documents, and
+        your finished course simply strengthens the skill on your
+        profile.
+      </p>
+      <p>
+        You can still add the qualification itself on your Qualifications
+        page: the title, the institution, the year. Employers read it as
+        you wrote it.
+      </p>
 
-      <Callout type="info" title="Cert + learning item aren&rsquo;t linked">
+      <Callout type="info" title="The green Verified badge is a different thing">
         <p>
-          The qualification you upload isn&rsquo;t formally tied to
-          the learning_item we suggested. Deliberate: you might have
-          taken a different course than the one we recommended  the
-          certificate stands on its own merits. The platform never
-          implies the cert is &ldquo;for&rdquo; a specific learning
-          path we proposed.
+          That badge answers <em>is a real person behind this profile?</em>{" "}
+          and comes from the live selfie check on your profile page, not
+          from any course or certificate. See{" "}
+          <em>Qualifications and the Verified badge</em>.
         </p>
       </Callout>
+
+      <h2>What actually moves you up</h2>
+      <p>
+        Finishing the right course does two useful things. The skill
+        appears on your profile, so employers searching for it can find
+        you. And your Career compass recalculates: the gap you closed
+        drops off the list, and your projected position in the local
+        pool updates with it.
+      </p>
+      <p>
+        If you want proof of the work rather than proof of attendance,
+        add it under <em>Work and projects</em> on your profile: a link,
+        photos, and a sentence in your own words about what your part
+        was. For most employers that is more persuasive than a
+        certificate.
+      </p>
 
       <DashboardLink href="/dashboard/grow">Open Career Compass</DashboardLink>
     </HelpProse>

@@ -8,7 +8,7 @@ export const meta: HelpArticleMeta = {
   slug: "document-sharing-and-employer-access",
   title: "Document sharing + employer access",
   shortDescription:
-    "Employers see your certificates exist, but can't download the files without your per-document consent. How requests work + how downloads are audit-logged.",
+    "We no longer collect certificates. If you uploaded one before, employers still cannot download it without your per-document consent. How requests work + how downloads are audit-logged.",
   category: "privacy",
   keywords: [
     "document",
@@ -32,12 +32,26 @@ export default function Article() {
   return (
     <HelpProse>
       <p>
-        On your public profile and dossier, employers see your
-        certificates as <em>list entries</em>: institution, programme,
-        NQF level, and verification chip. They cannot download the
-        certificate file itself without your per-document consent. This
-        is a stricter standard than the contact reveal &mdash; documents
-        are higher-risk PII, so the gate is finer-grained.
+        <strong>Since August 2026 we no longer collect certificates.</strong>{" "}
+        Qualifications are self-declared: you type the title, the
+        institution and the year, and employers read them exactly as you
+        wrote them, labelled unverified. There is no file to share,
+        because we hold no file.
+      </p>
+      <p>
+        This article still matters if you uploaded a certificate before
+        that change. Those documents were kept, because decisions were
+        made on them, and everything below still governs who can reach
+        them. You can delete any of them at any time by removing the
+        qualification.
+      </p>
+      <p>
+        On your public profile and dossier, employers see qualifications
+        as <em>list entries</em>: institution, programme, NQF level, and
+        verification chip. Where a document exists, they cannot download
+        it without your per-document consent. This is a stricter standard
+        than the contact reveal: documents are higher-risk personal
+        information, so the gate is finer-grained.
       </p>
 
       <h2>The request flow</h2>

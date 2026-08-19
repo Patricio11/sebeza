@@ -95,10 +95,16 @@ export default function Article() {
         Completing a learning path doesn&rsquo;t auto-update the
         proficiency on your profile. That&rsquo;s deliberate: a course
         completion is a signal, not a verification. After you finish,
-        go to the Profile editor, update the skill&rsquo;s proficiency
-        or years, and (where applicable) upload the completion
-        certificate via the Qualifications page. The matcher reads
-        proficiency from your profile, not from the compass.
+        go to the Profile editor and update the skill&rsquo;s
+        proficiency or years yourself. The matcher reads proficiency
+        from your profile, not from the compass.
+      </p>
+      <p>
+        There is no certificate to upload: qualifications are
+        self-declared, so you can simply list the course on your
+        Qualifications page. If you want to show the work rather than
+        the attendance, add it under <em>Work and projects</em> with a
+        link or photos and a line about what you did.
       </p>
     </HelpProse>
   );

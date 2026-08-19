@@ -347,7 +347,10 @@
       "seekerHint": "Ons wys nooit jou ID-nommer, dokumente of kontakbesonderhede in soekresultate nie, selfs nie vir geverifieerde werkgewers nie, totdat jy toestem."
     },
     "report": "Rapporteer hierdie profiel",
-    "redacted": "(Jou van word in openbare soektogte versteek totdat jy tot kontak toestem.)"
+    "redacted": "(Jou van word in openbare soektogte versteek totdat jy tot kontak toestem.)",
+    "projectsEyebrow": "Bewys",
+    "projects": "Werk en projekte",
+    "projectsSelfDeclared": "Self verklaar deur die kandidaat. Sebenza verifieer nie projekskakels of beelde nie."
   },
   "seekerDash": {
     "title": "Jou beheerpaneel",

@@ -347,7 +347,10 @@
       "seekerHint": "Asilokothi sibonise inombolo yakho kamazisi, amadokhumenti noma imininingwane yokuxhumana emiphumeleni yokusesha, ngisho nakubaqashi abaqinisekisiwe, uze uvume."
     },
     "report": "Bika le phrofayela",
-    "redacted": "(Isibongo sifihliwe ekusesheni komphakathi uze uvume ukuxhunywa.)"
+    "redacted": "(Isibongo sifihliwe ekusesheni komphakathi uze uvume ukuxhunywa.)",
+    "projectsEyebrow": "Ubufakazi",
+    "projects": "Umsebenzi namaphrojekthi",
+    "projectsSelfDeclared": "Kushiwo umuntu ngokwakhe. I-Sebenza ayiziqinisekisi izixhumanisi noma izithombe zephrojekthi."
   },
   "seekerDash": {
     "title": "Ideshibhodi yakho",

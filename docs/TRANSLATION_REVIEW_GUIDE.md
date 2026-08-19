@@ -173,3 +173,25 @@ originals are in `messages/en.json` at the same key paths.
 - [ ] Approved consent blocks pasted into the three catalogs; `CONSENT_HOLD_PREFIXES` emptied
       in `lib/i18n/catalogs.test.ts`; `npm run test` green.
 - [ ] Marketing "four languages" claims and video V9 unblocked.
+
+---
+
+## Surfaces that are ENGLISH-ONLY on purpose (2026-08-20)
+
+Not everything lives in the catalogs. These are deliberate, and a reviewer should
+know why rather than hunt for missing keys:
+
+| Surface | Why English-only | When it should change |
+|---|---|---|
+| **Live-selfie dialog** (`SelfieVerification.tsx`) | Biometric-adjacent consent copy. It explains what the camera does and what is stored, so it falls under the same human-review hold as the POPIA consent blocks. | Translate together with the consent blocks, by a human. |
+| **Coach's read** (`CompassReadCard.tsx` + the model output) | The narrative is generated per seeker at request time, so there is nothing to pre-translate. The card chrome around it is English. | When a persisted user locale exists, the prompt can ask for the seeker's language. Same blocker as the English-only transactional email gap. |
+| **Help centre articles** (`content/help/**`) | Long-form editorial content with no i18n pipeline; ~60 articles. | A dedicated phase, not a catalog pass. |
+| **DatePicker / MonthYearPicker chrome** ("Select date", "Pick a year", "Clear", "Today") | Pre-existing: the component never used the catalogs. | Small, self-contained catalog pass; worth doing with the next UI wave. |
+| **Employer dossier** (`/employer/dossier/[handle]`) | Pre-existing: the whole page is English, not just the new Work-and-projects block. | Whole-page pass, out of scope for a single feature. |
+
+**Rule for new work:** if the page around you calls `getTranslations` /
+`useTranslations`, your new copy MUST go in all four catalogs. The public profile
+`/p/[handle]` is localised, so the Work-and-projects section added on 2026-08-19
+was a genuine miss and was moved to `profile.projects*` keys on 2026-08-20, with an
+E2E asserting the isiZulu heading renders.
+

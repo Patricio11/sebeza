@@ -511,7 +511,10 @@
       "seekerHint": "We never show your ID number, documents, or contact details in search results  even to verified employers, until you consent."
     },
     "report": "Report this profile",
-    "redacted": "(Surname is hidden in public search until you consent to be contacted.)"
+    "redacted": "(Surname is hidden in public search until you consent to be contacted.)",
+    "projectsEyebrow": "Evidence",
+    "projects": "Work & projects",
+    "projectsSelfDeclared": "Self-declared by the candidate. Sebenza does not verify project links or images."
   },
   "seekerDash": {
     "title": "Your dashboard",

@@ -655,10 +655,10 @@ async function ProfileBody({
           )}
 
           {projects.length > 0 && (
-            <Section eyebrow="Evidence" title="Work & projects">
+            <Section eyebrow={t("projectsEyebrow")} title={t("projects")}>
               <ProjectsShowcase
                 projects={projects}
-                selfDeclaredNote="Self-declared by the candidate. Sebenza does not verify project links or images."
+                selfDeclaredNote={t("projectsSelfDeclared")}
               />
             </Section>
           )}

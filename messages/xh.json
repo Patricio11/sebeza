@@ -347,7 +347,10 @@
       "seekerHint": "Asize sibonise inombolo yakho yesazisi, amaxwebhu okanye iinkcukacha zoqhagamshelwano kwiziphumo zokhangelo, nkqu nakubaqeshi abaqinisekisiweyo, de uvume."
     },
     "report": "Xela le profayile",
-    "redacted": "(Ifani ifihliwe kukhangelo loluntu de uvume ukuqhagamshelwana.)"
+    "redacted": "(Ifani ifihliwe kukhangelo loluntu de uvume ukuqhagamshelwana.)",
+    "projectsEyebrow": "Ubungqina",
+    "projects": "Umsebenzi neeprojekthi",
+    "projectsSelfDeclared": "Kuxelwe ngumntu ngokwakhe. I-Sebenza ayiziqinisekisi iikhonkco okanye imifanekiso yeprojekthi."
   },
   "seekerDash": {
     "title": "Ideshbhodi yakho",

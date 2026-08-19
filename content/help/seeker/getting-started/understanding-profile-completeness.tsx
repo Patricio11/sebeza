@@ -52,9 +52,9 @@ export default function Article() {
           threshold most people miss.
         </li>
         <li>
-          <strong>At least one certificate.</strong> Verification state
-          doesn&rsquo;t matter for this count &mdash; uploading is what
-          counts. Pending and unverified both pass.
+          <strong>At least one qualification listed.</strong> You type
+          the title, institution and year. Nothing to upload: we
+          don&rsquo;t collect certificates.
         </li>
         <li>
           <strong>At least one work-history entry.</strong> Same idea:
@@ -78,7 +78,7 @@ export default function Article() {
         Search rank in the (profession × province) pool is a blend of
         three factors: completeness, freshness, and a small citizen
         boost. Completeness is the biggest of the three. Moving from
-        four skills to five, or adding a single certificate, can be
+        four skills to five, or listing a single qualification, can be
         the difference between page one and page four when an employer
         opens the matcher.
       </p>
@@ -86,7 +86,7 @@ export default function Article() {
       <Callout type="info" title="What's not on the list">
         <p>
           Bio length, photo quality, the number of skills above five,
-          how many certificates you upload, how recently you edited your
+          how many qualifications you list, how recently you edited your
           profile &mdash; none of those move the completeness score. The
           score is binary per field; it isn&rsquo;t a vanity dashboard.
         </p>

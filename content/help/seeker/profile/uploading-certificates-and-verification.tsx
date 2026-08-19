@@ -8,19 +8,21 @@ import {
 import type { HelpArticleMeta } from "@/content/help/types";
 
 export const meta: HelpArticleMeta = {
+  // Slug kept so existing links, bookmarks and HelpLink chips keep
+  // working; the article itself was rewritten on 2026-08-19 when
+  // certificate collection was retired.
   slug: "uploading-certificates-and-verification",
-  title: "Uploading certificates + verification",
+  title: "Qualifications and the Verified badge",
   shortDescription:
-    "The three verification states (unverified  pending  verified), what each one signals to employers, and what to do when an upload is rejected.",
+    "You list your qualifications yourself, no uploads. The green Verified badge is separate: it comes from the live selfie check and means a real person is behind the profile.",
   category: "profile",
   keywords: [
-    "certificate",
     "qualification",
-    "upload",
+    "certificate",
     "verification",
     "verified",
-    "pending",
-    "saqa",
+    "self-declared",
+    "selfie",
     "nqf",
   ],
   related: [
@@ -28,97 +30,89 @@ export const meta: HelpArticleMeta = {
     "deleting-your-account-right-to-erasure",
   ],
   surfaceLink: "/dashboard/qualifications",
-  updatedAt: "2026-05-29",
+  updatedAt: "2026-08-19",
 };
 
 export default function Article() {
   return (
     <HelpProse>
       <p>
-        Qualifications live on a dedicated page. Each certificate is
-        one upload: a PDF, JPG, or PNG, up to 10 MB. The platform reads
-        the institution, programme, and NQF level from a small form
-        you fill in after upload &mdash; not from the file itself. The
-        file is the evidence; the form is the metadata.
+        Two different things used to wear the same word. This article
+        separates them: <strong>your qualifications</strong>, which you
+        list yourself, and <strong>the Verified badge</strong>, which
+        says a real person is behind this profile.
       </p>
 
-      <h2>The three verification states</h2>
+      <h2>Qualifications are self-declared</h2>
       <p>
-        Every certificate carries one of three states. The state shows
-        as a chip on the qualifications list + on your dossier when an
-        employer opens it:
+        You add what you hold: the title, the institution, the year.
+        There is nothing to upload. We do not ask for your certificates
+        and we do not store them.
       </p>
-      <ul>
-        <li>
-          <strong>Unverified</strong> &mdash; the default for every
-          newly uploaded certificate. The platform shows the qualification
-          on your profile but with an explicit{" "}
-          <em>&ldquo;not yet verified&rdquo;</em> chip. This is
-          honest: employers know you self-asserted it.
-        </li>
-        <li>
-          <strong>Pending</strong> &mdash; you&rsquo;ve asked an admin
-          (or SAQA when that partner integration is live) to verify it.
-          Pending shows on your profile too; employers know the request
-          is open.
-        </li>
-        <li>
-          <strong>Verified</strong> &mdash; the verifier confirmed the
-          certificate against the issuing institution. The chip turns
-          solid; this is the strongest credential signal you can carry.
-        </li>
-      </ul>
+      <p>
+        Employers see your qualifications exactly as you entered them,
+        labelled <em>unverified</em>. That label is not a criticism. It
+        is us being straight about what we have checked, which is
+        nothing. Most professional platforms work this way; the
+        difference is that we say so instead of implying otherwise.
+      </p>
 
-      <Callout type="info" title="Default is unverified  on purpose">
+      <Callout type="info" title="Be accurate, for your own sake">
         <p>
-          Sebenza has a Verification-Honesty rule: badges reflect reality
-          and never lie. We don&rsquo;t auto-verify uploads &mdash; that
-          would mean an unverified document looks the same as a real
-          one. The unverified chip is uncomfortable on purpose; it&rsquo;s
-          what keeps verified meaningful.
+          Because nobody vets these entries, the only thing protecting
+          you is your own accuracy. An employer who discovers an
+          inflated qualification at interview will remember it. List
+          what you actually hold, and let the work speak.
         </p>
       </Callout>
 
-      <h2>How to request verification</h2>
+      <h2>The Verified badge is about you, not your certificates</h2>
+      <p>
+        The green <strong>Verified</strong> badge answers one question:{" "}
+        <em>is a real person behind this profile?</em> You earn it with a
+        quick live selfie check on your profile page.
+      </p>
+
       <Steps>
         <Step number={1}>
           <p>
-            On the Qualifications page, find the certificate row and hit{" "}
-            <strong>Request verification</strong>. The chip moves from{" "}
-            <em>unverified</em> to <em>pending</em>.
+            Go to your profile editor and find{" "}
+            <em>Verify your profile with a live selfie</em>, just under
+            your photo.
           </p>
         </Step>
         <Step number={2}>
           <p>
-            An admin (or SAQA partner, once that integration ships in
-            Phase 8+) reviews the upload against the issuing institution.
-            Turnaround is usually under 5 working days; you&rsquo;ll see
-            a notification when it&rsquo;s resolved.
+            Allow the camera. The check asks you to look straight ahead,
+            then to do two small things such as blinking or turning your
+            head. It runs <strong>on your own phone or computer</strong>:
+            no video is sent to us.
           </p>
         </Step>
         <Step number={3}>
           <p>
-            On success, the chip flips to <em>verified</em>. On
-            rejection, you get a notification with the reason &mdash; the
-            certificate stays on your profile but with the rejection
-            reason visible to you only (not to employers).
+            The photo taken at the end becomes your profile photo, and
+            the badge appears wherever employers see you. That is the
+            whole process, and you can remove the photo at any time.
           </p>
         </Step>
       </Steps>
 
-      <h2>When uploads get rejected</h2>
-      <p>
-        Common reasons: blurry photo of the certificate, missing
-        institution name in the form, name on the certificate
-        doesn&rsquo;t match the name on your profile, or the
-        certificate is for someone else (yes, this happens &mdash; usually
-        a wrong-file upload). Fix the issue, replace the file, and
-        re-submit. Your previous rejection rows stay in your activity
-        log for transparency; they don&rsquo;t persist on your public
-        profile.
-      </p>
+      <Callout type="info" title="What changed, and why">
+        <p>
+          We used to collect certificates and have an administrator
+          review them. We stopped, because it meant holding a pile of
+          personal documents to confirm something a document cannot
+          really confirm. Badges already earned that way remain: they
+          were honestly reviewed. Verification of actual credentials may
+          return through a partnership with SAQA, which checks the
+          national record rather than a scan.
+        </p>
+      </Callout>
 
-      <DashboardLink href="/dashboard/qualifications">Open qualifications</DashboardLink>
+      <DashboardLink href="/dashboard/qualifications">
+        Open Qualifications
+      </DashboardLink>
     </HelpProse>
   );
 }

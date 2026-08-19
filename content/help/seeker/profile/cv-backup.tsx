@@ -9,7 +9,7 @@ export const meta: HelpArticleMeta = {
   slug: "cv-backup",
   title: "Personal CV backup",
   shortDescription:
-    "Upload a single PDF as your personal backup copy. Private to you  not shared with employers, not indexed for search.",
+    "Upload a single PDF or Word document as your personal backup copy. Private to you  not shared with employers, not indexed for search.",
   category: "profile",
   keywords: ["cv", "resume", "backup", "pdf", "upload", "download", "private"],
   related: [
@@ -25,7 +25,8 @@ export default function Article() {
   return (
     <HelpProse>
       <p>
-        The personal CV backup is a simple thing: upload one PDF of
+        The personal CV backup is a simple thing: upload one PDF or
+        Word document of
         your CV (max 5 MB), download it whenever you need it, replace
         or delete it any time. That&rsquo;s the whole feature.
       </p>

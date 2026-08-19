@@ -107,3 +107,15 @@ test("public profile shows the project with hostname + self-declared note", asyn
   await page.waitForTimeout(300);
   await page.screenshot({ path: `${OUT}/03-public-profile.png` });
 });
+
+test("the projects section is localised (isiZulu)", async ({ page }) => {
+  await page.goto("/zu/p/andile-z");
+  await dismissCookies(page);
+  // 2026-08-20: the section shipped hardcoded in English on a localised
+  // page. Assert the isiZulu heading + self-declared note render.
+  const heading = page.getByRole("heading", { name: /Umsebenzi namaphrojekthi/i });
+  await heading.scrollIntoViewIfNeeded();
+  await expect(heading).toBeVisible();
+  await expect(page.getByText(/Kushiwo umuntu ngokwakhe/i)).toBeVisible();
+  await page.screenshot({ path: `${OUT}/04-public-profile-zu.png` });
+});

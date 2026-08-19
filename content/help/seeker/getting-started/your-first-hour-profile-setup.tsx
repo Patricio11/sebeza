@@ -65,7 +65,7 @@ export default function Article() {
         </Step>
         <Step number={3}>
           <p>
-            <strong>Upload one certificate.</strong> Even a single
+            <strong>List one qualification.</strong> Even a single
             unverified certificate moves you out of &ldquo;empty
             qualifications&rdquo; and into the segment employers
             actually scan. Verification happens later (admin or SAQA);
