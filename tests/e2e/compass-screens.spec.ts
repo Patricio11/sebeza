@@ -55,7 +55,32 @@ test.beforeAll(async () => {
 test.afterAll(async () => {
   if (!sql) return;
   await sql`DELETE FROM catalog_drafts WHERE id = ${DRAFT_ID}`;
+  await sql`DELETE FROM platform_settings WHERE key = 'feature_flag_seeker_ai_coach'`;
   await sql.end();
+});
+
+test("seeker: Coach's read card (coach flag ON)", async ({ page }) => {
+  await sql!`
+    INSERT INTO platform_settings (key, value) VALUES ('feature_flag_seeker_ai_coach', 'true'::jsonb)
+    ON CONFLICT (key) DO UPDATE SET value = 'true'::jsonb`;
+  await signIn(page, "andile-z@example.co.za");
+  await page.waitForURL(/\/dashboard/, { timeout: 30_000 });
+  await dismissCookies(page);
+  await page.goto("/en/dashboard/grow");
+  // Curly apostrophe in the rendered copy  match loosely.
+  await expect(page.getByText(/Coach.s read/)).toBeVisible();
+  await page.screenshot({ path: `${OUT}/04-coachs-read-card.png` });
+  await sql!`DELETE FROM platform_settings WHERE key = 'feature_flag_seeker_ai_coach'`;
+});
+
+test("marketing: the growth loop section", async ({ page }) => {
+  await page.goto("/en/marketing");
+  await dismissCookies(page);
+  const heading = page.getByText("And for the seeker nobody has found yet");
+  await heading.scrollIntoViewIfNeeded();
+  await expect(heading).toBeVisible();
+  await page.waitForTimeout(400);
+  await page.screenshot({ path: `${OUT}/05-marketing-growth-loop.png` });
 });
 
 test("seeker: compass explainer + blended demand", async ({ page }) => {

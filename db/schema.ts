@@ -1037,6 +1037,23 @@ export const catalogDrafts = pgTable("catalog_drafts", {
 });
 
 /**
+ * 2026-08-19 (0069)  "Coach's read": cached AI narrative of the
+ * seeker's OWN compass data. No user free-text ever feeds it; one row
+ * per profile, regenerated only when `inputHash` changes.
+ */
+export const compassReads = pgTable("compass_reads", {
+  profileId: text("profile_id")
+    .primaryKey()
+    .references(() => profiles.id, { onDelete: "cascade" }),
+  inputHash: text("input_hash").notNull(),
+  headline: text("headline").notNull(),
+  body: text("body").notNull(),
+  caveat: text("caveat").notNull(),
+  model: text("model"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+/**
  * 2026-08 (0067)  one-time gesture challenges for the live-selfie flow.
  * Server-minted so a replayed/pre-recorded capture can't reuse a
  * challenge; 5-minute expiry; marked used on completion. Rows are

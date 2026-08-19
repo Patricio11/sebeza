@@ -887,6 +887,21 @@
       "s6t": "Isizwe siyafunda.",
       "s6b": "Ukuqashwa okuqinisekisiwe kuhlanganiswa ezibalweni ezi-k-anonymised: isidingo, ukutholakala, ukushoda, imiphumela. Kubukhoma, hhayi okonyaka odlule."
     },
+    "growth": {
+      "eyebrow": "Umjikelezo wokukhula",
+      "heading": "Nakulowo ofuna umsebenzi ongakatholakali",
+      "lead": "I-Sebenza ayikufaki ohlwini nje. Iyakukhulisa  ngomjikelezo owodwa oqotho.",
+      "g1t": "Ikhampasi yakho yomsebenzi ifunda isidingo sangempela.",
+      "g1b": "Ibheka lokho abaqashi abaseduze kwakho abakusesha nabakuqasha ngempela, ikuqhathanise namakhono akho, bese isho igebe okufanele livalwe kuqala.",
+      "g2t": "Uqala indlela yokufunda.",
+      "g2b": "Izindlela zase-South Africa zamahhala nezingabizi  ama-learnership e-SETA, izinhlelo zase-TVET, izifundo eziqashelwayo ze-online  ezihambisana nalelo gebe kanye.",
+      "g3t": "Ikhono elisha lifika kwiphrofayela yakho.",
+      "g3b": "Ngesikhathi uqeda, liyabalwa. Azikho izitifiketi ezilayishwayo; iphrofayela yakho iyakhula nje.",
+      "g4t": "Izinga lakho liyanyuka.",
+      "g4b": "Imiphumela yosesho ivuna amakhono abaqashi abawafunayo. Ukufunda into efanele kukukhuphula  ikhampasi ize ikubonise ukugxuma okulindelekile ngaphambi kokuba uqale.",
+      "g5t": "Umqashi uyakuthola.",
+      "g5b": "Yilokho kanye okuyinhloso: uyatholakala ngomsebenzi ongawenza ngempela. Futhi uma kuphenduka ukuqashwa, kuqinisekiswa kuplatifomu  kubalwe ngeqiniso."
+    },
     "proof": {
       "eyebrow": "Ubufakazi",
       "heading": "Sincamela ukukubonisa izibalo ezibukhoma",

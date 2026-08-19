@@ -226,3 +226,28 @@ Accessibility) is part of the pitch.
 - [x] Verify: typecheck + unit tests + production build + curl; screenshots for the founder.
 
 *Sebenza · sebenzasa.com · South Africa · `/marketing` explainer funnel · source of record*
+
+---
+
+## 5b · The growth loop (added 2026-08-19, founder ask)
+
+Placed directly after "How it works", on paper background, same numbered-list pattern
+(brand-green numerals to distinguish it from the accent-ochre operational loop).
+Catalog namespace: `marketing.growth.*` (en + zu/xh/af AI drafts pending human review).
+
+**Eyebrow:** The growth loop
+**Heading:** And for the seeker nobody has found yet
+**Lead:** Sebenza doesn't just list you. It grows you  in one honest loop.
+
+1. **Your Career compass reads real demand.** It watches what employers near you actually
+   search and hire for, compares that with your skills, and names the gap worth closing first.
+2. **You start a learning path.** Free and low-cost South African routes  SETA learnerships,
+   TVET programmes, recognised online courses  matched to that exact gap.
+3. **The new skill lands on your profile.** The moment you finish, it counts. No certificates
+   to upload; your profile simply grows.
+4. **Your ranking rises.** Search results favour the skills employers want. Learning the right
+   thing moves you up  the compass even shows the projected jump before you start.
+5. **An employer finds you.** That's the whole point: you become findable for work you can
+   actually do. And when it turns into a hire, it's confirmed on the platform  truthfully
+   counted.
+

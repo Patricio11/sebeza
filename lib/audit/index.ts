@@ -154,6 +154,8 @@ export type AuditKind =
   | "org.delete"
   | "taxonomy.edit"
   | "profile.selfie.verified"
+  | "seeker.compass_read.call"
+  | "seeker.compass_read.moderation_drop"
   | "catalog.draft"
   | "catalog.approve"
   | "catalog.reject"

@@ -283,6 +283,45 @@ export default async function MarketingPage({
           </div>
         </section>
 
+        {/* ── 5b · The growth loop (2026-08-19, founder ask)  the seeker-
+            side story: Compass → learning path → skill on profile → rank
+            rises → found by an employer. ─────────────────────────────── */}
+        <section className="bg-[color:var(--color-paper)]">
+          <div className="mx-auto max-w-[880px] px-5 py-14 md:py-20">
+            <Eyebrow>{t("growth.eyebrow")}</Eyebrow>
+            <SectionHeading>{t("growth.heading")}</SectionHeading>
+            <p className="mt-3 max-w-2xl text-[color:var(--color-ink-soft)]">
+              {t("growth.lead")}
+            </p>
+            <ol className="mt-8 space-y-5">
+              {[
+                { title: t("growth.g1t"), body: t("growth.g1b") },
+                { title: t("growth.g2t"), body: t("growth.g2b") },
+                { title: t("growth.g3t"), body: t("growth.g3b") },
+                { title: t("growth.g4t"), body: t("growth.g4b") },
+                { title: t("growth.g5t"), body: t("growth.g5b") },
+              ].map((step, i) => (
+                <li
+                  key={step.title}
+                  className="grid grid-cols-[3rem_1fr] gap-4 border-b border-dashed border-[color:var(--color-hairline)] pb-5 last:border-0"
+                >
+                  <span className="font-display text-3xl italic leading-none text-[color:var(--color-brand)] tabular">
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                  <div>
+                    <h3 className="font-display text-lg leading-snug text-[color:var(--color-ink)]">
+                      {step.title}
+                    </h3>
+                    <p className="mt-1 max-w-2xl text-sm leading-relaxed text-[color:var(--color-ink-soft)]">
+                      {step.body}
+                    </p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </section>
+
         {/* ── 6 · Proof: live numbers, no invented quotes ─────────────── */}
         <section className="mx-auto max-w-[880px] px-5 py-14 md:py-20">
           <Eyebrow>{t("proof.eyebrow")}</Eyebrow>

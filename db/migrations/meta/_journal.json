@@ -484,6 +484,13 @@
       "when": 1787270402000,
       "tag": "0068_catalog_drafts",
       "breakpoints": false
+    },
+    {
+      "idx": 69,
+      "version": "7",
+      "when": 1787270403000,
+      "tag": "0069_compass_reads",
+      "breakpoints": false
     }
   ]
 }

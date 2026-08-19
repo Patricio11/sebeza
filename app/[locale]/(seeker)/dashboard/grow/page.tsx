@@ -4,6 +4,7 @@ import { Link } from "@/i18n/navigation";
 import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
 import { Button } from "@/components/ui/Button";
 import { getMyProfile } from "@/lib/profile/me";
+import { CompassReadCard } from "@/components/feature/seeker/CompassReadCard";
 import { getCompassForProfile } from "@/db/queries/career-compass";
 import { rankInPoolQuery } from "@/db/queries/analytics";
 import { SKILLS } from "@/lib/mock/taxonomy";
@@ -106,6 +107,8 @@ export default async function CareerCompassPage({
 
   const t = await getTranslations("seekerDash.grow");
   const tStudent = await getTranslations("seekerDash.grow.student");
+  // 2026-08-19  Coach's read rides the coach flag + its safety stack.
+  const coachFlagOn = await getSetting<boolean>("feature_flag_seeker_ai_coach");
   // Phase 6: compass reads real demand from `search_events` × the
   // controlled skill taxonomy, weighted by freshness, scoped to the
   // seeker's province. Student snapshot still uses the curated mock
@@ -308,6 +311,9 @@ export default async function CareerCompassPage({
           {t("nationalBasis")}
         </p>
       )}
+
+      {/* 2026-08-19  Coach's read (coach flag family; no free-text input). */}
+      {coachFlagOn && <CompassReadCard />}
 
       {/* Phase 10.2  help deep-links (D6). */}
       <div className="mb-4 flex flex-wrap items-center gap-2">
