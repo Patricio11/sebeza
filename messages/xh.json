@@ -595,6 +595,33 @@
       "remote": "Uvulekele nokusebenza ukude: {count, plural, one {ukhangelo olungu-#} other {ukhangelo olungu-#}} lwe-{profession} kulo lonke elase-South Africa.",
       "poolLink": "Bona abo uthelekiswa nabo e-{province}",
       "notHere": "Awukho e-{city}? Hlaziya indawo yakho"
+    },
+    "projects": {
+      "title": "Umsebenzi neeprojekthi",
+      "lead": "Bonisa oko sele ukwenzile ngokwenene. Yongeza ikhonkco, imifanekiso, okanye zombini, uze uthethe ngamazwi akho ukuba yintoni indima yakho.",
+      "selfDeclared": "Kuxelwe nguwe. Abaqeshi bakubona kanye njengoko ukubhalile.",
+      "add": "Yongeza iprojekthi",
+      "titleField": "Isihloko",
+      "urlField": "Ikhonkco (akunyanzelekanga)",
+      "contributionField": "Yayiyintoni indima yakho?",
+      "yearField": "Unyaka (akunyanzelekanga)",
+      "images": "Imifanekiso",
+      "addImage": "Yongeza umfanekiso",
+      "imageCap": "Ukuya kwi-5 yemifanekiso. Imifanekiso emikhulu iyancitshiswa xa ilayishwa.",
+      "remove": "Susa",
+      "save": "Gcina",
+      "cancel": "Rhoxisa",
+      "empty": {
+        "tech": "Yabelana ngenkqubo okanye i-app oyakhileyo, okanye indawo yakho yekhowudi. Nemifanekiso-skrini iyasebenza.",
+        "creative": "Yabelana ngeportfolio yakho okanye umsebenzi opapashiweyo, okanye ulayishe izinto ozizidlayo ngazo.",
+        "trade": "Yongeza imifanekiso yemisebenzi oyigqibileyo. Imifanekiso yangaphambili neyangasemva ibalisa ibali ngcono.",
+        "food": "Yongeza imifanekiso yezitya ozenzileyo, okanye imenyu oyiqulunqileyo.",
+        "beauty": "Yongeza imifanekiso yomsebenzi owenzileyo kubathengi abavumileyo ukufotwa.",
+        "education": "Yabelana ngenkqubo, isifundo okanye izixhobo ozenzileyo, okanye iprojekthi eyagqitywa ngabafundi bakho.",
+        "health": "Yabelana ngenkqubo okanye iphulo obuyinxalenye yalo. Akukho nkcukacha zezigulane, naphakade.",
+        "office": "Yabelana ngengxelo, inkqubo okanye indlela oyiphucileyo, uze uthethe ukuba yayiyintoni indima yakho.",
+        "general": "Yongeza umsebenzi ozidla ngawo: ikhonkco, imifanekiso, okanye zombini."
+      }
     }
   },
   "employerDash": {

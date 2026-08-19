@@ -595,6 +595,33 @@
       "remote": "Uvulekele nokusebenza ukude: {count, plural, one {ukusesha okungu-#} other {ukusesha okungu-#}} kwe-{profession} kulo lonke elase-South Africa.",
       "poolLink": "Bona oqhathaniswa nabo e-{province}",
       "notHere": "Awukho e-{city}? Buyekeza indawo yakho"
+    },
+    "projects": {
+      "title": "Umsebenzi namaphrojekthi",
+      "lead": "Bonisa lokho osukwenzile ngempela. Faka isixhumanisi, izithombe, noma kokubili, bese usho ngamazwi akho ukuthi iyiphi ingxenye yakho.",
+      "selfDeclared": "Kushiwo nguwe. Abaqashi bakubona kanye njengoba ukubhalile.",
+      "add": "Engeza iphrojekthi",
+      "titleField": "Isihloko",
+      "urlField": "Isixhumanisi (akuphoqelekile)",
+      "contributionField": "Yayiyini ingxenye yakho?",
+      "yearField": "Unyaka (akuphoqelekile)",
+      "images": "Izithombe",
+      "addImage": "Engeza isithombe",
+      "imageCap": "Kufika kwezingu-5 izithombe. Izithombe ezinkulu ziyanciphiswa lapho zilayishwa.",
+      "remove": "Susa",
+      "save": "Londoloza",
+      "cancel": "Khansela",
+      "empty": {
+        "tech": "Yabelana ngesistimu noma uhlelo olwakhile, noma indawo yakho yekhodi. Nezithombe-skrini ziyasebenza.",
+        "creative": "Yabelana ngeportfolio yakho noma umsebenzi oshicilelwe, noma ulayishe izinto ezimbalwa oziqhenyayo ngazo.",
+        "trade": "Faka izithombe zemisebenzi oyiqedile. Izithombe zangaphambili nezangemuva zixoxa indaba kangcono.",
+        "food": "Faka izithombe zokudla okuphekile, noma imenyu oyihlanganisile.",
+        "beauty": "Faka izithombe zomsebenzi owenzile kumakhasimende avumile ukuthwetshulwa.",
+        "education": "Yabelana ngohlelo, isifundo noma izinto ozakhile, noma iphrojekthi eyaqedwa abafundi bakho.",
+        "health": "Yabelana ngohlelo noma umkhankaso obuyingxenye yawo. Ayikho imininingwane yeziguli, nanini.",
+        "office": "Yabelana ngombiko, isistimu noma inqubo oyithuthukisile, bese usho ukuthi yayiyini ingxenye yakho.",
+        "general": "Faka umsebenzi oziqhenyayo ngawo: isixhumanisi, izithombe, noma kokubili."
+      }
     }
   },
   "employerDash": {

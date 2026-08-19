@@ -95,6 +95,7 @@ const KEY_SCHEMAS = {
   // Phase 34  Self Apply master switch (per-vacancy toggle is gate #2).
   feature_flag_vacancy_self_apply: z.boolean(),
   feature_flag_selfie_verification: z.boolean(),
+  feature_flag_seeker_projects: z.boolean(),
 } as const satisfies Record<SettingKey, z.ZodTypeAny>;
 
 const updateSchema = z.object({
@@ -132,6 +133,7 @@ const updateSchema = z.object({
     "testimonial_campaign_active",
     "feature_flag_vacancy_self_apply",
     "feature_flag_selfie_verification",
+    "feature_flag_seeker_projects",
   ] as const),
   value: z.unknown(),
 });

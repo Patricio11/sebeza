@@ -36,6 +36,9 @@ import { ShareProfileLink } from "@/components/feature/profile/ShareProfileLink"
 import { ShareMyProfileModal } from "@/components/feature/profile/ShareMyProfileModal";
 import { OpenToTagsEditor } from "@/components/feature/profile/OpenToTagsEditor";
 import { CvBackupEditor } from "@/components/feature/profile/CvBackupEditor";
+import { ProjectsEditor } from "@/components/feature/profile/ProjectsEditor";
+import { listProjectsForProfile } from "@/lib/profile/projects-read";
+import { projectHintKind } from "@/lib/profile/project-links";
 import { MobileSectionJumpNav } from "@/components/feature/profile/MobileSectionJumpNav";
 import { StudentContextEditor } from "@/components/feature/profile/StudentContextEditor";
 import { signedPhotoUrl } from "@/lib/storage/signed";
@@ -76,6 +79,11 @@ export default async function ProfileEditorPage({
     "feature_flag_selfie_verification",
   );
   const selfieVerifiedAt = await getMySelfieVerifiedAt(me.profileId);
+  // 2026-08-19  Work & projects (ships dark; PROFILE_PROJECTS_PLAN).
+  const projectsEnabled = await getSetting<boolean>("feature_flag_seeker_projects");
+  const projects = projectsEnabled
+    ? await listProjectsForProfile(me.profileId)
+    : [];
   const customSkills = customSkillsEnabled
     ? await listCustomSkills(me.profileId)
     : [];
@@ -166,6 +174,9 @@ export default async function ProfileEditorPage({
               </li>
             )}
             <li><a href="#open-to" className="text-[color:var(--color-ink-soft)] hover:text-[color:var(--color-ink)]">Open to</a></li>
+            {projectsEnabled && (
+              <li><a href="#projects" className="text-[color:var(--color-ink-soft)] hover:text-[color:var(--color-ink)]">Work &amp; projects</a></li>
+            )}
             <li><a href="#cv-backup" className="text-[color:var(--color-ink-soft)] hover:text-[color:var(--color-ink)]">CV backup</a></li>
           </ul>
           <p className="mt-6 rounded-[var(--radius-sm)] border border-dashed border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-3 text-xs text-[color:var(--color-ink-soft)]">
@@ -528,13 +539,34 @@ export default async function ProfileEditorPage({
             <OpenToTagsEditor initial={me.openToTags ?? []} />
           </section>
 
+          {/* 2026-08-19  Work & projects. Self-declared evidence of work;
+              deliberately outside completeness + ranking. */}
+          {projectsEnabled && (
+            <section id="projects" aria-labelledby="projects-h" className="scroll-mt-20">
+              <header className="mb-5 border-b-2 border-[color:var(--color-ink)] pb-3">
+                <div className="flex items-baseline gap-3">
+                  <span className="font-display text-2xl italic text-[color:var(--color-accent)]">
+                    08
+                  </span>
+                  <h2 id="projects-h" className="font-display text-2xl">
+                    Work &amp; projects
+                  </h2>
+                </div>
+              </header>
+              <ProjectsEditor
+                projects={projects}
+                hint={projectHintKind(me.profession)}
+              />
+            </section>
+          )}
+
           {/* Phase 11.5.2  personal CV backup. Private to the seeker;
               never exposed to employers. */}
           <section id="cv-backup" aria-labelledby="cv-h" className="scroll-mt-20">
             <header className="mb-5 border-b-2 border-[color:var(--color-ink)] pb-3">
               <div className="flex items-baseline gap-3">
                 <span className="font-display text-2xl italic text-[color:var(--color-accent)]">
-                  08
+                  09
                 </span>
                 <h2 id="cv-h" className="font-display text-2xl">
                   Personal CV backup

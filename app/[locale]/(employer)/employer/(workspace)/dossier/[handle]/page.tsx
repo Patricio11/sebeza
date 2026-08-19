@@ -23,6 +23,8 @@ import { PlacementNudgeBanner } from "@/components/feature/employer/PlacementNud
 import { placementNudgeState } from "@/lib/employer/placement-nudge";
 import type { ContactReveal } from "@/lib/employer/reveal";
 import { FileText, MapPin, Briefcase } from "lucide-react";
+import { listProjectsForHandle } from "@/lib/profile/projects-read";
+import { ProjectsShowcase } from "@/components/feature/profile/ProjectsShowcase";
 
 const REVEAL_GATE_DAYS = 30;
 
@@ -57,6 +59,10 @@ export default async function EmployerDossierPage({
   const verificationVisible = await getSetting<boolean>(
     "feature_flag_verification_badges_visible",
   );
+  // 2026-08-19  self-declared work evidence (ships dark).
+  const projects = (await getSetting<boolean>("feature_flag_seeker_projects"))
+    ? await listProjectsForHandle(handle)
+    : [];
 
   const db = getDb();
 
@@ -320,6 +326,23 @@ export default async function EmployerDossierPage({
               </ul>
             )}
           </section>
+
+          {/* 2026-08-19  Work & projects: the strongest review-time
+              evidence a candidate can offer. Self-declared, never verified. */}
+          {projects.length > 0 && (
+            <section aria-labelledby="projects-h">
+              <h2
+                id="projects-h"
+                className="mb-3 border-b-2 border-[color:var(--color-ink)] pb-2 font-display text-xl"
+              >
+                Work &amp; projects
+              </h2>
+              <ProjectsShowcase
+                projects={projects}
+                selfDeclaredNote="Self-declared by the candidate. Sebenza does not verify project links or images."
+              />
+            </section>
+          )}
 
           {/* Languages (docs/PROFILE_LANGUAGES_PLAN.md)  the review-time
               surface the feature exists for: spoken + written levels at

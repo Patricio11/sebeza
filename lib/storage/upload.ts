@@ -208,6 +208,24 @@ export async function uploadIdDocument(
 }
 
 /**
+ * 2026-08-19  "Work & projects" images (docs/PROFILE_PROJECTS_PLAN.md).
+ * Same WebP re-encode as profile photos: EXIF/GPS stripped, capped at
+ * 1600px, 256px thumb alongside. Lives under `{userId}/project-images/`
+ * so a future sweep can scope by prefix. The action layer caps the
+ * count (5 per project).
+ */
+export async function uploadProjectImage(
+  opts: UploadOpts,
+): Promise<{ key: string; mime: string }> {
+  return upload({
+    ...opts,
+    kind: "project-images",
+    maxBytes: PHOTO_MAX_BYTES,
+    allowed: PHOTO_ALLOWED,
+  });
+}
+
+/**
  * Phase 11.5.2  personal CV backup upload. PDF or Word (founder
  * decision 2026-08: .doc/.docx joined PDF; photo/scan uploads stay
  * rejected  a CV should be a document, not a picture of one). Same
@@ -238,7 +256,13 @@ async function upload(opts: {
   userId: string;
   id: string;
   file: File;
-  kind: "documents" | "photos" | "org-documents" | "id-documents" | "cvs";
+  kind:
+    | "documents"
+    | "photos"
+    | "project-images"
+    | "org-documents"
+    | "id-documents"
+    | "cvs";
   maxBytes: number;
   allowed: Set<string>;
 }): Promise<{ key: string; mime: string }> {
@@ -288,8 +312,8 @@ async function upload(opts: {
   // no transform service  still serves small avatars cheaply.
   // Documents are deliberately untouched: KYC/qualification files are
   // evidentiary and must stay byte-for-byte as submitted.
-  if (opts.kind === "photos") {
-    const key = `${opts.userId}/photos/${opts.id}.webp`;
+  if (opts.kind === "photos" || opts.kind === "project-images") {
+    const key = `${opts.userId}/${opts.kind}/${opts.id}.webp`;
     let main: Buffer;
     let thumb: Buffer;
     try {

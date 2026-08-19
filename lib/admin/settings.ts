@@ -154,7 +154,9 @@ export type SettingKey =
   | "feature_flag_vacancy_self_apply"
   // 2026-08  live-selfie verification (docs/SELFIE_VERIFICATION_PLAN.md).
   // Browser-side MediaPipe liveness earns the Verified badge; ships dark.
-  | "feature_flag_selfie_verification";
+  | "feature_flag_selfie_verification"
+  // 2026-08-19  Work & projects on the seeker profile (ships dark).
+  | "feature_flag_seeker_projects";
 
 const DEFAULTS: Record<SettingKey, unknown> = {
   freshness_band_days_fresh: 30,
@@ -198,6 +200,7 @@ const DEFAULTS: Record<SettingKey, unknown> = {
   // Phase 34  Self Apply ships dark.
   feature_flag_vacancy_self_apply: false,
   feature_flag_selfie_verification: false,
+  feature_flag_seeker_projects: false,
 };
 
 /**

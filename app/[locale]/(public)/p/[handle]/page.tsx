@@ -33,6 +33,8 @@ import { WorkAvailabilityChips } from "@/components/feature/profile/WorkAvailabi
 import { getSessionUser } from "@/lib/auth/dal";
 import { getMyProfile } from "@/lib/profile/me";
 import { getSetting } from "@/lib/admin/settings";
+import { listProjectsForHandle, type ProjectView } from "@/lib/profile/projects-read";
+import { ProjectsShowcase } from "@/components/feature/profile/ProjectsShowcase";
 import { isProfileIndexableQuery } from "@/db/queries/profiles";
 import type { LanguageRef } from "@/lib/mock/types";
 import { localeAlternates } from "@/lib/seo";
@@ -128,6 +130,10 @@ export default async function ProfilePage({ params }: Props) {
   const verificationVisible = await getSetting<boolean>(
     "feature_flag_verification_badges_visible",
   );
+  // 2026-08-19  Work & projects (ships dark). Self-declared evidence.
+  const projects = (await getSetting<boolean>("feature_flag_seeker_projects"))
+    ? await listProjectsForHandle(handle)
+    : [];
 
   const dossierHref = `/employer/dossier/${profile.handle}`;
   const ctaHref =
@@ -201,6 +207,7 @@ export default async function ProfilePage({ params }: Props) {
             !isOwner
           }
           verificationVisible={verificationVisible}
+          projects={projects}
         />
       </main>
       <SiteFooter />
@@ -604,6 +611,7 @@ async function ProfileBody({
   isOwner,
   viewerSignedInAsNonEmployer,
   verificationVisible,
+  projects,
 }: {
   profile: NonNullable<Awaited<ReturnType<typeof dataProvider.getProfile>>>;
   t: Awaited<ReturnType<typeof getTranslations<"profile">>>;
@@ -615,6 +623,8 @@ async function ProfileBody({
   viewerSignedInAsNonEmployer: boolean;
   /** Phase 9.16.1  threaded from ProfilePage's getSetting() read. */
   verificationVisible: boolean;
+  /** 2026-08-19  self-declared work evidence; empty when flag is OFF. */
+  projects: ProjectView[];
 }) {
   return (
     <div className="mx-auto max-w-[1320px] px-5 py-16 md:px-10 md:py-24">
@@ -642,6 +652,15 @@ async function ProfileBody({
               Hidden entirely when the seeker hasn't added any. */}
           {profile.languages && profile.languages.length > 0 && (
             <LanguagesSection languages={profile.languages} />
+          )}
+
+          {projects.length > 0 && (
+            <Section eyebrow="Evidence" title="Work & projects">
+              <ProjectsShowcase
+                projects={projects}
+                selfDeclaredNote="Self-declared by the candidate. Sebenza does not verify project links or images."
+              />
+            </Section>
           )}
 
           {profile.experience && profile.experience.length > 0 && (

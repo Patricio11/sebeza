@@ -595,6 +595,33 @@
       "remote": "Jy is ook oop vir afstandwerk: {count, plural, one {# soektog} other {# soektogte}} vir {profession} oor die hele South Africa.",
       "poolLink": "Sien teen wie jy in {province} vergelyk word",
       "notHere": "Nie in {city} nie? Werk jou ligging by"
+    },
+    "projects": {
+      "title": "Werk en projekte",
+      "lead": "Wys wat jy werklik gedoen het. Voeg 'n skakel, foto's, of albei by, en sê in jou eie woorde wat jou deel was.",
+      "selfDeclared": "Self verklaar. Werkgewers sien dit presies soos jy dit geskryf het.",
+      "add": "Voeg 'n projek by",
+      "titleField": "Titel",
+      "urlField": "Skakel (opsioneel)",
+      "contributionField": "Wat was jou deel?",
+      "yearField": "Jaar (opsioneel)",
+      "images": "Beelde",
+      "addImage": "Voeg beeld by",
+      "imageCap": "Tot 5 beelde. Groot foto's word tydens oplaai verklein.",
+      "remove": "Verwyder",
+      "save": "Stoor",
+      "cancel": "Kanselleer",
+      "empty": {
+        "tech": "Deel 'n stelsel of app wat jy gebou het, of jou kodebewaarplek. Skermkiekies werk ook.",
+        "creative": "Deel jou portefeulje of gepubliseerde werk, of laai 'n paar stukke op waarop jy trots is.",
+        "trade": "Voeg foto's by van werk wat jy voltooi het. Voor-en-na foto's vertel die storie die beste.",
+        "food": "Voeg foto's by van geregte wat jy gemaak het, of 'n spyskaart wat jy saamgestel het.",
+        "beauty": "Voeg foto's by van werk wat jy gedoen het op kliënte wat ingestem het tot foto's.",
+        "education": "Deel 'n program, kursus of materiaal wat jy geskep het, of 'n projek wat jou leerders voltooi het.",
+        "health": "Deel 'n program of inisiatief waarvan jy deel was. Nooit enige pasiëntbesonderhede nie.",
+        "office": "Deel 'n verslag, stelsel of proses wat jy verbeter het, en sê wat jou deel was.",
+        "general": "Voeg werk by waarop jy trots is: 'n skakel, foto's, of albei."
+      }
     }
   },
   "employerDash": {

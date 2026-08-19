@@ -1037,6 +1037,42 @@ export const catalogDrafts = pgTable("catalog_drafts", {
 });
 
 /**
+ * 2026-08-19 (0070)  "Work & projects": seeker-declared evidence of
+ * work. A link and/or up to 5 WebP images (shared upload pipeline), each
+ * with the seeker's own contribution note. DELIBERATELY excluded from
+ * completeness + ranking: many professions have nothing shareable
+ * online, and rewarding links would down-rank exactly the people the
+ * platform exists to serve.
+ */
+export const profileProjects = pgTable(
+  "profile_projects",
+  {
+    id: text("id").primaryKey(),
+    profileId: text("profile_id")
+      .notNull()
+      .references(() => profiles.id, { onDelete: "cascade" }),
+    title: text("title").notNull(),
+    /** Nullable: photo-only projects are first-class. http(s) only. */
+    url: text("url"),
+    /** "I built the backend"  self-declared, never verified. */
+    contribution: text("contribution").notNull(),
+    year: integer("year"),
+    skillSlugs: text("skill_slugs").array().notNull().default(sql`'{}'::text[]`),
+    /** WebP keys; each has a derived `.thumb.webp` sibling. Max 5. */
+    imageKeys: text("image_keys").array().notNull().default(sql`'{}'::text[]`),
+    sortOrder: integer("sort_order").notNull().default(0),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  },
+  (t) => ({
+    profileIdx: index("profile_projects_profile_idx").on(
+      t.profileId,
+      t.sortOrder,
+    ),
+  }),
+);
+
+/**
  * 2026-08-19 (0069)  "Coach's read": cached AI narrative of the
  * seeker's OWN compass data. No user free-text ever feeds it; one row
  * per profile, regenerated only when `inputHash` changes.

@@ -776,6 +776,33 @@
       "remote": "You're open to remote too  {count, plural, one {# search} other {# searches}} for {profession} across South Africa.",
       "poolLink": "See who you're matched against in {province}",
       "notHere": "Not in {city}? Update your location"
+    },
+    "projects": {
+      "title": "Work & projects",
+      "lead": "Show what you've actually done. Add a link, photos, or both, and say in your own words what your part was.",
+      "selfDeclared": "Self-declared. Employers see this exactly as you wrote it.",
+      "add": "Add a project",
+      "titleField": "Title",
+      "urlField": "Link (optional)",
+      "contributionField": "What was your part?",
+      "yearField": "Year (optional)",
+      "images": "Images",
+      "addImage": "Add image",
+      "imageCap": "Up to 5 images. Large photos are resized on upload.",
+      "remove": "Remove",
+      "save": "Save",
+      "cancel": "Cancel",
+      "empty": {
+        "tech": "Share a system or app you've built, or your code repository. Screenshots work too.",
+        "creative": "Share your portfolio or published work, or upload a few pieces you're proud of.",
+        "trade": "Add photos of jobs you've finished. Before-and-after shots tell the story best.",
+        "food": "Add photos of dishes you've made, or a menu you put together.",
+        "beauty": "Add photos of work you've done on clients who were happy to be photographed.",
+        "education": "Share a programme, course or materials you created, or a project your learners completed.",
+        "health": "Share a programme or initiative you were part of. No patient details, ever.",
+        "office": "Share a report, system or process you improved, and say what your part was.",
+        "general": "Add work you're proud of: a link, photos, or both."
+      }
     }
   },
   "employerDash": {
