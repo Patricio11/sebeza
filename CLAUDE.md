@@ -8,9 +8,38 @@
 - `docs/ROADMAP.md`  phased build plan (Phase 0 → 34; all shipped except 14, which is partnership-gated).
 - `docs/UX_UI_SPEC.md`  design system + screen-by-screen.
 
-**Current state (2026-08): LIVE, DB-BACKED, shipped through Phase 34 + the post-34 polish wave.**
-Postgres (Neon) + Drizzle, 65 migrations (0000→0064), Better Auth sessions, ~434-test vitest suite
-(unit/integration/compliance) + ~126-test Playwright E2E (desktop + 360px), 20 cron jobs.
+**Current state (2026-08-19): LIVE, DB-BACKED, shipped through Phase 34, the post-34 polish wave,
+and the 2026-08 operations wave (org gate, storage, verification, compass, projects).**
+Postgres (Neon) + Drizzle, 71 migrations (0000→0070), Better Auth sessions, ~510-test vitest suite
+(313 unit / 167 integration / 30 compliance) + 31 Playwright E2E specs (desktop + 360px), 20 cron jobs.
+
+**2026-08 operations wave (docs: ORG_ONBOARDING_GATE_PLAN, SELFIE_VERIFICATION_PLAN, COMPASS_FUEL_PLAN,
+PROFILE_PROJECTS_PLAN, MOBILE_FIXES_2026_08_19, COACH_LAUNCH_CHECKLIST):**
+- **Org onboarding gate** (0066): the employer WORKSPACE route group is hard-gated until an org is
+  approved; the KYC document checklist is ADMIN-MANAGED (`org_document_requirements`); vetting emails
+  fan out unconditionally (submission receipt, admin alert, approved w/ sign-in CTA, rejected, changes).
+  New employer pages go INSIDE `(workspace)` unless reachable pre-approval.
+- **Storage is admin-configurable** (`lib/storage/backend.ts` is THE seam): S3 / S3-compatible or
+  Supabase, configured on /admin/integrations (Save → Test → Enable); env `SUPABASE_*` is the fallback.
+  Photos are re-encoded to **WebP** (EXIF/GPS stripped, 1600px cap, 256px thumb); documents/IDs/CVs are
+  NEVER re-encoded. CVs accept PDF + Word. `lib/storage/keys.ts` holds thumb-key helpers.
+- **Verification** (0067): the profile badge answers ONE question, "is this a real person?", and derives
+  from `selfie_verified_at` ALONE (in-browser MediaPipe liveness; no biometric data server-side).
+  Qualification verification is a separate claim shown on the qualification row; **evidence uploads are
+  retired** (self-declared). Flag `feature_flag_selfie_verification`.
+- **Compass** (0068/0069): demand blends searches ×1.0 + open-vacancy skills ×1.5 + placements ×2.0 with
+  an honest national fallback (`demandBasis`); catalogue grows via **AI drafts an admin approves** on
+  /admin/learning-paths; the **Coach's read** narrates a seeker's own data with NO free-text input
+  (coach flag family, cached in `compass_reads`).
+- **Work & projects** (0070): links and/or up to 5 WebP images per project with a contribution note,
+  DELIBERATELY outside completeness + ranking. Flag `feature_flag_seeker_projects`.
+- **Production lessons that bite (all now guarded):** `backdrop-filter`/`transform` create a containing
+  block for `position: fixed` DESCENDANTS (the mobile drawer must PORTAL to body); production CSP needs
+  `'wasm-unsafe-eval'` for WebAssembly (MediaPipe hung forever without it); a raw `= ANY(...)` fragment
+  holding a JS array breaks on the Neon driver only (use `inArray`); crawler hits on the search-box template
+  polluted national demand (`lib/search/term-filter.ts` guards write AND read).
+- **`lib/ui/house-inputs.test.ts` fails the suite** on any raw `<select>`, any `<input type="date">`, or
+  any em-dash under app/components/lib/db/messages/docs/tests.
 Post-34 wave (2026-07-30 → 08-15, plan docs in docs/): profile LANGUAGES (spoken + written levels,
 migration 0064, counts in completeness via the ONE shared engine - keep recompute paths in parity);
 suggestion APPROVAL LOOP (promote/merge backfills the suggester's profile + notifies via

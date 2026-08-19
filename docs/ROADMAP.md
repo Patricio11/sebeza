@@ -1340,8 +1340,25 @@ HR Practitioner · Electrician · Plumber · Accountant · Nurse · Driver · Bo
 
 ---
 
-*Last Updated: 2026-08-15*
-*Version: 2.13  synced through the **post-34 polish wave** (profile languages in completeness;
+*Last Updated: 2026-08-19*
+*Version: 2.14  synced through the **2026-08 operations wave**: the platform is LIVE with real
+users, and this wave is what real traffic demanded. **Org onboarding gate** (0066: employer
+workspace hard-gated until approved; admin-managed KYC checklist; unconditional vetting email
+fan-out). **Storage made admin-configurable** (S3 or Supabase on /admin/integrations, Save → Test
+→ Enable; founder's S3 bucket live in af-south-1) with a **WebP photo pipeline** (EXIF/GPS
+stripped, capped, thumbs) and Word-format CVs. **Verification restructured**: the profile badge
+now answers ONE question, "is this a real person?", earned by an in-browser live-selfie check
+(0067, no biometric data server-side); qualification evidence uploads RETIRED (self-declared).
+**Compass fuel** (0068/0069): demand blends searches + open vacancies + confirmed placements with
+an honest national fallback; the learning catalogue grows via AI drafts an admin approves; the
+**Coach's read** narrates a seeker's own numbers with no free-text input. **Work & projects**
+(0070): links and/or up to 5 images per project with a contribution note, deliberately outside
+completeness and ranking so professions without shareable links are never down-ranked. Plus four
+production bugs found by real users and fixed at the root: the mobile drawer trapped by a
+`backdrop-filter` containing block, the production CSP blocking WebAssembly (the selfie checker
+could never load), crawler hits on the SEO search-box template being published as national demand,
+and the date picker's hidden year grid. Guarded by `lib/ui/house-inputs.test.ts` (no native
+selects, no native dates, no em-dashes). Prior: v2.13  synced through the **post-34 polish wave** (profile languages in completeness;
 suggestion approval loop with backfill + notify; /marketing funnel; branded 404/catch-all/
 global-error; admin smoke gate + formatDateZA hydration rule; private colleges; skill-suggest
 discoverability; no-em-dash copy rule). Prior: v2.12 synced through **Phase 34** (Self Apply: public vacancy link + seeker-initiated

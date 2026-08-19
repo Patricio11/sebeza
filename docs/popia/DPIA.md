@@ -628,6 +628,69 @@ and Afrikaans as Tier-1 locales this is a real accessibility gap; it is
 a follow-up phase, and consent/legal copy must be human-translated when
 it lands.
 
+### Addendum R-28: the 2026-08 operations wave (2026-08-19)
+
+**R-28.1  Data residency improved.** Object storage moved from Supabase to the
+responsible party's own **S3 bucket in `af-south-1` (Cape Town)**, selected and
+tested from /admin/integrations. CVs, certificates, org KYC documents, ID scans
+and photos therefore now rest **inside South Africa**, which materially reduces
+the cross-border transfer exposure recorded earlier in this document. Provider
+credentials are AES-256-GCM encrypted in `integration_settings` (not env), every
+object is written with SSE-AES256, and reads remain short-TTL presigned URLs.
+
+**R-28.2  Less personal information collected, not more.**
+- **Qualification evidence collection is RETIRED.** Seekers no longer upload
+  certificates; qualifications are self-declared and honestly labelled
+  unverified. Documents already held stay for the audit basis of decisions
+  already taken. This removes a standing document store of educational records.
+- **Profile and project images are re-encoded to WebP at upload with ALL EXIF
+  stripped, including GPS.** Phone photos previously carried the data subject's
+  location into our storage; they no longer can.
+
+**R-28.3  Liveness check: deliberately NOT biometric processing.** The profile
+badge now answers one question, "is this a real person?", earned by a live-selfie
+check. The liveness analysis (MediaPipe Face Landmarker) runs **entirely in the
+data subject's own browser**, on self-hosted assets. **No face data, video frame
+or template is transmitted to us or to any third party, and no face template is
+ever created, stored or compared.** The only server-side record is a timestamp
+(`profiles.selfie_verified_at`); the passing frame becomes the ordinary profile
+photo the seeker already chooses to publish, through the metadata-stripping
+pipeline above. On that basis the feature does **not** constitute processing of
+biometric special personal information under §26, and the alternative designs
+that would have (server-side face recognition via DeepFace / CompreFace, or a
+face-matching SaaS) were considered and rejected for exactly this reason.
+Consent is explicit and in plain language before the camera is requested, the
+check is optional, and removing the photo is always available. Server-side the
+flow is rate-limited with single-use, expiring challenges.
+**Honest limit, disclosed:** browser-side liveness deters bots, photographs and
+screen replays, not a determined attacker running a modified client. The badge
+therefore claims a live selfie, not identity. If identity assurance is ever
+required, that is a separate provider decision requiring its own DPIA entry.
+
+**R-28.4  Seeker-published project links and images (new surface).** Seekers may
+publish up to 6 projects with a link and/or 5 images. This is data the seeker
+deliberately publishes about themselves, but it created two POPIA-adjacent
+risks, both closed at the action layer: `mailto:`/`tel:` links and any
+phone/email shape typed into the contribution note are refused, because they
+would route employers around the audited, consent-gated contact-reveal flow;
+and seeker-supplied URLs are never fetched server-side (no link previews), so
+the platform cannot be turned into a request proxy. Links carry
+`nofollow noopener` and display their destination hostname.
+
+**R-28.5  Analytics honesty defect found and fixed.** Search-engine crawlers were
+fetching the sitelinks search-box URL template literally, and those hits were
+being recorded as employer demand and published on the public insights page as
+national statistics. Now filtered at both write and read
+(`lib/search/term-filter.ts`), with the polluted rows deleted. Recorded here
+because published national analytics is a representation we make to the public.
+
+**R-28.6  Security posture change (documented, narrow).** The production CSP now
+includes `'wasm-unsafe-eval'`, required for the in-browser liveness check to
+compile at all. It permits WebAssembly compilation ONLY and does not re-open
+JavaScript `eval()`, so the XSS backstop is unchanged. `camera=(self)` was added
+to Permissions-Policy for the same feature; microphone and geolocation remain
+disabled, and embedded third-party content still cannot reach the camera.
+
 ## 4. Sign-off
 
 To be signed by the Information Officer once designated. Until then,

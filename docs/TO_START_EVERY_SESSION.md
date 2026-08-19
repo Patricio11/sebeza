@@ -66,6 +66,34 @@ When I give you a Phase: pull design/screen detail from `UX_UI_SPEC.md` and task
 
 # CURRENT STATE (read this before doing anything)
 
+## AT A GLANCE (2026-08-19)
+**LIVE at sebenzasa.com with real users.** 71 migrations (0000→0070) · ~510 vitest
+(313 unit / 167 integration / 30 compliance) · 31 Playwright E2E specs (desktop + 360px) ·
+20 cron jobs. Storage runs on the founder's **S3 bucket in af-south-1** (POPIA in-country),
+configured from /admin/integrations.
+
+**The 2026-08 operations wave** (detail in the phase list below): org onboarding gate ·
+admin-configurable storage + WebP photos + Word CVs · verification restructured so the profile
+badge means "this is a real person" (live selfie) and qualification evidence uploads are retired ·
+compass demand blended with vacancies + placements · AI-drafted / admin-approved learning
+catalogue · Coach's read · Work & projects · four production bugs found by real users.
+
+**Waiting on the founder (not code):**
+1. `git push` to deploy the current stack. Migrations 0065–0070 are ALREADY applied to live Neon;
+   the deploy is code-only. The CSP fix that makes the selfie checker load is in there.
+2. `docs/COACH_LAUNCH_CHECKLIST.md`: verify crisis resources → configure an LLM provider with a
+   rand budget → tick the acknowledgement. That switches on BOTH interview practice and the
+   Coach's read.
+3. Flip `feature_flag_seeker_projects` once he has added a project to his own profile.
+4. Human translation review (`docs/TRANSLATION_REVIEW_GUIDE.md`) unblocks the four-languages
+   claim; POPIA Regulator registration + DPIA sign-off remain open.
+
+**Three rules a new session breaks most often:** every dropdown/date input is a CUSTOM component
+and there are NO em-dashes anywhere (all three enforced by `lib/ui/house-inputs.test.ts`); plan
+docs use `- [ ]` checkboxes ticked in the same commit; never flip flags or seed against the
+shared Neon DB (it IS production) - use the Docker harness.
+
+
 - **Phase 0** (foundations + POPIA spine)  ✅ done 2026-05-21. See `docs/completed/PHASE_0_COMPLETE.md`.
 - **Phase 1** (public face + search + redacted profile)  ✅ done 2026-05-21. See `docs/completed/PHASE_1_COMPLETE.md`.
 - **Phase 1.5** (auth UI + seeker/employer/admin dashboards + Career compass + Student mode + Mzansi National + mobile pass + ESSA-positioning cleanup)  ✅ done 2026-05-22, mock-driven. See `docs/completed/PHASE_1_5_COMPLETE.md`.

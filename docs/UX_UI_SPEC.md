@@ -160,21 +160,44 @@ across the whole app; the explicit `--color-sa-*` tokens are also available for 
   the input goes to the next form field  keyboard users almost never need it, and
   accidental password reveal on a shared screen is the bigger harm. Lives in its own file
   (`components/ui/PasswordField.tsx`, `"use client"`) so `TextField` stays server-friendly.
-- **`<DatePicker>`** + **`<MonthYearPicker>`** (Phase 9.16)  Civic Editorial date pickers.
-  DatePicker is a 3-view popover (day → month → year) for the sign-up DOB capture, range-
-  clampable via `min` / `max`. MonthYearPicker is the lighter variant used on graduation
-  date + similar yyyy-mm captures. Both mobile-first: bottom-sheet on phones, dropdown on
-  `md+`. Both throw their year-step cleanly via arrow-key + keyboard nav.
+- **`<DatePicker>`** + **`<MonthYearPicker>`** (Phase 9.16; extended 2026-08-19)  Civic
+  Editorial date pickers. DatePicker is a 3-view popover (day → month → year), range-clampable
+  via `min` / `max`. MonthYearPicker is the lighter yyyy-mm variant. Both mobile-first:
+  bottom-sheet on phones, dropdown on `md+`, full keyboard nav.
+  **2026-08-19 (user report: "no option to select year"):** the year grid existed but the only
+  way in was an UNLABELLED title tap. The title is now an explicit control with a chevron
+  (down = drill in, up = collapse), the year view titles itself **"Pick a year"**, and the new
+  `openTo` prop lets a field open straight on a grid  BOTH date-of-birth fields pass
+  `openTo="years"`. Accessible names are built FROM the visible title (WCAG 2.5.3 Label in Name;
+  an aria-label used to override it). A `name` + `defaultValue` uncontrolled mode (mirroring
+  CustomSelect) lets it live inside a plain server-rendered GET form.
+  **There are now ZERO native `<input type="date">` on the platform**, enforced by
+  `lib/ui/house-inputs.test.ts`.
 - **`<ComboboxField>`** (extended Phase 9.16)  picker over a flat list with type-to-filter
   ranking. Adds an optional `leading: string` slot per option (e.g. flag emoji on the
   nationality picker)  excluded from the type-to-filter rank so typing "south" still
   ranks "South Africa" at idx 0 rather than after the flag glyph. `allowOther` footer
   switches the field to free-text mode for the Phase 9.15 taxonomy-suggestion flow.
+- **`<MultiSelectComboboxField>`**  chip-based multi picker (skills, secondary professions).
+  `allowOther` + `onOtherSubmit` route a typed entry to the admin taxonomy queue; the parent
+  decides what to persist (secondary professions keep ONLY canonical labels, because the save
+  action structurally refuses anything else). **Its root must always keep `relative`**: it used
+  to be `className ?? "relative"`, so a caller passing `md:col-span-2` silently dropped the
+  positioning and the dropdown ran off to the right (fixed 2026-08-19 with `cn`).
+- **`<StickyHeaderShell>`** (2026-08-19)  the public sticky header. Slides away on scroll-down
+  and returns on scroll-up, **small screens only**; rAF-throttled passive listener, 6px jitter
+  threshold, never hides while the body is scroll-locked, honours `prefers-reduced-motion`,
+  exposes `data-hidden` for tests. Its transform creates a containing block for fixed
+  descendants, which is safe ONLY because MobileNav portals its drawer to `<body>`.
 - **`<CustomSelect>`**  replaces every native `<select>` on the platform. Portaled into
   `document.body` (so no ancestor `transform` / `overflow` ever displaces it). Desktop:
   anchored popover from measured trigger rect. Mobile: full-screen bottom sheet with backdrop
   + thumb-sized Close. Three variants: `default` (h-12, matches `TextField`), `compact` (h-10
   pill), `bare` (no chrome  used inside the SearchBar's hairline-divided cells).
+- **Field layout gotcha:** `TextField` / `TextareaField` / `SelectField` put `className` on the
+  CONTROL. To make a field span a grid row use **`wrapperClassName`** (reaches `FieldShell`), or
+  the span silently does nothing  which is exactly why the profile "About" box sat in one
+  column until 2026-08-19.
 - **`<AnimatedCount>`**  single client island for IntersectionObserver-triggered count-up on
   stat numerals. Honours `prefers-reduced-motion`.
 - **`<StudentContextEditor>`** (Phase 13.1)  on `/dashboard/profile`. Chip input for current

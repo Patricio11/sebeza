@@ -81,14 +81,19 @@ Background decisions in [docs/popia/DPIA.md](docs/popia/DPIA.md) (R8, R-27).
 - **Tailwind v4** (design tokens in `app/globals.css` via `@theme`); Fraunces
   display + Hanken Grotesk body via `next/font`.
 - **Drizzle ORM 0.45** + **Neon serverless** Postgres (EU, Phase 9; AWS Cape
-  Town `af-south-1` migration deferred). 65 migrations through 0064.
+  Town `af-south-1` migration of the DATABASE still deferred). 71 migrations
+  through 0070.
 - **Better Auth 1.6.25** with `nextCookies()` + `twoFactor` plugins
   (TOTP + backup codes).
 - **next-intl 4.12**  Tier-1 locales `en` / `zu` / `xh` / `af`; deep-merge
   fallback to English. Tier-2 / Tier-3 + professional translation land in
   Phase 10.
-- **Supabase Storage** for private documents (CVs, certificates, KYC docs,
-  profile photos). Service-role uploads, signed URLs only on audited reveal.
+- **Object storage is admin-configurable** (`lib/storage/backend.ts`): **AWS S3 in
+  `af-south-1` (Cape Town) is live**, so uploaded files rest in South Africa;
+  Supabase Storage remains the env fallback. Configured, tested and enabled from
+  /admin/integrations with credentials encrypted in the database. Private buckets,
+  signed URLs only on audited reveal. Photos are re-encoded to WebP with EXIF/GPS
+  stripped; documents are never re-encoded.
 - **Recharts 3.8** on `/insights` only (client island, mount-gated).
 - Postgres FTS + `pg_trgm` for search ranking; `sebenza_freshness_confidence()`
   SQL function feeds every freshness-weighted query (search rank, decline

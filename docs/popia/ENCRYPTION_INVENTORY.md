@@ -13,7 +13,7 @@ Last updated 2026-06-01 (Phase 13 added the LLM-provider credentials row).
 |---|---|---|
 | Browser ↔ Vercel | TLS 1.3 | Vercel manages cert via Let's Encrypt + auto-renewal. |
 | Vercel ↔ Neon | TLS 1.2+ | `sslmode=require` in the connection string. |
-| Vercel ↔ Supabase Storage | TLS 1.2+ | HTTPS only; signed-URL flow does not weaken this. |
+| Vercel ↔ object storage (S3 / Supabase) | TLS 1.2+ | HTTPS only; signed-URL flow does not weaken this. |
 | Vercel ↔ Resend | TLS 1.2+ | HTTPS API. |
 | Vercel ↔ Upstash (Phase 9) | TLS 1.2+ | HTTPS API. |
 | Vercel ↔ KYC SaaS (Phase 8+, gated) | TLS 1.2+ | Required by every SA-registered provider. |
@@ -23,7 +23,9 @@ Last updated 2026-06-01 (Phase 13 added the LLM-provider credentials row).
 | Data | Mechanism | Key location |
 |---|---|---|
 | Neon Postgres | Provider-side AES-256 (transparent) | Neon-managed. |
-| Supabase Storage objects | Provider-side AES-256 (transparent) | Supabase-managed. |
+| S3 objects (LIVE since 2026-08-18) | SSE-AES256, set on every PutObject | Bucket `sebenzasa-s3-bucket-...-af-south-1-an`, **Cape Town region: personal information stays in South Africa**. Private bucket; reads only via short-TTL presigned URLs. Provider chosen on /admin/integrations; credentials AES-256-GCM encrypted in `integration_settings`, never in env. |
+| Supabase Storage objects (fallback path) | Provider-side AES-256 (transparent) | Supabase-managed. Now the FALLBACK only: used when no admin storage config is enabled. |
+| Profile + project images | Re-encoded to WebP at upload | **All EXIF metadata is stripped, including GPS**, so a phone photo can no longer carry the data subject's location. Documents, ID scans and CVs are deliberately NOT re-encoded (evidentiary integrity). |
 | Vercel build artefacts | Provider-side | Vercel-managed. |
 
 ## Application-level (highest sensitivity)
