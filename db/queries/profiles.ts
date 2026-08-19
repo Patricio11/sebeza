@@ -42,6 +42,11 @@ import type {
 import { isOpenToTag } from "@/lib/mock/types";
 import { INSTITUTIONS, PROVINCES, findLanguageBySlug } from "@/lib/mock/taxonomy";
 import { randomUUID } from "node:crypto";
+import { headers } from "next/headers";
+import {
+  isRealSearchTerm,
+  looksLikeBot,
+} from "@/lib/search/term-filter";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Search
@@ -443,16 +448,34 @@ export async function searchProfilesQuery(
     employmentVerifiedAt: verifiedAtByProfile.get(r.id) ?? null,
   }));
 
-  // Skills-gap signal  every search writes a row. Phase 6 builds on this.
-  // Best-effort: write must not block the response.
+  // Skills-gap signal  every HUMAN search writes a row. Phase 6 builds
+  // on this. Best-effort: the write must not block the response.
+  //
+  // 2026-08-19: a live user saw `{search_term_string}` published as
+  // national demand. Crawlers fetch the sitelinks search-box template
+  // from our own JSON-LD literally, so those hits were being counted.
+  // Two guards now: the term must look like something a person typed,
+  // and the requester must not look like a bot. Filter-only searches
+  // (no free text) still record with `terms = NULL`  they are real
+  // demand signal, just not a term.
   try {
-    await db.insert(schema.searchEvents).values({
-      id: `srch_${randomUUID()}`,
-      terms: q || null,
-      filters: filters as unknown as Record<string, unknown>,
-      resultCount: profiles.length,
-      actorOrgId: null, // set in Phase 5 when employer reveal flow lands
-    });
+    const termIsReal = isRealSearchTerm(q);
+    let botUa = false;
+    try {
+      const h = await headers();
+      botUa = looksLikeBot(h.get("user-agent"));
+    } catch {
+      // No request scope (tests, cron)  treat as human.
+    }
+    if (!botUa && (termIsReal || !q)) {
+      await db.insert(schema.searchEvents).values({
+        id: `srch_${randomUUID()}`,
+        terms: termIsReal ? q : null,
+        filters: filters as unknown as Record<string, unknown>,
+        resultCount: profiles.length,
+        actorOrgId: null, // set in Phase 5 when employer reveal flow lands
+      });
+    }
   } catch {
     // Search analytics drift is acceptable; never break the request path.
   }

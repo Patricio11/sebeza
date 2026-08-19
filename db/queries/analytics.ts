@@ -110,6 +110,9 @@ export async function analyticsSnapshotQuery(): Promise<AnalyticsSnapshot> {
         SELECT LOWER(terms) AS term, COUNT(*)::int AS hits
         FROM search_events
         WHERE terms IS NOT NULL AND length(terms) >= 2
+          -- 2026-08-19: suppress crawler-fetched URL-template junk
+          -- (the {search_term_string} placeholder) already in the table.
+          AND terms !~ '[{}\\<>]'
         GROUP BY LOWER(terms)
       ),
       supply AS (
@@ -243,6 +246,9 @@ export async function skillsGapQuery(opts: {
         SELECT LOWER(terms) AS term, COUNT(*)::int AS hits
         FROM search_events
         WHERE terms IS NOT NULL AND length(terms) >= 2
+          -- 2026-08-19: suppress crawler-fetched URL-template junk
+          -- (the {search_term_string} placeholder) already in the table.
+          AND terms !~ '[{}\\<>]'
         GROUP BY LOWER(terms)
       ),
       supply AS (
@@ -465,6 +471,9 @@ export async function skillDemandQuery(opts: {
         SELECT LOWER(terms) AS term, COUNT(*)::int AS hits
         FROM search_events
         WHERE terms IS NOT NULL AND length(terms) >= 2
+          -- 2026-08-19: suppress crawler-fetched URL-template junk
+          -- (the {search_term_string} placeholder) already in the table.
+          AND terms !~ '[{}\\<>]'
         GROUP BY LOWER(terms)
       ),
       skill_supply AS (

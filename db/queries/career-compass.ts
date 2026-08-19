@@ -124,6 +124,8 @@ export async function getCompassForProfile(
         FROM search_events
         WHERE terms IS NOT NULL
           AND length(terms) >= 2
+          -- 2026-08-19: crawler-fetched URL-template junk.
+          AND terms !~ '[{}\<>]'
           AND at >= now() - (${DEMAND_WINDOW_DAYS} || ' days')::interval
         GROUP BY LOWER(terms)
       ),
@@ -216,6 +218,9 @@ export async function getCompassForProfile(
         SELECT LOWER(terms) AS term, COUNT(*)::int AS hits
         FROM search_events
         WHERE terms IS NOT NULL AND length(terms) >= 2
+          -- 2026-08-19: suppress crawler-fetched URL-template junk
+          -- (the {search_term_string} placeholder) already in the table.
+          AND terms !~ '[{}\\<>]'
         GROUP BY LOWER(terms)
       ),
       local_supply AS (

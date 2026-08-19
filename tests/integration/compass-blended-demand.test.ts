@@ -114,3 +114,30 @@ describe("blended compass demand", () => {
     expect(rec?.demandSignal?.searches).toBe(42);
   });
 });
+
+describe("search-event hygiene (2026-08-19 user report)", () => {
+  test("crawler URL-template terms never reach the demand aggregates", async () => {
+    // Simulate what Google's sitelinks-searchbox crawl used to write.
+    const junkId = `srch_junk_${randomUUID()}`;
+    await db.insert(schema.searchEvents).values({
+      id: junkId,
+      terms: "{search_term_string}",
+      filters: {},
+      resultCount: 0,
+    });
+    try {
+      const rows = (
+        (await db.execute(sql`
+          SELECT LOWER(terms) AS term
+          FROM search_events
+          WHERE terms IS NOT NULL
+            AND length(terms) >= 2
+            AND terms !~ '[{}\<>]'
+        `)) as unknown as { rows: Array<{ term: string }> }
+      ).rows;
+      expect(rows.some((r) => r.term.includes("search_term_string"))).toBe(false);
+    } finally {
+      await db.delete(schema.searchEvents).where(eq(schema.searchEvents.id, junkId));
+    }
+  });
+});
