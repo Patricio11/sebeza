@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/i18n/navigation";
 import { LocaleSwitcher } from "@/components/feature/LocaleSwitcher";
@@ -18,6 +19,14 @@ import { Menu, X } from "lucide-react";
  * closes it. Honours `prefers-reduced-motion` via the global CSS rule.
  *
  * Used by both `SiteHeader` (internal pages) and `LandingHeader` (the landing).
+ *
+ * 2026-08-19 (user-reported "screen freezes when you tap the three lines"):
+ * the drawer is PORTALLED to <body>. Both headers carry `backdrop-blur`,
+ * and an element with a `backdrop-filter` establishes a containing block
+ * for `position: fixed` DESCENDANTS  so `fixed inset-0` was resolving
+ * against the ~60px header strip instead of the viewport. The drawer was
+ * effectively invisible while body scroll stayed locked, which reads
+ * exactly like a frozen screen. Never render this inline again.
  */
 export interface MobileNavSession {
   /** Display name surfaced inside the drawer. */
@@ -41,6 +50,9 @@ export function MobileNav({
   const t = useTranslations("nav");
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  // Portals need a DOM target, so only after mount on the client.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
   // Close drawer on route change.
   useEffect(() => {
@@ -85,13 +97,15 @@ export function MobileNav({
         <Menu className="size-5" aria-hidden="true" />
       </button>
 
-      {open && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          aria-label={t("menu")}
-          className="fixed inset-0 z-50 flex flex-col md:hidden"
-        >
+      {open &&
+        mounted &&
+        createPortal(
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label={t("menu")}
+            className="fixed inset-0 z-50 flex flex-col md:hidden"
+          >
           {/* Scrim */}
           <button
             type="button"
@@ -211,8 +225,9 @@ export function MobileNav({
               </ul>
             </div>
           </div>
-        </div>
-      )}
+          </div>,
+          document.body,
+        )}
     </>
   );
 }

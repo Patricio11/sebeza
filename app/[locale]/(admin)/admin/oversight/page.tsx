@@ -18,6 +18,7 @@
 import { setRequestLocale } from "next-intl/server";
 import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
 import { Button } from "@/components/ui/Button";
+import { DatePicker } from "@/components/ui/DatePicker";
 import { verifyAdmin } from "@/lib/auth/dal";
 import { oversightLogQuery } from "@/lib/gov/oversight-query";
 import { REASON_LABELS } from "@/lib/gov/employer-lookup-types";
@@ -161,28 +162,16 @@ export default async function OversightPage({
             className="h-10 rounded-[var(--radius-sm)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] px-3 text-sm"
           />
         </label>
-        <label className="flex flex-col gap-1">
-          <span className="text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--color-ink-soft)]">
-            Since
-          </span>
-          <input
-            type="date"
-            name="since"
-            defaultValue={since}
-            className="h-10 rounded-[var(--radius-sm)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] px-3 text-sm"
-          />
-        </label>
-        <label className="flex flex-col gap-1">
-          <span className="text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--color-ink-soft)]">
-            Until (exclusive)
-          </span>
-          <input
-            type="date"
-            name="until"
-            defaultValue={until}
-            className="h-10 rounded-[var(--radius-sm)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] px-3 text-sm"
-          />
-        </label>
+        <DatePicker
+          label="Since"
+          name="since"
+          defaultValue={since}
+        />
+        <DatePicker
+          label="Until (exclusive)"
+          name="until"
+          defaultValue={until}
+        />
         <div className="self-end">
           <Button type="submit" variant="primary" size="md">
             Apply

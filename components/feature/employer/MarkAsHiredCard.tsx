@@ -12,6 +12,7 @@
 
 import { useState, useTransition } from "react";
 import { Briefcase, Check, AlertTriangle, Link as LinkIcon } from "lucide-react";
+import { DatePicker } from "@/components/ui/DatePicker";
 import { TextField } from "@/components/ui/FormField";
 import { markAsHired } from "@/lib/employer/placements";
 import type { ContactReveal } from "@/lib/employer/reveal";
@@ -184,12 +185,11 @@ export function MarkAsHiredCard({
               value={form.city}
               onChange={(e) => setForm({ ...form, city: e.target.value })}
             />
-            <TextField
+            <DatePicker
               id="hire-date"
               label="Hired on"
-              type="date"
               value={form.hiredAt}
-              onChange={(e) => setForm({ ...form, hiredAt: e.target.value })}
+              onChange={(v) => setForm({ ...form, hiredAt: v })}
             />
             <TextField
               id="hire-salary"

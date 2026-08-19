@@ -3,6 +3,7 @@ import { Link } from "@/i18n/navigation";
 import { LocaleSwitcher } from "@/components/feature/LocaleSwitcher";
 import { SebenzaLogo } from "@/components/ui/SebenzaLogo";
 import { MobileNav } from "@/components/layout/MobileNav";
+import { StickyHeaderShell } from "@/components/layout/StickyHeaderShell";
 import { getSessionUser } from "@/lib/auth/dal";
 import { roleHome } from "@/lib/auth/dal";
 import { ArrowUpRight } from "lucide-react";
@@ -28,7 +29,7 @@ export async function SiteHeader({ variant = "default" }: Props) {
   const dashboardLabel = labelForRoleHome(viewer?.role);
 
   return (
-    <header className="sticky top-0 z-30 bg-[color:var(--color-paper)]/95 backdrop-blur supports-[backdrop-filter]:bg-[color:var(--color-paper)]/80">
+    <StickyHeaderShell className="bg-[color:var(--color-paper)]/95 backdrop-blur supports-[backdrop-filter]:bg-[color:var(--color-paper)]/80">
       {/* Top flag band */}
       <div aria-hidden="true" className="flex h-[3px] w-full">
         <div className="flex-[3] bg-[color:var(--color-brand)]" />
@@ -116,7 +117,7 @@ export async function SiteHeader({ variant = "default" }: Props) {
           </div>
         </div>
       </div>
-    </header>
+    </StickyHeaderShell>
   );
 }
 

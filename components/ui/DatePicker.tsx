@@ -35,17 +35,40 @@ import {
   useRef,
   useState,
 } from "react";
-import { Calendar, ChevronLeft, ChevronRight, X } from "lucide-react";
+import {
+  Calendar,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  ChevronUp,
+  X,
+} from "lucide-react";
 
 interface Props {
+  /**
+   * Which grid the picker opens on. Defaults to "days"; date-of-birth
+   * fields pass "years" so the first tap is already the decade grid
+   * (2026-08-19 user report: paging back month-by-month to 2005).
+   */
+  openTo?: View;
+  /**
+   * Becomes the name of a hidden input so native form submission still
+   * works (mirrors CustomSelect). With `name` set you may pass
+   * `defaultValue` instead of `value`/`onChange` and let the picker
+   * hold its own state  the pattern server-rendered GET filter forms
+   * need.
+   */
+  name?: string;
+  defaultValue?: string;
   /** Optional id for the underlying button (used by <label htmlFor>). */
   id?: string;
   /** Visible label above the field. */
   label: string;
-  /** ISO yyyy-mm-dd string. "" = no selection. */
-  value: string;
+  /** ISO yyyy-mm-dd string. "" = no selection. Omit for uncontrolled
+   *  (`name` + `defaultValue`) usage inside a plain form. */
+  value?: string;
   /** Called with a new ISO yyyy-mm-dd string (or "" if cleared). */
-  onChange: (value: string) => void;
+  onChange?: (value: string) => void;
   /** Earliest selectable date, inclusive. ISO yyyy-mm-dd. */
   minDate?: string;
   /** Latest selectable date, inclusive. ISO yyyy-mm-dd. */
@@ -154,17 +177,31 @@ function clampToRange(
 export function DatePicker({
   id,
   label,
-  value,
+  value: controlledValue,
   onChange,
+  name,
+  defaultValue,
   minDate,
   maxDate,
   placeholder = "Select date",
+  openTo = "days",
   helpText,
   disabled,
   error,
   className,
 }: Props) {
   const reactId = useId();
+  // Controlled when `value` is supplied; otherwise self-managed so the
+  // hidden input can carry the value into a plain form submit.
+  const [uncontrolled, setUncontrolled] = useState(defaultValue ?? "");
+  const value = controlledValue ?? uncontrolled;
+  const commit = useCallback(
+    (next: string) => {
+      if (controlledValue === undefined) setUncontrolled(next);
+      onChange?.(next);
+    },
+    [controlledValue, onChange],
+  );
   const buttonId = id ?? `dpicker-${reactId}`;
   const popoverId = `${buttonId}-popover`;
 
@@ -217,7 +254,7 @@ export function DatePicker({
     setViewMonth(anchor.month);
     setFocusedDay(anchor.day);
     setYearPageStart(Math.floor(anchor.year / 12) * 12);
-    setView("days");
+    setView(openTo);
     requestAnimationFrame(() => gridRef.current?.focus());
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
@@ -253,18 +290,18 @@ export function DatePicker({
       const candidate: Ymd = { year, month, day };
       if (min && isBefore(candidate, min)) return;
       if (max && isAfter(candidate, max)) return;
-      onChange(formatValue(year, month, day));
+      commit(formatValue(year, month, day));
       setOpen(false);
       buttonRef.current?.focus();
     },
-    [onChange, min, max],
+    [commit, min, max],
   );
 
   const clear = useCallback(() => {
-    onChange("");
+    commit("");
     setOpen(false);
     buttonRef.current?.focus();
-  }, [onChange]);
+  }, [commit]);
 
   const goToToday = useCallback(() => {
     const target = clampToRange(today, min, max);
@@ -336,12 +373,16 @@ export function DatePicker({
   }
 
   const displayText = formatDisplay(value);
+  // 2026-08-19 (user report: "no option to select year, i had to click
+  // back on the months until i got to 2005"). The year grid existed but
+  // the only way in was an unlabelled title tap. The title is now an
+  // explicit control with a chevron, and the year view names itself.
   const titleText =
     view === "days"
       ? `${FULL_MONTHS[viewMonth - 1]} ${viewYear}`
       : view === "months"
         ? String(viewYear)
-        : `${yearPageStart}${yearPageStart + 11}`;
+        : "Pick a year";
 
   return (
     <div className={className ?? ""} ref={containerRef}>
@@ -351,6 +392,7 @@ export function DatePicker({
       >
         {label}
       </label>
+      {name && <input type="hidden" name={name} value={value} />}
       <button
         ref={buttonRef}
         id={buttonId}
@@ -432,19 +474,35 @@ export function DatePicker({
               <button
                 type="button"
                 onClick={() => {
+                  // days → months → years, and the year view collapses
+                  // back to days (the chevron flips to match).
                   if (view === "days") setView("months");
                   else if (view === "months") setView("years");
+                  else setView("days");
                 }}
+                // WCAG 2.5.3 (Label in Name): the accessible name must
+                // contain the visible text, so build it FROM titleText.
                 aria-label={
                   view === "days"
-                    ? "Switch to month picker"
+                    ? `${titleText}: switch to month picker`
                     : view === "months"
-                      ? "Switch to year picker"
-                      : "Year range"
+                      ? `${titleText}: switch to year picker`
+                      : titleText
                 }
-                className="cursor-pointer rounded-[var(--radius-sm)] px-2 py-1 font-display text-lg text-[color:var(--color-ink)] hover:bg-[color:var(--color-paper)]"
+                className="inline-flex cursor-pointer items-center gap-1.5 rounded-[var(--radius-sm)] px-2 py-1 font-display text-lg text-[color:var(--color-ink)] hover:bg-[color:var(--color-paper)]"
               >
                 {titleText}
+                {view === "years" ? (
+                  <ChevronUp
+                    className="size-4 text-[color:var(--color-ink-soft)]"
+                    aria-hidden="true"
+                  />
+                ) : (
+                  <ChevronDown
+                    className="size-4 text-[color:var(--color-ink-soft)]"
+                    aria-hidden="true"
+                  />
+                )}
               </button>
               <div className="flex items-center gap-1">
                 <button

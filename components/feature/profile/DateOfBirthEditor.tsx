@@ -112,6 +112,7 @@ export function DateOfBirthEditor({ initialValue }: Props) {
     <div className="rounded-[var(--radius-sm)] border border-[color:var(--color-hairline)] bg-[color:var(--color-paper)] p-3">
       <DatePicker
         label="Date of birth"
+        openTo="years"
         value={draft}
         onChange={setDraft}
         minDate={MIN_DATE}

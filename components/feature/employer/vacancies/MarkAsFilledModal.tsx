@@ -43,6 +43,7 @@ import {
   UserPlus,
   X,
 } from "lucide-react";
+import { DatePicker } from "@/components/ui/DatePicker";
 
 interface Props {
   vacancyId: string;
@@ -501,19 +502,12 @@ function Sheet({
               </ul>
               <div className="grid gap-3 md:grid-cols-2">
                 <div>
-                  <label
-                    htmlFor="hire-date"
-                    className="block text-[0.65rem] uppercase tracking-[0.18em] text-[color:var(--color-ink)]"
-                  >
-                    Hire date (shared)
-                  </label>
-                  <input
+                  <DatePicker
                     id="hire-date"
-                    type="date"
+                    label="Hire date (shared)"
                     value={hiredAt}
-                    onChange={(e) => setHiredAt(e.target.value)}
+                    onChange={setHiredAt}
                     disabled={pending}
-                    className="mt-1 w-full rounded-[var(--radius-sm)] border border-[color:var(--color-hairline)] bg-[color:var(--color-paper)] px-2 py-1.5 text-sm"
                   />
                 </div>
                 <div>

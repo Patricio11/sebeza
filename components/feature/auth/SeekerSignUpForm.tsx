@@ -647,6 +647,7 @@ export function SeekerSignUpForm({
           <DatePicker
             id="dateOfBirth"
             label="Date of birth"
+            openTo="years"
             value={state.dateOfBirth}
             onChange={(v) => setState({ ...state, dateOfBirth: v })}
             minDate={`${new Date().getUTCFullYear() - 100}-01-01`}

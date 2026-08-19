@@ -16,6 +16,7 @@
 import { useState, useTransition } from "react";
 import { CustomSelect } from "@/components/ui/CustomSelect";
 import { X, Plus, Loader2 } from "lucide-react";
+import { DatePicker } from "@/components/ui/DatePicker";
 import {
   addStudentMilestone,
   removeStudentMilestone,
@@ -160,17 +161,11 @@ function AddForm({
             })}
           />
         </label>
-        <label className="grid gap-1">
-          <span className="uppercase tracking-[0.14em] text-[color:var(--color-ink-soft)]">
-            Date
-          </span>
-          <input
-            type="date"
-            value={occurredOn}
-            onChange={(e) => setOccurredOn(e.target.value)}
-            className="rounded-[var(--radius-sm)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] px-2 py-1.5 text-sm"
-          />
-        </label>
+        <DatePicker
+          label="Date"
+          value={occurredOn}
+          onChange={setOccurredOn}
+        />
       </div>
       <label className="grid gap-1">
         <span className="uppercase tracking-[0.14em] text-[color:var(--color-ink-soft)]">

@@ -25,6 +25,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "@/i18n/navigation";
 import { Button } from "@/components/ui/Button";
 import { LogOut, X, ChevronRight, Send } from "lucide-react";
+import { DatePicker } from "@/components/ui/DatePicker";
 import {
   PLACEMENT_DEPARTURE_CATEGORIES,
   type PlacementDepartureCategory,
@@ -309,21 +310,14 @@ function DepartureForm({
       </p>
 
       <div>
-        <label
-          htmlFor="departure-date"
-          className="block text-[0.72rem] uppercase tracking-[0.22em] text-[color:var(--color-ink)]"
-        >
-          Departure date
-        </label>
-        <input
+        <DatePicker
           id="departure-date"
-          type="date"
+          label="Departure date"
           value={departureDate}
-          onChange={(e) => onDepartureDateChange(e.target.value)}
-          min={hireDateOnly}
-          max={today}
+          onChange={onDepartureDateChange}
+          minDate={hireDateOnly}
+          maxDate={today}
           disabled={pending}
-          className="mt-1.5 h-11 w-full rounded-[var(--radius-sm)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] px-3 text-sm text-[color:var(--color-ink)] outline-none focus:border-[color:var(--color-ink)]"
         />
       </div>
 
