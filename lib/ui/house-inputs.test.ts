@@ -13,6 +13,9 @@ import { readdirSync, readFileSync, statSync } from "node:fs";
 import path from "node:path";
 
 const ROOTS = ["app", "components"];
+/** Wider net for the punctuation rule: anything a human reads. */
+const PROSE_ROOTS = ["app", "components", "lib", "db", "messages", "docs", "tests"];
+const PROSE_EXT = /\.(tsx?|md|json|sql)$/;
 const ALLOWED_FILES = new Set([
   // The custom components themselves.
   path.join("components", "ui", "DatePicker.tsx"),
@@ -20,11 +23,12 @@ const ALLOWED_FILES = new Set([
   path.join("components", "ui", "CustomSelect.tsx"),
 ]);
 
-function walk(dir: string, out: string[] = []): string[] {
+function walk(dir: string, out: string[] = [], match = /\.tsx$/): string[] {
   for (const entry of readdirSync(dir)) {
+    if (entry === "node_modules" || entry === ".next") continue;
     const full = path.join(dir, entry);
-    if (statSync(full).isDirectory()) walk(full, out);
-    else if (entry.endsWith(".tsx")) out.push(full);
+    if (statSync(full).isDirectory()) walk(full, out, match);
+    else if (match.test(entry)) out.push(full);
   }
   return out;
 }
@@ -52,6 +56,26 @@ describe("house input rule", () => {
     expect(
       offenders,
       `Use <CustomSelect> / <ComboboxField> instead of <select>:\n${offenders.join("\n")}`,
+    ).toEqual([]);
+  });
+});
+
+/**
+ * House punctuation rule (founder standing instruction): NO em-dashes
+ * anywhere, in copy, comments or docs. They read as an AI tell. Use a
+ * colon, a comma, or a full stop.
+ */
+describe("house punctuation rule", () => {
+  test("no em-dashes anywhere a human reads", () => {
+    // Written as an escape on purpose: this file is inside the scan.
+    const EM_DASH = String.fromCharCode(0x2014);
+    const prose = PROSE_ROOTS.flatMap((r) => walk(r, [], PROSE_EXT));
+    const offenders = prose.filter((f) =>
+      readFileSync(f, "utf8").includes(EM_DASH),
+    );
+    expect(
+      offenders,
+      `Em-dash found. Use a colon, comma or full stop: ${offenders.join(", ")}`,
     ).toEqual([]);
   });
 });

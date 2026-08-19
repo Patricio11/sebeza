@@ -109,7 +109,7 @@ describe("isolation", () => {
   });
 });
 
-describe("peek (Phase 32.2.4b — read without spending)", () => {
+describe("peek (Phase 32.2.4b: read without spending)", () => {
   test("peek never consumes: N peeks leave the full budget intact", async () => {
     const key = freshKey();
     for (let i = 0; i < BUCKETS.upload.limit * 3; i++) {

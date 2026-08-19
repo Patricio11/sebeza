@@ -30,10 +30,10 @@ finish line):
 - [ ] Consider designating a Deputy Information Officer (PAIA s17)  as a
       practical matter the CEO cannot be the only person able to answer a
       data-subject request while travelling.
-- [x] Update `/paia` Section 2 — done 2026-07-28 (named IO + Yetotec address in
+- [x] Update `/paia` Section 2: done 2026-07-28 (named IO + Yetotec address in
       Sections 1 and 2; telephone still to publish at commercial launch).
 - [x] Add the named person to the responding-to-requests rota in
-      `BREACH_RESPONSE.md` — done 2026-07-28.
+      `BREACH_RESPONSE.md`: done 2026-07-28.
 - [ ] Sign off `DPIA.md` (the signature block at the end awaits the IO).
 
 A working email is published already at `popia@sebenzasa.com` and surfaced on

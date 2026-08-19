@@ -37,7 +37,7 @@ export const auth = betterAuth({
   // Phase 32.3.7 (security remediation)  localhost is a DEV-ONLY
   // trusted origin. This list is what Better Auth's origin-check
   // middleware validates `callbackURL` / `redirectTo` /
-  // `errorCallbackURL` against, and `/api/auth/*` is publicly mounted —
+  // `errorCallbackURL` against, and `/api/auth/*` is publicly mounted, 
   // so shipping localhost meant production accepted `http://localhost:*`
   // as a legitimate post-auth redirect target and request origin.
   trustedOrigins:

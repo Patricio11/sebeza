@@ -31,7 +31,7 @@ export async function clientIpKey(): Promise<string> {
       "unknown";
     return createHash("sha256").update(raw).digest("hex").slice(0, 24);
   } catch {
-    // `headers()` unavailable (unit-test context) — degrade to one
+    // `headers()` unavailable (unit-test context): degrade to one
     // shared bucket rather than throwing on a security path.
     return "no-request-context";
   }

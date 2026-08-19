@@ -238,7 +238,7 @@ describe("Phase 31  ID/passport COLLECTION gate (dormant by default)", () => {
     }
   });
 
-  test("(b)+(e): nationality analytics emit ONLY the two classes — never a raw country label", async () => {
+  test("(b)+(e): nationality analytics emit ONLY the two classes, never a raw country label", async () => {
     // Phase 31 plan assertions (b) + (e): the analytics derive
     // nationality_class from `is_citizen` in SQL and must never surface
     // a raw country label in any cell or export row.
@@ -252,14 +252,14 @@ describe("Phase 31  ID/passport COLLECTION gate (dormant by default)", () => {
       ...status.cells.map((c) => c.nationality_class),
     ];
     // The k=10 suppression may legitimately leave ZERO cells on the small
-    // seeded DB — that's the k-anonymity guarantee doing its job, so we
+    // seeded DB: that's the k-anonymity guarantee doing its job, so we
     // assert over whatever survives rather than demanding survivors.
     for (const c of classes) {
       expect(["sa_citizen", "foreign_national"]).toContain(c);
     }
     // Belt-and-braces: no country-label string anywhere in either payload
     // (the seed stores labels like "South African" / "Zimbabwean" on the
-    // legacy display column — they must never reach the analytics shape).
+    // legacy display column: they must never reach the analytics shape).
     const dump = JSON.stringify({ supply, status });
     expect(dump).not.toMatch(/South African|Zimbabwean|Nigerian|Mozambican|Congolese/);
   });

@@ -1520,11 +1520,11 @@ export const declineReason = pgEnum("decline_reason", [
  * Phase 34 carve-out (docs/PHASE_34_SELF_APPLY_PLAN.md, deliberate
  * contract rewrite): a vacancy whose owner switched `selfApplyEnabled`
  * ON exposes a DEFINED PUBLIC SUBSET at /apply/[selfApplyToken] via
- * `lib/vacancy/public.ts` — title, org name + verification, profession,
+ * `lib/vacancy/public.ts`: title, org name + verification, profession,
  * province/city (or national-remote), skills, seniority, min
  * experience, work availability, positions, description. NEVER in the
  * anonymous payload: salaryBand (shown only to signed-in seekers and
- * only while `salaryVisibleToApplicants` is true — D2), invite expiry
+ * only while `salaryVisibleToApplicants` is true, D2), invite expiry
  * policy, nudge settings, org ids, or any pipeline statistic. Salary
  * band otherwise keeps the Phase 5 placements rule: Owners + Recruiters
  * inside the org; suppressed for Viewers.

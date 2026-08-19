@@ -720,7 +720,7 @@ export async function findProfileByHandleQuery(
         //    RELATIONSHIPS CARRY ON. Auto-resumes on the date you pick."
         //   (components/feature/privacy/SearchabilityPauseControl.tsx)
         //
-        // Pause means "stop NEW discovery", not "go invisible" — a
+        // Pause means "stop NEW discovery", not "go invisible", a
         // seeker who wants to disappear revokes searchability instead
         // (which this query does honour, via the consent join upstream).
         // 404-ing a direct link would break exactly the existing

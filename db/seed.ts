@@ -2870,18 +2870,25 @@ async function seedPhase9_17SeekerInvitations() {
  *   Honesty Rule  rejection is per-document, not per-seeker).
  */
 async function convergeProfileVerificationRollup() {
-  console.log("🪪 Converging profile verification roll-up (Phase 9.14 rule)…");
+  console.log("🪪 Converging profile verification roll-up (live-selfie rule)…");
+  // 2026-08-19: the profile badge answers "is this a real person?" and
+  // derives from the live selfie ALONE. Showcase fixtures that the demo
+  // expects to look verified get a stamped `selfie_verified_at` (seed
+  // data has always fabricated its verification states); everything else
+  // converges to unverified. Real users must actually do the check.
+  await db.execute(sql`
+    UPDATE profiles p
+    SET selfie_verified_at = COALESCE(p.selfie_verified_at, now())
+    WHERE p.deleted_at IS NULL
+      AND EXISTS (
+        SELECT 1 FROM qualifications q
+        WHERE q.profile_id = p.id AND q.verification = 'verified'
+      )
+  `);
   await db.execute(sql`
     UPDATE profiles p
     SET verification = CASE
-      WHEN EXISTS (
-        SELECT 1 FROM qualifications q
-        WHERE q.profile_id = p.id AND q.verification = 'verified'
-      ) THEN 'verified'::verification_status
-      WHEN EXISTS (
-        SELECT 1 FROM qualifications q
-        WHERE q.profile_id = p.id AND q.verification = 'pending'
-      ) THEN 'pending'::verification_status
+      WHEN p.selfie_verified_at IS NOT NULL THEN 'verified'::verification_status
       ELSE 'unverified'::verification_status
     END
     WHERE p.deleted_at IS NULL

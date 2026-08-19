@@ -65,7 +65,7 @@ describe("Phase 32.3.2  gov employer lookup resists enumeration", () => {
     expect(await resolveOrgByName("%")).toBeNull();
   });
 
-  test("prefix probes like 'A%', 'B%' … match nothing — the register cannot be walked", async () => {
+  test("prefix probes like 'A%', 'B%' … match nothing, the register cannot be walked", async () => {
     for (const probe of ["A%", "B%", "D%", "S%", "%a%", "_"]) {
       expect(
         await resolveOrgByName(probe),

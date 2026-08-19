@@ -39,7 +39,7 @@ const SUSPENDED = {
 const HEALTHY = { email: "andile-z@example.co.za" };
 const WRONG_PASSWORD = "definitely-not-the-password-42";
 
-/** The exact free-text an admin might write — must never reach a client. */
+/** The exact free-text an admin might write: must never reach a client. */
 const SECRET_NOTE =
   "Suspected fraudulent CIPC documents, see internal ticket 4412.";
 
@@ -117,7 +117,7 @@ describe("Phase 32.2.2  sign-in discloses nothing pre-authentication", () => {
     }
   });
 
-  test("with the CORRECT password a suspended user is told honestly — but never the reason, and gets no session", async () => {
+  test("with the CORRECT password a suspended user is told honestly, but never the reason, and gets no session", async () => {
     // Reaching this branch proves the caller owns the credentials, so an
     // honest "you are suspended" is safe and is better UX than a vague
     // refusal. The admin's internal note still stays internal.
@@ -134,7 +134,7 @@ describe("Phase 32.2.2  sign-in discloses nothing pre-authentication", () => {
       expect(res.message).not.toContain("4412");
     }
 
-    // Better Auth issues a session as soon as the password checks out —
+    // Better Auth issues a session as soon as the password checks out, 
     // the moderation gate must destroy it, or the suspended user walks
     // away holding a valid cookie.
     const live = await db

@@ -872,12 +872,13 @@ export async function assertStallConsentGateEnforced(): Promise<AssertResult> {
 
 // ──────────────────────────────────────────────────────────────────────
 // Phase 9.14 compliance assertion  the seeker profile verification
-// roll-up. profiles.verification MUST equal the derived state from
-// qualifications:
-//   verified   ⇔ ≥1 qualification.verification = 'verified'
-//   pending    ⇔ no verified, but ≥1 pending
+// roll-up. 2026-08-19 (founder decision): the profile badge answers ONE
+// question, "is this a real person?", so it derives from the live selfie
+// alone:
+//   verified   ⇔ selfie_verified_at IS NOT NULL
 //   unverified ⇔ otherwise
-// `rejected` is never auto-applied at the profile level.
+// Qualification verification is a different claim and renders on the
+// qualification row. `rejected` is never auto-applied at profile level.
 // ──────────────────────────────────────────────────────────────────────
 
 export async function assertProfileVerificationMatchesRollup(): Promise<AssertResult> {
@@ -888,27 +889,14 @@ export async function assertProfileVerificationMatchesRollup(): Promise<AssertRe
         p.id,
         p.verification AS profile_verification,
         CASE
-          WHEN EXISTS (
-            SELECT 1 FROM qualifications q
-            WHERE q.profile_id = p.id AND q.verification = 'verified'
-          ) THEN 'verified'
-          WHEN EXISTS (
-            SELECT 1 FROM qualifications q
-            WHERE q.profile_id = p.id AND q.verification = 'pending'
-          ) THEN 'pending'
+          WHEN p.selfie_verified_at IS NOT NULL THEN 'verified'
           ELSE 'unverified'
         END AS expected_verification
       FROM profiles p
       WHERE p.deleted_at IS NULL
         AND p.verification <> CASE
-          WHEN EXISTS (
-            SELECT 1 FROM qualifications q
-            WHERE q.profile_id = p.id AND q.verification = 'verified'
-          ) THEN 'verified'::verification_status
-          WHEN EXISTS (
-            SELECT 1 FROM qualifications q
-            WHERE q.profile_id = p.id AND q.verification = 'pending'
-          ) THEN 'pending'::verification_status
+          WHEN p.selfie_verified_at IS NOT NULL
+            THEN 'verified'::verification_status
           ELSE 'unverified'::verification_status
         END
       LIMIT 5
@@ -925,7 +913,7 @@ export async function assertProfileVerificationMatchesRollup(): Promise<AssertRe
     name: "profile-verification-matches-rollup",
     message:
       mismatches.length === 0
-        ? "Every non-deleted profile's verification matches the qualification roll-up."
+        ? "Every non-deleted profile's badge matches the live-selfie rule."
         : `${mismatches.length} profile(s) drift from the roll-up. First: ${mismatches[0]!.id} has ${mismatches[0]!.profile_verification}, expected ${mismatches[0]!.expected_verification}.`,
   };
 }

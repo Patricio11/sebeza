@@ -1,12 +1,12 @@
 /**
- * Phase 31 ("Data minimisation", plan: docs/PHASE_9_19_PLAN.md) — the
+ * Phase 31 ("Data minimisation", plan: docs/PHASE_9_19_PLAN.md), the
  * dormant-by-default ID/passport posture plus the two-class citizen
  * capture, end to end:
  *
- *   1. Sign-up asks ONE Yes/No citizen question — the 191-country picker
+ *   1. Sign-up asks ONE Yes/No citizen question: the 191-country picker
  *      is gone, and no ID/passport is requested anywhere.
  *   2. /dashboard/profile with the flag OFF (the launch default) shows a
- *      "Date of birth" section only — no ID field, no KYC upload prompt.
+ *      "Date of birth" section only: no ID field, no KYC upload prompt.
  *   3. Flipping the flag ON (simulating the post-partnership state)
  *      brings the full 9.16 capture surface back exactly as built.
  *   4. The admin ack-gated switch renders on /admin/verifications.
@@ -32,7 +32,7 @@ async function setFlag(on: boolean) {
 
 test.beforeAll(async () => {
   const url = process.env.DATABASE_URL;
-  if (!url) throw new Error("DATABASE_URL missing — see playwright.config.");
+  if (!url) throw new Error("DATABASE_URL missing, see playwright.config.");
   sql = postgres(url, { max: 1 });
   await sql`DELETE FROM platform_settings WHERE key = ${FLAG}`;
 });
@@ -74,7 +74,7 @@ test("sign-up: one nationality picker for everyone (default South Africa); no ci
   await dismissCookieBanner(page);
 
   // Phase 31 final shape (operator, 2026-07-21): a single familiar
-  // nationality field — no "are you a citizen?" question anywhere, so
+  // nationality field: no "are you a citizen?" question anywhere, so
   // the form never reads as separating users into kinds. The two-class
   // analytics flag is derived server-side from the picked country.
   await expect(
@@ -84,14 +84,14 @@ test("sign-up: one nationality picker for everyone (default South Africa); no ci
     page.getByRole("radiogroup", { name: /citizen/i }),
   ).toHaveCount(0);
 
-  // exact: true — once a value is selected, a "Clear …" affordance also
+  // exact: true: once a value is selected, a "Clear …" affordance also
   // matches a substring name.
   const countryButton = page.getByRole("button", {
     name: "Which country are you from?",
     exact: true,
   });
   await expect(countryButton).toBeVisible();
-  // Defaults to South Africa (~99% of users — one tap less).
+  // Defaults to South Africa (~99% of users: one tap less).
   await expect(countryButton).toContainText("South Africa");
   // "Never a gate" copy is load-bearing (Location-Not-Nationality rule).
   await expect(page.getByText(/never a gate/i)).toBeVisible();
@@ -99,7 +99,7 @@ test("sign-up: one nationality picker for everyone (default South Africa); no ci
   await expect(page.getByText(/passport/i)).toHaveCount(0);
   await shoot(page, testInfo, "idmin-1-signup-nationality");
 
-  // Any other country simply derives the non-citizen class server-side —
+  // Any other country simply derives the non-citizen class server-side, 
   // same field, no separate declaration. South Africa IS in the list.
   await countryButton.click();
   const picker = page.getByRole("dialog", { name: /country.*picker/i });

@@ -39,7 +39,7 @@ const SCAN_DIRS = ["lib", "app"];
 /**
  * Anything that establishes WHO is calling. `getSessionUser` counts
  * because the house pattern is `const s = await getSessionUser(); if
- * (!s) return fail(...)` — the null-check is what makes it a guard, and
+ * (!s) return fail(...)`: the null-check is what makes it a guard, and
  * every current call site does it. `isAuthorizedCron` is the shared
  * secret gate for the 20 cron routes.
  */
@@ -141,7 +141,7 @@ function isServerActionModule(src: string): boolean {
  * Deliberately region-based rather than brace-matched. Brace matching
  * has to cope with destructured parameters (`{ profileId }`), object
  * type annotations (`Promise<ActionResult<{ … }>>`), template literals
- * and regex literals — every one of which produced false positives when
+ * and regex literals: every one of which produced false positives when
  * tried. A region is slightly permissive (a private helper sitting
  * between two exports is attributed to the one above it) but it cannot
  * produce a FALSE PASS for the case that matters: a function whose
@@ -170,14 +170,14 @@ function functionRegions(
 }
 
 /**
- * Does this region establish the caller's identity — directly, by
+ * Does this region establish the caller's identity, directly, by
  * delegating to Better Auth with the forwarded request headers, or by
  * calling a guarded helper defined in the same module?
  *
  * The `auth.api.*({ headers })` case is real delegation: Better Auth
  * resolves and verifies the session from those headers server-side
  * (this is how `lib/auth/two-factor.ts` works). The same-file case
- * covers the thin-wrapper pattern — e.g. the four
+ * covers the thin-wrapper pattern: e.g. the four
  * `lib/seeker/invitations.ts` responders all funnel into `respond()`,
  * whose first line is `verifyRole("seeker")`.
  */
@@ -226,7 +226,7 @@ describe("Server Action authorization guard (Phase 32.1.3)", () => {
 
     expect(
       unguarded,
-      `Exported Server Action(s) with no authorization guard — these are PUBLIC HTTP endpoints.\n` +
+      `Exported Server Action(s) with no authorization guard, these are PUBLIC HTTP endpoints.\n` +
         `Either add a guard as the first meaningful statement, or move the helper into a plain\n` +
         `module with no "use server" directive (see lib/profile/employment-verification-internal.ts).\n` +
         `Only allowlist it if it is deliberately public, and say why.\n\n` +

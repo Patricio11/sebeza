@@ -72,7 +72,7 @@ describe("Phase 32.4  welcome email dispatch", () => {
     expect(mail.html).toContain("/dashboard/privacy");
 
     // Seeded seekers all hold `searchability`; if the DB says so, the
-    // email must say so — and must NOT claim one they lack.
+    // email must say so: and must NOT claim one they lack.
     if (grantedNow.includes("searchability")) {
       expect(mail.html).toContain("find you by skill and location");
     }
@@ -96,7 +96,7 @@ describe("Phase 32.4  welcome email dispatch", () => {
     expect(mail.html).toMatch(/Discovery/i);
   });
 
-  test("admin accounts get nothing — they are issued, not onboarded", async () => {
+  test("admin accounts get nothing: they are issued, not onboarded", async () => {
     await sendWelcomeEmail({
       userId: ADMIN.id,
       email: ADMIN.email,

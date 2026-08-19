@@ -9,7 +9,7 @@
 --
 -- 17 major accredited private providers, kind='private', anchored at
 -- their main-campus city/province. MUST stay in sync with the
--- INSTITUTIONS constant in lib/mock/taxonomy.ts (the picker) — the FK
+-- INSTITUTIONS constant in lib/mock/taxonomy.ts (the picker), the FK
 -- on academic_profiles.institution_slug needs these rows to exist.
 --
 -- Idempotent (ON CONFLICT (slug) DO NOTHING). Existing free-text

@@ -1,16 +1,17 @@
 /**
  * Phase 9.14  Seeker profile verification roll-up.
  *
- * `profiles.verification` is derived from the seeker's live selfie and
- * qualifications (2026-08: the live selfie joined the rule, and is the
- * primary path now that evidence uploads are retired  see
- * docs/SELFIE_VERIFICATION_PLAN.md):
+ * `profiles.verification` answers exactly ONE question: is this a real
+ * person? (founder decision 2026-08-19, after a seeker showed Verified
+ * without ever doing the check):
  *
- *   - verified   ⇔ live selfie completed OR at least one qualification
- *                  is `verified` (legacy badges stay earned)
- *   - pending    ⇔ neither, but at least one qualification is `pending`
- *                  (the pre-retirement review backlog)
+ *   - verified   ⇔ the live selfie was completed
  *   - unverified ⇔ otherwise
+ *
+ * Qualification verification is a DIFFERENT claim ("a credential was
+ * checked") and stays where it belongs: on the qualification row, which
+ * already renders its own badge. One label, one meaning  the
+ * Verification-Honesty rule applied to the badge itself.
  *
  * `rejected` is NEVER auto-applied to a profile  rejection is per-
  * qualification only; a seeker isn't "rejected" as a person just
@@ -49,20 +50,14 @@ export async function recomputeProfileVerification(
     (await db.execute(sql`
       SELECT
         p.verification AS current_verification,
-        (p.selfie_verified_at IS NOT NULL) AS selfie_verified,
-        COUNT(*) FILTER (WHERE q.verification = 'verified')::int AS verified_count,
-        COUNT(*) FILTER (WHERE q.verification = 'pending')::int AS pending_count
+        (p.selfie_verified_at IS NOT NULL) AS selfie_verified
       FROM profiles p
-      LEFT JOIN qualifications q ON q.profile_id = p.id
       WHERE p.id = ${profileId}
         AND p.deleted_at IS NULL
-      GROUP BY p.verification, p.selfie_verified_at
     `)) as unknown as {
       rows: Array<{
         current_verification: VerificationStatus;
         selfie_verified: boolean;
-        verified_count: number;
-        pending_count: number;
       }>;
     }
   ).rows;
@@ -70,12 +65,7 @@ export async function recomputeProfileVerification(
   if (!row) return null;
 
   const from = row.current_verification;
-  const to: VerificationStatus =
-    row.selfie_verified || row.verified_count > 0
-      ? "verified"
-      : row.pending_count > 0
-        ? "pending"
-        : "unverified";
+  const to: VerificationStatus = row.selfie_verified ? "verified" : "unverified";
 
   if (from === to) return { changed: false, from, to };
 

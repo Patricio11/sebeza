@@ -6,7 +6,7 @@
  * Same privacy invariant as `lib/employer/vacancies.ts`: every read is
  * scoped by `organizationId` (resolved via the parent vacancy) and
  * every write Server Action calls `verifyOrgVerified()` (Phase 32.3.1
- * — invitations require a VERIFIED org, matching the sibling
+ *, invitations require a VERIFIED org, matching the sibling
  * seeker-invite path) then re-checks vacancy ownership via
  * `getMyVacancy()` before mutating. The compliance assertion (a) in
  * 9.8.8 catches regressions.

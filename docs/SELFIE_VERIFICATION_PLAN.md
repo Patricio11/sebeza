@@ -6,7 +6,7 @@ qualifications are self-declared and honestly labelled unverified; badges alread
 Goal: verify humans, store fewer files.
 
 **Architecture (decided with founder, from his open-source shortlist):** Google **MediaPipe
-Face Landmarker running fully in the browser** — the user's device does the liveness check
+Face Landmarker running fully in the browser**, the user's device does the liveness check
 (random gesture challenge: turn head / blink / smile), so **no face data is ever processed on
 our servers** (no biometric special-personal-information processing under POPIA §26; the
 passing frame simply becomes the profile photo through the existing WebP pipeline, which
@@ -77,7 +77,22 @@ and MediaPipe never finishes loading. Dev worked only because `'unsafe-eval'`
 E2E-asserted PAST the loading state, because the E2E server runs the production
 build (production CSP) while `npm run dev` does not.
 
-## Open decision: what does the Verified badge mean? (raised 2026-08-19)
+## RESOLVED 2026-08-19: the Verified badge = live selfie ONLY
+Founder chose option (b). `profiles.verification` now derives from
+`selfie_verified_at` alone: verified if the live check was completed, unverified
+otherwise. Qualification verification is a different claim and stays on the
+qualification row, where it already renders its own badge. One label, one
+meaning.
+
+Changed: `lib/profile/verification-rollup.ts`, the
+`profile-verification-matches-rollup` compliance assertion, and the seed's
+converge step (showcase fixtures get a stamped `selfie_verified_at` so demos and
+E2E keep their badges; seed data has always fabricated verification state).
+Live data re-derived the same day: 8 profiles moved to unverified (7 showcase
+fixtures + 1 real seeker whose badge had come from 4 admin-approved
+certificates); all 11 qualification badges untouched.
+
+## Original open decision (kept for the record)
 A live seeker shows Verified without doing the selfie. That is the roll-up
 working as specified (`verified ⇔ selfie OR >=1 verified qualification`): an
 admin approved 4 of her uploaded certificates on 2026-08-18 (audit

@@ -153,7 +153,7 @@ describe("Phase 32.2.1  the DAL fails closed on a stale session", () => {
       "@/lib/auth/dal",
     );
 
-    // Suspend directly, leaving a session row in place — this simulates a
+    // Suspend directly, leaving a session row in place, this simulates a
     // row that outlived its revocation (replica lag, a future code path
     // that forgets to revoke, a still-warm session cookie).
     await db

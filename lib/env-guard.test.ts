@@ -41,7 +41,7 @@ describe("assertNoTestEscapeHatchesInProduction (Phase 32.3.3)", () => {
     );
   });
 
-  it("THROWS on preview deployments too — a preview is still internet-reachable", () => {
+  it("THROWS on preview deployments too: a preview is still internet-reachable", () => {
     setEnv("1", "preview");
     expect(() => assertNoTestEscapeHatchesInProduction()).toThrow(
       /SEBENZA_E2E_HTTP=1/,

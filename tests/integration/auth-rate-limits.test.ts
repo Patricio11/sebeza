@@ -63,7 +63,7 @@ describe("Phase 32.2.4  sign-in is throttled per IP", () => {
     }
   });
 
-  test("the limit is keyed per IP, NOT per email — a victim cannot be locked out", async () => {
+  test("the limit is keyed per IP, NOT per email, a victim cannot be locked out", async () => {
     // Burn the budget against ONE address...
     for (let i = 0; i < BUCKETS.signin.limit; i++) {
       await signIn({ email: "victim@example.co.za", password: `x-${i}` });
@@ -71,7 +71,7 @@ describe("Phase 32.2.4  sign-in is throttled per IP", () => {
     // ...and confirm the refusal is about the caller, not the account:
     // a DIFFERENT address from the same client is refused identically.
     // (If the key were the email, this second address would still have a
-    // full budget — that asymmetry is exactly what would let an attacker
+    // full budget: that asymmetry is exactly what would let an attacker
     // lock a specific victim out.)
     const other = await signIn({
       email: "andile-z@example.co.za",
@@ -107,7 +107,7 @@ describe("Phase 32.2.4b  the budget counts FAILURES, not sign-ins", () => {
       await signIn({ email: "andile-z@example.co.za", password: `x-${i}` });
     }
     // Budget gone: now even the correct password is refused from this
-    // IP — the attacker-slowdown property 32.2.4 exists for.
+    // IP: the attacker-slowdown property 32.2.4 exists for.
     const blocked = await signIn({
       email: "andile-z@example.co.za",
       password: "sebenza-dev-2026",
@@ -140,7 +140,7 @@ describe("Phase 32.2.4  TOTP verification is throttled", () => {
 describe("Phase 32.2.4  throttling does not break anti-enumeration", () => {
   test("a rate-limited password-reset request still returns ok()", async () => {
     // The response must stay indistinguishable whether the address
-    // exists, does not exist, or the caller has been throttled —
+    // exists, does not exist, or the caller has been throttled, 
     // otherwise the limit itself becomes the oracle.
     for (let i = 0; i < BUCKETS["email-send"].limit + 3; i++) {
       const r = await requestPasswordReset({ email: "andile-z@example.co.za" });

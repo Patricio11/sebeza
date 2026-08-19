@@ -37,7 +37,7 @@ const nextConfig: NextConfig = {
             key: "Strict-Transport-Security",
             value: "max-age=63072000; includeSubDomains; preload",
           },
-          // API responses are data, never a document — a restrictive
+          // API responses are data, never a document: a restrictive
           // sandbox costs nothing and blocks any attempt to render one.
           {
             key: "Content-Security-Policy",
