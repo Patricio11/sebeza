@@ -87,9 +87,19 @@ function securityHeaders(): Record<string, string> {
     // Phase 26.4 (security audit)  `unsafe-eval` is DEV-ONLY (Turbopack HMR
     // needs eval). Production ships without it, so CSP keeps real teeth as an
     // XSS backstop. `unsafe-inline` stays until the nonce-CSP pre-launch item.
+    //
+    // 2026-08-19: `'wasm-unsafe-eval'` is REQUIRED in production for the
+    // live-selfie check  Chrome/Edge refuse `WebAssembly.instantiate`
+    // without it, so MediaPipe hung forever on "loading the checker"
+    // (a user reported the endless spinner; dev worked only because
+    // `unsafe-eval` implies wasm). It permits WebAssembly compilation
+    // ONLY  it does NOT re-open `eval()` for JavaScript, so the XSS
+    // backstop stays intact.
     process.env.NODE_ENV === "development"
-      ? "script-src 'self' 'unsafe-inline' 'unsafe-eval'"
-      : "script-src 'self' 'unsafe-inline'",
+      ? "script-src 'self' 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval'"
+      : "script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'",
+    // MediaPipe loads its wasm glue through a worker/blob URL.
+    "worker-src 'self' blob:",
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: blob: https:",
     "font-src 'self' data:",

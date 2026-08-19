@@ -33,6 +33,30 @@ const GESTURE_PROMPTS: Record<SelfieGesture, string> = {
   smile: "Give us a smile",
 };
 
+/** Wall-clock budget for downloading + compiling the checker. */
+const LOAD_TIMEOUT_MS = 25_000;
+
+class CheckerLoadTimeout extends Error {}
+
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const timer = setTimeout(
+      () => reject(new CheckerLoadTimeout("checker load timed out")),
+      ms,
+    );
+    promise.then(
+      (v) => {
+        clearTimeout(timer);
+        resolve(v);
+      },
+      (e) => {
+        clearTimeout(timer);
+        reject(e);
+      },
+    );
+  });
+}
+
 type Stage =
   | "consent"
   | "preparing"
@@ -121,19 +145,29 @@ export function SelfieVerification({
       await video.play();
 
       // Lazy-load MediaPipe only now  self-hosted assets, no CDN.
-      const { FilesetResolver, FaceLandmarker } = await import(
-        "@mediapipe/tasks-vision"
+      // 2026-08-19: this step hung forever in production because the CSP
+      // lacked 'wasm-unsafe-eval' (fixed in proxy.ts). A wall-clock
+      // timeout stays regardless: a stuck loader must surface as an
+      // honest error, never an endless spinner. Slow 3G needs room, so
+      // the budget is generous.
+      const landmarker = await withTimeout(
+        (async () => {
+          const { FilesetResolver, FaceLandmarker } = await import(
+            "@mediapipe/tasks-vision"
+          );
+          const vision = await FilesetResolver.forVisionTasks("/mediapipe/wasm");
+          return FaceLandmarker.createFromOptions(vision, {
+            baseOptions: {
+              modelAssetPath: "/models/face_landmarker.task",
+              delegate: "GPU",
+            },
+            runningMode: "VIDEO",
+            numFaces: 1,
+            outputFaceBlendshapes: true,
+          });
+        })(),
+        LOAD_TIMEOUT_MS,
       );
-      const vision = await FilesetResolver.forVisionTasks("/mediapipe/wasm");
-      const landmarker = await FaceLandmarker.createFromOptions(vision, {
-        baseOptions: {
-          modelAssetPath: "/models/face_landmarker.task",
-          delegate: "GPU",
-        },
-        runningMode: "VIDEO",
-        numFaces: 1,
-        outputFaceBlendshapes: true,
-      });
       landmarkerRef.current = landmarker;
 
       runLoop(landmarker, challenge.gestures);
@@ -141,7 +175,9 @@ export function SelfieVerification({
       fail(
         e instanceof DOMException && e.name === "NotAllowedError"
           ? "Camera access was blocked. Allow camera access in your browser and try again."
-          : "Couldn't start the camera check on this device. Please try again.",
+          : e instanceof CheckerLoadTimeout
+            ? "The face checker is taking too long to load. This can happen on a slow connection. Please try again, ideally on Wi-Fi."
+            : "Couldn't start the camera check on this device. Please try again, or use a different browser.",
       );
     }
   }

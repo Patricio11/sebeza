@@ -52,3 +52,40 @@ Ships DARK behind `feature_flag_selfie_verification` (default OFF, /admin/settin
 - [ ] Optional cleanup cron: delete stored qualification evidence files for already-decided
       rows (founder call; keeps audit basis if kept)
 - [ ] Camera-driven E2E with Playwright fake media stream (unit/integration cover the server)
+
+## Production incident: "stuck on loading the checker" (2026-08-19)
+A user reported the dialog spinning forever on *Starting camera and loading the
+checker*; 7 challenges had been minted and ZERO completed.
+
+**Root cause:** the production CSP shipped `script-src 'self' 'unsafe-inline'`
+with no `'wasm-unsafe-eval'`, so Chrome/Edge refuse `WebAssembly.instantiate`
+and MediaPipe never finishes loading. Dev worked only because `'unsafe-eval'`
+(dev-only, for Turbopack HMR) implies wasm permission.
+
+**Fixes:**
+- `proxy.ts`: added `'wasm-unsafe-eval'` to script-src in BOTH environments, plus
+  `worker-src 'self' blob:`. `wasm-unsafe-eval` permits WebAssembly compilation
+  only  it does NOT re-open JavaScript `eval()`, so the XSS backstop holds.
+- `SelfieVerification.tsx`: a 25s wall-clock timeout around the loader. A stuck
+  checker must surface as an honest, retryable error, never an endless spinner.
+- E2E now asserts the flow REACHES the calibrating stage ("Look straight at the
+  camera"), which proves the wasm actually compiled. The previous assertion also
+  accepted "starting camera", so it passed while the feature was broken  and the
+  committed screenshot showed the stuck state without anyone noticing.
+
+**Lesson:** any browser feature needing wasm, workers or blob URLs must be
+E2E-asserted PAST the loading state, because the E2E server runs the production
+build (production CSP) while `npm run dev` does not.
+
+## Open decision: what does the Verified badge mean? (raised 2026-08-19)
+A live seeker shows Verified without doing the selfie. That is the roll-up
+working as specified (`verified ⇔ selfie OR >=1 verified qualification`): an
+admin approved 4 of her uploaded certificates on 2026-08-18 (audit
+`verification.approve` x4). Nothing is broken  but the badge now carries two
+different claims ("a real human" vs "a credential was checked") with one label.
+Founder to choose:
+  (a) keep as is;
+  (b) profile badge = selfie ONLY, qualification verification stays on the
+      qualification row where it already renders;
+  (c) two distinct labels.
+

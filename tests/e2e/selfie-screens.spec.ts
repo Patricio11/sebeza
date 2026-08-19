@@ -69,12 +69,14 @@ test("seeker: selfie card, dialog, camera stage, qualifications rail", async ({
   await page.screenshot({ path: `${OUT}/02-selfie-consent.png` });
 
   await page.getByRole("button", { name: /start camera check/i }).click();
-  // Fake camera: reaches the live stage; gestures can't complete without
-  // a real face, which is exactly what we want to show (the prompt UI).
+  // 2026-08-19 regression: the checker used to hang on "loading the
+  // checker" forever in production because the CSP blocked WebAssembly.
+  // Asserting we REACH the calibrating stage proves the wasm actually
+  // compiled  the earlier, weaker assertion accepted the stuck state.
   await expect(
-    page.getByText(/look straight at the camera|starting camera/i),
-  ).toBeVisible({ timeout: 30_000 });
-  await page.waitForTimeout(1500);
+    page.getByText(/look straight at the camera/i),
+  ).toBeVisible({ timeout: 45_000 });
+  await page.waitForTimeout(500);
   await page.screenshot({ path: `${OUT}/03-selfie-camera-stage.png` });
   await page.keyboard.press("Escape");
 
