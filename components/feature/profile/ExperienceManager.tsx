@@ -229,7 +229,7 @@ export function ExperienceManager({ initial, labels }: Props) {
               label="Description"
               value={form.description}
               onChange={(e) => setForm({ ...form, description: e.target.value })}
-              className="md:col-span-2"
+              wrapperClassName="md:col-span-2"
               hint="Two sentences max. What did you own, what did you ship."
             />
           </div>

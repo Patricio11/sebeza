@@ -46,6 +46,7 @@ import {
   useState,
 } from "react";
 import { ChevronDown, X, Plus } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export interface MultiSelectOption {
   value: string;
@@ -318,7 +319,12 @@ export function MultiSelectComboboxField({
   };
 
   return (
-    <div ref={containerRef} className={className ?? "relative"}>
+    // 2026-08-19: `relative` must ALWAYS survive. It used to be
+    // `className ?? "relative"`, so any caller passing a layout class
+    // (e.g. `md:col-span-2`) silently dropped it and the absolutely
+    // positioned dropdown resolved against a distant ancestor, running
+    // off to the right of the field.
+    <div ref={containerRef} className={cn("relative", className)}>
       <label
         htmlFor={inputId}
         className="mb-1 block text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--color-ink-soft)]"

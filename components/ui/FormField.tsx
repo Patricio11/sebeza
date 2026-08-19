@@ -183,6 +183,13 @@ interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement
   label: string;
   hint?: string;
   optional?: boolean;
+  /**
+   * Layout class for the FIELD BLOCK (label + control + hint), e.g.
+   * `md:col-span-2` inside a grid. `className` styles the <textarea>
+   * itself, so a grid span passed there did nothing (2026-08-19: the
+   * profile "About" box stayed one column for exactly this reason).
+   */
+  wrapperClassName?: string;
 }
 
 export function TextareaField({
@@ -191,10 +198,17 @@ export function TextareaField({
   hint,
   optional,
   className,
+  wrapperClassName,
   ...props
 }: TextareaProps) {
   return (
-    <FieldShell id={id} label={label} hint={hint} optional={optional}>
+    <FieldShell
+      id={id}
+      label={label}
+      hint={hint}
+      optional={optional}
+      className={wrapperClassName}
+    >
       <textarea
         id={id}
         className={cn(

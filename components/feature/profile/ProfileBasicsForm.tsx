@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/Button";
 import { Checkbox } from "@/components/ui/Checkbox";
 import { ComboboxField } from "@/components/ui/ComboboxField";
 import { MultiSelectComboboxField } from "@/components/ui/MultiSelectComboboxField";
+import { submitTaxonomySuggestion } from "@/lib/taxonomy/suggestions";
 import { ProfileCompleteness } from "@/components/ui/ProfileCompleteness";
 import { updateProfileBasics } from "@/lib/profile/actions";
 import { PROVINCES } from "@/lib/mock/taxonomy";
@@ -92,6 +93,12 @@ export function ProfileBasicsForm({
   const [secondaryProfessions, setSecondaryProfessions] = useState<string[]>(
     initial.secondaryProfessions ?? [],
   );
+  // Feedback for a suggested (non-canonical) profession: it goes to the
+  // admin queue rather than onto the profile, because the save action
+  // structurally refuses non-canonical labels.
+  const [professionSuggestion, setProfessionSuggestion] = useState<
+    string | null
+  >(null);
   const [seniority, setSeniority] = useState<Seniority | null>(initial.seniority);
   const [province, setProvince] = useState(initial.province);
   const [city, setCity] = useState(initial.city);
@@ -304,9 +311,12 @@ export function ProfileBasicsForm({
           />
           {/* Phase 13.10  secondary profession lanes. Capped at 3
               via the onChange + the server-side refine. Stores
-              LABELS (matches profiles.profession convention). No
-              allowOther path  D3 in PHASE_13_10_PLAN.md keeps the
-              matcher's signal clean. Sits in the same grid cell as
+              LABELS (matches profiles.profession convention).
+              2026-08-19 (founder): suggesting is now allowed here too,
+              matching the primary picker. A suggestion is NOT canonical
+              until an admin promotes it, so the matcher's signal stays
+              clean (the original D3 concern in PHASE_13_10_PLAN.md).
+              Sits in the same grid cell as
               its sibling fields; spans both columns at md+ so the
               chips have room to breathe. */}
           <MultiSelectComboboxField
@@ -314,10 +324,29 @@ export function ProfileBasicsForm({
             helpText={`Up to ${SECONDARY_PROFESSIONS_MAX} other professions you've worked in. Surfaces you to employers who search for those roles. Your headline stays the primary above.`}
             values={secondaryProfessions}
             onChange={(next) => {
+              const canonical = new Set(professions.map((p) => p.label));
               const cleaned = Array.from(
-                new Set(next.filter((v) => v && v !== profession)),
+                new Set(
+                  next.filter(
+                    (v) => v && v !== profession && canonical.has(v),
+                  ),
+                ),
               ).slice(0, SECONDARY_PROFESSIONS_MAX);
               setSecondaryProfessions(cleaned);
+            }}
+            onOtherSubmit={(text) => {
+              const label = text.trim();
+              if (!label) return;
+              void submitTaxonomySuggestion({
+                kind: "profession",
+                customText: label,
+              }).then((res) => {
+                setProfessionSuggestion(
+                  res.ok
+                    ? `Thanks. "${label}" was sent to Sebenza for review. Once it is approved you can add it here.`
+                    : res.message,
+                );
+              });
             }}
             options={professions.map((p) => ({
               value: p.label,
@@ -328,8 +357,19 @@ export function ProfileBasicsForm({
                 ? `${SECONDARY_PROFESSIONS_MAX} reached  remove one to add another`
                 : "Search professions…"
             }
+            allowOther
+            otherLabel="My profession isn't listed"
+            otherHint="Admins review new professions before they appear for everyone."
             className="md:col-span-2"
           />
+          {professionSuggestion && (
+            <p
+              role="status"
+              className="md:col-span-2 -mt-3 text-xs text-[color:var(--color-brand-strong)]"
+            >
+              {professionSuggestion}
+            </p>
+          )}
           <SelectField
             id="seniority"
             label={labels.seniority}
@@ -367,7 +407,7 @@ export function ProfileBasicsForm({
             value={bio}
             onChange={(e) => setBio(e.target.value)}
             hint={labels.bioHelp}
-            className="md:col-span-2"
+            wrapperClassName="md:col-span-2"
           />
         </div>
       </section>
