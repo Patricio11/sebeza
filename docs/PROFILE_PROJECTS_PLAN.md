@@ -38,4 +38,4 @@ users too.
 - [x] Flag ON: add project w/ link + note + 2 images; renders on editor, public profile,
       dossier; images are WebP with thumbs; delete sweeps storage
 - [x] Blocked schemes + PII notes refused with friendly copy
-- [ ] role-arcs + admin-smoke green desktop + 360px
+- [x] role-arcs + admin-smoke green desktop + 360px
