@@ -107,6 +107,26 @@ the browser's own public key material, useless without our private VAPID key
 (which is encrypted at rest in `integration_settings`), so they are stored
 as-is.
 
+## Turning email notifications on
+
+The Email column in the preferences panel shows "Soon" until
+`feature_flag_email_notifications` is on. Before flipping it:
+
+1. `/admin/integrations` → **Email**. Choose **Resend (API key)**, paste
+   the key, and set From to an address on a domain you have verified
+   with Resend. Save.
+2. Press **Send test email**. It sends to whatever address you type and
+   reports the transport and the provider's message id, or Resend's own
+   error, which is specific where an SMTP numeric code is not.
+3. Enable the channel, then turn on `feature_flag_email_notifications`
+   on `/admin/settings`. The "Soon" pill disappears by itself.
+
+Note what changes the moment that flag goes on: kinds whose catalog
+default is `defaultEmail: true` start emailing everyone who has not
+opted out, immediately. Those are the transactional ones (invitations,
+their reminders and expiries, outcomes). Nothing marketing-shaped emails
+by default.
+
 ## Files
 
 | Path | What it is |

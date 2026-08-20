@@ -32,7 +32,7 @@ export default async function AdminIntegrationsPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  await verifyAdmin();
+  const admin = await verifyAdmin();
 
   const db = getDb();
 
@@ -128,6 +128,7 @@ export default async function AdminIntegrationsPage({
         announcementRecipients={announcementRecipients}
         smsFlagOn={smsFlagOn}
         whatsappFlagOn={whatsappFlagOn}
+        adminEmail={admin.email}
       />
     </DashboardMasthead>
   );

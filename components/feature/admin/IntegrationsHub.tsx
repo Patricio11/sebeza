@@ -28,6 +28,7 @@ import {
   testPushIntegration,
 } from "@/lib/admin/integrations";
 import { sendAnnouncement } from "@/lib/admin/announcements";
+import { sendTestEmail } from "@/lib/admin/email-debug";
 import type { IntegrationChannel, IntegrationSource } from "@/lib/integrations/resolve";
 
 export interface ChannelView {
@@ -59,7 +60,7 @@ const CHANNEL_META: Record<
     title: "Email (SMTP)",
     icon: <Mail className="size-4" aria-hidden="true" />,
     blurb:
-      "Transactional email. When configured + enabled here, these credentials replace the SMTP_* env vars.",
+      "Every email Sebenza sends: verification, password resets, welcome, and notification emails. Resend (paste one API key) or any SMTP relay. Configured here, these credentials replace the SMTP_* env vars. Save, then Test, then Enable.",
   },
   push: {
     title: "Push (phone notifications)",
@@ -80,11 +81,14 @@ export function IntegrationsHub({
   announcementRecipients,
   smsFlagOn,
   whatsappFlagOn,
+  adminEmail,
 }: {
   channels: ChannelView[];
   announcementRecipients: number;
   smsFlagOn: boolean;
   whatsappFlagOn: boolean;
+  /** Pre-fills the test-email prompt. Display only. */
+  adminEmail?: string;
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -112,6 +116,7 @@ export function IntegrationsHub({
             }
             pending={pending}
             run={run}
+            adminEmail={adminEmail}
           />
         ))}
       </section>
@@ -130,11 +135,13 @@ function ChannelCard({
   flagNote,
   pending,
   run,
+  adminEmail,
 }: {
   view: ChannelView;
   flagNote: string | null;
   pending: boolean;
   run: (fn: () => Promise<unknown>) => void;
+  adminEmail?: string;
 }) {
   const meta = CHANNEL_META[view.channel];
   const [open, setOpen] = useState(false);
@@ -181,12 +188,18 @@ function ChannelCard({
       secrets.accessKeyId = form.accessKeyId ?? "";
       secrets.secretAccessKey = form.secretAccessKey ?? "";
     } else {
-      config.host = form.host ?? "";
-      config.port = form.port ?? "587";
+      const provider = form.emailProvider ?? "resend";
+      config.provider = provider;
       config.from = form.from ?? "";
-      config.secure = form.secure ?? "false";
-      secrets.user = form.user ?? "";
-      secrets.pass = form.pass ?? "";
+      if (provider === "resend") {
+        secrets.apiKey = form.apiKey ?? "";
+      } else {
+        config.host = form.host ?? "";
+        config.port = form.port ?? "587";
+        config.secure = form.secure ?? "false";
+        secrets.user = form.user ?? "";
+        secrets.pass = form.pass ?? "";
+      }
     }
     run(async () => {
       const r = await saveIntegration(view.channel, config, secrets);
@@ -241,6 +254,35 @@ function ChannelCard({
         >
           {view.configured ? "Reconfigure" : "Configure"}
         </button>
+        {view.channel === "email" && view.configured && (
+          <button
+            type="button"
+            disabled={pending}
+            onClick={() => {
+              setTestResult(null);
+              const to = window.prompt(
+                "Send a test email to which address?",
+                adminEmail ?? "",
+              );
+              if (!to) return;
+              run(async () => {
+                const r = await sendTestEmail({ to });
+                setTestResult(
+                  r.ok
+                    ? {
+                        ok: true,
+                        message: `Sent via ${r.transport}${r.messageId ? ` (id ${r.messageId})` : ""}. Check the inbox, and the spam folder.`,
+                      }
+                    : { ok: false, message: r.message },
+                );
+              });
+            }}
+            className="inline-flex h-8 items-center gap-1 rounded-[var(--radius-pill)] border border-[color:var(--color-hairline)] px-3 text-xs hover:border-[color:var(--color-ink)] disabled:opacity-50"
+          >
+            <Mail className="size-3.5" aria-hidden="true" />
+            Send test email
+          </button>
+        )}
         {view.channel === "push" && view.configured && (
           <button
             type="button"
@@ -329,11 +371,32 @@ function ChannelCard({
           )}
           {view.channel === "email" && (
             <>
-              <input className={field} placeholder="SMTP host" value={form.host ?? ""} onChange={(e) => set("host", e.target.value)} />
-              <input className={field} placeholder="Port (587)" value={form.port ?? ""} onChange={(e) => set("port", e.target.value)} />
-              <input className={field} placeholder="From (Sebenza <noreply@…>)" value={form.from ?? ""} onChange={(e) => set("from", e.target.value)} />
-              <input className={field} placeholder="SMTP user" value={form.user ?? ""} onChange={(e) => set("user", e.target.value)} />
-              <input className={field} type="password" placeholder="SMTP password" value={form.pass ?? ""} onChange={(e) => set("pass", e.target.value)} />
+              <CustomSelect
+                value={form.emailProvider ?? "resend"}
+                onChange={(v) => set("emailProvider", v)}
+                options={[
+                  { value: "resend", label: "Resend (API key)" },
+                  { value: "smtp", label: "SMTP (any relay)" },
+                ]}
+                ariaLabel="Email provider"
+              />
+              <input className={field} placeholder="From (Sebenza <noreply@sebenzasa.com>)" value={form.from ?? ""} onChange={(e) => set("from", e.target.value)} />
+              {(form.emailProvider ?? "resend") === "resend" ? (
+                <>
+                  <input className={field} type="password" placeholder="Resend API key (re_…)" value={form.apiKey ?? ""} onChange={(e) => set("apiKey", e.target.value)} />
+                  <p className="text-[0.65rem] text-[color:var(--color-ink-soft)]">
+                    From the Resend dashboard, API Keys. The From domain must be
+                    verified with Resend first, or every send is rejected.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <input className={field} placeholder="SMTP host" value={form.host ?? ""} onChange={(e) => set("host", e.target.value)} />
+                  <input className={field} placeholder="Port (587)" value={form.port ?? ""} onChange={(e) => set("port", e.target.value)} />
+                  <input className={field} placeholder="SMTP user" value={form.user ?? ""} onChange={(e) => set("user", e.target.value)} />
+                  <input className={field} type="password" placeholder="SMTP password" value={form.pass ?? ""} onChange={(e) => set("pass", e.target.value)} />
+                </>
+              )}
             </>
           )}
           {view.channel === "storage" && (

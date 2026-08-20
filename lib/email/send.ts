@@ -44,7 +44,7 @@ export interface SendEmailInput {
   from?: string;
 }
 
-export type EmailTransport = "smtp" | "console";
+export type EmailTransport = "smtp" | "resend" | "console";
 
 /**
  * Whether to fail loud when `EMAIL_TRANSPORT` is misconfigured.
@@ -128,9 +128,54 @@ export async function sendEmail(input: SendEmailInput): Promise<{
   // DB, /admin/integrations) wins over env; otherwise the historical env
   // behaviour is unchanged.
   const admin = await resolveIntegration("email");
-  const kind: EmailTransport = admin ? "smtp" : transport();
+  const kind: EmailTransport = admin
+    ? admin.config.provider === "resend"
+      ? "resend"
+      : "smtp"
+    : transport();
   const from = fromAddress(input.from ?? admin?.config.from);
   const text = input.text ?? htmlToText(input.html);
+
+  // Resend's HTTP API. Chosen from /admin/integrations, where the
+  // founder pastes one API key instead of four SMTP fields.
+  //
+  // Called with plain fetch rather than the `resend` SDK, deliberately:
+  // the SDK is a dependency and a lock-in for one POST, and the SMTP
+  // path below still exists untouched, so moving to Sendgrid or SES
+  // later stays a config change rather than a rewrite.
+  if (kind === "resend") {
+    const apiKey = admin?.secrets.apiKey;
+    if (!apiKey) {
+      throw new Error(
+        "Resend selected but no API key is stored. Re-save the email integration.",
+      );
+    }
+    const res = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        from,
+        to: [input.to],
+        subject: input.subject,
+        html: input.html,
+        text,
+      }),
+    });
+    if (!res.ok) {
+      // Surface Resend's own message: it is specific ("domain not
+      // verified", "invalid from") in a way an SMTP numeric code is not,
+      // and the admin Test button shows it verbatim.
+      const detail = await res.text().catch(() => "");
+      throw new Error(
+        `Resend rejected the send (${res.status}): ${detail.slice(0, 300)}`,
+      );
+    }
+    const body = (await res.json().catch(() => null)) as { id?: string } | null;
+    return { transport: "resend", id: body?.id };
+  }
 
   if (kind === "smtp") {
     const host = admin ? admin.config.host : process.env.SMTP_HOST;
@@ -175,7 +220,7 @@ export async function sendEmail(input: SendEmailInput): Promise<{
     `\n📧 [email:console] ${input.to}  "${input.subject}"\n` +
       `   from: ${from}\n` +
       `   preview: ${text.slice(0, 80)}${text.length > 80 ? "…" : ""}\n` +
-      `   html:\n${indentLines(input.html, ", ")}\n`,
+      `   html:\n${indentLines(input.html, "     ")}\n`,
   );
   return { transport: "console" };
 }

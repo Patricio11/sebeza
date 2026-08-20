@@ -41,12 +41,24 @@ const configSchemas = {
     provider: z.enum(["twilio", "console"]),
     fromNumber: z.string().trim().max(20).optional().or(z.literal("")),
   }),
-  email: z.object({
-    host: z.string().trim().min(2).max(200),
-    port: z.string().trim().regex(/^\d+$/),
-    from: z.string().trim().max(200).optional().or(z.literal("")),
-    secure: z.enum(["true", "false"]).optional(),
-  }),
+  // Two ways to send: Resend's HTTP API (paste one key) or any SMTP
+  // relay. `provider` decides which fields matter; the other set is
+  // simply ignored, so switching back and forth does not lose config.
+  email: z
+    .object({
+      provider: z.enum(["resend", "smtp"]).default("smtp"),
+      host: z.string().trim().max(200).optional().or(z.literal("")),
+      port: z.string().trim().regex(/^\d*$/).optional().or(z.literal("")),
+      from: z.string().trim().max(200).optional().or(z.literal("")),
+      secure: z.enum(["true", "false"]).optional(),
+    })
+    .refine((v) => v.provider !== "smtp" || (!!v.host && !!v.port), {
+      message: "SMTP needs a host and a port.",
+    })
+    .refine((v) => v.provider !== "resend" || !!v.from, {
+      message:
+        "Resend needs a From address on a domain you have verified with them.",
+    }),
   // 2026-08  file storage (documents / photos / CVs). S3 or any
   // S3-compatible host; secrets are accessKeyId + secretAccessKey.
   storage: z.object({

@@ -22,7 +22,7 @@
 import { z } from "zod";
 import { verifyAdmin } from "@/lib/auth/dal";
 import { logAccess } from "@/lib/audit";
-import { sendEmail } from "@/lib/email/send";
+import { sendEmail, type EmailTransport } from "@/lib/email/send";
 import { emailShell } from "@/lib/email/templates/shell";
 
 const schema = z.object({
@@ -38,7 +38,7 @@ export type TestEmailResult =
       /** Which transport actually handled the send. `console` means the
        *  EMAIL_TRANSPORT env var wasn't set to `smtp`  emails are not
        *  going out, the operator needs to fix the env. */
-      transport: "smtp" | "console";
+      transport: EmailTransport;
       /** Provider message id when the transport returned one. */
       messageId?: string;
     }

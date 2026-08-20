@@ -15,7 +15,10 @@
  */
 
 import { emailShell, escapeHtml } from "./shell";
-import type { NotificationKind } from "@/lib/notifications/catalog";
+import {
+  NOTIFICATION_CATALOG,
+  type NotificationKind,
+} from "@/lib/notifications/catalog";
 
 export interface NotificationEmailContent {
   subject: string;
@@ -230,10 +233,30 @@ function weeklyDigestTemplate(
   return { subject: ctx.title, html };
 }
 
+/**
+ * Content for one notification email, or null only when the kind is
+ * genuinely not emailable.
+ *
+ * The map above is bespoke templates. Anything NOT in it falls back to
+ * the generic layout, driven by the catalog's own label, rather than
+ * returning null.
+ *
+ * That fallback is the point. Returning null meant a kind with no entry
+ * silently sent nothing: the preferences panel showed the person an
+ * Email toggle, they switched it on, and nothing ever arrived, with no
+ * error anywhere. Six of the sixteen kinds a seeker can manage were in
+ * exactly that state. A toggle that does nothing is worse than an
+ * absent one, so coverage is now structural: adding a kind to the
+ * catalog gives it a working email by default, and
+ * `notifications.test.ts` fails if that ever stops being true.
+ */
 export function emailContentFor(
   kind: NotificationKind,
   ctx: NotificationEmailContext,
 ): NotificationEmailContent | null {
   const tpl = TEMPLATES[kind];
-  return tpl ? tpl(ctx) : null;
+  if (tpl) return tpl(ctx);
+  const meta = NOTIFICATION_CATALOG[kind];
+  if (!meta) return null;
+  return genericTemplate(ctx, "Open Sebenza", meta.label);
 }

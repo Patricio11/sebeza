@@ -303,7 +303,7 @@ function ExperienceSection({
             e.endedAt ? fmtMonth(e.endedAt, locale) : t("present"),
           ]
             .filter(Boolean)
-            .join(", ");
+            .join(" - ");
           return (
             <div key={`${e.role}-${e.organization}-${i}`} className="cv-break-avoid">
               <div className="flex flex-wrap items-baseline justify-between gap-x-3">
