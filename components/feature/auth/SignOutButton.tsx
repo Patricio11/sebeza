@@ -23,7 +23,15 @@ export function SignOutButton({
   return (
     <button
       type="button"
-      onClick={() => startTransition(() => signOut())}
+      onClick={() =>
+        startTransition(async () => {
+          await signOut();
+          // Hard navigation on purpose: it drops every cached RSC
+          // payload for the signed-in session instead of re-rendering a
+          // protected page that no longer has one.
+          window.location.assign("/");
+        })
+      }
       disabled={pending}
       aria-label={iconOnly ? label : undefined}
       className={cn(

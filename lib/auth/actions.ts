@@ -1189,7 +1189,21 @@ export async function signIn(
 export async function signOut(): Promise<void> {
   const headers = await nextHeaders();
   await auth.api.signOut({ headers });
-  redirect("/");
+  // 2026-08-20: deliberately NO redirect() here.
+  //
+  // Redirecting from inside the action made Next re-render the page the
+  // action was called from as part of the action response, with the
+  // session already destroyed. On Vercel that render 500'd on
+  // /dashboard/profile (the founder's "Something went wrong" on
+  // sign-out; reproduced on production, digest 234172952 then
+  // 1480490623). Signing out from /dashboard and /dashboard/account was
+  // fine, so it was specific to re-rendering THAT protected page in a
+  // logged-out state.
+  //
+  // The caller now performs a full-page navigation once the cookie is
+  // gone, so no protected page is ever re-rendered mid-sign-out. That is
+  // also the more honest model: sign-out ends the session, then the
+  // browser starts fresh with no stale client cache.
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

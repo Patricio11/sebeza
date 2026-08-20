@@ -47,14 +47,16 @@ test("seeker signs out from the profile editor", async ({ page }) => {
   await expectNoErrorBoundary(page);
 });
 
-test("employer and admin sign out cleanly too", async ({ page }) => {
-  for (const email of ["naledi.khumalo@discovery.co.za", "admin@sebenzasa.com"]) {
-    await signIn(page, email);
-    await page
-      .getByRole("button", { name: /^sign out$/i })
-      .first()
-      .click();
-    await page.waitForURL(/\/(en)?$|\/sign-in/, { timeout: 30_000 });
-    await expectNoErrorBoundary(page);
-  }
+test("employer signs out cleanly", async ({ page }) => {
+  await signIn(page, "naledi.khumalo@discovery.co.za");
+  await page.getByRole("button", { name: /^sign out$/i }).first().click();
+  await page.waitForURL(/\/(en)?$|\/sign-in/, { timeout: 30_000 });
+  await expectNoErrorBoundary(page);
+});
+
+test("admin signs out cleanly", async ({ page }) => {
+  await signIn(page, "admin@sebenzasa.com");
+  await page.getByRole("button", { name: /^sign out$/i }).first().click();
+  await page.waitForURL(/\/(en)?$|\/sign-in/, { timeout: 30_000 });
+  await expectNoErrorBoundary(page);
 });
