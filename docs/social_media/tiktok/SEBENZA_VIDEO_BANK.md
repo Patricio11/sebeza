@@ -127,6 +127,22 @@ ever." → end card.
 is not a business model, it's exploitation. #Sebenza #FreeForJobSeekers #Mzansi
 **Cover:** reuse `../instagram/assets/story-free-always.png`
 
+### V13 · You get found (22s)
+**Hook:** "You don't apply. They come to you."
+**Beats:** a real employer on the public /search, signed in. Ticks four developers one by one
+and the selection bar rises with the count. Taps Invite, the dialog opens, picks the Senior
+Software Engineer vacancy, types a short personal note, sends. The result line lands: three
+invitations sent, and one person who could not be invited.
+**Overlays:** "A real employer, searching a skill and a city." → "She picks the people she
+wants." → "One vacancy. A note in her own words." → "Some can't be invited. Consent isn't
+optional here."
+**Caption:** On most platforms your CV disappears into a pile. Here an employer searches, finds
+you, and asks. And if you never gave permission to be matched, you simply don't get invited.
+That's not a setting we hid, it's the whole design. #Sebenza #YouGetFound #Jobs #SouthAfrica
+*This is the other half of V6's promise. V6 says employers search and you get found; this one
+shows it happening. The closing line is the point: the product says out loud, on screen, that
+someone could not be invited because they never consented.*
+
 ---
 
 ## PUBLISHING MATRIX

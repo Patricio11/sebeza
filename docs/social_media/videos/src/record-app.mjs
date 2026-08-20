@@ -85,14 +85,22 @@ async function dismissConsent(page) {
   });
 }
 
-async function showNote(page, html, holdMs) {
-  await page.evaluate((h) => {
+// `atTop` moves the note to the top of the frame. Needed when the thing
+// being narrated is itself at the bottom of the screen (a bottom-sheet
+// dialog, say) and the default position would cover the very thing the
+// note is pointing at.
+async function showNote(page, html, holdMs, { atTop = false } = {}) {
+  await page.evaluate(({ h, atTop }) => {
     const d = document.createElement("div");
     d.id = "sz-note";
     d.innerHTML = h;
+    if (atTop) {
+      d.style.top = "120px";
+      d.style.bottom = "auto";
+    }
     document.body.appendChild(d);
     requestAnimationFrame(() => (d.style.opacity = "1"));
-  }, html);
+  }, { h: html, atTop });
   await page.waitForTimeout(holdMs);
   await page.evaluate(() => { const d = document.getElementById("sz-note"); if (d) d.style.opacity = "0"; });
   await page.waitForTimeout(550);
@@ -314,6 +322,78 @@ if (want("v10")) await record("v10-skills-map.mp4", async (page, markLead) => {
   await smoothScroll(page, 1500, 4400);
   await n2;
   await showNote(page, "Not last year's survey. <em>Right now.</em>", 2800);
+  await showEndCard(page, 2800);
+});
+
+// ---- V13 · You get found (~22s) ----
+// The other half of V6's promise. V6 says "employers search, YOU get
+// found"; nothing in the bank ever showed the getting-found part. This
+// films the real Phase 29.4 funnel on the PUBLIC /search page: tick
+// candidates, the selection bar rises, the invite dialog opens, the
+// vacancy is picked, invitations go out. The close is the honest
+// result line, which says out loud that some people could not be
+// invited because they have not consented. That sentence is the whole
+// brand in the product's own words, so the video ends on it.
+if (want("v13")) await record("v13-you-get-found.mp4", async (page, markLead) => {
+  await page.goto(`${BASE}/sign-in`, { waitUntil: "load" });
+  await page.fill('input[type="email"]', "naledi.khumalo@discovery.co.za");
+  await page.fill('input[type="password"]', "sebenza-dev-2026");
+  await page.getByRole("button", { name: /sign in/i }).click();
+  await page.waitForURL("**/employer**", { timeout: 30000 });
+  await page.goto(`${BASE}/search?q=developer`, { waitUntil: "load" });
+  await page.waitForTimeout(1400);
+  await injectOverlaySystem(page);
+  await showHookStart(page, "You don't apply. <em>They come to you.</em>");
+  markLead();
+  await dismissConsent(page);
+  await showHookEnd(page, 2700);
+
+  const n1 = showNote(page, "A real employer, searching a skill and a city.", 3200);
+  await smoothScroll(page, 700, 3600);
+  await n1;
+
+  // Tick three candidates, one at a time, so the bar's count visibly
+  // climbs instead of appearing fully formed.
+  const boxes = page.getByLabel(/^Select .+ to invite$/);
+  const n2 = showNote(page, "She picks the people she wants.", 3400);
+  for (const i of [0, 1, 2, 3]) {
+    await boxes.nth(i).click();
+    await page.waitForTimeout(650);
+  }
+  await n2;
+  await page.waitForTimeout(900); // let the bar settle on screen
+
+  await page.getByRole("button", { name: /^Invite$/ }).click();
+  await page.waitForTimeout(1100);
+  const n3 = showNote(page, "One vacancy. A note in her own words.", 3400, {
+    atTop: true,
+  });
+  // Pick the vacancy that actually fits the search, not merely the first
+  // one in the list: inviting developers to an IT support role reads as
+  // spam, which is the opposite of the point.
+  await page
+    .locator("label")
+    .filter({ hasText: "Senior Software Engineer" })
+    .locator('input[name="invite-selection-vacancy"]')
+    .check();
+  await page.waitForTimeout(600);
+  await page.fill(
+    "textarea",
+    "Hi, saw your profile and the role looks like a strong match.",
+  );
+  await n3;
+
+  await page.getByRole("button", { name: /^Send \d+ invitation/ }).click();
+  // Hold on the untouched result line first. It is the payoff of the
+  // whole video, so nothing covers it, and only then does the closing
+  // note come in at the top of the frame.
+  await page.waitForTimeout(3000);
+  await showNote(
+    page,
+    "Some can't be invited. <em>Consent isn't optional here.</em>",
+    4000,
+    { atTop: true },
+  );
   await showEndCard(page, 2800);
 });
 

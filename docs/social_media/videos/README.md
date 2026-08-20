@@ -23,6 +23,7 @@ cards, the flag stripe) is baked in.
 | `v4-boring-work.mp4` (~18s) | V4 | A real vitest run (23 files / 275 tests, captured verbatim) replayed in a branded terminal. |
 | `v7-scam-signs.mp4` (~19s) | V7 | The three scam red flags, red alert cards. |
 | `v9-four-languages.mp4` (~25s) | V9 | The REAL translated landing: English → isiZulu → isiXhosa → Afrikaans, "South Africa" kept untranslated per the house rule. |
+| `v13-you-get-found.mp4` (~22s) | V13 | The real Phase 29.4 invite funnel on public /search: selection bar, invite dialog, vacancy picked, invitations sent, and the honest "1 couldn't receive an invite" result. |
 | `v10-skills-map.mp4` (~18s) | V10 | /insights live: status mix, the province × profession supply heatmap, skill-level demand. |
 
 **V9 is now filmed for real**: the zu/xh/af catalogs are full translations (pending human
