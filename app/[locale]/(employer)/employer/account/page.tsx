@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/Button";
 import { SignOutButton } from "@/components/feature/auth/SignOutButton";
 import { TwoFactorAccountPanel } from "@/components/feature/auth/TwoFactorAccountPanel";
 import { NotificationPrefsPanel } from "@/components/feature/notifications/NotificationPrefsPanel";
+import { PushOptIn } from "@/components/feature/notifications/PushOptIn";
 import { getMyNotificationPrefs } from "@/lib/notifications/query";
 import type { NotificationKind } from "@/lib/notifications/catalog";
 import { verifyEmployer, getSessionUser } from "@/lib/auth/dal";
@@ -30,6 +31,7 @@ export default async function EmployerAccountPage({
   const enforced = await getSetting<boolean>("feature_flag_2fa_enforced");
   const prefs = await getMyNotificationPrefs();
   const emailChannelEnabled = await getSetting<boolean>("feature_flag_email_notifications");
+  const pushChannelEnabled = await getSetting<boolean>("feature_flag_web_push");
   const t = await getTranslations("employerDash.account");
   const tOuter = await getTranslations("employerDash");
 
@@ -109,10 +111,18 @@ export default async function EmployerAccountPage({
           <h2 className="mb-4 border-b-2 border-[color:var(--color-ink)] pb-2 font-display text-xl">
             Notification preferences
           </h2>
+          {/* Phase 35  every role needs the device opt-in, not just
+              seekers: the admin Test button on /admin/integrations
+              cannot deliver anywhere until the admin has registered a
+              browser, and this is the only place to do it. */}
+          <div className="mb-4">
+            <PushOptIn />
+          </div>
           <NotificationPrefsPanel
             initialPrefs={prefs}
             kinds={EMPLOYER_NOTIFICATION_KINDS}
             emailChannelEnabled={emailChannelEnabled}
+            pushChannelEnabled={pushChannelEnabled}
           />
         </section>
 

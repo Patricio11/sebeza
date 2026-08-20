@@ -3,6 +3,7 @@ import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
 import { SignOutButton } from "@/components/feature/auth/SignOutButton";
 import { TwoFactorAccountPanel } from "@/components/feature/auth/TwoFactorAccountPanel";
 import { NotificationPrefsPanel } from "@/components/feature/notifications/NotificationPrefsPanel";
+import { PushOptIn } from "@/components/feature/notifications/PushOptIn";
 import { getMyNotificationPrefs } from "@/lib/notifications/query";
 import type { NotificationKind } from "@/lib/notifications/catalog";
 import { verifyAdmin } from "@/lib/auth/dal";
@@ -24,6 +25,7 @@ export default async function AdminAccountPage({
   const me = await verifyAdmin();
   const enforced = await getSetting<boolean>("feature_flag_2fa_enforced");
   const emailChannelEnabled = await getSetting<boolean>("feature_flag_email_notifications");
+  const pushChannelEnabled = await getSetting<boolean>("feature_flag_web_push");
   const prefs = await getMyNotificationPrefs();
 
   return (
@@ -86,10 +88,18 @@ export default async function AdminAccountPage({
             Admin notifications come from public reports and verification
             submissions. They land in your bell and on /admin/notifications.
           </p>
+          {/* Phase 35  every role needs the device opt-in, not just
+              seekers: the admin Test button on /admin/integrations
+              cannot deliver anywhere until the admin has registered a
+              browser, and this is the only place to do it. */}
+          <div className="mb-4">
+            <PushOptIn />
+          </div>
           <NotificationPrefsPanel
             initialPrefs={prefs}
             kinds={ADMIN_NOTIFICATION_KINDS}
             emailChannelEnabled={emailChannelEnabled}
+            pushChannelEnabled={pushChannelEnabled}
           />
         </section>
       </div>

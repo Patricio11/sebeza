@@ -248,7 +248,7 @@ export async function testPushIntegration(): Promise<{
       result = {
         ok: false,
         message:
-          "No device registered for your admin account yet. Turn notifications on for this browser on your account page, then test again.",
+          "No device registered for your admin account yet. Open /admin/account, turn notifications on for this browser, then come back and test again.",
       };
     } else {
       const sent = await pushToUser(
