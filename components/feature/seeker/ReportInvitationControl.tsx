@@ -53,7 +53,7 @@ export function ReportInvitationControl({ invitationId }: Props) {
     return (
       <span className="inline-flex items-center gap-1 text-xs text-[color:var(--color-brand-strong)]">
         <Flag className="size-3" aria-hidden="true" />
-        Reported  thanks
+        Reported, thanks
       </span>
     );
   }
@@ -120,7 +120,7 @@ export function ReportInvitationControl({ invitationId }: Props) {
                   Something off about this?
                 </h2>
                 <p className="mt-1 text-xs text-[color:var(--color-ink-soft)]">
-                  Reporting doesn&rsquo;t decline the invite  if the role
+                  Reporting doesn&rsquo;t decline the invite, if the role
                   is genuinely interesting, you can still accept on its merits.
                 </p>
               </div>

@@ -88,7 +88,7 @@ export function RecommendedEmployersCard({
       </ul>
 
       <p className="mt-4 text-xs italic text-[color:var(--color-ink-soft)]">
-        Sebenza never accepts paid placement on this list  ranking is
+        Sebenza never accepts paid placement on this list, ranking is
         confirmed-hire count only, with a suppression floor on
         low-volume employers. Follow an employer to get a quiet bell
         when they open a role you could fit.

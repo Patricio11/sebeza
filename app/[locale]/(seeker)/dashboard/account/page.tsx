@@ -141,11 +141,11 @@ export default async function AccountPage({
                 >
                   Forgot password
                 </Link>{" "}
-                to reset via email. In-app password change wires up in Phase 7
-                alongside 2FA.
+                to reset via email. Changing it from inside your account is coming
+                soon.
               </p>
               <Button variant="secondary" size="sm" className="mt-3" disabled>
-                {t("changePassword")} <span className="ml-2 text-[0.62rem] uppercase tracking-[0.18em]">Phase 7</span>
+                {t("changePassword")} <span className="ml-2 text-[0.62rem] uppercase tracking-[0.18em]">Soon</span>
               </Button>
             </div>
           </div>
@@ -227,7 +227,7 @@ export default async function AccountPage({
               {t("sessions")}
             </h2>
             <Button variant="ghost" size="sm" disabled>
-              {t("signOutAll")} <span className="ml-2 text-[0.62rem] uppercase tracking-[0.18em]">Phase 7</span>
+              {t("signOutAll")} <span className="ml-2 text-[0.62rem] uppercase tracking-[0.18em]">Soon</span>
             </Button>
           </header>
           <div className="rounded-[var(--radius-md)] border border-dashed border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-6">
@@ -238,8 +238,8 @@ export default async function AccountPage({
               />
               <div>
                 <p className="text-sm text-[color:var(--color-ink)]">
-                  Your current session is active. Multi-device session
-                  management wires up in Phase 7 alongside 2FA.
+                  Your current session is active. Managing sessions across
+                  several devices is coming soon.
                 </p>
                 <p className="mt-2 text-xs text-[color:var(--color-ink-soft)]">
                   In the meantime, you can sign out of this device using the

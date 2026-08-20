@@ -84,7 +84,7 @@ export function seekerInviteEmail(
       ${greeting}
     </p>
     <p style="font-size:16px;line-height:1.6;margin:0 0 16px;color:#14110d;">
-      <strong>${escapeHtml(input.orgName)}</strong>, a verified employer on Sebenza, has invited you to set up a profile on South Africa's talent platform. Sebenza is a national-scale, POPIA-compliant directory  your profile is yours to control, and verified employers can find you for the work you do.
+      <strong>${escapeHtml(input.orgName)}</strong>, a verified employer on Sebenza, has invited you to set up a profile on South Africa's talent platform. Sebenza is a national-scale, POPIA-compliant directory, your profile is yours to control, and verified employers can find you for the work you do.
     </p>
     ${professionLine}
     ${noteBlock}

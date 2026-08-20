@@ -292,7 +292,7 @@ export async function rotateLlmCredentials(
     existing = JSON.parse(decryptField(row[0].credentialsEnc));
   } catch {
     return fail(
-      "Existing credentials could not be decrypted  reconfigure first.",
+      "Existing credentials could not be decrypted, reconfigure first.",
     );
   }
 

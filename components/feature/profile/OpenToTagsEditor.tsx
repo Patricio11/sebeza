@@ -65,7 +65,7 @@ export function OpenToTagsEditor({ initial }: Props) {
     <div className="space-y-4">
       <p className="max-w-prose text-sm text-[color:var(--color-ink-soft)]">
         Optional secondary intent. Independent of your employment
-        status  a fully-employed senior can still be open to
+        status, a fully-employed senior can still be open to
         mentorship. Employers can filter on these in search, but they
         don&rsquo;t affect your primary ranking.
       </p>

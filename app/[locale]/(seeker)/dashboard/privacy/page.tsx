@@ -70,7 +70,7 @@ const PURPOSE_BODY: Record<(typeof CONSENT_PURPOSES)[number], string> = {
     "Include me in education-to-employment outcomes research. " +
     "What's shared: cohort-level numbers (programme × institution × province × graduation year, never under 10 people per cell). " +
     "What's never shared: any individual record, my name, my profile. " +
-    "Withholding this consent does not weaken job-search in any way  it's a separate, optional contribution to the public-good dataset.",
+    "Withholding this consent does not weaken job-search in any way, it's a separate, optional contribution to the public-good dataset.",
   // Short summary; the full D8 source text lives in PURPOSE_EXPLAINER
   // (tap-to-expand on mobile, expanded by default on md+).
   vacancy_matching:
@@ -80,7 +80,7 @@ const PURPOSE_BODY: Record<(typeof CONSENT_PURPOSES)[number], string> = {
   messaging_channel_whatsapp:
     "Let Sebenza send me a WhatsApp message for critical events. Same scope as SMS  no chatty marketing, just the time-sensitive lifecycle events.",
   announcements:
-    "Let Sebenza occasionally SMS me platform announcements (new features, important service notices). Optional and separate from critical notifications  saying no changes nothing about my job search. I can revoke any time.",
+    "Let Sebenza occasionally SMS me platform announcements (new features, important service notices). Optional and separate from critical notifications, saying no changes nothing about my job search. I can revoke any time.",
 };
 
 /**
@@ -95,7 +95,7 @@ const PURPOSE_EXPLAINER: Partial<
   Record<(typeof CONSENT_PURPOSES)[number], string>
 > = {
   vacancy_matching:
-    "When you grant this, verified employers can flag you for a specific role they're trying to fill  a chef position at a particular restaurant, a developer role at a particular bank. You'll get a notification with the role + employer named, and you can accept, decline, or decline with a reason. Declining is free. You can revoke this consent any time from your privacy centre, and declining a single invite doesn't hurt your visibility in search.",
+    "When you grant this, verified employers can flag you for a specific role they're trying to fill, a chef position at a particular restaurant, a developer role at a particular bank. You'll get a notification with the role + employer named, and you can accept, decline, or decline with a reason. Declining is free. You can revoke this consent any time from your privacy centre, and declining a single invite doesn't hurt your visibility in search.",
 };
 
 export default async function PrivacyPage({

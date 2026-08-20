@@ -140,14 +140,14 @@ function selectProvider(): DataProvider {
   if (choice === "mock") {
     if (process.env.NODE_ENV === "production") {
       throw new Error(
-        "[dataProvider] SEBENZA_DATA_PROVIDER=mock is not allowed in production  fabricated data must never reach users. Set it to 'db'.",
+        "[dataProvider] SEBENZA_DATA_PROVIDER=mock is not allowed in production, fabricated data must never reach users. Set it to 'db'.",
       );
     }
     return mockProvider;
   }
   if (choice !== "db") {
     console.warn(
-      `[dataProvider] Unknown SEBENZA_DATA_PROVIDER="${choice}"  using db.`,
+      `[dataProvider] Unknown SEBENZA_DATA_PROVIDER="${choice}", using db.`,
     );
   }
   return dbProvider;

@@ -43,7 +43,7 @@ export function NoInvitesDiagnosticCard({
       pass: statusFresh.pass,
       ordinal: "01",
       passLabel: "Status confirmed in the last 90 days",
-      failLabel: `Status hasn't been confirmed in ${statusFresh.days} days  the matcher down-ranks stale profiles.`,
+      failLabel: `Status hasn't been confirmed in ${statusFresh.days} days, the matcher down-ranks stale profiles.`,
       actionHref: "/dashboard",
       actionLabel: "Confirm status",
     },
@@ -51,7 +51,7 @@ export function NoInvitesDiagnosticCard({
       pass: completenessOk.pass,
       ordinal: "02",
       passLabel: "Profile is at least 50% complete",
-      failLabel: `Profile is ${completenessOk.percent}% complete  add skills, a cert, or experience.`,
+      failLabel: `Profile is ${completenessOk.percent}% complete, add skills, a cert, or experience.`,
       actionHref: "/dashboard/profile",
       actionLabel: "Open profile editor",
     },
@@ -60,7 +60,7 @@ export function NoInvitesDiagnosticCard({
       ordinal: "03",
       passLabel: "Vacancy-matching consent is on",
       failLabel:
-        "Vacancy-matching consent is off  employers cannot send you invitations until you turn it on.",
+        "Vacancy-matching consent is off, employers cannot send you invitations until you turn it on.",
       actionHref: "/dashboard/privacy",
       actionLabel: "Open Privacy & consent",
     },
@@ -69,7 +69,7 @@ export function NoInvitesDiagnosticCard({
       ordinal: "04",
       passLabel: "Employers in your skill × location are searching",
       failLabel:
-        "Your skill × province pool is small  consider Career Compass adjacent professions.",
+        "Your skill × province pool is small, consider Career Compass adjacent professions.",
       actionHref: "/dashboard/grow",
       actionLabel: "Open Career Compass",
     },
@@ -136,7 +136,7 @@ export function NoInvitesDiagnosticCard({
         <p className="mt-4 rounded-[var(--radius-sm)] border border-dashed border-[color:var(--color-hairline)] bg-[color:var(--color-surface-sunk)] p-3 text-xs text-[color:var(--color-ink-soft)]">
           All clear. The matcher hasn&rsquo;t surfaced you for a fresh
           vacancy yet. Most seekers see their first invite within 21 days
-          of a complete profile  the platform pool for{" "}
+          of a complete profile, the platform pool for{" "}
           {poolHasEmployers.poolTotal} seekers in your combo is active.
         </p>
       )}

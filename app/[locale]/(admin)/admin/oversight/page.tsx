@@ -203,7 +203,7 @@ export default async function OversightPage({
       {result.rows.length === 0 && !result.employerNotFound ? (
         <p className="mt-6 rounded-[var(--radius-md)] border border-dashed border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-6 text-sm text-[color:var(--color-ink-soft)]">
           No oversight events match these filters. This is the
-          expected state on a brand-new platform  the surfaces this
+          expected state on a brand-new platform, the surfaces this
           page watches (per-employer lookup + nationality exports)
           fire only when government users actively query them.
         </p>

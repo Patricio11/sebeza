@@ -45,7 +45,7 @@ export function CookieConsentBanner({ alreadyDecided }: Props) {
           <p className="mt-1 text-[color:var(--color-ink-soft)]">
             We use essential cookies (sign-in session, locale, this consent
             choice). Optional analytics cookies help us count anonymous page
-            views  no profile is built from your browsing. Read the{" "}
+            views, no profile is built from your browsing. Read the{" "}
             <a href="/privacy" className="underline">
               Privacy Policy
             </a>

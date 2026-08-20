@@ -105,7 +105,7 @@ export function BlockEmployerControl({ orgId, orgName }: Props) {
               <p className="mt-2 text-[color:var(--color-ink-soft)]">
                 You can unblock any time from{" "}
                 <strong>Privacy &rarr; Blocked employers</strong>. Reporting
-                misconduct is a separate flow  use that if this is more than
+                misconduct is a separate flow, use that if this is more than
                 just &ldquo;not interested&rdquo;.
               </p>
 

@@ -89,7 +89,7 @@ export async function requestPhoneVerificationCode(
     return {
       ok: false,
       message:
-        "Couldn't send the verification SMS. Try again in a few minutes  if the issue persists, contact support.",
+        "Couldn't send the verification SMS. Try again in a few minutes, if the issue persists, contact support.",
     };
   }
 

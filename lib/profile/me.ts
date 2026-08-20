@@ -65,7 +65,7 @@ export type MyProfile = PublicProfile & {
    * (or shows blank inputs) so the seeker can declare / clear.
    *
    * `currentEmployerName` is the resolved org's name when the FK is
-   * set, OR the free-text name from the pending row when the seeker's
+   * set  OR the free-text name from the pending row when the seeker's
    * employer is still awaiting admin review.
    */
   currentEmployerOrgId: string | null;

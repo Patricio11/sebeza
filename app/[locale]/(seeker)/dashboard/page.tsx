@@ -184,7 +184,7 @@ export default async function SeekerOverviewPage({
       {/* Phase 11.1.3  welcome-back delta card. Renders only when the
           seeker has been absent >= 7 days AND at least one delta number
           is positive. The card is suppressed silently when the absence
-          delivered nothing  nothing-changed is its own honest signal
+          delivered nothing, nothing-changed is its own honest signal
           but doesn't need celebrating. */}
       {absenceDays !== null && (
         <WelcomeBackCard
@@ -218,7 +218,7 @@ export default async function SeekerOverviewPage({
 
       {/* Phase 11.1.6  audit-log link prominence. Surfaces the "who
           looked at me this week" signal as a top-of-page callout when
-          there's something worth noticing  Sebenza gives this data
+          there's something worth noticing, Sebenza gives this data
           away by default, but most seekers never discovered the
           activity ledger. Only renders when viewersDelta > 0 (something
           actually happened this week) to avoid an empty boast. */}
@@ -301,7 +301,7 @@ export default async function SeekerOverviewPage({
             <div className="max-w-md text-[color:var(--color-ink-soft)]">
               <p>
                 {me.completeness >= 80
-                  ? "Your profile is in excellent shape  recruiters will see it first."
+                  ? "Your profile is in excellent shape, recruiters will see it first."
                   : me.completeness >= 50
                     ? "Solid foundation. A few more touches put you in the top tier."
                     : "Let's get the essentials in. Each section below adds visible weight."}
@@ -376,7 +376,7 @@ export default async function SeekerOverviewPage({
                   ) : rank.rank === 1 ? (
                     "You're top of the pool. Keep your status fresh."
                   ) : (
-                    "Your completeness is already maxed in this pool  keep status confirmed."
+                    "Your completeness is already maxed in this pool, keep status confirmed."
                   )}
                 </div>
               </div>
@@ -391,7 +391,7 @@ export default async function SeekerOverviewPage({
             </div>
           ) : (
             <div className="text-sm text-[color:var(--color-ink-soft)]">
-              Your profile isn't ranked yet  confirm your status to enter
+              Your profile isn't ranked yet, confirm your status to enter
               the pool.
             </div>
           )}
@@ -399,7 +399,7 @@ export default async function SeekerOverviewPage({
 
         {/* Phase 16.1  Work near you: location-framed, reverse-matching
             entry (be-found + honest demand + truthful pool link). Sits
-            above the compass  "near you" then "grow". */}
+            above the compass, "near you" then "grow". */}
         <div className="md:col-span-3">
           <WorkNearYouCard
             profession={me.profession}
@@ -450,7 +450,7 @@ export default async function SeekerOverviewPage({
               </>
             ) : (
               <h2 id="compass-h" className="mt-1 font-display text-2xl">
-                Your skills are already strong  explore adjacent roles.
+                Your skills are already strong, explore adjacent roles.
               </h2>
             )}
           </div>
@@ -591,7 +591,7 @@ export default async function SeekerOverviewPage({
         </ActivitySection>
 
         {/* Phase 11.1.4  recent achievement badges. Silent when the
-            seeker has none  no badges is honest, not a scolding. */}
+            seeker has none, no badges is honest, not a scolding. */}
         <RecentAchievementsStrip badges={recentBadges} locale={locale} />
       </div>
     </DashboardMasthead>

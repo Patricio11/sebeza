@@ -39,7 +39,7 @@ describe("encryptField / decryptField round-trip", () => {
   });
 
   test("recovers unicode plaintext exactly", () => {
-    const s = "Nkosazana 🇿🇦 Dlamini-Zuma  ID·ñ·ü";
+    const s = "Nkosazana 🇿🇦 Dlamini-Zuma, ID·ñ·ü";
     expect(decryptField(encryptField(s))).toBe(s);
   });
 

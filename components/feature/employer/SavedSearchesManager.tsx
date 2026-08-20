@@ -198,7 +198,7 @@ export function SavedSearchesManager({ initial, locale }: Props) {
           <Link href="/search" className="underline">
             /search
           </Link>{" "}
-          (the in-page "save" CTA wires in Phase 6).
+          (saving from the results page is coming soon).
         </div>
       ) : (
         <ul className="space-y-3">
@@ -262,8 +262,8 @@ export function SavedSearchesManager({ initial, locale }: Props) {
                 <div className="flex items-center gap-2">
                   <button
                     type="button"
-                    aria-label="Alerts (Phase 8)"
-                    title="Email alerts wire in Phase 8 alongside Resend"
+                    aria-label="Email alerts (coming soon)"
+                    title="Email alerts are coming soon"
                     disabled
                     className="rounded-[var(--radius-pill)] border border-[color:var(--color-hairline)] p-2 text-[color:var(--color-ink-soft)] opacity-50 cursor-not-allowed"
                   >

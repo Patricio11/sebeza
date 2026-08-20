@@ -64,7 +64,7 @@ export function DataSaverPreference({ initial }: Props) {
             <p className="mt-1 max-w-prose text-sm text-[color:var(--color-ink-soft)]">
               On low-data plans? Turn this on to skip avatars, charts,
               and animated elements. We&rsquo;ll still load everything
-              you need to use Sebenza  just lighter. Your browser&rsquo;s
+              you need to use Sebenza, just lighter. Your browser&rsquo;s
               <em> Save-Data </em> setting also turns it on automatically.
             </p>
           </div>

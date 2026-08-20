@@ -31,7 +31,7 @@ export default async function SettingsPage({
       </div>
 
       <p className="mb-6 text-sm text-[color:var(--color-ink-soft)]">
-        Each setting saves on its own  there is no batch save. The audit log
+        Each setting saves on its own, there is no batch save. The audit log
         records the prior and new value for every change.
       </p>
       <SettingsForm values={values} />

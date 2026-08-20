@@ -63,7 +63,7 @@ export async function updateStudentContext(
   if (!session) return { ok: false, message: "Not signed in." };
   const parsed = schemaInput.safeParse(input);
   if (!parsed.success) {
-    return { ok: false, message: "Check the form  one or more fields are too long." };
+    return { ok: false, message: "Check the form, one or more fields are too long." };
   }
 
   const db = getDb();

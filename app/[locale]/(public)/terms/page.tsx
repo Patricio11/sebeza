@@ -199,7 +199,7 @@ export default async function TermsOfServicePage({
               </li>
               <li>
                 Documents shared with you (e.g. qualifications) are for
-                the assessment at hand  do not retain or redistribute
+                the assessment at hand, do not retain or redistribute
                 them beyond that purpose.
               </li>
             </ul>
@@ -213,7 +213,7 @@ export default async function TermsOfServicePage({
                 Privacy Policy
               </Link>{" "}
               and the granular consent purposes you grant at sign-up or
-              later  each individually revocable from your privacy
+              later, each individually revocable from your privacy
               centre without closing your account. Accepting these terms
               does not grant any data-processing consent, and revoking a
               consent is never a breach of these terms. Access-to-records

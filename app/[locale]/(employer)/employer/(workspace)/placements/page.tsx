@@ -106,11 +106,11 @@ export default async function EmployeesListPage({
       role="employer"
       pageEyebrow="Outcomes"
       pageTitle="Employees"
-      pageSubtitle="Every Sebenza-confirmed hire your organisation has made, and how that placement is tracking over time. Lifecycle data feeds the platform's retention signal  the harder figure to find anywhere else."
+      pageSubtitle="Every Sebenza-confirmed hire your organisation has made, and how that placement is tracking over time. Lifecycle data feeds the platform's retention signal, the harder figure to find anywhere else."
       banner={
         session.verification !== "verified" ? (
           <OrgVerificationBanner
-            message="Your organisation isn't verified yet  some surfaces stay limited until verification completes."
+            message="Your organisation isn't verified yet, some surfaces stay limited until verification completes."
             cta="Complete verification"
           />
         ) : null
@@ -211,7 +211,7 @@ export default async function EmployeesListPage({
           {rows.length === 0 ? (
             <div className="rounded-[var(--radius-md)] border border-dashed border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] px-4 py-8 text-center text-sm text-[color:var(--color-ink-soft)]">
               {tab === "active"
-                ? "No active employees in this view  every placement is currently marked as departed or unknown."
+                ? "No active employees in this view, every placement is currently marked as departed or unknown."
                 : tab === "departed"
                   ? "No departures logged yet."
                   : "No employees in this view."}
@@ -231,8 +231,8 @@ export default async function EmployeesListPage({
       <p className="mt-8 text-xs italic text-[color:var(--color-ink-soft)]">
         Lifecycle data stays inside your organisation. Aggregate
         retention figures land on <Link href="/insights" className="underline">/insights</Link>
-        {" "}once Tier 3 of this phase ships  the per-employee detail
-        never leaves your workspace.
+        {" "}as the dataset grows. The per-employee detail never leaves your
+        workspace.
       </p>
     </DashboardMasthead>
   );

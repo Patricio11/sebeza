@@ -54,7 +54,7 @@ export const PLACEMENT_DEPARTURE_CATEGORIES: ReadonlyArray<{
   {
     value: "resigned",
     label: "Resigned",
-    description: "The seeker initiated  voluntary departure.",
+    description: "The seeker initiated, voluntary departure.",
   },
   {
     value: "contract_ended",
@@ -65,7 +65,7 @@ export const PLACEMENT_DEPARTURE_CATEGORIES: ReadonlyArray<{
     value: "moved_internally",
     label: "Moved internally",
     description:
-      "Same employer, different role  the platform's pipeline can still see them.",
+      "Same employer, different role, the platform's pipeline can still see them.",
   },
   {
     value: "retrenched",
@@ -86,6 +86,6 @@ export const PLACEMENT_DEPARTURE_CATEGORIES: ReadonlyArray<{
   {
     value: "other",
     label: "Other",
-    description: "Escape hatch  use sparingly.",
+    description: "Escape hatch, use sparingly.",
   },
 ];

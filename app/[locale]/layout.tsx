@@ -187,7 +187,7 @@ export default async function LocaleLayout({
         <ServiceWorkerRegistrar />
         {/* Phase 33  Vercel Analytics + Speed Insights. COOKIELESS by
             design (no cross-site tracking, no persistent identifier), so
-            they sit outside the cookie-consent gate  consistent with
+            they sit outside the cookie-consent gate, consistent with
             the banner's "no profile is built from your browsing"
             promise. Mounted only when actually running on Vercel: the
             injected /_vercel/*.js scripts exist nowhere else, so on

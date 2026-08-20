@@ -45,7 +45,7 @@ describe("safeInternalPath (Phase 29.5 open-redirect guard)", () => {
  * user could be dropped on an attacker's page with a trustworthy
  * referrer chain.
  */
-describe("Phase 32.2.6  auth ?next= payloads", () => {
+describe("Phase 32.2.6, auth ?next= payloads", () => {
   const HOME = "/dashboard";
   const attacks = [
     "//evil.example",

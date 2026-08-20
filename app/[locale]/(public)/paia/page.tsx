@@ -113,7 +113,7 @@ export default async function PaiaManualPage({
                 skills, experience, qualifications, employment status,
                 work availability, date of birth, nationality, and
                 only when the user opts into KYC verification later from
-                their dashboard  the encrypted SA ID or passport number
+                their dashboard, the encrypted SA ID or passport number
                 plus issuing country, and a private copy of the SA ID
                 book/card or passport bio page held in a user-scoped
                 folder of the private object store. ID number and
@@ -134,7 +134,7 @@ export default async function PaiaManualPage({
                 organisation id, the inviter's user id, the recipient
                 email + optional name/profession/note, the lifecycle
                 state (pending / accepted / declined / withdrawn /
-                expired), the timestamps, and  when accepted  the
+                expired), the timestamps, and, when accepted, the
                 linked profile id.
               </li>
               <li>
@@ -150,7 +150,7 @@ export default async function PaiaManualPage({
               <li>
                 <strong>Aggregate analytics</strong>  anonymised cohort
                 statistics for the longitudinal outcomes dataset (suppressed
-                below 10 individuals per cell, per Phase 7.5.4).
+                below 10 individuals per cell).
               </li>
             </ul>
           </Section>
@@ -191,7 +191,7 @@ export default async function PaiaManualPage({
               circumstances, to records of other persons (subject to PAIA's
               third-party-protection regime).
             </p>
-            <h3 className="mt-5 font-display text-lg">Your own records  easiest path</h3>
+            <h3 className="mt-5 font-display text-lg">Your own records, easiest path</h3>
             <p>
               Sign in and use{" "}
               <Link href="/dashboard/privacy" className="underline">
@@ -201,7 +201,7 @@ export default async function PaiaManualPage({
               with every row referencing your account. This is free, instant,
               and audit-logged (PAIA + POPIA §23 satisfied in one click).
             </p>
-            <h3 className="mt-5 font-display text-lg">Records about a third party  formal PAIA request</h3>
+            <h3 className="mt-5 font-display text-lg">Records about a third party, formal PAIA request</h3>
             <p>
               Complete Form 2 of the PAIA Regulations and submit it to the
               Information Officer at{" "}

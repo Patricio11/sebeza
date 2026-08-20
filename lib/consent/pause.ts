@@ -87,7 +87,7 @@ export async function pauseSearchability(
     return {
       ok: false,
       message:
-        "Turn searchability on first  pause only applies while you're on.",
+        "Turn searchability on first, pause only applies while you're on.",
     };
   }
 

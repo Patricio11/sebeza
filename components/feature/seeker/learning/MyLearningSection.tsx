@@ -55,7 +55,7 @@ export function MyLearningSection({
           My learning
         </h2>
         <span className="hidden text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--color-ink-soft)] md:inline">
-          Self-paced  external providers
+          Self-paced, external providers
         </span>
       </header>
 
@@ -84,7 +84,7 @@ export function MyLearningSection({
                 </span>{" "}
                 on any recommendation below to start tracking your progress. A
                 completed skill lands on your profile as{" "}
-                <em>self-attested  via learning</em>, and your projected rank
+                <em>self-attested, via learning</em>, and your projected rank
                 in the local pool shifts when you do.
               </p>
             </div>

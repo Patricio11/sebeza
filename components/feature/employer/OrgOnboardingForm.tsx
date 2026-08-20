@@ -241,7 +241,7 @@ export function OrgOnboardingForm({ initial }: Props) {
             Other supporting documents (optional)
           </h2>
           <p className="mt-1 text-xs text-[color:var(--color-ink-soft)]">
-            Anything else that helps  e.g. an SARB licence for
+            Anything else that helps, e.g. an SARB licence for
             financial-services orgs. Up to 3 files.
           </p>
         </header>

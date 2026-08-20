@@ -33,7 +33,7 @@ export async function LandingHeader() {
       <div className="mx-auto flex max-w-[1320px] items-center justify-between px-5 py-5 md:px-10">
         <Link
           href="/"
-          aria-label="Sebenza  home"
+          aria-label="Sebenza, home"
           className="group flex items-center rounded-sm focus-visible:outline-none"
         >
           <SebenzaLogo width={170} />

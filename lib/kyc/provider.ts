@@ -37,7 +37,7 @@ export async function resolveIdentityVerifier(): Promise<IdentityVerifier> {
   if (!provider) {
     // eslint-disable-next-line no-console
     console.warn(
-      `[kyc] Flag is ON but KYC_PROVIDER="${choice}" not registered  falling back to mock.`,
+      `[kyc] Flag is ON but KYC_PROVIDER="${choice}" not registered, falling back to mock.`,
     );
     return mockIdentityVerifier;
   }

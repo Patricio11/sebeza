@@ -61,7 +61,7 @@ export async function expireInvitationFromCron(
     userId: args.seekerUserId,
     kind: "vacancy.invite.expired",
     title: `Your invitation from ${args.orgName} expired`,
-    body: `The invite for "${args.vacancyTitle}" expired without a response. The role may have been filled  no action required.`,
+    body: `The invite for "${args.vacancyTitle}" expired without a response. The role may have been filled, no action required.`,
     meta: { invitationId: args.invitationId, vacancyId: args.vacancyId },
   });
 

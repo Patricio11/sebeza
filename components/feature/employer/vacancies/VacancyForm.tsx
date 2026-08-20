@@ -290,13 +290,13 @@ function buildSeasonalWindowSubmit({
 // captures 4-10 (post-Matric) so we offer the same range here  asking
 // a vacancy to require NQF 1-3 would never match any seeker.
 const NQF_OPTIONS: ReadonlyArray<{ value: number; label: string }> = [
-  { value: 4, label: "4  Matric / National Certificate" },
-  { value: 5, label: "5  Higher Certificate" },
-  { value: 6, label: "6  Diploma / Advanced Certificate" },
-  { value: 7, label: "7  Bachelor's degree" },
-  { value: 8, label: "8  Honours / Postgraduate Diploma" },
-  { value: 9, label: "9  Master's degree" },
-  { value: 10, label: "10  Doctorate" },
+  { value: 4, label: "4, Matric / National Certificate" },
+  { value: 5, label: "5, Higher Certificate" },
+  { value: 6, label: "6, Diploma / Advanced Certificate" },
+  { value: 7, label: "7, Bachelor's degree" },
+  { value: 8, label: "8, Honours / Postgraduate Diploma" },
+  { value: 9, label: "9, Master's degree" },
+  { value: 10, label: "10, Doctorate" },
 ];
 
 export function VacancyForm({
@@ -604,12 +604,12 @@ export function VacancyForm({
       title: title.trim(),
       professionSlug: profession,
       provinceSlug: submitProvince,
-      citySlug: null, // city refinement is Phase 9.8 vNext  province only for now
+      citySlug: null, // city refinement is Phase 9.8 vNext, province only for now
       skillSlugs: Array.from(skillSet),
       seniority: seniority || null,
       salaryBand: salaryBand.trim() || null,
       description: description.trim() || null,
-      documentsRequired: [], // vNext  for now the matching uses skills + profession
+      documentsRequired: [], // vNext, for now the matching uses skills + profession
       inviteExpiryDays: expiryNum,
       positions: positionsNum,
       workAvailability: Array.from(workAvailabilitySet),
@@ -742,7 +742,7 @@ export function VacancyForm({
         {/* Phase 10 follow-up  skills are now a typeahead multi-select
             with profession-scoped suggestions surfaced first. The old
             chip-toggle (every skill in the taxonomy shown as a chip)
-            doesn't scale past ~30 entries  see PROFESSION_SKILLS_MAP
+            doesn't scale past ~30 entries, see PROFESSION_SKILLS_MAP
             in lib/mock/taxonomy.ts for the ranking source. */}
         <MultiSelectComboboxField
           id="skillSlugs"
@@ -770,7 +770,7 @@ export function VacancyForm({
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           disabled={pending}
-          placeholder="What the role does, who it reports to, what success looks like in the first 90 days. Internal-only  no seeker ever sees this."
+          placeholder="What the role does, who it reports to, what success looks like in the first 90 days. Internal-only, no seeker ever sees this."
           maxLength={4000}
         />
       </section>
@@ -838,7 +838,7 @@ export function VacancyForm({
                 Optional. Pick the month (and, if you want, the year) for
                 each endpoint. Year is optional but recommended for
                 summer windows that cross December &mdash; e.g.{" "}
-                <em>Nov 2026  Feb 2027</em> reads unambiguously.
+                <em>Nov 2026, Feb 2027</em> reads unambiguously.
                 Leave both blank for &ldquo;seasonal work, timing
                 TBD.&rdquo;
               </p>
@@ -964,7 +964,7 @@ export function VacancyForm({
           Private to your organisation
         </div>
         <p className="text-xs text-[color:var(--color-ink-soft)]">
-          Salary band stays inside your workspace  consistent with how
+          Salary band stays inside your workspace, consistent with how
           Sebenza already handles placement salaries (Phase 5 rule). It
           is never on any seeker-facing surface, never in /search,
           never in /p/[handle].
@@ -973,7 +973,7 @@ export function VacancyForm({
           id="salaryBand"
           name="salaryBand"
           label="Salary band"
-          placeholder="e.g. R 480k  R 600k / year"
+          placeholder="e.g. R 480k, R 600k / year"
           optional
           value={salaryBand}
           onChange={(e) => setSalaryBand(e.target.value)}
@@ -1026,7 +1026,7 @@ export function VacancyForm({
           value={positions}
           onChange={(e) => setPositions(e.target.value)}
           disabled={pending}
-          hint="How many people you plan to hire on this vacancy. Leave empty if there's no fixed headcount  the match page then simply counts invites."
+          hint="How many people you plan to hire on this vacancy. Leave empty if there's no fixed headcount, the match page then simply counts invites."
         />
 
         {/* Phase 9.19 D8  opt-in follow-up nudge. A single gentle
@@ -1048,18 +1048,18 @@ export function VacancyForm({
             </span>
             <span className="mt-0.5 block text-xs text-[color:var(--color-ink-soft)]">
               One reminder, only to seekers who haven&rsquo;t responded yet.
-              Capped at one nudge per invite  re-nudging is harassment.
+              Capped at one nudge per invite, re-nudging is harassment.
             </span>
           </span>
         </label>
 
         {/* Phase 34  Self Apply. Rendered only while the platform flag
             is ON (ship-dark). Honest copy about exactly what the public
-            link shows  and what it never shows. */}
+            link shows, and what it never shows. */}
         {selfApplyFeatureOn && (
           <fieldset className="rounded-[var(--radius-md)] border border-[color:var(--color-brand)]/30 bg-[color:var(--color-brand-tint)] p-4">
             <legend className="px-1 font-display text-base">
-              Self Apply  public link
+              Self Apply, public link
             </legend>
             <label className="flex items-start gap-3">
               <input

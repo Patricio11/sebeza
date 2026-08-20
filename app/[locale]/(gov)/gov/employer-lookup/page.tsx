@@ -22,7 +22,7 @@ import { EmployerLookupForm } from "@/components/feature/gov/EmployerLookupForm"
 import { AlertTriangle, ShieldCheck } from "lucide-react";
 import { HelpLink } from "@/components/feature/help/HelpLink";
 
-export const revalidate = 0; // Always dynamic  the flag may change.
+export const revalidate = 0; // Always dynamic, the flag may change.
 
 export default async function GovEmployerLookupPage({
   params,
@@ -43,7 +43,7 @@ export default async function GovEmployerLookupPage({
       role="gov"
       pageEyebrow="Regulated · single-employer query"
       pageTitle="Per-employer mix lookup"
-      pageSubtitle="One employer at a time. Exact-match input only  no autocomplete, no browse, no leaderboard. Every lookup writes an audit row carrying the stated reason; the oversight log makes the trail itself reviewable."
+      pageSubtitle="One employer at a time. Exact-match input only, no autocomplete, no browse, no leaderboard. Every lookup writes an audit row carrying the stated reason; the oversight log makes the trail itself reviewable."
     >
       {/* Phase 10.4  help deep-links (D6). */}
       <div className="mb-4 flex flex-wrap items-center gap-2">
@@ -76,7 +76,7 @@ export default async function GovEmployerLookupPage({
           split of an employer&rsquo;s Sebenza-confirmed placements,
           when the placement count is above the small-numbers floor
           (k = {floor}). Below the floor: the count is shown but never
-          the split  that would re-identify individuals.
+          the split, that would re-identify individuals.
         </p>
         <p className="mt-2 text-sm text-[color:var(--color-ink-soft)]">
           <strong className="text-[color:var(--color-ink)]">
@@ -125,7 +125,7 @@ function DormantNotice() {
               feature_flag_employer_mix_lookup
             </code>{" "}
             off. The engine + UI are built and tested; activation pairs
-            with a concrete operational need  purpose-limitation,
+            with a concrete operational need, purpose-limitation,
             retention windows, and named operators become concrete at
             that point. Same dormant-by-default posture as the KYC and
             SAQA adapters from Phase 8.

@@ -122,7 +122,7 @@ export async function updateProfileBasics(
   // Phase 31 final shape  the code must be canonical (the derived label
   // displays publicly on the profile + search rows).
   if (!isValidCountryCode(v.nationality)) {
-    return fail("That nationality isn't recognised  pick from the list.");
+    return fail("That nationality isn't recognised, pick from the list.");
   }
 
   // Recompute completeness based on the new shape. Cheap; keeps the
@@ -362,7 +362,7 @@ export async function updateSkills(
   const session = await getSessionUser();
   if (!session) return fail("Not signed in.");
   const parsed = skillsSchema.safeParse(input);
-  if (!parsed.success) return fail("Skill list invalid  try again.");
+  if (!parsed.success) return fail("Skill list invalid, try again.");
   const db = getDb();
   const profile = await loadOwnedProfile(db, session.id);
   if (!profile) return fail("Profile not found.");
@@ -598,7 +598,7 @@ export async function changeNationalId(
   );
   if (!idCollectionEnabled) {
     return fail(
-      "ID collection is currently disabled on this platform  your profile works fully without it.",
+      "ID collection is currently disabled on this platform, your profile works fully without it.",
     );
   }
   const parsed = changeIdSchema.safeParse(input);
@@ -607,7 +607,7 @@ export async function changeNationalId(
   if (!v.ok) {
     return fail(
       v.reason === "bad_checksum"
-        ? "That ID number's checksum doesn't match  please double-check."
+        ? "That ID number's checksum doesn't match, please double-check."
         : v.reason === "wrong_length"
           ? "An SA ID number is 13 digits."
           : v.reason === "not_digits"

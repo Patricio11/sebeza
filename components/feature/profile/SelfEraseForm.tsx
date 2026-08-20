@@ -48,7 +48,7 @@ export function SelfEraseForm() {
     <form onSubmit={submit} className="mt-4 flex flex-col gap-3">
       <p className="text-xs text-[color:var(--color-ink-soft)]">
         This will soft-delete your account immediately. The nightly cron
-        hard-deletes after 30 days  within that window an administrator can
+        hard-deletes after 30 days, within that window an administrator can
         restore you. After 30 days everything is gone. To confirm, type
         <strong className="ml-1">ERASE</strong> in capital letters below.
       </p>

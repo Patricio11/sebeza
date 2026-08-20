@@ -176,7 +176,7 @@ export function SearchabilityPauseControl({
         htmlFor="pause-reason"
         className="mt-3 block text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--color-ink-soft)]"
       >
-        Optional reason (private  never sent to employers)
+        Optional reason (private, never sent to employers)
       </label>
       <textarea
         id="pause-reason"

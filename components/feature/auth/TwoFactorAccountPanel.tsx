@@ -68,7 +68,7 @@ export function TwoFactorAccountPanel({ enabled, enforced }: Props) {
               {enforced && (
                 <>
                   {" "}
-                  Note: 2FA is currently enforced for your role  you will be
+                  Note: 2FA is currently enforced for your role, you will be
                   asked to re-enrol immediately.
                 </>
               )}

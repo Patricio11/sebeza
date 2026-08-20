@@ -420,7 +420,7 @@ function OrgGroup({
                       <span aria-hidden="true">·</span>
                       <span>
                         Owner: {o.ownerName ?? "?"} ({o.ownerEmail}
-                        {o.ownerEmailVerified ? "" : "  unverified email"})
+                        {o.ownerEmailVerified ? "" : ", unverified email"})
                       </span>
                     </>
                   )}

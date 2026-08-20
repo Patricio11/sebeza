@@ -92,7 +92,7 @@ export function ContactRevealCard({
         </div>
         <p className="mt-2 text-sm text-[color:var(--color-ink)]">
           This seeker hasn't granted contact-reveal consent. Sebenza won't
-          surface their email or phone  even to verified employers  until
+          surface their email or phone, even to verified employers, until
           they explicitly opt in.
         </p>
         <button

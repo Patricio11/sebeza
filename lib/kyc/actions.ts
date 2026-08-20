@@ -63,7 +63,7 @@ export async function submitMyIdForVerification(): Promise<
   if (!session) return fail("Not signed in.");
   if (!(await idCollectionEnabled())) {
     return fail(
-      "ID verification is currently disabled on this platform  your profile works fully without it.",
+      "ID verification is currently disabled on this platform, your profile works fully without it.",
     );
   }
   const db = getDb();
@@ -196,7 +196,7 @@ export async function uploadIdDocument(
   if (!session) return fail("Not signed in.");
   if (!(await idCollectionEnabled())) {
     return fail(
-      "ID document upload is currently disabled on this platform  your profile works fully without it.",
+      "ID document upload is currently disabled on this platform, your profile works fully without it.",
     );
   }
 

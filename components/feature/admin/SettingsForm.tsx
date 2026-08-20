@@ -19,13 +19,13 @@ interface SettingRow {
 const ROWS: SettingRow[] = [
   {
     key: "freshness_band_days_fresh",
-    label: "Fresh  confirmed within",
+    label: "Fresh, confirmed within",
     type: "number",
     hint: "Days (≥1, ≤365)",
   },
   {
     key: "freshness_band_days_ageing",
-    label: "Ageing  older than",
+    label: "Ageing, older than",
     type: "number",
     hint: "Days (must be > fresh)",
   },
@@ -75,13 +75,13 @@ const ROWS: SettingRow[] = [
   {
     key: "feature_flag_employer_mix_lookup",
     label:
-      "Gov per-employer mix lookup (9.7.6  ships dormant; activate when DEL §8 partnership lands)",
+      "Gov per-employer mix lookup (9.7.6, ships dormant; activate when DEL §8 partnership lands)",
     type: "boolean",
   },
   {
     key: "feature_flag_verification_badges_visible",
     label:
-      "Show verification badges on profiles (9.16.1  turn off while verification volume is still thin)",
+      "Show verification badges on profiles (9.16.1, turn off while verification volume is still thin)",
     type: "boolean",
   },
   {
@@ -129,43 +129,43 @@ const ROWS: SettingRow[] = [
   {
     key: "feature_flag_seeker_skill_journey",
     label:
-      "Seeker · The Climb  live skill journey (learning progress + visible rank payoff + seeker-set proficiency)",
+      "Seeker · The Climb, live skill journey (learning progress + visible rank payoff + seeker-set proficiency)",
     type: "boolean",
   },
   {
     key: "feature_flag_seeker_demand_pulse",
     label:
-      "Seeker · Demand Pulse  weekly “your skill is heating up near you” nudge",
+      "Seeker · Demand Pulse, weekly “your skill is heating up near you” nudge",
     type: "boolean",
   },
   {
     key: "feature_flag_seeker_ai_coach",
     label:
-      "Seeker · AI Career Coach  interview practice (also requires a configured + budgeted LLM provider on /admin/llm)",
+      "Seeker · AI Career Coach, interview practice (also requires a configured + budgeted LLM provider on /admin/llm)",
     type: "boolean",
   },
   {
     key: "feature_flag_living_catalog",
     label:
-      "Seeker · Living Learning Catalog  path reviews + “recommended by N of M” roll-up on learning-path cards",
+      "Seeker · Living Learning Catalog, path reviews + “recommended by N of M” roll-up on learning-path cards",
     type: "boolean",
   },
   {
     key: "feature_flag_seeker_custom_skills",
     label:
-      "Seeker · Custom skills  add up to 3 self-described skills outside the taxonomy (never searchable until canonicalized)",
+      "Seeker · Custom skills, add up to 3 self-described skills outside the taxonomy (never searchable until canonicalized)",
     type: "boolean",
   },
   {
     key: "feature_flag_skill_prereqs",
     label:
-      "Seeker · Skill prerequisites  sequence recommendations (prereqs first), “Requires:” pills, and the “Unlocks next” moment",
+      "Seeker · Skill prerequisites, sequence recommendations (prereqs first), “Requires:” pills, and the “Unlocks next” moment",
     type: "boolean",
   },
   {
     key: "feature_flag_city_demand",
     label:
-      "Seeker · Hyper-local demand  “Your city’s hotspots” (top-5 metros only, k-anon floor, requires the seeker’s research-insights consent)",
+      "Seeker · Hyper-local demand, “Your city’s hotspots” (top-5 metros only, k-anon floor, requires the seeker’s research-insights consent)",
     type: "boolean",
   },
 ];

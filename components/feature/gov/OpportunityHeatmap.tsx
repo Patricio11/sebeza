@@ -42,7 +42,7 @@ export function OpportunityHeatmap({
         No cells currently classified <em>local supply available</em>.
         Either there isn&rsquo;t enough demand activity from verified
         employer accounts yet, or the supply / demand ratios across
-        every cell sit below 1.0. Honest blank, not guessed  the
+        every cell sit below 1.0. Honest blank, not guessed, the
         opportunity map only shows what the data supports.
       </p>
     );

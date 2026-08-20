@@ -71,7 +71,7 @@ export function EmploymentVerificationPanel({
     setError(null);
     if (!currentEmployerOrgId) {
       setError(
-        "Pick a current employer above first  verification needs an employer to verify against.",
+        "Pick a current employer above first, verification needs an employer to verify against.",
       );
       return;
     }
@@ -142,7 +142,7 @@ export function EmploymentVerificationPanel({
               <strong>{current.employerName ?? "the employer"}</strong>.
               They have {daysLeft} day{daysLeft === 1 ? "" : "s"} left to
               respond. We&rsquo;ll notify you with the binary outcome
-              (verified or not)  the contact&rsquo;s actual response stays
+              (verified or not), the contact&rsquo;s actual response stays
               between them and the platform.
             </p>
             <div className="mt-3 flex gap-2">

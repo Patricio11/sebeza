@@ -50,7 +50,7 @@ export default async function AccessibilityPage({
             </h1>
             <p className="mt-3 text-[color:var(--color-ink-soft)]">
               Last updated <time dateTime={lastUpdated}>{lastUpdated}</time>.
-              A national platform has to work for the whole nation  this
+              A national platform has to work for the whole nation, this
               page describes what we&rsquo;ve built, what&rsquo;s still in
               progress, and how to tell us when something doesn&rsquo;t
               work for you.
@@ -62,7 +62,7 @@ export default async function AccessibilityPage({
           <Section title="1. Our commitment">
             <p>
               Sebenza targets <strong>WCAG 2.2 Level AA</strong> across
-              every surface  public pages, seeker and employer
+              every surface, public pages, seeker and employer
               dashboards, and the government analytics portal.
               Accessibility is one of the platform&rsquo;s founding rules,
               not a retrofit: every page is designed to be usable on a
@@ -75,8 +75,8 @@ export default async function AccessibilityPage({
             <ul className="my-4 list-disc pl-6 space-y-2">
               <li>
                 <strong>Keyboard access everywhere.</strong> Every
-                interactive control  including our custom dropdowns,
-                date pickers, and multi-select fields  works with a
+                interactive control, including our custom dropdowns,
+                date pickers, and multi-select fields, works with a
                 keyboard alone, with visible focus indicators throughout.
               </li>
               <li>
@@ -87,7 +87,7 @@ export default async function AccessibilityPage({
               </li>
               <li>
                 <strong>Labelled forms.</strong> Every input routes
-                through labelled form components  no unlabelled fields.
+                through labelled form components, no unlabelled fields.
               </li>
               <li>
                 <strong>Reduced motion respected.</strong> The little
@@ -145,13 +145,13 @@ export default async function AccessibilityPage({
           <Section title="4. Tell us when something doesn't work">
             <p>
               If any part of Sebenza is hard or impossible for you to
-              use  with a screen reader, keyboard, switch device,
-              magnification, or anything else  we want to know. Email{" "}
+              use, with a screen reader, keyboard, switch device,
+              magnification, or anything else, we want to know. Email{" "}
               <a href="mailto:popia@sebenzasa.com" className="underline">
                 popia@sebenzasa.com
               </a>{" "}
               with the page and what happened. Accessibility reports are
-              treated as defects, not feedback  they get fixed, not
+              treated as defects, not feedback, they get fixed, not
               filed.
             </p>
           </Section>

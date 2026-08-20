@@ -169,8 +169,8 @@ export default async function GovBriefPage({
         </h2>
         <p className="mb-2 text-xs italic">
           Profession × province cells where demand is high, SA-citizen
-          supply is thin, AND most platform-confirmed placements went
-          to foreign nationals. Training-investment signal  the
+          supply is thin  AND most platform-confirmed placements went
+          to foreign nationals. Training-investment signal, the
           local pool isn&rsquo;t there to fill, so policy follow-up
           here should focus on building local capacity rather than
           tightening enforcement against employers who genuinely

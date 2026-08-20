@@ -171,7 +171,7 @@ function BulkImportPanel({
             value={syllabusText}
             onChange={(e) => setSyllabusText(e.target.value)}
             rows={6}
-            placeholder="Paste the official syllabus or module description from the institution's prospectus. Generic academic text only  no seeker PII."
+            placeholder="Paste the official syllabus or module description from the institution's prospectus. Generic academic text only, no seeker PII."
             className="rounded-[var(--radius-sm)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] px-3 py-2 text-sm"
           />
           <span className="text-[color:var(--color-ink-soft)]">

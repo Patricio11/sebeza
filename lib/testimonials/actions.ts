@@ -45,7 +45,7 @@ export async function submitTestimonial(
   }
   const clean = (quote ?? "").trim().replace(/\s+/g, " ").slice(0, QUOTE_MAX);
   if (clean.length < 20) {
-    return { ok: false, error: "A sentence or two helps  at least 20 characters." };
+    return { ok: false, error: "A sentence or two helps, at least 20 characters." };
   }
 
   const db = getDb();

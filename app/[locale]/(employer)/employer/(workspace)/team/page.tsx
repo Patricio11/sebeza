@@ -93,7 +93,7 @@ export default async function TeamPage({
                   {m.twoFa ? (
                     <span className="text-[color:var(--color-employed)]">Active</span>
                   ) : (
-                    <span className="text-[color:var(--color-danger)]">Required  not set</span>
+                    <span className="text-[color:var(--color-danger)]">Required, not set</span>
                   )}
                 </td>
                 <td className="px-5 py-3 text-[color:var(--color-ink-soft)]">{m.joined}</td>
@@ -152,7 +152,7 @@ export default async function TeamPage({
                   </span>
                 ) : (
                   <span className="text-[color:var(--color-danger)]">
-                    Required  not set
+                    Required, not set
                   </span>
                 )}
               </div>

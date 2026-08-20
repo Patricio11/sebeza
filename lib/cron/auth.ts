@@ -19,7 +19,7 @@ export function isAuthorizedCron(request: Request):
   const secret = process.env.CRON_SECRET;
   if (!secret) {
     // eslint-disable-next-line no-console
-    console.error("[cron] CRON_SECRET is not set  refusing all cron requests.");
+    console.error("[cron] CRON_SECRET is not set, refusing all cron requests.");
     return {
       ok: false,
       response: NextResponse.json(

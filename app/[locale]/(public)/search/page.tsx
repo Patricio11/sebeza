@@ -98,7 +98,7 @@ export async function generateMetadata({ params }: SearchPageProps) {
   return {
     title: t("headingFallback"),
     description:
-      "Search South Africa's national talent register by profession, province and skills. Live, freshness-weighted, consent-first profiles  free to browse.",
+      "Search South Africa's national talent register by profession, province and skills. Live, freshness-weighted, consent-first profiles, free to browse.",
     alternates: localeAlternates("/search"),
   };
 }
@@ -310,7 +310,7 @@ export default async function SearchPage({ params, searchParams }: SearchPagePro
               </h1>
               <p className="mt-3 max-w-2xl text-[color:var(--color-ink-soft)]">
                 Ranked by skill match, status freshness and completeness. Stale
-                statuses fall to the bottom  honestly.
+                statuses fall to the bottom, honestly.
               </p>
 
               {/* Phase 9.14.x  citizen split when the highlight toggle is on. */}
@@ -398,7 +398,7 @@ export default async function SearchPage({ params, searchParams }: SearchPagePro
                   </ol>
 
                   {/* Honest end-state. Real pagination is queued for Phase 8
-                      alongside the saved-search match cron  until then we
+                      alongside the saved-search match cron, until then we
                       tell the truth: this is the page-one window, refine
                       filters to narrow. No dead button. */}
                   <div className="mt-8 border-t border-dashed border-[color:var(--color-hairline)] pt-4 text-sm text-[color:var(--color-ink-soft)]">

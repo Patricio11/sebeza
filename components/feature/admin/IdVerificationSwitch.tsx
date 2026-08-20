@@ -57,7 +57,7 @@ export function IdVerificationSwitch({ enabled }: { enabled: boolean }) {
             className="size-5 text-[color:var(--color-brand)]"
             aria-hidden="true"
           />
-          ID / passport collection  system-wide switch
+          ID / passport collection, system-wide switch
         </h2>
         <span
           className={`inline-flex items-center gap-1.5 rounded-[var(--radius-pill)] px-3 py-1 text-xs font-medium ${

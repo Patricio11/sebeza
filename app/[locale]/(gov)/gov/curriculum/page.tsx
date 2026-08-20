@@ -89,7 +89,7 @@ export default async function GovCurriculumPage({
           How this is built
         </h2>
         <p className="mt-2 max-w-3xl text-sm text-[color:var(--color-ink-soft)]">
-          <strong>Programme  skill</strong> rows come from a curated
+          <strong>Programme, skill</strong> rows come from a curated
           mapping of programme outcomes (D4 in the 9.13 plan)
           shipped as an approximation pending the dormant Phase 8
           SAQA feed.{" "}
@@ -100,7 +100,7 @@ export default async function GovCurriculumPage({
           <em>gap</em> is the in-demand skills the programme&rsquo;s
           curriculum doesn&rsquo;t list. Cells with fewer than{" "}
           <span className="tabular">{result.k}</span> matching searches
-          are suppressed (primary + complementary)  the floor is a
+          are suppressed (primary + complementary), the floor is a
           privacy protection, never a hide-the-ugly-bits switch.
         </p>
       </section>
@@ -139,7 +139,7 @@ export default async function GovCurriculumPage({
 
       <section className="mt-8">
         <header className="mb-3 flex items-baseline justify-between gap-3 border-b-2 border-[color:var(--color-ink)] pb-2">
-          <h2 className="font-display text-2xl">Programme  market</h2>
+          <h2 className="font-display text-2xl">Programme, market</h2>
           <span className="text-xs text-[color:var(--color-ink-soft)]">
             {result.cells.length} cell{result.cells.length === 1 ? "" : "s"}
             {" · "}
@@ -154,11 +154,11 @@ export default async function GovCurriculumPage({
       </section>
 
       {/* Phase 13.6  module-grain gap analysis. Curriculum committees
-          set modules, not programmes  this card surfaces the
+          set modules, not programmes, this card surfaces the
           unit of work they can actually rewrite. */}
       <section className="mt-10">
         <header className="mb-3 flex items-baseline justify-between gap-3 border-b-2 border-[color:var(--color-ink)] pb-2">
-          <h2 className="font-display text-2xl">Module  market</h2>
+          <h2 className="font-display text-2xl">Module, market</h2>
           <Link
             href={moduleExportHref as never}
             prefetch={false}

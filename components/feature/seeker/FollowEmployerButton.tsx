@@ -63,7 +63,7 @@ export function FollowEmployerButton({
         disabled={pending}
         aria-pressed={following}
         aria-label={following ? "Unfollow employer" : "Follow employer"}
-        title={following ? "Following  click to unfollow" : "Follow this employer"}
+        title={following ? "Following, click to unfollow" : "Follow this employer"}
         className={
           "inline-flex size-8 items-center justify-center rounded-full border transition-colors " +
           (following

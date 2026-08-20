@@ -77,11 +77,11 @@ export function PhoneChannelPanel({
           />
           <div>
             <h3 className="font-display text-base text-[color:var(--color-ink)]">
-              SMS &amp; WhatsApp  coming soon
+              SMS &amp; WhatsApp, coming soon
             </h3>
             <p className="mt-1 max-w-prose text-sm text-[color:var(--color-ink-soft)]">
               We&rsquo;re preparing an opt-in channel for critical
-              events  vacancy invites + contact reveal  to reach
+              events, vacancy invites + contact reveal, to reach
               you off-platform on SMS or WhatsApp. The infrastructure
               is in place; an admin will switch it on once the cost
               guardrails are signed off. No personal phone-number data

@@ -26,7 +26,7 @@ interface Props {
 /**
  * Persistent Civic Editorial dashboard frame: the sidebar (desktop) + top tab
  * strip (mobile) that stay mounted across navigation. Rendered from the route
- * group's `layout.tsx`, NOT from each page  so navigating between pages only
+ * group's `layout.tsx`  NOT from each page  so navigating between pages only
  * swaps the `{children}` (the masthead + main), and the sidebar never
  * unmounts or flashes a skeleton.
  *
@@ -93,7 +93,7 @@ export function DashboardFrame({
               aria-hidden="true"
               className={cn("absolute inset-y-0 left-0 w-1", roleAccent.strip)}
             />
-            <Link href="/" aria-label="Sebenza  home" className="flex items-center">
+            <Link href="/" aria-label="Sebenza, home" className="flex items-center">
               <SebenzaLogo width={120} />
             </Link>
           </div>
@@ -155,7 +155,7 @@ export function DashboardFrame({
               <div className="flex-[1] bg-[color:var(--color-danger)]" />
             </div>
             <div className="flex items-center justify-between gap-3 px-5 py-3">
-              <Link href="/" aria-label="Sebenza  home" className="flex items-center">
+              <Link href="/" aria-label="Sebenza, home" className="flex items-center">
                 <SebenzaLogo width={110} />
               </Link>
               <div className="flex items-center gap-2">

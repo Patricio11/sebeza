@@ -161,7 +161,7 @@ export function StallReasonsCard({
           Compare with employer decline reasons above + curriculum coverage.
         </strong>{" "}
         A salary-driven employer gap reads differently than a learning-cost-
-        driven stall  three different interventions land on each. Open{" "}
+        driven stall, three different interventions land on each. Open{" "}
         <Link
           href={"/gov/curriculum" as never}
           className="underline hover:text-[color:var(--color-brand-strong)]"
@@ -264,7 +264,7 @@ function EmptyState({ k }: { k: number }) {
         learning items from learners with <em>outcomes_research</em> consent
         granted before it can be shown publicly (k-anonymity floor +
         complementary suppression). The floor is a privacy protection, not
-        a bug  cells unsuppress as more learners use the platform.
+        a bug, cells unsuppress as more learners use the platform.
       </p>
     </div>
   );

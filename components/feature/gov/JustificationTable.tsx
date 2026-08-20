@@ -51,7 +51,7 @@ export function JustificationTable({ data }: { data: JustificationResult }) {
     return (
       <p className="rounded-[var(--radius-md)] border border-dashed border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-6 text-sm text-[color:var(--color-ink-soft)]">
         No (profession × province) cells cleared the k = {data.k} supply
-        floor. This is expected at low data density  most cells will
+        floor. This is expected at low data density, most cells will
         light up once the platform has more profiles per profession +
         province, more search activity from verified employer accounts,
         and more confirmed placements logged.

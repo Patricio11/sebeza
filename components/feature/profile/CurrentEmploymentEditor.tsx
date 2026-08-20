@@ -191,7 +191,7 @@ export function CurrentEmploymentEditor({
         <TextField
           id="role-city-dash"
           label="City you work in"
-          placeholder="e.g. Cape Town  leave blank to use your home city"
+          placeholder="e.g. Cape Town, leave blank to use your home city"
           value={roleCity}
           onChange={(e) => setRoleCity(e.target.value)}
         />

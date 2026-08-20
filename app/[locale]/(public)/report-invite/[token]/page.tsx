@@ -55,7 +55,7 @@ export default async function ReportInvitePage({
           ) : (
             <div className="rounded-[var(--radius-md)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-5 text-sm text-[color:var(--color-ink-soft)]">
               <p>
-                We couldn&rsquo;t verify the invitation link  it may have
+                We couldn&rsquo;t verify the invitation link, it may have
                 expired or already been handled. If you keep receiving
                 invitations from someone you don&rsquo;t know, email
                 support@sebenzasa.com directly.

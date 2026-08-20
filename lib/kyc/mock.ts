@@ -16,7 +16,7 @@ export const mockIdentityVerifier: IdentityVerifier = {
       ok: true,
       status: "pending",
       providerTransactionId: null,
-      raw: { note: "MockIdentityVerifier  admin manual approval required." },
+      raw: { note: "MockIdentityVerifier, admin manual approval required." },
     };
   },
 };

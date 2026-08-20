@@ -116,7 +116,7 @@ export function PathReviewControl({
       ) : (
         <p className="flex items-center gap-1.5 text-xs text-[color:var(--color-ink-soft)]">
           <Check className="size-4 text-[color:var(--color-brand)]" aria-hidden="true" />
-          Thanks  your feedback helps other seekers choose.
+          Thanks, your feedback helps other seekers choose.
         </p>
       )}
     </div>

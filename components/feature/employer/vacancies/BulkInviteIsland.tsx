@@ -388,7 +388,7 @@ export function BulkInviteIsland({
             </p>
             {banner.skipped > 0 && (
               <p className="mt-1 text-xs text-[color:var(--color-ink-soft)]">
-                We don&rsquo;t show per-person reasons here  it would leak
+                We don&rsquo;t show per-person reasons here, it would leak
                 consent state. The full picture lives in the org&rsquo;s audit
                 log for admin oversight.
               </p>
@@ -539,7 +539,7 @@ export function BulkInviteIsland({
             </span>
             <div className="flex gap-3">
               {/* Phase 29.2  fill the selection with the top N by the
-                  current view order. Convenience only  the send still
+                  current view order. Convenience only, the send still
                   goes through the explicit confirm modal. */}
               {positions != null &&
                 positions > 0 &&
@@ -789,12 +789,12 @@ function BulkInviteModal({
 
         <p className="text-sm text-[color:var(--color-ink-soft)]">
           Each person will get a notification: <em>&ldquo;{vacancyTitle}.&rdquo;</em>
-          They can accept, decline, or decline with a reason  declining is
+          They can accept, decline, or decline with a reason, declining is
           free and never affects their visibility in search.
         </p>
 
         <ul className="mt-4 space-y-1.5 text-xs text-[color:var(--color-ink-soft)]">
-          <li> Anyone without vacancy-invite consent is skipped silently  per-person reasons stay in the audit log.</li>
+          <li> Anyone without vacancy-invite consent is skipped silently, per-person reasons stay in the audit log.</li>
           <li> Already-invited candidates are skipped (no duplicates).</li>
           <li> Audit-logged as <code>vacancy.invite</code> for each invite sent.</li>
         </ul>
@@ -834,12 +834,12 @@ function BulkInviteModal({
             disabled={pending}
             maxLength={PERSONAL_NOTE_MAX}
             rows={3}
-            placeholder="Why you're reaching out  what about their profile caught your eye."
+            placeholder="Why you're reaching out, what about their profile caught your eye."
             className="mt-1.5 w-full rounded-[var(--radius-sm)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-3 text-sm text-[color:var(--color-ink)] outline-none transition-colors placeholder:text-[color:var(--color-ink-soft)] focus:border-[color:var(--color-ink)]"
           />
           <p className="mt-1.5 text-xs text-[color:var(--color-ink-soft)]">
             The same note attaches to every invite in this batch. Logged
-            as PII alongside the audit row  if you'd rather not write
+            as PII alongside the audit row, if you'd rather not write
             anything, leave it blank.
           </p>
         </div>

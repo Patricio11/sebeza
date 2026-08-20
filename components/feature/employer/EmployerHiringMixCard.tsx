@@ -126,7 +126,7 @@ export function EmployerHiringMixCard({ data }: { data: EmployerOwnMix }) {
           specific regulatory-mandate claims. */}
       <p className="mt-6 inline-flex items-start gap-1.5 rounded-[var(--radius-sm)] bg-[color:var(--color-surface-sunk)] px-3 py-2 text-[0.7rem] italic text-[color:var(--color-ink-soft)]">
         <Info className="mt-0.5 size-3 shrink-0" aria-hidden="true" />
-        Your hiring mix on Sebenza, for your own records  useful
+        Your hiring mix on Sebenza, for your own records, useful
         when HR or compliance needs a quick split of confirmed
         placements. Sebenza-confirmed placements only; not a
         substitute for any official filing.

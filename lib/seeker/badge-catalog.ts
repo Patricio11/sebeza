@@ -71,7 +71,7 @@ export const BADGE_CATALOG: Record<BadgeSlug, BadgeMeta> = {
     slug: "first_placement",
     title: "First placement",
     description:
-      "Awarded when an employer confirms a placement of you on Sebenza  the Placement-Truth event.",
+      "Awarded when an employer confirms a placement of you on Sebenza, the Placement-Truth event.",
     artwork: "/badges/first-placement.svg",
   },
 };

@@ -49,7 +49,7 @@ function checkRateLimit(userId: string) {
   }
   bucket.count += 1;
   if (bucket.count > RATE_LIMIT) {
-    throw new StorageError("rate_limited", "Too many uploads  try again in a few minutes.");
+    throw new StorageError("rate_limited", "Too many uploads, try again in a few minutes.");
   }
 }
 
@@ -298,7 +298,7 @@ async function upload(opts: {
   if (sniffed !== opts.file.type) {
     throw new StorageError(
       "bad_content",
-      "Mismatched file content  please re-upload.",
+      "Mismatched file content, please re-upload.",
     );
   }
 
@@ -333,7 +333,7 @@ async function upload(opts: {
     } catch {
       throw new StorageError(
         "bad_content",
-        "That image couldn't be processed  please try a different photo.",
+        "That image couldn't be processed, please try a different photo.",
       );
     }
     await backend.upload(key, new Uint8Array(main), "image/webp");

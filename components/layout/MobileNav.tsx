@@ -128,7 +128,7 @@ export function MobileNav({
               <Link
                 href="/"
                 onClick={() => setOpen(false)}
-                aria-label="Sebenza  home"
+                aria-label="Sebenza, home"
                 className="flex items-center"
               >
                 <SebenzaLogo width={130} />

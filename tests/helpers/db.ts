@@ -6,7 +6,7 @@
  * behaviour is exactly right for tests and catastrophic against the dev or
  * production database. This guard is the structural protection:
  *
- *   1. Test-DB config lives in `.env.test.local` (gitignored), NOT in
+ *   1. Test-DB config lives in `.env.test.local` (gitignored)  NOT in
  *      `.env.local`, so the test suites can never silently inherit the
  *      dev DATABASE_URL.
  *   2. The file must set BOTH `SEBENZA_TEST_DB=1` and `DATABASE_URL`.

@@ -59,7 +59,7 @@ describe("validateDob()", () => {
     expect(validateDob("1990-06-15")).toEqual({ ok: true });
   });
 
-  test("accepts the boundary  exactly 14", () => {
+  test("accepts the boundary, exactly 14", () => {
     const today = new Date();
     const fourteen = `${today.getUTCFullYear() - 14}-${String(
       today.getUTCMonth() + 1,

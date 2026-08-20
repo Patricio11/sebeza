@@ -76,7 +76,7 @@ export default async function PrivacyPolicyPage({
 
           <Section title="2. What we collect, and why">
             <p>
-              Sebenza is special-category PII territory by design  we
+              Sebenza is special-category PII territory by design, we
               process ID numbers, qualifications, and employment status to
               make the SA talent pool visible. Each data category is
               attached to a specific lawful purpose:
@@ -84,10 +84,10 @@ export default async function PrivacyPolicyPage({
             <ul className="my-4 list-disc pl-6 space-y-2">
               <li>
                 <strong>Identity</strong> (name, email, date of birth,
-                nationality, and  only when you choose to be KYC-verified
-                later from your dashboard  your encrypted SA ID or
+                nationality, and, only when you choose to be KYC-verified
+                later from your dashboard, your encrypted SA ID or
                 passport number plus a copy of your SA ID book/card or
-                passport bio page)  to create an account, confirm you
+                passport bio page), to create an account, confirm you
                 meet the minimum age (14) under the Basic Conditions of
                 Employment Act, and link your profile to a real person.
                 ID number and document upload are never asked for at
@@ -105,17 +105,17 @@ export default async function PrivacyPolicyPage({
               </li>
               <li>
                 <strong>Professional</strong> (profession, skills, experience,
-                qualifications, work availability)  to make your profile
+                qualifications, work availability), to make your profile
                 findable to employers searching for that talent.
               </li>
               <li>
                 <strong>Status</strong> (employed / open-to-work / studying,
-                with confirmation timestamps)  to drive the freshness signal
+                with confirmation timestamps), to drive the freshness signal
                 that down-ranks stale records.
               </li>
               <li>
                 <strong>Activity</strong> (sign-ins, profile views, contact
-                reveals, document downloads)  to maintain the audit ledger
+                reveals, document downloads), to maintain the audit ledger
                 you can see on <code>/dashboard/activity</code>.
               </li>
               <li>
@@ -129,7 +129,7 @@ export default async function PrivacyPolicyPage({
                 organisation from sending you another invitation for at
                 least 90 days under POPIA &sect;11. You can also report
                 an invitation as unsolicited from a link inside every
-                invitation email  no Sebenza account required.
+                invitation email, no Sebenza account required.
               </li>
             </ul>
             <p>
@@ -139,7 +139,7 @@ export default async function PrivacyPolicyPage({
             </p>
           </Section>
 
-          <Section title="3. Consent  granular, revocable, never weaponised">
+          <Section title="3. Consent, granular, revocable, never weaponised">
             <p>
               We separate consent into independent purposes. You can grant or
               revoke any of them at any time from{" "}
@@ -166,7 +166,7 @@ export default async function PrivacyPolicyPage({
                 anonymised national employment statistics.
               </li>
               <li>
-                <strong>Outcomes research</strong> (Phase 7.5)  opt-in
+                <strong>Outcomes research</strong>: opt-in
                 inclusion in the longitudinal education-to-employment
                 dataset. Suppressed below cohorts of 10. Withholding does not
                 weaken your job-search experience in any way.
@@ -195,7 +195,7 @@ export default async function PrivacyPolicyPage({
               <li>The reveal is recorded in our audit log.</li>
             </ol>
             <p>
-              No condition skipped  ever. The audit log is the system of
+              No condition skipped, ever. The audit log is the system of
               record and you can review your own entries at{" "}
               <code>/dashboard/activity</code>.
             </p>
@@ -267,7 +267,7 @@ export default async function PrivacyPolicyPage({
           <Section title="8. Your rights under POPIA">
             <ul className="my-4 list-disc pl-6 space-y-2">
               <li>
-                <strong>Section 23  access:</strong> download a JSON file
+                <strong>Section 23, access:</strong> download a JSON file
                 of every row we hold about you from{" "}
                 <Link href="/dashboard/privacy" className="underline">
                   your privacy dashboard
@@ -275,12 +275,12 @@ export default async function PrivacyPolicyPage({
                 . Audit-logged.
               </li>
               <li>
-                <strong>Section 24  correction:</strong> edit any profile
+                <strong>Section 24, correction:</strong> edit any profile
                 field from <code>/dashboard/profile</code>. Re-confirm your
                 national ID and consent versions from the same surface.
               </li>
               <li>
-                <strong>Section 24  deletion:</strong> erase your account
+                <strong>Section 24, deletion:</strong> erase your account
                 from <code>/dashboard/privacy</code>. 30-day grace window
                 during which an administrator can restore; after that the
                 row is gone.
@@ -311,7 +311,7 @@ export default async function PrivacyPolicyPage({
               consent state) without which the site cannot work. We do not
               use third-party advertising trackers. If you accept analytics
               cookies on the banner, we use a privacy-respecting tool to
-              count page views  no personal profile is built from your
+              count page views, no personal profile is built from your
               browsing.
             </p>
           </Section>

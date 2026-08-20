@@ -43,7 +43,7 @@ export function ModuleDemandGapCard({ data, limit = 10 }: Props) {
               Module-grain
             </p>
             <h3 id="module-gap-h" className="font-display text-xl">
-              Module  market gap
+              Module, market gap
             </h3>
           </div>
         </div>
@@ -56,7 +56,7 @@ export function ModuleDemandGapCard({ data, limit = 10 }: Props) {
 
       <p className="mb-4 max-w-2xl text-sm text-[color:var(--color-ink-soft)]">
         Modules ranked by{" "}
-        <strong>employer demand × (5  editorial confidence)</strong>.
+        <strong>employer demand × (5, editorial confidence)</strong>.
         High rank = market wants the skill + the module only touches it
         briefly. Where curriculum committees can move the dial fastest.
       </p>

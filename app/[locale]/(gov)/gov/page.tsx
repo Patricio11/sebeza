@@ -53,7 +53,7 @@ export default async function GovOverviewPage({
       role="gov"
       pageEyebrow="National signal"
       pageTitle="Sebenza Labour Market Index"
-      pageSubtitle="One number, three components. Updated nightly. Not an official Stats SA statistic  opinionated index, formula published."
+      pageSubtitle="One number, three components. Updated nightly. Not an official Stats SA statistic, opinionated index, formula published."
       pageActions={
         <div className="flex flex-wrap items-center gap-2">
           <Link

@@ -351,7 +351,7 @@ export async function approveOrg(
   await notifyOrgMembers(row.id, {
     kind: "org.verified",
     title: "Your organisation is verified",
-    body: `${row.name} is now a verified employer  candidate reveal, document downloads, and vacancy invites are unlocked for every member of your team. Your account reference is ${row.id}.`,
+    body: `${row.name} is now a verified employer, candidate reveal, document downloads, and vacancy invites are unlocked for every member of your team. Your account reference is ${row.id}.`,
     link: "/employer",
     meta: { orgId: row.id, orgName: row.name },
   });
@@ -381,7 +381,7 @@ export async function approveOrg(
     members.map((m) =>
       sendEmail({
         to: m.email,
-        subject: `${row.name} is verified on Sebenza  your workspace is open`,
+        subject: `${row.name} is verified on Sebenza, your workspace is open`,
         html: orgVerifiedEmail({ name: m.name, orgName: row.name }),
       }).catch((e) => {
         // Non-fatal: the in-app notification already carries the decision.

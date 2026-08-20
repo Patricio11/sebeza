@@ -32,7 +32,7 @@ export async function callSelfHosted(
 ): Promise<LlmProviderResponse> {
   if (!call.endpointUrl?.trim()) {
     throw new Error(
-      "self_hosted requires endpointUrl  configure on /admin/llm.",
+      "self_hosted requires endpointUrl, configure on /admin/llm.",
     );
   }
   const body = {

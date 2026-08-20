@@ -79,7 +79,7 @@ export default async function GovShortagePage({
       role="gov"
       pageEyebrow="Policy intelligence"
       pageTitle="Skills-Shortage Justification Index"
-      pageSubtitle="One row per profession × province cell. Honest classifier  shortages are training-investment signals; local-supply-available cells are where local-hiring incentive policy can land cleanly. Never a foreigners-vs-locals scoreboard."
+      pageSubtitle="One row per profession × province cell. Honest classifier, shortages are training-investment signals; local-supply-available cells are where local-hiring incentive policy can land cleanly. Never a foreigners-vs-locals scoreboard."
       pageActions={
         <Link
           href={

@@ -66,7 +66,7 @@ export function StatusNudgeBanner({ band, days }: Props) {
           <h2 className="font-display text-lg leading-tight">
             {urgent
               ? `It's been ${days} days since you last confirmed your status.`
-              : `It's been ${days} days  is your status still accurate?`}
+              : `It's been ${days} days, is your status still accurate?`}
           </h2>
           <p className="mt-1 text-sm text-[color:var(--color-ink-soft)]">
             {urgent

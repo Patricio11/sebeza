@@ -531,7 +531,7 @@ async function respond<TSchema extends z.ZodTypeAny>(
 
   if (updateResult.length === 0) {
     return fail(
-      "Your response couldn't be saved  the invitation state changed in the meantime. Refresh and try again.",
+      "Your response couldn't be saved, the invitation state changed in the meantime. Refresh and try again.",
     );
   }
 

@@ -144,7 +144,7 @@ export default async function AdminLlmPage({
           spend until every gate is open.
         </p>
         <p className="mt-2">
-          Self-hosted is the POPIA-clean recommended path  inference
+          Self-hosted is the POPIA-clean recommended path, inference
           stays inside the af-south-1 residency boundary. OpenAI +
           Anthropic require explicit POPIA s.72 acknowledgement before
           credentials are accepted; the acknowledgement timestamp lands

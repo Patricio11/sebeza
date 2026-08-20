@@ -158,7 +158,7 @@ export default async function SeekerInvitationDetailPage({
             </div>
           )}
           {/* Phase 9.21  surface the season window when the vacancy
-              declared one. Informational only (D5)  the seeker reads
+              declared one. Informational only (D5), the seeker reads
               the months and decides; nothing here is a filter. */}
           {inv.seasonalWindow && (
             <div>
@@ -269,7 +269,7 @@ export default async function SeekerInvitationDetailPage({
 
       <p className="mt-8 text-xs italic text-[color:var(--color-ink-soft)]">
         Salary band, internal notes, and the employer&rsquo;s candidate
-        pipeline are private to the organisation  this invitation is
+        pipeline are private to the organisation, this invitation is
         the only thing they&rsquo;ve sent you. Declining never affects
         your search visibility, and you can withdraw <strong>Vacancy
         invites</strong> consent any time from your{" "}

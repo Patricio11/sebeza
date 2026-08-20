@@ -97,7 +97,7 @@ export function StudentProgressionTimeline({
       {events.length === 0 ? (
         <p className="rounded-[var(--radius-sm)] border border-dashed border-[color:var(--color-hairline)] bg-[color:var(--color-surface-sunk)] px-4 py-6 text-center text-xs text-[color:var(--color-ink-soft)]">
           No events on your timeline yet. Add a qualification, complete
-          a learning path, or declare a milestone below  the platform
+          a learning path, or declare a milestone below, the platform
           will surface it here.
         </p>
       ) : (

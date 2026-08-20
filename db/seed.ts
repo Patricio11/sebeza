@@ -159,7 +159,7 @@ async function seedLlmProviders() {
  * constant's display order.
  */
 async function seedLearningPaths() {
-  console.log("📚 Phase 18  learning_paths catalog (mirrors MOCK_COMPASS)…");
+  console.log("📚 Phase 18, learning_paths catalog (mirrors MOCK_COMPASS)…");
   const rows = MOCK_COMPASS.learningPaths.map((p, i) => ({
     id: slugifyLearningPathId(p.title),
     title: p.title,
@@ -178,7 +178,33 @@ async function seedLearningPaths() {
     lastVerifiedAt: new Date(),
     sortOrder: i,
   }));
-  await db.insert(schema.learningPaths).values(rows).onConflictDoNothing();
+  // `onConflictDoNothing` contradicted the mirror invariant above: an
+  // existing row never picked up a corrected title or cost note, so the
+  // parity test failed on any database seeded before the edit rather
+  // than on any real drift. Re-seeding now refreshes the editorial
+  // fields. It deliberately does NOT touch `lastVerifiedAt`, because
+  // re-running a seed is not an editorial review and must not reset
+  // anybody's 90-day freshness clock.
+  await db
+    .insert(schema.learningPaths)
+    .values(rows)
+    .onConflictDoUpdate({
+      target: schema.learningPaths.id,
+      set: {
+        title: sql`excluded.title`,
+        provider: sql`excluded.provider`,
+        providerKind: sql`excluded.provider_kind`,
+        cost: sql`excluded.cost`,
+        costNote: sql`excluded.cost_note`,
+        outcome: sql`excluded.outcome`,
+        durationWeeks: sql`excluded.duration_weeks`,
+        unlocksSkills: sql`excluded.unlocks_skills`,
+        national: sql`excluded.national`,
+        url: sql`excluded.url`,
+        sebenzaReviewed: sql`excluded.sebenza_reviewed`,
+        sortOrder: sql`excluded.sort_order`,
+      },
+    });
   console.log(`   inserted ${rows.length} learning paths`);
 }
 
@@ -197,7 +223,7 @@ function slugifyLearningPathId(title: string): string {
  * the SKILLS taxonomy (FK). Runs after `seedTaxonomy` (which seeds skills).
  */
 async function seedSkillPrereqs() {
-  console.log("🪜 Phase 20  skill prerequisite graph…");
+  console.log("🪜 Phase 20, skill prerequisite graph…");
   const PAIRS: Array<{ skill: string; prereq: string; reason: string }> = [
     { skill: "postgres", prereq: "sql", reason: "SQL fundamentals come before Postgres-specific work." },
     { skill: "industrial-wiring", prereq: "wiring", reason: "Industrial wiring builds on domestic wiring basics." },
@@ -230,7 +256,7 @@ async function seedSkillPrereqs() {
  * consent, so the feature demos for the standard test seeker.
  */
 async function seedCityDemand() {
-  console.log("📍 Phase 21  city-scoped employer demand (top metros)…");
+  console.log("📍 Phase 21, city-scoped employer demand (top metros)…");
   const METROS: Array<{
     city: string;
     province: string;
@@ -313,7 +339,7 @@ async function seedCityDemand() {
  * (the AI-Coach switch is acknowledgement-gated on this).
  */
 async function seedCrisisResources() {
-  console.log("🛟 Phase 22  crisis-resource template (INACTIVE; admin verifies)…");
+  console.log("🛟 Phase 22, crisis-resource template (INACTIVE; admin verifies)…");
   await db
     .insert(schema.crisisResources)
     .values([
@@ -322,7 +348,7 @@ async function seedCrisisResources() {
         name: "SADAG (South African Depression and Anxiety Group)",
         contact: "[ADMIN: add SADAG's current verified helpline number]",
         availability: null,
-        note: "Template only  verify against sadag.org, then activate. Never ship an unverified number.",
+        note: "Template only, verify against sadag.org, then activate. Never ship an unverified number.",
         active: false,
         sortOrder: 0,
       },
@@ -336,7 +362,7 @@ async function seedCrisisResources() {
  * render parity. Admin-correctable from here on; never invented at runtime.
  */
 async function seedGraduateProgrammes() {
-  console.log("🎓 Phase 23  graduate programmes (mirrors seed constants)…");
+  console.log("🎓 Phase 23, graduate programmes (mirrors seed constants)…");
   const rows = SEED_GRADUATE_PROGRAMMES.map((p, i) => ({
     id: slugifyLearningPathId(`${p.organisation} ${p.title}`),
     title: p.title,
@@ -376,7 +402,7 @@ async function seedGraduateProgrammes() {
  *     in-progress at 50%, one accepted) + earned badges; lerato-n gets badges.
  */
 async function seedShowcase() {
-  console.log("🌟 Phase 23.6  showcase seed (flagship accounts + filled-vacancy story)…");
+  console.log("🌟 Phase 23.6, showcase seed (flagship accounts + filled-vacancy story)…");
   const v3 = id("vac", "grad-sw-dev-programme");
   const orgId = id("org", "discovery-bank");
   const cohort = (n: string) => id("prof", `wits-bsc-cs-2026-${n}`);
@@ -420,7 +446,7 @@ async function seedShowcase() {
           userId: u.userId,
           kind: "vacancy.outcome.other-hired",
           title: "Update on Graduate Software Developer Programme",
-          body: "Discovery Bank filled this role with another candidate. Your profile made the shortlist  keeping your status fresh and adding one in-demand skill puts you in a stronger position for the next one.",
+          body: "Discovery Bank filled this role with another candidate. Your profile made the shortlist, keeping your status fresh and adding one in-demand skill puts you in a stronger position for the next one.",
           link: "/dashboard/grow",
           meta: { vacancyId: v3, orgId },
           createdAt: new Date("2026-04-02"),
@@ -527,7 +553,7 @@ async function seedShowcase() {
       ])
       .onConflictDoNothing();
   }
-  console.log("   filled-vacancy feedback + cohort placements + flagship enrichment done");
+  console.log(", filled-vacancy feedback + cohort placements + flagship enrichment done");
 }
 
 async function seedTaxonomy() {
@@ -770,7 +796,7 @@ async function seedOrgsAndPlacements() {
     twoFactorActive: true,
   });
 
-  console.log("🤝 Placements (illustrative  match the landing outcomes)…");
+  console.log("🤝 Placements (illustrative, match the landing outcomes)…");
   await db.insert(schema.placements).values([
     {
       id: id("plc", "thandeka"),
@@ -849,7 +875,7 @@ async function seedConsents() {
  * → size 12, placed 3, rate 25%.
  */
 async function seedPhase7_5OutcomesCohort() {
-  console.log("🎓 Phase 7.5  synthetic graduate cohort for /insights outcomes…");
+  console.log("🎓 Phase 7.5, synthetic graduate cohort for /insights outcomes…");
   const pwHash = await hashPassword(SEED_PASSWORD);
   const orgId = id("org", "discovery-bank");
   const institutionSlug = "wits";
@@ -1043,7 +1069,7 @@ function provinceSlugByLabel(label: string): string {
  * hires across more professions.
  */
 async function seedPhase9_7NationalityDemo() {
-  console.log("🌍 Phase 9.7  foreign-national profiles + demand seeds…");
+  console.log("🌍 Phase 9.7, foreign-national profiles + demand seeds…");
   const pwHash = await hashPassword(SEED_PASSWORD);
   const discoveryOrgId = id("org", "discovery-bank");
   const memberSince = new Date("2024-02-01");
@@ -1244,7 +1270,7 @@ async function seedPhase9_7NationalityDemo() {
  * cron'd row).
  */
 async function seedPhase9_8Vacancies() {
-  console.log("📝 Phase 9.8.8  vacancies + invitations + linked placements…");
+  console.log("📝 Phase 9.8.8, vacancies + invitations + linked placements…");
   const orgId = id("org", "discovery-bank");
   const recruiterUserId = id("user", "naledi-k");
   const now = Date.now();
@@ -1619,7 +1645,7 @@ async function seedPhase9_8Vacancies() {
  * Real uploads on actual onboarding flows will work normally.
  */
 async function seedPhase9_10OrgVetting() {
-  console.log("🛡  Phase 9.10  org vetting lifecycle fixtures…");
+  console.log("🛡  Phase 9.10, org vetting lifecycle fixtures…");
   const pwHash = await hashPassword(SEED_PASSWORD);
   const now = Date.now();
   const day = 24 * 60 * 60 * 1000;
@@ -1739,7 +1765,7 @@ async function seedPhase9_10OrgVetting() {
       name: f.orgName,
       registrationNumber: f.registration,
       industry: f.industry,
-      sizeBand: "11  50",
+      sizeBand: "11, 50",
       city: f.city,
       country: f.country,
       verification: f.verification,
@@ -1802,7 +1828,7 @@ async function seedPhase9_10OrgVetting() {
  * Audit rows mirror what the action handlers + abandon modal write.
  */
 async function seedPhase9_12LearningLoop() {
-  console.log("📚 Phase 9.12  learning-loop fixtures (Wits cohort 08)…");
+  console.log("📚 Phase 9.12, learning-loop fixtures (Wits cohort 08)…");
   const profileId = id("prof", "wits-bsc-cs-2026-08");
   const userId = id("user", "wits-bsc-cs-2026-08");
   const day = 24 * 60 * 60 * 1000;
@@ -1817,7 +1843,7 @@ async function seedPhase9_12LearningLoop() {
       id: lrnReact,
       profileId,
       skillSlug: "react",
-      title: "Build a React app from scratch  freeCodeCamp",
+      title: "Build a React app from scratch, freeCodeCamp",
       provider: "freeCodeCamp",
       resourceUrl: "https://www.freecodecamp.org/learn/front-end-development-libraries/",
       resourceKind: "free",
@@ -1829,7 +1855,7 @@ async function seedPhase9_12LearningLoop() {
       id: lrnTs,
       profileId,
       skillSlug: "typescript",
-      title: "TypeScript fundamentals  TVET short course",
+      title: "TypeScript fundamentals, TVET short course",
       provider: "Tshwane North TVET",
       resourceUrl: null,
       resourceKind: "tvet",
@@ -1842,7 +1868,7 @@ async function seedPhase9_12LearningLoop() {
       id: lrnPg,
       profileId,
       skillSlug: "postgres",
-      title: "PostgreSQL for backend  paid bootcamp",
+      title: "PostgreSQL for backend, paid bootcamp",
       provider: "Codespace SA",
       resourceUrl: null,
       resourceKind: "other",
@@ -1977,7 +2003,7 @@ async function seedPhase9_12LearningLoop() {
  * fixtures for variety).
  */
 async function seedPhase9_13StallFixtures() {
-  console.log("📉 Phase 9.13  stall-cell fixtures (10 BSc CS · postgres abandoned)…");
+  console.log("📉 Phase 9.13, stall-cell fixtures (10 BSc CS · postgres abandoned)…");
   const day = 24 * 60 * 60 * 1000;
   const now = Date.now();
   // Cohort members to add stall fixtures for (10 total, excluding
@@ -2009,7 +2035,7 @@ async function seedPhase9_13StallFixtures() {
       id: id("lrn", `${handle}-postgres-stall`),
       profileId: id("prof", handle),
       skillSlug: "postgres",
-      title: "PostgreSQL for backend  paid bootcamp",
+      title: "PostgreSQL for backend, paid bootcamp",
       provider: "Codespace SA",
       resourceUrl: null,
       resourceKind: "other",
@@ -2024,7 +2050,7 @@ async function seedPhase9_13StallFixtures() {
       id: id("lrn", `${handle}-postgres-stall-q`),
       profileId: id("prof", handle),
       skillSlug: "postgres",
-      title: "PostgreSQL for backend  bootcamp",
+      title: "PostgreSQL for backend, bootcamp",
       provider: "Codespace SA",
       resourceUrl: null,
       resourceKind: "other",
@@ -2041,7 +2067,7 @@ async function seedPhase9_13StallFixtures() {
 }
 
 async function seedPhase9_13ProgrammeSkills() {
-  console.log("🏛️  Phase 9.13  programme_skills hand-curated mapping…");
+  console.log("🏛️  Phase 9.13, programme_skills hand-curated mapping…");
 
   type PSRow = {
     institutionSlug: string;
@@ -2157,7 +2183,7 @@ async function seedPhase9_13ProgrammeSkills() {
 
 async function seedPhase13_2ModuleSkills() {
   console.log(
-    "📚  Phase 13.5  module_skills Tier-1 editorial seed",
+    "📚  Phase 13.5, module_skills Tier-1 editorial seed",
   );
 
   type MSRow = {
@@ -2566,7 +2592,7 @@ async function seedPhase13_2ModuleSkills() {
  *      but the submitter's profile (if any) is untouched.
  */
 async function seedPhase9_15TaxonomySuggestions() {
-  console.log("📥 Phase 9.15  taxonomy suggestion fixtures…");
+  console.log("📥 Phase 9.15, taxonomy suggestion fixtures…");
   const day = 24 * 60 * 60 * 1000;
   const now = Date.now();
 
@@ -2611,7 +2637,7 @@ async function seedPhase9_15TaxonomySuggestions() {
     state: "rejected",
     resolvedByUserId: id("user", "sebenza-admin"),
     resolvedAt: new Date(now - 9 * day),
-    adminNote: "Not a real profession  spam submission.",
+    adminNote: "Not a real profession, spam submission.",
   });
 
   // Audit log entries mirroring what the production write paths produce.
@@ -2652,7 +2678,7 @@ async function seedPhase9_15TaxonomySuggestions() {
       meta: {
         kind: "profession",
         customText: "asdfasdf",
-        reason: "Not a real profession  spam submission.",
+        reason: "Not a real profession, spam submission.",
       },
       at: new Date(now - 9 * day),
     },
@@ -2660,7 +2686,7 @@ async function seedPhase9_15TaxonomySuggestions() {
 }
 
 async function seedPhase7Reports() {
-  console.log("🚩 Phase 7 sample reports (open + closed  for /admin/moderation)…");
+  console.log("🚩 Phase 7 sample reports (open + closed, for /admin/moderation)…");
   await db.insert(schema.reports).values([
     {
       id: id("rep", "amara-spam"),
@@ -2685,7 +2711,7 @@ async function seedPhase7Reports() {
 
 async function main() {
   const started = Date.now();
-  console.log("🌱 Sebenza seed  Phase 2 starting database\n");
+  console.log("🌱 Sebenza seed, Phase 2 starting database\n");
 
   await truncate();
   // Phase 13.3 follow-up  re-insert the 4 dormant LLM provider rows.
@@ -2805,7 +2831,7 @@ async function main() {
 // ─────────────────────────────────────────────────────────────────────────────
 
 async function seedPhase9_17SeekerInvitations() {
-  console.log("📨 Phase 9.17  seeker invitation fixtures…");
+  console.log("📨 Phase 9.17, seeker invitation fixtures…");
   const day = 24 * 60 * 60 * 1000;
   const now = Date.now();
   const orgId = id("org", "discovery-bank");
@@ -2820,7 +2846,7 @@ async function seedPhase9_17SeekerInvitations() {
     name: "Thandi Mokoena",
     profession: "Software Developer",
     personalNote:
-      "We loved your portfolio at the WeThinkCode demo day. We're building out our payments team  please confirm so we can put you forward.",
+      "We loved your portfolio at the WeThinkCode demo day. We're building out our payments team, please confirm so we can put you forward.",
     state: "pending",
     createdAt: new Date(now - 3 * day),
     expiresAt: new Date(now + 11 * day),

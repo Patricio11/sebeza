@@ -40,7 +40,7 @@ export default async function EmployerHelpIndexPage({
       role="employer"
       pageEyebrow="Documentation"
       pageTitle="Help center"
-      pageSubtitle="Everything you can do as an employer on Sebenza  laid out by category, searchable, with deep-links back to the dashboard surfaces they cover. English only at v1; translations follow."
+      pageSubtitle="Everything you can do as an employer on Sebenza, laid out by category, searchable, with deep-links back to the dashboard surfaces they cover. English only at v1; translations follow."
     >
       <HelpSearchIsland
         articles={EMPLOYER_HELP_ARTICLES.map((a) => a.meta)}
@@ -108,9 +108,8 @@ export default async function EmployerHelpIndexPage({
       )}
 
       <p className="mt-12 text-xs italic text-[color:var(--color-ink-soft)]">
-        Seeker, admin + government help centres land in Phase 10.2 / 10.3 / 10.4.
-        Translations to isiZulu, isiXhosa + Afrikaans follow once the
-        employer surface is proven  POPIA / consent copy is
+        Translations to isiZulu, isiXhosa and Afrikaans follow once this
+        surface is proven, POPIA / consent copy is
         human-translated only.
       </p>
     </DashboardMasthead>

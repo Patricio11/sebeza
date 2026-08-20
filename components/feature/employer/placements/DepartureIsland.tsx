@@ -201,8 +201,8 @@ export function DepartureIsland({
             {step === "reengaged" && (
               <p className="text-sm text-[color:var(--color-ink-soft)]">
                 {chosenVacancyId
-                  ? "Invite queued. The seeker will be notified via the same channel as your bulk-invite flow  if they revoked vacancy-invite consent post-departure, the send is silently skipped per the existing audit-only policy."
-                  : "Departure logged. You can come back any time and invite them to another role  the re-engage panel will also surface from the list view next time they show up."}
+                  ? "Invite queued. The seeker will be notified via the same channel as your bulk-invite flow, if they revoked vacancy-invite consent post-departure, the send is silently skipped per the existing audit-only policy."
+                  : "Departure logged. You can come back any time and invite them to another role, the re-engage panel will also surface from the list view next time they show up."}
               </p>
             )}
 
@@ -391,7 +391,7 @@ function DepartureForm({
           disabled={pending}
           maxLength={NOTE_MAX}
           rows={3}
-          placeholder="Appended to the durable internal note. Use for your own context  never the disciplinary reason."
+          placeholder="Appended to the durable internal note. Use for your own context, never the disciplinary reason."
           className="mt-1.5 w-full rounded-[var(--radius-sm)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-3 text-sm text-[color:var(--color-ink)] outline-none placeholder:text-[color:var(--color-ink-soft)] focus:border-[color:var(--color-ink)]"
         />
       </div>
@@ -413,7 +413,7 @@ function ReengagePanel({
   if (openVacancies.length === 0) {
     return (
       <p className="text-sm text-[color:var(--color-ink-soft)]">
-        You don&rsquo;t have any open vacancies right now  nothing to
+        You don&rsquo;t have any open vacancies right now, nothing to
         re-engage on. Their dossier stays accessible the next time
         you open a role they&rsquo;d be a fit for.
       </p>
@@ -423,7 +423,7 @@ function ReengagePanel({
     <div className="space-y-3">
       <p className="text-sm text-[color:var(--color-ink-soft)]">
         Want to invite them to one of your other open vacancies? Same
-        consent + audit path as the bulk-invite flow  if they revoked
+        consent + audit path as the bulk-invite flow, if they revoked
         vacancy-invite consent post-departure, the send is silently
         skipped (audit only).
       </p>

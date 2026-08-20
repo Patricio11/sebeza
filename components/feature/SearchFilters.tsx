@@ -179,7 +179,7 @@ export function SearchFilters({ defaultFilters, query }: Props) {
           );
         })}
         <p className="mt-2 text-xs italic text-[color:var(--color-ink-soft)]">
-          Self-declared by each seeker  independent of employment status.
+          Self-declared by each seeker, independent of employment status.
         </p>
       </FilterGroup>
 

@@ -175,7 +175,7 @@ function digestBodyLine(p: DigestBodyInputs): string {
     parts.push(`Rank #${p.rank} of ${p.poolTotal} in your pool`);
   }
   if (parts.length === 0) {
-    return "A quiet week  but your status is current and you're still in the pool.";
+    return "A quiet week, but your status is current and you're still in the pool.";
   }
   return parts.join(" · ") + ".";
 }

@@ -107,7 +107,7 @@ export function TwoFactorSetupForm({ email, postSetupHref }: Props) {
         <div>
           <h2 className="font-display text-xl">1. Scan in your authenticator</h2>
           <p className="mt-1 text-sm text-[color:var(--color-ink-soft)]">
-            Google Authenticator, 1Password, Authy  any TOTP app works.
+            Google Authenticator, 1Password, Authy, any TOTP app works.
           </p>
           <div className="mt-4 flex flex-col items-center gap-4 rounded-[var(--radius-md)] border border-[color:var(--color-hairline)] bg-white p-5 md:flex-row md:items-start">
             {qrSrc && (
@@ -164,7 +164,7 @@ export function TwoFactorSetupForm({ email, postSetupHref }: Props) {
             setError(null);
           }}
         >
-          I have saved my codes  continue
+          I have saved my codes, continue
         </Button>
       </div>
     );

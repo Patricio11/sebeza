@@ -144,7 +144,7 @@ export function InviteSeekerForm({ professions }: Props) {
             onChange={(e) => setNote(e.target.value.slice(0, 200))}
             rows={3}
             maxLength={200}
-            placeholder="e.g. We worked together at the BNG project  please confirm so I can put you forward for the next contract."
+            placeholder="e.g. We worked together at the BNG project, please confirm so I can put you forward for the next contract."
             className="mt-1 w-full rounded-[var(--radius-sm)] border border-[color:var(--color-hairline)] bg-[color:var(--color-paper)] px-3 py-2.5 text-sm text-[color:var(--color-ink)] outline-none transition-colors focus:border-[color:var(--color-ink)] focus:ring-2 focus:ring-[color:var(--color-brand)]/30"
             disabled={pending}
           />

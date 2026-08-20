@@ -260,7 +260,7 @@ export function OrgReviewModal({ detail, onClose }: Props) {
               tone="muted"
               icon={Clock}
               title="Waiting on the Owner to submit"
-              body="Their email is verified  the form is open on their side. No admin action right now."
+              body="Their email is verified, the form is open on their side. No admin action right now."
             />
           )}
           {org.adminNote && org.verification === "unverified" && (
@@ -378,7 +378,7 @@ export function OrgReviewModal({ detail, onClose }: Props) {
                 htmlFor="reject-reason"
                 className="block text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--color-ink)]"
               >
-                Rejection reason  the org will see this verbatim
+                Rejection reason, the org will see this verbatim
               </label>
               <textarea
                 id="reject-reason"
@@ -401,7 +401,7 @@ export function OrgReviewModal({ detail, onClose }: Props) {
                 htmlFor="changes-note"
                 className="block text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--color-ink)]"
               >
-                Note  shown to the org as a yellow banner on their form
+                Note, shown to the org as a yellow banner on their form
               </label>
               <textarea
                 id="changes-note"
@@ -411,7 +411,7 @@ export function OrgReviewModal({ detail, onClose }: Props) {
                 maxLength={500}
                 rows={3}
                 className="mt-1 w-full rounded-[var(--radius-sm)] border border-[color:var(--color-hairline)] bg-[color:var(--color-paper)] p-2 text-sm"
-                placeholder="e.g. Proof of address is older than 3 months  please upload a recent municipal bill or bank statement."
+                placeholder="e.g. Proof of address is older than 3 months, please upload a recent municipal bill or bank statement."
               />
               <p className="mt-1 text-[0.65rem] text-[color:var(--color-ink-soft)]">
                 {500 - note.length} characters left.

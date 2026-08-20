@@ -30,7 +30,7 @@ export function StatusChip({ status, confirmedAt, locale = "en", className }: Pr
   const days = daysSince(confirmedAt);
   const a11y =
     band === "stale"
-      ? `${label}. Status is stale  confirmed ${days} days ago.`
+      ? `${label}. Status is stale, confirmed ${days} days ago.`
       : `${label}. Confirmed ${relative}.`;
 
   return (

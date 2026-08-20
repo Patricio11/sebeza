@@ -68,7 +68,7 @@ export default async function EmployerOnboardingPage({
             Your account isn&rsquo;t linked to an organisation
           </h2>
           <p className="mt-2 text-sm text-[color:var(--color-ink-soft)]">
-            Contact support to resolve  this is unusual and we can fix it
+            Contact support to resolve, this is unusual and we can fix it
             from the admin side.
           </p>
         </div>
@@ -119,7 +119,7 @@ export default async function EmployerOnboardingPage({
             Check your spam / junk folder if it&rsquo;s been more than a few
             minutes. Outlook + Gmail sometimes file first-time senders
             there. If you&rsquo;ve lost the email entirely, support can
-            mark you verified manually  reach out via your sign-up email.
+            mark you verified manually, reach out via your sign-up email.
           </p>
         </section>
       </Shell>
@@ -144,7 +144,7 @@ export default async function EmployerOnboardingPage({
                 id="pending-h"
                 className="font-display text-xl text-[color:var(--color-ink)]"
               >
-                Thanks  your application is under review
+                Thanks, your application is under review
               </h2>
               <p className="mt-2 text-sm text-[color:var(--color-ink-soft)]">
                 Our team typically reviews KYC submissions within one
@@ -205,7 +205,7 @@ export default async function EmployerOnboardingPage({
                 </p>
               )}
               <p className="mt-4 text-xs text-[color:var(--color-ink-soft)]">
-                If circumstances have changed, contact support  rejected
+                If circumstances have changed, contact support, rejected
                 applications can be re-vetted after the underlying issue is
                 resolved.
               </p>

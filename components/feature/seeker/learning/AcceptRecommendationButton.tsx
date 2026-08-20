@@ -85,7 +85,7 @@ export function AcceptRecommendationButton({
           {pending ? "Adding" : `Learn ${skillLabel}`}
         </Button>
         {/* Phase 11.2.4  parking-lot CTA. Secondary so it never
-            competes with the commit path  recovers warm intent the
+            competes with the commit path, recovers warm intent the
             seeker would otherwise scroll past. */}
         <button
           type="button"

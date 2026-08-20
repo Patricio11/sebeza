@@ -93,7 +93,7 @@ export async function createTestimonial(
     quote: parsed.data.quote,
     displayName: parsed.data.displayName,
     displayContext: parsed.data.displayContext,
-    consentDisplay: true, // admin-authored copy  the admin owns it
+    consentDisplay: true, // admin-authored copy, the admin owns it
     state: "approved",
     sortOrder: (agg?.max ?? 0) + 1,
   });

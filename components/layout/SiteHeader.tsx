@@ -48,7 +48,7 @@ export async function SiteHeader({ variant = "default" }: Props) {
         <div className="mx-auto flex max-w-[1320px] items-center justify-between gap-6 px-5 py-3 md:px-8">
           <Link
             href="/"
-            aria-label="Sebenza  home"
+            aria-label="Sebenza, home"
             className="group flex items-center rounded-sm focus-visible:outline-none"
           >
             <SebenzaLogo width={140} />

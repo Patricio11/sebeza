@@ -339,11 +339,11 @@ export default async function CareerCompassPage({
           Lands here when a seeker opens the in-app / email notification
           about a vacancy that was filled with another candidate. The
           banner restates the role's published gaps (never names or
-          attributes the hired person  D4 privacy invariant) and the
+          attributes the hired person, D4 privacy invariant) and the
           highlighted recommendations below give an actionable next step. */}
       {missingLabels.length > 0 && (
         <section
-          aria-label="Vacancy outcome  growth focus"
+          aria-label="Vacancy outcome, growth focus"
           className="mb-6 rounded-[var(--radius-md)] border-2 border-[color:var(--color-accent)] bg-[color:var(--color-accent-tint)] p-5 md:p-6"
         >
           <div className="flex items-center gap-2 text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--color-accent)]">
@@ -437,7 +437,7 @@ export default async function CareerCompassPage({
 
       {/* Phase 11.2.9  compact student-lane nudge on /dashboard/grow
           itself. The non-student rendering of this page is otherwise
-          silent about the academic surface  one quiet line surfaces
+          silent about the academic surface, one quiet line surfaces
           the lane without dominating the page. */}
       {!me.academic && (
         <p className="mt-6">
@@ -807,7 +807,7 @@ function RecommendationItem({
       <div className="grid gap-4 md:grid-cols-[2.5rem_1fr_auto] md:items-start">
         {/* Phase 11.5.10  visually styled "01 / 02 / ..." ordinal.
             Without an explicit aria-label screen readers announce
-            "zero one"  confusing. The aria-label restates it as
+            "zero one", confusing. The aria-label restates it as
             "Recommendation 1". The styled glyph stays visual via
             aria-hidden on the inner span. */}
         <span
@@ -835,7 +835,7 @@ function RecommendationItem({
             {costAccessAbandoned && (
               <span
                 className="inline-flex items-center gap-1 rounded-[var(--radius-pill)] border border-dashed border-[color:var(--color-brand)] bg-[color:var(--color-brand-tint)] px-2 py-0.5 text-[0.62rem] uppercase tracking-[0.18em] text-[color:var(--color-brand-strong)]"
-                title="You previously gave up on this skill for cost or access reasons  free alternative shown."
+                title="You previously gave up on this skill for cost or access reasons, free alternative shown."
               >
                 Free alt
               </span>
@@ -1017,7 +1017,7 @@ function LearningPathCard({
           />
         ) : (
           <p className="text-xs italic text-[color:var(--color-ink-soft)]">
-            Provider link coming  search &ldquo;{path.title}&rdquo; on Google for now.
+            Provider link coming, search &ldquo;{path.title}&rdquo; on Google for now.
           </p>
         )}
         {path.sebenzaReviewed && (

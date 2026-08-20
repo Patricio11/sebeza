@@ -148,7 +148,7 @@ export function TestimonialsManager({
         </h2>
         {rows.length === 0 ? (
           <p className="text-sm text-[color:var(--color-ink-soft)]">
-            Nothing yet  start a campaign to collect real words from users.
+            Nothing yet, start a campaign to collect real words from users.
           </p>
         ) : (
           <ul className="space-y-3">

@@ -144,7 +144,7 @@ function s3Backend(
             ok: false,
             message:
               `Write OK, but read (GetObject) failed on "${bucket}": ` +
-              `${ge instanceof Error ? ge.message : String(ge)}. Grant s3:GetObject on the bucket objects  signed downloads need it.`,
+              `${ge instanceof Error ? ge.message : String(ge)}. Grant s3:GetObject on the bucket objects, signed downloads need it.`,
           };
         }
         let cleaned = true;
@@ -160,7 +160,7 @@ function s3Backend(
           message: `Connected to S3 (${region}); write + read on "${bucket}" OK${
             cleaned
               ? "; probe cleaned up."
-              : " (probe left  DeleteObject not granted; uploads replace by key, so this only matters for document removal)."
+              : " (probe left, DeleteObject not granted; uploads replace by key, so this only matters for document removal)."
           }`,
         };
       } catch (e) {

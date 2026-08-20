@@ -31,7 +31,7 @@ export async function GET(request: Request) {
         capturedAt: capturedAt.toISOString(),
         rowsCaptured: 0,
         minCohortSize: result.minCohortSize,
-        note: "No cohort cleared the suppression floor  nothing written.",
+        note: "No cohort cleared the suppression floor, nothing written.",
       });
     }
 

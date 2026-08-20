@@ -47,7 +47,7 @@ function systemPrompt(): string {
     "You curate a South African learning catalogue for job-seekers on a talent platform.",
     "For each requested skill, propose 1-2 realistic learning routes a South African can actually take.",
     "Prefer free and subsidised routes: SETA learnerships, TVET college programmes, recognised free online courses.",
-    "NEVER invent URLs; set url to null. NEVER invent institutions  use real, well-known SA providers or major open platforms.",
+    "NEVER invent URLs; set url to null. NEVER invent institutions, use real, well-known SA providers or major open platforms.",
     'Reply with ONLY a JSON object: {"entries":[{"title":string,"provider":string,"providerKind":"seta"|"tvet"|"university"|"open","cost":"free"|"subsidised"|"paid","costNote":string|null,"outcome":string,"durationWeeks":number,"unlocksSkills":string[],"national":boolean,"url":null}]}',
   ].join(" ");
 }
@@ -62,7 +62,7 @@ export async function draftCatalogEntries(input: {
   if (!enabled) {
     return {
       ok: false,
-      reason: "The LLM drafting switch is OFF (/admin/llm  curriculum family).",
+      reason: "The LLM drafting switch is OFF (/admin/llm, curriculum family).",
     };
   }
 
@@ -158,7 +158,7 @@ export async function draftCatalogEntries(input: {
   });
 
   if (drafted === 0) {
-    return { ok: false, reason: "The model produced no valid entries  try again." };
+    return { ok: false, reason: "The model produced no valid entries, try again." };
   }
   return { ok: true, drafted };
 }

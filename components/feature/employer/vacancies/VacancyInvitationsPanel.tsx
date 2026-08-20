@@ -129,8 +129,9 @@ export function VacancyInvitationsPanel({
           Pipeline · {invitations.length} invitation{invitations.length === 1 ? "" : "s"}
         </h2>
         <p className="text-xs text-[color:var(--color-ink-soft)]">
-          Counts the people you&rsquo;ve invited to this vacancy. The seeker
-          accept / decline / decline-with-reason flow lands in Phase 9.8.5.
+          Everyone you have invited to this vacancy, and how each of them
+          responded. Declining is free for the seeker and never affects how
+          they appear in search.
         </p>
       </header>
 

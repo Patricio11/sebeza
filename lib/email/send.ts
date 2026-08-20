@@ -76,14 +76,14 @@ function transport(): EmailTransport {
   );
   if (strict() && hasSomeSmtpConfig) {
     throw new Error(
-      "EMAIL_TRANSPORT is not set, but SMTP_* env vars are present  this almost always means the deploy is missing `EMAIL_TRANSPORT=smtp`. Refusing to silently log to console. Set EMAIL_TRANSPORT_STRICT=false to opt out.",
+      "EMAIL_TRANSPORT is not set, but SMTP_* env vars are present, this almost always means the deploy is missing `EMAIL_TRANSPORT=smtp`. Refusing to silently log to console. Set EMAIL_TRANSPORT_STRICT=false to opt out.",
     );
   }
   if (!warnedAboutFallthrough && hasSomeSmtpConfig) {
     warnedAboutFallthrough = true;
     // eslint-disable-next-line no-console
     console.warn(
-      "[email] EMAIL_TRANSPORT not set but SMTP_* env vars are present  falling back to console transport. Set EMAIL_TRANSPORT=smtp to actually send.",
+      "[email] EMAIL_TRANSPORT not set but SMTP_* env vars are present, falling back to console transport. Set EMAIL_TRANSPORT=smtp to actually send.",
     );
   }
   return "console";
@@ -175,7 +175,7 @@ export async function sendEmail(input: SendEmailInput): Promise<{
     `\n📧 [email:console] ${input.to}  "${input.subject}"\n` +
       `   from: ${from}\n` +
       `   preview: ${text.slice(0, 80)}${text.length > 80 ? "…" : ""}\n` +
-      `   html:\n${indentLines(input.html, "     ")}\n`,
+      `   html:\n${indentLines(input.html, ", ")}\n`,
   );
   return { transport: "console" };
 }

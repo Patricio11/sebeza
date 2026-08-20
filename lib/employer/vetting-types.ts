@@ -18,7 +18,7 @@ export type OrgDocumentKind =
 export const ORG_DOCUMENT_LABEL: Record<OrgDocumentKind, string> = {
   company_reg_cert: "Company registration certificate (CIPC / CK1 / CK2)",
   tax_clearance: "Tax clearance certificate (SARS)",
-  proof_of_address: "Proof of physical address  3 months old",
+  proof_of_address: "Proof of physical address, 3 months old",
   bank_confirmation: "Bank confirmation letter",
   other: "Other supporting document (optional)",
 };

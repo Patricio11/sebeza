@@ -246,7 +246,7 @@ export function ProfileBasicsForm({
               leading: flagEmoji(c.code),
             }))}
             placeholder="Search countries…"
-            helpText="Shown on your profile and in search results. Never a gate  Sebenza matches by location + skill."
+            helpText="Shown on your profile and in search results. Never a gate, Sebenza matches by location + skill."
             required
           />
         </div>
@@ -354,7 +354,7 @@ export function ProfileBasicsForm({
             }))}
             placeholder={
               secondaryProfessions.length >= SECONDARY_PROFESSIONS_MAX
-                ? `${SECONDARY_PROFESSIONS_MAX} reached  remove one to add another`
+                ? `${SECONDARY_PROFESSIONS_MAX} reached, remove one to add another`
                 : "Search professions…"
             }
             allowOther

@@ -50,7 +50,7 @@ export function AiCoachIntegrationSwitch({ enabled }: { enabled: boolean }) {
           className="flex items-center gap-2 font-display text-lg"
         >
           <Bot className="size-5 text-[color:var(--color-brand)]" aria-hidden="true" />
-          AI Career Coach  system-wide switch
+          AI Career Coach, system-wide switch
         </h2>
         <span
           className={`inline-flex items-center gap-1.5 rounded-[var(--radius-pill)] px-3 py-1 text-xs font-medium ${
@@ -72,7 +72,7 @@ export function AiCoachIntegrationSwitch({ enabled }: { enabled: boolean }) {
         />
         <div className="text-[color:var(--color-ink-soft)]">
           <p className="font-medium text-[color:var(--color-ink)]">
-            This is a different risk class  an LLM speaking to job seekers.
+            This is a different risk class, an LLM speaking to job seekers.
           </p>
           <p className="mt-1">
             Do not enable in production until the safety review is complete:

@@ -345,7 +345,7 @@ function TenureTimeline({
                 })}
               </span>
               {employee.checkInDue
-                ? "  the 3 / 6 / 12-month milestone has passed without a confirmation."
+                ? ", the 3 / 6 / 12-month milestone has passed without a confirmation."
                 : ""}
             </span>
           </li>
@@ -379,8 +379,8 @@ function CheckHistoryPanel({ checks }: { checks: PlacementStatusCheckRow[] }) {
       </div>
       {checks.length === 0 ? (
         <p className="text-sm italic text-[color:var(--color-ink-soft)]">
-          No check-ins recorded yet. Tier 2 of Phase 9.20 wires the
-          "Is X still employed?" quick action.
+          No check-ins recorded yet. The quick "is this person still with
+          you?" action is coming soon.
         </p>
       ) : (
         <ol className="space-y-2 text-sm">

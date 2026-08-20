@@ -114,7 +114,7 @@ export function SwitchProfessionConfirmModal({
           <p className="mt-3">
             What does <em>not</em> change: your work history, your existing
             skills, your verification state, your status freshness. The switch
-            is reversible  swap back any time from your profile editor.
+            is reversible, swap back any time from your profile editor.
           </p>
 
           {error && (

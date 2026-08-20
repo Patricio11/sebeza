@@ -163,7 +163,7 @@ export default async function VacancyDetailPage({
           vacancy-side axes (work availability, min years, min NQF) above
           the "Find matches" CTA so the organiser sees, at a glance, what
           the matcher will constrain on. Each field that's blank renders
-          as "No requirement"  consistent with D0 (vacancy is source of
+          as "No requirement", consistent with D0 (vacancy is source of
           truth; blank = matcher ignores axis). */}
       <MatchRequirementsStrip vacancy={vacancy} />
 
@@ -209,7 +209,7 @@ export default async function VacancyDetailPage({
               Find candidates for this vacancy
             </p>
             <p className="mt-1 text-xs text-[color:var(--color-ink-soft)]">
-              Reverse-matched against the live talent pool  ranked, redacted,
+              Reverse-matched against the live talent pool, ranked, redacted,
               SA citizens highlighted first.
             </p>
           </div>
@@ -343,11 +343,9 @@ export default async function VacancyDetailPage({
       )}
 
       <p className="mt-8 text-xs italic text-[color:var(--color-ink-soft)]">
-        Phase 9.8.1 ships the vacancy lifecycle. <strong>Find matches</strong>
-        {" "}(reverse-matching),{" "}
-        <strong>invite flow</strong>, and the{" "}
-        <strong>decline-with-reason</strong> response live on the same vacancy
-        in 9.8.2 + 9.8.4 + 9.8.5. Coming next.
+        <strong>Find matches</strong> ranks candidates against this vacancy,
+        <strong> Invite</strong> asks the ones you choose, and their response,
+        including a reason if they give one, lands back here in the pipeline.
       </p>
     </DashboardMasthead>
   );

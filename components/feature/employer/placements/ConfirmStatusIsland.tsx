@@ -126,7 +126,7 @@ export function ConfirmStatusIsland({
             </div>
 
             <p className="text-sm text-[color:var(--color-ink-soft)]">
-              A quick yes is all we need  this keeps the platform&rsquo;s
+              A quick yes is all we need, this keeps the platform&rsquo;s
               retention figure honest. Use the field below if you want to
               jot down any context for your own records.
             </p>

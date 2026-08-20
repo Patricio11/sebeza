@@ -95,7 +95,7 @@ export default async function EmployerInvitesPage({
           tone="accent"
           icon={Users2}
           emptyTitle="Nobody has joined yet."
-          emptyNote="Once an invited candidate completes sign-up, they'll appear here. You'll see the same redacted profile every verified employer sees  no extra access."
+          emptyNote="Once an invited candidate completes sign-up, they'll appear here. You'll see the same redacted profile every verified employer sees, no extra access."
         >
           <ul className="space-y-3">
             {groups.joined.map((r) => (
@@ -113,7 +113,7 @@ export default async function EmployerInvitesPage({
             emptyNote=""
           >
             <p className="mb-3 rounded-[var(--radius-sm)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface-sunk)] px-3 py-2 text-xs text-[color:var(--color-ink-soft)]">
-              POPIA §11  we respect every decline for at least 90 days
+              POPIA §11, we respect every decline for at least 90 days
               from the decline date before allowing another invitation
               to the same email from your organisation.
             </p>

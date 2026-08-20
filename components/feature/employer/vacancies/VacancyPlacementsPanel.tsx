@@ -120,7 +120,7 @@ export function VacancyPlacementsPanel({
           </p>
           <p className="mt-1 text-xs text-[color:var(--color-ink-soft)]">
             Pick the candidate you hired below. The dossier opens with
-            this vacancy already linked  one tap to confirm.
+            this vacancy already linked, one tap to confirm.
           </p>
         </div>
       )}
@@ -178,7 +178,7 @@ export function VacancyPlacementsPanel({
       {canEdit && pendingAccepted.length > 0 && (
         <div>
           <p className="mb-2 text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--color-ink-soft)]">
-            Accepted invitees  log a hire
+            Accepted invitees, log a hire
           </p>
           <ul className="space-y-2">
             {pendingAccepted.map((inv) => (
@@ -218,7 +218,7 @@ export function VacancyPlacementsPanel({
       {/* Fallback note  the dossier flow stays the canonical entry
           point for hires logged from outside the invitation pipeline
           (the employer found the right person via /search and the
-          invitee list was incidental). Inline guidance only  no new
+          invitee list was incidental). Inline guidance only, no new
           surface to maintain. */}
       {canEdit && (
         <p className="mt-4 text-xs text-[color:var(--color-ink-soft)]">

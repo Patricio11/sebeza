@@ -10,7 +10,7 @@
  *
  * POPIA reminder is inline + explicit  the note is flagged as
  * seeker-authored free text in the audit row (the note body itself
- * stays in the learning_items table, NOT in audit meta).
+ * stays in the learning_items table  NOT in audit meta).
  */
 
 import { useEffect, useState, useTransition } from "react";
@@ -143,7 +143,7 @@ export function AbandonModal({ itemId, skillLabel, onClose, onDone }: Props) {
               Stop learning &ldquo;{skillLabel}&rdquo;?
             </h2>
             <p className="mt-1 text-xs text-[color:var(--color-ink-soft)]">
-              No judgement  picking a reason helps us point you somewhere
+              No judgement, picking a reason helps us point you somewhere
               better next time and (anonymously, with privacy floors)
               helps SA policy understand where learners get stuck.
             </p>
@@ -237,7 +237,7 @@ export function AbandonModal({ itemId, skillLabel, onClose, onDone }: Props) {
               )}
               {freeAltLoaded && !freeAlt && (
                 <p className="text-xs text-[color:var(--color-brand-strong)]">
-                  No free alternative on file for this skill yet  the
+                  No free alternative on file for this skill yet, the
                   abandonment is still useful signal for SA-policy.
                 </p>
               )}

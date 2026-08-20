@@ -276,7 +276,7 @@ function Sheet({
   async function onSkip() {
     if (
       !window.confirm(
-        "Skip will mark the vacancy filled without logging who you hired. Sebenza's analytics work better when every filled vacancy has placement data  are you sure?",
+        "Skip will mark the vacancy filled without logging who you hired. Sebenza's analytics work better when every filled vacancy has placement data, are you sure?",
       )
     )
       return;
@@ -375,7 +375,7 @@ function Sheet({
                               {inv.state === "accepted_with_notice" &&
                                 inv.noticePeriodMonths != null && (
                                   <>
-                                    {"  "}
+                                    {", "}
                                     <Clock
                                       className="ml-1 inline size-3 align-text-bottom"
                                       aria-hidden="true"
@@ -433,7 +433,7 @@ function Sheet({
                 <p className="mt-1 text-[0.65rem] text-[color:var(--color-ink-soft)]">
                   Scoped to candidates in the vacancy&rsquo;s province.
                   Outside-pipeline hires complete via the dossier flow
-                  after submit  the modal queues them.
+                  after submit, the modal queues them.
                 </p>
                 {results.length > 0 && (
                   <ul className="mt-2 flex flex-col gap-1">
@@ -486,7 +486,7 @@ function Sheet({
                       {s.displayName}
                       <span className="ml-1 text-[color:var(--color-ink-soft)]">
                         @{s.handle}
-                        {s.source === "outside" && "  outside pipeline"}
+                        {s.source === "outside" && ", outside pipeline"}
                       </span>
                     </span>
                     <button
@@ -524,7 +524,7 @@ function Sheet({
                     onChange={(e) => setSalary(e.target.value)}
                     disabled={pending}
                     maxLength={80}
-                    placeholder="e.g. R 480k  600k / year"
+                    placeholder="e.g. R 480k, 600k / year"
                     className="mt-1 w-full rounded-[var(--radius-sm)] border border-[color:var(--color-hairline)] bg-[color:var(--color-paper)] px-2 py-1.5 text-sm"
                   />
                 </div>
@@ -554,7 +554,7 @@ function Sheet({
             disabled={pending}
             className="text-[0.7rem] uppercase tracking-[0.18em] text-[color:var(--color-ink-soft)] hover:text-[color:var(--color-ink)] hover:underline"
           >
-            Skip  log later
+            Skip, log later
           </button>
           <div className="flex gap-2">
             <Button

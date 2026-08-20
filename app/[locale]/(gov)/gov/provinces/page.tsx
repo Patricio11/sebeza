@@ -22,7 +22,7 @@ export default async function GovProvincesIndexPage({
       role="gov"
       pageEyebrow="Geography"
       pageTitle="Provinces"
-      pageSubtitle="Per-province deep dives  supply, top local gaps, freshness, monthly trend."
+      pageSubtitle="Per-province deep dives, supply, top local gaps, freshness, monthly trend."
     >
       {/* Phase 10.4  help deep-links (D6). */}
       <div className="mb-4 flex flex-wrap items-center gap-2">

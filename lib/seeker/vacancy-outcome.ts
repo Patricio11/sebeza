@@ -118,7 +118,7 @@ export function composeOutcomeNotification(
   } else if (input.requiredSkillSlugs.length > 0) {
     // Recipient matched every required skill  decision was about other factors.
     lines.push(
-      `Your profile shows every skill the role asked for. The decision came down to factors not on the profile  keep your status fresh and apply your skills to other open roles.`,
+      `Your profile shows every skill the role asked for. The decision came down to factors not on the profile, keep your status fresh and apply your skills to other open roles.`,
     );
   }
 

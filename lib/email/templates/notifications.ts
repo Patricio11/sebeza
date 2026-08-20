@@ -175,12 +175,12 @@ function weeklyDigestTemplate(
   const rankLine =
     rank != null && poolTotal != null
       ? `<strong>#${rank}</strong> of ${poolTotal} in your local pool.`
-      : `Not yet ranked  confirm your status to enter the pool.`;
+      : `Not yet ranked, confirm your status to enter the pool.`;
   const freshnessLine =
     freshnessBand === "fresh"
       ? `Status is fresh (${daysStale} day${daysStale === 1 ? "" : "s"} since last confirmed).`
       : freshnessBand === "ageing"
-        ? `Status is ${daysStale} days old  a re-confirm puts you back at the top.`
+        ? `Status is ${daysStale} days old, a re-confirm puts you back at the top.`
         : `Status is stale (${daysStale} days). Re-confirming restores full ranking weight.`;
 
   const html = emailShell(`

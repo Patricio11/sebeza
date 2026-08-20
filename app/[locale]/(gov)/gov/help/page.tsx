@@ -44,7 +44,7 @@ export default async function GovHelpIndexPage({
       role="gov"
       pageEyebrow="Documentation"
       pageTitle="Government help center"
-      pageSubtitle="Everything a gov user can do on Sebenza  laid out by category, searchable, with deep-links back to the analytics surfaces they cover. Aggregate-only data; no individual seeker PII anywhere on this platform for gov users."
+      pageSubtitle="Everything a gov user can do on Sebenza, laid out by category, searchable, with deep-links back to the analytics surfaces they cover. Aggregate-only data; no individual seeker PII anywhere on this platform for gov users."
     >
       <HelpSearchIsland
         articles={GOV_HELP_ARTICLES.map((a) => a.meta)}
@@ -111,7 +111,7 @@ export default async function GovHelpIndexPage({
 
       <p className="mt-12 text-xs italic text-[color:var(--color-ink-soft)]">
         Phase 10.4 closes the four-role help-centre suite. Translation
-        to isiZulu, isiXhosa + Afrikaans is deferred  the gov
+        to isiZulu, isiXhosa + Afrikaans is deferred, the gov
         workspace is English-only in v1, and POPIA-grade copy is
         human-translated only.
       </p>

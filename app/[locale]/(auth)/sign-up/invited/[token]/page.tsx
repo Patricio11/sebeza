@@ -56,7 +56,7 @@ export default async function InvitedSignUpPage({
       >
         <div className="rounded-[var(--radius-md)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-5 text-sm text-[color:var(--color-ink-soft)]">
           <p>
-            You can still create a Sebenza profile directly  no invitation
+            You can still create a Sebenza profile directly, no invitation
             needed.{" "}
             <Link
               href={"/sign-up/seeker" as never}
@@ -101,8 +101,8 @@ function InvitedDossier({ orgName }: { orgName: string | null }) {
       n: "01",
       title: orgName ? `Why ${orgName}?` : "Why this invitation?",
       body: orgName
-        ? `${orgName} is a verified employer on Sebenza  meaning we've checked their CIPC registration, tax clearance, and proof of address. They thought you'd be a good fit for the platform.`
-        : "Sebenza only lets verified employers send invitations  meaning we've checked their CIPC registration, tax clearance, and proof of address before letting them invite anyone.",
+        ? `${orgName} is a verified employer on Sebenza, meaning we've checked their CIPC registration, tax clearance, and proof of address. They thought you'd be a good fit for the platform.`
+        : "Sebenza only lets verified employers send invitations, meaning we've checked their CIPC registration, tax clearance, and proof of address before letting them invite anyone.",
     },
     {
       n: "02",
@@ -112,7 +112,7 @@ function InvitedDossier({ orgName }: { orgName: string | null }) {
     {
       n: "03",
       title: "Just the start",
-      body: "After these three steps, your full profile editor lives in the dashboard  experience, qualifications, skills, headline, bio. Add it at your own pace.",
+      body: "After these three steps, your full profile editor lives in the dashboard, experience, qualifications, skills, headline, bio. Add it at your own pace.",
     },
   ];
   return (

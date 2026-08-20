@@ -69,7 +69,7 @@ export async function revealContact(input: {
   const limit = await enforce("reveal", session.orgId);
   if (!limit.ok) {
     return fail(
-      "Reveal limit reached for this hour  please try again shortly.",
+      "Reveal limit reached for this hour, please try again shortly.",
     );
   }
 

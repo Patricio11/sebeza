@@ -112,7 +112,7 @@ const CS_SNAPSHOT: StudentSnapshot = {
     },
     {
       skill: { slug: "comp4001-accessibility", label: "Inclusive Computing (COMS4001H)" },
-      curriculumHint: "Honours-level elective  open to high-performing third-years",
+      curriculumHint: "Honours-level elective, open to high-performing third-years",
       detail:
         "Almost no other graduate carries WCAG fluency. Big differentiator for public-sector and Discovery-style fintech work.",
       demandSignal: { searches: 320, matches: 110 },
@@ -132,7 +132,7 @@ const CS_SNAPSHOT: StudentSnapshot = {
       fieldTags: ["Computer Science", "Software Engineering", "Information Systems"],
     },
     {
-      title: "Discovery Graduate Programme  Tech & Data",
+      title: "Discovery Graduate Programme, Tech & Data",
       organisation: "Discovery",
       sector: "corporate",
       kind: "graduate_programme",
@@ -162,7 +162,7 @@ const CS_SNAPSHOT: StudentSnapshot = {
       sector: "public",
       kind: "learnership",
       durationMonths: 12,
-      cities: ["National  host employer dependent"],
+      cities: ["National, host employer dependent"],
       applicationStatus: "open",
       applicationHint: "Quarterly intake · paying stipend throughout",
       eligibility:
@@ -203,18 +203,18 @@ const CS_SNAPSHOT: StudentSnapshot = {
 const ACCOUNTING_SNAPSHOT: StudentSnapshot = {
   graduationHeadline: { monthsLeft: 6, expectedGraduation: "2026-11" },
   bridgeHeadline:
-    "BCom Honours qualifies you for SAICA articles  most leverage now is choosing the right traineeship.",
+    "BCom Honours qualifies you for SAICA articles, most leverage now is choosing the right traineeship.",
   electives: [
     {
       skill: { slug: "afm4001-data-analytics", label: "Accounting Data Analytics" },
-      curriculumHint: "Honours elective  UCT BCom Hons",
+      curriculumHint: "Honours elective, UCT BCom Hons",
       detail:
         "Bridges Excel + IFRS into Power BI / SQL. Currently the deciding factor between traineeships at the Big Four.",
       demandSignal: { searches: 540, matches: 180 },
     },
     {
       skill: { slug: "afm4002-tax", label: "Advanced Tax Practice" },
-      curriculumHint: "Honours elective  UCT BCom Hons",
+      curriculumHint: "Honours elective, UCT BCom Hons",
       detail:
         "SARS + private-sector tax practice still has the deepest persistent skills gap in the accounting market.",
       demandSignal: { searches: 410, matches: 140 },

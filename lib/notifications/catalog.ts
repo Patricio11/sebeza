@@ -369,7 +369,7 @@ export const NOTIFICATION_CATALOG = {
   //    cross-kind cap  celebration is never throttled.
   //  - `learning.nudge` is a gentle "still working on it?" check on
   //    stalled items. In-app default ON, email default OFF (lower
-  //    intrusion), AND subject to the D5 cross-kind weekly cap
+  //    intrusion)  AND subject to the D5 cross-kind weekly cap
   //    (combined with `vacancy.outcome.other-hired`) enforced
   //    cron-side in 9.12.6 to avoid demoralizing recipients.
   // ──────────────────────────────────────────────────────────────────────

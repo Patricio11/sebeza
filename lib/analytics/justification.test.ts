@@ -33,7 +33,7 @@ function cell(over: Partial<JustificationCellInputs> = {}): JustificationCellInp
 
 describe("classifyJustification()", () => {
   test(
-    "shortage  all four conditions met: high demand, thin local supply, " +
+    "shortage, all four conditions met: high demand, thin local supply, " +
       "foreign-fill majority, enough placements",
     () => {
       const out = classifyJustification(
@@ -49,7 +49,7 @@ describe("classifyJustification()", () => {
     },
   );
 
-  test("supply_available  demand met by SA citizens, ratio >= 1.0", () => {
+  test("supply_available, demand met by SA citizens, ratio >= 1.0", () => {
     const out = classifyJustification(
       cell({
         demand_score: 2.0,
@@ -64,7 +64,7 @@ describe("classifyJustification()", () => {
   });
 
   test(
-    "supply_available  ratio exactly at 1.0 still qualifies (>=, not >)",
+    "supply_available, ratio exactly at 1.0 still qualifies (>=, not >)",
     () => {
       const out = classifyJustification(
         cell({ demand_score: 1.0, local_supply_ratio: 1.0 }),
@@ -74,7 +74,7 @@ describe("classifyJustification()", () => {
     },
   );
 
-  test("indeterminate  demand below floor", () => {
+  test("indeterminate, demand below floor", () => {
     const out = classifyJustification(
       cell({
         demand_score: 0.5, // < 1.0
@@ -88,7 +88,7 @@ describe("classifyJustification()", () => {
   });
 
   test(
-    "indeterminate  high demand + thin supply + foreign-fill majority " +
+    "indeterminate, high demand + thin supply + foreign-fill majority " +
       "but placements below the min-placement floor",
     () => {
       const out = classifyJustification(
@@ -105,7 +105,7 @@ describe("classifyJustification()", () => {
   );
 
   test(
-    "indeterminate  high demand + thin supply but foreign-fill share " +
+    "indeterminate, high demand + thin supply but foreign-fill share " +
       "below floor (placements went mostly to SA citizens)",
     () => {
       const out = classifyJustification(
@@ -122,7 +122,7 @@ describe("classifyJustification()", () => {
   );
 
   test(
-    "indeterminate  the gap zone: demand met, local supply sits between " +
+    "indeterminate, the gap zone: demand met, local supply sits between " +
       "the threshold and 1.0",
     () => {
       const out = classifyJustification(
@@ -153,7 +153,7 @@ describe("classifyJustification()", () => {
     expect(out).toBe("supply_available");
   });
 
-  test("boundary  demand exactly at floor classifies", () => {
+  test("boundary, demand exactly at floor classifies", () => {
     expect(
       classifyJustification(
         cell({ demand_score: 1.0, local_supply_ratio: 1.0 }),
@@ -162,7 +162,7 @@ describe("classifyJustification()", () => {
     ).toBe("supply_available");
   });
 
-  test("boundary  foreign_fill_share exactly at floor counts as floor met", () => {
+  test("boundary, foreign_fill_share exactly at floor counts as floor met", () => {
     expect(
       classifyJustification(
         cell({
@@ -177,7 +177,7 @@ describe("classifyJustification()", () => {
   });
 
   test(
-    "tunable  raising lmi_demand_floor lifts cells that used to classify " +
+    "tunable, raising lmi_demand_floor lifts cells that used to classify " +
       "out into indeterminate",
     () => {
       const tight: JustificationThresholds = { ...DEFAULTS, demandFloor: 3.0 };

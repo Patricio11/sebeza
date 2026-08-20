@@ -31,7 +31,7 @@ import { HelpLink } from "@/components/feature/help/HelpLink";
 import { PROFESSIONS } from "@/lib/mock/taxonomy";
 import { formatVacancyLocation } from "@/lib/employer/vacancies-display";
 
-export const revalidate = 0; // Always fresh  this is the employer's pipeline view.
+export const revalidate = 0; // Always fresh, this is the employer's pipeline view.
 
 export default async function VacanciesListPage({
   params,
@@ -62,7 +62,7 @@ export default async function VacanciesListPage({
       role="employer"
       pageEyebrow={session.name ?? "Employer workspace"}
       pageTitle="Vacancies"
-      pageSubtitle="Private to your organisation. Vacancies are reverse-matching specifications  invite specific people, capture their accept / decline-with-reason, log the placement when filled. Never a public posting."
+      pageSubtitle="Private to your organisation. Vacancies are reverse-matching specifications, invite specific people, capture their accept / decline-with-reason, log the placement when filled. Never a public posting."
       pageActions={
         canEdit ? (
           <Link

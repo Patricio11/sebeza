@@ -25,7 +25,7 @@ describe("moderateQuestions (22.3 output backstop)", () => {
     const { kept, droppedCount } = moderateQuestions([
       "Tell me about your strengths.",
       "If you answer well you are hired on the spot.",
-      "You passed  when can you start?",
+      "You passed, when can you start?",
     ]);
     expect(droppedCount).toBe(2);
     expect(kept).toEqual(["Tell me about your strengths."]);

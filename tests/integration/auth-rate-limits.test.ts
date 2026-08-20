@@ -63,7 +63,7 @@ describe("Phase 32.2.4  sign-in is throttled per IP", () => {
     }
   });
 
-  test("the limit is keyed per IP, NOT per email, a victim cannot be locked out", async () => {
+  test("the limit is keyed per IP  NOT per email, a victim cannot be locked out", async () => {
     // Burn the budget against ONE address...
     for (let i = 0; i < BUCKETS.signin.limit; i++) {
       await signIn({ email: "victim@example.co.za", password: `x-${i}` });

@@ -64,7 +64,7 @@ export function TestimonialPromptCard() {
           <button
             type="button"
             onClick={dismiss}
-            aria-label="Not now  ask me again next month"
+            aria-label="Not now, ask me again next month"
             className="grid size-6 place-items-center rounded-full text-[color:var(--color-ink-soft)] hover:bg-[color:var(--color-surface)] hover:text-[color:var(--color-ink)]"
           >
             <X className="size-4" aria-hidden="true" />
@@ -75,7 +75,7 @@ export function TestimonialPromptCard() {
       {done ? (
         <p className="mt-2 flex items-center gap-2 text-sm text-[color:var(--color-ink)]">
           <Check className="size-4 text-[color:var(--color-brand)]" aria-hidden="true" />
-          Thank you  our team will review it before anything is shown publicly.
+          Thank you, our team will review it before anything is shown publicly.
         </p>
       ) : (
         <form onSubmit={submit} className="mt-2">
@@ -101,7 +101,7 @@ export function TestimonialPromptCard() {
               />
               <span>
                 Sebenza may show these words publicly with my first name and
-                role  never my contact details. I can ask for it to be removed
+                role, never my contact details. I can ask for it to be removed
                 any time.
               </span>
             </label>

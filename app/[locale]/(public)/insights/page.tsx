@@ -34,7 +34,7 @@ export const revalidate = 300;
 export const metadata: Metadata = {
   title: "National Employment Insights",
   description:
-    "Live South African employment statistics: skills gaps, hiring demand by province, freshness-weighted workforce data and confirmed placement outcomes  from Sebenza's national talent register.",
+    "Live South African employment statistics: skills gaps, hiring demand by province, freshness-weighted workforce data and confirmed placement outcomes, from Sebenza's national talent register.",
   alternates: localeAlternates("/insights"),
 };
 
@@ -717,7 +717,7 @@ export default async function InsightsPage({
                 <p className="mt-1 max-w-2xl text-sm text-[color:var(--color-ink-soft)]">
                   Of the Sebenza-confirmed placements that made it to each
                   milestone, how many were still active at that mark. Per-
-                  cell suppression at k = 10  employer privacy is held;
+                  cell suppression at k = 10, employer privacy is held;
                   the national picture stays honest.
                 </p>
               </div>
@@ -736,7 +736,7 @@ export default async function InsightsPage({
             {retention.nationalByMilestone.length === 0 ? (
               <div className="rounded-[var(--radius-md)] border border-dashed border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-6 text-sm text-[color:var(--color-ink-soft)]">
                 Not enough confirmed placements have reached the first
-                milestone yet to publish a retention figure  the dataset
+                milestone yet to publish a retention figure, the dataset
                 grows as employers log + check in on hires across the
                 platform. The k = 10 floor is intentional, not a bug.
               </div>
@@ -769,7 +769,7 @@ export default async function InsightsPage({
                     </h3>
                     <p className="mt-1 text-xs text-[color:var(--color-ink-soft)]">
                       12-month retention by (profession × province), best
-                      first. Tie-breaker is cohort size  larger cohorts
+                      first. Tie-breaker is cohort size, larger cohorts
                       surface above smaller ones at the same rate.
                     </p>
                     <ul className="mt-4 grid gap-2 md:grid-cols-2">
@@ -801,7 +801,7 @@ export default async function InsightsPage({
                   published cell{retention.cellsPublished === 1 ? "" : "s"}
                    cells below the k = 10 floor are suppressed at the
                   cron so per-employer numbers never leak. Retention =
-                  active at the milestone, NOT active today.
+                  active at the milestone  NOT active today.
                 </p>
               </>
             )}

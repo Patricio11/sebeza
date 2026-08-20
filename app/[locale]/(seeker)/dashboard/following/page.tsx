@@ -64,7 +64,7 @@ export default async function FollowingPage({
             On a search result or employer profile, tap the heart icon
             to start following. They&rsquo;re never told. You&rsquo;ll
             get a quiet bell when they open a role you could be a fit
-            for  no email, no chase.
+            for, no email, no chase.
           </p>
         </div>
       ) : (

@@ -58,7 +58,7 @@ export function validateDob(iso: string): ValidationResult {
   if (age > MAX_AGE) {
     return {
       ok: false,
-      message: "Date of birth is out of range  please check the year.",
+      message: "Date of birth is out of range, please check the year.",
     };
   }
   return { ok: true };
@@ -122,7 +122,7 @@ export function validateSaId(idRaw: string, dobIso: string): ValidationResult {
   if (!luhnValid(id)) {
     return {
       ok: false,
-      message: "SA ID check digit is invalid  please verify the number.",
+      message: "SA ID check digit is invalid, please verify the number.",
     };
   }
 
@@ -178,7 +178,7 @@ export function validatePassport(
   if (!isValidCountryCode(countryCode)) {
     return {
       ok: false,
-      message: "That country code isn't recognised  pick from the list.",
+      message: "That country code isn't recognised, pick from the list.",
     };
   }
   return { ok: true };

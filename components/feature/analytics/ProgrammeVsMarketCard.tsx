@@ -72,7 +72,7 @@ export function ProgrammeVsMarketCard({
   const cardSubtitle =
     subtitle ??
     (data.studentScope
-      ? "Skills your programme covers + the in-demand skills it doesn't  the gap signal."
+      ? "Skills your programme covers + the in-demand skills it doesn't, the gap signal."
       : "Cross-market. One row per (institution × programme × province) cell that meets the k-anonymity floor.");
 
   return (
@@ -439,7 +439,7 @@ function InferredSkillRow({
               // so the student sees how the platform derived the
               // recommendation (and the auditor can trace which row
               // surfaced it).
-              title={`via module "${s.matchedFrom}"  editorial catalogue  confidence ${s.confidence}/5`}
+              title={`via module "${s.matchedFrom}", editorial catalogue, confidence ${s.confidence}/5`}
               aria-label={`${s.label}, via module ${s.matchedFrom}, editorial confidence ${s.confidence} of 5`}
             >
               {s.label}
@@ -471,8 +471,8 @@ function EmptyState({
       </p>
       <p className="mx-auto mt-2 max-w-md text-xs text-[color:var(--color-ink-soft)]">
         {studentScope
-          ? "We don't yet have a programme_skills mapping for your enrolment. As the curated mapping expands (and the dormant Phase 8 SAQA feed activates), this card will populate."
-          : `Each (programme × institution × province) cell needs at least ${k} matching search-events before it can be shown publicly (k-anonymity floor + complementary suppression). The floor is a privacy protection, not a bug  cells unsuppress as data accumulates.`}
+          ? "We don't yet have a skills map for your programme. As the curated mapping expands (and the dormant Phase 8 SAQA feed activates), this card will populate."
+          : `Each (programme × institution × province) cell needs at least ${k} matching search-events before it can be shown publicly (k-anonymity floor + complementary suppression). The floor is a privacy protection, not a bug, cells unsuppress as data accumulates.`}
       </p>
     </div>
   );

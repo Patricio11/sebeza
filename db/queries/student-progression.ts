@@ -350,13 +350,13 @@ function buildHint(
     return "Next: add a qualification on your profile so we can plot your verified credentials here.";
   }
   if ((ac.currentYear ?? 0) >= 3 && !c.hasProject) {
-    return "Next: declare your project / dissertation topic on your profile  it's the strongest single skill signal we can capture.";
+    return "Next: declare your project / dissertation topic on your profile, it's the strongest single skill signal we can capture.";
   }
   if ((ac.currentYear ?? 0) >= 2 && !c.hasElective) {
     return "Next: declare your elective on your profile so the matcher can read the intentional bit of your degree.";
   }
   if (c.learningCompletedCount === 0) {
-    return "Next: start a learning path from Career Compass  the first completion lands here as a verified row.";
+    return "Next: start a learning path from Career Compass, the first completion lands here as a verified row.";
   }
   return null;
 }

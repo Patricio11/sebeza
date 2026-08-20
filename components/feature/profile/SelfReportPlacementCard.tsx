@@ -57,7 +57,7 @@ export function SelfReportPlacementCard() {
             <p className="font-medium">Self-reported placement logged.</p>
             <p className="mt-1 text-xs text-[color:var(--color-ink-soft)]">
               Shown on your public profile flagged as self-declared. Employer
-              confirmation lifts it to the verified count  ask them to log
+              confirmation lifts it to the verified count, ask them to log
               the hire from their side.
             </p>
           </div>
@@ -80,7 +80,7 @@ export function SelfReportPlacementCard() {
           <p className="mt-1 text-xs text-[color:var(--color-ink-soft)]">
             Optional. Adding a self-reported placement helps your profile
             tell the right story. Employer-confirmed placements count in
-            national analytics; self-reports do not  Placement-Truth Rule.
+            national analytics; self-reports do not, Placement-Truth Rule.
           </p>
         </div>
       </div>

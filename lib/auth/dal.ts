@@ -16,7 +16,7 @@
  * Architecture:
  *
  *   Layer 1  proxy.ts (optional)        : optimistic redirect on cookie absence
- *                                          (UX speed-up, NOT a security boundary)
+ *                                          (UX speed-up  NOT a security boundary)
  *
  *   Layer 2  DAL (this file)            : authoritative validation
  *                                          (`auth.api.getSession` → DB)

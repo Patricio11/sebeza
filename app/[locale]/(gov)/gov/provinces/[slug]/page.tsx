@@ -111,7 +111,7 @@ export default async function GovProvinceDeepDive({
 
       {/* Nationality-split supply table (Phase 9.7.2). Toggle via
           ?split=nationality. Aggregate-only, k-floored, 2-class
-          (sa_citizen / foreign_national)  never country-level. */}
+          (sa_citizen / foreign_national), never country-level. */}
       <section className="mt-12">
         <header className="mb-3 flex items-baseline justify-between gap-3 border-b-2 border-[color:var(--color-ink)] pb-2">
           <h2 className="font-display text-xl">

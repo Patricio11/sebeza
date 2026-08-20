@@ -253,7 +253,7 @@ export const OPEN_TO_TAG_LABEL: Record<OpenToTag, string> = {
 
 export const OPEN_TO_TAG_HINT: Record<OpenToTag, string> = {
   mentorship:
-    "Mentor a junior in your field once a month  usually unpaid.",
+    "Mentor a junior in your field once a month, usually unpaid.",
   freelance:
     "Bounded freelance or consulting work alongside your day job.",
   contract_gigs:
@@ -357,7 +357,7 @@ export interface SearchFilters {
   /** Exact profession-label filter. Used by the /insights heatmap deep-link
    *  so cell clicks are robust against FTS-tokenization quirks + casing
    *  drift in stored profession strings. Pass the canonical label
-   *  ("Software Developer"), NOT the slug. Case-insensitive at query time. */
+   *  ("Software Developer")  NOT the slug. Case-insensitive at query time. */
   profession?: string | null;
   province?: string | null;
   city?: string | null;

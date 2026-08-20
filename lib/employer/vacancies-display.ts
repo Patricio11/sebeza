@@ -92,9 +92,9 @@ function composeAnyProvinceLabel(
 ): string {
   const hasRemote = workAvailability.includes("remote");
   const hasHybrid = workAvailability.includes("hybrid");
-  if (hasRemote && hasHybrid) return "Any province  Remote / Hybrid";
-  if (hasRemote) return "Any province  Remote";
-  if (hasHybrid) return "Any province  Hybrid";
+  if (hasRemote && hasHybrid) return "Any province, Remote / Hybrid";
+  if (hasRemote) return "Any province, Remote";
+  if (hasHybrid) return "Any province, Hybrid";
   return "Any province";
 }
 

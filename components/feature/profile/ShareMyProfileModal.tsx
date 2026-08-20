@@ -99,7 +99,7 @@ export function ShareMyProfileModal({
                 </h2>
                 <p className="mt-1 text-xs text-[color:var(--color-ink-soft)]">
                   Recipients see a rich preview card on WhatsApp and
-                  LinkedIn  not just a link. Same redaction rules as
+                  LinkedIn, not just a link. Same redaction rules as
                   your public profile.
                 </p>
               </div>

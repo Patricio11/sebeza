@@ -362,7 +362,7 @@ async function ProfileHero({
                   rendered when the seeker declared secondary
                   professions. Civic-Editorial: italic eyebrow + small
                   hairline-bordered chips. NOT clickable links per D5
-                  in PHASE_13_10_PLAN.md  the matcher widens
+                  in PHASE_13_10_PLAN.md, the matcher widens
                   automatically; a chip-as-link would imply a
                   secondary-only filter that doesn't exist. */}
               {profile.secondaryProfessions &&
@@ -401,7 +401,7 @@ async function ProfileHero({
 
         {/* Right-rail panel  swaps between owner-preview and the employer
             request-to-engage card. Same trust-signal block at the bottom in
-            both modes  the owner should see what employers see. */}
+            both modes, the owner should see what employers see. */}
         <aside className="col-span-12 md:col-span-5">
           <div className="relative rounded-2xl border border-[color:var(--color-ink)]/10 bg-[color:var(--color-surface)] p-7 shadow-press md:p-8">
             {/* Tiny flag mark inside */}
@@ -423,7 +423,7 @@ async function ProfileHero({
                 </h2>
                 <p className="mt-2 text-sm text-[color:var(--color-ink-soft)]">
                   This is the dossier verified employers see. The
-                  request-to-engage card lives here for them  contact reveals
+                  request-to-engage card lives here for them, contact reveals
                   and document requests are gated behind your consent and
                   every action is audit-logged.
                 </p>
@@ -536,7 +536,7 @@ async function ProfileHero({
               {/* Phase 9.22  current employer. Only shown for picker-
                   visible orgs (pending seeker_named never appears).
                   Badge spells out the verification posture honestly.
-                  Phase 9.23  when the seeker has a verified
+                  Phase 9.23, when the seeker has a verified
                   employment record within the 12-month badge window,
                   the dossier row also shows the Employer-verified
                   badge with the date. The badge silently decays at
@@ -1214,7 +1214,7 @@ function GatedSection({
         <div className="relative max-w-2xl">
           <div className="flex items-center gap-2 text-[0.72rem] uppercase tracking-[0.28em] text-[color:var(--color-brand-strong)]">
             <ShieldCheck className="size-3.5" aria-hidden="true" />
-            What employers see  redacted
+            What employers see, redacted
           </div>
           <h2
             id="gated-h"
@@ -1226,7 +1226,7 @@ function GatedSection({
             Verified employers see a locked panel where this section sits.
             Your email, mobile, un-redacted surname, CV and certificate
             files are revealed only after they request access and you
-            approve  every reveal is audit-logged and surfaced back to
+            approve, every reveal is audit-logged and surfaced back to
             you in your activity feed.
           </p>
 
@@ -1279,7 +1279,7 @@ function GatedSection({
         <div className="relative max-w-2xl">
           <div className="flex items-center gap-2 text-[0.72rem] uppercase tracking-[0.28em] text-[color:var(--color-brand-strong)]">
             <Lock className="size-3.5" aria-hidden="true" />
-            Recorded access  employer-only
+            Recorded access, employer-only
           </div>
           <h2
             id="gated-h"
@@ -1290,7 +1290,7 @@ function GatedSection({
           <p className="mt-3 text-[color:var(--color-ink-soft)]">
             Verified employer accounts can request to reveal this candidate&rsquo;s
             contact details and documents, post-consent. Your account
-            doesn&rsquo;t have that action  every reveal is audit-logged and
+            doesn&rsquo;t have that action, every reveal is audit-logged and
             surfaced back to the candidate in their activity feed.
           </p>
 

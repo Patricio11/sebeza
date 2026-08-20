@@ -110,7 +110,7 @@ export function InvitationResponseIsland({
         tone="accent"
         icon={CheckCircle2}
         title={`You've accepted "${vacancyTitle}".`}
-        body={`${orgName} has been notified. They'll move you through their hiring flow  interview details, contact, and next steps happen outside this page.`}
+        body={`${orgName} has been notified. They'll move you through their hiring flow, interview details, contact, and next steps happen outside this page.`}
       />
     );
   }
@@ -150,7 +150,7 @@ export function InvitationResponseIsland({
             </p>
             <p className="mt-1 text-xs text-[color:var(--color-ink-soft)]">
               Re-open the conversation. {orgName} will see you&rsquo;d like
-              to reconsider  if the role is still open, they can pick
+              to reconsider, if the role is still open, they can pick
               the thread back up.
             </p>
           </div>
@@ -211,7 +211,7 @@ export function InvitationResponseIsland({
           <p className="mt-1 text-xs text-[color:var(--color-ink-soft)]">
             Accept now if you&rsquo;re available. Accept with notice if you
             need time to wrap up your current role. Decline (with or
-            without a reason)  declining is free and never affects your
+            without a reason), declining is free and never affects your
             visibility in search.
           </p>
         </div>
@@ -513,7 +513,7 @@ function DeclineModal({
                 }
               />
               <p className="mt-1 text-xs text-[color:var(--color-ink-soft)]">
-                Work-related reasons only  please don&rsquo;t include
+                Work-related reasons only, please don&rsquo;t include
                 personal info like health, family status, or religion.
               </p>
               <p className="mt-1 text-right text-[0.65rem] text-[color:var(--color-ink-soft)]">

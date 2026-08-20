@@ -82,7 +82,7 @@ export function AccountAdminActions({ userId, status, targetRole, isSelf }: Prop
             <ReasonForm
               label="Suspend"
               tone="danger"
-              placeholder="Reason (10+ chars)  shown in the audit log…"
+              placeholder="Reason (10+ chars), shown in the audit log…"
               minLength={10}
               reason={reason}
               setReason={setReason}
@@ -107,7 +107,7 @@ export function AccountAdminActions({ userId, status, targetRole, isSelf }: Prop
           <GuardNote>
             {isSelf
               ? "You can’t suspend your own account."
-              : "Admin accounts can’t be suspended here  use the ops procedure."}
+              : "Admin accounts can’t be suspended here, use the ops procedure."}
           </GuardNote>
         )}
 

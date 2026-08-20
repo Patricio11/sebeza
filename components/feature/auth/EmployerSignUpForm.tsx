@@ -191,7 +191,7 @@ export function EmployerSignUpForm() {
           <TextField
             id="industryOther"
             name="industryOther"
-            label="Industry  please specify"
+            label="Industry, please specify"
             placeholder="e.g. Renewable energy"
             value={fields.industryOther}
             onChange={(e) => setField("industryOther", e.target.value)}

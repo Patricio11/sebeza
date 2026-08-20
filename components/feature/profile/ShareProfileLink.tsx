@@ -43,7 +43,7 @@ export function ShareProfileLink({
   handle,
   compact,
   title = "Share your profile",
-  subtitle = "Your public profile lives at this URL. Send it to anyone  it shows the same redacted view employers see.",
+  subtitle = "Your public profile lives at this URL. Send it to anyone, it shows the same redacted view employers see.",
   className,
 }: Props) {
   const relativeUrl = `/p/${handle}`;
@@ -65,7 +65,7 @@ export function ShareProfileLink({
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      setError("Couldn't copy automatically  press Ctrl+C / ⌘C to copy.");
+      setError("Couldn't copy automatically, press Ctrl+C / ⌘C to copy.");
     }
   }
 

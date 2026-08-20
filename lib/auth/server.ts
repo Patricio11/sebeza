@@ -64,7 +64,7 @@ export const auth = betterAuth({
         type: "string",
         required: false,
         defaultValue: "seeker",
-        input: false, // never settable from client sign-up  server-set only
+        input: false, // never settable from client sign-up, server-set only
       },
     },
   },
@@ -100,7 +100,7 @@ export const auth = betterAuth({
     sendVerificationEmail: async ({ user, url }) => {
       await sendEmail({
         to: user.email,
-        subject: "Verify your email  Sebenza",
+        subject: "Verify your email, Sebenza",
         html: verifyEmailTemplate({ name: user.name || user.email, url }),
       });
     },
@@ -248,7 +248,7 @@ function verifyEmailTemplate({
       <span style="word-break:break-all;color:#006b3c;">${url}</span>
     </p>
     <p style="font-size:12px;line-height:1.6;color:#5a5249;margin:24px 0 0;font-style:italic;">
-      Didn't sign up for Sebenza? You can ignore this email  no account will be created.
+      Didn't sign up for Sebenza? You can ignore this email, no account will be created.
     </p>
   `);
 }
@@ -277,7 +277,7 @@ function resetPasswordEmail({
       <span style="word-break:break-all;color:#006b3c;">${url}</span>
     </p>
     <p style="font-size:12px;line-height:1.6;color:#5a5249;margin:24px 0 0;font-style:italic;">
-      Didn't request this? You can safely ignore the email  your current password still works.
+      Didn't request this? You can safely ignore the email, your current password still works.
     </p>
   `);
 }

@@ -174,7 +174,7 @@ const STATE_COPY: Record<
   string,
   { label: string; tone: "brand" | "accent" | "muted" | "danger" }
 > = {
-  invited: { label: "Invited  waiting for your response", tone: "brand" },
+  invited: { label: "Invited, waiting for your response", tone: "brand" },
   accepted: { label: "Accepted", tone: "accent" },
   accepted_with_notice: { label: "Accepted (with notice)", tone: "accent" },
   declined: { label: "Declined", tone: "danger" },
@@ -280,7 +280,7 @@ function InvitationCard({
           <div className="flex flex-wrap items-center gap-2 text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--color-ink-soft)]">
             <span className="truncate">{inv.orgName}</span>
             {/* Phase 11.3.5  verification chip inline with the org
-                name on the inbox card  trust signal at a glance. */}
+                name on the inbox card, trust signal at a glance. */}
             <EmployerVerificationChip state={inv.orgVerification} />
           </div>
           <h3 className="mt-0.5 font-display text-lg text-[color:var(--color-ink)]">
@@ -345,7 +345,7 @@ function EmptyState() {
       <h2 className="mt-4 font-display text-xl">No invitations yet</h2>
       <p className="mx-auto mt-2 max-w-md text-sm text-[color:var(--color-ink-soft)]">
         When a verified employer flags you for a specific role, the
-        invitation will land here  attributed by name, with the role
+        invitation will land here, attributed by name, with the role
         + employer always visible. You&rsquo;ll also get a notification.
       </p>
       <p className="mx-auto mt-3 max-w-md text-xs text-[color:var(--color-ink-soft)]">

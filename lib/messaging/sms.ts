@@ -110,7 +110,7 @@ export async function sendSms(
   if (kind === "console") {
     // eslint-disable-next-line no-console
     console.info(
-      `\n📱 [sms:console] ${input.to}\n   body: ${input.body}\n   tag: ${input.tag ?? "n/a"}\n`,
+      `\n📱 [sms:console] ${input.to}\n, body: ${input.body}\n, tag: ${input.tag ?? "n/a"}\n`,
     );
     return { transport: "console" };
   }

@@ -247,7 +247,7 @@ function InviteDialog({
                         <span className="flex-1 min-w-0">
                           <span className="block truncate">{v.title}</span>
                           {/* Phase 13.9  location subtitle (incl.
-                              "Any province  Remote / Hybrid"). */}
+                              "Any province, Remote / Hybrid"). */}
                           {v.locationLabel && (
                             <span className="block truncate text-[0.7rem] text-[color:var(--color-ink-soft)]">
                               {v.locationLabel}
@@ -279,7 +279,7 @@ function InviteDialog({
                 onChange={(e) => setPersonalNote(e.target.value)}
                 maxLength={200}
                 rows={2}
-                placeholder="Hi  saw your profile and the role looks like a strong match."
+                placeholder="Hi, saw your profile and the role looks like a strong match."
                 className="rounded-[var(--radius-sm)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] px-3 py-2 text-sm"
               />
               <span className="text-[0.7rem] text-[color:var(--color-ink-soft)]">

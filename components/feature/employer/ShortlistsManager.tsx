@@ -77,7 +77,7 @@ export function ShortlistsManager({ initial }: Props) {
   function handleDelete(poolId: string, name: string) {
     if (
       !window.confirm(
-        `Delete pool "${name}"? Members are not deleted  they just lose their place in this pool.`,
+        `Delete pool "${name}"? Members are not deleted, they just lose their place in this pool.`,
       )
     )
       return;
@@ -188,7 +188,7 @@ export function ShortlistsManager({ initial }: Props) {
           <Link href="/search" className="underline">
             /search
           </Link>{" "}
-          → click a candidate → "Add to pool"  wires up alongside the Phase
+          → click a candidate → "Add to pool", wires up alongside the Phase
           5 follow-up).
         </div>
       ) : (

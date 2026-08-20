@@ -48,7 +48,7 @@ export function VacancySnapshotCard({
         <summary className="cursor-pointer text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--color-ink-soft)]">
           <span className="inline-flex items-center gap-1.5">
             <Briefcase className="size-3.5" aria-hidden="true" />
-            Vacancy spec (live  may have changed)
+            Vacancy spec (live, may have changed)
           </span>
         </summary>
         <p className="mt-3 whitespace-pre-wrap text-sm text-[color:var(--color-ink)]">
@@ -90,7 +90,7 @@ export function VacancySnapshotCard({
       <summary className="flex cursor-pointer flex-wrap items-center justify-between gap-2 text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--color-ink-soft)]">
         <span className="inline-flex items-center gap-1.5">
           <Briefcase className="size-3.5" aria-hidden="true" />
-          Vacancy spec  frozen at send
+          Vacancy spec, frozen at send
         </span>
         <span className="inline-flex items-center gap-1 normal-case text-xs italic">
           <ClockArrowUp className="size-3" aria-hidden="true" />

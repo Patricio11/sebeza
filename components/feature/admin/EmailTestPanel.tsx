@@ -135,7 +135,7 @@ export function EmailTestPanel({ defaultRecipient }: Props) {
                 server terminal instead of reaching any SMTP provider.
                 This means <code>EMAIL_TRANSPORT</code> is not set to{" "}
                 <code>smtp</code> on this deploy. Set the env var and
-                redeploy  no email actually left the server.
+                redeploy, no email actually left the server.
               </p>
             </>
           )}

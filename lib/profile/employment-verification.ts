@@ -200,7 +200,7 @@ export async function requestEmploymentVerification(
   }
   if (profile.currentEmployerOrgId !== v.employerOrgId) {
     return fail(
-      "The employer on your profile no longer matches the one you're verifying  refresh the page and try again.",
+      "The employer on your profile no longer matches the one you're verifying, refresh the page and try again.",
     );
   }
 
@@ -369,7 +369,7 @@ export async function withdrawEmploymentVerification(
   }
   if (r.state !== "pending") {
     return fail(
-      "This verification has already been resolved  there's nothing to withdraw.",
+      "This verification has already been resolved, there's nothing to withdraw.",
     );
   }
 

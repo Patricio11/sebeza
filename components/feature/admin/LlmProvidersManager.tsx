@@ -53,10 +53,10 @@ type Props = {
 
 const CROSS_BORDER_PROVIDERS = new Set(["openai", "anthropic"]);
 const PROVIDER_KIND_HINT: Record<string, string> = {
-  openai: "Cross-border (US)  POPIA s.72 acknowledgement required",
-  anthropic: "Cross-border (US)  POPIA s.72 acknowledgement required",
-  mistral: "EU (POPIA-equivalent regime)  no s.72 acknowledgement",
-  self_hosted: "Self-hosted in af-south-1  POPIA-clean recommended path",
+  openai: "Cross-border (US), POPIA s.72 acknowledgement required",
+  anthropic: "Cross-border (US), POPIA s.72 acknowledgement required",
+  mistral: "EU (POPIA-equivalent regime), no s.72 acknowledgement",
+  self_hosted: "Self-hosted in af-south-1, POPIA-clean recommended path",
 };
 
 export function LlmProvidersManager({ providers, killSwitchOn }: Props) {

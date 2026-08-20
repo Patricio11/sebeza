@@ -55,7 +55,7 @@ export async function sendWelcomeEmail(input: {
 
     await sendEmail({
       to: input.email,
-      subject: "Welcome to Sebenza  next steps for your organisation",
+      subject: "Welcome to Sebenza, next steps for your organisation",
       html: employerWelcomeEmail({
         name: input.name,
         orgName: orgRows[0]?.name ?? null,
@@ -80,7 +80,7 @@ export async function sendWelcomeEmail(input: {
 
   await sendEmail({
     to: input.email,
-    subject: "Welcome to Sebenza  three things to do next",
+    subject: "Welcome to Sebenza, three things to do next",
     html: seekerWelcomeEmail({
       name: input.name,
       grantedConsents: granted.map((g) => g.purpose as ConsentPurpose),

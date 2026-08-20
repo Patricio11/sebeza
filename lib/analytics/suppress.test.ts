@@ -131,7 +131,7 @@ describe("suppress()", () => {
   );
 
   test(
-    "two or more survivors in a group means no derivation possible  " +
+    "two or more survivors in a group means no derivation possible, " +
       "neither is dropped by that axis pass",
     () => {
       const rows = [
@@ -155,7 +155,7 @@ describe("suppress()", () => {
   );
 
   test(
-    "no suppressed siblings  a lone survivor in a group is left alone " +
+    "no suppressed siblings, a lone survivor in a group is left alone " +
       "(nothing to derive from)",
     () => {
       // Only one province ever existed for this (programme, institution,
@@ -172,7 +172,7 @@ describe("suppress()", () => {
   );
 
   test(
-    "different (programme, institution) groups are independent  " +
+    "different (programme, institution) groups are independent, " +
       "suppression in one does not bleed into the other",
     () => {
       const rows = [
@@ -195,7 +195,7 @@ describe("suppress()", () => {
     },
   );
 
-  test("no axes provided  only primary suppression runs", () => {
+  test("no axes provided, only primary suppression runs", () => {
     const rows = [row("GP", 2024, 15), row("WC", 2024, 5)];
     const out = suppress(rows, {
       countKey: "cohort_size",
@@ -221,7 +221,7 @@ describe("suppress()", () => {
   });
 
   test(
-    "row pass and col pass are independent  a cell that survives row " +
+    "row pass and col pass are independent, a cell that survives row " +
       "can still be dropped by col, and vice versa",
     () => {
       const rows = [

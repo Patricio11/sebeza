@@ -55,7 +55,7 @@ async function runSaqaCheck(qualification: {
   return {
     status: "verified",
     providerTxId: `mock-saqa-${qualification.id}`,
-    raw: { note: "SAQA worker mock  partnership not yet active." },
+    raw: { note: "SAQA worker mock, partnership not yet active." },
   };
 }
 

@@ -94,7 +94,7 @@ interface InitOptions {
  */
 export async function initSentry(opts: InitOptions): Promise<void> {
   const dsn = process.env.SENTRY_DSN;
-  if (!dsn) return; // Default state  Sentry off in dev / fresh fork.
+  if (!dsn) return; // Default state, Sentry off in dev / fresh fork.
 
   // Lazy-import so we don't take the dep until it's actually wanted.
   try {

@@ -78,7 +78,7 @@ export function EmployerLookupForm() {
             value={orgName}
             onChange={(e) => setOrgName(e.target.value)}
             disabled={pending || registrationNumber.trim().length > 0}
-            hint="No autocomplete by design  this surface never enumerates employers."
+            hint="No autocomplete by design, this surface never enumerates employers."
           />
           <TextField
             id="registrationNumber"
@@ -167,7 +167,7 @@ function ResultPanel({ result }: { result: LookupResult }) {
         <h3 className="font-display text-lg">No match.</h3>
         <p className="mt-2 text-sm text-[color:var(--color-ink-soft)]">
           No organisation found with that exact name / registration
-          number. Exact-match-only is deliberate  the surface
+          number. Exact-match-only is deliberate, the surface
           never returns &ldquo;close matches.&rdquo; If the spelling
           differs by a character, the lookup will refuse. Floor at the
           time of this query: k = {result.floor}.

@@ -82,7 +82,7 @@ export function LearningPathsManager({ paths }: { paths: AdminPathDto[] }) {
                 <div className="text-sm">
                   <strong>{p.title}</strong>
                   <span className="text-[color:var(--color-ink-soft)]">
-                    {"  "}
+                    {", "}
                     {p.lastVerifiedAt
                       ? `last verified ${formatDate(p.lastVerifiedAt)}`
                       : "never verified"}
@@ -178,7 +178,7 @@ export function LearningPathsManager({ paths }: { paths: AdminPathDto[] }) {
                       {p.reviewCount > 0
                         ? `${p.recommendCount}/${p.reviewCount} recommend`
                         : "no reviews yet"}
-                      {"  "}
+                      {", "}
                       {p.lastVerifiedAt
                         ? `verified ${formatDate(p.lastVerifiedAt)}`
                         : "never verified"}

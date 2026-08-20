@@ -54,7 +54,7 @@ export function NationalIdControls({
           : v.reason === "not_digits"
             ? "Only digits, please."
             : v.reason === "bad_checksum"
-              ? "Checksum doesn't match  double-check the number."
+              ? "Checksum doesn't match, double-check the number."
               : "That doesn't look like a valid SA ID number.",
       );
       return;
@@ -102,7 +102,7 @@ export function NationalIdControls({
               </span>
             ) : (
               <span className="text-[color:var(--color-ink-soft)]">
-                No ID on file  verification cannot proceed until one is captured.
+                No ID on file, verification cannot proceed until one is captured.
               </span>
             )}
           </div>

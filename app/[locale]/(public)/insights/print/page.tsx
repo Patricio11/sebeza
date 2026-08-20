@@ -12,7 +12,7 @@ import { PrintActions } from "@/components/feature/PrintActions";
 export const revalidate = 300;
 
 export const metadata = {
-  title: "Sebenza Insights  print briefing",
+  title: "Sebenza Insights, print briefing",
   robots: { index: false, follow: false },
 };
 

@@ -492,7 +492,7 @@ function VacancyPickerBody({
             </p>
             <p className="mt-1 text-xs text-[color:var(--color-ink-soft)]">
               {result.skipped > 0 && result.invited > 0
-                ? `${result.skipped} couldn't receive an invite (consent or already invited)  counts only, per-person reasons stay in the audit log. `
+                ? `${result.skipped} couldn't receive an invite (consent or already invited), counts only, per-person reasons stay in the audit log. `
                 : ""}
               Track responses on the vacancy&rsquo;s pipeline panel.
             </p>
@@ -607,7 +607,7 @@ function VacancyPickerBody({
           onChange={(e) => setPersonalNote(e.target.value)}
           maxLength={200}
           rows={2}
-          placeholder="Hi  saw your profile and the role looks like a strong match."
+          placeholder="Hi, saw your profile and the role looks like a strong match."
           className="rounded-[var(--radius-sm)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] px-3 py-2 text-sm"
         />
         <span className="text-[0.7rem] text-[color:var(--color-ink-soft)]">

@@ -67,7 +67,7 @@ export default async function NewVacancyPage({
       })
     | undefined;
   let pageSubtitle =
-    "Private to your organisation. Vacancies start as drafts  open them when ready to invite candidates.";
+    "Private to your organisation. Vacancies start as drafts, open them when ready to invite candidates.";
   if (duplicateFrom) {
     const source = await getMyVacancy(duplicateFrom);
     if (source) {
@@ -92,7 +92,7 @@ export default async function NewVacancyPage({
         // seasonal vacancies.
         seasonalWindow: source.seasonalWindow,
       };
-      pageSubtitle = `Pre-filled from "${source.title}". Edit anything before saving  this creates a fresh draft, the original stays untouched.`;
+      pageSubtitle = `Pre-filled from "${source.title}". Edit anything before saving, this creates a fresh draft, the original stays untouched.`;
     }
   }
 

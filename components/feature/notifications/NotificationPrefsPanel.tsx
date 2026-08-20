@@ -4,6 +4,11 @@
  * Phase 7 (C.6)  Notification preferences panel.
  *
  * One row per catalog kind, three columns: In-app · Email · Push.
+ *
+ * Two things deliberately absent: the raw catalog key (a database
+ * identifier that means nothing to the person reading it) and any
+ * mention of our internal phase numbering. A disabled channel says
+ * "Soon", which is true and is all a user needs to know.
  * A column whose channel is not live is disabled with a pill rather
  * than hidden, so the shape of the panel does not change when a
  * channel is switched on.
@@ -29,7 +34,7 @@ interface Props {
   /** Catalog keys to render. Caller decides which kinds are relevant to the role. */
   kinds: NotificationKind[];
   /** Phase 8  whether the master email-channel flag is on. When off,
-   *  the email column stays disabled with a "Phase 8" pill. */
+   *  the email column stays disabled behind a "Soon" pill. */
   emailChannelEnabled?: boolean;
   /** Phase 35  whether the master web-push flag is on. Note this is
    *  the PLATFORM switch only: a user still has to grant permission on
@@ -121,9 +126,6 @@ function PrefRow({
         <p className="text-xs text-[color:var(--color-ink-soft)]">
           {meta.description}
         </p>
-        <code className="mt-1 inline-block rounded-[var(--radius-sm)] bg-[color:var(--color-surface-sunk)] px-1.5 py-0.5 text-[0.6rem] text-[color:var(--color-ink-soft)]">
-          {kind}
-        </code>
         {error && (
           <p className="mt-1 text-xs text-[color:var(--color-danger)]">{error}</p>
         )}
@@ -140,7 +142,7 @@ function PrefRow({
         label="Email"
         on={emailChannelEnabled && pref.email}
         disabled={!emailChannelEnabled || pending}
-        pill={emailChannelEnabled ? undefined : "Phase 8"}
+        pill={emailChannelEnabled ? undefined : "Soon"}
         onChange={toggleEmail}
       />
 

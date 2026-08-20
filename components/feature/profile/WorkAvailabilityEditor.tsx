@@ -30,11 +30,11 @@ const LABEL: Record<WorkAvailabilityKind, string> = {
 const HINT: Record<WorkAvailabilityKind, string> = {
   casual: "Hourly / per-shift. Waitressing, retail, event work.",
   seasonal:
-    "Recurring window each year  lodges in Dec-Feb, citrus pickers May-Oct, Christmas trade.",
+    "Recurring window each year, lodges in Dec-Feb, citrus pickers May-Oct, Christmas trade.",
   part_time: "Regular but < 35 hours a week. Compatible with study.",
   contract: "Fixed-term or project work.",
   full_time: "Permanent, full-time roles.",
-  remote: "Work from anywhere  no daily commute required.",
+  remote: "Work from anywhere, no daily commute required.",
   hybrid: "Mix of office + remote days. Usually 23 days on-site.",
 };
 
@@ -74,7 +74,7 @@ export function WorkAvailabilityEditor({ initialValues }: Props) {
         What work are you open to?
       </legend>
       <p className="mb-4 text-xs text-[color:var(--color-ink-soft)]">
-        Independent of your employment status. Pick everything that fits  a
+        Independent of your employment status. Pick everything that fits, a
         full-time employee can still be open to contract work, a student can
         signal casual shifts.
       </p>

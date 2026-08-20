@@ -45,7 +45,7 @@ export default async function AdminHelpIndexPage({
       role="admin"
       pageEyebrow="Documentation"
       pageTitle="Admin help center"
-      pageSubtitle="Everything an admin can do on the platform  laid out by category, searchable, with deep-links back to the console surfaces they cover. Internal-only; never reachable from public routes."
+      pageSubtitle="Everything an admin can do on the platform, laid out by category, searchable, with deep-links back to the console surfaces they cover. Internal-only; never reachable from public routes."
     >
       <HelpSearchIsland
         articles={ADMIN_HELP_ARTICLES.map((a) => a.meta)}
@@ -113,7 +113,7 @@ export default async function AdminHelpIndexPage({
       <p className="mt-12 text-xs italic text-[color:var(--color-ink-soft)]">
         Government help centre lands in Phase 10.4. Translations to
         isiZulu, isiXhosa + Afrikaans are deliberately deferred for
-        admin docs  the console is English-only for trained staff,
+        admin docs, the console is English-only for trained staff,
         and POPIA / consent copy is human-translated only.
       </p>
     </DashboardMasthead>

@@ -79,7 +79,7 @@ export async function sendWhatsApp(
   if (kind === "console") {
     // eslint-disable-next-line no-console
     console.info(
-      `\n📞 [whatsapp:console] ${input.to}\n   body: ${input.body}\n   templateId: ${input.templateId ?? "n/a"}\n   tag: ${input.tag ?? "n/a"}\n`,
+      `\n📞 [whatsapp:console] ${input.to}\n, body: ${input.body}\n, templateId: ${input.templateId ?? "n/a"}\n, tag: ${input.tag ?? "n/a"}\n`,
     );
     return { transport: "console" };
   }

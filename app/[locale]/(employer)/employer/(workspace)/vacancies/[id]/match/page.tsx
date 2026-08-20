@@ -192,7 +192,7 @@ export default async function VacancyMatchPage({
         {counts.total > 0 && counts.foreignNational > 0 && (
           <p className="mt-1 text-xs text-[color:var(--color-ink-soft)]">
             Of those, {nfmt.format(counts.foreignNational)} are
-            foreign nationals  highlighted SA candidates rank first via
+            foreign nationals, highlighted SA candidates rank first via
             the platform's citizen-highlight boost.
           </p>
         )}
@@ -308,7 +308,7 @@ export default async function VacancyMatchPage({
             <p className="mt-6 rounded-[var(--radius-sm)] border border-dashed border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] px-4 py-3 text-xs text-[color:var(--color-ink-soft)]">
               Top 50 ranked candidates shown. The honest-supply line
               above counts <strong>all {nfmt.format(counts.total)}</strong>
-              {" "}matches across the platform  use Refine in search
+              {" "}matches across the platform, use Refine in search
               if you want to narrow the ranked view.
             </p>
           )}

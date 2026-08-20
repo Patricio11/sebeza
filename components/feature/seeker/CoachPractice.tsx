@@ -19,18 +19,18 @@ import { HelpLink } from "@/components/feature/help/HelpLink";
 
 const REASON_COPY: Record<string, string> = {
   no_provider:
-    "AI coaching isn't switched on yet  an administrator still needs to connect a provider. Please check back soon.",
+    "AI coaching isn't switched on yet, an administrator still needs to connect a provider. Please check back soon.",
   no_credentials:
-    "AI coaching isn't switched on yet  an administrator still needs to connect a provider. Please check back soon.",
+    "AI coaching isn't switched on yet, an administrator still needs to connect a provider. Please check back soon.",
   budget:
     "AI coaching has paused for this month while we manage costs. Please check back soon.",
   flag_off: "AI coaching isn't available right now.",
   payload_unsafe:
-    "Please remove any personal details (ID number, email, or phone) from the role and try again  just the job title is enough.",
+    "Please remove any personal details (ID number, email, or phone) from the role and try again, just the job title is enough.",
   failed:
     "The coach couldn't be reached right now. Please try again in a moment.",
   empty:
-    "No questions came back  try describing the role a little differently.",
+    "No questions came back, try describing the role a little differently.",
   off_scope:
     "I can only help you practise interview questions. Try a role you're preparing for.",
 };
@@ -59,7 +59,7 @@ export function CoachPractice({ defaultRole }: { defaultRole: string }) {
       {/* Phase 22.3  structural anti-opportunity framing. Always visible; not
           copy the model can override. This is practice, never a real opening. */}
       <p className="mb-6 rounded-[var(--radius-md)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface-sunk)] p-3 text-xs text-[color:var(--color-ink-soft)]">
-        This is practice to help you prepare  it is not a real interview, and
+        This is practice to help you prepare, it is not a real interview, and
         not a job offer.
       </p>
 
@@ -94,7 +94,7 @@ export function CoachPractice({ defaultRole }: { defaultRole: string }) {
           </Button>
         </div>
         <p className="mt-2 text-xs text-[color:var(--color-ink-soft)]">
-          We only send the role and your listed skills  never your name, ID, or
+          We only send the role and your listed skills, never your name, ID, or
           contact details.
         </p>
       </form>
@@ -148,7 +148,7 @@ export function CoachPractice({ defaultRole }: { defaultRole: string }) {
             ))}
           </ol>
           <p className="mt-3 text-xs text-[color:var(--color-ink-soft)]">
-            AI-generated to help you rehearse. Real interviews vary  treat these
+            AI-generated to help you rehearse. Real interviews vary, treat these
             as practice, not predictions.
           </p>
         </div>

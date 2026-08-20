@@ -51,7 +51,7 @@ type Step = 1 | 2 | 3;
  */
 const PURPOSE_ONBOARDING_EXPLAINER: Partial<Record<ConsentPurpose, string>> = {
   vacancy_matching:
-    "When you grant this, verified employers can flag you for a specific role they're trying to fill  a chef position at a particular restaurant, a developer role at a particular bank. You'll get a notification with the role + employer named, and you can accept, decline, or decline with a reason. Declining is free. You can revoke this consent any time from your privacy centre, and declining a single invite doesn't hurt your visibility in search.",
+    "When you grant this, verified employers can flag you for a specific role they're trying to fill, a chef position at a particular restaurant, a developer role at a particular bank. You'll get a notification with the role + employer named, and you can accept, decline, or decline with a reason. Declining is free. You can revoke this consent any time from your privacy centre, and declining a single invite doesn't hurt your visibility in search.",
 };
 
 /**
@@ -681,7 +681,7 @@ export function SeekerSignUpForm({
               server-side from the picked country (ZA → citizen class).
               SA + SADC are pinned at the head of the list; the flag
               emoji renders in the `leading` slot and is excluded from
-              type-to-filter ranking. Never a gate  the help text says
+              type-to-filter ranking. Never a gate, the help text says
               so. */}
           <ComboboxField
             id="nationality"
@@ -932,7 +932,7 @@ export function SeekerSignUpForm({
           />
 
           {/* Phase 34  Self Apply funnel: the vacancy-tailored moment.
-              The role's asked-for skills as one-tap chips  select what
+              The role's asked-for skills as one-tap chips, select what
               you have, it saves straight onto your profile (validated
               server-side against the vacancy's own list). Optional +
               skippable; zero free typing. */}
@@ -1134,7 +1134,7 @@ export function SeekerSignUpForm({
                 <TextField
                   id="role-city"
                   label="City you work in"
-                  placeholder="e.g. Cape Town  leave blank to use your home city"
+                  placeholder="e.g. Cape Town, leave blank to use your home city"
                   value={state.currentRoleCity}
                   onChange={(e) =>
                     setState({ ...state, currentRoleCity: e.target.value })
@@ -1149,7 +1149,7 @@ export function SeekerSignUpForm({
               itself) toggles `isStudent` AND opens/closes the panel
               in one go. Previously this was a <details>/<summary>
               pair that let the panel open without flipping the
-              checkbox state  desync bug. */}
+              checkbox state, desync bug. */}
           <div
             className={
               "rounded-[var(--radius-md)] border-2 " +
@@ -1354,7 +1354,7 @@ export function SeekerSignUpForm({
 
                   {/* Phase 13.1  current-semester context. All three
                       optional. Modules input is a single textarea
-                      (comma / newline separated)  no chip-input client
+                      (comma / newline separated), no chip-input client
                       island at sign-up; the editor handles the richer
                       capture path. */}
                   <div className="md:col-span-2 mt-2 rounded-[var(--radius-sm)] border border-dashed border-[color:var(--color-hairline)] bg-[color:var(--color-surface-sunk)] p-4">
@@ -1383,7 +1383,7 @@ export function SeekerSignUpForm({
                           id="academic-elective"
                           label="Elective you chose"
                           placeholder="e.g. Cloud Computing"
-                          hint="One elective  the one that excites you most."
+                          hint="One elective, the one that excites you most."
                           value={state.academic.electiveChosen}
                           onChange={(e) =>
                             setState({
@@ -1434,7 +1434,7 @@ export function SeekerSignUpForm({
             </legend>
             <p className="mt-1 mb-3 text-xs text-[color:var(--color-ink-soft)]">
               What kinds of work you&rsquo;re open to. Independent of your
-              current status  e.g. an employed person can also be open to
+              current status, e.g. an employed person can also be open to
               contract work. You can change this any time from your dashboard.
             </p>
             <ul className="grid gap-2 sm:grid-cols-2">

@@ -81,7 +81,7 @@ export function TaxonomySuggestionsManager({
           lifecycle as profession; Promote inserts the entry into the
           skills table. The submitting seeker / employer re-adds the
           skill on their next profile / vacancy edit (no automatic
-          backfill  non-canonical entries weren't persisted in the
+          backfill, non-canonical entries weren't persisted in the
           first place). */}
       <Section
         title="Skill suggestions"
@@ -321,7 +321,7 @@ function SuggestionRowCard({
               />
               <p className="mt-2 text-xs italic text-[color:var(--color-ink-soft)]">
                 Promoting marks this org as verified seeker-named. It
-                does NOT grant vacancy-posting rights  the employer
+                does NOT grant vacancy-posting rights, the employer
                 still needs to sign up + complete KYC for that.
               </p>
             </>

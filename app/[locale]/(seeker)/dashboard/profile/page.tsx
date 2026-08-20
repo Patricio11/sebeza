@@ -243,7 +243,7 @@ export default async function ProfileEditorPage({
                 </div>
               </div>
               <p className="text-xs text-[color:var(--color-ink-soft)]">
-                Read-only. Email change wires up in Phase 9 alongside the
+                Read-only. Changing your email is coming soon, alongside the
                 domain-verified Resend campaign domain.
               </p>
             </div>
@@ -270,14 +270,14 @@ export default async function ProfileEditorPage({
               <SectionHeading
                 eyebrow="01"
                 title={t("sections.identity")}
-                hint="Display name + citizenship. Sebenza matches by location and skill  citizenship is analytics + highlight only, never a gate."
+                hint="Display name + citizenship. Sebenza matches by location and skill, citizenship is analytics + highlight only, never a gate."
               />
             }
             locationHeading={
               <SectionHeading
                 eyebrow="02"
                 title={t("sections.locationTitle")}
-                hint="Where you live and want to work. Sebenza matches by location + skill  never by nationality."
+                hint="Where you live and want to work. Sebenza matches by location + skill, never by nationality."
               />
             }
             professionalHeading={
@@ -308,7 +308,7 @@ export default async function ProfileEditorPage({
             <SectionHeading
               eyebrow="04"
               title={t("sections.skillsTitle")}
-              hint="Skills must come from our controlled taxonomy  keeps search and analytics clean."
+              hint="Skills must come from our controlled taxonomy, keeps search and analytics clean."
             />
             <SkillsEditor
               initial={initialSkills}
@@ -330,7 +330,7 @@ export default async function ProfileEditorPage({
             <SectionHeading
               eyebrow="04b"
               title="Languages"
-              hint="Self-declared  employers see these when reviewing you. Many roles need a specific language."
+              hint="Self-declared, employers see these when reviewing you. Many roles need a specific language."
             />
             <LanguagesEditor initial={me.languages ?? []} />
           </section>
@@ -340,7 +340,7 @@ export default async function ProfileEditorPage({
             <SectionHeading
               eyebrow="05"
               title="Work availability"
-              hint="What kinds of work you're open to  independent of your current employment status."
+              hint="What kinds of work you're open to, independent of your current employment status."
             />
             <WorkAvailabilityEditor initialValues={me.workAvailability ?? []} />
           </section>
@@ -384,7 +384,7 @@ export default async function ProfileEditorPage({
           {/* National ID  Phase 31: collection dormant by default. The
               ID/KYC panels appear ONLY when collection is ON, or when the
               seeker already holds ID data (then in status/remove-only
-              mode  erasure never switches off). */}
+              mode, erasure never switches off). */}
           <section id="national-id">
             <SectionHeading
               eyebrow="06"
@@ -492,10 +492,10 @@ export default async function ProfileEditorPage({
                 </SelectField>
               </div>
               <p className="mt-4 rounded-[var(--radius-sm)] border border-dashed border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-3 text-xs text-[color:var(--color-ink-soft)]">
-                Institution + programme + NQF level stay read-only
-                until Phase 8 wires the SAQA + institution
-                verification integration. The current-semester
-                context below is editable any time.
+                Institution, programme and NQF level stay read-only while
+                we build the verification link with SAQA and the
+                institutions. The current-semester context below is
+                editable any time.
               </p>
 
               {/* Phase 13.1  current-semester context editor.
@@ -532,7 +532,7 @@ export default async function ProfileEditorPage({
                 </h2>
               </div>
               <p className="mt-2 text-sm text-[color:var(--color-ink-soft)]">
-                Optional secondary intent  doesn&rsquo;t change your
+                Optional secondary intent, doesn&rsquo;t change your
                 employment status.
               </p>
             </header>

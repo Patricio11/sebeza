@@ -111,7 +111,7 @@ export default async function OrganisationPage({
             </div>
             <p className="mt-3 text-sm text-[color:var(--color-ink-soft)]">
               {isVerified
-                ? "Your organisation is verified. You can reveal candidate contact details and request documents  every access is audit-logged."
+                ? "Your organisation is verified. You can reveal candidate contact details and request documents, every access is audit-logged."
                 : verification === "pending"
                   ? "Your application is under review by our team. We typically respond within one business day."
                   : verification === "rejected"

@@ -126,7 +126,7 @@ export default async function GovOpportunityPage({
         </h2>
         <p className="mt-2 text-sm text-[color:var(--color-ink-soft)]">
           The cells below are where Sebenza data suggests SA-citizen
-          talent is genuinely available  useful for designing local-
+          talent is genuinely available, useful for designing local-
           hiring incentives, training programmes, and policy follow-up
           in (profession × province) cells where the supply is there
           to back the intervention. The complement view on{" "}

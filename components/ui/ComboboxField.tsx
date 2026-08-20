@@ -117,7 +117,7 @@ export function ComboboxField({
   disabled,
   required,
   name,
-  emptyText = "No matches  refine your search or contact support if your option isn't listed.",
+  emptyText = "No matches, refine your search or contact support if your option isn't listed.",
   className,
   allowOther,
   onOtherSubmit,

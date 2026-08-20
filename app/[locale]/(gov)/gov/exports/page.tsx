@@ -37,20 +37,20 @@ export default async function GovExportsPage({
         <ExportCard
           title="Sebenza LMI (latest)"
           href="/api/lmi"
-          desc="Composite index + components + previous snapshot delta. JSON. Public  no auth required."
+          desc="Composite index + components + previous snapshot delta. JSON. Public, no auth required."
         />
         <ExportCard
           title="Audit log (admin only)"
           href="/api/admin/audit-log/export"
-          desc="Per-kind + per-actor filter. Capped at 10 000 rows; bigger windows are a Phase 10 email-it job."
+          desc="Per-kind + per-actor filter. Capped at 10 000 rows per export; narrow the window, or ask us for a larger extract."
         />
         <ExportCard
-          title="Nationality mix  status (national)"
+          title="Nationality mix, status (national)"
           href="/api/gov/nationality-mix/export?dim=status"
           desc="Employment status × SA-citizen / foreign-national. 2-class only (no country-level data). Suppressed cells (count below floor) excluded."
         />
         <ExportCard
-          title="Nationality mix  supply (national)"
+          title="Nationality mix, supply (national)"
           href="/api/gov/nationality-mix/export?dim=supply"
           desc="Province × profession × SA-citizen / foreign-national supply. 2-class only. Suppressed at k = floor. Add ?province=Gauteng for a single-province slice."
         />
