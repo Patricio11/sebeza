@@ -53,7 +53,8 @@ We'll share the journey here. The wins, the hard parts, all of it.
 ---
 
 ### IG-3 · The one-liner
-**Visual:** product screenshot of the search (branded frame, no PII)
+**Visual:** `../facebook/assets/post-03-one-liner.png` (shared with FB post 3).
+Branded card around a real product screenshot of a seeded showcase profile.
 **Caption:**
 Search "chef in Cape Town." See real people, near you, ready to work.
 

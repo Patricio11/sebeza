@@ -1,0 +1,123 @@
+<!doctype html>
+<!--
+  Sebenza social PRODUCT card (1080x1350).
+  Same house language as quote.html, but the proof is a REAL screenshot
+  of the shipped product instead of a pull-quote.
+
+  Slots filled by render.mjs: [data-slot=eyebrow], [data-slot=headline],
+  [data-slot=sub], [data-slot=caption], [data-mark], and [data-shot]
+  (an <img src> set to a file in ./shots).
+
+  Screenshots MUST come from the seeded harness (fictional showcase
+  profiles). Never publish a shot containing a real person's data.
+
+  The flag stripe (green 3 : gold 2 : red 1) is the house law: every
+  Sebenza social graphic carries it at the very bottom, full bleed.
+-->
+<html>
+<head>
+<meta charset="utf-8" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=Hanken+Grotesk:ital,wght@0,400..700;1,400..700&display=block" rel="stylesheet" />
+<style>
+  :root {
+    --paper: #fbf8f0;
+    --ink: #14110d;
+    --ink-soft: #5a5249;
+    --green: #006b3c;
+    --green-deep: #003d1f;
+    --gold: #c98214;
+    --red: #de3831;
+    --hairline: #e4ded4;
+    --headline-size: 76px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 100%; height: 100%; }
+  body {
+    font-family: "Hanken Grotesk", system-ui, sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+  }
+  .card {
+    width: 100vw; height: 100vh;
+    display: flex; flex-direction: column;
+    padding: 84px 84px 0;
+    position: relative;
+  }
+  .toprule { height: 8px; width: 148px; background: var(--green); margin-bottom: 36px; }
+  .eyebrow {
+    font-weight: 700; font-size: 26px; letter-spacing: 0.24em;
+    text-transform: uppercase; color: var(--ink-soft);
+  }
+  .headline {
+    font-family: "Fraunces", Georgia, serif;
+    font-weight: 560; font-size: var(--headline-size);
+    line-height: 1.1; letter-spacing: -0.015em;
+    margin-top: 26px; max-width: 900px;
+    font-variation-settings: "opsz" 144;
+  }
+  .headline em { font-style: italic; color: var(--gold); font-weight: 540; }
+  .sub {
+    margin-top: 24px; font-size: 31px; line-height: 1.4;
+    color: var(--ink-soft); max-width: 840px; font-weight: 400;
+  }
+  .sub:empty { display: none; }
+
+  /* The screenshot sits on a raised surface so it reads as a real UI
+     rather than a flat illustration. */
+  .shotwrap {
+    flex: 1; display: flex; align-items: center; justify-content: center;
+    padding: 40px 0 24px; min-height: 0;
+  }
+  .shot {
+    max-width: 100%; max-height: 100%;
+    border: 1px solid var(--hairline);
+    border-radius: 22px;
+    box-shadow: 0 26px 60px rgba(20, 17, 13, 0.16),
+                0 4px 12px rgba(20, 17, 13, 0.06);
+    display: block;
+  }
+  .caption {
+    font-size: 24px; color: var(--ink-soft); font-weight: 500;
+    letter-spacing: 0.02em; text-align: center; padding-bottom: 22px;
+  }
+  .caption:empty { display: none; }
+
+  .footer {
+    display: flex; align-items: center; gap: 22px;
+    padding-bottom: 54px;
+  }
+  .footer .mark { width: 52px; height: 47px; display: block; }
+  .footer .mark svg { width: 100%; height: 100%; display: block; }
+  .wordmark {
+    font-family: "Fraunces", Georgia, serif; font-weight: 700;
+    font-size: 44px; color: var(--green-deep); letter-spacing: -0.01em;
+  }
+  .site {
+    font-size: 27px; color: var(--ink-soft); font-weight: 500;
+    letter-spacing: 0.02em; margin-left: auto;
+  }
+  .stripe { display: flex; height: 18px; width: 100vw; position: absolute; left: 0; bottom: 0; }
+  .stripe .g { flex: 3; background: var(--green); }
+  .stripe .a { flex: 2; background: var(--gold); }
+  .stripe .r { flex: 1; background: var(--red); }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="toprule"></div>
+    <div class="eyebrow" data-slot="eyebrow"></div>
+    <div class="headline" data-slot="headline"></div>
+    <div class="sub" data-slot="sub"></div>
+    <div class="shotwrap"><img class="shot" data-shot alt="" /></div>
+    <div class="caption" data-slot="caption"></div>
+    <div class="footer">
+      <span class="mark" data-mark></span>
+      <span class="wordmark">Sebenza</span>
+      <span class="site">sebenzasa.com</span>
+    </div>
+    <div class="stripe"><div class="g"></div><div class="a"></div><div class="r"></div></div>
+  </div>
+</body>
+</html>

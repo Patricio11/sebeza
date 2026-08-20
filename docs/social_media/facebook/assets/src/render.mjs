@@ -98,6 +98,14 @@ const CARDS = [
   },
   { template: "checklist.html", out: "post-30-promise.png", w: 1080, h: 1350 },
   {
+    template: "product.html", out: "post-03-one-liner.png", w: 1080, h: 1350,
+    eyebrow: "What Sebenza is",
+    headline: "Search a skill and a city. See <em>real people</em>.",
+    sub: "Not a pile of CVs. A place where talent is findable.",
+    shot: "shots/search-chef-row.png",
+    caption: "Live search on sebenzasa.com &middot; chef, Cape Town",
+  },
+  {
     template: "quote.html", out: "post-02-who.png", w: 1080, h: 1350,
     theme: "light", size: 92, eyebrow: "Who's behind this",
     headline: "A small South African company with one belief: this country's talent deserves to be <em>seen</em>.",
@@ -125,6 +133,11 @@ for (const card of CARDS) {
       set("eyebrow", card.eyebrow);
       set("headline", card.headline);
       set("sub", card.sub ?? "");
+      set("caption", card.caption ?? "");
+      if (card.shot) {
+        const img = document.querySelector("[data-shot]");
+        if (img) img.setAttribute("src", card.shot);
+      }
       document.querySelectorAll("[data-mark]").forEach((el) => (el.innerHTML = mark));
     },
     { card, mark: markTone === "dark" ? MARK_LIGHT_ON_DARK : MARK_DARK_ON_LIGHT },

@@ -63,7 +63,10 @@ Search "chef in Cape Town" and see real people, near you, available for work, wi
 Not a pile of CVs. Not a job board you scroll forever. A place where talent is *findable*.
 
 That's the heart of it. Everything else we're building sits on top of that one idea. 🔍🇿🇦
-**Visual:** A clean product screenshot of the search (ask Claude for a branded frame; no real PII).
+**Visual:** `assets/post-03-one-liner.png` (branded card around a real product
+screenshot). The shot is captured from the SEEDED harness by
+`tests/e2e/social-capture.spec.ts`, so the person shown is a fictional
+showcase profile, never a real user.
 **Tags:** #Sebenza #SebenzaSA #Jobs #SouthAfrica #FutureOfWork
 
 ---
