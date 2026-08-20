@@ -354,10 +354,20 @@ if (want("v13")) await record("v13-you-get-found.mp4", async (page, markLead) =>
 
   // Tick three candidates, one at a time, so the bar's count visibly
   // climbs instead of appearing fully formed.
-  const boxes = page.getByLabel(/^Select .+ to invite$/);
+  // Selected BY NAME, never by list position, and the four are chosen
+  // deliberately: three hold `vacancy_matching` consent and are clean on
+  // this vacancy, and Cohort 08 has never granted it. That is what makes
+  // the closing line true. Pick by index instead and the one skip can
+  // land on `already_invited` left over from an earlier take, which
+  // would make the "consent" claim a lie. Re-seed before recording.
   const n2 = showNote(page, "She picks the people she wants.", 3400);
-  for (const i of [0, 1, 2, 3]) {
-    await boxes.nth(i).click();
+  for (const who of [
+    "Andile Z.",
+    "Lerato N.",
+    "BSc CS Cohort 06",
+    "BSc CS Cohort 08",
+  ]) {
+    await page.getByLabel(`Select ${who} to invite`).click();
     await page.waitForTimeout(650);
   }
   await n2;
@@ -391,6 +401,59 @@ if (want("v13")) await record("v13-you-get-found.mp4", async (page, markLead) =>
   await showNote(
     page,
     "Some can't be invited. <em>Consent isn't optional here.</em>",
+    4000,
+    { atTop: true },
+  );
+  await showEndCard(page, 2800);
+});
+
+// ---- V14 · The other side of that invite (~20s) ----
+// The companion to V13, filmed from the seeker's chair: the same
+// invitation V13 just sent, as Andile receives it.
+//
+// DEPENDS ON V13 having run first in this same session, because the
+// invitation it opens is the one V13 created. Record them together:
+//   ONLY=v13,v14 node record-app.mjs
+//
+// It stops at the Accept / Decline choice and never clicks either. The
+// point of the video is that the choice belongs to him, so the film
+// should not make it for him.
+if (want("v14")) await record("v14-the-other-side.mp4", async (page, markLead) => {
+  await page.goto(`${BASE}/sign-in`, { waitUntil: "load" });
+  await page.fill('input[type="email"]', "andile-z@example.co.za");
+  await page.fill('input[type="password"]', "sebenza-dev-2026");
+  await page.getByRole("button", { name: /sign in/i }).click();
+  await page.waitForURL("**/dashboard**", { timeout: 30000 });
+  await page.goto(`${BASE}/dashboard/invitations`, { waitUntil: "load" });
+  await page.waitForTimeout(1400);
+  await injectOverlaySystem(page);
+  await showHookStart(page, "This is the other side of that invite.");
+  markLead();
+  await dismissConsent(page);
+  await showHookEnd(page, 2600);
+
+  const n1 = showNote(page, "He never applied. <em>He was found.</em>", 3400);
+  await page.waitForTimeout(2400);
+  await n1;
+
+  await page
+    .getByRole("link", { name: /Senior Software Engineer at Discovery/i })
+    .first()
+    .click();
+  await page.waitForTimeout(1800);
+
+  // Describes only what is actually on this screen. The employer's
+  // personal note is NOT rendered here (it goes out in the invite
+  // email), so the note must not claim it is.
+  const n2 = showNote(page, "The role, the pay, and how long he has.", 3600);
+  await smoothScroll(page, 800, 4000);
+  await n2;
+
+  // Land on the response actions and hold. Nothing is clicked.
+  await smoothScroll(page, 700, 3200);
+  await showNote(
+    page,
+    "Accept, or don't. <em>His call, not ours.</em>",
     4000,
     { atTop: true },
   );

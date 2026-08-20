@@ -762,7 +762,8 @@
       "lead": "Short, practical guides  and a CV built from your profile in one tap.",
       "seeAll": "See all work-ready guides",
       "prepareTitle": "Prepare for this role",
-      "prepareLead": "You accepted this invitation  here's how to get ready.",
+      "prepareLead": "You accepted this invitation. Here’s how to get ready.",
+      "prepareLeadPending": "Still deciding? Here’s how to get ready either way.",
       "prepareInterview": "How to prepare for the interview",
       "prepareCv": "Build your CV",
       "prepareScams": "Spot a job scam"

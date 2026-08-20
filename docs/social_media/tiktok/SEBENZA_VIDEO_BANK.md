@@ -139,6 +139,19 @@ optional here."
 **Caption:** On most platforms your CV disappears into a pile. Here an employer searches, finds
 you, and asks. And if you never gave permission to be matched, you simply don't get invited.
 That's not a setting we hid, it's the whole design. #Sebenza #YouGetFound #Jobs #SouthAfrica
+### V14 · The other side of that invite (20s)
+**Hook:** "This is the other side of that invite."
+**Beats:** the same invitation V13 just sent, opened by the person who received it. Who it is
+from, the role, the pay band, the date he has to answer by, the vacancy spec frozen at the
+moment it was sent. Then Accept, Accept with notice, Decline. Nothing is clicked.
+**Overlays:** "He never applied. He was found." → "The role, the pay, and how long he has." →
+"Accept, or don't. His call, not ours."
+**Caption:** He never applied for this. An employer searched, found him, and asked. Now it is
+his decision, and declining costs him nothing: it never touches how he shows up in search.
+That is the part most platforms get backwards. #Sebenza #YouGetFound #Jobs #SouthAfrica
+*Pairs with V13, post it the day after. Filming note: V14 opens the invitation V13 creates, so
+they must be recorded together, in order, against a freshly seeded test database.*
+
 *This is the other half of V6's promise. V6 says employers search and you get found; this one
 shows it happening. The closing line is the point: the product says out loud, on screen, that
 someone could not be invited because they never consented.*

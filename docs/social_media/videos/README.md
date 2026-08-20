@@ -24,6 +24,7 @@ cards, the flag stripe) is baked in.
 | `v7-scam-signs.mp4` (~19s) | V7 | The three scam red flags, red alert cards. |
 | `v9-four-languages.mp4` (~25s) | V9 | The REAL translated landing: English → isiZulu → isiXhosa → Afrikaans, "South Africa" kept untranslated per the house rule. |
 | `v13-you-get-found.mp4` (~22s) | V13 | The real Phase 29.4 invite funnel on public /search: selection bar, invite dialog, vacancy picked, invitations sent, and the honest "1 couldn't receive an invite" result. |
+| `v14-the-other-side.mp4` (~20s) | V14 | The same invitation from the seeker's chair: employer, role, pay band, deadline, and the Accept / Decline choice left untouched. Records only after V13. |
 | `v10-skills-map.mp4` (~18s) | V10 | /insights live: status mix, the province × profession supply heatmap, skill-level demand. |
 
 **V9 is now filmed for real**: the zu/xh/af catalogs are full translations (pending human
@@ -50,6 +51,11 @@ node docs/social_media/videos/src/record-cards.mjs
 node docs/social_media/videos/src/serve-app.mjs        # keep running
 node docs/social_media/videos/src/record-app.mjs
 ```
+
+V13 + V14 are a pair and share state: V13 sends the invitation V14 opens, and V13's closing
+line is only true against a freshly seeded database (a leftover invitation from an earlier
+take turns the one skip into `already_invited` instead of `consent_not_granted`). Re-seed,
+then record both together with `ONLY=v13,v14`.
 
 ## Making a new video
 

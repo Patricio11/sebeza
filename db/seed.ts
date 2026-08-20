@@ -992,7 +992,7 @@ async function seedPhase7_5OutcomesCohort() {
       role: ["Backend developer", "Data engineer", "Frontend developer"][i] ?? "Software developer",
       city: "Sandton",
       hiredAt: new Date(`2026-04-${10 + i * 3}`),
-      salaryBand: "R 480k–600k",
+      salaryBand: "R 480k-600k",
       source: "employer_confirmed" as const,
     })),
   );
@@ -1171,7 +1171,7 @@ async function seedPhase9_7NationalityDemo() {
       role: "Full-stack developer",
       city: "Sandton",
       hiredAt: new Date("2026-03-20"),
-      salaryBand: "R 480k600k",
+      salaryBand: "R 480k-600k",
       source: "employer_confirmed" as const,
     },
     {
@@ -1182,7 +1182,7 @@ async function seedPhase9_7NationalityDemo() {
       role: "Junior backend developer",
       city: "Sandton",
       hiredAt: new Date("2026-04-22"),
-      salaryBand: "R 360k480k",
+      salaryBand: "R 360k-480k",
       source: "employer_confirmed" as const,
     },
   ]);
@@ -1265,7 +1265,7 @@ async function seedPhase9_8Vacancies() {
       citySlug: null,
       skillSlugs: ["typescript", "postgres"],
       seniority: "Senior",
-      salaryBand: "R 720k900k",
+      salaryBand: "R 720k-900k",
       description:
         "Senior individual contributor. You'll own a slice of the platform end-to-end. SQL fluency + production TypeScript expected. Private to Discovery Bank.",
       documentsRequired: [],
@@ -1283,7 +1283,7 @@ async function seedPhase9_8Vacancies() {
       citySlug: null,
       skillSlugs: ["typescript", "postgres"],
       seniority: "Intermediate",
-      salaryBand: "R 480k600k",
+      salaryBand: "R 480k-600k",
       description: "Backend role on the payments platform. Cape Town team.",
       documentsRequired: [],
       status: "open" as const,
@@ -1300,7 +1300,7 @@ async function seedPhase9_8Vacancies() {
       citySlug: null,
       skillSlugs: [],
       seniority: "Junior",
-      salaryBand: "R 300k360k",
+      salaryBand: "R 300k-360k",
       description:
         "12-month graduate rotation through the platform team. Open to recent BSc CS / IT grads.",
       documentsRequired: [],
@@ -1328,7 +1328,7 @@ async function seedPhase9_8Vacancies() {
       citySlug: null,
       skillSlugs: ["customer-service", "excel", "sql"],
       seniority: "Intermediate",
-      salaryBand: "R 240k300k",
+      salaryBand: "R 240k-300k",
       description:
         "First-line IT support for the Sandton campus. You'll troubleshoot workstation + access issues, log and triage tickets, and walk non-technical colleagues through fixes with patience. Shift roster includes one Saturday a month.",
       documentsRequired: [],

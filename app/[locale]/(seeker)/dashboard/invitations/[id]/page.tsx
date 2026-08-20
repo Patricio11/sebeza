@@ -223,7 +223,15 @@ export default async function SeekerInvitationDetailPage({
             {tReady("prepareTitle")}
           </h2>
           <p className="mt-1 text-sm text-[color:var(--color-ink-soft)]">
-            {tReady("prepareLead")}
+            {/* The panel deliberately shows while the invitation is still
+                open, so the lead cannot claim he accepted it. Telling
+                someone they accepted something they have not is exactly
+                the kind of small lie the product does not tell. */}
+            {tReady(
+              inv.state === "accepted" || inv.state === "accepted_with_notice"
+                ? "prepareLead"
+                : "prepareLeadPending",
+            )}
           </p>
           <ul className="mt-3 grid gap-2 sm:grid-cols-3">
             <PrepareLink
