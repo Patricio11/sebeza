@@ -23,6 +23,8 @@ import type { InvitationRow, InvitationState } from "@/lib/employer/invitations"
 import { CheckCircle2, Clock, MinusCircle, Send, X, XCircle } from "lucide-react";
 
 interface Props {
+  /** G10  so a dead row can offer "invite someone else". */
+  vacancyId: string;
   invitations: InvitationRow[];
   canEdit: boolean;
   locale: string;
@@ -81,6 +83,7 @@ const STATE_ICON: Record<InvitationState, typeof CheckCircle2> = {
 };
 
 export function VacancyInvitationsPanel({
+  vacancyId,
   invitations,
   canEdit,
   locale,
@@ -153,6 +156,14 @@ export function VacancyInvitationsPanel({
           const Icon = STATE_ICON[inv.state];
           const tone = TONE_CLASS[STATE_TONE[inv.state]];
           const canWithdraw = canEdit && inv.state === "invited";
+          // A seat that came back: nobody replied, they said no, or we
+          // pulled it. Either way the useful next step is finding
+          // somebody else, and until now the row offered nothing.
+          const seatFreed =
+            canEdit &&
+            (inv.state === "expired" ||
+              inv.state === "withdrawn" ||
+              inv.state === "declined");
           return (
             <li
               key={inv.id}
@@ -222,6 +233,14 @@ export function VacancyInvitationsPanel({
                   </p>
                 )}
               </div>
+              {seatFreed && (
+                <Link
+                  href={`/employer/vacancies/${vacancyId}/match` as never}
+                  className="inline-flex h-8 shrink-0 items-center gap-1 rounded-[var(--radius-pill)] border border-[color:var(--color-hairline)] px-3 text-xs text-[color:var(--color-ink-soft)] hover:border-[color:var(--color-ink)] hover:text-[color:var(--color-ink)]"
+                >
+                  Invite someone else
+                </Link>
+              )}
               {canWithdraw && (
                 <Button
                   type="button"

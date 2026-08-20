@@ -33,6 +33,10 @@
       "schedule": "45 3 * * *"
     },
     {
+      "path": "/api/cron/vacancy-pipeline-sweep",
+      "schedule": "0 6 * * 1"
+    },
+    {
       "path": "/api/cron/seeker-invite-expiry",
       "schedule": "0 4 * * *"
     },

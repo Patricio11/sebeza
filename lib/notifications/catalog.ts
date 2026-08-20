@@ -221,6 +221,24 @@ export const NOTIFICATION_CATALOG = {
       "Polite reminder when an invitation's response window passed. The role may have been filled in the meantime, no action required.",
     dedupeWindowSeconds: 0,
   },
+  // G11  the only aggregate signal an employer gets. Everything else
+  // in this catalogue is per-seeker and per-event, so a recruiter whose
+  // vacancy is quietly failing finds out by noticing.
+  //
+  // The bar for firing is deliberately high: the vacancy is open, it
+  // declared how many people it needs, it is still short, and there is
+  // nobody left to hear from. That last clause is what stops this being
+  // a nag. If even one invitation is pending, the recruiter is waiting
+  // on someone, not stuck, and we say nothing.
+  "vacancy.pipeline.stalled": {
+    defaultInApp: true,
+    defaultEmail: true,
+    audience: "org_members",
+    label: "A vacancy is short and nobody is left to respond",
+    description:
+      "Fires when an open vacancy still needs people, every invitation has been answered, expired or withdrawn, and there is nobody pending. Once a week per vacancy at most.",
+    dedupeWindowSeconds: 7 * 24 * 60 * 60,
+  },
   "vacancy.invite.unanswered": {
     defaultInApp: true,
     defaultEmail: true,

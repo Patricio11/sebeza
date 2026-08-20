@@ -532,6 +532,19 @@ export function BulkInviteIsland({
               {selectedCount === 0
                 ? `${eligibleDisplayed} candidate${eligibleDisplayed === 1 ? "" : "s"} eligible to invite`
                 : `${selectedCount} selected of ${eligibleDisplayed} eligible`}
+              {/* G9  a soft warning when the selection runs well past
+                  the seats left. Never a block: inviting more people
+                  than seats is often deliberate, since some will decline
+                  and some will go quiet. Doing it unknowingly is the
+                  only part worth flagging. */}
+              {fill?.remaining != null &&
+                fill.remaining > 0 &&
+                selectedCount > fill.remaining * 3 && (
+                  <span className="ml-1 text-[color:var(--color-ink)]">
+                    · {selectedCount} selected for {fill.remaining} seat
+                    {fill.remaining === 1 ? "" : "s"}
+                  </span>
+                )}
               {/* Honest seat context, and it counts DOWN: a label that
                   ignores who already accepted is worse than no label,
                   because it quietly invites over-inviting. */}

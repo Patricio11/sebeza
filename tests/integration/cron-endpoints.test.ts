@@ -96,6 +96,10 @@ describe("idempotency + fail-closed on the remaining high-stakes crons", () => {
     "employment-verification-expire",
     "skill-gap-snapshot",
     "lmi-snapshot",
+    // G11  double-firing here would nag an employer twice about the
+    // same stuck vacancy; the catalog's 7-day per-vacancy dedupe is
+    // what makes run 2 a no-op.
+    "vacancy-pipeline-sweep",
   ];
 
   test.each(HIGH_STAKES)("%s: runs clean twice", async (name) => {

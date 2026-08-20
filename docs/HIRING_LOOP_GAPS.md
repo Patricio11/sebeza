@@ -1,7 +1,7 @@
 # The hiring loop: what is missing between "invited" and "hired"
 
-Status: 2026-08-20. **G1 to G8, G12 and G13 are now built.** The rest are
-still open and marked below.
+Status: 2026-08-20. **All fourteen gaps are now closed.** Kept as the record
+of what was wrong and why each fix is shaped the way it is.
 
 Sebenza models **who** with real care: a seven-state invitation machine, a
 decline taxonomy, a vacancy snapshot frozen at send, an expiry cron, placement
@@ -150,16 +150,32 @@ simply hear nothing.
 
 ---
 
-## What is left
+## The last four
 
-- **G9** soft warning when invites far exceed remaining seats.
-- **G10** re-invite from an expired row.
-- **G11** the aggregate signal: a weekly per-vacancy digest, and an alert
-  when a vacancy is short with nothing pending. The vacancy page now
-  shows that state live ("2 still to fill and nobody left to hear
-  from"), so the remaining work is purely the out-of-app nudge.
-- **G14** `OUTCOME_FANOUT_CAP` still truncates silently past 100
-  recipients. The closure fan-out inherits the same cap.
+- **G9 DONE.** The match page says "40 selected for 2 seats" once the
+  selection runs past three times the seats left. A warning, never a
+  block: over-inviting is often deliberate, since people decline and go
+  quiet. Doing it without noticing is the only part worth flagging.
+- **G10 DONE.** An expired, withdrawn or declined row now offers
+  "Invite someone else" straight to the match list. Those rows were dead
+  ends: Withdraw is the only action and it is already gone by then.
+- **G11 DONE**, as the alert rather than the digest.
+  `vacancy.pipeline.stalled` fires from a Monday-morning cron when a
+  vacancy is open, declared a headcount, is still short, and has NOBODY
+  pending. That last condition is the whole design: while even one
+  invitation is outstanding the recruiter is waiting on a person, not
+  stuck, and a notification would be noise. Deduped per vacancy for
+  seven days.
+  A weekly per-vacancy digest is deliberately NOT built. With the alert
+  in place a digest would mostly restate what the vacancy page already
+  shows, and an email that is usually ignorable teaches people to ignore
+  the one that is not.
+- **G14 DONE.** The fan-out no longer truncates. It used to
+  `slice(0, 100)` to bound the email burst, which meant silently telling
+  nobody past the hundredth person that the role they accepted was gone:
+  the same defect as G12, one layer down. A cap on kindness is not a cap
+  on cost. The constant survives only to flag an unusually large batch
+  in the audit trail.
 
 ## What "done" means here
 

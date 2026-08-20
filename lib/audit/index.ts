@@ -241,6 +241,8 @@ export type AuditKind =
   | "vacancy.outcome.other-hired"
   // G13  closure fan-out when a vacancy ends with no recorded hire.
   | "vacancy.outcome.closed"
+  // G11  weekly stalled-pipeline sweep.
+  | "vacancy.pipeline.stalled"
   // Phase 9.12  the learning loop. Seeker-private events that capture
   // the accept / start / complete / abandon transitions on a
   // `learning_items` row. Abandon meta carries the reason + (when

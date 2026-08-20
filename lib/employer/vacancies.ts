@@ -1334,14 +1334,20 @@ export async function markVacancyFilledAndLogHires(
 
   // ── Outcome fan-out: not-selected accepted invitees ───────────────────
   // Per D5: accepted / accepted_with_notice MINUS the hired set.
-  // Capped at OUTCOME_FANOUT_CAP per call to bound the email burst.
+  //
+  // G14  this used to `.slice(0, OUTCOME_FANOUT_CAP)`, which bounded the
+  // email burst by silently telling nobody past the hundredth person that
+  // the role they accepted was gone. That is the same defect as G12, one
+  // layer down: a cap on kindness is not a cap on cost. Everyone is
+  // notified now; the constant survives as the threshold at which we
+  // record that the batch was unusually large.
   const notSelectedProfileIds = Array.from(acceptedProfileIds).filter(
     (id) => !hireProfileIds.includes(id),
   );
   let notSelectedCount = 0;
 
   if (notSelectedProfileIds.length > 0) {
-    const recipients = notSelectedProfileIds.slice(0, OUTCOME_FANOUT_CAP);
+    const recipients = notSelectedProfileIds;
 
     // Pull recipient profiles + skill slugs in two bulk queries.
     const recipientRows = await db
@@ -1427,7 +1433,9 @@ export async function markVacancyFilledAndLogHires(
       meta: {
         orgId: session.orgId,
         recipientCount: notSelectedCount,
-        capped: notSelectedProfileIds.length > OUTCOME_FANOUT_CAP,
+        // Not a truncation any more, just a flag that this batch was
+        // large enough to be worth noticing in the audit trail.
+        largeBatch: notSelectedProfileIds.length > OUTCOME_FANOUT_CAP,
       },
     });
   }
@@ -1583,7 +1591,9 @@ async function notifyAcceptedOnClosure(
           ]),
         ),
       )
-      .limit(OUTCOME_FANOUT_CAP);
+      // Deliberately unlimited, for the G14 reason above: everyone who
+      // accepted is owed the ending, however many of them there are.
+      ;
 
     let sent = 0;
     for (const r of rows) {

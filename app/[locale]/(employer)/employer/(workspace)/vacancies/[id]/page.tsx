@@ -255,6 +255,7 @@ export default async function VacancyDetailPage({
       )}
       {invitations.length > 0 && (
         <VacancyInvitationsPanel
+          vacancyId={vacancy.id}
           invitations={invitations}
           canEdit={canEdit}
           locale={locale}

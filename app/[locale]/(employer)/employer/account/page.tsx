@@ -52,10 +52,24 @@ export default async function EmployerAccountPage({
       )[0]?.role ?? null
     : null;
 
+  // Same defect the seeker list had: written early and never grown, so
+  // three kinds were manageable and nine were not, including every
+  // hiring-pipeline event an employer actually acts on. Vacancy
+  // activity leads, because that is what a recruiter opens this page
+  // for.
   const EMPLOYER_NOTIFICATION_KINDS: NotificationKind[] = [
+    "vacancy.response",
+    "vacancy.reconsider",
+    "vacancy.self_apply",
+    "vacancy.invite.unanswered",
+    "vacancy.pipeline.stalled",
+    "saved_search.new_matches",
+    "placement.status.check_due",
+    "org.seeker_invite.accepted",
     "org.verified",
     "org.rejected",
-    "saved_search.new_matches",
+    "org.documents.submitted",
+    "org.review.changes",
   ];
 
   return (
