@@ -353,6 +353,21 @@ export const NOTIFICATION_CATALOG = {
   // the hired person's data, per D4) and links to Career Compass for
   // any missing skills.
   // ──────────────────────────────────────────────────────────────────────
+  // G13  closure WITHOUT a recorded hire. The 9.11 fan-out only fires
+  // when an employer logs who they hired, so anyone who took "Skip, log
+  // later" or simply closed the vacancy left their accepted candidates
+  // holding a live invitation forever. This is the honest version of
+  // that ending: the role is over, and we say plainly that we do not
+  // know who got it, because we do not.
+  "vacancy.outcome.closed": {
+    defaultInApp: true,
+    defaultEmail: true,
+    audience: "seeker",
+    label: "A vacancy you accepted was closed",
+    description:
+      "Sent when a role you accepted stops being open without a hire being recorded on Sebenza. It may have been filled elsewhere, or paused. Your profile, your status and your visibility in search are untouched.",
+    dedupeWindowSeconds: 0,
+  },
   "vacancy.outcome.other-hired": {
     defaultInApp: true,
     defaultEmail: true,

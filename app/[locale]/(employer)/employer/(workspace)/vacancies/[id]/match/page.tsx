@@ -45,6 +45,9 @@ import { BulkInviteIsland } from "@/components/feature/employer/vacancies/BulkIn
 import { PROVINCES, PROFESSIONS, findCityBySlug } from "@/lib/mock/taxonomy";
 import { formatVacancyLocation } from "@/lib/employer/vacancies-display";
 import { getSetting } from "@/lib/admin/settings";
+import { listInvitationsForVacancy } from "@/lib/employer/invitations";
+import { getPlacementsForVacancy } from "@/lib/employer/placements";
+import { fillState } from "@/lib/employer/vacancy-fill";
 import { getDb } from "@/db/client";
 import * as schema from "@/db/schema";
 import { ChevronLeft, MapPin, Search, Users } from "lucide-react";
@@ -74,6 +77,20 @@ export default async function VacancyMatchPage({
       getSetting<boolean>("feature_flag_verification_badges_visible"),
       getVacancyShortlistProfileIds(vacancy.id),
     ]);
+
+  // G1  the seat maths needs who has already accepted or been hired,
+  // not just the target on the vacancy row.
+  const [invitationsForFill, placementsForFill] = await Promise.all([
+    listInvitationsForVacancy(vacancy.id),
+    getPlacementsForVacancy(vacancy.id),
+  ]);
+  const fill = fillState({
+    positions: vacancy.positions,
+    acceptedCount: invitationsForFill.filter(
+      (i) => i.state === "accepted" || i.state === "accepted_with_notice",
+    ).length,
+    placementCount: placementsForFill.length,
+  });
   // `getMyVacancy` already resolved above, so a null here means the row
   // vanished mid-request  treat it the same as not-found.
   if (!match) notFound();
@@ -217,8 +234,9 @@ export default async function VacancyMatchPage({
             vacancyId={vacancy.id}
             vacancyTitle={vacancy.title}
             canInvite={canInvite}
-            // Phase 29.1  seat context + "Select top N" convenience.
-            positions={vacancy.positions}
+            // Seat context that counts down: the target minus whoever
+            // has already accepted or been hired.
+            fill={fill}
             addToShortlistAction={async (profileId: string) => {
               "use server";
               const res = await addToVacancyShortlist({

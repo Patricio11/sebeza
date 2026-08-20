@@ -79,6 +79,7 @@ export default async function AccountPage({
     "vacancy.invite.followup",
     "vacancy.invite.expired",
     "vacancy.outcome.other-hired",
+    "vacancy.outcome.closed",
     "employer.opened_vacancy.in_your_pool",
     "contact.revealed",
     "document.downloaded",

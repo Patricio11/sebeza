@@ -147,3 +147,27 @@ export function composeOutcomeNotification(
     missingSkillSlugs: missing,
   };
 }
+
+/**
+ * G13  copy for a vacancy that CLOSED without a recorded hire.
+ *
+ * Deliberately not `composeOutcomeNotification`: that one opens with
+ * "filled the role with another candidate", which would be a claim we
+ * cannot support here. Nobody told us anyone was hired. Saying so is
+ * the whole point, and it is the difference between honest closure and
+ * a polite fiction.
+ */
+export function composeClosureNotification(input: {
+  orgName: string;
+  vacancyTitle: string;
+}): { title: string; body: string; link: string } {
+  return {
+    title: `${input.orgName} closed "${input.vacancyTitle}"`,
+    body:
+      `You accepted this invitation, so here is the honest close: the role is no longer open. ` +
+      `No hire was recorded on Sebenza, which usually means it was filled elsewhere or put on hold, ` +
+      `and we would rather tell you that than leave you waiting. ` +
+      `Nothing about your profile, your status or how you appear in search has changed.`,
+    link: "/dashboard/invitations",
+  };
+}

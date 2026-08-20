@@ -42,36 +42,14 @@ import { sql } from "drizzle-orm";
 import { getSetting } from "@/lib/admin/settings";
 import { suppress, type SuppressionAxis } from "@/lib/analytics/suppress";
 
-export type DeclineReasonValue =
-  | "already_employed"
-  | "salary_not_competitive"
-  | "location_not_feasible"
-  | "skills_mismatch"
-  | "role_not_what_im_looking_for"
-  | "other"
-  | "unspecified";
-
-export const DECLINE_REASON_VALUES: DeclineReasonValue[] = [
-  "already_employed",
-  "salary_not_competitive",
-  "location_not_feasible",
-  "skills_mismatch",
-  "role_not_what_im_looking_for",
-  "other",
-  "unspecified",
-];
-
-/** Human-readable labels for the breakdown UI. Order matches
- *  `DECLINE_REASON_VALUES` so the rendering is stable. */
-export const DECLINE_REASON_LABEL: Record<DeclineReasonValue, string> = {
-  already_employed: "Already employed",
-  salary_not_competitive: "Salary not competitive",
-  location_not_feasible: "Location not feasible",
-  skills_mismatch: "Skills mismatch",
-  role_not_what_im_looking_for: "Not the right role",
-  other: "Other",
-  unspecified: "No reason given",
-};
+// Vocabulary re-exported from the pure module so client components can
+// import a label without pulling `postgres` into the browser bundle.
+import { type DeclineReasonValue } from "@/lib/vacancy/decline-reasons";
+export {
+  DECLINE_REASON_VALUES,
+  DECLINE_REASON_LABEL,
+  type DeclineReasonValue,
+} from "@/lib/vacancy/decline-reasons";
 
 export interface DeclineReasonCell {
   profession_slug: string;

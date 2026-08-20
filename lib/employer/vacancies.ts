@@ -30,6 +30,7 @@ import { verifyEmployer, verifyOrgVerified } from "@/lib/auth/dal";
 import { logAccess } from "@/lib/audit";
 import { createNotification, notifyAllAdmins } from "@/lib/notifications/server";
 import {
+  composeClosureNotification,
   composeOutcomeNotification,
   type OutcomeComposerInput,
 } from "@/lib/seeker/vacancy-outcome";
@@ -1076,6 +1077,13 @@ export async function transitionVacancyStatus(
     meta: { orgId: guard.orgId, prior, next },
   });
 
+  // G13  leaving `open` ends the wait for anyone who accepted, so say
+  // so. No-ops when hires were logged (they already heard) or when the
+  // vacancy is merely being re-opened.
+  if (next === "closed" || next === "filled") {
+    await notifyAcceptedOnClosure(vacancyId, guard.orgId);
+  }
+
   revalidatePath("/employer/vacancies");
   revalidatePath(`/employer/vacancies/${vacancyId}`);
   return ok();
@@ -1520,6 +1528,95 @@ const skipSchema = z.object({ vacancyId: z.string().min(1) });
  * employer hired someone before joining Sebenza, can't pretend
  * otherwise) without normalising it.
  */
+/**
+ * G13  tell everyone holding an ACCEPTED invitation that the vacancy is
+ * over, when it closes without a recorded hire.
+ *
+ * Runs on the two paths the 9.11 fan-out never covered: "Skip, log
+ * later", and a plain close. Silent by design in one case only: if
+ * placements exist, the hires path has already sent the richer
+ * `vacancy.outcome.other-hired` and sending this too would tell the
+ * same person twice, in two different registers.
+ *
+ * Best-effort throughout. A notification failure must never leave the
+ * vacancy half-transitioned.
+ */
+async function notifyAcceptedOnClosure(
+  vacancyId: string,
+  orgId: string,
+): Promise<number> {
+  try {
+    const db = getDb();
+
+    const placed = await db
+      .select({ id: schema.placements.id })
+      .from(schema.placements)
+      .where(eq(schema.placements.vacancyId, vacancyId))
+      .limit(1);
+    if (placed.length > 0) return 0; // the hires path already spoke
+
+    const rows = await db
+      .select({
+        userId: schema.profiles.userId,
+        vacancyTitle: schema.vacancies.title,
+        orgName: schema.organizations.name,
+      })
+      .from(schema.vacancyInvitations)
+      .innerJoin(
+        schema.profiles,
+        eq(schema.profiles.id, schema.vacancyInvitations.profileId),
+      )
+      .innerJoin(
+        schema.vacancies,
+        eq(schema.vacancies.id, schema.vacancyInvitations.vacancyId),
+      )
+      .innerJoin(
+        schema.organizations,
+        eq(schema.organizations.id, schema.vacancies.organizationId),
+      )
+      .where(
+        and(
+          eq(schema.vacancyInvitations.vacancyId, vacancyId),
+          inArray(schema.vacancyInvitations.state, [
+            "accepted",
+            "accepted_with_notice",
+          ]),
+        ),
+      )
+      .limit(OUTCOME_FANOUT_CAP);
+
+    let sent = 0;
+    for (const r of rows) {
+      const composed = composeClosureNotification({
+        orgName: r.orgName,
+        vacancyTitle: r.vacancyTitle,
+      });
+      await createNotification({
+        userId: r.userId,
+        kind: "vacancy.outcome.closed",
+        title: composed.title,
+        body: composed.body,
+        link: composed.link,
+        meta: { vacancyId, orgId },
+      });
+      sent++;
+    }
+    if (sent > 0) {
+      await logAccess({
+        kind: "vacancy.outcome.closed",
+        actor: `system:closure`,
+        subject: vacancyId,
+        meta: { orgId, kind: "vacancy.outcome.closed", recipientCount: sent },
+      });
+    }
+    return sent;
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.error("[vacancy] closure fan-out failed:", vacancyId, e);
+    return 0;
+  }
+}
+
 export async function markVacancyFilledNoPlacement(
   input: z.infer<typeof skipSchema>,
 ): Promise<ActionResult> {
@@ -1555,6 +1652,10 @@ export async function markVacancyFilledNoPlacement(
     subject: vacancyId,
     meta: { orgId: guard.orgId, prior: existing.status },
   });
+
+  // G12  "Skip, log later" used to end in silence. Anyone who accepted
+  // was left holding a live invitation with no idea it was over.
+  await notifyAcceptedOnClosure(vacancyId, guard.orgId);
 
   revalidatePath("/employer/vacancies");
   revalidatePath(`/employer/vacancies/${vacancyId}`);

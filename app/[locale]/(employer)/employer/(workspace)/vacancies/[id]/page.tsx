@@ -43,6 +43,7 @@ import {
   withdrawInvitation,
 } from "@/lib/employer/invitations";
 import { getPlacementsForVacancy } from "@/lib/employer/placements";
+import { fillState, fillLabel } from "@/lib/employer/vacancy-fill";
 import { getProfessions, getSkills } from "@/lib/taxonomy/query";
 import { PROVINCES } from "@/lib/mock/taxonomy";
 import { formatVacancyLocation } from "@/lib/employer/vacancies-display";
@@ -92,6 +93,17 @@ export default async function VacancyDetailPage({
     listInvitationsForVacancy(vacancy.id),
     getPlacementsForVacancy(vacancy.id),
   ]);
+
+  // G1  the number the whole page was missing: how many people this
+  // vacancy still needs. Acceptances count while nothing is hired yet;
+  // placements take over the moment any exist. See lib/employer/vacancy-fill.ts.
+  const fill = fillState({
+    positions: vacancy.positions,
+    acceptedCount: invitations.filter(
+      (i) => i.state === "accepted" || i.state === "accepted_with_notice",
+    ).length,
+    placementCount: placements.length,
+  });
 
   // Phase 23.4  live catalogues; the DB is the authority for both.
   const [professions, skills] = await Promise.all([
@@ -191,6 +203,7 @@ export default async function VacancyDetailPage({
             (i) => i.origin === "employer_invite",
           )}
           followUpNudgesEnabled={vacancy.followUpNudgesEnabled}
+          fill={fill}
         />
       )}
 
@@ -228,6 +241,18 @@ export default async function VacancyDetailPage({
           Visible to all roles (Viewers can see who's in the pipeline);
           withdraw action is Owner/Recruiter-only and only available
           while an invite is still in the `invited` state. */}
+      {invitations.length === 0 && (
+        <section className="mb-6 rounded-[var(--radius-md)] border border-dashed border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-5 text-sm text-[color:var(--color-ink-soft)]">
+          <p className="font-display text-base text-[color:var(--color-ink)]">
+            Nobody has been invited yet
+          </p>
+          <p className="mt-1">
+            {fillLabel(fill)
+              ? `${fillLabel(fill)}. Find matches above to start inviting people.`
+              : "Find matches above to see candidates ranked against this vacancy, then invite the ones you want."}
+          </p>
+        </section>
+      )}
       {invitations.length > 0 && (
         <VacancyInvitationsPanel
           invitations={invitations}
@@ -269,6 +294,7 @@ export default async function VacancyDetailPage({
                 key={next}
                 vacancyId={vacancy.id}
                 vacancyTitle={vacancy.title}
+                positions={vacancy.positions}
                 acceptedInvitees={invitations.filter(
                   (i) =>
                     i.state === "accepted" ||
@@ -363,20 +389,28 @@ function ViewerNotice() {
 function AcceptRateStrip({
   invitations,
   followUpNudgesEnabled,
+  fill,
 }: {
   invitations: import("@/lib/employer/invitations").InvitationRow[];
   followUpNudgesEnabled: boolean;
+  fill: import("@/lib/employer/vacancy-fill").FillState;
 }) {
-  // Bucket every invitation into one of five lifecycle columns. We
-  // deliberately fold `accepted_with_notice` into accepted (it IS an
-  // acceptance), `reconsidering` into declined (it's a transient
-  // sub-state of declined), and `withdrawn` into expired (both are
-  // "no further action expected"). Sum across buckets equals total,
-  // so the figures don't lie even when transient states exist.
+  // Bucket every invitation into a lifecycle column. `accepted_with_notice`
+  // folds into accepted (it IS an acceptance) and `reconsidering` into
+  // declined (a transient sub-state of declined). Sum across buckets
+  // equals total, so the figures don't lie even when transient states
+  // exist.
+  //
+  // G4  withdrawn no longer hides inside expired. "They ignored me"
+  // and "I pulled it back" are opposite facts about your own pipeline,
+  // and one of them is not even about the candidate. The column only
+  // appears when it has something in it, so the common case stays a
+  // clean five.
   let accepted = 0;
   let declined = 0;
   let pending = 0;
   let expired = 0;
+  let withdrawn = 0;
   for (const inv of invitations) {
     switch (inv.state) {
       case "accepted":
@@ -391,8 +425,10 @@ function AcceptRateStrip({
         pending++;
         break;
       case "expired":
-      case "withdrawn":
         expired++;
+        break;
+      case "withdrawn":
+        withdrawn++;
         break;
     }
   }
@@ -412,6 +448,11 @@ function AcceptRateStrip({
       <div className="mb-2 flex flex-wrap items-baseline justify-between gap-2">
         <span className="text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--color-ink-soft)]">
           Invitation outcomes
+          {fillLabel(fill) && (
+            <span className="ml-2 normal-case tracking-normal text-[color:var(--color-ink)]">
+              {fillLabel(fill)}
+            </span>
+          )}
         </span>
         <span className="text-xs text-[color:var(--color-ink-soft)]">
           {acceptRate !== null ? (
@@ -426,13 +467,24 @@ function AcceptRateStrip({
           )}
         </span>
       </div>
-      <dl className="grid grid-cols-2 gap-3 text-sm md:grid-cols-5">
+      <dl
+        className={`grid grid-cols-2 gap-3 text-sm ${withdrawn > 0 ? "md:grid-cols-6" : "md:grid-cols-5"}`}
+      >
         <StatCell label="Sent" value={total} />
         <StatCell label="Accepted" value={accepted} accent="brand" />
         <StatCell label="Declined" value={declined} />
         <StatCell label="Pending" value={pending} />
-        <StatCell label="Expired" value={expired} />
+        <StatCell label="No reply" value={expired} />
+        {withdrawn > 0 && <StatCell label="You withdrew" value={withdrawn} />}
       </dl>
+      {fill.isShort && pending === 0 && (
+        <p className="mt-2 text-xs text-[color:var(--color-ink)]">
+          {fill.remaining} still to fill and nobody left to hear from.{" "}
+          <span className="text-[color:var(--color-ink-soft)]">
+            Find matches above to invite more people.
+          </span>
+        </p>
+      )}
       {followUpNudgesEnabled && pending > 0 && (
         <p className="mt-2 text-xs text-[color:var(--color-ink-soft)]">
           Follow-up nudges are on for this vacancy. Pending invitations

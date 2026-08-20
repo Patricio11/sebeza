@@ -121,7 +121,10 @@ export interface BulkInviteIslandProps {
    * fills the selection with the N best-ranked eligible rows; sending
    * still happens through the explicit, consent-gated confirm modal.
    */
-  positions?: number | null;
+  /** G1/G2  the live fill state, not just the target. The old
+   *  `positions` prop echoed the form field, so it still said "3
+   *  positions to fill" after two people had accepted. */
+  fill?: import("@/lib/employer/vacancy-fill").FillState | null;
   items: BulkInviteItem[];
   /**
    * Phase 9.19 Tier 2  add/remove the (vacancy, profile) pair from
@@ -145,7 +148,7 @@ export function BulkInviteIsland({
   vacancyId,
   vacancyTitle,
   canInvite,
-  positions = null,
+  fill = null,
   items,
   addToShortlistAction,
   removeFromShortlistAction,
@@ -529,11 +532,17 @@ export function BulkInviteIsland({
               {selectedCount === 0
                 ? `${eligibleDisplayed} candidate${eligibleDisplayed === 1 ? "" : "s"} eligible to invite`
                 : `${selectedCount} selected of ${eligibleDisplayed} eligible`}
-              {/* Phase 29.1  honest seat context; only when the vacancy
-                  actually declared a headcount. */}
-              {positions != null && positions > 0 && (
+              {/* Honest seat context, and it counts DOWN: a label that
+                  ignores who already accepted is worse than no label,
+                  because it quietly invites over-inviting. */}
+              {fill?.positions != null && (
                 <span className="ml-1">
-                  · {positions} position{positions === 1 ? "" : "s"} to fill
+                  ·{" "}
+                  {fill.isShort
+                    ? `${fill.remaining} still to fill`
+                    : fill.isOver
+                      ? `${fill.positions} position${fill.positions === 1 ? "" : "s"}, ${fill.filled} already`
+                      : "seats already covered"}
                 </span>
               )}
             </span>
@@ -541,15 +550,18 @@ export function BulkInviteIsland({
               {/* Phase 29.2  fill the selection with the top N by the
                   current view order. Convenience only, the send still
                   goes through the explicit confirm modal. */}
-              {positions != null &&
-                positions > 0 &&
-                positions < eligibleDisplayed && (
+              {/* G3  selects what is still NEEDED, not the original
+                  target. Picking 5 again when 4 have accepted is how
+                  people get invited to a role that is already gone. */}
+              {fill?.remaining != null &&
+                fill.remaining > 0 &&
+                fill.remaining < eligibleDisplayed && (
                   <button
                     type="button"
-                    onClick={() => selectTopN(positions)}
+                    onClick={() => selectTopN(fill.remaining as number)}
                     className="rounded-[var(--radius-pill)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] px-2.5 py-1 hover:border-[color:var(--color-ink)] hover:text-[color:var(--color-ink)]"
                   >
-                    Select top {positions}
+                    Select top {fill.remaining}
                   </button>
                 )}
               <button

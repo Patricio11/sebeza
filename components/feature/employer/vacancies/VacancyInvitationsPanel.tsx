@@ -15,6 +15,10 @@
 import { useState, useTransition } from "react";
 import { useRouter, Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/Button";
+import {
+  DECLINE_REASON_LABEL,
+  type DeclineReasonValue,
+} from "@/lib/vacancy/decline-reasons";
 import type { InvitationRow, InvitationState } from "@/lib/employer/invitations";
 import { CheckCircle2, Clock, MinusCircle, Send, X, XCircle } from "lucide-react";
 
@@ -184,11 +188,29 @@ export function VacancyInvitationsPanel({
                     `  responds-by ${dfmt.format(new Date(inv.expiresAt))}`}
                   {inv.respondedAt &&
                     inv.state !== "invited" &&
-                    `  responded ${dfmt.format(new Date(inv.respondedAt))}`}
+                    // The expiry cron stamps `respondedAt` when it closes
+                    // a row, so this timestamp is only a RESPONSE for
+                    // states somebody actually chose. Expired means the
+                    // window shut; withdrawn was us, not them.
+                    (inv.state === "expired"
+                      ? `  expired ${dfmt.format(new Date(inv.respondedAt))}`
+                      : inv.state === "withdrawn"
+                        ? `  withdrawn ${dfmt.format(new Date(inv.respondedAt))}`
+                        : `  responded ${dfmt.format(new Date(inv.respondedAt))}`)}
                   {inv.noticePeriodMonths != null && (
                     <>  notice: {inv.noticePeriodMonths} month{inv.noticePeriodMonths === 1 ? "" : "s"}</>
                   )}
                 </p>
+                {inv.declineReason && (
+                  <p className="mt-1 text-xs text-[color:var(--color-ink)]">
+                    <span className="text-[0.65rem] uppercase tracking-[0.18em] text-[color:var(--color-ink-soft)]">
+                      Reason
+                    </span>{" "}
+                    {DECLINE_REASON_LABEL[
+                      inv.declineReason as DeclineReasonValue
+                    ] ?? inv.declineReason}
+                  </p>
+                )}
                 {inv.declineNote && (
                   <p className="mt-1 text-xs text-[color:var(--color-ink-soft)]">
                     <em>

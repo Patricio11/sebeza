@@ -48,6 +48,9 @@ import { DatePicker } from "@/components/ui/DatePicker";
 interface Props {
   vacancyId: string;
   vacancyTitle: string;
+  /** G8  the target, so the modal can show a denominator instead of a
+   *  bare count that reads as completion. */
+  positions?: number | null;
   /** Accepted + accepted-with-notice invitations on this vacancy.
    *  Parent (vacancy detail page) passes the existing list it
    *  already loads for the pipeline panel  no extra round trip. */
@@ -72,6 +75,7 @@ export function MarkAsFilledModal({
   vacancyId,
   vacancyTitle,
   acceptedInvitees,
+  positions = null,
   triggerLabel = "Mark as filled",
 }: Props) {
   const [open, setOpen] = useState(false);
@@ -90,6 +94,7 @@ export function MarkAsFilledModal({
           vacancyId={vacancyId}
           vacancyTitle={vacancyTitle}
           acceptedInvitees={acceptedInvitees}
+          positions={positions}
           onClose={() => setOpen(false)}
         />
       )}
@@ -103,11 +108,13 @@ function Sheet({
   vacancyId,
   vacancyTitle,
   acceptedInvitees,
+  positions,
   onClose,
 }: {
   vacancyId: string;
   vacancyTitle: string;
   acceptedInvitees: InvitationRow[];
+  positions?: number | null;
   onClose: () => void;
 }) {
   const router = useRouter();
@@ -471,7 +478,19 @@ function Sheet({
             <section className="mt-6 rounded-[var(--radius-md)] border-2 border-[color:var(--color-ink)] bg-[color:var(--color-brand-tint)] p-4">
               <h3 className="mb-2 text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--color-ink)]">
                 Selected hires  {selectedList.length}
+                {positions != null && positions > 0 && ` of ${positions}`}
               </h3>
+              {positions != null &&
+                positions > 0 &&
+                selectedList.length < positions && (
+                  <p className="mb-3 text-xs text-[color:var(--color-ink)]">
+                    That is {positions - selectedList.length} short of the{" "}
+                    {positions} you set. Marking this filled closes the
+                    vacancy anyway, which is fine if you filled the rest
+                    elsewhere. If you are still looking, close the modal and
+                    invite more people instead.
+                  </p>
+                )}
               <ul className="mb-3 flex flex-col gap-1">
                 {selectedList.map((s) => (
                   <li

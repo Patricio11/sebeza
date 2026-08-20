@@ -239,6 +239,8 @@ export type AuditKind =
   | "org.vacancy.filled.no-placement"
   | "search.outside-hire-lookup"
   | "vacancy.outcome.other-hired"
+  // G13  closure fan-out when a vacancy ends with no recorded hire.
+  | "vacancy.outcome.closed"
   // Phase 9.12  the learning loop. Seeker-private events that capture
   // the accept / start / complete / abandon transitions on a
   // `learning_items` row. Abandon meta carries the reason + (when
