@@ -66,14 +66,29 @@ export default async function AccountPage({
     "feature_flag_whatsapp_channel_enabled",
   );
 
+  // This list was written in Phase 7, before vacancy invitations existed,
+  // and never grew with the catalog: the invitation kinds have been
+  // firing at seekers with no way to manage them. Phase 35 makes that
+  // untenable, because `vacancy.invite` is one of the two kinds that now
+  // push to a phone by default, and "you can turn off the whole device"
+  // is not a substitute for "you can turn off this one thing".
+  //
+  // Invitations lead, because they are the ones people act on.
   const SEEKER_NOTIFICATION_KINDS: NotificationKind[] = [
+    "vacancy.invite",
+    "vacancy.invite.followup",
+    "vacancy.invite.expired",
+    "vacancy.outcome.other-hired",
+    "employer.opened_vacancy.in_your_pool",
     "contact.revealed",
     "document.downloaded",
     "placement.confirmed",
+    "employment.verification.outcome",
     "qualification.verified",
     "qualification.rejected",
     "profile.viewed",
     "status.stale.warning",
+    "consent.searchability.paused",
     "account.suspended",
     "account.restored",
   ];

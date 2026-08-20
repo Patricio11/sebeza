@@ -85,7 +85,7 @@ export const NOTIFICATION_CATALOG = {
     audience: "seeker",
     label: "A placement was confirmed for you",
     description:
-      "The employer logged the hire through Sebenza  this counts toward the national placement total.",
+      "The employer logged the hire through Sebenza, this counts toward the national placement total.",
     dedupeWindowSeconds: 0,
   },
   "qualification.verified": {
@@ -106,7 +106,7 @@ export const NOTIFICATION_CATALOG = {
     audience: "seeker",
     label: "A skill of yours is heating up",
     description:
-      "A gentle weekly heads-up when employers are searching more for one of your skills (or your profession) in your province  read straight off the live demand signal. In the bell by default; turn on email if you'd like it pushed.",
+      "A gentle weekly heads-up when employers are searching more for one of your skills (or your profession) in your province, read straight off the live demand signal. In the bell by default; turn on email if you'd like it pushed.",
     dedupeWindowSeconds: 6 * 24 * 60 * 60,
   },
   // Phase 18.2 ("Living Learning Catalog")  weekly heartbeat to admins when
@@ -208,7 +208,7 @@ export const NOTIFICATION_CATALOG = {
     audience: "seeker",
     label: "A verified employer flagged you for a specific role",
     description:
-      "Sent when an employer invites you to a vacancy they're trying to fill. You can accept, decline, or decline with a reason. Declining is free  it never affects your visibility in search.",
+      "Sent when an employer invites you to a vacancy they're trying to fill. You can accept, decline, or decline with a reason. Declining is free, it never affects your visibility in search.",
     dedupeWindowSeconds: 0, // every distinct invite is its own notification
   },
   "vacancy.invite.expired": {
@@ -217,7 +217,7 @@ export const NOTIFICATION_CATALOG = {
     audience: "seeker",
     label: "A vacancy invite expired without a response",
     description:
-      "Polite reminder when an invitation's response window passed. The role may have been filled in the meantime  no action required.",
+      "Polite reminder when an invitation's response window passed. The role may have been filled in the meantime, no action required.",
     dedupeWindowSeconds: 0,
   },
   "vacancy.invite.unanswered": {
@@ -239,7 +239,7 @@ export const NOTIFICATION_CATALOG = {
     audience: "seeker",
     label: "Gentle reminder about a pending invitation",
     description:
-      "A single follow-up fires one week after an invitation if you haven't responded yet. Capped at one per invite ever  the employer chose to enable nudges on this vacancy. You can still accept, decline, or decline with a reason.",
+      "A single follow-up fires one week after an invitation if you haven't responded yet. Capped at one per invite ever, the employer chose to enable nudges on this vacancy. You can still accept, decline, or decline with a reason.",
     dedupeWindowSeconds: 0,
   },
   // Phase 9.20 D2  the lifecycle check-in-due cron. Fires when a
@@ -255,7 +255,7 @@ export const NOTIFICATION_CATALOG = {
     audience: "org_members",
     label: "An employee's status check is due",
     description:
-      "Fires nightly when a placement passes one of its check-in milestones (3 / 6 / 12 months, then annual) without an Owner / Recruiter confirming the person is still in the role. One question, one tap  keeps the platform's retention figure honest.",
+      "Fires nightly when a placement passes one of its check-in milestones (3 / 6 / 12 months, then annual) without an Owner / Recruiter confirming the person is still in the role. One question, one tap, keeps the platform's retention figure honest.",
     dedupeWindowSeconds: 0,
   },
   // Phase 9.23  employment-verification outcome. Fires once when a
@@ -270,7 +270,7 @@ export const NOTIFICATION_CATALOG = {
     audience: "seeker",
     label: "Employment-verification outcome",
     description:
-      "Fires when the contact you nominated responds to your employment-verification request, or when the 14-day window closes without a response. Binary outcome only  the contact's actual response stays in their conversation with the platform, never surfaces to you beyond verified vs not.",
+      "Fires when the contact you nominated responds to your employment-verification request, or when the 14-day window closes without a response. Binary outcome only, the contact's actual response stays in their conversation with the platform, never surfaces to you beyond verified vs not.",
     dedupeWindowSeconds: 0,
   },
   "vacancy.response": {
@@ -279,7 +279,7 @@ export const NOTIFICATION_CATALOG = {
     audience: "org_members",
     label: "A seeker responded to a vacancy invitation",
     description:
-      "Fires when an invited seeker accepts, accepts with notice, or declines. The decline-reason  if one was given  is included so you can read the market signal.",
+      "Fires when an invited seeker accepts, accepts with notice, or declines. The decline-reason, if one was given, is included so you can read the market signal.",
     dedupeWindowSeconds: 0,
   },
   "vacancy.reconsider": {
@@ -288,7 +288,7 @@ export const NOTIFICATION_CATALOG = {
     audience: "org_members",
     label: "A seeker who previously declined wants to reconsider",
     description:
-      "The change-of-mind path: a declined seeker tapped \"Express interest again.\" Human workflow, not a dead end  re-open the conversation if the role is still open.",
+      "The change-of-mind path: a declined seeker tapped \"Express interest again.\" Human workflow, not a dead end, re-open the conversation if the role is still open.",
     dedupeWindowSeconds: 0,
   },
   // Suggestion approval loop (docs/SUGGESTION_APPROVAL_LOOP_PLAN.md):
@@ -342,7 +342,7 @@ export const NOTIFICATION_CATALOG = {
     audience: "org_members",
     label: "Our team asked you to revise your application",
     description:
-      "An admin requested specific changes to your onboarding submission. Your application form is open again with the admin's note pinned at the top  edit and resubmit.",
+      "An admin requested specific changes to your onboarding submission. Your application form is open again with the admin's note pinned at the top, edit and resubmit.",
     dedupeWindowSeconds: 0,
   },
   // ──────────────────────────────────────────────────────────────────────
@@ -379,7 +379,7 @@ export const NOTIFICATION_CATALOG = {
     audience: "seeker",
     label: "You completed a learning item",
     description:
-      "Celebrates honestly when you mark a learning item complete  the skill lands on your profile as self-attested (via learning) and your projected rank in your local pool shifts. Email channel default-on; opt out per kind if you'd rather only see it in the bell.",
+      "Celebrates honestly when you mark a learning item complete, the skill lands on your profile as self-attested (via learning) and your projected rank in your local pool shifts. Email channel default-on; opt out per kind if you'd rather only see it in the bell.",
     dedupeWindowSeconds: 0,
   },
   "learning.nudge": {
@@ -405,7 +405,7 @@ export const NOTIFICATION_CATALOG = {
     audience: "all_admins",
     label: "A new taxonomy suggestion landed",
     description:
-      "A user picked \"Other\" and entered a free-text profession or institution that isn't in the canonical list. Review on /admin/taxonomy/suggestions  promote it, merge it into an existing entry (fixes misspellings), or reject it. Rejection never erases the user's data.",
+      "A user picked \"Other\" and entered a free-text profession or institution that isn't in the canonical list. Review on /admin/taxonomy/suggestions, promote it, merge it into an existing entry (fixes misspellings), or reject it. Rejection never erases the user's data.",
     dedupeWindowSeconds: 24 * 60 * 60,
   },
   // Phase 9.16  admin-mediated seeker ID verification. Mirrors the
@@ -473,7 +473,7 @@ export const NOTIFICATION_CATALOG = {
     audience: "seeker",
     label: "Weekly recap email",
     description:
-      "Every Monday morning: a short email with the activity, rank, and freshness changes from the past 7 days. Off-channel reach for the weeks you don't open the app. You can opt out anytime  the email itself carries the preferences link.",
+      "Every Monday morning: a short email with the activity, rank, and freshness changes from the past 7 days. Off-channel reach for the weeks you don't open the app. You can opt out anytime, the email itself carries the preferences link.",
     dedupeWindowSeconds: 6 * 24 * 60 * 60,
   },
   // Phase 11.2.2  cost-driven swap to a free alternative. Quiet
