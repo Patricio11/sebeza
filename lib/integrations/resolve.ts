@@ -62,7 +62,7 @@ export async function integrationSource(
       : channel === "whatsapp"
         ? !!process.env.WHATSAPP_PROVIDER
         : channel === "storage"
-          ? !!process.env.SUPABASE_URL && !!process.env.SUPABASE_SERVICE_ROLE_KEY
+          ? false // storage has no env fallback: admin config only
           : !!process.env.EMAIL_TRANSPORT || !!process.env.SMTP_HOST;
   return envConfigured ? "env" : "none";
 }

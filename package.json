@@ -25,7 +25,6 @@
     "@aws-sdk/s3-request-presigner": "^3.1112.0",
     "@mediapipe/tasks-vision": "^1.0.1",
     "@neondatabase/serverless": "1.0.2",
-    "@supabase/supabase-js": "^2.106.1",
     "@types/ws": "^8.18.1",
     "@vercel/analytics": "^2.0.1",
     "@vercel/speed-insights": "^2.0.0",

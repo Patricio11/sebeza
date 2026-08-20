@@ -13,7 +13,7 @@ Last updated 2026-06-01 (Phase 13 added the LLM-provider credentials row).
 |---|---|---|
 | Browser ↔ Vercel | TLS 1.3 | Vercel manages cert via Let's Encrypt + auto-renewal. |
 | Vercel ↔ Neon | TLS 1.2+ | `sslmode=require` in the connection string. |
-| Vercel ↔ object storage (S3 / Supabase) | TLS 1.2+ | HTTPS only; signed-URL flow does not weaken this. |
+| Vercel ↔ S3 | TLS 1.2+ | HTTPS only; presigned-URL flow does not weaken this. |
 | Vercel ↔ Resend | TLS 1.2+ | HTTPS API. |
 | Vercel ↔ Upstash (Phase 9) | TLS 1.2+ | HTTPS API. |
 | Vercel ↔ KYC SaaS (Phase 8+, gated) | TLS 1.2+ | Required by every SA-registered provider. |
@@ -24,7 +24,7 @@ Last updated 2026-06-01 (Phase 13 added the LLM-provider credentials row).
 |---|---|---|
 | Neon Postgres | Provider-side AES-256 (transparent) | Neon-managed. |
 | S3 objects (LIVE since 2026-08-18) | SSE-AES256, set on every PutObject | Bucket `sebenzasa-s3-bucket-...-af-south-1-an`, **Cape Town region: personal information stays in South Africa**. Private bucket; reads only via short-TTL presigned URLs. Provider chosen on /admin/integrations; credentials AES-256-GCM encrypted in `integration_settings`, never in env. |
-| Supabase Storage objects (fallback path) | Provider-side AES-256 (transparent) | Supabase-managed. Now the FALLBACK only: used when no admin storage config is enabled. |
+| ~~Supabase Storage~~ | n/a | **Removed 2026-08-20.** Every stored object was confirmed present in S3 first; the provider, its env vars and the SDK dependency are gone. |
 | Profile + project images | Re-encoded to WebP at upload | **All EXIF metadata is stripped, including GPS**, so a phone photo can no longer carry the data subject's location. Documents, ID scans and CVs are deliberately NOT re-encoded (evidentiary integrity). |
 | Vercel build artefacts | Provider-side | Vercel-managed. |
 
@@ -134,7 +134,7 @@ casing.
       env at minimum; AWS Secrets Manager when we migrate).
 - [ ] Implement the keyring + the rotation script (currently single-key).
 - [ ] Set the 12-month rotation reminder in the team calendar.
-- [ ] Document where Vercel + Neon + Supabase store their own audit
+- [ ] Document where Vercel + Neon + AWS store their own audit
       logs of admin access to our environment, for forensic readiness.
 - [ ] Extend the rotation script (`scripts/rotate-id-keys.ts` in the
       runbook above) to walk `app_user.phone_e164_enc` and

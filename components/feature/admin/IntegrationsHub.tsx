@@ -63,7 +63,7 @@ const CHANNEL_META: Record<
     title: "Storage (files)",
     icon: <HardDrive className="size-4" aria-hidden="true" />,
     blurb:
-      "Documents, photos, and CVs. S3 (or any S3-compatible host) or Supabase Storage. When enabled here, it replaces the SUPABASE_* env vars. Save, then Test, then Enable.",
+      "Documents, photos, and CVs on S3 (or any S3-compatible host). Credentials are encrypted in the database. Save, then Test, then Enable.",
   },
 };
 
@@ -162,14 +162,12 @@ function ChannelCard({
       secrets.twilioSid = form.twilioSid ?? "";
       secrets.twilioToken = form.twilioToken ?? "";
     } else if (view.channel === "storage") {
-      config.provider = form.provider ?? "s3";
+      config.provider = "s3";
       config.bucket = form.bucket ?? "";
       config.region = form.region ?? "";
       config.endpoint = form.endpoint ?? "";
-      config.url = form.url ?? "";
       secrets.accessKeyId = form.accessKeyId ?? "";
       secrets.secretAccessKey = form.secretAccessKey ?? "";
-      secrets.serviceKey = form.serviceKey ?? "";
     } else {
       config.host = form.host ?? "";
       config.port = form.port ?? "587";
@@ -312,29 +310,11 @@ function ChannelCard({
           )}
           {view.channel === "storage" && (
             <>
-              <CustomSelect
-                ariaLabel="Storage provider"
-                value={form.provider ?? "s3"}
-                onChange={(v) => set("provider", v)}
-                options={[
-                  { value: "s3", label: "S3 / S3-compatible" },
-                  { value: "supabase", label: "Supabase Storage" },
-                ]}
-              />
               <input className={field} placeholder="Bucket (e.g. sebenza-private)" value={form.bucket ?? ""} onChange={(e) => set("bucket", e.target.value)} />
-              {(form.provider ?? "s3") === "s3" ? (
-                <>
-                  <input className={field} placeholder="Region (af-south-1)" value={form.region ?? ""} onChange={(e) => set("region", e.target.value)} />
-                  <input className={field} placeholder="Endpoint URL (blank for AWS; set for R2/MinIO…)" value={form.endpoint ?? ""} onChange={(e) => set("endpoint", e.target.value)} />
-                  <input className={field} placeholder="Access key ID" value={form.accessKeyId ?? ""} onChange={(e) => set("accessKeyId", e.target.value)} />
-                  <input className={field} type="password" placeholder="Secret access key" value={form.secretAccessKey ?? ""} onChange={(e) => set("secretAccessKey", e.target.value)} />
-                </>
-              ) : (
-                <>
-                  <input className={field} placeholder="Supabase project URL (https://…supabase.co)" value={form.url ?? ""} onChange={(e) => set("url", e.target.value)} />
-                  <input className={field} type="password" placeholder="Service-role key" value={form.serviceKey ?? ""} onChange={(e) => set("serviceKey", e.target.value)} />
-                </>
-              )}
+              <input className={field} placeholder="Region (af-south-1)" value={form.region ?? ""} onChange={(e) => set("region", e.target.value)} />
+              <input className={field} placeholder="Endpoint URL (blank for AWS; set for R2/MinIO…)" value={form.endpoint ?? ""} onChange={(e) => set("endpoint", e.target.value)} />
+              <input className={field} placeholder="Access key ID" value={form.accessKeyId ?? ""} onChange={(e) => set("accessKeyId", e.target.value)} />
+              <input className={field} type="password" placeholder="Secret access key" value={form.secretAccessKey ?? ""} onChange={(e) => set("secretAccessKey", e.target.value)} />
             </>
           )}
           {error && (

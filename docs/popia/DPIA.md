@@ -179,7 +179,7 @@ covered by this DPIA:
        identifier.
     3. **ID document scan**. When the seeker opts into KYC
        verification from `/dashboard/profile`, a private object lives
-       at `{userId}/id-documents/{profileId}.{ext}` in the Supabase
+       at `{userId}/id-documents/{profileId}.{ext}` in the private
        private bucket. A scan typically reveals: full names, SA ID
        number (in `national_id_enc` only if the seeker also typed it
        in), photograph, date of birth, place of birth. A bucket-level
@@ -237,7 +237,9 @@ covered by this DPIA:
     re-run server-side before the row is written. A tampered request
     cannot backdoor through the 14100 age gate.
 - **Residual risk**: low-to-moderate. A bucket-level compromise of
-  Supabase storage remains the main outstanding concern; this is
+  (RESOLVED 2026-08-20, see addendum R-28.1: storage is now the
+  responsible party's own S3 bucket in af-south-1 and Supabase was
+  removed entirely.) Supabase storage was the main outstanding concern; it was
   shared with the existing qualification + org KYC documents and is
   addressed by Supabase's at-rest encryption + the Phase 9 migration
   to the `af-south-1` Cape Town region for POPIA in-country residency.

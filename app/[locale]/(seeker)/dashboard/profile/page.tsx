@@ -42,7 +42,7 @@ import { projectHintKind } from "@/lib/profile/project-links";
 import { MobileSectionJumpNav } from "@/components/feature/profile/MobileSectionJumpNav";
 import { StudentContextEditor } from "@/components/feature/profile/StudentContextEditor";
 import { signedPhotoUrl } from "@/lib/storage/signed";
-import { isStorageConfigured } from "@/lib/storage/supabase";
+import { isStorageAvailable } from "@/lib/storage/backend";
 import {
   TextField,
   SelectField,
@@ -121,7 +121,7 @@ export default async function ProfileEditorPage({
   // Mint a short-lived signed URL for the current photo, if any. The page
   // re-renders on every nav so this stays fresh.
   const photoUrl =
-    me.profilePhotoUrl && isStorageConfigured()
+    me.profilePhotoUrl && (await isStorageAvailable())
       ? await signedPhotoUrl(me.profilePhotoUrl)
       : null;
 

@@ -44,7 +44,7 @@ import {
   deleteStorageObject,
 } from "./upload";
 import { photoThumbKey, hasPhotoThumb } from "./keys";
-import { StorageError } from "./supabase";
+import { StorageError } from "./config";
 
 function asFile(bytes: Uint8Array | Buffer, name: string, type: string): File {
   return new File([new Uint8Array(bytes)], name, { type });

@@ -15,7 +15,7 @@
 
 import "server-only";
 import sharp from "sharp";
-import { StorageError } from "./supabase";
+import { StorageError } from "./config";
 import { getStorageBackend } from "./backend";
 import { photoThumbKey, hasPhotoThumb } from "./keys";
 

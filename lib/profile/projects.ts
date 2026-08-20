@@ -21,7 +21,7 @@ import { verifyRole } from "@/lib/auth/dal";
 import { getSetting } from "@/lib/admin/settings";
 import { logAccess } from "@/lib/audit";
 import { uploadProjectImage, deleteStorageObject } from "@/lib/storage/upload";
-import { StorageError } from "@/lib/storage/supabase";
+import { StorageError } from "@/lib/storage/config";
 import {
   normaliseProjectUrl,
   noteHasContactDetails,

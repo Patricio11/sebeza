@@ -88,11 +88,11 @@ Background decisions in [docs/popia/DPIA.md](docs/popia/DPIA.md) (R8, R-27).
 - **next-intl 4.12**  Tier-1 locales `en` / `zu` / `xh` / `af`; deep-merge
   fallback to English. Tier-2 / Tier-3 + professional translation land in
   Phase 10.
-- **Object storage is admin-configurable** (`lib/storage/backend.ts`): **AWS S3 in
-  `af-south-1` (Cape Town) is live**, so uploaded files rest in South Africa;
-  Supabase Storage remains the env fallback. Configured, tested and enabled from
-  /admin/integrations with credentials encrypted in the database. Private buckets,
-  signed URLs only on audited reveal. Photos are re-encoded to WebP with EXIF/GPS
+- **Object storage is AWS S3** (`lib/storage/backend.ts`), live in
+  **`af-south-1` (Cape Town)**, so uploaded files rest in South Africa.
+  Configured, tested and enabled from /admin/integrations with credentials
+  encrypted in the database; there is no env fallback and no second vendor.
+  Private bucket, presigned URLs only on audited reveal. Photos are re-encoded to WebP with EXIF/GPS
   stripped; documents are never re-encoded.
 - **Recharts 3.8** on `/insights` only (client island, mount-gated).
 - Postgres FTS + `pg_trgm` for search ranking; `sebenza_freshness_confidence()`
@@ -109,7 +109,7 @@ Background decisions in [docs/popia/DPIA.md](docs/popia/DPIA.md) (R8, R-27).
 | 1 | Mock-data clickable surface | ✅ | [PHASE_1_COMPLETE](docs/completed/PHASE_1_COMPLETE.md) |
 | 1.5 | Civic-Editorial design system | ✅ | [PHASE_1_5_COMPLETE](docs/completed/PHASE_1_5_COMPLETE.md) |
 | 2 | Auth + real consent persistence | ✅ | [PHASE_2_COMPLETE](docs/completed/PHASE_2_COMPLETE.md) |
-| 3 | File storage (Supabase) | ✅ | [PHASE_3_COMPLETE](docs/completed/PHASE_3_COMPLETE.md) |
+| 3 | File storage | ✅ | [PHASE_3_COMPLETE](docs/completed/PHASE_3_COMPLETE.md) |
 | 4 | Data-provider DB swap | ✅ | [PHASE_4_COMPLETE](docs/completed/PHASE_4_COMPLETE.md) |
 | 5 | Employer workflows (saved searches, reveals, hires) | ✅ | [PHASE_5_COMPLETE](docs/completed/PHASE_5_COMPLETE.md) |
 | 6 | Analytics + snapshots | ✅ | [PHASE_6_COMPLETE](docs/completed/PHASE_6_COMPLETE.md) |

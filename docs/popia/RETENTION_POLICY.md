@@ -24,7 +24,7 @@ Last updated 2026-06-01 (Phase 13 added 4 new rows + 1 special-handling block).
 | **Search events** | `search_events` | 90 days raw; aggregated indefinitely in `skill_gap_snapshots` | Phase 9.x cron prunes raw rows; snapshots retained as policy asset |
 | **Skill-gap snapshots** | `skill_gap_snapshots` | Indefinite (the trend signal compounds in value) | None  append-only |
 | **Outcome snapshots** | `outcome_snapshots` | Indefinite (longitudinal cohort dataset) | None  append-only; cells already k-anonymised at capture |
-| **Uploaded files** | Object storage: S3 `af-south-1` (live), Supabase as fallback | Same lifecycle as the profile | Hard-delete cron also issues a storage delete for the user's key prefix. Deleting a photo or project image sweeps its derived WebP thumbnail too. |
+| **Uploaded files** | AWS S3 `af-south-1` (the only store since 2026-08-20) | Same lifecycle as the profile | Hard-delete cron also issues a storage delete for the user's key prefix. Deleting a photo or project image sweeps its derived WebP thumbnail too. |
 | **Sessions** | `session` | Better Auth default (30-day rolling) | Plugin handles expiry |
 | **Two-factor secrets + backup codes** | `two_factor` | Same lifecycle as the user account | CASCADE on `app_user` DELETE |
 | **KYC transaction id** | `app_user.kyc_transaction_id` | Same lifecycle as the user account | NULLed by `revokeMyKyc`; lives until user deletion |
@@ -74,7 +74,7 @@ for the launch checklist.
 - Cleared when the user removes their ID via
   `/dashboard/profile` → National ID → Remove.
 
-### Documents in object storage (S3 `af-south-1`, Supabase fallback)
+### Documents in object storage (AWS S3 `af-south-1`)
 - Private bucket; reads are signed-URL only.
 - Signed URL TTL is 60 seconds (`lib/storage/signed`).
 - Bucket prefix follows `profiles/{profile_id}/...` so hard-delete can

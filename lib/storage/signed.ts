@@ -9,7 +9,7 @@
  */
 
 import "server-only";
-import { DOCUMENT_URL_TTL, PHOTO_URL_TTL } from "./supabase";
+import { DOCUMENT_URL_TTL, PHOTO_URL_TTL } from "./config";
 import { getStorageBackend } from "./backend";
 import { photoThumbKey, hasPhotoThumb } from "./keys";
 

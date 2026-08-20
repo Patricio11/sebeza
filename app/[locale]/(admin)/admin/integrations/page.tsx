@@ -101,11 +101,7 @@ export default async function AdminIntegrationsPage({
           icon={<HardDrive className="size-4" aria-hidden="true" />}
           title="Storage"
           value={
-            storage.source === "admin"
-              ? `Admin config · ${storage.provider === "s3" ? "S3" : "Supabase"}`
-              : storage.source === "env"
-                ? "Env fallback · Supabase"
-                : "Not configured"
+            storage.source === "admin" ? "Admin config · S3" : "Not configured"
           }
           detail="Documents, photos, CVs · configure in the Storage card below"
           ok={storage.source !== "none"}

@@ -30,7 +30,7 @@ import {
 } from "@/db/queries/profiles";
 import { analyticsSnapshotQuery } from "@/db/queries/analytics";
 import { signedPhotoUrl } from "@/lib/storage/signed";
-import { isStorageConfigured } from "@/lib/storage/supabase";
+import { isStorageAvailable } from "@/lib/storage/backend";
 
 export interface DataProvider {
   searchProfiles(filters: SearchFilters): Promise<SearchResult>;
@@ -114,7 +114,7 @@ const dbProvider: DataProvider = {
 async function signPhotoUrls(
   profiles: PublicProfile[],
 ): Promise<PublicProfile[]> {
-  if (!isStorageConfigured()) {
+  if (!(await isStorageAvailable())) {
     return profiles.map((p) => ({ ...p, profilePhotoUrl: null }));
   }
   return Promise.all(

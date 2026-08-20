@@ -42,7 +42,7 @@ import { z } from "zod";
 import { verifyEmployer } from "@/lib/auth/dal";
 import { logAccess } from "@/lib/audit";
 import { uploadOrgDocument, deleteStorageObject } from "@/lib/storage/upload";
-import { StorageError } from "@/lib/storage/supabase";
+import { StorageError } from "@/lib/storage/config";
 import { createNotification, notifyAllAdmins } from "@/lib/notifications/server";
 import { sendEmail } from "@/lib/email/send";
 import {

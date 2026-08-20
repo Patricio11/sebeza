@@ -19,7 +19,6 @@ import type { IntegrationChannel } from "@/lib/integrations/resolve";
 import {
   buildStorageBackend,
   invalidateStorageBackendCache,
-  type StorageProvider,
 } from "@/lib/storage/backend";
 
 export type IntegrationResult = { ok: true } | { ok: false; error: string };
@@ -42,11 +41,10 @@ const configSchemas = {
     from: z.string().trim().max(200).optional().or(z.literal("")),
     secure: z.enum(["true", "false"]).optional(),
   }),
-  // 2026-08  file storage (documents / photos / CVs). S3 is the primary
-  // target; Supabase remains available. Secrets: accessKeyId +
-  // secretAccessKey (s3) or serviceKey (supabase).
+  // 2026-08  file storage (documents / photos / CVs). S3 or any
+  // S3-compatible host; secrets are accessKeyId + secretAccessKey.
   storage: z.object({
-    provider: z.enum(["s3", "supabase"]),
+    provider: z.literal("s3").default("s3"),
     bucket: z.string().trim().min(2).max(100),
     region: z.string().trim().max(40).optional().or(z.literal("")),
     endpoint: z
@@ -57,15 +55,6 @@ const configSchemas = {
       .or(z.literal(""))
       .refine((v) => !v || /^https?:\/\//.test(v), {
         message: "Endpoint must be an http(s) URL.",
-      }),
-    url: z
-      .string()
-      .trim()
-      .max(300)
-      .optional()
-      .or(z.literal(""))
-      .refine((v) => !v || /^https?:\/\//.test(v), {
-        message: "Supabase URL must be an http(s) URL.",
       }),
   }),
 } as const;
@@ -182,9 +171,7 @@ export async function testStorageIntegration(): Promise<
       string,
       string
     >;
-    const provider: StorageProvider =
-      config.provider === "supabase" ? "supabase" : "s3";
-    const backend = buildStorageBackend(provider, config, secrets);
+    const backend = buildStorageBackend("s3", config, secrets);
     result = await backend.test();
   } catch (e) {
     result = {

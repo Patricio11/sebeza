@@ -19,8 +19,10 @@ PROFILE_PROJECTS_PLAN, MOBILE_FIXES_2026_08_19, COACH_LAUNCH_CHECKLIST):**
   approved; the KYC document checklist is ADMIN-MANAGED (`org_document_requirements`); vetting emails
   fan out unconditionally (submission receipt, admin alert, approved w/ sign-in CTA, rejected, changes).
   New employer pages go INSIDE `(workspace)` unless reachable pre-approval.
-- **Storage is admin-configurable** (`lib/storage/backend.ts` is THE seam): S3 / S3-compatible or
-  Supabase, configured on /admin/integrations (Save → Test → Enable); env `SUPABASE_*` is the fallback.
+- **Storage is S3 only** (`lib/storage/backend.ts` is THE seam): S3 or any S3-compatible host,
+  configured on /admin/integrations (Save → Test → Enable). **Supabase Storage and the env fallback
+  were REMOVED 2026-08-20** after every stored object was confirmed to be in S3; there is no second
+  vendor and no `SUPABASE_*`. Read paths must gate on `isStorageAvailable()`, never a vendor env var.
   Photos are re-encoded to **WebP** (EXIF/GPS stripped, 1600px cap, 256px thumb); documents/IDs/CVs are
   NEVER re-encoded. CVs accept PDF + Word. `lib/storage/keys.ts` holds thumb-key helpers.
 - **Verification** (0067): the profile badge answers ONE question, "is this a real person?", and derives
@@ -107,7 +109,7 @@ Editorial layouts, thick rules, all-caps tracked eyebrows, tabular numerals. NOT
 - Tailwind v4 (tokens in `app/globals.css` @theme) · next-intl 4.12 (en base; zu/xh/af deepMerge fallback).
 - Drizzle ORM 0.45 + Postgres (Neon serverless driver; `DATABASE_DRIVER=postgres-js` for local/Docker).
 - Better Auth 1.6 (sessions, email verification, 2FA TOTP; prod admins hard-require 2FA).
-- Supabase Storage (private buckets, signed URLs) · nodemailer SMTP (`EMAIL_TRANSPORT=smtp|console`).
+- AWS S3 object storage (private bucket, presigned URLs, admin-configured) · nodemailer SMTP (`EMAIL_TRANSPORT=smtp|console`).
 - Recharts 3.8 (insights only) · Lucide · clsx + tailwind-merge `cn()`.
 
 ## Architecture (what actually matters now)
@@ -143,7 +145,7 @@ npm run test:e2e     # Playwright (Docker test Postgres + .env.test.local)
 - `SEBENZA_DATA_PROVIDER`  defaults to `db`; `mock` is dev/test-only (throws in prod).
 - `DATABASE_URL` (+ optional `DATABASE_DRIVER=postgres-js`) · `SEBENZA_ENCRYPTION_KEY` (base64, 32B).
 - `BETTER_AUTH_SECRET` · `CRON_SECRET` (all 20 cron routes fail closed without it).
-- Supabase: `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` · SMTP: `EMAIL_TRANSPORT`, `SMTP_*`.
+- Storage: configured on /admin/integrations (no env vars) · SMTP: `EMAIL_TRANSPORT`, `SMTP_*`.
 
 ## When in doubt
 Rule wins over instinct. If a "wow" instinct conflicts with No-Flash, POPIA-First, or

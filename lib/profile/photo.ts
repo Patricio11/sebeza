@@ -15,7 +15,7 @@ import { revalidatePath } from "next/cache";
 import { getSessionUser } from "@/lib/auth/guard";
 import { logAccess } from "@/lib/audit";
 import { uploadPhoto, deleteStorageObject } from "@/lib/storage/upload";
-import { StorageError } from "@/lib/storage/supabase";
+import { StorageError } from "@/lib/storage/config";
 
 export type ActionResult<T extends object = object> =
   | ({ ok: true } & T)

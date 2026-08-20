@@ -305,7 +305,7 @@ export async function listConsentsForUser(
 
 /** Seeker review bundle: the ID document + qualifications (with ids + signed
  *  document URLs) the admin needs to make verification decisions on the user
- *  detail page. All reads from the DB + Supabase Storage. */
+ *  detail page. All reads from the DB + object storage. */
 export interface SeekerReviewBundle {
   idDoc: {
     signedUrl: string | null;

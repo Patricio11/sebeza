@@ -3,10 +3,10 @@
  * database.
  *
  * Contracts:
- *   - resolution order: ENABLED admin "storage" row → env Supabase →
- *     not_configured (thrown as a friendly StorageError)
+ *   - the ONLY source is an ENABLED admin "storage" row; anything else
+ *     is not_configured (thrown as a friendly StorageError). Supabase
+ *     and the env fallback were removed on 2026-08-20.
  *   - a disabled admin row does NOT win (enable is explicit)
- *   - buildStorageBackend("supabase") without url/serviceKey refuses
  *   - the admin save action validates the storage config shape
  */
 import { afterAll, beforeAll, describe, expect, test, vi } from "vitest";
@@ -34,13 +34,13 @@ import { getDb } from "@/db/client";
 import * as schema from "@/db/schema";
 import { encryptField } from "@/lib/crypto";
 import {
-  buildStorageBackend,
   getStorageBackend,
   invalidateStorageBackendCache,
+  isStorageAvailable,
   storageStatus,
 } from "@/lib/storage/backend";
 import { saveIntegration } from "@/lib/admin/integrations";
-import { StorageError } from "@/lib/storage/supabase";
+import { StorageError } from "@/lib/storage/config";
 
 const db = getDb();
 
@@ -113,25 +113,6 @@ describe("storage backend resolution", () => {
     await deleteStorageRow();
   });
 
-  test("env Supabase is the fallback when set", async () => {
-    process.env.SUPABASE_URL = "https://example.supabase.co";
-    process.env.SUPABASE_SERVICE_ROLE_KEY = "test-service-key";
-    invalidateStorageBackendCache();
-
-    const status = await storageStatus();
-    expect(status.source).toBe("env");
-    expect(status.provider).toBe("supabase");
-
-    delete process.env.SUPABASE_URL;
-    delete process.env.SUPABASE_SERVICE_ROLE_KEY;
-    invalidateStorageBackendCache();
-  });
-
-  test("supabase builder refuses missing url / service key", () => {
-    expect(() =>
-      buildStorageBackend("supabase", { bucket: "b" }, {}),
-    ).toThrowError(StorageError);
-  });
 });
 
 describe("saveIntegration storage validation", () => {
@@ -165,5 +146,29 @@ describe("saveIntegration storage validation", () => {
       .where(eq(schema.integrationSettings.channel, "storage"));
     expect(row?.enabled).toBe(false);
     expect(row?.credentialsEnc).toBeTruthy();
+  });
+});
+
+describe("isStorageAvailable (2026-08-20 live bug)", () => {
+  test("true for an S3 admin config even with no Supabase env", async () => {
+    // The read paths used to gate on the Supabase-only check, so once
+    // live storage moved to S3 every profile photo rendered as initials.
+    delete process.env.SUPABASE_URL;
+    delete process.env.SUPABASE_SERVICE_ROLE_KEY;
+    await deleteStorageRow();
+    expect(await isStorageAvailable()).toBe(false);
+
+    await db.insert(schema.integrationSettings).values({
+      channel: "storage",
+      enabled: true,
+      credentialsEnc: encryptField(
+        JSON.stringify({ accessKeyId: "AKIATEST", secretAccessKey: "shhh" }),
+      ),
+      config: { provider: "s3", bucket: "sebenza-test", region: "af-south-1" },
+    });
+    invalidateStorageBackendCache();
+
+    expect(await isStorageAvailable()).toBe(true);
+    await deleteStorageRow();
   });
 });

@@ -29,7 +29,7 @@ import {
   uploadIdDocument as uploadIdDocumentToStorage,
   deleteStorageObject,
 } from "@/lib/storage/upload";
-import { StorageError } from "@/lib/storage/supabase";
+import { StorageError } from "@/lib/storage/config";
 import { resolveIdentityVerifier } from "./provider";
 import { getSetting } from "@/lib/admin/settings";
 

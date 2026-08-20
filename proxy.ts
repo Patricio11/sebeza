@@ -51,7 +51,7 @@ function isProtected(pathname: string): boolean {
  * Strict CSP that allows:
  *   - script-src 'self' (plus 'unsafe-inline' for Next's hydration
  *     bootstrap until we wire nonce-based CSP  documented below)
- *   - connect-src 'self' + Supabase + Resend + the configured app URL
+ *   - connect-src 'self' + Resend + the configured app URL
  *   - frame-ancestors 'none' (with X-Frame-Options as legacy fallback)
  *   - object-src 'none' (no Flash, no plugins)
  *   - base-uri 'self' (anti-injection)
@@ -69,19 +69,6 @@ function isProtected(pathname: string): boolean {
  * docs/popia/ENCRYPTION_INVENTORY.md "Open items".
  */
 function securityHeaders(): Record<string, string> {
-  // Phase 32.3.4 (security remediation)  read `SUPABASE_URL`, not
-  // `NEXT_PUBLIC_SUPABASE_URL`. The latter is defined NOWHERE
-  // (`.env.example`, `.env.local` and `lib/storage/supabase.ts` all use
-  // `SUPABASE_URL`), so this ternary always took the wildcard branch and
-  // production `connect-src` permitted ANY Supabase project  including
-  // an attacker's  as an exfiltration destination. The value is only
-  // ever read server-side here, so the NEXT_PUBLIC_ prefix was never
-  // needed. The wildcard remains only as a last-resort fallback when
-  // storage is genuinely unconfigured (local dev).
-  const supabaseUrl = process.env.SUPABASE_URL;
-  const supabaseHost = supabaseUrl
-    ? new URL(supabaseUrl).origin
-    : "https://*.supabase.co";
   const csp = [
     "default-src 'self'",
     // Phase 26.4 (security audit)  `unsafe-eval` is DEV-ONLY (Turbopack HMR
@@ -103,7 +90,7 @@ function securityHeaders(): Record<string, string> {
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: blob: https:",
     "font-src 'self' data:",
-    `connect-src 'self' ${supabaseHost} https://api.resend.com https://api.qrserver.com`,
+    "connect-src 'self' https://api.resend.com https://api.qrserver.com",
     "frame-ancestors 'none'",
     "form-action 'self'",
     "base-uri 'self'",

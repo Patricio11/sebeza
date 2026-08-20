@@ -1,12 +1,14 @@
 /**
  * 2026-08  storage backend seam (founder decision: storage must be
- * admin-configurable like the messaging channels, with S3 as the
- * primary target  same posture as the working PayLink Pro setup).
+ * admin-configurable like the messaging channels, on S3  same posture
+ * as the working PayLink Pro setup).
  *
- * Resolution order:
- *   1. An ENABLED `integration_settings` row with channel "storage"
- *      (provider "s3" or "supabase", secrets AES-encrypted at rest).
- *   2. Env fallback: the historical SUPABASE_* vars, unchanged.
+ * Storage is S3 (or any S3-compatible host). The ONLY source is an
+ * ENABLED `integration_settings` row with channel "storage", whose
+ * credentials are AES-encrypted at rest and managed on
+ * /admin/integrations. There is no env fallback and no second vendor:
+ * Supabase Storage was removed on 2026-08-20 (founder decision) after
+ * every stored object was confirmed to live in S3.
  *
  * The DB row is cached in-process for 30s  signed photo URLs render
  * on every profile card and must not cost a DB round-trip each.
@@ -23,7 +25,6 @@
  */
 
 import "server-only";
-import { createClient } from "@supabase/supabase-js";
 import {
   S3Client,
   PutObjectCommand,
@@ -35,10 +36,10 @@ import { eq } from "drizzle-orm";
 import { getDb } from "@/db/client";
 import * as schema from "@/db/schema";
 import { decryptField } from "@/lib/crypto";
-import { StorageError, isStorageConfigured, BUCKET } from "./supabase";
+import { StorageError, BUCKET } from "./config";
 
-export type StorageProvider = "s3" | "supabase";
-export type StorageSource = "admin" | "env" | "none";
+export type StorageProvider = "s3";
+export type StorageSource = "admin" | "none";
 
 export interface StorageBackend {
   provider: StorageProvider;
@@ -172,92 +173,13 @@ function s3Backend(
   };
 }
 
-function supabaseBackend(
-  url: string,
-  serviceKey: string,
-  bucket: string,
-): StorageBackend {
-  const client = createClient(url, serviceKey, {
-    auth: { persistSession: false, autoRefreshToken: false },
-  });
-
-  return {
-    provider: "supabase",
-    async upload(key, bytes, contentType) {
-      const { error } = await client.storage
-        .from(bucket)
-        .upload(key, bytes, { contentType, upsert: true });
-      if (error) throw new StorageError("upload_failed", error.message);
-    },
-    async remove(key) {
-      const { error } = await client.storage.from(bucket).remove([key]);
-      if (error) throw new StorageError("delete_failed", error.message);
-    },
-    async signedUrl(key, ttlSeconds, opts) {
-      const { data, error } = await client.storage
-        .from(bucket)
-        .createSignedUrl(key, ttlSeconds);
-      if (error || !data) return null;
-      let signed = data.signedUrl;
-      if (opts?.width && opts.width > 0) {
-        const sep = signed.includes("?") ? "&" : "?";
-        signed = `${signed}${sep}width=${Math.round(opts.width)}&resize=cover`;
-      }
-      return signed;
-    },
-    async test() {
-      const key = `__connection_test__/probe-${Date.now()}.txt`;
-      try {
-        const up = await client.storage
-          .from(bucket)
-          .upload(key, new Blob(["sebenza storage connection test"]), {
-            upsert: true,
-          });
-        if (up.error) {
-          return {
-            ok: false,
-            message: `Supabase upload failed on "${bucket}": ${up.error.message}`,
-          };
-        }
-        let cleaned = true;
-        try {
-          const rm = await client.storage.from(bucket).remove([key]);
-          if (rm.error) cleaned = false;
-        } catch {
-          cleaned = false;
-        }
-        return {
-          ok: true,
-          message: `Connected to Supabase; write on "${bucket}" OK${
-            cleaned ? "; probe cleaned up." : " (probe left  delete not permitted)."
-          }`,
-        };
-      } catch (e) {
-        return {
-          ok: false,
-          message: `Supabase test failed: ${e instanceof Error ? e.message : String(e)}`,
-        };
-      }
-    },
-  };
-}
-
 /** Builder shared by the live resolution path and the admin Test action. */
 export function buildStorageBackend(
-  provider: StorageProvider,
+  _provider: StorageProvider,
   config: Record<string, string>,
   secrets: Record<string, string>,
 ): StorageBackend {
-  if (provider === "s3") return s3Backend(config, secrets);
-  const url = config.url || "";
-  const serviceKey = secrets.serviceKey || "";
-  if (!url || !serviceKey) {
-    throw new StorageError(
-      "not_configured",
-      "Supabase storage needs a project URL and a service-role key.",
-    );
-  }
-  return supabaseBackend(url, serviceKey, config.bucket || BUCKET);
+  return s3Backend(config, secrets);
 }
 
 // ─── Resolution (admin row → env fallback) ───────────────────────────────────
@@ -290,24 +212,11 @@ async function resolveUncached(): Promise<ResolvedStorage> {
         string,
         string
       >;
-      const provider: StorageProvider =
-        config.provider === "supabase" ? "supabase" : "s3";
-      return { backend: buildStorageBackend(provider, config, secrets), source: "admin" };
+      return { backend: buildStorageBackend("s3", config, secrets), source: "admin" };
     }
   } catch {
-    // fall through to env
-  }
-
-  // 2. Historical env-configured Supabase.
-  if (isStorageConfigured()) {
-    return {
-      backend: supabaseBackend(
-        process.env.SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_ROLE_KEY!,
-        BUCKET,
-      ),
-      source: "env",
-    };
+    // An undecryptable row must not take uploads down with a crash;
+    // it degrades to "not configured" and the admin sees it on the hub.
   }
 
   return { backend: null, source: "none" };
@@ -330,6 +239,18 @@ export async function getStorageBackend(): Promise<StorageBackend> {
     );
   }
   return backend;
+}
+
+/**
+ * True when ANY storage provider is available (admin config OR the env
+ * fallback). 2026-08-20: read paths used to gate on the Supabase-only
+ * `isStorageConfigured()`, so once live storage moved to S3 every
+ * profile photo silently rendered as initials. Ask the SEAM, never a
+ * single vendor's env vars.
+ */
+export async function isStorageAvailable(): Promise<boolean> {
+  const { backend } = await resolve();
+  return backend !== null;
 }
 
 /** Hub display only: which source is live + which provider. */

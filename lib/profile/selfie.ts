@@ -26,7 +26,7 @@ import { verifyRole } from "@/lib/auth/dal";
 import { getSetting } from "@/lib/admin/settings";
 import { logAccess } from "@/lib/audit";
 import { uploadPhoto, deleteStorageObject } from "@/lib/storage/upload";
-import { StorageError } from "@/lib/storage/supabase";
+import { StorageError } from "@/lib/storage/config";
 import { recomputeProfileVerification } from "@/lib/profile/verification-rollup";
 
 export type ActionResult<T extends object = object> =

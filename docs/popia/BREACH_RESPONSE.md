@@ -15,9 +15,9 @@ Any of the following, suspected or confirmed:
 
 1. Unauthorised access to the database or a user account.
 2. Leak of national ID ciphertext together with the encryption key.
-3. Misconfigured object-storage bucket (S3 `af-south-1`, or the Supabase fallback) exposing private documents.
+3. Misconfigured S3 bucket (`af-south-1`) exposing private documents.
 4. A privileged employee credentials being phished or stolen.
-5. A sub-processor (Neon, AWS S3, Supabase, Resend, KYC SaaS, **LLM provider:
+5. A sub-processor (Neon, AWS S3, Resend, KYC SaaS, **LLM provider:
    OpenAI / Anthropic / Mistral / self-hosted infra** [Phase 13.3])
    disclosing a breach that touches our data. Note: the LLM
    sub-processors process only generic syllabus / module text  no
