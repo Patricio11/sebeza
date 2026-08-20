@@ -53,7 +53,11 @@ test("seeker: opt-in card and the Phone column", async ({ page, context }) => {
 
   // The first three rows are the invitation family, which is what the
   // Phone column exists for.
-  const prefs = page.locator("ul", { hasText: "vacancy.invite" }).first();
+  // Anchored on the LABEL, not the catalog key: the key is deliberately
+  // no longer rendered (it is a database identifier, not user copy).
+  const prefs = page
+    .locator("ul", { hasText: "flagged you for a specific role" })
+    .first();
   await prefs.scrollIntoViewIfNeeded();
   await page.waitForTimeout(400);
   await prefs.screenshot({ path: `${OUT}/seeker-prefs-rows.png` });

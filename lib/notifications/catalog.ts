@@ -182,7 +182,8 @@ export const NOTIFICATION_CATALOG = {
     defaultEmail: false,
     audience: "seeker",
     label: "Employment status nudges",
-    description: "Phase 8 cron flips this on when your status hasn't been confirmed lately.",
+    description:
+      "A nudge when your employment status hasn't been confirmed for a while, so employers see something current.",
     dedupeWindowSeconds: 7 * 24 * 60 * 60,
   },
   "saved_search.new_matches": {
@@ -190,7 +191,7 @@ export const NOTIFICATION_CATALOG = {
     defaultEmail: false,
     audience: "org_members",
     label: "New matches on a saved search",
-    description: "Phase 8 cron rolls these up daily.",
+    description: "Rolled up once a day, so a busy day doesn't flood you.",
     dedupeWindowSeconds: 24 * 60 * 60,
   },
   // ──────────────────────────────────────────────────────────────────────
@@ -500,7 +501,7 @@ export const NOTIFICATION_CATALOG = {
     audience: "seeker",
     label: "Searchability paused",
     description:
-      "Confirmation that you paused appearing in employer search for a defined window. Your record stays intact; existing relationships hold; the cron auto-unpauses you on the expiry date.",
+      "Confirmation that you paused appearing in employer search for a defined window. Your record stays intact, existing relationships hold, and you are put back automatically on the date you chose.",
     dedupeWindowSeconds: 0,
   },
   // Phase 11.4.2  warm-intent capture. Fires when a followed
