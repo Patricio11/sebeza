@@ -10,6 +10,7 @@ import { ShieldCheck } from "lucide-react";
 import { SignOutButton } from "@/components/feature/auth/SignOutButton";
 import { TwoFactorAccountPanel } from "@/components/feature/auth/TwoFactorAccountPanel";
 import { NotificationPrefsPanel } from "@/components/feature/notifications/NotificationPrefsPanel";
+import { PushOptIn } from "@/components/feature/notifications/PushOptIn";
 import { getMyNotificationPrefs } from "@/lib/notifications/query";
 import type { NotificationKind } from "@/lib/notifications/catalog";
 import { getSetting } from "@/lib/admin/settings";
@@ -33,6 +34,7 @@ export default async function AccountPage({
   const t = await getTranslations("seekerDash.account");
   const prefs = await getMyNotificationPrefs();
   const emailChannelEnabled = await getSetting<boolean>("feature_flag_email_notifications");
+  const pushChannelEnabled = await getSetting<boolean>("feature_flag_web_push");
 
   // Phase 11.4.3 + 11.4.4  account-row reads for the new preference
   // surfaces. dataSaverMode flag drives bandwidth downgrades; the SMS /
@@ -160,10 +162,18 @@ export default async function AccountPage({
           >
             Notification preferences
           </h2>
+          {/* Phase 35  the device opt-in sits directly above the
+              per-kind grid, because "which notifications" is a
+              meaningless question until "on this phone" is answered.
+              Renders nothing when push is off or unsupported. */}
+          <div className="mb-4">
+            <PushOptIn />
+          </div>
           <NotificationPrefsPanel
             initialPrefs={prefs}
             kinds={SEEKER_NOTIFICATION_KINDS}
             emailChannelEnabled={emailChannelEnabled}
+            pushChannelEnabled={pushChannelEnabled}
           />
         </section>
 

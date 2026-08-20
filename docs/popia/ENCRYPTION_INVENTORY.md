@@ -15,6 +15,7 @@ Last updated 2026-06-01 (Phase 13 added the LLM-provider credentials row).
 | Vercel ↔ Neon | TLS 1.2+ | `sslmode=require` in the connection string. |
 | Vercel ↔ S3 | TLS 1.2+ | HTTPS only; presigned-URL flow does not weaken this. |
 | Vercel ↔ Resend | TLS 1.2+ | HTTPS API. |
+| Vercel ↔ browser push services (Phase 35) | TLS 1.2+ | Payload additionally encrypted end-to-end per RFC 8291 (aes128gcm) with the browser's own key material, so the push vendor cannot read it. |
 | Vercel ↔ Upstash (Phase 9) | TLS 1.2+ | HTTPS API. |
 | Vercel ↔ KYC SaaS (Phase 8+, gated) | TLS 1.2+ | Required by every SA-registered provider. |
 

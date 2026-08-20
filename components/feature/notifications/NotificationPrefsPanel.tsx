@@ -3,9 +3,10 @@
 /**
  * Phase 7 (C.6)  Notification preferences panel.
  *
- * One row per catalog kind, two columns: In-app · Email. The Email
- * column is disabled with a "Phase 8" pill until Resend lands  the
- * column exists today so the schema doesn't churn when email ships.
+ * One row per catalog kind, three columns: In-app · Email · Push.
+ * A column whose channel is not live is disabled with a pill rather
+ * than hidden, so the shape of the panel does not change when a
+ * channel is switched on.
  *
  * The seeker / employer / admin account pages pick which kinds to
  * show (some are admin-only, e.g. `moderation.reported`). The panel
@@ -30,12 +31,18 @@ interface Props {
   /** Phase 8  whether the master email-channel flag is on. When off,
    *  the email column stays disabled with a "Phase 8" pill. */
   emailChannelEnabled?: boolean;
+  /** Phase 35  whether the master web-push flag is on. Note this is
+   *  the PLATFORM switch only: a user still has to grant permission on
+   *  each device (see PushOptIn), so a push toggle being on here means
+   *  "send it to my phone IF my phone is registered". */
+  pushChannelEnabled?: boolean;
 }
 
 export function NotificationPrefsPanel({
   initialPrefs,
   kinds,
   emailChannelEnabled = false,
+  pushChannelEnabled = false,
 }: Props) {
   return (
     <ul className="divide-y divide-[color:var(--color-hairline)] overflow-hidden rounded-[var(--radius-md)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)]">
@@ -45,6 +52,7 @@ export function NotificationPrefsPanel({
           kind={kind}
           initialEffective={effectivePref(initialPrefs, kind)}
           emailChannelEnabled={emailChannelEnabled}
+          pushChannelEnabled={pushChannelEnabled}
         />
       ))}
     </ul>
@@ -55,10 +63,12 @@ function PrefRow({
   kind,
   initialEffective,
   emailChannelEnabled,
+  pushChannelEnabled,
 }: {
   kind: NotificationKind;
   initialEffective: NotificationPref;
   emailChannelEnabled: boolean;
+  pushChannelEnabled: boolean;
 }) {
   const meta = NOTIFICATION_CATALOG[kind];
   const [pref, setPref] = useState<NotificationPref>(initialEffective);
@@ -91,8 +101,21 @@ function PrefRow({
     });
   }
 
+  function togglePush(next: boolean) {
+    setError(null);
+    const previous = pref;
+    setPref((p) => ({ ...p, push: next }));
+    startTransition(async () => {
+      const res = await updateNotificationPref({ kind, push: next });
+      if (!res.ok) {
+        setPref(previous);
+        setError(res.message);
+      }
+    });
+  }
+
   return (
-    <li className="grid gap-3 px-5 py-4 md:grid-cols-[1fr_auto_auto] md:items-center">
+    <li className="grid gap-3 px-5 py-4 md:grid-cols-[1fr_auto_auto_auto] md:items-center">
       <div>
         <div className="font-display text-base">{meta.label}</div>
         <p className="text-xs text-[color:var(--color-ink-soft)]">
@@ -119,6 +142,14 @@ function PrefRow({
         disabled={!emailChannelEnabled || pending}
         pill={emailChannelEnabled ? undefined : "Phase 8"}
         onChange={toggleEmail}
+      />
+
+      <Toggle
+        label="Phone"
+        on={pushChannelEnabled && pref.push}
+        disabled={!pushChannelEnabled || pending}
+        pill={pushChannelEnabled ? undefined : "Soon"}
+        onChange={togglePush}
       />
     </li>
   );

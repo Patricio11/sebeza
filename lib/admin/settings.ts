@@ -156,7 +156,14 @@ export type SettingKey =
   // Browser-side MediaPipe liveness earns the Verified badge; ships dark.
   | "feature_flag_selfie_verification"
   // 2026-08-19  Work & projects on the seeker profile (ships dark).
-  | "feature_flag_seeker_projects";
+  | "feature_flag_seeker_projects"
+  // Phase 35  Web Push (VAPID) to a person's own phone. Ships dark.
+  // Three gates must ALL be open for a push to leave the building: this
+  // flag, an admin-configured + enabled `push` integration row, and the
+  // recipient's own per-device browser permission. Flipping this off is
+  // a killswitch: it stops sends without touching anybody's
+  // subscriptions, so turning it back on does not ask everyone again.
+  | "feature_flag_web_push";
 
 const DEFAULTS: Record<SettingKey, unknown> = {
   freshness_band_days_fresh: 30,
@@ -201,6 +208,7 @@ const DEFAULTS: Record<SettingKey, unknown> = {
   feature_flag_vacancy_self_apply: false,
   feature_flag_selfie_verification: false,
   feature_flag_seeker_projects: false,
+  feature_flag_web_push: false,
 };
 
 /**

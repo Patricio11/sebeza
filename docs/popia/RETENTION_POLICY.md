@@ -19,6 +19,7 @@ Last updated 2026-06-01 (Phase 13 added 4 new rows + 1 special-handling block).
 | **Profile + child tables** (experiences, qualifications, profile_skills, academic_profiles) | Tables linked by `profile_id` | Same lifecycle as the user account | CASCADE on `app_user` DELETE |
 | **Placements** | `placements` | Same lifecycle as the user account | Manual DELETE inside `hard-delete-erased` cron (no CASCADE) |
 | **Consents** | `consents` | Same lifecycle as the user account | CASCADE on `app_user` DELETE |
+| **Push subscriptions** (Phase 35) | `push_subscriptions` | Until the user turns push off on that device, or the push service reports the device gone (404/410), or 5 consecutive delivery failures | CASCADE on `app_user` DELETE; pruned inside `pushToUser`; `unsubscribeFromPush` removes on request |
 | **Notifications** | `notifications` | Same lifecycle as the user account | CASCADE on `app_user` DELETE. Read state never affects retention. |
 | **Audit log** | `audit_log` | **5 years** from event date | Phase 9.x cron `/api/cron/audit-log-prune` (documented below) |
 | **Search events** | `search_events` | 90 days raw; aggregated indefinitely in `skill_gap_snapshots` | Phase 9.x cron prunes raw rows; snapshots retained as policy asset |

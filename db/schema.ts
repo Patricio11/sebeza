@@ -2055,6 +2055,33 @@ export const notifications = pgTable("notifications", {
 });
 
 /**
+ * Phase 35  Web Push subscriptions (VAPID).
+ *
+ * One row per browser-and-device a user opted in on. `endpoint` is the
+ * browser vendor's push URL and is the subscription's identity: it is
+ * unique, so re-subscribing the same installation updates in place
+ * rather than forking a duplicate that would deliver twice.
+ *
+ * POPIA: the endpoint identifies a device, so it is personal data. It
+ * is deleted on unsubscribe, on a 404/410 from the push service, and by
+ * the cascade when the account is erased. See RETENTION_POLICY.md.
+ */
+export const pushSubscriptions = pgTable("push_subscriptions", {
+  id: text("id").primaryKey(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => appUser.id, { onDelete: "cascade" }),
+  endpoint: text("endpoint").notNull(),
+  p256dh: text("p256dh").notNull(),
+  auth: text("auth").notNull(),
+  /** Coarse label ("Chrome on Android"), never the raw user-agent. */
+  deviceLabel: text("device_label"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  lastSuccessAt: timestamp("last_success_at"),
+  failureCount: integer("failure_count").notNull().default(0),
+});
+
+/**
  * Time-series snapshots of the skills-gap signal. Captured by
  * `captureSkillGapSnapshot()` (run nightly by the Phase 8 cron; in the
  * meantime triggerable manually from the Phase 7 admin surface).

@@ -19,11 +19,13 @@ import {
   Loader2,
   Power,
   PlugZap,
+  BellRing,
 } from "lucide-react";
 import {
   saveIntegration,
   setIntegrationEnabled,
   testStorageIntegration,
+  testPushIntegration,
 } from "@/lib/admin/integrations";
 import { sendAnnouncement } from "@/lib/admin/announcements";
 import type { IntegrationChannel, IntegrationSource } from "@/lib/integrations/resolve";
@@ -58,6 +60,12 @@ const CHANNEL_META: Record<
     icon: <Mail className="size-4" aria-hidden="true" />,
     blurb:
       "Transactional email. When configured + enabled here, these credentials replace the SMTP_* env vars.",
+  },
+  push: {
+    title: "Push (phone notifications)",
+    icon: <BellRing className="size-4" aria-hidden="true" />,
+    blurb:
+      "Web Push to a seeker's phone, using a VAPID key pair you generate once. Save, then register your own device on your account page, then Test, then Enable. Sends still require the feature_flag_web_push flag and the person's own per-device opt-in.",
   },
   storage: {
     title: "Storage (files)",
@@ -161,6 +169,10 @@ function ChannelCard({
       config.fromNumber = form.fromNumber ?? "";
       secrets.twilioSid = form.twilioSid ?? "";
       secrets.twilioToken = form.twilioToken ?? "";
+    } else if (view.channel === "push") {
+      config.subject = form.subject ?? "";
+      secrets.publicKey = form.publicKey ?? "";
+      secrets.privateKey = form.privateKey ?? "";
     } else if (view.channel === "storage") {
       config.provider = "s3";
       config.bucket = form.bucket ?? "";
@@ -229,6 +241,22 @@ function ChannelCard({
         >
           {view.configured ? "Reconfigure" : "Configure"}
         </button>
+        {view.channel === "push" && view.configured && (
+          <button
+            type="button"
+            disabled={pending}
+            onClick={() => {
+              setTestResult(null);
+              run(async () => {
+                setTestResult(await testPushIntegration());
+              });
+            }}
+            className="inline-flex h-8 items-center gap-1 rounded-[var(--radius-pill)] border border-[color:var(--color-hairline)] px-3 text-xs hover:border-[color:var(--color-ink)] disabled:opacity-50"
+          >
+            <BellRing className="size-3.5" aria-hidden="true" />
+            Send test notification
+          </button>
+        )}
         {view.channel === "storage" && view.configured && (
           <button
             type="button"
@@ -315,6 +343,16 @@ function ChannelCard({
               <input className={field} placeholder="Endpoint URL (blank for AWS; set for R2/MinIO…)" value={form.endpoint ?? ""} onChange={(e) => set("endpoint", e.target.value)} />
               <input className={field} placeholder="Access key ID" value={form.accessKeyId ?? ""} onChange={(e) => set("accessKeyId", e.target.value)} />
               <input className={field} type="password" placeholder="Secret access key" value={form.secretAccessKey ?? ""} onChange={(e) => set("secretAccessKey", e.target.value)} />
+            </>
+          )}
+          {view.channel === "push" && (
+            <>
+              <input className={field} placeholder="VAPID public key" value={form.publicKey ?? ""} onChange={(e) => set("publicKey", e.target.value)} />
+              <input className={field} type="password" placeholder="VAPID private key" value={form.privateKey ?? ""} onChange={(e) => set("privateKey", e.target.value)} />
+              <input className={field} placeholder="Contact subject (mailto:info@sebenzasa.com)" value={form.subject ?? ""} onChange={(e) => set("subject", e.target.value)} />
+              <p className="text-[0.65rem] text-[color:var(--color-ink-soft)]">
+                Generate the pair once with <code>npx web-push generate-vapid-keys</code>. Changing the public key invalidates every device already registered, so rotate only when you must.
+              </p>
             </>
           )}
           {error && (

@@ -5,7 +5,7 @@
  *
  *   - markRead({ id })        flip one row's read_at.
  *   - markAllRead()           flip every unread row for the user.
- *   - updateNotificationPref  toggle inApp / email for one kind.
+ *   - updateNotificationPref  toggle inApp / email / push for one kind.
  *   - getUnreadCountForBell   wrapper around the cached query so the
  *                              client-side bell can re-poll cheaply.
  *
@@ -93,6 +93,8 @@ const updatePrefSchema = z.object({
   kind: z.string(),
   inApp: z.boolean().optional(),
   email: z.boolean().optional(),
+  /** Phase 35  web push to the user's opted-in devices. */
+  push: z.boolean().optional(),
 });
 
 export async function updateNotificationPref(
@@ -118,6 +120,7 @@ export async function updateNotificationPref(
   const next: NotificationPref = {
     inApp: parsed.data.inApp ?? current.inApp,
     email: parsed.data.email ?? current.email,
+    push: parsed.data.push ?? current.push,
   };
 
   const merged: NotificationPrefMap = { ...existing, [kind]: next };

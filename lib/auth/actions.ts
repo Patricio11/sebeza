@@ -43,6 +43,10 @@ import { enforce, peek } from "@/lib/rate-limit";
 import { clientIpKey, emailKey } from "@/lib/rate-limit/client-ip";
 import { getSetting } from "@/lib/admin/settings";
 import {
+  defaultPrefFor,
+  type NotificationPrefMap,
+} from "@/lib/notifications/catalog";
+import {
   loadSelfApplyVacancyByToken,
   recordSelfApplication,
 } from "@/lib/vacancy/self-apply-internal";
@@ -117,6 +121,14 @@ const seekerSignUpSchema = z.object({
    *  means a bypassed-form payload without it is refused outright;
    *  acceptance evidence lands in the auth.signup audit meta. */
   termsAccepted: z.literal(true),
+  /** Phase 35  a COMMUNICATION PREFERENCE, not a POPIA consent and
+   *  not a contract term: "tell me on my phone when an employer
+   *  invites me". Optional, defaults to false, and cannot by itself
+   *  cause a single push: the browser still has to grant permission
+   *  on a device. What it does is record the intent, so the dashboard
+   *  can offer the one-tap finisher to people who asked for it and
+   *  stay quiet for people who did not. */
+  wantsPushNotifications: z.boolean().optional(),
   // Step 3  first profile fields
   profession: z.string().min(2),
   province: z.string().min(2),
@@ -706,12 +718,36 @@ export async function signUpSeeker(
       }
     }
 
+    // Phase 35  record the push PREFERENCE captured at sign-up. Only
+    // the two invite kinds, because those are the ones with a clock on
+    // them; everything else stays opt-in from the preferences panel.
+    // Writing `false` explicitly matters as much as writing `true`: it
+    // is how the dashboard knows not to keep offering.
+    if (typeof v.wantsPushNotifications === "boolean") {
+      try {
+        const wants = v.wantsPushNotifications;
+        const prefs: NotificationPrefMap = {};
+        for (const kind of ["vacancy.invite", "vacancy.invite.followup"] as const) {
+          prefs[kind] = { ...defaultPrefFor(kind), push: wants };
+        }
+        await db
+          .update(schema.appUser)
+          .set({ notificationPrefs: prefs, updatedAt: new Date() })
+          .where(eq(schema.appUser.id, user.id));
+      } catch (e) {
+        // Auxiliary: a preference write must never tank a sign-up.
+        // eslint-disable-next-line no-console
+        console.error("[signup] push preference write failed:", e);
+      }
+    }
+
     await logAccess({
       kind: "auth.signup",
       actor: user.id,
       meta: {
         role: "seeker",
         consents: v.grantedConsents,
+        pushPreference: v.wantsPushNotifications ?? null,
         // Contract-acceptance evidence (schema guarantees true; the
         // timestamp is what future disputes need).
         termsAcceptedAt: new Date().toISOString(),

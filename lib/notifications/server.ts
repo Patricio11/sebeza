@@ -34,6 +34,8 @@ import {
 import { getSetting } from "@/lib/admin/settings";
 import { sendEmail } from "@/lib/email/send";
 import { emailContentFor } from "@/lib/email/templates/notifications";
+import { buildPushPayload } from "@/lib/push/config";
+import { pushToUser } from "@/lib/push/send";
 
 /** Per-kind email rate limit. Phase 8 requirement: max 1 email per
  *  (user × kind) per 60 s so dossier-reload bursts can't spam. */
@@ -184,6 +186,36 @@ export async function createNotification(
             );
           }
         }
+      }
+    }
+    // ── Phase 35  push channel ───────────────────────────────────────
+    // Gated on the same three things as email, in the same order:
+    //   1. The `feature_flag_web_push` platform flag.
+    //   2. The user's per-kind push preference (default: off, except
+    //      the two invite kinds in PUSH_DEFAULT_ON).
+    //   3. VAPID actually being configured, which `pushToUser` checks.
+    //
+    // The payload is intentionally thin. `input.body` can carry an
+    // employer's name, a decline reason, or a salary band, and a push
+    // renders on a lock screen a stranger can read, so the push says
+    // only what the notification IS and where to tap. The catalog label
+    // is the right length and is already written for a human.
+    if (pref.push && (await getSetting<boolean>("feature_flag_web_push"))) {
+      try {
+        await pushToUser(
+          input.userId,
+          buildPushPayload({
+            title: "Sebenza",
+            body: meta.label,
+            path: input.link ?? "/dashboard",
+            // One tag per kind: a second invitation replaces the first
+            // in the tray rather than stacking five deep.
+            tag: input.kind,
+          }),
+        );
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.error("[notifications] push dispatch failed:", input.kind, e);
       }
     }
   } catch (e) {

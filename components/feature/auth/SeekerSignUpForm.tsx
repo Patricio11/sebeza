@@ -147,6 +147,11 @@ interface FormState {
   passwordConfirm: string;
   // Step 2
   consents: Record<ConsentPurpose, boolean>;
+  /** Phase 35  a communication PREFERENCE, deliberately not one of the
+   *  POPIA consents above and not part of the terms acceptance. It
+   *  cannot by itself deliver anything: the browser still has to grant
+   *  permission on the device. */
+  wantsPush: boolean;
   /** Terms-of-Service + Privacy Policy acceptance  a CONTRACT
    *  acceptance, deliberately distinct from the granular POPIA
    *  consents above (bundling those into one T&C tick would be
@@ -199,6 +204,7 @@ const initialState: FormState = {
   nationality: "ZA",
   password: "",
   passwordConfirm: "",
+  wantsPush: true,
   consents: Object.fromEntries(
     CONSENT_PURPOSES.map((p) => [p, REQUIRED_FOR_SEARCHABILITY.includes(p)]),
   ) as Record<ConsentPurpose, boolean>,
@@ -347,6 +353,7 @@ export function SeekerSignUpForm({
       dateOfBirth: state.dateOfBirth,
       nationality: state.nationality,
       consents: state.consents,
+      wantsPush: state.wantsPush,
       termsAccepted: state.termsAccepted,
       profession: state.profession,
       province: state.province,
@@ -549,6 +556,7 @@ export function SeekerSignUpForm({
           password: state.password,
           grantedConsents,
           termsAccepted: true,
+          wantsPushNotifications: state.wantsPush,
           profession: state.profession,
           province: state.province,
           status: state.status,
@@ -845,6 +853,36 @@ export function SeekerSignUpForm({
                   </span>
                   <span className="mt-0.5 block text-xs text-[color:var(--color-ink-soft)]">
                     {t("step2.terms.hint")}
+                  </span>
+                </>
+              }
+            />
+          </div>
+
+          {/* Phase 35  a communication PREFERENCE. Deliberately below
+              the POPIA consents and outside their box, because it is not
+              one of them: it authorises no processing, it only says
+              where you would like to be told. Ticking it delivers
+              nothing on its own; the phone still has to grant
+              permission, which we ask for later, from the dashboard,
+              with a real button. Asking the browser here would burn the
+              one permission prompt we get before anyone has seen why it
+              is worth having. */}
+          <div className="rounded-[var(--radius-sm)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-4">
+            <Checkbox
+              checked={state.wantsPush}
+              disabled={pending}
+              onChange={(v) => setState({ ...state, wantsPush: v })}
+              label={
+                <>
+                  <span className="font-medium text-[color:var(--color-ink)]">
+                    Tell me on my phone when an employer invites me
+                  </span>
+                  <span className="mt-0.5 block text-xs text-[color:var(--color-ink-soft)]">
+                    Invitations have a deadline, so hearing late can cost you
+                    the chance. We never put your details in the notification
+                    itself. You will be asked to allow this on your phone after
+                    you sign in, and you can change it any time.
                   </span>
                 </>
               }

@@ -43,6 +43,7 @@
     "recharts": "3.8.1",
     "sharp": "^0.35.3",
     "tailwind-merge": "2.5.4",
+    "web-push": "^3.6.7",
     "ws": "^8.21.0",
     "zod": "3.23.8"
   },
@@ -53,6 +54,7 @@
     "@types/nodemailer": "^8.0.0",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/web-push": "^3.6.4",
     "dotenv": "^16.4.5",
     "drizzle-kit": "^0.31.10",
     "eslint": "^9",

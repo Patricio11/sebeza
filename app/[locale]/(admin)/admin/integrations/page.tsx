@@ -40,7 +40,7 @@ export default async function AdminIntegrationsPage({
   const rows = await db.select().from(schema.integrationSettings);
   const byChannel = new Map(rows.map((r) => [r.channel, r]));
   const channels: ChannelView[] = [];
-  for (const channel of ["sms", "whatsapp", "email", "storage"] as const) {
+  for (const channel of ["sms", "whatsapp", "email", "storage", "push"] as const) {
     const row = byChannel.get(channel);
     channels.push({
       channel,

@@ -693,6 +693,40 @@ JavaScript `eval()`, so the XSS backstop is unchanged. `camera=(self)` was added
 to Permissions-Policy for the same feature; microphone and geolocation remain
 disabled, and embedded third-party content still cannot reach the camera.
 
+**R-28.7  Web Push subscriptions (new processing, new personal data).** Phase 35
+registers a browser push endpoint per device a user opts in on. The endpoint
+identifies an installation, so it is personal information under s.1, and it is
+processed to deliver notifications the person asked for (s.11(1)(a), consent,
+expressed twice: a preference at sign-up and a per-device browser permission
+that we cannot grant on their behalf).
+
+Mitigations, all implemented:
+
+- **The payload carries no personal information.** Title, a catalog label, and a
+  relative path. No employer name, no salary, no decline reason, no candidate
+  name. This matters more than usual because the surface is a lock screen that
+  a person other than the data subject may be looking at.
+- **Transport is end-to-end encrypted** to the browser under RFC 8291, so the
+  push vendor (Google, Mozilla, Apple) relays ciphertext it cannot read.
+- **We never store the raw user-agent**, only a coarse label such as "Chrome on
+  Android", so the subscription row is not a fingerprinting surface.
+- **Deletion is automatic and multi-path**: on user request, on a 404/410 from
+  the push service, after five consecutive failures, and by FK cascade on
+  erasure.
+- **Three independent gates** must be open to send at all (platform flag, admin
+  configuration, device permission), and the platform flag is a killswitch that
+  stops delivery without destroying anyone's subscription.
+- **The default set is two kinds**, both invitation-related and both carrying a
+  deadline. Everything else is opt-in. The expiry notification is deliberately
+  excluded: it is cron-written at 03:45, it is bad news, and nothing can be done
+  about it.
+
+Residual risk: LOW. A person who loses a phone without unsubscribing leaves a
+live endpoint pointing at a device they no longer hold. It carries no personal
+information in the payload, and signing out of the account does not by itself
+revoke it. Sign-out-triggered revocation is an open improvement, tracked
+alongside the Phase 35 notes.
+
 ## 4. Sign-off
 
 To be signed by the Information Officer once designated. Until then,

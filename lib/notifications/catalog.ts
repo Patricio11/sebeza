@@ -28,6 +28,15 @@ export interface NotificationKindMeta {
   defaultInApp: boolean;
   /** Default for `notification_prefs[kind].email` when unset. */
   defaultEmail: boolean;
+  /**
+   * Phase 35  default for `notification_prefs[kind].push` when unset.
+   *
+   * Optional, and omitted means OFF. A push interrupts someone's day on
+   * a device they carry, so the default is silence and the exceptions
+   * are listed explicitly in `PUSH_DEFAULT_ON` below. Users can still
+   * switch push on for any kind from the preferences panel.
+   */
+  defaultPush?: boolean;
   /** Who receives this kind. */
   audience: NotificationAudience;
   /** Label on the preferences panel. */
@@ -513,15 +522,40 @@ export const NOTIFICATION_CATALOG = {
 
 export type NotificationKind = keyof typeof NOTIFICATION_CATALOG;
 
+/**
+ * Phase 35  the only kinds that push by default.
+ *
+ * The test for membership is narrow: would a person want their phone to
+ * buzz for this, at the moment it happens, because there is something
+ * they can do about it and a clock running? An invitation passes (it
+ * expires). Closure and receipts do not, however welcome they are, so
+ * they stay opt-in.
+ *
+ * Note what is deliberately NOT here: `vacancy.invite.expired`. It is
+ * written by a 03:45 cron, it is bad news, and there is nothing left to
+ * do about it. Waking someone at four in the morning to tell them they
+ * missed something is not a notification, it is a poke in the ribs.
+ */
+export const PUSH_DEFAULT_ON = new Set<string>([
+  "vacancy.invite",
+  "vacancy.invite.followup",
+]);
+
 export interface NotificationPref {
   inApp: boolean;
   email: boolean;
+  /** Phase 35  web push to the user's opted-in devices. */
+  push: boolean;
 }
 export type NotificationPrefMap = Partial<Record<NotificationKind, NotificationPref>>;
 
 export function defaultPrefFor(kind: NotificationKind): NotificationPref {
-  const meta = NOTIFICATION_CATALOG[kind];
-  return { inApp: meta.defaultInApp, email: meta.defaultEmail };
+  const meta = NOTIFICATION_CATALOG[kind] as NotificationKindMeta;
+  return {
+    inApp: meta.defaultInApp,
+    email: meta.defaultEmail,
+    push: meta.defaultPush ?? PUSH_DEFAULT_ON.has(kind),
+  };
 }
 
 /**
@@ -538,5 +572,6 @@ export function effectivePref(
   return {
     inApp: stored?.inApp ?? dflt.inApp,
     email: stored?.email ?? dflt.email,
+    push: stored?.push ?? dflt.push,
   };
 }
