@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/Button";
+import { Link } from "@/i18n/navigation";
 import { updateSetting } from "@/lib/admin/settings-actions";
 import type { SettingKey } from "@/lib/admin/settings";
 
@@ -12,8 +13,10 @@ interface Props {
 interface SettingRow {
   key: SettingKey;
   label: string;
-  type: "number" | "boolean";
+  type: "number" | "boolean" | "managed";
   hint?: string;
+  /** For "managed" rows: where the real, ack-gated switch lives. */
+  href?: string;
 }
 
 const ROWS: SettingRow[] = [
@@ -77,6 +80,102 @@ const ROWS: SettingRow[] = [
     label:
       "Gov per-employer mix lookup (9.7.6, ships dormant; activate when DEL §8 partnership lands)",
     type: "boolean",
+  },
+  // ── Launch switches ──────────────────────────────────────────────
+  // Features that shipped dark. Until 2026-08-21 these flags existed in
+  // the registry but had NO toggle anywhere in the product, so the only
+  // way to launch a finished feature was a manual database write. Every
+  // dark-shipped flag must land a row here in the same commit.
+  {
+    key: "feature_flag_selfie_verification",
+    label: "Selfie verification (the Verified badge)",
+    type: "boolean",
+    hint:
+      "Seekers earn the profile badge with an in-browser live selfie. " +
+      "All processing stays on their device; nothing biometric reaches the server.",
+  },
+  {
+    key: "feature_flag_vacancy_self_apply",
+    label: "Vacancy Self Apply (public apply links)",
+    type: "boolean",
+    hint:
+      "Employers can enable a public apply link per vacancy. Second gate: " +
+      "each vacancy's own toggle must also be on.",
+  },
+  {
+    key: "feature_flag_seeker_projects",
+    label: "Work & projects on seeker profiles",
+    type: "boolean",
+    hint:
+      "Project links + images, self-declared. Never counts toward " +
+      "completeness or ranking.",
+  },
+  {
+    key: "feature_flag_web_push",
+    label: "Web push notifications (phones)",
+    type: "boolean",
+    hint:
+      "Killswitch for push delivery. Needs the Push integration configured, " +
+      "tested and enabled on Integrations first. Turning this off stops sends " +
+      "without touching anyone's subscription.",
+  },
+  {
+    key: "feature_flag_sms_channel_enabled",
+    label: "SMS notifications channel",
+    type: "boolean",
+    hint:
+      "Critical notifications by SMS. Needs the SMS integration configured " +
+      "on Integrations; sends also require per-user consent + verified phone.",
+  },
+  {
+    key: "feature_flag_whatsapp_channel_enabled",
+    label: "WhatsApp notifications channel",
+    type: "boolean",
+    hint: "Same gates as SMS, over WhatsApp Business.",
+  },
+  {
+    key: "feature_flag_sms_quiet_hours_start",
+    label: "SMS quiet hours start (SAST)",
+    type: "number",
+    hint: "0 - 23 (default 21). No SMS/WhatsApp sends after this hour.",
+  },
+  {
+    key: "feature_flag_sms_quiet_hours_end",
+    label: "SMS quiet hours end (SAST)",
+    type: "number",
+    hint: "0 - 23 (default 7). Sends resume at this hour.",
+  },
+  {
+    key: "feature_flag_llm_curriculum_enabled",
+    label: "AI curriculum drafts",
+    type: "boolean",
+    hint:
+      "Lets the configured LLM draft learning-path suggestions for admin " +
+      "approval. Needs an active provider on the LLM page.",
+  },
+  {
+    key: "testimonial_campaign_active",
+    label: "Testimonial campaign",
+    type: "boolean",
+    hint: "Shows the testimonial prompt card to eligible seekers.",
+  },
+  {
+    key: "feature_flag_seeker_ai_coach",
+    label: "AI Coach (seekers)",
+    type: "managed",
+    href: "/admin/llm",
+    hint:
+      "Ack-gated: the safety review acknowledgement lives with the switch " +
+      "on the LLM page, so it cannot be flipped from here.",
+  },
+  {
+    key: "feature_flag_id_verification_enabled",
+    label: "ID / passport collection",
+    type: "managed",
+    href: "/admin/verifications",
+    hint:
+      "Ack-gated on the verifications page. Removal of an already-saved ID " +
+      "is never gated, only collection is.",
   },
   {
     key: "feature_flag_verification_badges_visible",
@@ -234,7 +333,7 @@ export function SettingsForm({ values }: Props) {
           Feature flags
         </h2>
         <ul className="space-y-3">
-          {ROWS.filter((r) => r.type === "boolean").map((row) => (
+          {ROWS.filter((r) => r.type !== "number").map((row) => (
             <SettingRow key={row.key} row={row} value={values[row.key]} />
           ))}
         </ul>
@@ -245,6 +344,32 @@ export function SettingsForm({ values }: Props) {
 
 function SettingRow({ row, value }: { row: SettingRow; value: unknown }) {
   const [pending, startTransition] = useTransition();
+  // Ack-gated switches render as a status + a link to the real switch.
+  // Duplicating the toggle here would bypass the acknowledgement flow,
+  // and a bypassable safety ack is not an ack.
+  if (row.type === "managed") {
+    return (
+      <li className="flex flex-wrap items-center justify-between gap-3 rounded-[var(--radius-md)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] px-4 py-3">
+        <div className="min-w-0">
+          <div className="text-sm text-[color:var(--color-ink)]">{row.label}</div>
+          {row.hint && (
+            <p className="mt-0.5 text-xs text-[color:var(--color-ink-soft)]">{row.hint}</p>
+          )}
+        </div>
+        <div className="flex items-center gap-3">
+          <span className="text-[0.65rem] uppercase tracking-[0.18em] text-[color:var(--color-ink-soft)]">
+            {value ? "On" : "Off"}
+          </span>
+          <Link
+            href={(row.href ?? "/admin") as never}
+            className="rounded-[var(--radius-pill)] border border-[color:var(--color-hairline)] px-3 py-1 text-xs hover:border-[color:var(--color-ink)]"
+          >
+            Manage
+          </Link>
+        </div>
+      </li>
+    );
+  }
   const [draft, setDraft] = useState<string>(String(value ?? ""));
   const [status, setStatus] = useState<"idle" | "saved" | "error">("idle");
   const [error, setError] = useState<string | null>(null);
