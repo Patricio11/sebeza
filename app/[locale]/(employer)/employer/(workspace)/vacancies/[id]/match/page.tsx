@@ -21,7 +21,7 @@
  * surface; 9.8.2 is just the match view.
  */
 
-import { setRequestLocale } from "next-intl/server";
+import { setRequestLocale, getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { Link } from "@/i18n/navigation";
 import { inArray } from "drizzle-orm";
@@ -84,6 +84,7 @@ export default async function VacancyMatchPage({
     listInvitationsForVacancy(vacancy.id),
     getPlacementsForVacancy(vacancy.id),
   ]);
+  const tm = await getTranslations("employerVacancies.match");
   const fill = fillState({
     positions: vacancy.positions,
     acceptedCount: invitationsForFill.filter(
@@ -150,7 +151,7 @@ export default async function VacancyMatchPage({
   return (
     <DashboardMasthead
       role="employer"
-      pageEyebrow="Find matches"
+      pageEyebrow={tm("eyebrow")}
       pageTitle={vacancy.title}
       pageSubtitle={`${professionLabel}${vacancy.seniority ? ` · ${vacancy.seniority}` : ""} · ${provinceLabel}`}
     >
@@ -163,7 +164,7 @@ export default async function VacancyMatchPage({
           className="inline-flex items-center gap-1 text-xs uppercase tracking-[0.18em] text-[color:var(--color-ink-soft)] hover:text-[color:var(--color-ink)]"
         >
           <ChevronLeft className="size-3" aria-hidden="true" />
-          Back to vacancy
+          {tm("back")}
         </Link>
         <span aria-hidden="true" className="text-[color:var(--color-ink-soft)]">·</span>
         <VacancyStatusChip status={vacancy.status} />
@@ -172,8 +173,8 @@ export default async function VacancyMatchPage({
           <MapPin className="size-3" aria-hidden="true" />
           {provinceLabel}
         </span>
-        <HelpLink slug="finding-matches" label="How matches work" />
-        <HelpLink slug="bulk-invite" label="Bulk invite guide" />
+        <HelpLink slug="finding-matches" label={tm("helpMatches")} />
+        <HelpLink slug="bulk-invite" label={tm("helpBulk")} />
       </div>
 
       {/* Honest-supply line  sticky on top so it stays visible while
@@ -194,8 +195,8 @@ export default async function VacancyMatchPage({
               className="font-display text-lg leading-none text-[color:var(--color-ink)]"
             >
               {counts.total === 0
-                ? "No candidates match this vacancy yet"
-                : `${nfmt.format(counts.saCitizen)} SA ${counts.saCitizen === 1 ? "citizen" : "citizens"} · ${nfmt.format(counts.total)} ${counts.total === 1 ? "candidate" : "candidates"} match this vacancy`}
+                ? tm("supplyNone")
+                : tm("supply", { citizens: counts.saCitizen, total: counts.total })}
             </h2>
           </div>
           <Link
@@ -203,14 +204,12 @@ export default async function VacancyMatchPage({
             className="inline-flex h-9 items-center gap-1.5 rounded-[var(--radius-pill)] border border-[color:var(--color-ink)] px-3 text-xs font-medium hover:bg-[color:var(--color-ink)] hover:text-[color:var(--color-paper)]"
           >
             <Search className="size-3.5" aria-hidden="true" />
-            Refine in search
+            {tm("refine")}
           </Link>
         </div>
         {counts.total > 0 && counts.foreignNational > 0 && (
           <p className="mt-1 text-xs text-[color:var(--color-ink-soft)]">
-            Of those, {nfmt.format(counts.foreignNational)} are
-            foreign nationals, highlighted SA candidates rank first via
-            the platform's citizen-highlight boost.
+            {tm("foreignNote", { count: counts.foreignNational })}
           </p>
         )}
       </section>
@@ -332,12 +331,6 @@ export default async function VacancyMatchPage({
           )}
         </>
       )}
-
-      {/* Phase 9.8.5 nudge  what's coming next on this same flow. */}
-      <p className="mt-8 text-xs italic text-[color:var(--color-ink-soft)]">
-        Phase 9.8.4 ships the bulk-invite. The seeker accept /
-        decline-with-reason / reconsider lifecycle lands in 9.8.5.
-      </p>
 
       {/* Hidden session ref to silence the unused-var lint when this
           page later wires per-action audit-log calls. */}

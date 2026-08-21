@@ -27,6 +27,7 @@
  */
 
 import { useMemo, useState, useTransition, type ReactNode } from "react";
+import { useTranslations } from "next-intl";
 import { CustomSelect } from "@/components/ui/CustomSelect";
 import { useRouter } from "@/i18n/navigation";
 
@@ -49,28 +50,27 @@ import type { WorkAvailabilityKind } from "@/lib/mock/types";
  */
 const WORK_AVAILABILITY_CHIPS: ReadonlyArray<{
   value: WorkAvailabilityKind;
-  label: string;
 }> = [
-  { value: "full_time", label: "Full-time" },
-  { value: "part_time", label: "Part-time" },
-  { value: "contract", label: "Contract" },
-  { value: "casual", label: "Casual" },
-  { value: "remote", label: "Remote" },
-  { value: "hybrid", label: "Hybrid" },
+  { value: "full_time" },
+  { value: "part_time" },
+  { value: "contract" },
+  { value: "casual" },
+  { value: "remote" },
+  { value: "hybrid" },
 ];
 
-const YEARS_QUICKPICKS: ReadonlyArray<{ value: number; label: string }> = [
-  { value: 5, label: "5+ yrs" },
-  { value: 8, label: "8+ yrs" },
+const YEARS_QUICKPICKS: ReadonlyArray<{ value: number }> = [
+  { value: 5 },
+  { value: 8 },
 ];
 
 type SortKey = "best" | "freshest" | "complete" | "citizens";
 
-const SORT_OPTIONS: ReadonlyArray<{ value: SortKey; label: string }> = [
-  { value: "best", label: "Best match" },
-  { value: "freshest", label: "Most recent status" },
-  { value: "complete", label: "Most complete profile" },
-  { value: "citizens", label: "SA citizens first" },
+const SORT_OPTIONS: ReadonlyArray<{ value: SortKey }> = [
+  { value: "best" },
+  { value: "freshest" },
+  { value: "complete" },
+  { value: "citizens" },
 ];
 
 type ViewMode = "all" | "shortlist";
@@ -153,6 +153,7 @@ export function BulkInviteIsland({
   addToShortlistAction,
   removeFromShortlistAction,
 }: BulkInviteIslandProps) {
+  const t = useTranslations("employerVacancies.match.invite");
   const router = useRouter();
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [modalOpen, setModalOpen] = useState(false);
@@ -386,14 +387,14 @@ export function BulkInviteIsland({
           <div className="flex-1 text-sm">
             <p className="font-display text-base text-[color:var(--color-ink)]">
               {banner.invited === 0
-                ? `No invites sent  ${banner.skipped} not eligible to receive an invite right now.`
-                : `${banner.invited} invite${banner.invited === 1 ? "" : "s"} sent${banner.skipped > 0 ? ` · ${banner.skipped} not eligible to receive an invite right now` : ""}.`}
+                ? t("bannerNone", { skipped: banner.skipped })
+                : banner.skipped > 0
+                  ? t("bannerSentSkipped", { invited: banner.invited, skipped: banner.skipped })
+                  : t("bannerSent", { invited: banner.invited })}
             </p>
             {banner.skipped > 0 && (
               <p className="mt-1 text-xs text-[color:var(--color-ink-soft)]">
-                We don&rsquo;t show per-person reasons here, it would leak
-                consent state. The full picture lives in the org&rsquo;s audit
-                log for admin oversight.
+                {t("bannerSkippedNote")}
               </p>
             )}
           </div>
@@ -401,7 +402,7 @@ export function BulkInviteIsland({
             type="button"
             onClick={() => setBanner(null)}
             className="rounded-[var(--radius-pill)] p-1 text-[color:var(--color-ink-soft)] hover:text-[color:var(--color-ink)]"
-            aria-label="Dismiss"
+            aria-label={t("dismiss")}
           >
             <X className="size-4" aria-hidden="true" />
           </button>
@@ -417,7 +418,7 @@ export function BulkInviteIsland({
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div
             role="tablist"
-            aria-label="Candidate view"
+            aria-label={t("viewLabel")}
             className="inline-flex rounded-[var(--radius-pill)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-0.5 text-xs"
           >
             <button
@@ -432,7 +433,7 @@ export function BulkInviteIsland({
                   : "text-[color:var(--color-ink-soft)] hover:text-[color:var(--color-ink)]")
               }
             >
-              All matches ({items.length})
+              {t("viewAll", { count: items.length })}
             </button>
             <button
               type="button"
@@ -446,17 +447,17 @@ export function BulkInviteIsland({
                   : "text-[color:var(--color-ink-soft)] hover:text-[color:var(--color-ink)]")
               }
             >
-              Shortlist ({shortlistCount})
+              {t("viewShortlist", { count: shortlistCount })}
             </button>
           </div>
           <label className="inline-flex items-center gap-2 text-xs text-[color:var(--color-ink-soft)]">
-            Sort
+            {t("sort")}
             <CustomSelect
               variant="compact"
-              ariaLabel="Sort candidates"
+              ariaLabel={t("sortLabel")}
               value={sortKey}
               onChange={(v) => setSortKey(v as SortKey)}
-              options={SORT_OPTIONS.map((opt) => ({ value: opt.value, label: opt.label }))}
+              options={SORT_OPTIONS.map((opt) => ({ value: opt.value, label: t(`sort${opt.value[0]!.toUpperCase()}${opt.value.slice(1)}`) }))}
             />
           </label>
         </div>
@@ -476,7 +477,7 @@ export function BulkInviteIsland({
                 : "border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] text-[color:var(--color-ink-soft)] hover:border-[color:var(--color-ink)] hover:text-[color:var(--color-ink)]")
             }
           >
-            All
+            {t("chipAll")}
           </button>
           {WORK_AVAILABILITY_CHIPS.map((chip) => {
             const on = availabilityFilter.has(chip.value);
@@ -493,7 +494,7 @@ export function BulkInviteIsland({
                     : "border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] text-[color:var(--color-ink)] hover:border-[color:var(--color-ink)]")
                 }
               >
-                {chip.label}
+                {t(`chip${chip.value.split("_").map((w) => w[0]!.toUpperCase() + w.slice(1)).join("")}`)}
               </button>
             );
           })}
@@ -516,7 +517,7 @@ export function BulkInviteIsland({
                     : "border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] text-[color:var(--color-ink)] hover:border-[color:var(--color-ink)]")
                 }
               >
-                {pick.label}
+                {t("yearsChip", { years: pick.value })}
               </button>
             );
           })}
@@ -530,8 +531,8 @@ export function BulkInviteIsland({
           <div className="mb-3 flex flex-wrap items-center justify-between gap-2 text-xs text-[color:var(--color-ink-soft)]">
             <span>
               {selectedCount === 0
-                ? `${eligibleDisplayed} candidate${eligibleDisplayed === 1 ? "" : "s"} eligible to invite`
-                : `${selectedCount} selected of ${eligibleDisplayed} eligible`}
+                ? t("eligible", { count: eligibleDisplayed })
+                : t("selectedOf", { selected: selectedCount, eligible: eligibleDisplayed })}
               {/* G9  a soft warning when the selection runs well past
                   the seats left. Never a block: inviting more people
                   than seats is often deliberate, since some will decline
@@ -541,8 +542,7 @@ export function BulkInviteIsland({
                 fill.remaining > 0 &&
                 selectedCount > fill.remaining * 3 && (
                   <span className="ml-1 text-[color:var(--color-ink)]">
-                    · {selectedCount} selected for {fill.remaining} seat
-                    {fill.remaining === 1 ? "" : "s"}
+                    {t("overSelect", { selected: selectedCount, remaining: fill.remaining })}
                   </span>
                 )}
               {/* Honest seat context, and it counts DOWN: a label that
@@ -552,10 +552,10 @@ export function BulkInviteIsland({
                 <span className="ml-1">
                   ·{" "}
                   {fill.isShort
-                    ? `${fill.remaining} still to fill`
+                    ? t("seatsShort", { remaining: fill.remaining ?? 0 })
                     : fill.isOver
-                      ? `${fill.positions} position${fill.positions === 1 ? "" : "s"}, ${fill.filled} already`
-                      : "seats already covered"}
+                      ? t("seatsOver", { positions: fill.positions, filled: fill.filled })
+                      : t("seatsCovered")}
                 </span>
               )}
             </span>
@@ -574,7 +574,7 @@ export function BulkInviteIsland({
                     onClick={() => selectTopN(fill.remaining as number)}
                     className="rounded-[var(--radius-pill)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] px-2.5 py-1 hover:border-[color:var(--color-ink)] hover:text-[color:var(--color-ink)]"
                   >
-                    Select top {fill.remaining}
+                    {t("selectTop", { count: fill.remaining })}
                   </button>
                 )}
               <button
@@ -582,7 +582,7 @@ export function BulkInviteIsland({
                 onClick={selectAll}
                 className="rounded-[var(--radius-pill)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] px-2.5 py-1 hover:border-[color:var(--color-ink)] hover:text-[color:var(--color-ink)]"
               >
-                Select all
+                {t("selectAll")}
               </button>
               {selectedCount > 0 && (
                 <button
@@ -590,7 +590,7 @@ export function BulkInviteIsland({
                   onClick={clearSelection}
                   className="rounded-[var(--radius-pill)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] px-2.5 py-1 hover:border-[color:var(--color-ink)] hover:text-[color:var(--color-ink)]"
                 >
-                  Clear
+                  {t("clear")}
                 </button>
               )}
             </div>
@@ -603,18 +603,17 @@ export function BulkInviteIsland({
         <div className="mb-6 rounded-[var(--radius-sm)] border border-dashed border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] px-4 py-6 text-center text-sm text-[color:var(--color-ink-soft)]">
           {viewMode === "shortlist" ? (
             <>
-              <strong>No one on the shortlist yet.</strong> Tap the
-              bookmark icon beside any candidate to save them here.
+              <strong>{t("emptyShortlist")}</strong> {t("emptyShortlistSub")}
             </>
           ) : (
             <>
-              <strong>No candidates match these filters.</strong>{" "}
+              <strong>{t("emptyFiltered")}</strong>{" "}
               <button
                 type="button"
                 onClick={clearAllFilters}
                 className="underline underline-offset-2 hover:text-[color:var(--color-ink)]"
               >
-                Clear filters
+                {t("clearFilters")}
               </button>
             </>
           )}
@@ -633,7 +632,7 @@ export function BulkInviteIsland({
                   {it.alreadyInvited ? (
                     <span
                       className="rounded-[var(--radius-pill)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface-sunk)] px-2 py-0.5 text-[0.6rem] uppercase tracking-[0.18em] text-[color:var(--color-ink-soft)]"
-                      title="Already on the invitation list for this vacancy"
+                      title={t("alreadyInvited")}
                     >
                       Invited
                     </span>
@@ -673,7 +672,7 @@ export function BulkInviteIsland({
                         : `Save ${it.displayName} to shortlist`
                     }
                     title={
-                      shortlisted ? "Remove from shortlist" : "Save to shortlist"
+                      shortlisted ? t("shortlistRemove") : t("shortlistAdd")
                     }
                     className={
                       "flex size-11 items-center justify-center rounded-[var(--radius-sm)] transition-colors disabled:opacity-50 " +
@@ -733,7 +732,7 @@ export function BulkInviteIsland({
               disabled={pending}
             >
               <Send className="size-4" aria-hidden="true" />
-              Invite to opportunity
+              {t("inviteCta")}
             </Button>
           </div>
         </div>
@@ -780,6 +779,7 @@ function BulkInviteModal({
   onCancel,
   onConfirm,
 }: ModalProps) {
+  const t = useTranslations("employerVacancies.match.invite");
   return (
     <div
       role="dialog"
@@ -799,13 +799,13 @@ function BulkInviteModal({
             id="bulk-invite-h"
             className="font-display text-xl text-[color:var(--color-ink)]"
           >
-            Invite {selectedCount} {selectedCount === 1 ? "person" : "people"} to this opportunity?
+            {t("modalTitle", { count: selectedCount })}
           </h3>
           <button
             type="button"
             onClick={onCancel}
             disabled={pending}
-            aria-label="Close"
+            aria-label={t("close")}
             className="rounded-[var(--radius-pill)] p-1 text-[color:var(--color-ink-soft)] hover:text-[color:var(--color-ink)]"
           >
             <X className="size-5" aria-hidden="true" />
@@ -813,15 +813,13 @@ function BulkInviteModal({
         </div>
 
         <p className="text-sm text-[color:var(--color-ink-soft)]">
-          Each person will get a notification: <em>&ldquo;{vacancyTitle}.&rdquo;</em>
-          They can accept, decline, or decline with a reason, declining is
-          free and never affects their visibility in search.
+          {t("modalLead", { vacancyTitle })}
         </p>
 
         <ul className="mt-4 space-y-1.5 text-xs text-[color:var(--color-ink-soft)]">
-          <li> Anyone without vacancy-invite consent is skipped silently, per-person reasons stay in the audit log.</li>
-          <li> Already-invited candidates are skipped (no duplicates).</li>
-          <li> Audit-logged as <code>vacancy.invite</code> for each invite sent.</li>
+          <li>{t("rule1")}</li>
+          <li>{t("rule2")}</li>
+          <li>{t("rule3")}</li>
         </ul>
 
         {/* Phase 9.19 D6  optional personal note. Same 200-char cap +
@@ -835,9 +833,9 @@ function BulkInviteModal({
             className="flex items-baseline justify-between text-[0.72rem] uppercase tracking-[0.22em] text-[color:var(--color-ink)]"
           >
             <span>
-              Add a note
+              {t("noteLabel")}
               <span className="ml-1 text-[color:var(--color-ink-soft)]">
-                (optional)
+                {t("noteOptional")}
               </span>
             </span>
             <span
@@ -859,13 +857,11 @@ function BulkInviteModal({
             disabled={pending}
             maxLength={PERSONAL_NOTE_MAX}
             rows={3}
-            placeholder="Why you're reaching out, what about their profile caught your eye."
+            placeholder={t("notePlaceholder")}
             className="mt-1.5 w-full rounded-[var(--radius-sm)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-3 text-sm text-[color:var(--color-ink)] outline-none transition-colors placeholder:text-[color:var(--color-ink-soft)] focus:border-[color:var(--color-ink)]"
           />
           <p className="mt-1.5 text-xs text-[color:var(--color-ink-soft)]">
-            The same note attaches to every invite in this batch. Logged
-            as PII alongside the audit row, if you'd rather not write
-            anything, leave it blank.
+            {t("noteHelp")}
           </p>
         </div>
 
@@ -886,7 +882,7 @@ function BulkInviteModal({
             onClick={onCancel}
             disabled={pending}
           >
-            Cancel
+            {t("cancel")}
           </Button>
           <Button
             type="button"
@@ -895,7 +891,7 @@ function BulkInviteModal({
             onClick={onConfirm}
             disabled={pending}
           >
-            {pending ? "Sending" : `Send ${selectedCount} invite${selectedCount === 1 ? "" : "s"}`}
+            {pending ? t("sending") : t("send", { count: selectedCount })}
           </Button>
         </div>
       </div>
