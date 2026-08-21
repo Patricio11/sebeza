@@ -991,5 +991,69 @@
     "email": "I-imeyili",
     "phone": "Ifoni",
     "soon": "Maduze"
+  },
+  "employerVacancies": {
+    "fill": {
+      "noneYet": "{positions, plural, one {isikhundla esingu-1} other {izikhundla ezingu-#}}, akukagcwaliswa lutho",
+      "accepted": "{positions, plural, one {isikhundla esingu-1} other {izikhundla ezingu-#}}, abangu-{filled} bamukele",
+      "acceptedShort": "{positions, plural, one {isikhundla esingu-1} other {izikhundla ezingu-#}}, abangu-{filled} bamukele, kusele abangu-{remaining}",
+      "hiredShort": "{positions, plural, one {isikhundla esingu-1} other {izikhundla ezingu-#}}, abangu-{filled} baqashiwe, kusele abangu-{remaining}",
+      "allFilled": "{positions, plural, one {isikhundla esingu-1} other {izikhundla ezingu-#}}, konke kugcwalisiwe",
+      "overHired": "{positions, plural, one {isikhundla esingu-1} other {izikhundla ezingu-#}}, abangu-{filled} baqashiwe"
+    },
+    "strip": {
+      "heading": "Imiphumela yezimemo",
+      "acceptRate": "{rate}% ukwamukelwa ezimpendulweni ezivaliwe",
+      "noResponses": "Azikho izimpendulo okwamanje",
+      "sent": "Kuthunyelwe",
+      "accepted": "Kwamukelwe",
+      "declined": "Kwenqatshiwe",
+      "pending": "Kusalindile",
+      "noReply": "Ayikho impendulo",
+      "withdrawn": "Uyihoxisile",
+      "stalled": "{remaining, plural, one {1 esasele ukugcwaliswa} other {ezingu-# ezisele ukugcwaliswa}} futhi akusekho muntu ozophendula.",
+      "stalledCta": "Thola abafanelekayo ngenhla ukuze umeme abanye abantu.",
+      "nudgeNote": "Izikhumbuzo zokulandelela zivuliwe kulesi sikhala. Izimemo ezisalindile ezingaphezu kwezinsuku eziyi-7 zizothola isikhumbuzo esisodwa esimnene."
+    },
+    "pipeline": {
+      "heading": "Uhlu · {count, plural, one {isimemo esingu-1} other {izimemo ezingu-#}}",
+      "sub": "Wonke umuntu omumemile kulesi sikhala, nokuthi ngamunye wabo uphendule kanjani. Ukwenqaba kumahhala kumfuni-msebenzi futhi akusoze kwathinta indlela avela ngayo ekusesheni.",
+      "invited": "Umenywe",
+      "applied": "Ufake isicelo",
+      "respondsBy": "phendula ngo-{date}",
+      "responded": "uphendule ngo-{date}",
+      "expired": "yaphelelwa yisikhathi ngo-{date}",
+      "withdrawnAt": "yahoxiswa ngo-{date}",
+      "notice": "isaziso: {months, plural, one {inyanga engu-1} other {izinyanga ezingu-#}}",
+      "reason": "Isizathu",
+      "noteWarning": "kubhalwe umfuni-msebenzi · phatha njenge-PII",
+      "selfApplied": "Uzifakele isicelo",
+      "withdraw": "Hoxisa",
+      "inviteSomeoneElse": "Mema omunye umuntu",
+      "state": {
+        "invited": "Umenywe",
+        "accepted": "Kwamukelwe",
+        "accepted_with_notice": "Kwamukelwe (nesaziso)",
+        "declined": "Kwenqatshiwe",
+        "reconsidering": "Uyacabanga futhi",
+        "withdrawn": "Kuhoxisiwe",
+        "expired": "Kuphelelwe yisikhathi"
+      },
+      "withdrawing": "Iyahoxiswa"
+    },
+    "empty": {
+      "heading": "Akukho muntu osememiwe okwamanje",
+      "withTarget": "{fillLine}. Thola abafanelekayo ngenhla ukuze uqale ukumema abantu.",
+      "noTarget": "Thola abafanelekayo ngenhla ukuze ubone abafakizicelo abahleliwe ngalesi sikhala, bese umema labo obafunayo."
+    },
+    "declineReason": {
+      "already_employed": "Usevele eqashiwe",
+      "salary_not_competitive": "Iholo alincintisani",
+      "location_not_feasible": "Indawo ayifinyeleleki",
+      "skills_mismatch": "Amakhono awahambisani",
+      "role_not_what_im_looking_for": "Akuyona indima efanele",
+      "other": "Okunye",
+      "unspecified": "Asikho isizathu esinikeziwe"
+    }
   }
 }

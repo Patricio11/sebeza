@@ -991,5 +991,69 @@
     "email": "E-pos",
     "phone": "Foon",
     "soon": "Binnekort"
+  },
+  "employerVacancies": {
+    "fill": {
+      "noneYet": "{positions, plural, one {1 pos} other {# poste}}, nog niks gevul nie",
+      "accepted": "{positions, plural, one {1 pos} other {# poste}}, {filled} aanvaar",
+      "acceptedShort": "{positions, plural, one {1 pos} other {# poste}}, {filled} aanvaar, {remaining} oor",
+      "hiredShort": "{positions, plural, one {1 pos} other {# poste}}, {filled} aangestel, {remaining} oor",
+      "allFilled": "{positions, plural, one {1 pos} other {# poste}}, almal gevul",
+      "overHired": "{positions, plural, one {1 pos} other {# poste}}, {filled} aangestel"
+    },
+    "strip": {
+      "heading": "Uitnodigingsuitkomste",
+      "acceptRate": "{rate}% aanvaarding op afgehandelde antwoorde",
+      "noResponses": "Nog geen antwoorde nie",
+      "sent": "Gestuur",
+      "accepted": "Aanvaar",
+      "declined": "Van die hand gewys",
+      "pending": "Hangende",
+      "noReply": "Geen antwoord",
+      "withdrawn": "Jy het onttrek",
+      "stalled": "{remaining, plural, one {1 nog te vul} other {# nog te vul}} en niemand oor om van te hoor nie.",
+      "stalledCta": "Vind passings hierbo om meer mense uit te nooi.",
+      "nudgeNote": "Opvolg-herinneringe is aan vir hierdie vakature. Hangende uitnodigings ouer as 7 dae kry een sagte herinnering."
+    },
+    "pipeline": {
+      "heading": "Pyplyn · {count, plural, one {1 uitnodiging} other {# uitnodigings}}",
+      "sub": "Almal wat jy vir hierdie vakature uitgenooi het, en hoe elkeen geantwoord het. Om te weier is gratis vir die werksoeker en raak nooit hoe hulle in soektogte verskyn nie.",
+      "invited": "Uitgenooi",
+      "applied": "Aansoek gedoen",
+      "respondsBy": "antwoord teen {date}",
+      "responded": "geantwoord {date}",
+      "expired": "verval {date}",
+      "withdrawnAt": "onttrek {date}",
+      "notice": "kennistydperk: {months, plural, one {1 maand} other {# maande}}",
+      "reason": "Rede",
+      "noteWarning": "deur werksoeker geskryf · hanteer as PII",
+      "selfApplied": "Self aansoek gedoen",
+      "withdraw": "Onttrek",
+      "inviteSomeoneElse": "Nooi iemand anders",
+      "state": {
+        "invited": "Uitgenooi",
+        "accepted": "Aanvaar",
+        "accepted_with_notice": "Aanvaar (met kennistydperk)",
+        "declined": "Van die hand gewys",
+        "reconsidering": "Heroorweeg",
+        "withdrawn": "Onttrek",
+        "expired": "Verval"
+      },
+      "withdrawing": "Onttrek tans"
+    },
+    "empty": {
+      "heading": "Niemand is nog uitgenooi nie",
+      "withTarget": "{fillLine}. Vind passings hierbo om mense te begin uitnooi.",
+      "noTarget": "Vind passings hierbo om kandidate teen hierdie vakature gerangskik te sien, en nooi dan die wat jy wil he."
+    },
+    "declineReason": {
+      "already_employed": "Reeds in diens",
+      "salary_not_competitive": "Salaris nie mededingend nie",
+      "location_not_feasible": "Ligging nie haalbaar nie",
+      "skills_mismatch": "Vaardighede pas nie",
+      "role_not_what_im_looking_for": "Nie die regte rol nie",
+      "other": "Ander",
+      "unspecified": "Geen rede gegee nie"
+    }
   }
 }

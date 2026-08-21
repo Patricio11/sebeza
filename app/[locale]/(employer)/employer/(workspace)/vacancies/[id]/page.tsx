@@ -43,7 +43,8 @@ import {
   withdrawInvitation,
 } from "@/lib/employer/invitations";
 import { getPlacementsForVacancy } from "@/lib/employer/placements";
-import { fillState, fillLabel } from "@/lib/employer/vacancy-fill";
+import { fillState, fillLabelParts } from "@/lib/employer/vacancy-fill";
+import { getTranslations } from "next-intl/server";
 import { getProfessions, getSkills } from "@/lib/taxonomy/query";
 import { PROVINCES } from "@/lib/mock/taxonomy";
 import { formatVacancyLocation } from "@/lib/employer/vacancies-display";
@@ -97,6 +98,11 @@ export default async function VacancyDetailPage({
   // G1  the number the whole page was missing: how many people this
   // vacancy still needs. Acceptances count while nothing is hired yet;
   // placements take over the moment any exist. See lib/employer/vacancy-fill.ts.
+  const t = await getTranslations("employerVacancies");
+  const fillLine = (f: import("@/lib/employer/vacancy-fill").FillState) => {
+    const parts = fillLabelParts(f);
+    return parts ? t(`fill.${parts.id}`, parts.params) : null;
+  };
   const fill = fillState({
     positions: vacancy.positions,
     acceptedCount: invitations.filter(
@@ -204,6 +210,8 @@ export default async function VacancyDetailPage({
           )}
           followUpNudgesEnabled={vacancy.followUpNudgesEnabled}
           fill={fill}
+          fillLine={fillLine(fill)}
+          t={t}
         />
       )}
 
@@ -244,12 +252,15 @@ export default async function VacancyDetailPage({
       {invitations.length === 0 && (
         <section className="mb-6 rounded-[var(--radius-md)] border border-dashed border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-5 text-sm text-[color:var(--color-ink-soft)]">
           <p className="font-display text-base text-[color:var(--color-ink)]">
-            Nobody has been invited yet
+            {t("empty.heading")}
           </p>
           <p className="mt-1">
-            {fillLabel(fill)
-              ? `${fillLabel(fill)}. Find matches above to start inviting people.`
-              : "Find matches above to see candidates ranked against this vacancy, then invite the ones you want."}
+            {(() => {
+              const line = fillLine(fill);
+              return line
+                ? t("empty.withTarget", { fillLine: line })
+                : t("empty.noTarget");
+            })()}
           </p>
         </section>
       )}
@@ -391,10 +402,14 @@ function AcceptRateStrip({
   invitations,
   followUpNudgesEnabled,
   fill,
+  fillLine,
+  t,
 }: {
   invitations: import("@/lib/employer/invitations").InvitationRow[];
   followUpNudgesEnabled: boolean;
   fill: import("@/lib/employer/vacancy-fill").FillState;
+  fillLine: string | null;
+  t: Awaited<ReturnType<typeof getTranslations<"employerVacancies">>>;
 }) {
   // Bucket every invitation into a lifecycle column. `accepted_with_notice`
   // folds into accepted (it IS an acceptance) and `reconsidering` into
@@ -448,48 +463,40 @@ function AcceptRateStrip({
     >
       <div className="mb-2 flex flex-wrap items-baseline justify-between gap-2">
         <span className="text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--color-ink-soft)]">
-          Invitation outcomes
-          {fillLabel(fill) && (
+          {t("strip.heading")}
+          {fillLine && (
             <span className="ml-2 normal-case tracking-normal text-[color:var(--color-ink)]">
-              {fillLabel(fill)}
+              {fillLine}
             </span>
           )}
         </span>
         <span className="text-xs text-[color:var(--color-ink-soft)]">
-          {acceptRate !== null ? (
-            <>
-              <strong className="text-[color:var(--color-ink)]">
-                {acceptRate}%
-              </strong>{" "}
-              acceptance on closed responses
-            </>
-          ) : (
-            "No responses yet"
-          )}
+          {acceptRate !== null
+            ? t("strip.acceptRate", { rate: acceptRate })
+            : t("strip.noResponses")}
         </span>
       </div>
       <dl
         className={`grid grid-cols-2 gap-3 text-sm ${withdrawn > 0 ? "md:grid-cols-6" : "md:grid-cols-5"}`}
       >
-        <StatCell label="Sent" value={total} />
-        <StatCell label="Accepted" value={accepted} accent="brand" />
-        <StatCell label="Declined" value={declined} />
-        <StatCell label="Pending" value={pending} />
-        <StatCell label="No reply" value={expired} />
-        {withdrawn > 0 && <StatCell label="You withdrew" value={withdrawn} />}
+        <StatCell label={t("strip.sent")} value={total} />
+        <StatCell label={t("strip.accepted")} value={accepted} accent="brand" />
+        <StatCell label={t("strip.declined")} value={declined} />
+        <StatCell label={t("strip.pending")} value={pending} />
+        <StatCell label={t("strip.noReply")} value={expired} />
+        {withdrawn > 0 && <StatCell label={t("strip.withdrawn")} value={withdrawn} />}
       </dl>
       {fill.isShort && pending === 0 && (
         <p className="mt-2 text-xs text-[color:var(--color-ink)]">
-          {fill.remaining} still to fill and nobody left to hear from.{" "}
+          {t("strip.stalled", { remaining: fill.remaining ?? 0 })}{" "}
           <span className="text-[color:var(--color-ink-soft)]">
-            Find matches above to invite more people.
+            {t("strip.stalledCta")}
           </span>
         </p>
       )}
       {followUpNudgesEnabled && pending > 0 && (
         <p className="mt-2 text-xs text-[color:var(--color-ink-soft)]">
-          Follow-up nudges are on for this vacancy. Pending invitations
-          past 7 days will receive one gentle reminder.
+          {t("strip.nudgeNote")}
         </p>
       )}
     </section>

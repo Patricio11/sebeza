@@ -91,29 +91,40 @@ export function fillState(input: FillInput): FillState {
 }
 
 /**
- * One short line for the employer, phrased so the number never claims
- * more than it knows. An acceptance is "accepted", a placement is
- * "hired": the two are not interchangeable, and a recruiter reading
- * "3 hired" when nobody has been hired yet would be right to distrust
- * everything else on the page.
+ * The fill line as data, not prose.
+ *
+ * The words live in the message catalogs (employerVacancies.fill.*) so
+ * the line renders in the viewer's language; this module only decides
+ * WHICH line, because that decision carries the honesty rule: an
+ * acceptance is "accepted", a placement is "hired", and "all filled" is
+ * a claim only placements can earn. Components call
+ * t(`fill.${id}`, params).
  */
-export function fillLabel(state: FillState): string | null {
-  if (state.positions == null) return null;
-  const seats = `${state.positions} position${state.positions === 1 ? "" : "s"}`;
-  if (state.basis === "none") return `${seats}, none filled yet`;
+export type FillLabelId =
+  | "noneYet" // a target, nothing filled
+  | "accepted" // counted from acceptances (never says hired/filled)
+  | "acceptedShort" // acceptances, still short
+  | "hiredShort" // placements, still short
+  | "allFilled" // placements met the target
+  | "overHired"; // more placements than seats
 
-  const verb = state.basis === "placements" ? "hired" : "accepted";
-  if (state.isOver) {
-    return `${seats}, ${state.filled} ${verb}`;
+export interface FillLabelParts {
+  id: FillLabelId;
+  params: { positions: number; filled: number; remaining: number };
+}
+
+export function fillLabelParts(state: FillState): FillLabelParts | null {
+  if (state.positions == null) return null;
+  const params = {
+    positions: state.positions,
+    filled: state.filled,
+    remaining: state.remaining ?? 0,
+  };
+  if (state.basis === "none") return { id: "noneYet", params };
+  if (state.basis === "acceptances") {
+    return { id: state.isShort ? "acceptedShort" : "accepted", params };
   }
-  if (state.isMet) {
-    // "All filled" is a claim about HIRES. Enough people accepting is
-    // not the same thing: any of them can still fall through, and a
-    // recruiter who reads "all filled" and stops looking has been
-    // misled by us. Only placements earn that phrase.
-    return state.basis === "placements"
-      ? `${seats}, all filled`
-      : `${seats}, ${state.filled} ${verb}`;
-  }
-  return `${seats}, ${state.filled} ${verb}, ${state.remaining} to go`;
+  if (state.isOver) return { id: "overHired", params };
+  if (state.isMet) return { id: "allFilled", params };
+  return { id: "hiredShort", params };
 }

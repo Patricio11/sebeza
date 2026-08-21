@@ -14,9 +14,10 @@
 
 import { useState, useTransition } from "react";
 import { useRouter, Link } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/Button";
 import {
-  DECLINE_REASON_LABEL,
+  DECLINE_REASON_VALUES,
   type DeclineReasonValue,
 } from "@/lib/vacancy/decline-reasons";
 import type { InvitationRow, InvitationState } from "@/lib/employer/invitations";
@@ -94,6 +95,7 @@ export function VacancyInvitationsPanel({
   const [error, setError] = useState<string | null>(null);
   const [, startTransition] = useTransition();
 
+  const t = useTranslations("employerVacancies");
   const dfmt = new Intl.DateTimeFormat(locale, {
     year: "numeric",
     month: "short",
@@ -133,12 +135,10 @@ export function VacancyInvitationsPanel({
           id="invitations-h"
           className="font-display text-xl text-[color:var(--color-ink)]"
         >
-          Pipeline · {invitations.length} invitation{invitations.length === 1 ? "" : "s"}
+          {t("pipeline.heading", { count: invitations.length })}
         </h2>
         <p className="text-xs text-[color:var(--color-ink-soft)]">
-          Everyone you have invited to this vacancy, and how each of them
-          responded. Declining is free for the seeker and never affects how
-          they appear in search.
+          {t("pipeline.sub")}
         </p>
       </header>
 
@@ -181,22 +181,22 @@ export function VacancyInvitationsPanel({
                     className={`inline-flex items-center gap-1 rounded-[var(--radius-pill)] border px-2 py-0.5 text-[0.65rem] uppercase tracking-[0.18em] ${tone}`}
                   >
                     <Icon className="size-3" aria-hidden="true" />
-                    {STATE_LABEL[inv.state]}
+                    {t(`pipeline.state.${inv.state}`)}
                   </span>
                   {/* Phase 34  honest provenance: they walked in via
                       the public link, nobody on the team invited them. */}
                   {inv.origin === "self_apply" && (
                     <span className="inline-flex items-center gap-1 rounded-[var(--radius-pill)] border border-[color:var(--color-brand)]/50 bg-[color:var(--color-brand-tint)] px-2 py-0.5 text-[0.65rem] uppercase tracking-[0.18em] text-[color:var(--color-brand-strong)]">
-                      Self-applied
+                      {t("pipeline.selfApplied")}
                     </span>
                   )}
                 </div>
                 <p className="mt-1 text-xs text-[color:var(--color-ink-soft)]">
-                  {inv.origin === "self_apply" ? "Applied" : "Invited"}{" "}
+                  {inv.origin === "self_apply" ? t("pipeline.applied") : t("pipeline.invited")}{" "}
                   {dfmt.format(new Date(inv.invitedAt))}
                   {inv.expiresAt &&
                     inv.state === "invited" &&
-                    ` · responds-by ${dfmt.format(new Date(inv.expiresAt))}`}
+                    ` · ${t("pipeline.respondsBy", { date: dfmt.format(new Date(inv.expiresAt)) })}`}
                   {inv.respondedAt &&
                     inv.state !== "invited" &&
                     // The expiry cron stamps `respondedAt` when it closes
@@ -204,22 +204,24 @@ export function VacancyInvitationsPanel({
                     // states somebody actually chose. Expired means the
                     // window shut; withdrawn was us, not them.
                     (inv.state === "expired"
-                      ? ` · expired ${dfmt.format(new Date(inv.respondedAt))}`
+                      ? ` · ${t("pipeline.expired", { date: dfmt.format(new Date(inv.respondedAt)) })}`
                       : inv.state === "withdrawn"
-                        ? ` · withdrawn ${dfmt.format(new Date(inv.respondedAt))}`
-                        : ` · responded ${dfmt.format(new Date(inv.respondedAt))}`)}
+                        ? ` · ${t("pipeline.withdrawnAt", { date: dfmt.format(new Date(inv.respondedAt)) })}`
+                        : ` · ${t("pipeline.responded", { date: dfmt.format(new Date(inv.respondedAt)) })}`)}
                   {inv.noticePeriodMonths != null && (
-                    <> · notice: {inv.noticePeriodMonths} month{inv.noticePeriodMonths === 1 ? "" : "s"}</>
+                    <> · {t("pipeline.notice", { months: inv.noticePeriodMonths })}</>
                   )}
                 </p>
                 {inv.declineReason && (
                   <p className="mt-1 text-xs text-[color:var(--color-ink)]">
                     <span className="text-[0.65rem] uppercase tracking-[0.18em] text-[color:var(--color-ink-soft)]">
-                      Reason
+                      {t("pipeline.reason")}
                     </span>{" "}
-                    {DECLINE_REASON_LABEL[
-                      inv.declineReason as DeclineReasonValue
-                    ] ?? inv.declineReason}
+                    {DECLINE_REASON_VALUES.includes(
+                      inv.declineReason as DeclineReasonValue,
+                    )
+                      ? t(`declineReason.${inv.declineReason as DeclineReasonValue}`)
+                      : inv.declineReason}
                   </p>
                 )}
                 {inv.declineNote && (
@@ -228,7 +230,7 @@ export function VacancyInvitationsPanel({
                       &ldquo;{inv.declineNote}&rdquo;
                     </em>{" "}
                     <span className="text-[0.65rem] uppercase tracking-[0.18em]">
-                      seeker-authored · treat as PII
+                      {t("pipeline.noteWarning")}
                     </span>
                   </p>
                 )}
@@ -238,7 +240,7 @@ export function VacancyInvitationsPanel({
                   href={`/employer/vacancies/${vacancyId}/match` as never}
                   className="inline-flex h-8 shrink-0 items-center gap-1 rounded-[var(--radius-pill)] border border-[color:var(--color-hairline)] px-3 text-xs text-[color:var(--color-ink-soft)] hover:border-[color:var(--color-ink)] hover:text-[color:var(--color-ink)]"
                 >
-                  Invite someone else
+                  {t("pipeline.inviteSomeoneElse")}
                 </Link>
               )}
               {canWithdraw && (
@@ -250,7 +252,7 @@ export function VacancyInvitationsPanel({
                   disabled={pendingId === inv.id}
                 >
                   <X className="size-4" aria-hidden="true" />
-                  {pendingId === inv.id ? "Withdrawing" : "Withdraw"}
+                  {pendingId === inv.id ? t("pipeline.withdrawing") : t("pipeline.withdraw")}
                 </Button>
               )}
             </li>

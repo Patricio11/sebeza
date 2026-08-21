@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { fillState, fillLabel } from "./vacancy-fill";
+import { fillState, fillLabelParts } from "./vacancy-fill";
 
 const base = { positions: null, acceptedCount: 0, placementCount: 0 };
 
@@ -8,13 +8,13 @@ describe("fillState", () => {
     const s = fillState({ ...base, acceptedCount: 3 });
     expect(s.remaining).toBeNull();
     expect(s.isShort).toBe(false);
-    expect(fillLabel(s)).toBeNull();
+    expect(fillLabelParts(s)).toBeNull();
   });
 
   it("counts acceptances while nobody has been hired yet", () => {
     const s = fillState({ positions: 5, acceptedCount: 2, placementCount: 0 });
     expect(s).toMatchObject({ filled: 2, remaining: 3, basis: "acceptances", isShort: true });
-    expect(fillLabel(s)).toBe("5 positions, 2 accepted, 3 to go");
+    expect(fillLabelParts(s)).toEqual({ id: "acceptedShort", params: { positions: 5, filled: 2, remaining: 3 } });
   });
 
   it("switches to placements once hires are logged, and does NOT add them up", () => {
@@ -23,7 +23,7 @@ describe("fillState", () => {
     const s = fillState({ positions: 3, acceptedCount: 1, placementCount: 1 });
     expect(s.filled).toBe(1);
     expect(s.basis).toBe("placements");
-    expect(fillLabel(s)).toBe("3 positions, 1 hired, 2 to go");
+    expect(fillLabelParts(s)).toEqual({ id: "hiredShort", params: { positions: 3, filled: 1, remaining: 2 } });
   });
 
   it("never says 'hired', or 'all filled', about a mere acceptance", () => {
@@ -32,21 +32,21 @@ describe("fillState", () => {
     // "all filled" and stops looking has been misled.
     const s = fillState({ positions: 2, acceptedCount: 2, placementCount: 0 });
     expect(s.isMet).toBe(true);
-    expect(fillLabel(s)).toBe("2 positions, 2 accepted");
-    expect(fillLabel(s)).not.toContain("hired");
-    expect(fillLabel(s)).not.toContain("all filled");
+    // The id is "accepted", never "allFilled" or a hired variant: enough
+    // acceptances to cover the seats is still not a hire, in any language.
+    expect(fillLabelParts(s)).toEqual({ id: "accepted", params: { positions: 2, filled: 2, remaining: 0 } });
   });
 
   it("reports a met target without a remaining nag", () => {
     const s = fillState({ positions: 2, acceptedCount: 0, placementCount: 2 });
     expect(s).toMatchObject({ isMet: true, isShort: false, isOver: false, remaining: 0 });
-    expect(fillLabel(s)).toBe("2 positions, all filled");
+    expect(fillLabelParts(s)).toEqual({ id: "allFilled", params: { positions: 2, filled: 2, remaining: 0 } });
   });
 
   it("shows over-filling rather than clamping it out of sight", () => {
     const s = fillState({ positions: 2, acceptedCount: 0, placementCount: 3 });
     expect(s).toMatchObject({ isOver: true, isMet: true, remaining: 0 });
-    expect(fillLabel(s)).toBe("2 positions, 3 hired");
+    expect(fillLabelParts(s)).toEqual({ id: "overHired", params: { positions: 2, filled: 3, remaining: 0 } });
   });
 
   it("treats a zero or negative target as no target", () => {
@@ -56,14 +56,15 @@ describe("fillState", () => {
   });
 
   it("says so plainly when a target exists and nothing has happened", () => {
-    expect(fillLabel(fillState({ ...base, positions: 4 }))).toBe(
-      "4 positions, none filled yet",
-    );
+    expect(fillLabelParts(fillState({ ...base, positions: 4 }))).toEqual({
+      id: "noneYet",
+      params: { positions: 4, filled: 0, remaining: 4 },
+    });
   });
 
   it("uses the singular for one seat", () => {
-    expect(fillLabel(fillState({ positions: 1, acceptedCount: 0, placementCount: 0 }))).toBe(
-      "1 position, none filled yet",
-    );
+    expect(
+      fillLabelParts(fillState({ positions: 1, acceptedCount: 0, placementCount: 0 }))?.id,
+    ).toBe("noneYet");
   });
 });

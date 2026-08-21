@@ -1048,5 +1048,69 @@
     "email": "Email",
     "phone": "Phone",
     "soon": "Soon"
+  },
+  "employerVacancies": {
+    "fill": {
+      "noneYet": "{positions, plural, one {1 position} other {# positions}}, none filled yet",
+      "accepted": "{positions, plural, one {1 position} other {# positions}}, {filled} accepted",
+      "acceptedShort": "{positions, plural, one {1 position} other {# positions}}, {filled} accepted, {remaining} to go",
+      "hiredShort": "{positions, plural, one {1 position} other {# positions}}, {filled} hired, {remaining} to go",
+      "allFilled": "{positions, plural, one {1 position} other {# positions}}, all filled",
+      "overHired": "{positions, plural, one {1 position} other {# positions}}, {filled} hired"
+    },
+    "strip": {
+      "heading": "Invitation outcomes",
+      "acceptRate": "{rate}% acceptance on closed responses",
+      "noResponses": "No responses yet",
+      "sent": "Sent",
+      "accepted": "Accepted",
+      "declined": "Declined",
+      "pending": "Pending",
+      "noReply": "No reply",
+      "withdrawn": "You withdrew",
+      "stalled": "{remaining, plural, one {1 still to fill} other {# still to fill}} and nobody left to hear from.",
+      "stalledCta": "Find matches above to invite more people.",
+      "nudgeNote": "Follow-up nudges are on for this vacancy. Pending invitations past 7 days will receive one gentle reminder."
+    },
+    "pipeline": {
+      "heading": "Pipeline · {count, plural, one {1 invitation} other {# invitations}}",
+      "sub": "Everyone you have invited to this vacancy, and how each of them responded. Declining is free for the seeker and never affects how they appear in search.",
+      "invited": "Invited",
+      "applied": "Applied",
+      "respondsBy": "responds-by {date}",
+      "responded": "responded {date}",
+      "expired": "expired {date}",
+      "withdrawnAt": "withdrawn {date}",
+      "notice": "notice: {months, plural, one {1 month} other {# months}}",
+      "reason": "Reason",
+      "noteWarning": "seeker-authored · treat as PII",
+      "selfApplied": "Self-applied",
+      "withdraw": "Withdraw",
+      "inviteSomeoneElse": "Invite someone else",
+      "state": {
+        "invited": "Invited",
+        "accepted": "Accepted",
+        "accepted_with_notice": "Accepted (with notice)",
+        "declined": "Declined",
+        "reconsidering": "Reconsidering",
+        "withdrawn": "Withdrawn",
+        "expired": "Expired"
+      },
+      "withdrawing": "Withdrawing"
+    },
+    "empty": {
+      "heading": "Nobody has been invited yet",
+      "withTarget": "{fillLine}. Find matches above to start inviting people.",
+      "noTarget": "Find matches above to see candidates ranked against this vacancy, then invite the ones you want."
+    },
+    "declineReason": {
+      "already_employed": "Already employed",
+      "salary_not_competitive": "Salary not competitive",
+      "location_not_feasible": "Location not feasible",
+      "skills_mismatch": "Skills mismatch",
+      "role_not_what_im_looking_for": "Not the right role",
+      "other": "Other",
+      "unspecified": "No reason given"
+    }
   }
 }
