@@ -634,10 +634,14 @@
       "search": "Soek talent",
       "savedSearches": "Gestoorde soektogte",
       "shortlists": "Talentpoele",
-      "placements": "Plasings",
+      "placements": "Werknemers",
       "organisation": "Organisasie",
       "team": "Span",
-      "account": "Rekening"
+      "account": "Rekening",
+      "vacancies": "Vakatures",
+      "invites": "Uitnodigings",
+      "notifications": "Kennisgewings",
+      "help": "Hulp"
     },
     "orgUnverifiedBanner": "Jou organisasie is nog nie geverifieer nie. Jy kan talent soek en kortlyste bou, maar kontakbesonderhede en dokumente bly gesluit totdat verifikasie voltooi is.",
     "orgUnverifiedCta": "Begin verifikasie",
@@ -1054,6 +1058,106 @@
       "role_not_what_im_looking_for": "Nie die regte rol nie",
       "other": "Ander",
       "unspecified": "Geen rede gegee nie"
+    },
+    "form": {
+      "title": {
+        "label": "Roltitel",
+        "placeholder": "bv. Senior Gebaksjef",
+        "hint": "Die etiket wat jou span op die vakaturelys sien."
+      },
+      "profession": {
+        "label": "Beroep",
+        "placeholder": "Soek beroepe…"
+      },
+      "province": {
+        "label": "Provinsie",
+        "select": "Kies…",
+        "any": "Enige provinsie (afgeleë / hibried)"
+      },
+      "seniority": {
+        "label": "Senioriteit",
+        "any": "Enige / nie gespesifiseer nie"
+      },
+      "skills": {
+        "label": "Vereiste vaardighede",
+        "placeholder": "Tik om vaardighede te soek…"
+      },
+      "description": {
+        "label": "Beskrywing",
+        "placeholder": "Wat die rol behels, aan wie dit rapporteer, hoe sukses in die eerste 90 dae lyk. Slegs intern, geen werksoeker sien dit ooit nie."
+      },
+      "match": {
+        "heading": "Passingsvereistes",
+        "sub": "Word gebruik om die kandidaatlys op die “Vind passings”-skerm te vernou. Los enige veld leeg as dit nie ’n vereiste is nie: die passer ignoreer daardie as heeltemal."
+      },
+      "workMode": {
+        "legend": "Werkwyse & diensaard",
+        "sub": "Kies almal wat van toepassing is. Niks gekies nie = die rol aanvaar enige werkwyse of diensaard."
+      },
+      "season": {
+        "heading": "Seisoenvenster",
+        "sub": "Opsioneel. Kies die maand (en, as jy wil, die jaar) vir elke eindpunt. Die jaar is opsioneel maar word aanbeveel vir somervensters wat oor Desember strek. Los albei leeg vir “seisoenwerk, tydsberekening word bevestig”.",
+        "start": "Seisoen begin",
+        "end": "Seisoen eindig"
+      },
+      "minYears": {
+        "label": "Minimum jare ondervinding",
+        "hint": "Los leeg as dit nie ’n vereiste is nie. Werksoekers wat nie ’n getal verklaar het nie, sal nie deurkom sodra ’n vloer gestel is nie."
+      },
+      "minNqf": {
+        "label": "Minimum NKR-vlak",
+        "none": "Geen NKR-vereiste nie",
+        "hint": "Los leeg as dit nie ’n vereiste is nie (die meeste ambagte, gasvryheid, los werk en verkoopsrolle sal nie een nodig hê nie)."
+      },
+      "salary": {
+        "heading": "Privaat aan jou organisasie",
+        "sub": "Die salarisband bly binne jou werkruimte. Dit word nooit op enige werksoeker-oppervlak gewys nie, nooit in soektogte nie, en nooit op ’n openbare profiel nie.",
+        "label": "Salarisband",
+        "placeholder": "bv. R 480k tot R 600k / jaar",
+        "badge": "Privaat"
+      },
+      "expiry": {
+        "heading": "Uitnodiging verval",
+        "sub": "Hoe lank ’n uitnodiging oop bly as die werksoeker nie geantwoord het nie. Wanneer dit verval, kry albei kante ’n kennisgewing. Los leeg (of 0) om uitnodigings onbepaald oop te hou.",
+        "label": "Dae voor die uitnodiging verval",
+        "hint": "14 dae is die tipiese verstek; 0 of leeg = verval nooit."
+      },
+      "positions": {
+        "label": "Oop poste",
+        "hint": "Hoeveel mense jy op hierdie vakature beplan om aan te stel. Los leeg as daar geen vaste getal is nie; die passingsbladsy tel dan bloot uitnodigings."
+      },
+      "nudge": {
+        "label": "Stuur ’n sagte herinnering na 7 dae",
+        "sub": "Een herinnering, net aan werksoekers wat nog nie geantwoord het nie. Beperk tot een herinnering per uitnodiging: om weer te por is teistering."
+      },
+      "selfApply": {
+        "legend": "Self Aansoek, openbare skakel",
+        "label": "Laat werksoekers via ’n openbare skakel aansoek doen",
+        "sub": "Skep ’n deelbare bladsy met die rol, vaardighede en beskrywing (nooit die salarisband vir besoekers nie, nooit jou pyplyn nie). Aansoekers beland in hierdie vakature se pyplyn as aanvaarde kandidate met ’n “Self aansoek gedoen”-merkie. Jy hersien en keur hulle soos genooide werksoekers. Ontmerk enige tyd om die skakel te sluit."
+      },
+      "errors": {
+        "expiry": "Uitnodigingsverval moet leeg wees of ’n positiewe aantal dae.",
+        "nqf": "Minimum NKR-vlak moet leeg wees, of tussen 1 en 10.",
+        "provinceAny": "Kies afgeleë of hibried voordat jy Enige provinsie kies."
+      },
+      "workAvailability": {
+        "full_time": "Voltyds",
+        "part_time": "Deeltyds",
+        "contract": "Kontrak",
+        "casual": "Los",
+        "seasonal": "Seisoenaal",
+        "remote": "Afgeleë",
+        "hybrid": "Hibried"
+      },
+      "submit": "Stoor vakature",
+      "positionsErr": "Oop poste moet leeg wees, of ’n heelgetal tussen 1 en 999.",
+      "minYearsErr": "Minimum jare ondervinding moet leeg wees, of ’n heelgetal tussen 0 en 60.",
+      "professionOther": "Stel ’n nuwe beroep voor",
+      "skillsOther": "Vaardigheid nie gelys nie?",
+      "skillsHelp": "Kies die vaardighede wat hierdie vakature nodig het. Die passer gebruik dit om kandidate te rangskik. Kan jy nie een vind nie? Tik dit in elk geval en voeg dit by: ons span hersien nuwe vaardighede en dit word platformwyd beskikbaar.",
+      "saving": "Stoor tans",
+      "create": "Skep vakature",
+      "saveChanges": "Stoor veranderinge"
     }
   }
 }

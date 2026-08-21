@@ -6,7 +6,7 @@
  * client form receives a stable list without re-fetching.
  */
 
-import { setRequestLocale } from "next-intl/server";
+import { setRequestLocale, getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
 import { verifyEmployer } from "@/lib/auth/dal";
@@ -37,6 +37,7 @@ export default async function NewVacancyPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
+  const tv = await getTranslations("employerVacancies");
   const session = await verifyEmployer();
 
   const role = await getMyOrgRole();
@@ -139,7 +140,7 @@ export default async function NewVacancyPage({
               : { ok: false, message: res.message };
           }}
           redirectTo={successRedirect}
-          submitLabel="Create vacancy"
+          submitLabel={tv("form.create")}
         />
       </div>
     </DashboardMasthead>

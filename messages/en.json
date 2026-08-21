@@ -820,10 +820,14 @@
       "search": "Search talent",
       "savedSearches": "Saved searches",
       "shortlists": "Talent pools",
-      "placements": "Placements",
+      "placements": "Employees",
       "organisation": "Organisation",
       "team": "Team",
-      "account": "Account"
+      "account": "Account",
+      "vacancies": "Vacancies",
+      "invites": "Invites",
+      "notifications": "Notifications",
+      "help": "Help"
     },
     "orgUnverifiedBanner": "Your organisation is not yet verified. You can search talent and build shortlists, but contact details and documents stay locked until verification is complete.",
     "orgUnverifiedCta": "Start verification",
@@ -1111,6 +1115,106 @@
       "role_not_what_im_looking_for": "Not the right role",
       "other": "Other",
       "unspecified": "No reason given"
+    },
+    "form": {
+      "title": {
+        "label": "Role title",
+        "placeholder": "e.g. Senior Pastry Chef",
+        "hint": "The label your team sees on the vacancy list."
+      },
+      "profession": {
+        "label": "Profession",
+        "placeholder": "Search professions…"
+      },
+      "province": {
+        "label": "Province",
+        "select": "Select…",
+        "any": "Any province (remote / hybrid)"
+      },
+      "seniority": {
+        "label": "Seniority",
+        "any": "Any / not specified"
+      },
+      "skills": {
+        "label": "Required skills",
+        "placeholder": "Type to search skills…"
+      },
+      "description": {
+        "label": "Description",
+        "placeholder": "What the role does, who it reports to, what success looks like in the first 90 days. Internal-only, no seeker ever sees this."
+      },
+      "match": {
+        "heading": "Match requirements",
+        "sub": "Used to narrow the candidate list on the “Find matches” screen. Leave any field blank if it isn’t a requirement: the matcher then ignores that axis entirely."
+      },
+      "workMode": {
+        "legend": "Work mode & employment type",
+        "sub": "Pick all that apply. None selected = the role accepts any work mode or employment type."
+      },
+      "season": {
+        "heading": "Season window",
+        "sub": "Optional. Pick the month (and, if you want, the year) for each endpoint. Year is optional but recommended for summer windows that cross December. Leave both blank for “seasonal work, timing to be confirmed”.",
+        "start": "Season starts",
+        "end": "Season ends"
+      },
+      "minYears": {
+        "label": "Minimum years of experience",
+        "hint": "Leave blank if this isn’t a requirement. Seekers who haven’t declared a number won’t pass once a floor is set."
+      },
+      "minNqf": {
+        "label": "Minimum NQF level",
+        "none": "No NQF requirement",
+        "hint": "Leave blank if this isn’t a requirement (most trades, hospitality, casual labour and sales roles won’t need one)."
+      },
+      "salary": {
+        "heading": "Private to your organisation",
+        "sub": "The salary band stays inside your workspace. It is never shown on any seeker-facing surface, never in search, and never on a public profile.",
+        "label": "Salary band",
+        "placeholder": "e.g. R 480k to R 600k / year",
+        "badge": "Private"
+      },
+      "expiry": {
+        "heading": "Invite expiry",
+        "sub": "How long an invite stays open if the seeker hasn’t responded. When it expires, both sides get a notification. Leave empty (or 0) to keep invites open indefinitely.",
+        "label": "Days until invite expires",
+        "hint": "14 days is the typical default; 0 or empty = never expires."
+      },
+      "positions": {
+        "label": "Open positions",
+        "hint": "How many people you plan to hire on this vacancy. Leave empty if there’s no fixed headcount; the match page then simply counts invites."
+      },
+      "nudge": {
+        "label": "Send a gentle nudge after 7 days",
+        "sub": "One reminder, only to seekers who haven’t responded yet. Capped at one nudge per invite: re-nudging is harassment."
+      },
+      "selfApply": {
+        "legend": "Self Apply, public link",
+        "label": "Let seekers apply via a public link",
+        "sub": "Generates a shareable page with the role, skills and description (never the salary band for visitors, never your pipeline). Applicants land in this vacancy’s pipeline as accepted candidates with a “Self-applied” chip. You review and shortlist them like invited seekers. Untick any time to close the link."
+      },
+      "errors": {
+        "expiry": "Invite expiry must be empty or a positive number of days.",
+        "nqf": "Minimum NQF level must be empty, or between 1 and 10.",
+        "provinceAny": "Pick remote or hybrid before choosing Any province."
+      },
+      "workAvailability": {
+        "full_time": "Full-time",
+        "part_time": "Part-time",
+        "contract": "Contract",
+        "casual": "Casual",
+        "seasonal": "Seasonal",
+        "remote": "Remote",
+        "hybrid": "Hybrid"
+      },
+      "submit": "Save vacancy",
+      "positionsErr": "Open positions must be empty, or a whole number between 1 and 999.",
+      "minYearsErr": "Minimum years of experience must be empty, or a whole number between 0 and 60.",
+      "professionOther": "Suggest a new profession",
+      "skillsOther": "Skill not listed?",
+      "skillsHelp": "Pick the skills this vacancy needs. The matcher uses them to rank candidates. Can’t find one? Type it anyway and add it: our team reviews new skills and it becomes available platform-wide.",
+      "saving": "Saving",
+      "create": "Create vacancy",
+      "saveChanges": "Save changes"
     }
   }
 }

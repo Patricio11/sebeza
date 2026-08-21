@@ -372,7 +372,7 @@ export default async function VacancyDetailPage({
                 : { ok: false, message: res.message };
             }}
             redirectTo={`/employer/vacancies/${vacancy.id}`}
-            submitLabel="Save changes"
+            submitLabel={t("form.saveChanges")}
             cancelHref={`/employer/vacancies/${vacancy.id}`}
           />
         </div>

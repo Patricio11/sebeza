@@ -634,10 +634,14 @@
       "search": "Sesha ithalente",
       "savedSearches": "Ukusesha okulondoloziwe",
       "shortlists": "Amaqoqo ethalente",
-      "placements": "Ukubekwa",
+      "placements": "Abasebenzi",
       "organisation": "Inhlangano",
       "team": "Ithimba",
-      "account": "I-akhawunti"
+      "account": "I-akhawunti",
+      "vacancies": "Izikhala",
+      "invites": "Izimemo",
+      "notifications": "Izaziso",
+      "help": "Usizo"
     },
     "orgUnverifiedBanner": "Inhlangano yakho ayikaqinisekiswa. Ungasesha ithalente wakhe amaqoqo, kodwa imininingwane yokuxhumana namadokhumenti kuhlala kukhiyiwe kuze kuphele ukuqinisekiswa.",
     "orgUnverifiedCta": "Qala ukuqinisekiswa",
@@ -1054,6 +1058,106 @@
       "role_not_what_im_looking_for": "Akuyona indima efanele",
       "other": "Okunye",
       "unspecified": "Asikho isizathu esinikeziwe"
+    },
+    "form": {
+      "title": {
+        "label": "Isihloko sesikhundla",
+        "placeholder": "isb. Umpheki Omkhulu Wamakhekhe",
+        "hint": "Ilebula ithimba lakho elilibonayo ohlwini lwezikhala."
+      },
+      "profession": {
+        "label": "Umsebenzi",
+        "placeholder": "Sesha imisebenzi…"
+      },
+      "province": {
+        "label": "Isifundazwe",
+        "select": "Khetha…",
+        "any": "Noma isiphi isifundazwe (ukusebenza ukude / okuxubile)"
+      },
+      "seniority": {
+        "label": "Izinga lobuchule",
+        "any": "Noma yikuphi / akushiwongo"
+      },
+      "skills": {
+        "label": "Amakhono adingekayo",
+        "placeholder": "Thayipha ukusesha amakhono…"
+      },
+      "description": {
+        "label": "Incazelo",
+        "placeholder": "Ukuthi isikhundla senzani, sibika kubani, nokuthi impumelelo ibukeka kanjani ezinsukwini zokuqala ezingu-90. Ngokwangaphakathi kuphela, akekho umfuni-msebenzi oyibonayo."
+      },
+      "match": {
+        "heading": "Izidingo zokufaniswa",
+        "sub": "Kusetshenziselwa ukunciphisa uhlu lwabafakizicelo esikrinini esithi “Thola abafanelekayo”. Shiya noma yiliphi ibhokisi lingenalutho uma lingesona isidingo: umfanisi uzoyeka leyo nto ngokuphelele."
+      },
+      "workMode": {
+        "legend": "Indlela yokusebenza nohlobo lomsebenzi",
+        "sub": "Khetha konke okufanelekile. Uma ungakhethi lutho = isikhundla samukela noma iyiphi indlela yokusebenza noma uhlobo lomsebenzi."
+      },
+      "season": {
+        "heading": "Iwindi lenkathi",
+        "sub": "Akuphoqelekile. Khetha inyanga (nonyaka, uma ufuna) kuwo womabili amaphuzu. Unyaka awuphoqelekile kodwa uyanconywa kumawindi ehlobo adlula uZibandlela. Shiya womabili engenalutho uma uthi “umsebenzi wesikhathi esithile, isikhathi sizoqinisekiswa”.",
+        "start": "Inkathi iqala",
+        "end": "Inkathi iphela"
+      },
+      "minYears": {
+        "label": "Iminyaka encane yolwazi",
+        "hint": "Shiya kungenalutho uma lokhu kungesona isidingo. Abafuni-msebenzi abangashongo inombolo ngeke badlule uma usubeke umkhawulo."
+      },
+      "minNqf": {
+        "label": "Izinga eliphansi le-NQF",
+        "none": "Asikho isidingo se-NQF",
+        "hint": "Shiya kungenalutho uma lokhu kungesona isidingo (imisebenzi yezandla eminingi, ezokungenisa izihambi, umsebenzi wesikhashana nokuthengisa ngeke kudinge lona)."
+      },
+      "salary": {
+        "heading": "Kuyimfihlo enhlanganweni yakho",
+        "sub": "Ibhande leholo lihlala ngaphakathi endaweni yakho yokusebenza. Alikaze libonakale kunoma yisiphi isikhala esibonwa umfuni-msebenzi, alikho ekusesheni, futhi alikho kuphrofayela yomphakathi.",
+        "label": "Ibhande leholo",
+        "placeholder": "isb. R 480k kuya ku-R 600k / ngonyaka",
+        "badge": "Kuyimfihlo"
+      },
+      "expiry": {
+        "heading": "Ukuphelelwa yisikhathi kwesimemo",
+        "sub": "Ukuthi isimemo sihlala sivuliwe isikhathi esingakanani uma umfuni-msebenzi engaphendulanga. Uma siphelelwa yisikhathi, zombili izinhlangothi zithola isaziso. Shiya kungenalutho (noma u-0) ukuze izimemo zihlale zivuliwe unomphela.",
+        "label": "Izinsuku kuze kuphelelwe isimemo",
+        "hint": "Izinsuku eziyi-14 yizona ezivamile; u-0 noma okungenalutho = akuphelelwa."
+      },
+      "positions": {
+        "label": "Izikhundla ezivuliwe",
+        "hint": "Ukuthi bangaki abantu ohlela ukubaqasha kulesi sikhala. Shiya kungenalutho uma kungekho inani elimisiwe; ikhasi lokufanisa liyobe selibala izimemo nje."
+      },
+      "nudge": {
+        "label": "Thumela isikhumbuzo esimnene ngemva kwezinsuku eziyi-7",
+        "sub": "Isikhumbuzo esisodwa, kuphela kubafuni-msebenzi abangakaphenduli. Kukhawulelwe esikhumbuzweni esisodwa ngesimemo ngasinye: ukuphinda ukhumbuze kuwukuhlukumeza."
+      },
+      "selfApply": {
+        "legend": "Zifakele isicelo, ilinki yomphakathi",
+        "label": "Vumela abafuni-msebenzi bafake isicelo ngelinki yomphakathi",
+        "sub": "Kwakha ikhasi elingabelwana ngalo elinesikhundla, amakhono nencazelo (alikaze libe nebhande leholo kubavakashi, alikaze libe nohlu lwakho). Abafaki-zicelo bafika ohlwini lwalesi sikhala njengabafakizicelo abamukelwe benophawu oluthi “Uzifakele isicelo”. Uyababuyekeza futhi ubakhethe njengabafuni-msebenzi abamenyiwe. Susa uphawu noma nini ukuze uvale ilinki."
+      },
+      "errors": {
+        "expiry": "Ukuphelelwa yisikhathi kwesimemo kufanele kungabi nalutho noma kube yinombolo yezinsuku engaphezu kuka-0.",
+        "nqf": "Izinga eliphansi le-NQF kufanele lingabi nalutho, noma libe phakathi kuka-1 no-10.",
+        "provinceAny": "Khetha ukusebenza ukude noma okuxubile ngaphambi kokukhetha Noma isiphi isifundazwe."
+      },
+      "workAvailability": {
+        "full_time": "Isikhathi esigcwele",
+        "part_time": "Isikhathi esiyingxenye",
+        "contract": "Ikhontrakhi",
+        "casual": "Owesikhashana",
+        "seasonal": "Wenkathi ethile",
+        "remote": "Ukude",
+        "hybrid": "Okuxubile"
+      },
+      "submit": "Londoloza isikhala",
+      "positionsErr": "Izikhundla ezivuliwe kufanele zingabi nalutho, noma zibe yinombolo ephelele phakathi kuka-1 no-999.",
+      "minYearsErr": "Iminyaka encane yolwazi kufanele ingabi nalutho, noma ibe yinombolo ephelele phakathi kuka-0 no-60.",
+      "professionOther": "Phakamisa umsebenzi omusha",
+      "skillsOther": "Ikhono alikho ohlwini?",
+      "skillsHelp": "Khetha amakhono lesi sikhala esiwadingayo. Umfanisi uwasebenzisa ukuhlela abafakizicelo. Awulitholi? Lithayiphe noma kunjalo bese ulengeza: ithimba lethu libuyekeza amakhono amasha bese liyatholakala kuyo yonke inkundla.",
+      "saving": "Iyalondoloza",
+      "create": "Dala isikhala",
+      "saveChanges": "Londoloza izinguquko"
     }
   }
 }

@@ -32,6 +32,7 @@ import type {
   WorkAvailabilityKind,
 } from "@/lib/mock/types";
 import { useSessionDraft } from "@/lib/hooks/useSessionDraft";
+import { useTranslations } from "next-intl";
 
 export interface VacancyFormValue {
   title: string;
@@ -101,7 +102,7 @@ export interface VacancyFormProps {
   ) => Promise<{ ok: true } | { ok: false; message: string }>;
   /** Where to navigate on success. */
   redirectTo: string;
-  /** Submit button label. Defaults to "Save vacancy". */
+  /** Submit button label. Defaults to the translated "Save vacancy". */
   submitLabel?: string;
   /** Cancel button href. Defaults to /employer/vacancies. */
   cancelHref?: string;
@@ -183,19 +184,21 @@ function workAvailabilityUnlocksAnyProvince(
 // human-readable label for the chips. Order mirrors the seeker form
 // (Phase 9.18) so a vacancy editor coming from the seeker side sees a
 // consistent layout.
+// The label is no longer baked in: it comes from
+// employerVacancies.form.workAvailability.<value>, so the chips read in
+// the employer's own language.
 const WORK_AVAILABILITY_CHOICES: ReadonlyArray<{
   value: WorkAvailabilityKind;
-  label: string;
 }> = [
-  { value: "full_time", label: "Full-time" },
-  { value: "part_time", label: "Part-time" },
-  { value: "contract", label: "Contract" },
-  { value: "casual", label: "Casual" },
+  { value: "full_time" },
+  { value: "part_time" },
+  { value: "contract" },
+  { value: "casual" },
   // Phase 9.21  recurring calendar-window work; reveals the
   // optional season window sub-block below the chips when picked.
-  { value: "seasonal", label: "Seasonal" },
-  { value: "remote", label: "Remote" },
-  { value: "hybrid", label: "Hybrid" },
+  { value: "seasonal" },
+  { value: "remote" },
+  { value: "hybrid" },
 ];
 
 /**
@@ -306,13 +309,14 @@ export function VacancyForm({
   skills,
   onSubmit,
   redirectTo,
-  submitLabel = "Save vacancy",
+  submitLabel,
   cancelHref = "/employer/vacancies",
   draftId = "new",
   selfApplyFeatureOn = false,
 }: VacancyFormProps) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
+  const t = useTranslations("employerVacancies.form");
   const [error, setError] = useState<string | null>(null);
 
   // Controlled fields  needed for the skills multi-select +
@@ -541,7 +545,7 @@ export function VacancyForm({
     const expiryNum =
       expiryRaw === "" || expiryRaw === "0" ? null : Number(expiryRaw);
     if (expiryNum !== null && (!Number.isFinite(expiryNum) || expiryNum < 1)) {
-      setError("Invite expiry must be empty or a positive number of days.");
+      setError(t("errors.expiry"));
       return;
     }
 
@@ -557,7 +561,7 @@ export function VacancyForm({
       (!Number.isFinite(positionsNum) || positionsNum < 1 || positionsNum > 999)
     ) {
       setError(
-        "Open positions must be empty, or a whole number between 1 and 999.",
+        t("positionsErr"),
       );
       return;
     }
@@ -569,7 +573,7 @@ export function VacancyForm({
       (!Number.isFinite(yearsNum) || yearsNum < 0 || yearsNum > 60)
     ) {
       setError(
-        "Minimum years of experience must be empty, or a whole number between 0 and 60.",
+        t("minYearsErr"),
       );
       return;
     }
@@ -579,7 +583,7 @@ export function VacancyForm({
       nqfNum !== null &&
       (!Number.isFinite(nqfNum) || nqfNum < 1 || nqfNum > 10)
     ) {
-      setError("Minimum NQF level must be empty, or between 1 and 10.");
+      setError(t("errors.nqf"));
       return;
     }
 
@@ -592,7 +596,7 @@ export function VacancyForm({
     let submitProvince: string | null;
     if (province === PROVINCE_ANY_SENTINEL) {
       if (!anyProvinceUnlocked) {
-        setError("Pick remote or hybrid before choosing Any province.");
+        setError(t("errors.provinceAny"));
         return;
       }
       submitProvince = null;
@@ -664,19 +668,19 @@ export function VacancyForm({
         <TextField
           id="title"
           name="title"
-          label="Role title"
-          placeholder="e.g. Senior Pastry Chef"
+          label={t("title.label")}
+          placeholder={t("title.placeholder")}
           required
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           disabled={pending}
-          hint="The label your team sees on the vacancy list."
+          hint={t("title.hint")}
         />
         <div className="grid gap-5 md:grid-cols-2">
           <ComboboxField
             id="profession"
             name="profession"
-            label="Profession"
+            label={t("profession.label")}
             required
             value={profession}
             onChange={setProfession}
@@ -685,21 +689,21 @@ export function VacancyForm({
               value: p.slug,
               label: p.label,
             }))}
-            placeholder="Search professions…"
+            placeholder={t("profession.placeholder")}
             allowOther
-            otherLabel="Suggest a new profession"
+            otherLabel={t("professionOther")}
           />
           <div>
             <SelectField
               id="province"
               name="province"
-              label="Province"
+              label={t("province.label")}
               required
               value={province}
               onChange={(e) => setProvince(e.target.value)}
               disabled={pending}
             >
-              <option value="">Select…</option>
+              <option value="">{t("province.select")}</option>
               {/* Phase 13.9  "Any province" sentinel. Only listed
                   when work_availability includes remote or hybrid
                   (D2). Removed via state convergence (D6) when the
@@ -726,12 +730,12 @@ export function VacancyForm({
         <SelectField
           id="seniority"
           name="seniority"
-          label="Seniority"
+          label={t("seniority.label")}
           value={seniority ?? ""}
           onChange={(e) => setSeniority(e.target.value)}
           disabled={pending}
         >
-          <option value="">Any / not specified</option>
+          <option value="">{t("seniority.any")}</option>
           {SENIORITY_OPTIONS.map((s) => (
             <option key={s} value={s}>
               {s}
@@ -746,18 +750,18 @@ export function VacancyForm({
             in lib/mock/taxonomy.ts for the ranking source. */}
         <MultiSelectComboboxField
           id="skillSlugs"
-          label="Required skills"
-          helpText="Pick the skills this vacancy needs. The matcher uses them to rank candidates. Can't find one? Type it anyway and add it - our team reviews new skills and it becomes available platform-wide."
+          label={t("skills.label")}
+          helpText={t("skillsHelp")}
           values={Array.from(skillSet)}
           onChange={(next) => setSkillSet(new Set(next))}
           options={skills.map((s) => ({ value: s.slug, label: s.label }))}
           suggestedValues={
             profession ? PROFESSION_SKILLS_MAP[profession] ?? [] : []
           }
-          placeholder="Type to search skills…"
+          placeholder={t("skills.placeholder")}
           disabled={pending}
           allowOther
-          otherLabel="Skill not listed?"
+          otherLabel={t("skillsOther")}
           otherHint="Can't find a skill? Just keep typing it and add it - our team reviews new skills."
           splitOtherOnComma
         />
@@ -765,12 +769,12 @@ export function VacancyForm({
         <TextareaField
           id="description"
           name="description"
-          label="Description"
+          label={t("description.label")}
           optional
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           disabled={pending}
-          placeholder="What the role does, who it reports to, what success looks like in the first 90 days. Internal-only, no seeker ever sees this."
+          placeholder={t("description.placeholder")}
           maxLength={4000}
         />
       </section>
@@ -784,21 +788,18 @@ export function VacancyForm({
           so the form must never push organisers to pick one. */}
       <section className="flex flex-col gap-5">
         <div className="text-[0.72rem] uppercase tracking-[0.22em] text-[color:var(--color-ink)]">
-          Match requirements
+          {t("match.heading")}
         </div>
         <p className="text-xs text-[color:var(--color-ink-soft)]">
-          Used to narrow the candidate list on the &ldquo;Find matches&rdquo;
-          screen. Leave any field blank if it isn&rsquo;t a requirement &mdash;
-          the matcher then ignores that axis entirely.
+          {t("match.sub")}
         </p>
 
         <fieldset className="flex flex-col gap-2">
           <legend className="text-[0.72rem] uppercase tracking-[0.22em] text-[color:var(--color-ink)]">
-            Work mode &amp; employment type
+            {t("workMode.legend")}
           </legend>
           <p className="text-xs text-[color:var(--color-ink-soft)]">
-            Pick all that apply. None selected = the role accepts any work
-            mode / employment type.
+            {t("workMode.sub")}
           </p>
           <ul className="-mb-2 flex flex-wrap gap-2 pt-1">
             {WORK_AVAILABILITY_CHOICES.map((choice) => {
@@ -817,7 +818,7 @@ export function VacancyForm({
                         : "border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] text-[color:var(--color-ink)] hover:border-[color:var(--color-ink)]")
                     }
                   >
-                    {choice.label}
+                    {t(`workAvailability.${choice.value}`)}
                   </button>
                 </li>
               );
@@ -832,20 +833,15 @@ export function VacancyForm({
           {workAvailabilitySet.has("seasonal") && (
             <div className="mt-3 rounded-[var(--radius-sm)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface-sunk)] p-3">
               <p className="text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--color-ink-soft)]">
-                Season window
+                {t("season.heading")}
               </p>
               <p className="mt-1 text-xs text-[color:var(--color-ink-soft)]">
-                Optional. Pick the month (and, if you want, the year) for
-                each endpoint. Year is optional but recommended for
-                summer windows that cross December &mdash; e.g.{" "}
-                <em>Nov 2026, Feb 2027</em> reads unambiguously.
-                Leave both blank for &ldquo;seasonal work, timing
-                TBD.&rdquo;
+                {t("season.sub")}
               </p>
               <div className="mt-3 grid gap-3 md:grid-cols-2">
                 <MonthYearPicker
                   id="seasonalWindowStart"
-                  label="Season starts"
+                  label={t("season.start")}
                   value={composeIsoMonth(
                     seasonalWindowStartMonth,
                     seasonalWindowStartYear,
@@ -872,7 +868,7 @@ export function VacancyForm({
                 />
                 <MonthYearPicker
                   id="seasonalWindowEnd"
-                  label="Season ends"
+                  label={t("season.end")}
                   value={composeIsoMonth(
                     seasonalWindowEndMonth,
                     seasonalWindowEndYear,
@@ -925,7 +921,7 @@ export function VacancyForm({
           <TextField
             id="minYearsExperience"
             name="minYearsExperience"
-            label="Minimum years of experience"
+            label={t("minYears.label")}
             type="number"
             inputMode="numeric"
             min={0}
@@ -934,19 +930,19 @@ export function VacancyForm({
             value={minYearsExperience}
             onChange={(e) => setMinYearsExperience(e.target.value)}
             disabled={pending}
-            hint="Leave blank if this isn't a requirement. Seekers who haven't declared a number won't pass once a floor is set."
+            hint={t("minYears.hint")}
           />
           <SelectField
             id="minNqfLevel"
             name="minNqfLevel"
-            label="Minimum NQF level"
+            label={t("minNqf.label")}
             optional
             value={minNqfLevel}
             onChange={(e) => setMinNqfLevel(e.target.value)}
             disabled={pending}
-            hint="Leave blank if this isn't a requirement (most trades, hospitality, casual labour and sales roles won't need one)."
+            hint={t("minNqf.hint")}
           >
-            <option value="">No NQF requirement</option>
+            <option value="">{t("minNqf.none")}</option>
             {NQF_OPTIONS.map((opt) => (
               <option key={opt.value} value={String(opt.value)}>
                 {opt.label}
@@ -961,19 +957,16 @@ export function VacancyForm({
       <section className="flex flex-col gap-5">
         <div className="flex items-center gap-2 text-[0.72rem] uppercase tracking-[0.22em] text-[color:var(--color-ink)]">
           <Lock className="size-3" aria-hidden="true" />
-          Private to your organisation
+          {t("salary.heading")}
         </div>
         <p className="text-xs text-[color:var(--color-ink-soft)]">
-          Salary band stays inside your workspace, consistent with how
-          Sebenza already handles placement salaries (Phase 5 rule). It
-          is never on any seeker-facing surface, never in /search,
-          never in /p/[handle].
+          {t("salary.sub")}
         </p>
         <TextField
           id="salaryBand"
           name="salaryBand"
-          label="Salary band"
-          placeholder="e.g. R 480k, R 600k / year"
+          label={t("salary.label")}
+          placeholder={t("salary.placeholder")}
           optional
           value={salaryBand}
           onChange={(e) => setSalaryBand(e.target.value)}
@@ -981,7 +974,7 @@ export function VacancyForm({
           badge={
             <span className="inline-flex items-center gap-1 rounded-[var(--radius-pill)] border border-[color:var(--color-accent)] bg-[color:var(--color-accent)]/10 px-2 py-0.5 text-[0.62rem] uppercase tracking-[0.18em] text-[color:var(--color-accent)]">
               <Lock className="size-2.5" aria-hidden="true" />
-              Private
+              {t("salary.badge")}
             </span>
           }
         />
@@ -991,17 +984,15 @@ export function VacancyForm({
 
       <section className="flex flex-col gap-5">
         <div className="text-[0.72rem] uppercase tracking-[0.22em] text-[color:var(--color-ink)]">
-          Invite expiry
+          {t("expiry.heading")}
         </div>
         <p className="text-xs text-[color:var(--color-ink-soft)]">
-          How long an invite stays open if the seeker hasn&rsquo;t responded.
-          When it expires, both sides get a notification. Leave empty (or 0)
-          to keep invites open indefinitely.
+          {t("expiry.sub")}
         </p>
         <TextField
           id="inviteExpiryDays"
           name="inviteExpiryDays"
-          label="Days until invite expires"
+          label={t("expiry.label")}
           type="number"
           inputMode="numeric"
           min={0}
@@ -1009,7 +1000,7 @@ export function VacancyForm({
           value={inviteExpiryDays}
           onChange={(e) => setInviteExpiryDays(e.target.value)}
           disabled={pending}
-          hint="14 days is the typical default; 0 or empty = never expires."
+          hint={t("expiry.hint")}
         />
 
         {/* Phase 29.1  optional headcount. Blank = unspecified; the match
@@ -1017,7 +1008,7 @@ export function VacancyForm({
         <TextField
           id="positions"
           name="positions"
-          label="Open positions"
+          label={t("positions.label")}
           type="number"
           inputMode="numeric"
           min={1}
@@ -1026,7 +1017,7 @@ export function VacancyForm({
           value={positions}
           onChange={(e) => setPositions(e.target.value)}
           disabled={pending}
-          hint="How many people you plan to hire on this vacancy. Leave empty if there's no fixed headcount, the match page then simply counts invites."
+          hint={t("positions.hint")}
         />
 
         {/* Phase 9.19 D8  opt-in follow-up nudge. A single gentle
@@ -1044,11 +1035,10 @@ export function VacancyForm({
           />
           <span className="flex-1 text-sm">
             <span className="font-display text-base text-[color:var(--color-ink)]">
-              Send a gentle nudge after 7 days
+              {t("nudge.label")}
             </span>
             <span className="mt-0.5 block text-xs text-[color:var(--color-ink-soft)]">
-              One reminder, only to seekers who haven&rsquo;t responded yet.
-              Capped at one nudge per invite, re-nudging is harassment.
+              {t("nudge.sub")}
             </span>
           </span>
         </label>
@@ -1059,7 +1049,7 @@ export function VacancyForm({
         {selfApplyFeatureOn && (
           <fieldset className="rounded-[var(--radius-md)] border border-[color:var(--color-brand)]/30 bg-[color:var(--color-brand-tint)] p-4">
             <legend className="px-1 font-display text-base">
-              Self Apply, public link
+              {t("selfApply.legend")}
             </legend>
             <label className="flex items-start gap-3">
               <input
@@ -1071,7 +1061,7 @@ export function VacancyForm({
               />
               <span className="flex-1 text-sm">
                 <span className="font-display text-base text-[color:var(--color-ink)]">
-                  Let seekers apply via a public link
+                  {t("selfApply.label")}
                 </span>
                 <span className="mt-0.5 block text-xs leading-relaxed text-[color:var(--color-ink-soft)]">
                   Generates a shareable page with the role, skills and
@@ -1123,7 +1113,7 @@ export function VacancyForm({
           Cancel
         </Button>
         <Button type="submit" variant="primary" size="lg" disabled={pending}>
-          {pending ? "Saving" : submitLabel}
+          {pending ? t("saving") : (submitLabel ?? t("submit"))}
         </Button>
       </div>
     </form>

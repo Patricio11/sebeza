@@ -1,6 +1,6 @@
-import { setRequestLocale } from "next-intl/server";
+import { setRequestLocale, getTranslations } from "next-intl/server";
 import { DashboardFrame } from "@/components/layout/DashboardFrame";
-import { EMPLOYER_NAV } from "@/components/layout/employerNav";
+import { employerNav } from "@/components/layout/employerNav";
 import { verifyEmployer } from "@/lib/auth/dal";
 
 // Phase 33 (33.6)  belt to the robots.txt braces: robots.txt only
@@ -31,13 +31,14 @@ export default async function EmployerLayout({
   const { locale } = await params;
   setRequestLocale(locale);
   const session = await verifyEmployer();
+  const tNav = await getTranslations("employerDash.nav");
 
   return (
     <DashboardFrame
       role="employer"
       workspaceLabel={session.orgName ?? "Your organisation"}
       workspaceEyebrow="Employer · workspace"
-      nav={EMPLOYER_NAV}
+      nav={employerNav((k) => tNav(k))}
     >
       {children}
     </DashboardFrame>

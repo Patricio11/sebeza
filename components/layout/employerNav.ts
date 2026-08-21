@@ -14,7 +14,19 @@ import {
 } from "lucide-react";
 import type { DashboardNavItem } from "./dashboardChrome";
 
-export const EMPLOYER_NAV: DashboardNavItem[] = [
+/**
+ * The employer nav, built from the catalogs.
+ *
+ * These labels were hardcoded English while translations for most of
+ * them already sat unused in `employerDash.nav`, so an employer who
+ * picked isiZulu still navigated in English. `t` is the caller's
+ * translator for that namespace.
+ */
+export function employerNav(t: (key: string) => string): DashboardNavItem[] {
+  return EMPLOYER_NAV.map((item) => ({ ...item, label: t(item.key) }));
+}
+
+const EMPLOYER_NAV: DashboardNavItem[] = [
   { key: "overview", label: "Overview", href: "/employer", icon: LayoutDashboard, mobilePrimary: true },
   { key: "search", label: "Search talent", href: "/search", icon: Search, mobilePrimary: true, mobileLabel: "Search" },
   { key: "savedSearches", label: "Saved searches", href: "/employer/saved-searches", icon: Bookmark },
