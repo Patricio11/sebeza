@@ -360,7 +360,7 @@ function TenureTimeline({
               <strong>Departed</strong> on{" "}
               <span className="tabular">{employee.departureDate}</span>
               {employee.departureCategory
-                ? `  ${departureCategoryLabel(employee.departureCategory)}`
+                ? ` · ${departureCategoryLabel(employee.departureCategory)}`
                 : ""}
             </span>
           </li>

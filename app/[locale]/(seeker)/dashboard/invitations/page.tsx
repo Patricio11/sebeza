@@ -288,7 +288,7 @@ function InvitationCard({
           </h3>
           <p className="mt-1 text-xs text-[color:var(--color-ink-soft)]">
             {professionLabel}
-            {inv.seniority ? `  ${inv.seniority}` : ""}
+            {inv.seniority ? ` · ${inv.seniority}` : ""}
             {" · "}
             <span className="inline-flex items-center gap-1">
               <MapPin className="size-3" aria-hidden="true" />
@@ -322,7 +322,7 @@ function InvitationCard({
               Invited {dfmt.format(new Date(inv.invitedAt))}
               {inv.expiresAt &&
                 inv.state === "invited" &&
-                `  responds-by ${dfmt.format(new Date(inv.expiresAt))}`}
+                ` · responds-by ${dfmt.format(new Date(inv.expiresAt))}`}
             </span>
           </div>
         </div>

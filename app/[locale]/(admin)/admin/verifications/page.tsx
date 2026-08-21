@@ -406,8 +406,8 @@ function OrgGroup({
                   {o.registrationNumber
                     ? `CIPC ${o.registrationNumber}`
                     : "No CIPC on file"}
-                  {o.industry ? `  ${o.industry}` : ""}
-                  {o.country ? `  ${o.country}` : ""}
+                  {o.industry ? ` · ${o.industry}` : ""}
+                  {o.country ? ` · ${o.country}` : ""}
                 </div>
                 <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-[color:var(--color-ink-soft)]">
                   <span>Created {relative(o.createdAt)}</span>

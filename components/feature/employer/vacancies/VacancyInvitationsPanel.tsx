@@ -196,7 +196,7 @@ export function VacancyInvitationsPanel({
                   {dfmt.format(new Date(inv.invitedAt))}
                   {inv.expiresAt &&
                     inv.state === "invited" &&
-                    `  responds-by ${dfmt.format(new Date(inv.expiresAt))}`}
+                    ` · responds-by ${dfmt.format(new Date(inv.expiresAt))}`}
                   {inv.respondedAt &&
                     inv.state !== "invited" &&
                     // The expiry cron stamps `respondedAt` when it closes
@@ -204,12 +204,12 @@ export function VacancyInvitationsPanel({
                     // states somebody actually chose. Expired means the
                     // window shut; withdrawn was us, not them.
                     (inv.state === "expired"
-                      ? `  expired ${dfmt.format(new Date(inv.respondedAt))}`
+                      ? ` · expired ${dfmt.format(new Date(inv.respondedAt))}`
                       : inv.state === "withdrawn"
-                        ? `  withdrawn ${dfmt.format(new Date(inv.respondedAt))}`
-                        : `  responded ${dfmt.format(new Date(inv.respondedAt))}`)}
+                        ? ` · withdrawn ${dfmt.format(new Date(inv.respondedAt))}`
+                        : ` · responded ${dfmt.format(new Date(inv.respondedAt))}`)}
                   {inv.noticePeriodMonths != null && (
-                    <>  notice: {inv.noticePeriodMonths} month{inv.noticePeriodMonths === 1 ? "" : "s"}</>
+                    <> · notice: {inv.noticePeriodMonths} month{inv.noticePeriodMonths === 1 ? "" : "s"}</>
                   )}
                 </p>
                 {inv.declineReason && (

@@ -95,7 +95,7 @@ export function NotificationBell({
         type="button"
         aria-haspopup="true"
         aria-expanded={open}
-        aria-label={`Notifications${unread > 0 ? `  ${unread} unread` : ""}`}
+        aria-label={`Notifications${unread > 0 ? ` · ${unread} unread` : ""}`}
         onClick={() => setOpen((v) => !v)}
         className={`relative inline-flex ${sizeClasses} items-center justify-center rounded-full border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] text-[color:var(--color-ink)] hover:border-[color:var(--color-ink)]`}
       >

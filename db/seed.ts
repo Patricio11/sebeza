@@ -1297,6 +1297,8 @@ async function seedPhase9_8Vacancies() {
       documentsRequired: [],
       status: "open" as const,
       inviteExpiryDays: 14,
+      // Two accepted against three seats: the "still short" path.
+      positions: 3,
       createdAt: new Date(now - 10 * day),
     },
     {
@@ -1314,6 +1316,7 @@ async function seedPhase9_8Vacancies() {
       documentsRequired: [],
       status: "open" as const,
       inviteExpiryDays: 7,
+      positions: 2,
       createdAt: new Date(now - 14 * day),
     },
     {
@@ -1332,6 +1335,9 @@ async function seedPhase9_8Vacancies() {
       documentsRequired: [],
       status: "filled" as const,
       inviteExpiryDays: 14,
+      // Filled with the placements to match, so the label reads
+      // "hired" rather than "accepted".
+      positions: 2,
       createdAt: new Date(now - 60 * day),
       closedAt: new Date(now - 7 * day),
     },
@@ -1360,6 +1366,7 @@ async function seedPhase9_8Vacancies() {
       documentsRequired: [],
       status: "open" as const,
       inviteExpiryDays: 14,
+      positions: 1,
       selfApplyEnabled: true,
       selfApplyToken: "sa-demo-it-support-2026-fixed01",
       salaryVisibleToApplicants: true,

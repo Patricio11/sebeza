@@ -46,7 +46,7 @@ describe("sweepStalledPipelines", () => {
 
     for (const row of fired) {
       expect(
-        pendingVacancies.has(row.subject),
+        row.subject != null && pendingVacancies.has(row.subject),
         `fired for ${row.subject}, which still has someone pending`,
       ).toBe(false);
     }

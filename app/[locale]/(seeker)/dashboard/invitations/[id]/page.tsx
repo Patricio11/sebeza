@@ -126,7 +126,7 @@ export default async function SeekerInvitationDetailPage({
             </dd>
             <dd className="mt-0.5 text-xs text-[color:var(--color-ink-soft)]">
               {professionLabel}
-              {inv.seniority ? `  ${inv.seniority}` : ""}
+              {inv.seniority ? ` · ${inv.seniority}` : ""}
             </dd>
           </div>
           <div>

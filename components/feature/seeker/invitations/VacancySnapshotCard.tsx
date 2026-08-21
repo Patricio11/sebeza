@@ -103,7 +103,7 @@ export function VacancySnapshotCard({
       </h3>
       <p className="mt-0.5 text-xs text-[color:var(--color-ink-soft)]">
         {professionLabel}
-        {snapshot.seniority ? `  ${snapshot.seniority}` : ""}
+        {snapshot.seniority ? ` · ${snapshot.seniority}` : ""}
         {" · "}
         {provinceLabel}
       </p>
