@@ -6,6 +6,31 @@ const withNextIntl = createNextIntlPlugin("./i18n/request.ts");
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  /**
+   * 2026-08-21  the sharp/libvips production outage.
+   *
+   * Every route whose bundle touches lib/storage/upload.ts (the WebP
+   * pipeline: profile photos, project images, selfies, KYC docs, org
+   * vetting) 500'd on Vercel with ERR_DLOPEN_FAILED: libvips-cpp.so
+   * not found. That broke /admin/verifications outright and was the
+   * true root cause of the /dashboard/profile sign-out failures.
+   *
+   * Why: sharp's native binary loads libvips via dlopen at runtime,
+   * not via require(), so Vercel's output file tracing never sees the
+   * dependency and leaves `@img/sharp-libvips-linux-x64/**` out of the
+   * function bundle. Locally node_modules is complete, so it never
+   * reproduces off Vercel. Confirmed against the build's own
+   * page.js.nft.json: 93 sharp files traced, zero libvips.
+   *
+   * Both key spellings are kept deliberately: the route matcher is a
+   * glob, and a key that fails to match is a silent no-op, which is
+   * exactly how this class of bug ships. A few MB per function is the
+   * price of photos that upload.
+   */
+  outputFileTracingIncludes: {
+    "**": ["./node_modules/@img/**/*"],
+    "/**": ["./node_modules/@img/**/*"],
+  },
   experimental: {
     // Keep client JS lean (No-Flash budget: <~150KB on key routes).
     optimizePackageImports: ["lucide-react", "recharts"],
