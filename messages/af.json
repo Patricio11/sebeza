@@ -974,5 +974,22 @@
       "ctaCreate": "Skep 'n gratis profiel",
       "ctaTalk": "Praat met ons"
     }
+  },
+  "pushOptIn": {
+    "title": "Word op jou foon in kennis gestel",
+    "offBody": "Wanneer 'n werkgewer jou vir 'n rol uitnooi, kan jou foon jou dadelik laat weet. Uitnodigings verval, so as jy laat daarvan hoor, kan dit jou die kans kos. Ons plaas nooit jou besonderhede in die kennisgewing self nie.",
+    "onBody": "Aan vir hierdie toestel{others, plural, =0 {} one { en # ander} other { en # ander}}. Jy kan dit hier enige tyd afskakel, en in jou voorkeure presies kies watter kennisgewings jou foon bereik.",
+    "blockedBody": "Jou blaaier blokkeer kennisgewings vir Sebenza. Ons kan nie weer van hier af vra nie: skakel dit weer aan in jou blaaierinstellings vir hierdie werf, en herlaai dan hierdie bladsy.",
+    "installBody": "Op iPhone en iPad werk kennisgewings eers wanneer Sebenza by jou tuisskerm gevoeg is. Tik Share, dan Add to Home Screen, maak Sebenza daarvandaan oop, en hierdie opsie sal verskyn.",
+    "enableCta": "Skakel kennisgewings aan",
+    "disableCta": "Skakel af op hierdie toestel",
+    "errRegister": "Hierdie toestel kon nie geregistreer word nie. Probeer asseblief weer.",
+    "errDisable": "Kon dit nie afskakel nie. Probeer asseblief weer."
+  },
+  "notificationPrefs": {
+    "inApp": "In-app",
+    "email": "E-pos",
+    "phone": "Foon",
+    "soon": "Binnekort"
   }
 }

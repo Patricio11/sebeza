@@ -195,3 +195,22 @@ know why rather than hunt for missing keys:
 was a genuine miss and was moved to `profile.projects*` keys on 2026-08-20, with an
 E2E asserting the isiZulu heading renders.
 
+
+
+## Additions since the 2026-08-16 draft
+
+**2026-08-21, web push (Phase 35).** New keys, AI-drafted in zu/xh/af and
+awaiting your review like the rest:
+
+- `pushOptIn.*`, the "Get told on your phone" card on the seeker account
+  page. `onBody` carries an ICU plural (`others`), keep it intact.
+- `notificationPrefs.*`, the In-app / Email / Phone column labels and the
+  "Soon" pill on the notification preferences panel.
+- `auth.seekerSignUp.step2.pushPref.*`, the sign-up preference checkbox.
+  English-only in all catalogs on purpose: it sits on the consent screen
+  and follows the same hold-for-human rule as its neighbours.
+
+**Known English-only surface:** the employer vacancy workspace
+(/employer/vacancies and its match page) has never been catalog-driven,
+zero translation calls. The 2026-08 hiring-loop work matched that
+existing state. Translating it is its own project, not a review item.

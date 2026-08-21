@@ -18,6 +18,7 @@
  */
 
 import { useEffect, useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
 import { Bell, BellOff, BellRing, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import {
@@ -49,6 +50,7 @@ type Phase =
   | "blocked"; // permission denied at the browser level
 
 export function PushOptIn() {
+  const t = useTranslations("pushOptIn");
   const [phase, setPhase] = useState<Phase>("loading");
   const [publicKey, setPublicKey] = useState<string | null>(null);
   const [devices, setDevices] = useState(0);
@@ -131,7 +133,7 @@ export function PushOptIn() {
         setDevices((n) => n + 1);
         setPhase("on");
       } catch {
-        setError("This device could not be registered. Please try again.");
+        setError(t("errRegister"));
       }
     });
   }
@@ -152,7 +154,7 @@ export function PushOptIn() {
         setDevices((n) => Math.max(0, n - 1));
         setPhase("off");
       } catch {
-        setError("Could not turn these off. Please try again.");
+        setError(t("errDisable"));
       }
     });
   }
@@ -176,41 +178,30 @@ export function PushOptIn() {
         </span>
         <div className="min-w-0 flex-1">
           <h2 id="push-optin-h" className="font-display text-base">
-            Get told on your phone
+            {t("title")}
           </h2>
 
           {phase === "off" && (
             <p className="mt-1 text-sm text-[color:var(--color-ink-soft)]">
-              When an employer invites you to a role, your phone can tell you
-              straight away. Invitations expire, so hearing about one late can
-              cost you the chance. We never put your details in the
-              notification itself.
+              {t("offBody")}
             </p>
           )}
 
           {phase === "on" && (
             <p className="mt-1 text-sm text-[color:var(--color-ink-soft)]">
-              On for this device
-              {devices > 1 ? ` and ${devices - 1} other` : ""}
-              {devices > 2 ? "s" : ""}. You can switch it off here at any time,
-              and choose exactly which notifications reach your phone in your
-              preferences.
+              {t("onBody", { others: Math.max(0, devices - 1) })}
             </p>
           )}
 
           {phase === "blocked" && (
             <p className="mt-1 text-sm text-[color:var(--color-ink-soft)]">
-              Your browser is blocking notifications for Sebenza. We cannot ask
-              again from here: turn them back on in your browser settings for
-              this site, then reload this page.
+              {t("blockedBody")}
             </p>
           )}
 
           {phase === "needs-install" && (
             <p className="mt-1 text-sm text-[color:var(--color-ink-soft)]">
-              On iPhone and iPad, notifications only work once Sebenza is added
-              to your home screen. Tap Share, then Add to Home Screen, open
-              Sebenza from there, and this option will appear.
+              {t("installBody")}
             </p>
           )}
 
@@ -234,9 +225,7 @@ export function PushOptIn() {
                 {pending && (
                   <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
                 )}
-                {phase === "on"
-                  ? "Turn off on this device"
-                  : "Turn on notifications"}
+                {phase === "on" ? t("disableCta") : t("enableCta")}
               </Button>
             </div>
           )}

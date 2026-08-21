@@ -974,5 +974,22 @@
       "ctaCreate": "Yenza iprofayile yasimahla",
       "ctaTalk": "Thetha nathi"
     }
+  },
+  "pushOptIn": {
+    "title": "Yaziswa efowunini yakho",
+    "offBody": "Xa umqeshi ekumemela kwindima, ifowuni yakho inokukuxelela kwangoko. Izimemo ziyaphelelwa, ngoko ukuva sele kusemva kunokukulahlekisela ithuba. Asifaki iinkcukacha zakho kwisaziso ngokwaso.",
+    "onBody": "Ivuliwe kule divayisi{others, plural, =0 {} one { nakwenye enye} other { nakwezinye ezingu-#}}. Ungayivala apha nanini na, kwaye ukhethe ukuba zeziphi izaziso ezifikelela efowunini yakho kwiimfuno zakho.",
+    "blockedBody": "Isikhangeli sakho sivala izaziso zeSebenza. Asikwazi ukubuza kwakhona sisuka apha: zivule kwiisetingi zesikhangeli sakho zale sayithi, uze uphinde ulayishe eli phepha.",
+    "installBody": "Kwi-iPhone ne-iPad, izaziso zisebenza kuphela xa iSebenza yongezwe kwiscreen sakho sasekhaya. Cofa u-Share, uze u-Add to Home Screen, vula iSebenza ukusuka apho, kwaye olu khetho luya kuvela.",
+    "enableCta": "Vula izaziso",
+    "disableCta": "Vala kule divayisi",
+    "errRegister": "Le divayisi ayikwazanga ukubhaliswa. Nceda uzame kwakhona.",
+    "errDisable": "Akukwazekanga ukuyivala. Nceda uzame kwakhona."
+  },
+  "notificationPrefs": {
+    "inApp": "Kwi-app",
+    "email": "I-imeyile",
+    "phone": "Ifowuni",
+    "soon": "Kungekudala"
   }
 }

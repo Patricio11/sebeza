@@ -876,13 +876,10 @@ export function SeekerSignUpForm({
               label={
                 <>
                   <span className="font-medium text-[color:var(--color-ink)]">
-                    Tell me on my phone when an employer invites me
+                    {t("step2.pushPref.label")}
                   </span>
                   <span className="mt-0.5 block text-xs text-[color:var(--color-ink-soft)]">
-                    Invitations have a deadline, so hearing late can cost you
-                    the chance. We never put your details in the notification
-                    itself. You will be asked to allow this on your phone after
-                    you sign in, and you can change it any time.
+                    {t("step2.pushPref.hint")}
                   </span>
                 </>
               }

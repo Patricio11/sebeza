@@ -19,6 +19,7 @@
  */
 
 import { useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
 import { updateNotificationPref } from "@/lib/notifications/actions";
 import {
   effectivePref,
@@ -75,6 +76,7 @@ function PrefRow({
   emailChannelEnabled: boolean;
   pushChannelEnabled: boolean;
 }) {
+  const t = useTranslations("notificationPrefs");
   const meta = NOTIFICATION_CATALOG[kind];
   const [pref, setPref] = useState<NotificationPref>(initialEffective);
   const [pending, startTransition] = useTransition();
@@ -132,25 +134,25 @@ function PrefRow({
       </div>
 
       <Toggle
-        label="In-app"
+        label={t("inApp")}
         on={pref.inApp}
         disabled={pending}
         onChange={toggleInApp}
       />
 
       <Toggle
-        label="Email"
+        label={t("email")}
         on={emailChannelEnabled && pref.email}
         disabled={!emailChannelEnabled || pending}
-        pill={emailChannelEnabled ? undefined : "Soon"}
+        pill={emailChannelEnabled ? undefined : t("soon")}
         onChange={toggleEmail}
       />
 
       <Toggle
-        label="Phone"
+        label={t("phone")}
         on={pushChannelEnabled && pref.push}
         disabled={!pushChannelEnabled || pending}
-        pill={pushChannelEnabled ? undefined : "Soon"}
+        pill={pushChannelEnabled ? undefined : t("soon")}
         onChange={togglePush}
       />
     </li>

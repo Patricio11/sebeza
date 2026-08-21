@@ -373,6 +373,10 @@
           "and": "and",
           "privacyLink": "Privacy Policy",
           "hint": "The Terms cover your account + acceptable use. Consent choices above stay separately revocable from your privacy centre."
+        },
+        "pushPref": {
+          "label": "Tell me on my phone when an employer invites me",
+          "hint": "Invitations have a deadline, so hearing late can cost you the chance. We never put your details in the notification itself. You will be asked to allow this on your phone after you sign in, and you can change it any time."
         }
       },
       "step3": {
@@ -1027,5 +1031,22 @@
     "no": "No",
     "required": "Required",
     "optional": "Optional"
+  },
+  "pushOptIn": {
+    "title": "Get told on your phone",
+    "offBody": "When an employer invites you to a role, your phone can tell you straight away. Invitations expire, so hearing about one late can cost you the chance. We never put your details in the notification itself.",
+    "onBody": "On for this device{others, plural, =0 {} one { and # other} other { and # others}}. You can switch it off here at any time, and choose exactly which notifications reach your phone in your preferences.",
+    "blockedBody": "Your browser is blocking notifications for Sebenza. We cannot ask again from here: turn them back on in your browser settings for this site, then reload this page.",
+    "installBody": "On iPhone and iPad, notifications only work once Sebenza is added to your home screen. Tap Share, then Add to Home Screen, open Sebenza from there, and this option will appear.",
+    "enableCta": "Turn on notifications",
+    "disableCta": "Turn off on this device",
+    "errRegister": "This device could not be registered. Please try again.",
+    "errDisable": "Could not turn these off. Please try again."
+  },
+  "notificationPrefs": {
+    "inApp": "In-app",
+    "email": "Email",
+    "phone": "Phone",
+    "soon": "Soon"
   }
 }
