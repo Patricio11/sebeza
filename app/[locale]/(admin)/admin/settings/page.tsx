@@ -34,10 +34,13 @@ export default async function SettingsPage({
         Each setting saves on its own, there is no batch save. The audit log
         records the prior and new value for every change.
       </p>
-      <SettingsForm values={values} />
-      <div className="mt-10">
-        <EmailTestPanel defaultRecipient={session.email} />
-      </div>
+      {/* The email diagnostic renders inside the Notifications tab,
+          next to the switches it exists to verify, instead of trailing
+          every tab. */}
+      <SettingsForm
+        values={values}
+        emailTestSlot={<EmailTestPanel defaultRecipient={session.email} />}
+      />
     </DashboardMasthead>
   );
 }

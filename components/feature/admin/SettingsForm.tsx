@@ -8,7 +8,16 @@ import type { SettingKey } from "@/lib/admin/settings";
 
 interface Props {
   values: Record<SettingKey, unknown>;
+  /** The email pipeline diagnostic, rendered only under Notifications. */
+  emailTestSlot?: React.ReactNode;
 }
+
+type SettingsTab =
+  | "launch"
+  | "growth"
+  | "notifications"
+  | "verification"
+  | "ranking";
 
 interface SettingRow {
   key: SettingKey;
@@ -17,68 +26,121 @@ interface SettingRow {
   hint?: string;
   /** For "managed" rows: where the real, ack-gated switch lives. */
   href?: string;
+  /** Which tab the row renders under. */
+  group: SettingsTab;
 }
+
+/** Founder decision, 2026-08-21: one page for every flag, but tabbed,
+ *  because sixty rows in a single column is a wall, not a control room.
+ *  The tab is part of the row definition so a new setting cannot be
+ *  added without deciding where it belongs. */
+const TABS: Array<{ id: SettingsTab; label: string; blurb: string }> = [
+  {
+    id: "launch",
+    label: "Launch",
+    blurb:
+      "Features that shipped dark and wait here for the day you flip them on.",
+  },
+  {
+    id: "growth",
+    label: "Growth & AI",
+    blurb:
+      "The seeker growth loop and everything the platform's AI is allowed to do.",
+  },
+  {
+    id: "notifications",
+    label: "Notifications",
+    blurb:
+      "Which channels may reach users, and when they must stay quiet.",
+  },
+  {
+    id: "verification",
+    label: "Verification & access",
+    blurb: "Identity, partnerships, and who gets through which door.",
+  },
+  {
+    id: "ranking",
+    label: "Ranking & data",
+    blurb:
+      "The numbers behind search ranking and the honesty floors on analytics.",
+  },
+];
 
 const ROWS: SettingRow[] = [
   {
     key: "freshness_band_days_fresh",
+    group: "ranking",
     label: "Fresh, confirmed within",
     type: "number",
     hint: "Days (≥1, ≤365)",
   },
   {
     key: "freshness_band_days_ageing",
+    group: "ranking",
     label: "Ageing, older than",
     type: "number",
     hint: "Days (must be > fresh)",
   },
   {
     key: "ranking_weight_freshness",
+    group: "ranking",
     label: "Freshness confidence weight",
     type: "number",
     hint: "0 – 5 (default 1.0)",
   },
   {
     key: "ranking_weight_completeness",
+    group: "ranking",
     label: "Profile completeness weight",
     type: "number",
     hint: "0 – 5 (default 1.0)",
   },
   {
     key: "ranking_weight_citizen_boost",
+    group: "ranking",
     label: "Citizen-highlight boost",
     type: "number",
     hint: "1 – 2 (default 1.08)",
   },
   {
     key: "feature_flag_2fa_enforced",
+    group: "verification",
     label: "Enforce 2FA for admin & employer sign-ins",
     type: "boolean",
   },
   {
     key: "feature_flag_email_notifications",
-    label: "Send transactional emails (Phase 8)",
+    group: "notifications",
+    label: "Email notifications",
+    hint:
+      "Transactional email for the notification kinds users opted into. Configure and test the Email provider on Integrations first.",
     type: "boolean",
   },
   {
     key: "feature_flag_gov_portal",
-    label: "Government partner portal (Phase 9)",
+    group: "verification",
+    label: "Government partner portal",
+    hint: "Read-only national analytics portal for government partners.",
     type: "boolean",
   },
   {
     key: "feature_flag_kyc_provider",
+    group: "verification",
     label: "Real KYC provider (requires partnership + creds)",
     type: "boolean",
   },
   {
     key: "feature_flag_saqa_worker",
+    group: "verification",
     label: "SAQA NLRD verification worker (requires partnership + creds)",
     type: "boolean",
   },
   {
     key: "feature_flag_employer_mix_lookup",
-    label:
-      "Gov per-employer mix lookup (9.7.6, ships dormant; activate when DEL §8 partnership lands)",
+    group: "verification",
+    label: "Per-employer mix lookup (government)",
+    hint:
+      "Ships dormant. Activate when the DEL §8 partnership lands.",
     type: "boolean",
   },
   // ── Launch switches ──────────────────────────────────────────────
@@ -88,6 +150,7 @@ const ROWS: SettingRow[] = [
   // dark-shipped flag must land a row here in the same commit.
   {
     key: "feature_flag_selfie_verification",
+    group: "launch",
     label: "Selfie verification (the Verified badge)",
     type: "boolean",
     hint:
@@ -96,6 +159,7 @@ const ROWS: SettingRow[] = [
   },
   {
     key: "feature_flag_vacancy_self_apply",
+    group: "launch",
     label: "Vacancy Self Apply (public apply links)",
     type: "boolean",
     hint:
@@ -104,6 +168,7 @@ const ROWS: SettingRow[] = [
   },
   {
     key: "feature_flag_seeker_projects",
+    group: "launch",
     label: "Work & projects on seeker profiles",
     type: "boolean",
     hint:
@@ -112,6 +177,7 @@ const ROWS: SettingRow[] = [
   },
   {
     key: "feature_flag_web_push",
+    group: "notifications",
     label: "Web push notifications (phones)",
     type: "boolean",
     hint:
@@ -121,6 +187,7 @@ const ROWS: SettingRow[] = [
   },
   {
     key: "feature_flag_sms_channel_enabled",
+    group: "notifications",
     label: "SMS notifications channel",
     type: "boolean",
     hint:
@@ -129,24 +196,28 @@ const ROWS: SettingRow[] = [
   },
   {
     key: "feature_flag_whatsapp_channel_enabled",
+    group: "notifications",
     label: "WhatsApp notifications channel",
     type: "boolean",
     hint: "Same gates as SMS, over WhatsApp Business.",
   },
   {
     key: "feature_flag_sms_quiet_hours_start",
+    group: "notifications",
     label: "SMS quiet hours start (SAST)",
     type: "number",
     hint: "0 - 23 (default 21). No SMS/WhatsApp sends after this hour.",
   },
   {
     key: "feature_flag_sms_quiet_hours_end",
+    group: "notifications",
     label: "SMS quiet hours end (SAST)",
     type: "number",
     hint: "0 - 23 (default 7). Sends resume at this hour.",
   },
   {
     key: "feature_flag_llm_curriculum_enabled",
+    group: "growth",
     label: "AI curriculum drafts",
     type: "boolean",
     hint:
@@ -155,12 +226,14 @@ const ROWS: SettingRow[] = [
   },
   {
     key: "testimonial_campaign_active",
+    group: "growth",
     label: "Testimonial campaign",
     type: "boolean",
     hint: "Shows the testimonial prompt card to eligible seekers.",
   },
   {
     key: "feature_flag_seeker_ai_coach",
+    group: "growth",
     label: "AI Coach (seekers)",
     type: "managed",
     href: "/admin/llm",
@@ -170,6 +243,7 @@ const ROWS: SettingRow[] = [
   },
   {
     key: "feature_flag_id_verification_enabled",
+    group: "verification",
     label: "ID / passport collection",
     type: "managed",
     href: "/admin/verifications",
@@ -179,12 +253,14 @@ const ROWS: SettingRow[] = [
   },
   {
     key: "feature_flag_verification_badges_visible",
-    label:
-      "Show verification badges on profiles (9.16.1, turn off while verification volume is still thin)",
+    group: "verification",
+    label: "Show verification badges on profiles",
+    hint: "Turn off while verification volume is still thin.",
     type: "boolean",
   },
   {
     key: "outcomes_min_cohort_size",
+    group: "ranking",
     label: "Outcomes minimum cohort size (k-anonymity floor)",
     type: "number",
     hint:
@@ -193,6 +269,7 @@ const ROWS: SettingRow[] = [
   },
   {
     key: "lmi_demand_floor",
+    group: "ranking",
     label: "Demand floor (Justification Index)",
     type: "number",
     hint:
@@ -201,6 +278,7 @@ const ROWS: SettingRow[] = [
   },
   {
     key: "lmi_local_supply_threshold",
+    group: "ranking",
     label: "Local supply ratio threshold",
     type: "number",
     hint:
@@ -209,6 +287,7 @@ const ROWS: SettingRow[] = [
   },
   {
     key: "lmi_foreign_fill_floor",
+    group: "ranking",
     label: "Foreign-fill share floor",
     type: "number",
     hint:
@@ -217,6 +296,7 @@ const ROWS: SettingRow[] = [
   },
   {
     key: "employer_mix_min_placements",
+    group: "ranking",
     label: "Employer-mix minimum placements",
     type: "number",
     hint:
@@ -227,117 +307,140 @@ const ROWS: SettingRow[] = [
   // Seeker growth suite  all ship dark (default OFF); flip on when ready.
   {
     key: "feature_flag_seeker_skill_journey",
+    group: "growth",
     label:
       "Seeker · The Climb, live skill journey (learning progress + visible rank payoff + seeker-set proficiency)",
     type: "boolean",
   },
   {
     key: "feature_flag_seeker_demand_pulse",
-    label:
-      "Seeker · Demand Pulse, weekly “your skill is heating up near you” nudge",
-    type: "boolean",
-  },
-  {
-    key: "feature_flag_seeker_ai_coach",
-    label:
-      "Seeker · AI Career Coach, interview practice (also requires a configured + budgeted LLM provider on /admin/llm)",
+    group: "growth",
+    label: "Seeker · Demand Pulse",
+    hint: "Weekly nudge when a seeker's skill is heating up near them.",
     type: "boolean",
   },
   {
     key: "feature_flag_living_catalog",
+    group: "growth",
     label:
       "Seeker · Living Learning Catalog, path reviews + “recommended by N of M” roll-up on learning-path cards",
     type: "boolean",
   },
   {
     key: "feature_flag_seeker_custom_skills",
+    group: "growth",
     label:
       "Seeker · Custom skills, add up to 3 self-described skills outside the taxonomy (never searchable until canonicalized)",
     type: "boolean",
   },
   {
     key: "feature_flag_skill_prereqs",
+    group: "growth",
     label:
       "Seeker · Skill prerequisites, sequence recommendations (prereqs first), “Requires:” pills, and the “Unlocks next” moment",
     type: "boolean",
   },
   {
     key: "feature_flag_city_demand",
+    group: "growth",
     label:
       "Seeker · Hyper-local demand, “Your city’s hotspots” (top-5 metros only, k-anon floor, requires the seeker’s research-insights consent)",
     type: "boolean",
   },
 ];
 
-export function SettingsForm({ values }: Props) {
+export function SettingsForm({ values, emailTestSlot }: Props) {
+  // Deep-linkable (?tab=notifications) without a navigation: reading
+  // once at mount and mirroring into the URL keeps this a plain client
+  // island with no router coupling. No-Flash: the tab switch re-renders
+  // a filtered list, nothing animates, nothing refetches.
+  const [tab, setTab] = useState<SettingsTab>(() => {
+    if (typeof window === "undefined") return "launch";
+    const t = new URLSearchParams(window.location.search).get("tab");
+    return TABS.some((x) => x.id === t) ? (t as SettingsTab) : "launch";
+  });
+
+  function switchTab(next: SettingsTab) {
+    setTab(next);
+    const url = new URL(window.location.href);
+    url.searchParams.set("tab", next);
+    window.history.replaceState(null, "", url);
+  }
+
+  const active = TABS.find((t) => t.id === tab)!;
+  const rows = ROWS.filter((r) => r.group === tab);
+  const numbers = rows.filter((r) => r.type === "number");
+  const switches = rows.filter((r) => r.type !== "number");
+
   return (
-    <div className="grid gap-10 md:grid-cols-2">
-      <section className="md:col-span-2">
-        <h2 className="mb-4 border-b-2 border-[color:var(--color-ink)] pb-2 font-display text-xl">
-          Freshness bands
-        </h2>
-        <div className="grid gap-4 md:grid-cols-2">
-          {ROWS.filter((r) => r.key.startsWith("freshness_band")).map((row) => (
-            <SettingRow key={row.key} row={row} value={values[row.key]} />
-          ))}
-        </div>
-      </section>
+    <div>
+      {/* The tab rail. Editorial, not app-chrome: an underline, not a
+          pill bar. */}
+      <div
+        role="tablist"
+        aria-label="Setting groups"
+        className="flex flex-wrap gap-x-6 gap-y-2 border-b border-[color:var(--color-hairline)]"
+      >
+        {TABS.map((t) => {
+          const isActive = t.id === tab;
+          const count = ROWS.filter((r) => r.group === t.id).length;
+          return (
+            <button
+              key={t.id}
+              role="tab"
+              aria-selected={isActive}
+              onClick={() => switchTab(t.id)}
+              className={
+                "-mb-px flex items-baseline gap-1.5 border-b-2 px-1 pb-2.5 text-[0.72rem] uppercase tracking-[0.18em] transition-colors " +
+                (isActive
+                  ? "border-[color:var(--color-ink)] font-medium text-[color:var(--color-ink)]"
+                  : "border-transparent text-[color:var(--color-ink-soft)] hover:text-[color:var(--color-ink)]")
+              }
+            >
+              {t.label}
+              <span
+                className={
+                  "text-[0.6rem] tabular-nums " +
+                  (isActive
+                    ? "text-[color:var(--color-ink-soft)]"
+                    : "text-[color:var(--color-ink-soft)]/60")
+                }
+              >
+                {count}
+              </span>
+            </button>
+          );
+        })}
+      </div>
 
-      <section className="md:col-span-2">
-        <h2 className="mb-4 border-b-2 border-[color:var(--color-ink)] pb-2 font-display text-xl">
-          Search ranking weights
-        </h2>
-        <div className="grid gap-4 md:grid-cols-3">
-          {ROWS.filter((r) => r.key.startsWith("ranking_weight")).map((row) => (
-            <SettingRow key={row.key} row={row} value={values[row.key]} />
-          ))}
-        </div>
-      </section>
+      <p className="mt-4 max-w-2xl text-sm text-[color:var(--color-ink-soft)]">
+        {active.blurb}
+      </p>
 
-      <section className="md:col-span-2">
-        <h2 className="mb-4 border-b-2 border-[color:var(--color-ink)] pb-2 font-display text-xl">
-          Outcomes (Phase 7.5)
-        </h2>
-        <div className="grid gap-4 md:grid-cols-2">
-          {ROWS.filter((r) => r.key === "outcomes_min_cohort_size").map((row) => (
-            <SettingRow key={row.key} row={row} value={values[row.key]} />
-          ))}
-        </div>
-      </section>
-
-      <section className="md:col-span-2">
-        <h2 className="mb-4 border-b-2 border-[color:var(--color-ink)] pb-2 font-display text-xl">
-          Shortage Justification Index (Phase 9.7.3)
-        </h2>
-        <p className="mb-4 text-sm text-[color:var(--color-ink-soft)]">
-          Explicit, plain-language thresholds that drive the cell
-          classifier on <code>/gov/shortage</code>. Same values feed the
-          per-employer lookup in 9.7.6.
-          <strong> The formula is published verbatim on /gov</strong>
-           policy users can argue with these numbers from the page,
-          which is the point.
-        </p>
-        <div className="grid gap-4 md:grid-cols-2">
-          {ROWS.filter((r) =>
-            ["lmi_demand_floor", "lmi_local_supply_threshold", "lmi_foreign_fill_floor", "employer_mix_min_placements"].includes(
-              r.key,
-            ),
-          ).map((row) => (
-            <SettingRow key={row.key} row={row} value={values[row.key]} />
-          ))}
-        </div>
-      </section>
-
-      <section className="md:col-span-2">
-        <h2 className="mb-4 border-b-2 border-[color:var(--color-ink)] pb-2 font-display text-xl">
-          Feature flags
-        </h2>
-        <ul className="space-y-3">
-          {ROWS.filter((r) => r.type !== "number").map((row) => (
+      {switches.length > 0 && (
+        <ul className="mt-6 grid gap-3 lg:grid-cols-2">
+          {switches.map((row) => (
             <SettingRow key={row.key} row={row} value={values[row.key]} />
           ))}
         </ul>
-      </section>
+      )}
+
+      {tab === "notifications" && emailTestSlot && (
+        <div className="mt-8">{emailTestSlot}</div>
+      )}
+
+      {numbers.length > 0 && (
+        <div className="mt-8">
+          <h2 className="mb-4 border-b-2 border-[color:var(--color-ink)] pb-2 font-display text-lg">
+            Thresholds
+          </h2>
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {numbers.map((row) => (
+              <SettingRow key={row.key} row={row} value={values[row.key]} />
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -391,8 +494,15 @@ function SettingRow({ row, value }: { row: SettingRow; value: unknown }) {
   if (row.type === "boolean") {
     const on = value === true;
     return (
-      <li className="flex items-center justify-between rounded-[var(--radius-sm)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] px-4 py-3">
-        <span className="text-sm">{row.label}</span>
+      <li className="flex items-start justify-between gap-4 rounded-[var(--radius-sm)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] px-4 py-3">
+        <div className="min-w-0">
+          <span className="text-sm">{row.label}</span>
+          {row.hint && (
+            <p className="mt-0.5 text-xs leading-relaxed text-[color:var(--color-ink-soft)]">
+              {row.hint}
+            </p>
+          )}
+        </div>
         <div className="flex items-center gap-3">
           {status === "saved" && (
             <span className="text-xs text-[color:var(--color-employed)]">Saved</span>
