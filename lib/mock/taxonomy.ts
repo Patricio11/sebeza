@@ -550,3 +550,17 @@ export function findLanguageBySlug(slug: string | null | undefined) {
   if (!slug) return null;
   return LANGUAGES.find((l) => l.slug === slug) ?? null;
 }
+
+/**
+ * Display name for an institution slug.
+ *
+ * The analytics datasets store slugs, and several surfaces were
+ * rendering them verbatim: a table cell reading "wits", and the same
+ * value in the government CSV export. Falls back to the slug itself for
+ * an institution that predates the taxonomy, because a lowercase slug
+ * is still better than an empty cell.
+ */
+export function institutionLabel(slug: string | null | undefined): string {
+  if (!slug) return "";
+  return INSTITUTIONS.find((i) => i.slug === slug)?.label ?? slug;
+}

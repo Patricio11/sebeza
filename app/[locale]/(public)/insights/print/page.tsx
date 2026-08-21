@@ -1,3 +1,4 @@
+import { institutionLabel } from "@/lib/mock/taxonomy";
 import { setRequestLocale } from "next-intl/server";
 import { dataProvider } from "@/lib/data/provider";
 import {
@@ -172,7 +173,7 @@ export default async function InsightsPrintPage({
                   className="border-b border-gray-200"
                 >
                   <td className="py-1">
-                    {c.programme} · {c.institution} · {c.province} · {c.graduationYear}
+                    {c.programme} · {institutionLabel(c.institution)} · {c.province} · {c.graduationYear}
                   </td>
                   <td className="py-1 text-right font-mono tabular">{nfmt.format(c.cohortSize)}</td>
                   <td className="py-1 text-right font-mono tabular">{nfmt.format(c.placed)}</td>

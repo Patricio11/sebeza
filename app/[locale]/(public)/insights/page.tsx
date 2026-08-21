@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { institutionLabel } from "@/lib/mock/taxonomy";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
@@ -661,7 +662,7 @@ export default async function InsightsPage({
                       >
                         <td className="px-4 py-2">{c.programme}</td>
                         <td className="px-4 py-2 text-[color:var(--color-ink-soft)]">
-                          {c.institution}
+                          {institutionLabel(c.institution)}
                         </td>
                         <td className="px-4 py-2 capitalize text-[color:var(--color-ink-soft)]">
                           {c.province}

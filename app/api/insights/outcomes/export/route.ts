@@ -10,6 +10,7 @@
  * Audit-logged as `analytics.export`.
  */
 
+import { institutionLabel } from "@/lib/mock/taxonomy";
 import { NextResponse } from "next/server";
 import { outcomesQuery } from "@/lib/analytics/outcomes";
 import { logAccess } from "@/lib/audit";
@@ -37,7 +38,7 @@ export async function GET() {
     ],
     outcomes.cohorts.map((c) => [
       c.programme,
-      c.institution,
+      institutionLabel(c.institution),
       c.province,
       c.graduationYear,
       c.cohortSize,
