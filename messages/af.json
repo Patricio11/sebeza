@@ -1222,6 +1222,60 @@
         "chipAll": "Almal",
         "yearsChip": "{years}+ jaar"
       }
+    },
+    "status": {
+      "draft": "Konsep",
+      "open": "Oop",
+      "closed": "Gesluit",
+      "filled": "Gevul"
+    },
+    "list": {
+      "title": "Vakatures",
+      "subtitle": "Privaat aan jou organisasie. Vakatures is omgekeerde-passingspesifikasies: nooi spesifieke mense, vang hul aanvaarding of weiering met ’n rede vas, en teken die plasing aan wanneer dit gevul is. Nooit ’n openbare advertensie nie.",
+      "helpCreate": "Skep ’n vakature",
+      "helpLifecycle": "Lewensiklus-toestande",
+      "helpDuplicate": "Dupliseer ’n bestaande",
+      "new": "Nuwe vakature",
+      "viewerNote": "Jou werkruimterol is Kyker, dus is die vakaturelys leesalleen vir jou. Vra ’n Eienaar of Werwer om vakatures te skep of te redigeer.",
+      "emptyHeading": "Nog geen vakatures nie",
+      "emptyCta": "Skep jou eerste vakature",
+      "duplicateTitle": "Maak die skepvorm oop, vooraf ingevul met hierdie vakature se waardes"
+    },
+    "filled": {
+      "trigger": "Merk as gevul",
+      "heading": "Wie het jy aangestel vir “{vacancyTitle}”?",
+      "lead": "Om die aanstelling nou vas te lê hou die nasionale plasingsdata eerlik, en die werksoekers wat nie gekies is nie kry ’n eerlike groeisein. Meervoudige aanstellings word toegelaat.",
+      "close": "Sluit",
+      "acceptedHeading": "Aanvaarde genooides · {count}",
+      "acceptedEmpty": "Nog geen aanvaarde genooides op hierdie vakature nie. Gebruik die soektog hieronder om ’n aanstelling van buite die uitnodigingspyplyn aan te teken.",
+      "noticeLine": "Kennistydperk: {months, plural, one {1 maand} other {# maande}}",
+      "outsideShow": "Iemand aangestel wat nie in hierdie lys is nie",
+      "outsideHide": "Versteek buite-pyplyn-soektog",
+      "outsidePlaceholder": "Soek op naam of vaardigheid",
+      "outsideAria": "Soek die aangestelde kandidaat",
+      "outsideNote": "Beperk tot kandidate in die vakature se provinsie. Buite-pyplyn-aanstellings word ná indiening via die dossier-vloei voltooi; die venster hou hulle in die tou.",
+      "selectedHeading": "Gekose aanstellings · {count}",
+      "selectedOfPositions": "Gekose aanstellings · {count} van {positions}",
+      "shortNote": "Dit is {short} minder as die {positions} wat jy gestel het. Om dit as gevul te merk sluit die vakature in elk geval, wat reg is as jy die res elders gevul het. As jy nog soek, sluit dit en nooi eerder meer mense.",
+      "hireDate": "Aanstellingsdatum (gedeel)",
+      "salaryLabel": "Salarisband (opsioneel, geld vir almal)",
+      "salaryPlaceholder": "bv. R 480k tot R 600k / jaar",
+      "skip": "Slaan oor, teken later aan",
+      "skipConfirm": "Oorslaan merk die vakature as gevul sonder om aan te teken wie jy aangestel het. Sebenza se ontledings werk beter wanneer elke gevulde vakature plasingsdata het. Is jy seker?",
+      "pickOneError": "Kies ten minste een aanstelling, of gebruik die Slaan oor-skakel.",
+      "cancel": "Kanselleer",
+      "saving": "Stoor tans",
+      "submit": "Merk gevul + teken {count, plural, one {1 aanstelling} other {# aanstellings}} aan"
+    },
+    "placements": {
+      "heading": "Plasings · {count} aangeteken",
+      "truthNote": "Slegs werkgewer-bevestigde plasings tel vir nasionale ontledings.",
+      "filledPrompt": "Hierdie vakature is as gevul gemerk: teken die plasing aan wat dit gesluit het.",
+      "filledPromptSub": "Kies die kandidaat wat jy aangestel het hieronder. Die dossier maak oop met hierdie vakature reeds gekoppel, een tik om te bevestig.",
+      "pendingHeading": "Aanvaarde genooides, teken ’n aanstelling aan",
+      "acceptedWithNotice": "Aanvaar met {months, plural, one {’n kennistydperk van 1 maand} other {’n kennistydperk van # maande}}",
+      "logHire": "Teken hierdie aanstelling aan",
+      "outsideNote": "Iemand aangestel wat nie op die aanvaarde lys is nie? Maak hul dossier oop en gebruik Merk as aangestel; om van hierdie vakature af te begin, koppel die plasing outomaties daaraan."
     }
   }
 }

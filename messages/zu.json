@@ -1222,6 +1222,60 @@
         "chipAll": "Konke",
         "yearsChip": "{years}+ iminyaka"
       }
+    },
+    "status": {
+      "draft": "Uhlaka",
+      "open": "Kuvuliwe",
+      "closed": "Kuvaliwe",
+      "filled": "Kugcwalisiwe"
+    },
+    "list": {
+      "title": "Izikhala",
+      "subtitle": "Kuyimfihlo enhlanganweni yakho. Izikhala ziyizincazelo zokufanisa okuhlehlisiwe: mema abantu abathile, uthole ukwamukela noma ukwenqaba kwabo nesizathu, bese ubhala ukubekwa uma sekugcwalisiwe. Akusoze kwaba isikhangiso somphakathi.",
+      "helpCreate": "Dala isikhala",
+      "helpLifecycle": "Izigaba zempilo",
+      "helpDuplicate": "Phinda esikhona",
+      "new": "Isikhala esisha",
+      "viewerNote": "Indima yakho endaweni yokusebenza ithi Umbukeli, ngakho uhlu lwezikhala lufundwa kuphela kuwe. Cela uMnikazi noma uMqashi ukuthi adale noma ahlele izikhala.",
+      "emptyHeading": "Azikho izikhala okwamanje",
+      "emptyCta": "Dala isikhala sakho sokuqala",
+      "duplicateTitle": "Vula ifomu lokudala seligcwaliswe ngamagugu alesi sikhala"
+    },
+    "filled": {
+      "trigger": "Maka njengokugcwalisiwe",
+      "heading": "Uqashe bani ku-“{vacancyTitle}”?",
+      "lead": "Ukubhala ukuqasha manje kugcina imininingwane yokubekwa kazwelonke ithembekile, futhi abafuni-msebenzi abangakhethwanga bathola isignali yokukhula ethembekile. Kuvunyelwe ukuqasha abaningi.",
+      "close": "Vala",
+      "acceptedHeading": "Abamukele izimemo · {count}",
+      "acceptedEmpty": "Abekho abamukele izimemo kulesi sikhala okwamanje. Sebenzisa ukusesha ngezansi ukubhala ukuqasha okuvela ngaphandle kohlu lwezimemo.",
+      "noticeLine": "Isaziso: {months, plural, one {inyanga engu-1} other {izinyanga ezingu-#}}",
+      "outsideShow": "Uqashe umuntu ongekho kulolu hlu",
+      "outsideHide": "Fihla ukusesha kwangaphandle kohlu",
+      "outsidePlaceholder": "Sesha ngegama noma ngekhono",
+      "outsideAria": "Sesha umfakizicelo oqashiwe",
+      "outsideNote": "Kukhawulelwe kubafakizicelo besifundazwe salesi sikhala. Ukuqasha kwangaphandle kohlu kuphothulwa ngohlelo lwedosiye ngemva kokuthumela; le modali iyakulinda.",
+      "selectedHeading": "Abaqashiwe abakhethiwe · {count}",
+      "selectedOfPositions": "Abaqashiwe abakhethiwe · {count} kwabangu-{positions}",
+      "shortNote": "Lokho kusilele ngabangu-{short} kwabangu-{positions} obabekile. Ukumaka lokhu njengokugcwalisiwe kuvala isikhala noma kunjalo, okulungile uma ugcwalise abanye kwenye indawo. Uma usafuna, vala lokhu bese umema abanye abantu.",
+      "hireDate": "Usuku lokuqasha (oluhlanganyelwe)",
+      "salaryLabel": "Ibhande leholo (akuphoqelekile, lisebenza kubo bonke)",
+      "salaryPlaceholder": "isb. R 480k kuya ku-R 600k / ngonyaka",
+      "skip": "Yeqa, bhala kamuva",
+      "skipConfirm": "Ukweqa kuzomaka isikhala njengokugcwalisiwe ngaphandle kokubhala ukuthi uqashe bani. Izibalo zeSebenza zisebenza kangcono uma sonke isikhala esigcwalisiwe sinemininingwane yokubekwa. Uqinisekile?",
+      "pickOneError": "Khetha okungenani oyedwa oqashiwe, noma usebenzise ilinki ethi Yeqa.",
+      "cancel": "Khansela",
+      "saving": "Iyalondoloza",
+      "submit": "Maka kugcwalisiwe + bhala {count, plural, one {oqashiwe ongu-1} other {abaqashiwe abangu-#}}"
+    },
+    "placements": {
+      "heading": "Ukubekwa · {count} okubhaliwe",
+      "truthNote": "Ukubekwa okuqinisekiswe umqashi kuphela okubalwa ezibalweni zikazwelonke.",
+      "filledPrompt": "Lesi sikhala simakwe njengokugcwalisiwe: bhala ukubekwa okusivalile.",
+      "filledPromptSub": "Khetha umfakizicelo omqashile ngezansi. Idosiye livuleka nalesi sikhala sesixhunyiwe, ukuchofoza kanye ukuqinisekisa.",
+      "pendingHeading": "Abamukele izimemo, bhala ukuqasha",
+      "acceptedWithNotice": "Wamukela {months, plural, one {ngesaziso senyanga engu-1} other {ngesaziso sezinyanga ezingu-#}}",
+      "logHire": "Bhala lokhu kuqasha",
+      "outsideNote": "Uqashe umuntu ongekho ohlwini lwabamukele? Vula idosiye lakhe usebenzise okuthi Maka njengoqashiwe; ukuqala kulesi sikhala kuxhuma ukubekwa kuso ngokuzenzakalela."
     }
   }
 }

@@ -30,6 +30,7 @@
  */
 
 import { Link } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
 import { Briefcase, CheckCircle2, Lock, Plus, Trophy } from "lucide-react";
 
 import type { VacancyPlacementRow } from "@/lib/employer/placements";
@@ -59,6 +60,7 @@ export function VacancyPlacementsPanel({
   invitations,
   locale,
 }: Props) {
+  const t = useTranslations("employerVacancies.placements");
   const accepted = invitations.filter((i) => ACCEPTED_STATES.has(i.state));
   const placedProfileIds = new Set(placements.map((p) => p.profileId));
   const pendingAccepted = accepted.filter(
@@ -102,12 +104,11 @@ export function VacancyPlacementsPanel({
             id="placements-h"
             className="font-display text-xl text-[color:var(--color-ink)]"
           >
-            Placements · {placements.length} logged
+            {t("heading", { count: placements.length })}
           </h2>
         </div>
         <p className="text-xs text-[color:var(--color-ink-soft)]">
-          Only <strong>employer-confirmed</strong> placements count toward
-          national analytics (Placement-Truth Rule).
+          {t("truthNote")}
         </p>
       </header>
 
@@ -115,12 +116,10 @@ export function VacancyPlacementsPanel({
       {filledPrompt && (
         <div className="mb-4 rounded-[var(--radius-sm)] border border-[color:var(--color-accent)] bg-[color:var(--color-paper)] p-3 text-sm">
           <p className="font-display text-base text-[color:var(--color-ink)]">
-            This vacancy is marked <strong>filled</strong>  log the
-            placement that closed it.
+            {t("filledPrompt")}
           </p>
           <p className="mt-1 text-xs text-[color:var(--color-ink-soft)]">
-            Pick the candidate you hired below. The dossier opens with
-            this vacancy already linked, one tap to confirm.
+            {t("filledPromptSub")}
           </p>
         </div>
       )}
@@ -178,7 +177,7 @@ export function VacancyPlacementsPanel({
       {canEdit && pendingAccepted.length > 0 && (
         <div>
           <p className="mb-2 text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--color-ink-soft)]">
-            Accepted invitees, log a hire
+            {t("pendingHeading")}
           </p>
           <ul className="space-y-2">
             {pendingAccepted.map((inv) => (
@@ -196,7 +195,7 @@ export function VacancyPlacementsPanel({
                   {inv.state === "accepted_with_notice" &&
                     inv.noticePeriodMonths != null && (
                       <p className="mt-0.5 text-xs text-[color:var(--color-ink-soft)]">
-                        Accepted with {inv.noticePeriodMonths}-month notice
+                        {t("acceptedWithNotice", { months: inv.noticePeriodMonths })}
                       </p>
                     )}
                 </div>
@@ -207,7 +206,7 @@ export function VacancyPlacementsPanel({
                   className="inline-flex h-10 items-center gap-2 rounded-[var(--radius-pill)] border-2 border-[color:var(--color-ink)] bg-[color:var(--color-ink)] px-4 text-sm font-medium text-[color:var(--color-paper)] hover:bg-[color:var(--color-brand-strong)] hover:border-[color:var(--color-brand-strong)]"
                 >
                   <Briefcase className="size-4" aria-hidden="true" />
-                  Log this hire
+                  {t("logHire")}
                 </Link>
               </li>
             ))}
@@ -223,10 +222,7 @@ export function VacancyPlacementsPanel({
       {canEdit && (
         <p className="mt-4 text-xs text-[color:var(--color-ink-soft)]">
           <Plus className="mr-1 inline size-3" aria-hidden="true" />
-          Hired someone not on the accepted list? Open their dossier and
-          use <em>Mark as hired</em>  pass{" "}
-          <code>?vacancyId={vacancyId}</code> in the URL to link the
-          placement to this vacancy.
+          {t("outsideNote")}
         </p>
       )}
     </section>

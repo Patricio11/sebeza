@@ -1222,6 +1222,60 @@
         "chipAll": "Konke",
         "yearsChip": "{years}+ iminyaka"
       }
+    },
+    "status": {
+      "draft": "Uyilo",
+      "open": "Ivuliwe",
+      "closed": "Ivaliwe",
+      "filled": "Izalisiwe"
+    },
+    "list": {
+      "title": "Izithuba",
+      "subtitle": "Yimfihlo kumbutho wakho. Izithuba ziinkcazelo zokuhambelanisa okubuyisiweyo: mema abantu abathile, ufumane ukwamkela okanye ukukhaba kwabo nesizathu, uze ubhale ukubekwa xa sele izalisiwe. Ayize ibe sisibhengezo soluntu.",
+      "helpCreate": "Yenza isithuba",
+      "helpLifecycle": "Amanqanaba obomi",
+      "helpDuplicate": "Phinda esikhoyo",
+      "new": "Isithuba esitsha",
+      "viewerNote": "Indima yakho kwindawo yokusebenza nguMboneleli, ngoko uluhlu lwezithuba lufundwa kuphela kuwe. Cela uMnini okanye uMqeshi ukuba enze okanye ahlele izithuba.",
+      "emptyHeading": "Akukho zithuba okwangoku",
+      "emptyCta": "Yenza isithuba sakho sokuqala",
+      "duplicateTitle": "Vula ifomu yokudala sele izaliswe ngamaxabiso esi sithuba"
+    },
+    "filled": {
+      "trigger": "Phawula njengezalisiweyo",
+      "heading": "Uqeshe bani ku-“{vacancyTitle}”?",
+      "lead": "Ukubhala uqesho ngoku kugcina idatha yokubekwa kazwelonke inyanisekile, kwaye abafuni-msebenzi abangakhethwanga bafumana umqondiso wokukhula onyanisekileyo. Kuvunyelwe uqesho oluninzi.",
+      "close": "Vala",
+      "acceptedHeading": "Abamkele izimemo · {count}",
+      "acceptedEmpty": "Abekho abamkele izimemo kwesi sithuba okwangoku. Sebenzisa ukhangelo olungezantsi ukubhala uqesho oluvela ngaphandle koluhlu lwezimemo.",
+      "noticeLine": "Isaziso: {months, plural, one {inyanga e-1} other {iinyanga ezingu-#}}",
+      "outsideShow": "Uqeshe umntu ongekhoyo kolu luhlu",
+      "outsideHide": "Fihla ukhangelo lwangaphandle koluhlu",
+      "outsidePlaceholder": "Khangela ngegama okanye ngesakhono",
+      "outsideAria": "Khangela umfaki-sicelo oqeshiweyo",
+      "outsideNote": "Kuphelele kubafaki-zicelo bephondo lesi sithuba. Uqesho lwangaphandle koluhlu lugqitywa ngohlelo lwedosiye emva kokuthumela; le modali iyalulinda.",
+      "selectedHeading": "Abaqeshiweyo abakhethiweyo · {count}",
+      "selectedOfPositions": "Abaqeshiweyo abakhethiweyo · {count} kwabangu-{positions}",
+      "shortNote": "Oko kushiyeka ngabangu-{short} kwabangu-{positions} obamiseleyo. Ukuphawula oku njengokuzalisiweyo kuvala isithuba nangona kunjalo, nto leyo ilungileyo ukuba ugcwalise abanye kwenye indawo. Ukuba usakhangela, vala oku uze umeme abanye abantu.",
+      "hireDate": "Umhla woqesho (owabelwanayo)",
+      "salaryLabel": "Ibhendi yomvuzo (ayinyanzelekanga, isebenza kubo bonke)",
+      "salaryPlaceholder": "umz. R 480k ukuya ku-R 600k / ngonyaka",
+      "skip": "Tsiba, bhala kamva",
+      "skipConfirm": "Ukutsiba kuya kuphawula isithuba njengesizalisiweyo ngaphandle kokubhala ukuba uqeshe bani. Izibalo zeSebenza zisebenza ngcono xa sonke isithuba esizalisiweyo sinedatha yokubekwa. Uqinisekile?",
+      "pickOneError": "Khetha ubuncinane omnye oqeshiweyo, okanye usebenzise ikhonkco elithi Tsiba.",
+      "cancel": "Rhoxisa",
+      "saving": "Iyagcina",
+      "submit": "Phawula izalisiwe + bhala {count, plural, one {oqeshiweyo om-1} other {abaqeshiweyo abangu-#}}"
+    },
+    "placements": {
+      "heading": "Ukubekwa · {count} okubhaliweyo",
+      "truthNote": "Kuphela kukubekwa okuqinisekiswe ngumqeshi okubalwa kwizibalo zikazwelonke.",
+      "filledPrompt": "Esi sithuba siphawulwe njengesizalisiweyo: bhala ukubekwa okusivalileyo.",
+      "filledPromptSub": "Khetha umfaki-sicelo omqeshileyo ngezantsi. Idosiye livuleka nesi sithuba sele sinxulunyanisiwe, ucofo olunye ukuqinisekisa.",
+      "pendingHeading": "Abamkele izimemo, bhala uqesho",
+      "acceptedWithNotice": "Wamkela {months, plural, one {ngesaziso senyanga e-1} other {ngesaziso seenyanga ezingu-#}}",
+      "logHire": "Bhala olu qesho",
+      "outsideNote": "Uqeshe umntu ongekhoyo kuluhlu lwabamkeleyo? Vula idosiye yakhe usebenzise u-Phawula njengoqeshiweyo; ukuqala kwesi sithuba kunxulumanisa ukubekwa kuso ngokuzenzekelayo."
     }
   }
 }

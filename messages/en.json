@@ -1279,6 +1279,60 @@
         "chipAll": "All",
         "yearsChip": "{years}+ yrs"
       }
+    },
+    "status": {
+      "draft": "Draft",
+      "open": "Open",
+      "closed": "Closed",
+      "filled": "Filled"
+    },
+    "list": {
+      "title": "Vacancies",
+      "subtitle": "Private to your organisation. Vacancies are reverse-matching specifications: invite specific people, capture their accept or decline with a reason, and log the placement when filled. Never a public posting.",
+      "helpCreate": "Create a vacancy",
+      "helpLifecycle": "Lifecycle states",
+      "helpDuplicate": "Duplicate an existing",
+      "new": "New vacancy",
+      "viewerNote": "Your workspace role is Viewer, so the vacancy list is read-only for you. Ask an Owner or Recruiter to create or edit vacancies.",
+      "emptyHeading": "No vacancies yet",
+      "emptyCta": "Create your first vacancy",
+      "duplicateTitle": "Open the create form pre-filled with this vacancy's values"
+    },
+    "filled": {
+      "trigger": "Mark as filled",
+      "heading": "Who did you hire for “{vacancyTitle}”?",
+      "lead": "Capturing the hire now keeps the national placement data honest, and the seekers who weren’t selected get an honest growth signal. Multiple hires allowed.",
+      "close": "Close",
+      "acceptedHeading": "Accepted invitees · {count}",
+      "acceptedEmpty": "No accepted invitees on this vacancy yet. Use the search below to log a hire from outside the invitation pipeline.",
+      "noticeLine": "Notice: {months, plural, one {1 month} other {# months}}",
+      "outsideShow": "Hired someone not in this list",
+      "outsideHide": "Hide outside-pipeline search",
+      "outsidePlaceholder": "Search by name or skill",
+      "outsideAria": "Search for the hired candidate",
+      "outsideNote": "Scoped to candidates in the vacancy’s province. Outside-pipeline hires complete via the dossier flow after submit; the modal queues them.",
+      "selectedHeading": "Selected hires · {count}",
+      "selectedOfPositions": "Selected hires · {count} of {positions}",
+      "shortNote": "That is {short} short of the {positions} you set. Marking this filled closes the vacancy anyway, which is fine if you filled the rest elsewhere. If you are still looking, close this and invite more people instead.",
+      "hireDate": "Hire date (shared)",
+      "salaryLabel": "Salary band (optional, applies to all)",
+      "salaryPlaceholder": "e.g. R 480k to R 600k / year",
+      "skip": "Skip, log later",
+      "skipConfirm": "Skip will mark the vacancy filled without logging who you hired. Sebenza’s analytics work better when every filled vacancy has placement data. Are you sure?",
+      "pickOneError": "Pick at least one hire, or use the Skip link.",
+      "cancel": "Cancel",
+      "saving": "Saving",
+      "submit": "Mark filled + log {count, plural, one {1 hire} other {# hires}}"
+    },
+    "placements": {
+      "heading": "Placements · {count} logged",
+      "truthNote": "Only employer-confirmed placements count toward national analytics.",
+      "filledPrompt": "This vacancy is marked filled: log the placement that closed it.",
+      "filledPromptSub": "Pick the candidate you hired below. The dossier opens with this vacancy already linked, one tap to confirm.",
+      "pendingHeading": "Accepted invitees, log a hire",
+      "acceptedWithNotice": "Accepted with {months, plural, one {a 1-month} other {a #-month}} notice",
+      "logHire": "Log this hire",
+      "outsideNote": "Hired someone not on the accepted list? Open their dossier and use Mark as hired; starting from this vacancy links the placement to it automatically."
     }
   }
 }

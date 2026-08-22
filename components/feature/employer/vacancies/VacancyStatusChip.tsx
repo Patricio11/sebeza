@@ -1,5 +1,5 @@
+import { useTranslations } from "next-intl";
 import {
-  VACANCY_STATUS_LABEL,
   VACANCY_STATUS_TONE,
   type VacancyStatus,
 } from "@/lib/employer/vacancies-types";
@@ -23,6 +23,7 @@ export function VacancyStatusChip({
   status: VacancyStatus;
   className?: string;
 }) {
+  const t = useTranslations("employerVacancies.status");
   const tone = VACANCY_STATUS_TONE[status];
   return (
     <span
@@ -32,7 +33,7 @@ export function VacancyStatusChip({
         className,
       )}
     >
-      {VACANCY_STATUS_LABEL[status]}
+      {t(status)}
     </span>
   );
 }

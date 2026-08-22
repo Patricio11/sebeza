@@ -10,7 +10,8 @@
  * without horizontal scroll.
  */
 
-import { setRequestLocale } from "next-intl/server";
+import { setRequestLocale, getTranslations } from "next-intl/server";
+import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
 import { verifyEmployer } from "@/lib/auth/dal";
@@ -40,6 +41,7 @@ export default async function VacanciesListPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
+  const tl = await getTranslations("employerVacancies.list");
   const session = await verifyEmployer();
 
   const [role, vacancies] = await Promise.all([
@@ -61,8 +63,8 @@ export default async function VacanciesListPage({
     <DashboardMasthead
       role="employer"
       pageEyebrow={session.name ?? "Employer workspace"}
-      pageTitle="Vacancies"
-      pageSubtitle="Private to your organisation. Vacancies are reverse-matching specifications, invite specific people, capture their accept / decline-with-reason, log the placement when filled. Never a public posting."
+      pageTitle={tl("title")}
+      pageSubtitle={tl("subtitle")}
       pageActions={
         canEdit ? (
           <Link
@@ -70,22 +72,20 @@ export default async function VacanciesListPage({
             className="inline-flex h-10 items-center gap-2 rounded-[var(--radius-pill)] bg-[color:var(--color-ink)] px-4 text-sm font-medium text-[color:var(--color-paper)] shadow-press hover:-translate-y-0.5"
           >
             <Plus className="size-4" aria-hidden="true" />
-            New vacancy
+            {tl("new")}
           </Link>
         ) : null
       }
     >
       {/* Phase 10.1  help deep-links (D6). */}
       <div className="mb-4 flex flex-wrap items-center gap-2">
-        <HelpLink slug="creating-a-vacancy" label="Create a vacancy" />
-        <HelpLink slug="vacancy-lifecycle" label="Lifecycle states" />
-        <HelpLink slug="duplicate-vacancy" label="Duplicate an existing" />
+        <HelpLink slug="creating-a-vacancy" label={tl("helpCreate")} />
+        <HelpLink slug="vacancy-lifecycle" label={tl("helpLifecycle")} />
+        <HelpLink slug="duplicate-vacancy" label={tl("helpDuplicate")} />
       </div>
       {!canEdit && (
         <p className="mb-6 rounded-[var(--radius-sm)] border border-dashed border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] px-4 py-3 text-xs text-[color:var(--color-ink-soft)]">
-          Your workspace role is <strong>Viewer</strong>  vacancy list is
-          read-only. Ask an Owner or Recruiter to create or edit
-          vacancies.
+          {tl("viewerNote")}
         </p>
       )}
 
@@ -120,13 +120,14 @@ export default async function VacanciesListPage({
 }
 
 function EmptyState({ canEdit }: { canEdit: boolean }) {
+  const tl = useTranslations("employerVacancies.list");
   return (
     <div className="rounded-[var(--radius-md)] border border-dashed border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-8 text-center md:p-12">
       <Briefcase
         className="mx-auto size-8 text-[color:var(--color-ink-soft)]"
         aria-hidden="true"
       />
-      <h2 className="mt-4 font-display text-xl">No vacancies yet</h2>
+      <h2 className="mt-4 font-display text-xl">{tl("emptyHeading")}</h2>
       <p className="mx-auto mt-2 max-w-md text-sm text-[color:var(--color-ink-soft)]">
         A vacancy is a private hiring specification. Create one to
         reverse-match against the talent base and invite specific
@@ -138,7 +139,7 @@ function EmptyState({ canEdit }: { canEdit: boolean }) {
           className="mt-6 inline-flex h-10 items-center gap-2 rounded-[var(--radius-pill)] bg-[color:var(--color-ink)] px-4 text-sm font-medium text-[color:var(--color-paper)] shadow-press hover:-translate-y-0.5"
         >
           <Plus className="size-4" aria-hidden="true" />
-          Create your first vacancy
+          {tl("emptyCta")}
         </Link>
       )}
     </div>
@@ -154,6 +155,7 @@ function VacancyCard({
   showSalary: boolean;
   canEdit: boolean;
 }) {
+  const tl = useTranslations("employerVacancies.list");
   const professionLabel =
     PROFESSIONS.find((p) => p.slug === vacancy.professionSlug)?.label ??
     vacancy.professionSlug;
@@ -233,7 +235,7 @@ function VacancyCard({
               `/employer/vacancies/new?duplicateFrom=${vacancy.id}` as never
             }
             className="inline-flex h-8 items-center gap-1.5 rounded-[var(--radius-pill)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] px-3 text-xs text-[color:var(--color-ink-soft)] hover:border-[color:var(--color-ink)] hover:text-[color:var(--color-ink)]"
-            title="Open the create form pre-filled with this vacancy's values"
+            title={tl("duplicateTitle")}
           >
             <Copy className="size-3" aria-hidden="true" />
             Duplicate

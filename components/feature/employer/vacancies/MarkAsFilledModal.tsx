@@ -43,6 +43,7 @@ import {
   UserPlus,
   X,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { DatePicker } from "@/components/ui/DatePicker";
 
 interface Props {
@@ -55,7 +56,7 @@ interface Props {
    *  Parent (vacancy detail page) passes the existing list it
    *  already loads for the pipeline panel  no extra round trip. */
   acceptedInvitees: InvitationRow[];
-  /** Renders the trigger button label. Defaults to "Mark as filled". */
+  /** Renders the trigger button label. Defaults to the translated "Mark as filled". */
   triggerLabel?: string;
 }
 
@@ -76,8 +77,9 @@ export function MarkAsFilledModal({
   vacancyTitle,
   acceptedInvitees,
   positions = null,
-  triggerLabel = "Mark as filled",
+  triggerLabel,
 }: Props) {
+  const t = useTranslations("employerVacancies.filled");
   const [open, setOpen] = useState(false);
   return (
     <>
@@ -87,7 +89,7 @@ export function MarkAsFilledModal({
         size="sm"
         onClick={() => setOpen(true)}
       >
-        {triggerLabel}
+        {triggerLabel ?? t("trigger")}
       </Button>
       {open && (
         <Sheet
@@ -117,6 +119,7 @@ function Sheet({
   positions?: number | null;
   onClose: () => void;
 }) {
+  const t = useTranslations("employerVacancies.filled");
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -214,7 +217,7 @@ function Sheet({
   async function onSubmit() {
     setError(null);
     if (selected.size === 0) {
-      setError("Pick at least one hire, or use the Skip link.");
+      setError(t("pickOneError"));
       return;
     }
 
@@ -283,7 +286,7 @@ function Sheet({
   async function onSkip() {
     if (
       !window.confirm(
-        "Skip will mark the vacancy filled without logging who you hired. Sebenza's analytics work better when every filled vacancy has placement data, are you sure?",
+        t("skipConfirm"),
       )
     )
       return;
@@ -322,19 +325,17 @@ function Sheet({
               id="mark-filled-h"
               className="font-display text-xl text-[color:var(--color-ink)]"
             >
-              Who did you hire for &ldquo;{vacancyTitle}&rdquo;?
+              {t("heading", { vacancyTitle })}
             </h2>
             <p className="mt-1 text-xs text-[color:var(--color-ink-soft)]">
-              Capturing the hire now powers Placement-Truth + the seekers
-              who weren&rsquo;t selected get an honest growth signal.
-              Multiple hires allowed.
+              {t("lead")}
             </p>
           </div>
           <button
             type="button"
             onClick={onClose}
             disabled={pending}
-            aria-label="Close"
+            aria-label={t("close")}
             className="rounded-[var(--radius-pill)] p-1 text-[color:var(--color-ink-soft)] hover:text-[color:var(--color-ink)]"
           >
             <X className="size-5" aria-hidden="true" />
@@ -346,12 +347,11 @@ function Sheet({
           {/* Section A  Accepted invitees */}
           <section>
             <h3 className="mb-2 text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--color-ink-soft)]">
-              Accepted invitees  {acceptedInvitees.length}
+              {t("acceptedHeading", { count: acceptedInvitees.length })}
             </h3>
             {acceptedInvitees.length === 0 ? (
               <p className="rounded-[var(--radius-sm)] border border-dashed border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] px-3 py-2 text-xs text-[color:var(--color-ink-soft)]">
-                No accepted invitees on this vacancy yet. Use the search
-                below to log a hire from outside the invitation pipeline.
+                {t("acceptedEmpty")}
               </p>
             ) : (
               <ul className="flex flex-col gap-2">
@@ -387,8 +387,7 @@ function Sheet({
                                       className="ml-1 inline size-3 align-text-bottom"
                                       aria-hidden="true"
                                     />{" "}
-                                    Notice: {inv.noticePeriodMonths} month
-                                    {inv.noticePeriodMonths === 1 ? "" : "s"}
+                                    {t("noticeLine", { months: inv.noticePeriodMonths })}
                                   </>
                                 )}
                             </>
@@ -411,8 +410,8 @@ function Sheet({
             >
               <UserPlus className="size-3.5" aria-hidden="true" />
               {showTypeahead
-                ? "Hide outside-pipeline search"
-                : "Hired someone not in this list"}
+                ? t("outsideHide")
+                : t("outsideShow")}
             </button>
             {showTypeahead && (
               <div className="mt-3">
@@ -426,9 +425,9 @@ function Sheet({
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                     disabled={pending}
-                    placeholder="Search by name or skill"
+                    placeholder={t("outsidePlaceholder")}
                     className="w-full bg-transparent text-sm outline-none"
-                    aria-label="Search for the hired candidate"
+                    aria-label={t("outsideAria")}
                   />
                   {searching && (
                     <Loader2
@@ -438,9 +437,7 @@ function Sheet({
                   )}
                 </div>
                 <p className="mt-1 text-[0.65rem] text-[color:var(--color-ink-soft)]">
-                  Scoped to candidates in the vacancy&rsquo;s province.
-                  Outside-pipeline hires complete via the dossier flow
-                  after submit, the modal queues them.
+                  {t("outsideNote")}
                 </p>
                 {results.length > 0 && (
                   <ul className="mt-2 flex flex-col gap-1">
@@ -477,18 +474,15 @@ function Sheet({
           {selectedList.length > 0 && (
             <section className="mt-6 rounded-[var(--radius-md)] border-2 border-[color:var(--color-ink)] bg-[color:var(--color-brand-tint)] p-4">
               <h3 className="mb-2 text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--color-ink)]">
-                Selected hires  {selectedList.length}
-                {positions != null && positions > 0 && ` of ${positions}`}
+                {positions != null && positions > 0
+                  ? t("selectedOfPositions", { count: selectedList.length, positions })
+                  : t("selectedHeading", { count: selectedList.length })}
               </h3>
               {positions != null &&
                 positions > 0 &&
                 selectedList.length < positions && (
                   <p className="mb-3 text-xs text-[color:var(--color-ink)]">
-                    That is {positions - selectedList.length} short of the{" "}
-                    {positions} you set. Marking this filled closes the
-                    vacancy anyway, which is fine if you filled the rest
-                    elsewhere. If you are still looking, close the modal and
-                    invite more people instead.
+                    {t("shortNote", { short: positions - selectedList.length, positions })}
                   </p>
                 )}
               <ul className="mb-3 flex flex-col gap-1">
@@ -523,7 +517,7 @@ function Sheet({
                 <div>
                   <DatePicker
                     id="hire-date"
-                    label="Hire date (shared)"
+                    label={t("hireDate")}
                     value={hiredAt}
                     onChange={setHiredAt}
                     disabled={pending}
@@ -534,7 +528,7 @@ function Sheet({
                     htmlFor="shared-salary"
                     className="block text-[0.65rem] uppercase tracking-[0.18em] text-[color:var(--color-ink)]"
                   >
-                    Salary band (optional, applies to all)
+                    {t("salaryLabel")}
                   </label>
                   <input
                     id="shared-salary"
@@ -543,7 +537,7 @@ function Sheet({
                     onChange={(e) => setSalary(e.target.value)}
                     disabled={pending}
                     maxLength={80}
-                    placeholder="e.g. R 480k, 600k / year"
+                    placeholder={t("salaryPlaceholder")}
                     className="mt-1 w-full rounded-[var(--radius-sm)] border border-[color:var(--color-hairline)] bg-[color:var(--color-paper)] px-2 py-1.5 text-sm"
                   />
                 </div>
@@ -573,7 +567,7 @@ function Sheet({
             disabled={pending}
             className="text-[0.7rem] uppercase tracking-[0.18em] text-[color:var(--color-ink-soft)] hover:text-[color:var(--color-ink)] hover:underline"
           >
-            Skip, log later
+            {t("skip")}
           </button>
           <div className="flex gap-2">
             <Button
@@ -583,7 +577,7 @@ function Sheet({
               onClick={onClose}
               disabled={pending}
             >
-              Cancel
+              {t("cancel")}
             </Button>
             <Button
               type="button"
@@ -592,9 +586,7 @@ function Sheet({
               onClick={onSubmit}
               disabled={pending || selected.size === 0}
             >
-              {pending
-                ? "Saving"
-                : `Mark filled + log ${selectedList.length} hire${selectedList.length === 1 ? "" : "s"}`}
+              {pending ? t("saving") : t("submit", { count: selectedList.length })}
             </Button>
           </div>
         </div>
