@@ -54,12 +54,22 @@ for (const video of RUN) {
     recordVideo: { dir: outDir, size: { width: W, height: H } },
   });
   const page = await context.newPage();
+  // Recording starts the moment the page exists, so everything up to
+  // fonts-ready is captured as BLANK frames (Google Fonts loads with
+  // display=block, which hides all text until the font arrives).
+  // Measure that lead and cut it off in ffmpeg, or the published video
+  // opens on seconds of white and the hook is not on frame one
+  // (founder caught this on v12, 2026-08-22).
+  const createdAt = Date.now();
   await page.goto("file://" + path.join(srcDir, video.template).replace(/\\/g, "/"));
   await page.evaluate((mark) => {
     document.querySelectorAll("[data-mark]").forEach((el) => (el.innerHTML = mark));
   }, MARK);
   await page.evaluate(() => document.fonts.ready);
   await page.waitForTimeout(400);
+  // Keep ~0.15s of painted hook before play so frame one is the hook,
+  // never the blank pre-fonts page.
+  const leadMs = Math.max(0, Date.now() - createdAt - 150);
   await page.evaluate(() => document.body.classList.add("play")); // choreography starts here
   await page.waitForTimeout(video.durationMs + 400);
   await context.close();
@@ -68,7 +78,7 @@ for (const video of RUN) {
   const mp4 = path.join(outDir, video.out);
   const res = spawnSync(
     ffmpeg,
-    ["-y", "-i", webm, "-c:v", "libx264", "-preset", "slow", "-crf", "20", "-pix_fmt", "yuv420p", "-r", "30", "-movflags", "+faststart", mp4],
+    ["-y", "-ss", (leadMs / 1000).toFixed(2), "-i", webm, "-c:v", "libx264", "-preset", "slow", "-crf", "20", "-pix_fmt", "yuv420p", "-r", "30", "-movflags", "+faststart", mp4],
     { stdio: ["ignore", "ignore", "pipe"] },
   );
   if (res.status !== 0) throw new Error(`ffmpeg failed for ${video.out}: ${res.stderr}`);

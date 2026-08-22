@@ -152,6 +152,48 @@ That is the part most platforms get backwards. #Sebenza #YouGetFound #Jobs #Sout
 *Pairs with V13, post it the day after. Filming note: V14 opens the invitation V13 creates, so
 they must be recorded together, in order, against a freshly seeded test database.*
 
+### V15 · Highlight SA citizens (23s)
+**Hook:** "One tap groups South Africans first."
+**Beats:** the real /search: results for "developer" → open filters → tick "Highlight SA
+citizens" → the results regroup with the citizen treatment, nobody disappears.
+**Overlays:** "Employers sometimes must hire local. So we made it honest." → "A highlight. Not
+a filter." → "SA citizens grouped first. Nobody removed." → "Nationality is shown, never a
+barrier."
+**Caption:** Employers sometimes need to hire local. So we built the honest version: one tap
+groups South African citizens first, and nobody is removed from the results. Matched by skill
+and place, always. #Sebenza #SouthAfrica #Jobs
+**Cover:** none needed (opens on the real product)
+
+### V16 · The interview, on the record (38s)
+**Hook:** "Interviews used to happen over WhatsApp. Not any more."
+**Beats:** the real scheduling flow, both chairs: the employer opens an accepted candidate's
+row → date, time, format, place and instructions in one card → Schedule. Then the candidate's
+side: the same invitation, every detail, add-to-calendar, one tap to Confirm.
+**Overlays:** "An accepted candidate, waiting on a time." → "Date, time, format, place,
+instructions. One card." → "Sent. The candidate gets every detail, instantly." → "When, where,
+what to bring. Add to calendar, one tap." → "Confirmed. Both sides see the same facts."
+**Caption:** The interview is the most human step of hiring, and it used to happen off the
+record. Now the details live in one card, the candidate confirms with one tap, and both sides
+see the same facts. #Sebenza #Jobs #Hiring
+**Cover:** none needed (opens on the real product)
+*Records against the seeded test DB; the block clears prior interviews first (the
+one-active-per-invitation index refuses a second take otherwise).*
+
+### V17 · From attended to hired (25s)
+**Hook:** "The interview happened. Then what?"
+**Beats:** the interviews agenda asks the one honest question, "Did they attend?" → Attended →
+the row becomes "Log this hire" → the dossier's mark-as-hired card with the vacancy already
+attached.
+**Overlays:** "One honest question: did they attend?" → "Attended becomes a doorway: Log this
+hire." → "The vacancy rides along. Role, date, done." → "A hire only counts when it's
+confirmed. That's the rule."
+**Caption:** Most platforms lose the story after the interview. Here attendance is recorded
+honestly and an attended interview becomes a confirmed hire on the national record. A hire only
+counts when it's confirmed. #Sebenza #Jobs #SouthAfrica
+**Cover:** none needed (opens on the real product)
+*Pairs with V16, post it soon after. Staged: a confirmed past interview + the contact reveal
+the real flow would have required.*
+
 *This is the other half of V6's promise. V6 says employers search and you get found; this one
 shows it happening. The closing line is the point: the product says out loud, on screen, that
 someone could not be invited because they never consented.*

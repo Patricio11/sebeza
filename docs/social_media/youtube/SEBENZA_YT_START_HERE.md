@@ -81,6 +81,11 @@ the standing block (below).
 | V10 | South Africa's live skills map |
 | V11 | Building South Africa's talent platform · Day ___ |
 | V12 | What Sebenza costs a job-seeker: R0 |
+| V13 | You don't apply. They come to you. |
+| V14 | The other side of that invite |
+| V15 | The honest "hire local" toggle 🇿🇦 |
+| V16 | Interviews used to happen over WhatsApp. Not any more. |
+| V17 | From interview to hired, on the record |
 
 **Standing description block (append to every Short):**
 

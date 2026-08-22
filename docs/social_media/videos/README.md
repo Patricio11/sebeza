@@ -26,6 +26,9 @@ cards, the flag stripe) is baked in.
 | `v13-you-get-found.mp4` (~22s) | V13 | The real Phase 29.4 invite funnel on public /search: selection bar, invite dialog, vacancy picked, invitations sent, and the honest "1 couldn't receive an invite" result. |
 | `v14-the-other-side.mp4` (~20s) | V14 | The same invitation from the seeker's chair: employer, role, pay band, deadline, and the Accept / Decline choice left untouched. Records only after V13. |
 | `v10-skills-map.mp4` (~18s) | V10 | /insights live: status mix, the province × profession supply heatmap, skill-level demand. |
+| `v15-highlight-sa.mp4` (~23s) | V15 | The Citizen-Visibility toggle on the real /search: highlight, never a filter; nobody removed. |
+| `v16-interview-scheduled.mp4` (~38s) | V16 | The real interview flow, both chairs: employer schedules (one card), candidate confirms. Clears prior interviews via stageSql before each take. |
+| `v17-attended-to-hired.mp4` (~25s) | V17 | The agenda's "Did they attend?" → Attended → "Log this hire" → the dossier card, vacancy attached. Staged past interview + reveal. |
 
 **V9 is now filmed for real**: the zu/xh/af catalogs are full translations (pending human
 review) and the landing is catalog-driven, so the demo shows the genuine product. Recommended:

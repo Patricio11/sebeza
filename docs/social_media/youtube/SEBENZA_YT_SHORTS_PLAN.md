@@ -218,6 +218,53 @@ Built here, for here. 🇿🇦 → sebenzasa.com
 
 ---
 
+## 14 · V15, the honest hire-local toggle 🎬 `videos/v15-highlight-sa.mp4`
+
+- [ ] Posted
+
+**Title:** `The honest "hire local" toggle 🇿🇦`
+
+**Description:**
+```
+Employers sometimes need to hire local. So we built the honest version: one tap groups South African citizens first, and nobody is removed from the results. Matched by skill and place, always.
+
+Sebenza is South Africa's national talent platform. Free for job-seekers, always.
+Built here, for here. 🇿🇦 → sebenzasa.com
+#Sebenza #SouthAfrica #Shorts
+```
+
+## 15 · V16, the interview on the record 🎬 `videos/v16-interview-scheduled.mp4`
+
+- [ ] Posted
+
+**Title:** `Interviews used to happen over WhatsApp. Not any more.`
+
+**Description:**
+```
+The interview is the most human step of hiring, and it used to happen off the record. Now the date, time, place and instructions live in one card, the candidate confirms with one tap, and both sides see the same facts.
+
+Sebenza is South Africa's national talent platform. Free for job-seekers, always.
+Built here, for here. 🇿🇦 → sebenzasa.com
+#Sebenza #SouthAfrica #Shorts
+```
+
+## 16 · V17, from attended to hired 🎬 `videos/v17-attended-to-hired.mp4`
+
+- [ ] Posted **(soon after V16, they tell one story)**
+
+**Title:** `From interview to hired, on the record`
+
+**Description:**
+```
+Most platforms lose the story after the interview. Here attendance is recorded honestly, and an attended interview becomes a confirmed hire on the national record. A hire only counts when it's confirmed.
+
+Sebenza is South Africa's national talent platform. Free for job-seekers, always.
+Built here, for here. 🇿🇦 → sebenzasa.com
+#Sebenza #SouthAfrica #Shorts
+```
+
+---
+
 *V11 (the build-log series) is not in this list: it repeats forever,
 one episode whenever something real ships, title
 `Building South Africa's talent platform · Day ___` + the standing

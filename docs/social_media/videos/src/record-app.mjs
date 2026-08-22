@@ -17,7 +17,7 @@
 import { chromium } from "playwright";
 import { createRequire } from "node:module";
 import { rmSync } from "node:fs";
-import { spawnSync } from "node:child_process";
+import { execSync, spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 
@@ -27,6 +27,16 @@ const require = createRequire(path.join(outDir, "package.json"));
 const ffmpeg = require("ffmpeg-static");
 
 const BASE = process.env.SEBENZA_VIDEO_BASE_URL ?? "http://localhost:3100";
+
+// Stage state in the DISPOSABLE test database (the only DB serve-app.mjs
+// will ever run against). Used by the interview videos so retakes are
+// idempotent: the one-active index would otherwise refuse the second take.
+function stageSql(q) {
+  execSync(
+    'docker exec sebenza-test-pg psql -U postgres -d sebenza_test -c "' + q.replace(/"/g, '\\"') + '"',
+    { stdio: "ignore" },
+  );
+}
 const VIEW = { width: 756, height: 1344 }; // exact 9:16, still mobile layout
 
 // ---- Overlay system (injected per page; uses the app's own brand fonts) ----
@@ -457,6 +467,177 @@ if (want("v14")) await record("v14-the-other-side.mp4", async (page, markLead) =
     4000,
     { atTop: true },
   );
+  await showEndCard(page, 2800);
+});
+
+
+// ---- V15 · Highlight SA citizens (~21s) ----
+// The Citizen-Visibility Rule, on camera: the toggle GROUPS South
+// Africans first, it never removes anyone. The overlays say exactly
+// that, because the honesty IS the pitch (Location-Not-Nationality).
+if (want("v15")) await record("v15-highlight-sa.mp4", async (page, markLead) => {
+  await page.goto(`${BASE}/search?q=developer`, { waitUntil: "load" });
+  await page.waitForTimeout(1400);
+  await injectOverlaySystem(page);
+  await showHookStart(page, "One tap groups <em>South Africans</em> first.");
+  markLead();
+  await dismissConsent(page);
+  await showHookEnd(page, 2600);
+
+  const n1 = showNote(page, "Employers sometimes must hire local. So we made it <em>honest</em>.", 3200);
+  await smoothScroll(page, 420, 3200);
+  await n1;
+
+  // Scope every interaction to the OPEN sheet: the hidden desktop
+  // filter rail carries the same labels and getByText would match it
+  // (invisible) and wait forever.
+  await page.getByRole("button", { name: /open filters/i }).click();
+  const sheet = page.getByRole("dialog", { name: /filters/i });
+  await sheet.waitFor({ timeout: 5000 }).catch(async () => {
+    await page.getByRole("button", { name: /open filters/i }).click();
+    await sheet.waitFor({ timeout: 5000 });
+  });
+  await page.waitForTimeout(600);
+  const n2 = showNote(page, "A highlight. <em>Not a filter.</em>", 2800, { atTop: true });
+  await sheet.getByText("Highlight SA citizens").click();
+  await page.waitForTimeout(1200);
+  await n2;
+  await sheet.getByRole("button", { name: /^apply$/i }).click();
+  await page.waitForTimeout(1600);
+
+  await injectOverlaySystem(page);
+  const n3 = showNote(page, "SA citizens grouped first. <em>Nobody removed.</em>", 3400);
+  await smoothScroll(page, 900, 4200);
+  await n3;
+  await showNote(page, "Matched by skill and place. Nationality is shown, <em>never a barrier</em>.", 3200);
+  await showEndCard(page, 2800);
+});
+
+// ---- V16 · The interview, on the record (~32s) ----
+// The real scheduling flow both ways: the employer sets date, time,
+// place and instructions in one card; the candidate opens the same
+// facts and confirms. Stage: clear any active interview on the seeded
+// vacancy so retakes don't hit the one-active-per-invitation index.
+if (want("v16")) await record("v16-interview-scheduled.mp4", async (page, markLead) => {
+  stageSql("DELETE FROM interviews WHERE vacancy_id='vac_senior-software-engineer'");
+  await page.goto(`${BASE}/sign-in`, { waitUntil: "load" });
+  await page.fill('input[type="email"]', "naledi.khumalo@discovery.co.za");
+  await page.fill('input[type="password"]', "sebenza-dev-2026");
+  await page.getByRole("button", { name: /sign in/i }).click();
+  await page.waitForURL("**/employer**", { timeout: 30000 });
+  await page.goto(`${BASE}/employer/vacancies/vac_senior-software-engineer`, { waitUntil: "load" });
+  await page.waitForTimeout(1400);
+  await injectOverlaySystem(page);
+  await showHookStart(page, "Interviews used to happen over <em>WhatsApp</em>. Not any more.");
+  markLead();
+  await dismissConsent(page);
+  await showHookEnd(page, 2600);
+
+  const n1 = showNote(page, "An accepted candidate, waiting on a time.", 2800);
+  await smoothScroll(page, 760, 3400);
+  await n1;
+
+  await page
+    .locator("li", { hasText: "Chiamaka" })
+    .getByRole("button", { name: /schedule interview/i })
+    .first()
+    .click();
+  await page.waitForTimeout(900);
+
+  // Date: three days out (page forward if the month rolls over).
+  const target = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
+  await page.locator("#interview-date").click();
+  await page.waitForTimeout(600);
+  if (target.getMonth() !== new Date().getMonth()) {
+    await page.getByRole("button", { name: /next/i }).first().click();
+    await page.waitForTimeout(400);
+  }
+  await page.getByRole("option", { name: new RegExp(`^${target.getDate()}$`) }).first().click();
+  await page.waitForTimeout(700);
+  await page.locator("#interview-time").click();
+  await page.waitForTimeout(600);
+  await page.getByRole("option", { name: "10:00" }).click();
+  await page.waitForTimeout(600);
+  const n2 = showNote(page, "Date, time, format, place, instructions. <em>One card.</em>", 3600, { atTop: true });
+  await page.locator("#interview-location").fill("1 Discovery Place, Sandton");
+  await page.waitForTimeout(500);
+  await page.locator("#interview-instructions").fill("Ask for Naledi at reception. Parking on level B2.");
+  await page.waitForTimeout(700);
+  await n2;
+  await page.getByRole("button", { name: /^schedule$/i }).click();
+  await page.waitForTimeout(2000);
+  await injectOverlaySystem(page);
+  await showNote(page, "Sent. The candidate gets every detail, <em>instantly</em>.", 3000);
+
+  // The other chair: the candidate opens the same facts and answers.
+  await page.context().clearCookies();
+  await page.goto(`${BASE}/sign-in`, { waitUntil: "load" });
+  await page.fill('input[type="email"]', "chiamaka-o@example.co.za");
+  await page.fill('input[type="password"]', "sebenza-dev-2026");
+  await page.getByRole("button", { name: /sign in/i }).click();
+  await page.waitForURL("**/dashboard**", { timeout: 30000 });
+  await page.goto(`${BASE}/dashboard/invitations`, { waitUntil: "load" });
+  await page.waitForTimeout(1200);
+  // Fresh session after clearCookies: the consent banner is back.
+  await dismissConsent(page);
+  await page.waitForTimeout(400);
+  await page
+    .getByRole("link", { name: /Senior Software Engineer at Discovery/i })
+    .first()
+    .click();
+  await page.waitForTimeout(1800);
+  await injectOverlaySystem(page);
+  const n3 = showNote(page, "When, where, what to bring. <em>Add to calendar, one tap.</em>", 3600);
+  await smoothScroll(page, 700, 3800);
+  await n3;
+  await page.getByRole("button", { name: /^confirm$/i }).click();
+  await page.waitForTimeout(1800);
+  await showNote(page, "Confirmed. Both sides see the <em>same facts</em>.", 3000);
+  await showEndCard(page, 2800);
+});
+
+// ---- V17 · From attended to hired (~24s) ----
+// Attendance closes the loop into Placement-Truth: the agenda asks the
+// one honest question, an attended interview becomes "Log this hire",
+// and the hire lands on the national record. Staged: a confirmed
+// interview 3 hours in the past for the seeded accepted invitee.
+if (want("v17")) await record("v17-attended-to-hired.mp4", async (page, markLead) => {
+  stageSql("DELETE FROM interviews WHERE vacancy_id='vac_senior-software-engineer'");
+  stageSql("INSERT INTO interviews (id, invitation_id, vacancy_id, organization_id, profile_id, scheduled_by_user_id, starts_at, duration_minutes, location_kind, location, instructions, state, responded_at) SELECT 'int_video-v17', vi.id, vi.vacancy_id, 'org_discovery-bank', vi.profile_id, 'user_naledi-k', now() - interval '3 hours', 45, 'in_person', '1 Discovery Place, Sandton', 'Ask for Naledi at reception.', 'confirmed', now() - interval '2 days' FROM vacancy_invitations vi WHERE vi.vacancy_id='vac_senior-software-engineer' AND vi.profile_id='prof_chiamaka-o'");
+  // The showcase story: Discovery revealed her contact when she accepted
+  // (the real flow requires it before scheduling), so the dossier's
+  // mark-as-hired card shows its ready state, not the reveal gate.
+  stageSql("INSERT INTO audit_log (id, kind, actor, subject, meta, at) VALUES ('aud_video-v17-reveal', 'profile.contact.reveal', 'user_naledi-k', 'prof_chiamaka-o', json_build_object('orgId', 'org_discovery-bank')::jsonb, now() - interval '2 days') ON CONFLICT (id) DO UPDATE SET at = now() - interval '2 days'");
+  await page.goto(`${BASE}/sign-in`, { waitUntil: "load" });
+  await page.fill('input[type="email"]', "naledi.khumalo@discovery.co.za");
+  await page.fill('input[type="password"]', "sebenza-dev-2026");
+  await page.getByRole("button", { name: /sign in/i }).click();
+  await page.waitForURL("**/employer**", { timeout: 30000 });
+  await page.goto(`${BASE}/employer/interviews`, { waitUntil: "load" });
+  await page.waitForTimeout(1400);
+  await injectOverlaySystem(page);
+  await showHookStart(page, "The interview happened. <em>Then what?</em>");
+  markLead();
+  await dismissConsent(page);
+  await showHookEnd(page, 2600);
+
+  const n1 = showNote(page, "One honest question: <em>did they attend?</em>", 3200);
+  await page.waitForTimeout(2600);
+  await n1;
+  await page.getByRole("button", { name: /^attended$/i }).first().click();
+  await page.waitForTimeout(2200);
+  await injectOverlaySystem(page);
+  const n2 = showNote(page, "Attended becomes a doorway: <em>Log this hire.</em>", 3400);
+  await page.waitForTimeout(2800);
+  await n2;
+  await page.getByRole("link", { name: /log this hire/i }).first().click();
+  await page.waitForLoadState("load");
+  await page.waitForTimeout(1800);
+  await injectOverlaySystem(page);
+  const n3 = showNote(page, "The vacancy rides along. Role, date, done.", 3400);
+  await smoothScroll(page, 600, 3600);
+  await n3;
+  await showNote(page, "A hire only counts when it's <em>confirmed</em>. That's the rule.", 3200);
   await showEndCard(page, 2800);
 });
 
