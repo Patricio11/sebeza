@@ -21,12 +21,36 @@ import {
   type DeclineReasonValue,
 } from "@/lib/vacancy/decline-reasons";
 import type { InvitationRow, InvitationState } from "@/lib/employer/invitations";
-import { CheckCircle2, Clock, MinusCircle, Send, X, XCircle } from "lucide-react";
+import {
+  InterviewScheduleDialog,
+  type InterviewDetailsInput,
+  type ScheduleTarget,
+} from "./InterviewScheduleDialog";
+import { formatSaDateTime } from "@/lib/interviews/links";
+import {
+  CalendarClock,
+  CalendarPlus,
+  CheckCircle2,
+  Clock,
+  MinusCircle,
+  Send,
+  X,
+  XCircle,
+} from "lucide-react";
+
+/** The active interview chip data, keyed by invitation id. */
+export interface ActiveInterviewChip {
+  id: string;
+  startsAt: string;
+  state: "scheduled" | "confirmed";
+}
 
 interface Props {
   /** G10  so a dead row can offer "invite someone else". */
   vacancyId: string;
   invitations: InvitationRow[];
+  /** Active (scheduled|confirmed) interview per invitation, if any. */
+  interviews: Record<string, ActiveInterviewChip>;
   canEdit: boolean;
   locale: string;
   withdrawAction: (
@@ -37,7 +61,18 @@ interface Props {
     invitationId: string,
     note: string,
   ) => Promise<{ ok: true } | { ok: false; message: string }>;
+  /** Interview scheduling, one invitee. Bound by the page. */
+  scheduleAction: (
+    invitationId: string,
+    details: InterviewDetailsInput,
+  ) => Promise<{ ok: true } | { ok: false; message: string }>;
+  /** Interview scheduling, every accepted invitee at once. */
+  scheduleAllAction: (
+    details: InterviewDetailsInput,
+  ) => Promise<{ ok: true } | { ok: false; message: string }>;
 }
+
+const ACCEPTED_STATES: InvitationState[] = ["accepted", "accepted_with_notice"];
 
 const STATE_LABEL: Record<InvitationState, string> = {
   offer_made: "Offer made",
@@ -94,10 +129,13 @@ const STATE_ICON: Record<InvitationState, typeof CheckCircle2> = {
 export function VacancyInvitationsPanel({
   vacancyId,
   invitations,
+  interviews,
   canEdit,
   locale,
   withdrawAction,
   offerAction,
+  scheduleAction,
+  scheduleAllAction,
 }: Props) {
   const router = useRouter();
   const [pendingId, setPendingId] = useState<string | null>(null);
@@ -124,6 +162,14 @@ export function VacancyInvitationsPanel({
   // draft. Only one row at a time; opening another closes the first.
   const [offerFor, setOfferFor] = useState<string | null>(null);
   const [offerDraft, setOfferDraft] = useState("");
+
+  // Interview dialog: which seat (or "everyone") we're scheduling.
+  const [scheduleTarget, setScheduleTarget] = useState<ScheduleTarget | null>(null);
+  // Accepted seats with no active interview yet: the bulk button's
+  // audience. The server re-checks and skips honestly either way.
+  const unscheduledAccepted = invitations.filter(
+    (i) => ACCEPTED_STATES.includes(i.state) && !interviews[i.id],
+  );
 
   function onSendOffer(invitationId: string) {
     const note = offerDraft.trim();
@@ -171,6 +217,21 @@ export function VacancyInvitationsPanel({
         <p className="text-xs text-[color:var(--color-ink-soft)]">
           {t("pipeline.sub")}
         </p>
+        {/* Group scheduling: only worth a button when two or more
+            accepted seats still lack an interview; a single seat has
+            its own per-row button. */}
+        {canEdit && unscheduledAccepted.length >= 2 && (
+          <button
+            type="button"
+            onClick={() =>
+              setScheduleTarget({ kind: "bulk", count: unscheduledAccepted.length })
+            }
+            className="inline-flex h-8 items-center gap-1.5 rounded-[var(--radius-pill)] border border-[color:var(--color-ink)] bg-[color:var(--color-ink)] px-3 text-xs font-medium text-[color:var(--color-paper)] hover:bg-[color:var(--color-brand-strong)] hover:border-[color:var(--color-brand-strong)]"
+          >
+            <CalendarPlus className="size-3.5" aria-hidden="true" />
+            {t("interviews.scheduleAll", { count: unscheduledAccepted.length })}
+          </button>
+        )}
       </header>
 
       {error && (
@@ -194,6 +255,12 @@ export function VacancyInvitationsPanel({
           // while no offer has been made. A second decline is final.
           const canOffer =
             canEdit && inv.state === "declined" && !inv.offerMadeAt;
+          // The accepted seat's next step: get them in the room. One
+          // active interview per invitation; while one exists the row
+          // shows the chip instead of the button.
+          const activeInterview = interviews[inv.id];
+          const canSchedule =
+            canEdit && ACCEPTED_STATES.includes(inv.state) && !activeInterview;
           const seatFreed =
             canEdit &&
             (inv.state === "expired" ||
@@ -308,6 +375,22 @@ export function VacancyInvitationsPanel({
                     </div>
                   </div>
                 )}
+                {/* The scheduled-interview chip: every role sees it
+                    (Viewers included); managing it lives on the
+                    interviews page. */}
+                {activeInterview && (
+                  <p className="mt-2">
+                    <span className="inline-flex items-center gap-1.5 rounded-[var(--radius-pill)] border border-[color:var(--color-brand)] bg-[color:var(--color-brand-tint)] px-2.5 py-1 text-xs text-[color:var(--color-brand-strong)]">
+                      <CalendarClock className="size-3.5" aria-hidden="true" />
+                      {t(
+                        activeInterview.state === "confirmed"
+                          ? "interviews.chipConfirmed"
+                          : "interviews.chipScheduled",
+                        { when: formatSaDateTime(new Date(activeInterview.startsAt)) },
+                      )}
+                    </span>
+                  </p>
+                )}
                 {inv.declineNote && (
                   <p className="mt-1 text-xs text-[color:var(--color-ink-soft)]">
                     <em>
@@ -319,6 +402,22 @@ export function VacancyInvitationsPanel({
                   </p>
                 )}
               </div>
+              {canSchedule && (
+                <button
+                  type="button"
+                  onClick={() =>
+                    setScheduleTarget({
+                      kind: "single",
+                      invitationId: inv.id,
+                      name: inv.displayName,
+                    })
+                  }
+                  className="inline-flex h-8 shrink-0 items-center gap-1 rounded-[var(--radius-pill)] border border-[color:var(--color-brand)] bg-[color:var(--color-brand-tint)] px-3 text-xs font-medium text-[color:var(--color-brand-strong)] hover:border-[color:var(--color-brand-strong)]"
+                >
+                  <CalendarPlus className="size-3.5" aria-hidden="true" />
+                  {t("interviews.schedule")}
+                </button>
+              )}
               {canOffer && offerFor !== inv.id && (
                 <button
                   type="button"
@@ -355,6 +454,17 @@ export function VacancyInvitationsPanel({
           );
         })}
       </ul>
+
+      <InterviewScheduleDialog
+        open={scheduleTarget !== null}
+        target={scheduleTarget}
+        onClose={() => setScheduleTarget(null)}
+        onSubmit={(details) =>
+          scheduleTarget?.kind === "single"
+            ? scheduleAction(scheduleTarget.invitationId, details)
+            : scheduleAllAction(details)
+        }
+      />
     </section>
   );
 }

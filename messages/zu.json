@@ -632,6 +632,31 @@
       "theirWords": "Ngamazwi abo",
       "finalNote": "Ukwamukela kusebenza njengokwamukela isimemo ncamashi. Ukwenqaba futhi kungokugcina: ngeke bathembise kabili, futhi akusoze kwathinta indlela ovela ngayo ekusesheni.",
       "chip": "Isithembiso esisha, silinde impendulo yakho"
+    },
+    "interview": {
+      "eyebrow": "Inhlolokhono ihleliwe",
+      "timeLine": "Isikhathi saseNingizimu Afrika · imizuzu engu-{minutes}",
+      "kinds": {
+        "in_person": "Ubuso nobuso",
+        "video": "Ikholi yevidiyo",
+        "phone": "Ikholi yocingo"
+      },
+      "instructions": "Imiyalelo",
+      "googleCalendar": "Engeza ku-Google Calendar",
+      "icsFile": "Landa i-.ics",
+      "calendarTitle": "Inhlolokhono: {vacancy} e-{org}",
+      "youConfirmed": "Uyiqinisekisile le nhlolokhono.",
+      "confirm": "Qinisekisa",
+      "cantMake": "Angikwazi ukufika",
+      "working": "Iyasebenza…",
+      "declineLead": "Batshele ukuthi awukwazi ngalesi sikhathi. Uma uthanda, chaza isizathu noma uphakamise isikhathi esingcono; umqashi angahlela esisha.",
+      "declinePlaceholder": "Inothi elikhethekayo, isb. ekuseni kungcono kimi",
+      "declineBack": "Emuva",
+      "declineSend": "Thumela",
+      "wasCancelled": "Inhlolokhono ebihlelelwe u-{when} ikhanselwe umqashi.",
+      "youDeclined": "Utshele umqashi ukuthi awukwazi ukufika ngo-{when}.",
+      "tookPlace": "Le nhlolokhono ibihlelelwe u-{when}.",
+      "footNote": "Ukuqinisekisa noma ukwenqaba akubizi lutho futhi akuthinti ukubonakala kwakho. Yilo mqashi kuphela obona impendulo yakho."
     }
   },
   "employerDash": {
@@ -647,6 +672,7 @@
       "account": "I-akhawunti",
       "vacancies": "Izikhala",
       "invites": "Izimemo",
+      "interviews": "Izinhlolokhono",
       "notifications": "Izaziso",
       "help": "Usizo"
     },
@@ -1348,6 +1374,90 @@
       "duplicateTitle": "Phinda isikhala",
       "subtitle": "Kuyimfihlo enhlanganweni yakho. Izikhala ziqala njengezinhlaka, uzivule uma usukulungele ukumema abafakizicelo.",
       "duplicateSubtitle": "Kugcwaliswe kusengaphambili kusuka ku-“{source}”. Hlela noma yini ngaphambi kokulondoloza; lokhu kudala uhlaka olusha, okwangempela kuhlala kungathintwa."
+    },
+    "interviews": {
+      "schedule": "Hlela inhlolokhono",
+      "scheduleAll": "Hlela zonke ({count})",
+      "chipScheduled": "Inhlolokhono: {when} · kulindwe impendulo",
+      "chipConfirmed": "Inhlolokhono: {when} · iqinisekisiwe",
+      "dialogEyebrow": "Inhlolokhono · Sebenza",
+      "dialogTitleSingle": "Hlela inhlolokhono no-{name}",
+      "dialogTitleBulk": "Hlela izinhlolokhono ezingu-{count}",
+      "bulkLead": "Isikhathi esisodwa, abantu abangu-{count}: wonke umuntu owamukele kulesi sikhala ongakabi nayo inhlolokhono uthola imininingwane efanayo. Osehleliwe uyeqiwa.",
+      "date": "Usuku",
+      "datePlaceholder": "Khetha usuku",
+      "time": "Isikhathi",
+      "timeHint": "Isikhathi saseNingizimu Afrika (SAST)",
+      "timePlaceholder": "Khetha isikhathi",
+      "duration": "Ubude besikhathi",
+      "durationMinutes": "Imizuzu engu-{minutes}",
+      "kind": "Uhlobo",
+      "kinds": {
+        "in_person": "Ubuso nobuso",
+        "video": "Ikholi yevidiyo",
+        "phone": "Ikholi yocingo"
+      },
+      "locationLabel": {
+        "in_person": "Ikheli",
+        "video": "Isixhumanisi somhlangano",
+        "phone": "Inombolo yocingo"
+      },
+      "locationPlaceholder": {
+        "in_person": "12 Long Street, eKapa",
+        "video": "Namathisela isixhumanisi somhlangano",
+        "phone": "Inombolo ozofona ngayo"
+      },
+      "instructions": "Imiyalelo",
+      "instructionsPlaceholder": "Ozobuza yena, okumele akuphathe, ukupaka, noma yini emsiza afike elungile.",
+      "instructionsHint": "{count} / 500",
+      "preview": "{when} isikhathi saseNingizimu Afrika",
+      "previewEmpty": "Khetha usuku nesikhathi",
+      "errors": {
+        "past": "Khetha isikhathi esizayo"
+      },
+      "cancel": "Khansela",
+      "send": "Hlela",
+      "sendBulk": "Hlela {count}",
+      "sending": "Iyahlela…"
     }
+  },
+  "employerInterviews": {
+    "eyebrow": "Umqashi · izinhlolokhono",
+    "title": "Izinhlolokhono",
+    "subtitle": "Wonke amadinga kuzo zonke izikhala zakho, ngesikhathi saseNingizimu Afrika.",
+    "filterAll": "Zonke izikhala",
+    "empty": {
+      "heading": "Azikho izinhlolokhono okwamanje",
+      "body": "Hlela izinhlolokhono usuka kupayipi lwesikhala: vula isikhala bese ukhetha umuntu owamukele.",
+      "cta": "Iya ezikhaleni"
+    },
+    "attendance": {
+      "heading": "Bafikile? ({count})",
+      "sub": "Lezi zinhlolokhono sezedlule. Ukubhala ukufika kugcina uhlelo luneqiniso, futhi inhlolokhono efikelwe ingaba ukuqashwa okubhaliwe.",
+      "attended": "Ufikile",
+      "noShow": "Akafikanga",
+      "viewerNote": "Umnikazi noma umqashi-bantu ubhala ukufika."
+    },
+    "upcoming": {
+      "heading": "Ezizayo ({count})"
+    },
+    "calendarTitle": "Inhlolokhono: {name}",
+    "googleCalendar": "Google Calendar",
+    "icsFile": "Ifayela lekhalenda (.ics)",
+    "cancel": "Khansela",
+    "durationLine": "Imizuzu engu-{minutes}",
+    "state": {
+      "confirmed": "Kuqinisekisiwe",
+      "awaitingReply": "Kulindwe impendulo",
+      "attended": "Ufikile",
+      "no_show": "Akafikanga",
+      "declined": "Akakwazanga",
+      "cancelled": "Kukhanseliwe"
+    },
+    "history": {
+      "heading": "Ezakamuva",
+      "logHire": "Bhala lokhu kuqashwa"
+    },
+    "footer": "Ukukhansela kutshela umuntu ngokushesha. Ukuhlela kabusha, khansela isikhathi esidala bese uhlela esisha; umfuni-msebenzi ubona lonke ushintsho esimemeni sakhe."
   }
 }

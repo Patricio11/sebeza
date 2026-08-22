@@ -632,6 +632,31 @@
       "theirWords": "In hul woorde",
       "finalNote": "Aanvaarding werk presies soos om die uitnodiging te aanvaar. Om weer te weier is finaal: hulle kan nie twee keer aanbied nie, en dit raak nooit hoe jy in soektogte verskyn nie.",
       "chip": "Nuwe aanbod, wag vir jou antwoord"
+    },
+    "interview": {
+      "eyebrow": "Onderhoud geskeduleer",
+      "timeLine": "Suid-Afrikaanse tyd · {minutes} minute",
+      "kinds": {
+        "in_person": "In persoon",
+        "video": "Video-oproep",
+        "phone": "Telefoonoproep"
+      },
+      "instructions": "Instruksies",
+      "googleCalendar": "Voeg by Google Kalender",
+      "icsFile": "Laai .ics af",
+      "calendarTitle": "Onderhoud: {vacancy} by {org}",
+      "youConfirmed": "Jy het hierdie onderhoud bevestig.",
+      "confirm": "Bevestig",
+      "cantMake": "Kan nie kom nie",
+      "working": "Besig…",
+      "declineLead": "Laat weet hulle jy kan nie hierdie tyd maak nie. Sê gerus hoekom of stel 'n beter tyd voor; die werkgewer kan 'n nuwe een skeduleer.",
+      "declinePlaceholder": "Opsionele nota, bv. oggende werk beter vir my",
+      "declineBack": "Terug",
+      "declineSend": "Stuur",
+      "wasCancelled": "Die onderhoud wat vir {when} gereël is, is deur die werkgewer gekanselleer.",
+      "youDeclined": "Jy het die werkgewer laat weet jy kan nie die {when}-gleuf maak nie.",
+      "tookPlace": "Hierdie onderhoud was vir {when} gereël.",
+      "footNote": "Om te bevestig of te weier kos niks en raak nooit jou sigbaarheid nie. Net hierdie werkgewer sien jou antwoord."
     }
   },
   "employerDash": {
@@ -647,6 +672,7 @@
       "account": "Rekening",
       "vacancies": "Vakatures",
       "invites": "Uitnodigings",
+      "interviews": "Onderhoude",
       "notifications": "Kennisgewings",
       "help": "Hulp"
     },
@@ -1348,6 +1374,90 @@
       "duplicateTitle": "Dupliseer vakature",
       "subtitle": "Privaat aan jou organisasie. Vakatures begin as konsepte; maak hulle oop wanneer jy gereed is om kandidate te nooi.",
       "duplicateSubtitle": "Vooraf ingevul vanaf “{source}”. Redigeer enigiets voor jy stoor; dit skep ’n vars konsep, die oorspronklike bly onaangeraak."
+    },
+    "interviews": {
+      "schedule": "Skeduleer onderhoud",
+      "scheduleAll": "Skeduleer almal ({count})",
+      "chipScheduled": "Onderhoud: {when} · wag op antwoord",
+      "chipConfirmed": "Onderhoud: {when} · bevestig",
+      "dialogEyebrow": "Onderhoud · Sebenza",
+      "dialogTitleSingle": "Skeduleer 'n onderhoud met {name}",
+      "dialogTitleBulk": "Skeduleer {count} onderhoude",
+      "bulkLead": "Een tydgleuf, {count} mense: almal wat op hierdie vakature aanvaar het en nog nie 'n onderhoud het nie, kry dieselfde besonderhede. Enigiemand wat reeds geskeduleer is, word oorgeslaan.",
+      "date": "Datum",
+      "datePlaceholder": "Kies 'n datum",
+      "time": "Tyd",
+      "timeHint": "Suid-Afrikaanse tyd (SAST)",
+      "timePlaceholder": "Kies 'n tyd",
+      "duration": "Duur",
+      "durationMinutes": "{minutes} minute",
+      "kind": "Formaat",
+      "kinds": {
+        "in_person": "In persoon",
+        "video": "Video-oproep",
+        "phone": "Telefoonoproep"
+      },
+      "locationLabel": {
+        "in_person": "Adres",
+        "video": "Vergaderingskakel",
+        "phone": "Telefoonnommer"
+      },
+      "locationPlaceholder": {
+        "in_person": "Langstraat 12, Kaapstad",
+        "video": "Plak die vergaderingskakel",
+        "phone": "Die nommer waarvandaan jy sal bel"
+      },
+      "instructions": "Instruksies",
+      "instructionsPlaceholder": "Vir wie om te vra, wat om saam te bring, parkering, enigiets wat hulle help om gereed op te daag.",
+      "instructionsHint": "{count} / 500",
+      "preview": "{when} Suid-Afrikaanse tyd",
+      "previewEmpty": "Kies 'n datum en tyd",
+      "errors": {
+        "past": "Kies 'n tyd in die toekoms"
+      },
+      "cancel": "Kanselleer",
+      "send": "Skeduleer",
+      "sendBulk": "Skeduleer {count}",
+      "sending": "Skeduleer tans…"
     }
+  },
+  "employerInterviews": {
+    "eyebrow": "Werkgewer · onderhoude",
+    "title": "Onderhoude",
+    "subtitle": "Elke afspraak oor al jou vakatures, in Suid-Afrikaanse tyd.",
+    "filterAll": "Alle vakatures",
+    "empty": {
+      "heading": "Nog geen onderhoude nie",
+      "body": "Skeduleer onderhoude vanuit 'n vakature se pyplyn: maak 'n vakature oop en kies 'n aanvaarde kandidaat.",
+      "cta": "Gaan na vakatures"
+    },
+    "attendance": {
+      "heading": "Het hulle opgedaag? ({count})",
+      "sub": "Hierdie onderhoude is verby. Om bywoning aan te teken hou die pyplyn eerlik, en 'n bygewoonde onderhoud kan 'n aangetekende aanstelling word.",
+      "attended": "Bygewoon",
+      "noShow": "Nie opgedaag nie",
+      "viewerNote": "'n Eienaar of Werwer teken bywoning aan."
+    },
+    "upcoming": {
+      "heading": "Komende ({count})"
+    },
+    "calendarTitle": "Onderhoud: {name}",
+    "googleCalendar": "Google Kalender",
+    "icsFile": "Kalenderlêer (.ics)",
+    "cancel": "Kanselleer",
+    "durationLine": "{minutes} minute",
+    "state": {
+      "confirmed": "Bevestig",
+      "awaitingReply": "Wag op antwoord",
+      "attended": "Bygewoon",
+      "no_show": "Nie opgedaag nie",
+      "declined": "Kon nie kom nie",
+      "cancelled": "Gekanselleer"
+    },
+    "history": {
+      "heading": "Onlangs",
+      "logHire": "Teken hierdie aanstelling aan"
+    },
+    "footer": "Kansellasie laat weet die kandidaat dadelik. Om te herskeduleer, kanselleer die ou tyd en skeduleer 'n nuwe een; die werksoeker sien elke verandering op hul uitnodiging."
   }
 }

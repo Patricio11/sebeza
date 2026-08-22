@@ -358,6 +358,17 @@ export async function assertNoVacancyFieldOnPublicSurfaces(): Promise<AssertResu
     // lib/vacancy/); actions.ts itself only writes profile_skills.
     "lib\\auth",
     "lib/auth",
+    // 2026-08 Interviews (docs/INTERVIEWS_PLAN.md)  interview reads join
+    // vacancies for the TITLE only, and every read is org-scoped
+    // (listInterviewsForOrg) or owner-scoped (the seeker's own
+    // invitation / their .ics). Nothing anonymous, nothing public.
+    "lib\\interviews\\query",
+    "lib/interviews/query",
+    // The 3-day reminder cron: notifies the invited seeker + the
+    // organising org about THEIR OWN interview; the vacancy title
+    // travels only to the two parties already inside the invitation.
+    "app\\api\\cron\\interview-reminders",
+    "app/api/cron/interview-reminders",
   ];
   const SCAN_ROOTS = ["app", "lib", "db/queries", "db/seed.ts", "components"];
   const PATTERN =

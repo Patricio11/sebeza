@@ -818,6 +818,31 @@
       "theirWords": "In their words",
       "finalNote": "Accepting works exactly like accepting the invitation. Declining again is final: they cannot offer twice, and it never affects how you appear in search.",
       "chip": "New offer, waiting for your response"
+    },
+    "interview": {
+      "eyebrow": "Interview scheduled",
+      "timeLine": "South African time · {minutes} minutes",
+      "kinds": {
+        "in_person": "In person",
+        "video": "Video call",
+        "phone": "Phone call"
+      },
+      "instructions": "Instructions",
+      "googleCalendar": "Add to Google Calendar",
+      "icsFile": "Download .ics",
+      "calendarTitle": "Interview: {vacancy} at {org}",
+      "youConfirmed": "You confirmed this interview.",
+      "confirm": "Confirm",
+      "cantMake": "Can't make it",
+      "working": "Working…",
+      "declineLead": "Tell them you can't make this time. If you like, say why or suggest a better time; the employer can schedule a new one.",
+      "declinePlaceholder": "Optional note, e.g. mornings work better for me",
+      "declineBack": "Back",
+      "declineSend": "Send",
+      "wasCancelled": "The interview set for {when} was cancelled by the employer.",
+      "youDeclined": "You told the employer you can't make the {when} slot.",
+      "tookPlace": "This interview was set for {when}.",
+      "footNote": "Confirming or declining costs nothing and never affects your visibility. Only this employer sees your answer."
     }
   },
   "employerDash": {
@@ -833,6 +858,7 @@
       "account": "Account",
       "vacancies": "Vacancies",
       "invites": "Invites",
+      "interviews": "Interviews",
       "notifications": "Notifications",
       "help": "Help"
     },
@@ -1405,6 +1431,90 @@
       "duplicateTitle": "Duplicate vacancy",
       "subtitle": "Private to your organisation. Vacancies start as drafts, open them when ready to invite candidates.",
       "duplicateSubtitle": "Pre-filled from “{source}”. Edit anything before saving; this creates a fresh draft, the original stays untouched."
+    },
+    "interviews": {
+      "schedule": "Schedule interview",
+      "scheduleAll": "Schedule all ({count})",
+      "chipScheduled": "Interview: {when} · awaiting reply",
+      "chipConfirmed": "Interview: {when} · confirmed",
+      "dialogEyebrow": "Interview · Sebenza",
+      "dialogTitleSingle": "Schedule an interview with {name}",
+      "dialogTitleBulk": "Schedule {count} interviews",
+      "bulkLead": "One time slot, {count} people: everyone accepted on this vacancy who has no interview yet gets the same details. Anyone already scheduled is skipped.",
+      "date": "Date",
+      "datePlaceholder": "Select a date",
+      "time": "Time",
+      "timeHint": "South African time (SAST)",
+      "timePlaceholder": "Select a time",
+      "duration": "Duration",
+      "durationMinutes": "{minutes} minutes",
+      "kind": "Format",
+      "kinds": {
+        "in_person": "In person",
+        "video": "Video call",
+        "phone": "Phone call"
+      },
+      "locationLabel": {
+        "in_person": "Address",
+        "video": "Meeting link",
+        "phone": "Phone number"
+      },
+      "locationPlaceholder": {
+        "in_person": "12 Long Street, Cape Town",
+        "video": "Paste the meeting link",
+        "phone": "The number you will call from"
+      },
+      "instructions": "Instructions",
+      "instructionsPlaceholder": "Who to ask for, what to bring, parking, anything that helps them arrive ready.",
+      "instructionsHint": "{count} / 500",
+      "preview": "{when} South African time",
+      "previewEmpty": "Pick a date and time",
+      "errors": {
+        "past": "Pick a time in the future"
+      },
+      "cancel": "Cancel",
+      "send": "Schedule",
+      "sendBulk": "Schedule {count}",
+      "sending": "Scheduling…"
     }
+  },
+  "employerInterviews": {
+    "eyebrow": "Employer · interviews",
+    "title": "Interviews",
+    "subtitle": "Every appointment across your vacancies, in South African time.",
+    "filterAll": "All vacancies",
+    "empty": {
+      "heading": "No interviews yet",
+      "body": "Schedule interviews from a vacancy's pipeline: open a vacancy and pick an accepted candidate.",
+      "cta": "Go to vacancies"
+    },
+    "attendance": {
+      "heading": "Did they attend? ({count})",
+      "sub": "These interviews have passed. Recording attendance keeps the pipeline honest, and an attended interview can become a logged hire.",
+      "attended": "Attended",
+      "noShow": "No-show",
+      "viewerNote": "An Owner or Recruiter records attendance."
+    },
+    "upcoming": {
+      "heading": "Upcoming ({count})"
+    },
+    "calendarTitle": "Interview: {name}",
+    "googleCalendar": "Google Calendar",
+    "icsFile": "Calendar file (.ics)",
+    "cancel": "Cancel",
+    "durationLine": "{minutes} minutes",
+    "state": {
+      "confirmed": "Confirmed",
+      "awaitingReply": "Awaiting reply",
+      "attended": "Attended",
+      "no_show": "No-show",
+      "declined": "Couldn't make it",
+      "cancelled": "Cancelled"
+    },
+    "history": {
+      "heading": "Recent",
+      "logHire": "Log this hire"
+    },
+    "footer": "Cancelling tells the candidate straight away. To reschedule, cancel the old time and schedule a new one; the seeker sees every change on their invitation."
   }
 }

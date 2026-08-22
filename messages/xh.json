@@ -632,6 +632,31 @@
       "theirWords": "Ngamazwi abo",
       "finalNote": "Ukwamkela kusebenza kanye njengokwamkela isimemo. Ukukhaba kwakhona kokokugqibela: abanakuthembisa kabini, kwaye akuze kuchaphazele indlela obonakala ngayo kukhangelo.",
       "chip": "Isithembiso esitsha, silinde impendulo yakho"
+    },
+    "interview": {
+      "eyebrow": "Udliwano-ndlebe lucwangcisiwe",
+      "timeLine": "Ixesha laseMzantsi Afrika · imizuzu engu-{minutes}",
+      "kinds": {
+        "in_person": "Ubuso ngobuso",
+        "video": "Umnxeba wevidiyo",
+        "phone": "Umnxeba wefowuni"
+      },
+      "instructions": "Imiyalelo",
+      "googleCalendar": "Yongeza kwi-Google Calendar",
+      "icsFile": "Khuphela i-.ics",
+      "calendarTitle": "Udliwano-ndlebe: {vacancy} e-{org}",
+      "youConfirmed": "Uluqinisekisile olu dliwano-ndlebe.",
+      "confirm": "Qinisekisa",
+      "cantMake": "Andikwazi ukufika",
+      "working": "Iyasebenza…",
+      "declineLead": "Baxelele ukuba awukwazi ngeli xesha. Ukuba uyathanda, chaza isizathu okanye ucebise ixesha elingcono; umqeshi angacwangcisa elitsha.",
+      "declinePlaceholder": "Inqaku elikhethekayo, umz. kusasa kulunge ngakumbi kum",
+      "declineBack": "Buyela",
+      "declineSend": "Thumela",
+      "wasCancelled": "Udliwano-ndlebe olwalucwangciselwe u-{when} lurhoxisiwe ngumqeshi.",
+      "youDeclined": "Uxelele umqeshi ukuba awukwazi ukufika ngo-{when}.",
+      "tookPlace": "Olu dliwano-ndlebe lwalucwangciselwe u-{when}.",
+      "footNote": "Ukuqinisekisa okanye ukwala akubizi nto kwaye akuchaphazeli ukubonakala kwakho. Ngulo mqeshi kuphela obona impendulo yakho."
     }
   },
   "employerDash": {
@@ -647,6 +672,7 @@
       "account": "Iakhawunti",
       "vacancies": "Izithuba",
       "invites": "Izimemo",
+      "interviews": "Iindliwano-ndlebe",
       "notifications": "Izaziso",
       "help": "Uncedo"
     },
@@ -1348,6 +1374,90 @@
       "duplicateTitle": "Phinda isithuba",
       "subtitle": "Yimfihlo kumbutho wakho. Izithuba ziqala njengezoyilo, uzivule xa sele ukulungele ukumema abafaki-zicelo.",
       "duplicateSubtitle": "Izaliswe kwangaphambili ukusuka ku-“{source}”. Hlela nantoni na phambi kokugcina; oku kwenza uyilo olutsha, eyoqobo ihlala ingachukunyiswanga."
+    },
+    "interviews": {
+      "schedule": "Cwangcisa udliwano-ndlebe",
+      "scheduleAll": "Cwangcisa zonke ({count})",
+      "chipScheduled": "Udliwano-ndlebe: {when} · kulindwe impendulo",
+      "chipConfirmed": "Udliwano-ndlebe: {when} · luqinisekisiwe",
+      "dialogEyebrow": "Udliwano-ndlebe · Sebenza",
+      "dialogTitleSingle": "Cwangcisa udliwano-ndlebe no-{name}",
+      "dialogTitleBulk": "Cwangcisa iindliwano-ndlebe ezingu-{count}",
+      "bulkLead": "Ixesha elinye, abantu abangu-{count}: wonke umntu owamkele kwesi sithuba ongekabi nalo udliwano-ndlebe ufumana iinkcukacha ezifanayo. Osele ecwangcisiwe akaphinde acwangciswe.",
+      "date": "Umhla",
+      "datePlaceholder": "Khetha umhla",
+      "time": "Ixesha",
+      "timeHint": "Ixesha laseMzantsi Afrika (SAST)",
+      "timePlaceholder": "Khetha ixesha",
+      "duration": "Ubude bexesha",
+      "durationMinutes": "Imizuzu engu-{minutes}",
+      "kind": "Uhlobo",
+      "kinds": {
+        "in_person": "Ubuso ngobuso",
+        "video": "Umnxeba wevidiyo",
+        "phone": "Umnxeba wefowuni"
+      },
+      "locationLabel": {
+        "in_person": "Idilesi",
+        "video": "Ikhonkco lentlanganiso",
+        "phone": "Inombolo yefowuni"
+      },
+      "locationPlaceholder": {
+        "in_person": "12 Long Street, eKapa",
+        "video": "Ncamathisela ikhonkco lentlanganiso",
+        "phone": "Inombolo oza kufowuna ngayo"
+      },
+      "instructions": "Imiyalelo",
+      "instructionsPlaceholder": "Uza kubuza bani, uze nantoni, ukupaka, nantoni na ebanceda bafike belungile.",
+      "instructionsHint": "{count} / 500",
+      "preview": "{when} ixesha laseMzantsi Afrika",
+      "previewEmpty": "Khetha umhla nexesha",
+      "errors": {
+        "past": "Khetha ixesha elizayo"
+      },
+      "cancel": "Rhoxisa",
+      "send": "Cwangcisa",
+      "sendBulk": "Cwangcisa {count}",
+      "sending": "Iyacwangcisa…"
     }
+  },
+  "employerInterviews": {
+    "eyebrow": "Umqeshi · iindliwano-ndlebe",
+    "title": "Iindliwano-ndlebe",
+    "subtitle": "Onke amadinga kuzo zonke izithuba zakho, ngexesha laseMzantsi Afrika.",
+    "filterAll": "Zonke izithuba",
+    "empty": {
+      "heading": "Akukho ndliwano-ndlebe okwangoku",
+      "body": "Cwangcisa iindliwano-ndlebe usuka kumjelo wesithuba: vula isithuba uze ukhethe umgqatswa owamkelweyo.",
+      "cta": "Yiya kwizithuba"
+    },
+    "attendance": {
+      "heading": "Bafikile? ({count})",
+      "sub": "Ezi ndliwano-ndlebe sele zidlulile. Ukubhala ukufika kugcina umjelo unyanisekile, kwaye udliwano-ndlebe olufikelweyo lunokuba kukuqeshwa okubhaliweyo.",
+      "attended": "Ufikile",
+      "noShow": "Akafikanga",
+      "viewerNote": "Umnini okanye umqeshi-bantu ubhala ukufika."
+    },
+    "upcoming": {
+      "heading": "Ezizayo ({count})"
+    },
+    "calendarTitle": "Udliwano-ndlebe: {name}",
+    "googleCalendar": "Google Calendar",
+    "icsFile": "Ifayile yekhalenda (.ics)",
+    "cancel": "Rhoxisa",
+    "durationLine": "Imizuzu engu-{minutes}",
+    "state": {
+      "confirmed": "Kuqinisekisiwe",
+      "awaitingReply": "Kulindwe impendulo",
+      "attended": "Ufikile",
+      "no_show": "Akafikanga",
+      "declined": "Akakwazanga",
+      "cancelled": "Kurhoxisiwe"
+    },
+    "history": {
+      "heading": "Ezakutsha nje",
+      "logHire": "Bhala oku kuqeshwa"
+    },
+    "footer": "Ukurhoxisa kuxelela umgqatswa kwangoko. Ukucwangcisa kwakhona, rhoxisa ixesha elidala uze ucwangcise elitsha; umfuni-msebenzi ubona lonke utshintsho kwisimemo sakhe."
   }
 }

@@ -243,6 +243,12 @@ export type AuditKind =
   | "vacancy.outcome.closed"
   // The counter-offer to a declined invitation (one per invitation, ever).
   | "vacancy.offer"
+  // Interview scheduling lifecycle (docs/INTERVIEWS_PLAN.md).
+  | "interview.schedule"
+  | "interview.cancel"
+  | "interview.response"
+  | "interview.attendance"
+  | "interview.reminder"
   // G11  weekly stalled-pipeline sweep.
   | "vacancy.pipeline.stalled"
   // Phase 9.12  the learning loop. Seeker-private events that capture

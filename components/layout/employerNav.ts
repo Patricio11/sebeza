@@ -3,6 +3,7 @@ import {
   Search,
   Bookmark,
   Briefcase,
+  CalendarClock,
   Users2,
   CheckCircle2,
   Building2,
@@ -38,6 +39,9 @@ const EMPLOYER_NAV: DashboardNavItem[] = [
   // Vacancies because both are outbound-from-employer workflows;
   // Vacancies invites EXISTING seekers, Invites onboards NEW ones.
   { key: "invites", label: "Invites", href: "/employer/invites", icon: UserPlus },
+  // Interviews sit right after the pipelines that create them: the
+  // agenda view of every appointment across vacancies.
+  { key: "interviews", label: "Interviews", href: "/employer/interviews", icon: CalendarClock },
   { key: "shortlists", label: "Talent pools", href: "/employer/shortlists", icon: Users2 },
   // Phase 9.20 D11  the URL stays /employer/placements so every
   // historic deep link (audit log meta, notification emails, ISR

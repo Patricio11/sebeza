@@ -519,6 +519,13 @@
       "when": 1787270407000,
       "tag": "0073_vacancy_offer",
       "breakpoints": false
+    },
+    {
+      "idx": 74,
+      "version": "7",
+      "when": 1787270408000,
+      "tag": "0074_interviews",
+      "breakpoints": false
     }
   ]
 }

@@ -63,6 +63,8 @@ export default async function EmployerAccountPage({
     "vacancy.self_apply",
     "vacancy.invite.unanswered",
     "vacancy.pipeline.stalled",
+    "interview.response",
+    "interview.reminder.employer",
     "saved_search.new_matches",
     "placement.status.check_due",
     "org.seeker_invite.accepted",

@@ -20,6 +20,8 @@ import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
 import { verifyRole } from "@/lib/auth/dal";
 import { getMyInvitation } from "@/lib/seeker/invitations";
 import { InvitationResponseIsland } from "@/components/feature/seeker/invitations/InvitationResponseIsland";
+import { InterviewPanel } from "@/components/feature/seeker/invitations/InterviewPanel";
+import { interviewForInvitationOwnedBy } from "@/lib/interviews/query";
 import { VacancySnapshotCard } from "@/components/feature/seeker/invitations/VacancySnapshotCard";
 import { EmployerVerificationChip } from "@/components/feature/seeker/invitations/EmployerVerificationChip";
 import { BlockEmployerControl } from "@/components/feature/seeker/BlockEmployerControl";
@@ -49,7 +51,7 @@ export default async function SeekerInvitationDetailPage({
 }) {
   const { locale, id } = await params;
   setRequestLocale(locale);
-  await verifyRole("seeker");
+  const session = await verifyRole("seeker");
 
   const inv = await getMyInvitation(id);
   if (!inv) notFound();
@@ -71,6 +73,10 @@ export default async function SeekerInvitationDetailPage({
 
   // Phase 11.4.2  follow-state read for the heart button.
   const following = await isFollowingEmployer(inv.orgId);
+
+  // The interview, if the employer scheduled one on this invitation.
+  // Owner-scoped read: someone else's invitation id returns null.
+  const interview = await interviewForInvitationOwnedBy(inv.id, session.id);
 
   const professionLabel =
     PROFESSIONS.find((p) => p.slug === inv.professionSlug)?.label ??
@@ -227,6 +233,24 @@ export default async function SeekerInvitationDetailPage({
             {tOffer("finalNote")}
           </p>
         </section>
+      )}
+      {/* The interview, when one is scheduled on this invitation. Sits
+          above the response island: an appointment with a clock on it
+          outranks everything else here. */}
+      {interview && (
+        <InterviewPanel
+          interview={{
+            id: interview.id,
+            startsAtIso: interview.startsAt.toISOString(),
+            durationMinutes: interview.durationMinutes,
+            locationKind: interview.locationKind,
+            location: interview.location,
+            instructions: interview.instructions,
+            state: interview.state,
+            orgName: inv.orgName,
+            vacancyTitle: inv.vacancyTitle,
+          }}
+        />
       )}
       <InvitationResponseIsland
         invitationId={inv.id}

@@ -2065,6 +2065,47 @@ export const notifications = pgTable("notifications", {
 });
 
 /**
+ * Interview scheduling (2026-08-22).
+ *
+ * An interview belongs to an accepted vacancy invitation and carries
+ * the when/where/how both sides need. One ACTIVE row
+ * (scheduled|confirmed) per invitation, enforced by a partial unique
+ * index in the migration: a reschedule is a cancel plus a new row, so
+ * the trail keeps every version of the plan.
+ *
+ * `startsAt` is stored UTC and rendered Africa/Johannesburg.
+ * `location` and `instructions` are employer-authored seeker-directed
+ * content, the same PII posture as invite notes.
+ */
+export const interviews = pgTable(
+  "interviews",
+  {
+    id: text("id").primaryKey(),
+    invitationId: text("invitation_id")
+      .notNull()
+      .references(() => vacancyInvitations.id, { onDelete: "cascade" }),
+    vacancyId: text("vacancy_id").notNull(),
+    organizationId: text("organization_id").notNull(),
+    profileId: text("profile_id").notNull(),
+    scheduledByUserId: text("scheduled_by_user_id").notNull(),
+    startsAt: timestamp("starts_at").notNull(),
+    durationMinutes: integer("duration_minutes").notNull().default(60),
+    locationKind: text("location_kind").notNull(),
+    location: text("location").notNull(),
+    instructions: text("instructions"),
+    state: text("state").notNull().default("scheduled"),
+    seekerNote: text("seeker_note"),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    respondedAt: timestamp("responded_at"),
+    cancelledAt: timestamp("cancelled_at"),
+  },
+  (t) => [
+    index("interviews_org_starts_idx").on(t.organizationId, t.startsAt),
+    index("interviews_profile_idx").on(t.profileId),
+  ],
+);
+
+/**
  * Phase 35  Web Push subscriptions (VAPID).
  *
  * One row per browser-and-device a user opted in on. `endpoint` is the

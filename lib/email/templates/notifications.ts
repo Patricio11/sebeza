@@ -19,6 +19,7 @@ import {
   NOTIFICATION_CATALOG,
   type NotificationKind,
 } from "@/lib/notifications/catalog";
+import { formatSaDateTime, googleCalendarUrl } from "@/lib/interviews/links";
 
 export interface NotificationEmailContent {
   subject: string;
@@ -83,12 +84,79 @@ function genericTemplate(
   return { subject: ctx.title, html };
 }
 
+// Interview scheduled / reminded: the emails whose whole job is
+// logistics, so the details render as a card (big date, rows for place
+// and instructions) plus one-tap add-to-Google-Calendar. The meta
+// payload is written by scheduleInterview (and echoed by the reminder
+// cron) and is employer-authored, seeker-directed content.
+function interviewDetailsTemplate(
+  ctx: NotificationEmailContext,
+): NotificationEmailContent {
+    const m = (ctx.meta ?? {}) as {
+      startsAtIso?: string;
+      durationMinutes?: number;
+      location?: string;
+      locationKind?: string;
+      instructions?: string | null;
+      orgName?: string;
+      vacancyTitle?: string;
+    };
+    if (!m.startsAtIso || !m.location) {
+      return genericTemplate(ctx, "Open the invitation", "Interview");
+    }
+    const starts = new Date(m.startsAtIso);
+    const when = formatSaDateTime(starts);
+    const gcal = googleCalendarUrl({
+      startsAt: starts,
+      durationMinutes: m.durationMinutes ?? 60,
+      title: `Interview: ${m.vacancyTitle ?? "Sebenza"}${m.orgName ? ` at ${m.orgName}` : ""}`,
+      location: m.location,
+      description: m.instructions ?? "",
+      uid: `sebenza-${ctx.link ?? m.startsAtIso}`,
+    });
+    const row = (label: string, value: string) => `
+      <tr>
+        <td style="padding:10px 16px;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#5a5249;white-space:nowrap;vertical-align:top;">${escapeHtml(label)}</td>
+        <td style="padding:10px 16px;font-size:15px;line-height:1.5;color:#14110d;">${escapeHtml(value)}</td>
+      </tr>`;
+    const html = emailShell(`
+      <p style="font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:#003d1f;margin:16px 0 8px;">Interview</p>
+      <h1 style="font-family:'Fraunces',Georgia,serif;font-size:28px;line-height:1.2;margin:0 0 16px;color:#14110d;">
+        ${escapeHtml(ctx.title)}
+      </h1>
+      <p style="font-size:16px;line-height:1.6;margin:0 0 20px;color:#14110d;">
+        ${greeting(ctx.recipientName)}
+      </p>
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
+             style="margin:0 0 24px;border:2px solid #14110d;border-radius:12px;border-collapse:separate;overflow:hidden;">
+        <tr>
+          <td colspan="2" style="padding:18px 16px;background:#f3efe7;">
+            <div style="font-family:'Fraunces',Georgia,serif;font-size:24px;color:#14110d;">${escapeHtml(when)}</div>
+            <div style="font-size:13px;color:#5a5249;margin-top:2px;">South African time · ${m.durationMinutes ?? 60} minutes</div>
+          </td>
+        </tr>
+        ${row("Where", m.location)}
+        ${m.instructions ? row("Instructions", m.instructions) : ""}
+      </table>
+      ${ctaButton(gcal, "Add to Google Calendar")}
+      ${ctaButton(fullLink(ctx.link), "Confirm or respond on Sebenza")}
+      <p style="font-size:12px;line-height:1.6;color:#5a5249;margin:24px 0 0;font-style:italic;">
+        You can change which Sebenza emails you receive in your account's
+        Notification preferences.
+      </p>
+    `);
+  return { subject: ctx.title, html };
+}
+
 const TEMPLATES: Partial<
   Record<
     NotificationKind,
     (ctx: NotificationEmailContext) => NotificationEmailContent
   >
 > = {
+  "interview.scheduled": interviewDetailsTemplate,
+  "interview.reminder": interviewDetailsTemplate,
+  "interview.reminder.employer": interviewDetailsTemplate,
   "contact.revealed": (ctx) =>
     genericTemplate(ctx, "See your activity log", "Contact revealed"),
   "document.downloaded": (ctx) =>

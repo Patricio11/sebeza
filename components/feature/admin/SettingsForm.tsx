@@ -447,6 +447,11 @@ export function SettingsForm({ values, emailTestSlot }: Props) {
 
 function SettingRow({ row, value }: { row: SettingRow; value: unknown }) {
   const [pending, startTransition] = useTransition();
+  // Hooks run unconditionally (rules-of-hooks); the managed early
+  // return below simply never reads the draft/status state.
+  const [draft, setDraft] = useState<string>(String(value ?? ""));
+  const [status, setStatus] = useState<"idle" | "saved" | "error">("idle");
+  const [error, setError] = useState<string | null>(null);
   // Ack-gated switches render as a status + a link to the real switch.
   // Duplicating the toggle here would bypass the acknowledgement flow,
   // and a bypassable safety ack is not an ack.
@@ -473,10 +478,6 @@ function SettingRow({ row, value }: { row: SettingRow; value: unknown }) {
       </li>
     );
   }
-  const [draft, setDraft] = useState<string>(String(value ?? ""));
-  const [status, setStatus] = useState<"idle" | "saved" | "error">("idle");
-  const [error, setError] = useState<string | null>(null);
-
   function save(next: unknown) {
     setError(null);
     setStatus("idle");

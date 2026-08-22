@@ -43,6 +43,12 @@ import {
   makeOfferOnInvitation,
   withdrawInvitation,
 } from "@/lib/employer/invitations";
+import {
+  scheduleInterview,
+  scheduleInterviewsForVacancy,
+} from "@/lib/employer/interviews";
+import { activeInterviewsByInvitation } from "@/lib/interviews/query";
+import type { InterviewDetailsInput } from "@/components/feature/employer/vacancies/InterviewScheduleDialog";
 import { getPlacementsForVacancy } from "@/lib/employer/placements";
 import { fillState, fillLabelParts } from "@/lib/employer/vacancy-fill";
 import { getTranslations } from "next-intl/server";
@@ -92,9 +98,10 @@ export default async function VacancyDetailPage({
   if (!vacancy) notFound();
   const canEdit = canEditVacancies(role);
   const showSalary = canSeeSalary(role);
-  const [invitations, placements] = await Promise.all([
+  const [invitations, placements, interviews] = await Promise.all([
     listInvitationsForVacancy(vacancy.id),
     getPlacementsForVacancy(vacancy.id),
+    activeInterviewsByInvitation(vacancy.id),
   ]);
 
   // G1  the number the whole page was missing: how many people this
@@ -269,6 +276,7 @@ export default async function VacancyDetailPage({
         <VacancyInvitationsPanel
           vacancyId={vacancy.id}
           invitations={invitations}
+          interviews={interviews}
           canEdit={canEdit}
           locale={locale}
           withdrawAction={async (invitationId: string) => {
@@ -279,6 +287,22 @@ export default async function VacancyDetailPage({
           offerAction={async (invitationId: string, note: string) => {
             "use server";
             const res = await makeOfferOnInvitation({ invitationId, note });
+            return res.ok ? { ok: true } : { ok: false, message: res.message };
+          }}
+          scheduleAction={async (
+            invitationId: string,
+            details: InterviewDetailsInput,
+          ) => {
+            "use server";
+            const res = await scheduleInterview({ invitationId, ...details });
+            return res.ok ? { ok: true } : { ok: false, message: res.message };
+          }}
+          scheduleAllAction={async (details: InterviewDetailsInput) => {
+            "use server";
+            const res = await scheduleInterviewsForVacancy({
+              vacancyId: vacancy.id,
+              ...details,
+            });
             return res.ok ? { ok: true } : { ok: false, message: res.message };
           }}
         />

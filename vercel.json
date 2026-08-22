@@ -83,6 +83,10 @@
     {
       "path": "/api/cron/learning-path-freshness",
       "schedule": "15 6 * * 1"
+    },
+    {
+      "path": "/api/cron/interview-reminders",
+      "schedule": "30 4 * * *"
     }
   ]
 }

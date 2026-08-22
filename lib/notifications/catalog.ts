@@ -217,6 +217,55 @@ export const NOTIFICATION_CATALOG = {
   // is the highest-signal actionable event a seeker receives after the
   // invitation itself, and the role can fill or close at any moment,
   // which is as real a clock as an expiry date.
+  // Interview scheduling (docs/INTERVIEWS_PLAN.md). Both seeker kinds
+  // are time-critical by nature: an interview IS a clock. Push on.
+  "interview.scheduled": {
+    defaultInApp: true,
+    defaultEmail: true,
+    audience: "seeker",
+    label: "An interview was scheduled with you",
+    description:
+      "The date, time, place and instructions, with one-tap add-to-calendar. You can confirm, or say you can't make it.",
+    dedupeWindowSeconds: 0,
+  },
+  "interview.cancelled": {
+    defaultInApp: true,
+    defaultEmail: true,
+    audience: "seeker",
+    label: "An interview was cancelled",
+    description:
+      "Sent immediately when an employer cancels a scheduled interview, so you never travel for a meeting that is off.",
+    dedupeWindowSeconds: 0,
+  },
+  // The 3-day reminder, both sides. A calendar helps only people who
+  // use calendars; the reminder is the platform doing the remembering.
+  "interview.reminder": {
+    defaultInApp: true,
+    defaultEmail: true,
+    audience: "seeker",
+    label: "Interview reminder",
+    description:
+      "A reminder three days before a scheduled interview, with the full details again.",
+    dedupeWindowSeconds: 0,
+  },
+  "interview.reminder.employer": {
+    defaultInApp: true,
+    defaultEmail: true,
+    audience: "org_members",
+    label: "Interview reminder",
+    description:
+      "A reminder three days before an interview your organisation scheduled.",
+    dedupeWindowSeconds: 0,
+  },
+  "interview.response": {
+    defaultInApp: true,
+    defaultEmail: true,
+    audience: "org_members",
+    label: "A candidate responded to an interview",
+    description:
+      "Fires when an invited candidate confirms the interview or says they can't make it.",
+    dedupeWindowSeconds: 0,
+  },
   "vacancy.offer": {
     defaultInApp: true,
     defaultEmail: true,
@@ -588,6 +637,10 @@ export const PUSH_DEFAULT_ON = new Set<string>([
   "vacancy.invite",
   "vacancy.invite.followup",
   "vacancy.offer",
+  "interview.scheduled",
+  "interview.cancelled",
+  // The reminder exists to interrupt: that is its whole job.
+  "interview.reminder",
 ]);
 
 export interface NotificationPref {
