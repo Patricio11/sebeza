@@ -13,9 +13,11 @@
 
 import { cookies as nextCookies } from "next/headers";
 import { revalidatePath } from "next/cache";
-
-const COOKIE_NAME = "sebenza_cookie_consent";
-const ONE_YEAR_SECONDS = 60 * 60 * 24 * 365;
+import {
+  CONSENT_COOKIE_NAME as COOKIE_NAME,
+  CONSENT_MAX_AGE_SECONDS as ONE_YEAR_SECONDS,
+  encodeConsent,
+} from "./consent-shared";
 
 export type ConsentScope = "essential" | "analytics";
 
@@ -24,10 +26,6 @@ export interface CookieConsentState {
   analytics: boolean;
   /** ISO timestamp of when the choice was made. */
   recordedAt: string | null;
-}
-
-function encode(state: Pick<CookieConsentState, "analytics">): string {
-  return `essential:1|analytics:${state.analytics ? "1" : "0"}|at:${encodeURIComponent(new Date().toISOString())}`;
 }
 
 function decode(raw: string | undefined): CookieConsentState {
@@ -56,7 +54,7 @@ export async function setCookieConsent(input: {
   analytics: boolean;
 }): Promise<{ ok: true }> {
   const jar = await nextCookies();
-  jar.set(COOKIE_NAME, encode({ analytics: input.analytics }), {
+  jar.set(COOKIE_NAME, encodeConsent(input.analytics), {
     path: "/",
     httpOnly: false, // client needs to read it to suppress the banner on render
     secure: process.env.NODE_ENV === "production",

@@ -14,6 +14,11 @@
 
 import { useState, useTransition } from "react";
 import { setCookieConsent } from "@/lib/cookies/consent";
+import {
+  CONSENT_COOKIE_NAME,
+  CONSENT_MAX_AGE_SECONDS,
+  encodeConsent,
+} from "@/lib/cookies/consent-shared";
 
 interface Props {
   /** Server-resolved: whether the cookie is already set. When true, render nothing. */
@@ -25,9 +30,22 @@ export function CookieConsentBanner({ alreadyDecided }: Props) {
   const [pending, startTransition] = useTransition();
 
   function choose(analytics: boolean) {
+    // Persist SYNCHRONOUSLY, before anything async: a navigation
+    // cancels in-flight fetches, so the old hide-now-persist-later
+    // design silently lost the choice on slow connections and the
+    // banner re-asked on the next page. The cookie is httpOnly:false
+    // by design (the server sets it that way), so the client may write
+    // it, percent-encoded to byte-match the server's own format.
+    document.cookie =
+      `${CONSENT_COOKIE_NAME}=${encodeURIComponent(encodeConsent(analytics))}` +
+      `; path=/; max-age=${CONSENT_MAX_AGE_SECONDS}; SameSite=Lax` +
+      (window.location.protocol === "https:" ? "; Secure" : "");
     setDismissed(true);
+    // The server action is now belt-and-braces: it re-sets the same
+    // cookie and revalidates the layout so server renders agree. Its
+    // failure no longer matters for persistence, so it is best-effort.
     startTransition(async () => {
-      await setCookieConsent({ analytics });
+      await setCookieConsent({ analytics }).catch(() => {});
     });
   }
 
