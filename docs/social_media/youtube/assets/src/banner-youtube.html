@@ -31,23 +31,26 @@
     display: flex; flex-direction: column; align-items: center; justify-content: center;
     text-align: center;
   }
-  .lockup { display: flex; align-items: center; gap: 26px; }
-  .mark { width: 104px; height: 94px; }
+  /* Founder feedback (2026-08-22): the lockup read small in YouTube's
+     device preview, using barely half the safe area. Scaled ~1.4x to
+     fill it, leaving ~30px breathing room inside the box. */
+  .lockup { display: flex; align-items: center; gap: 34px; }
+  .mark { width: 146px; height: 132px; }
   .mark svg { width: 100%; height: 100%; display: block; }
   .wordmark {
     font-family: "Fraunces", Georgia, serif; font-weight: 700;
-    font-size: 118px; letter-spacing: -0.015em; line-height: 1;
+    font-size: 165px; letter-spacing: -0.015em; line-height: 1;
     font-variation-settings: "opsz" 144;
   }
   .tagline {
-    margin-top: 26px; font-weight: 700; font-size: 24px;
-    letter-spacing: 0.32em; text-transform: uppercase;
+    margin-top: 30px; font-weight: 700; font-size: 34px;
+    letter-spacing: 0.3em; text-transform: uppercase;
     color: var(--gold-bright);
   }
-  .stripe { display: flex; height: 12px; width: 420px; margin-top: 30px; }
+  .stripe { display: flex; height: 14px; width: 580px; margin-top: 30px; }
   .site {
-    margin-top: 22px; font-size: 24px; font-weight: 500;
-    color: rgba(251, 248, 240, 0.65); letter-spacing: 0.05em;
+    margin-top: 20px; font-size: 30px; font-weight: 500;
+    color: rgba(251, 248, 240, 0.7); letter-spacing: 0.05em;
   }
   .stripe .g { flex: 3; background: var(--green-soft); }
   .stripe .a { flex: 2; background: var(--gold); }
