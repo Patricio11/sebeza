@@ -30,8 +30,10 @@ import {
   markVacancyFilledNoPlacement,
   searchOutsideHireCandidates,
 } from "@/lib/employer/vacancies";
+import { inviteSeeker } from "@/lib/employer/seeker-invitations";
 import type { InvitationRow } from "@/lib/employer/invitations";
 import type { SearchResultRow } from "@/db/queries/profiles";
+import { Avatar } from "@/components/ui/Avatar";
 import { Checkbox } from "@/components/ui/Checkbox";
 import {
   AlertTriangle,
@@ -283,15 +285,50 @@ function Sheet({
     });
   }
 
-  async function onSkip() {
-    if (
-      !window.confirm(
-        t("skipConfirm"),
-      )
-    )
-      return;
+  // The no-platform-hire pane (2026-08-22, founder request). Replaces
+  // the old window.confirm skip: when nobody from Sebenza filled the
+  // seat, ask where the hire came from. If they hired someone off the
+  // platform, the employer can congratulate them and invite them to
+  // join, riding the Phase 9.17 invite rails (caps, decline cooldown,
+  // report path) with a congratulations-flavoured email.
+  const [skipPane, setSkipPane] = useState(false);
+  const [elsewhereEmail, setElsewhereEmail] = useState("");
+  const [elsewhereName, setElsewhereName] = useState("");
+  const [elsewhereNote, setElsewhereNote] = useState<string | null>(null);
+
+  function markFilledOnly() {
     setError(null);
     startTransition(async () => {
+      const res = await markVacancyFilledNoPlacement({ vacancyId });
+      if (!res.ok) {
+        setError(res.message);
+        return;
+      }
+      router.refresh();
+      onClose();
+    });
+  }
+
+  function markFilledAndInvite() {
+    setError(null);
+    setElsewhereNote(null);
+    startTransition(async () => {
+      // Invite first: if the email already has a Sebenza account, the
+      // honest next step is logging the hire against their real
+      // profile (Placement-Truth), not skipping - so we stop here and
+      // show that message instead of marking filled.
+      const invite = await inviteSeeker({
+        email: elsewhereEmail.trim(),
+        name: elsewhereName.trim() || undefined,
+        congratsRole: vacancyTitle,
+        // Joining through this exact link later closes the loop:
+        // employment link + placement (docs/RECRUITER_CLIENT_PLAN.md).
+        congratsVacancyId: vacancyId,
+      });
+      if (!invite.ok) {
+        setElsewhereNote(invite.message);
+        return;
+      }
       const res = await markVacancyFilledNoPlacement({ vacancyId });
       if (!res.ok) {
         setError(res.message);
@@ -344,6 +381,105 @@ function Sheet({
 
         {/* Body  scrollable */}
         <div className="flex-1 overflow-y-auto px-5 py-4 md:px-6">
+          {skipPane && (
+            <section className="rounded-[var(--radius-md)] border-2 border-[color:var(--color-accent)] bg-[color:var(--color-accent)]/5 p-4">
+              <h3 className="font-display text-lg text-[color:var(--color-ink)]">
+                {t("elsewhere.heading")}
+              </h3>
+              <p className="mt-1 text-xs text-[color:var(--color-ink-soft)]">
+                {t("elsewhere.lead")}
+              </p>
+
+              <div className="mt-4 rounded-[var(--radius-sm)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-3">
+                <p className="text-sm text-[color:var(--color-ink)]">
+                  {t("elsewhere.inviteLead")}
+                </p>
+                <div className="mt-3 grid gap-3 md:grid-cols-2">
+                  <div>
+                    <label
+                      htmlFor="elsewhere-name"
+                      className="block text-[0.65rem] uppercase tracking-[0.18em] text-[color:var(--color-ink)]"
+                    >
+                      {t("elsewhere.nameLabel")}
+                    </label>
+                    <input
+                      id="elsewhere-name"
+                      type="text"
+                      value={elsewhereName}
+                      onChange={(e) => setElsewhereName(e.target.value)}
+                      disabled={pending}
+                      maxLength={120}
+                      placeholder={t("elsewhere.namePlaceholder")}
+                      className="mt-1 w-full rounded-[var(--radius-sm)] border border-[color:var(--color-hairline)] bg-[color:var(--color-paper)] px-2 py-1.5 text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label
+                      htmlFor="elsewhere-email"
+                      className="block text-[0.65rem] uppercase tracking-[0.18em] text-[color:var(--color-ink)]"
+                    >
+                      {t("elsewhere.emailLabel")}
+                    </label>
+                    <input
+                      id="elsewhere-email"
+                      type="email"
+                      inputMode="email"
+                      value={elsewhereEmail}
+                      onChange={(e) => setElsewhereEmail(e.target.value)}
+                      disabled={pending}
+                      maxLength={255}
+                      placeholder={t("elsewhere.emailPlaceholder")}
+                      className="mt-1 w-full rounded-[var(--radius-sm)] border border-[color:var(--color-hairline)] bg-[color:var(--color-paper)] px-2 py-1.5 text-sm"
+                    />
+                  </div>
+                </div>
+                {elsewhereNote && (
+                  <p className="mt-2 rounded-[var(--radius-sm)] border border-[color:var(--color-accent)] bg-[color:var(--color-accent)]/10 px-3 py-2 text-xs text-[color:var(--color-ink)]">
+                    {elsewhereNote}
+                  </p>
+                )}
+                <p className="mt-2 text-[0.65rem] text-[color:var(--color-ink-soft)]">
+                  {t("elsewhere.consentNote")}
+                </p>
+                <div className="mt-3">
+                  <Button
+                    type="button"
+                    variant="primary"
+                    size="sm"
+                    onClick={markFilledAndInvite}
+                    disabled={
+                      pending || !/^\S+@\S+\.\S+$/.test(elsewhereEmail.trim())
+                    }
+                  >
+                    {pending ? t("saving") : t("elsewhere.inviteCta")}
+                  </Button>
+                </div>
+              </div>
+
+              <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+                <button
+                  type="button"
+                  onClick={() => setSkipPane(false)}
+                  disabled={pending}
+                  className="text-[0.7rem] uppercase tracking-[0.18em] text-[color:var(--color-ink-soft)] hover:text-[color:var(--color-ink)] hover:underline"
+                >
+                  {t("elsewhere.back")}
+                </button>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  onClick={markFilledOnly}
+                  disabled={pending}
+                >
+                  {pending ? t("saving") : t("elsewhere.justMark")}
+                </Button>
+              </div>
+            </section>
+          )}
+
+          {!skipPane && (
+          <>
           {/* Section A  Accepted invitees */}
           <section>
             <h3 className="mb-2 text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--color-ink-soft)]">
@@ -361,12 +497,18 @@ function Sheet({
                     <li key={inv.profileId}>
                       <div
                         className={
-                          "rounded-[var(--radius-sm)] border bg-[color:var(--color-surface)] p-3 hover:border-[color:var(--color-ink)] " +
+                          "flex items-center gap-3 rounded-[var(--radius-sm)] border bg-[color:var(--color-surface)] p-3 hover:border-[color:var(--color-ink)] " +
                           (isSelected
                             ? "border-[color:var(--color-brand)] bg-[color:var(--color-brand-tint)]"
                             : "border-[color:var(--color-hairline)]")
                         }
                       >
+                        <Avatar
+                          name={inv.displayName}
+                          size="sm"
+                          showRing={false}
+                          decorative
+                        />
                         <Checkbox
                           checked={isSelected}
                           onChange={() => toggleInvitee(inv)}
@@ -545,6 +687,9 @@ function Sheet({
             </section>
           )}
 
+          </>
+          )}
+
           {error && (
             <div
               role="alert"
@@ -559,37 +704,43 @@ function Sheet({
           )}
         </div>
 
-        {/* Sticky footer */}
-        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[color:var(--color-hairline)] bg-[color:var(--color-paper)] p-4 md:p-5">
-          <button
-            type="button"
-            onClick={onSkip}
-            disabled={pending}
-            className="text-[0.7rem] uppercase tracking-[0.18em] text-[color:var(--color-ink-soft)] hover:text-[color:var(--color-ink)] hover:underline"
-          >
-            {t("skip")}
-          </button>
-          <div className="flex gap-2">
-            <Button
+        {/* Sticky footer  hidden while the no-platform-hire pane is
+            open (that pane carries its own actions). */}
+        {!skipPane && (
+          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[color:var(--color-hairline)] bg-[color:var(--color-paper)] p-4 md:p-5">
+            <button
               type="button"
-              variant="secondary"
-              size="sm"
-              onClick={onClose}
+              onClick={() => {
+                setError(null);
+                setSkipPane(true);
+              }}
               disabled={pending}
+              className="text-[0.7rem] uppercase tracking-[0.18em] text-[color:var(--color-ink-soft)] hover:text-[color:var(--color-ink)] hover:underline"
             >
-              {t("cancel")}
-            </Button>
-            <Button
-              type="button"
-              variant="primary"
-              size="md"
-              onClick={onSubmit}
-              disabled={pending || selected.size === 0}
-            >
-              {pending ? t("saving") : t("submit", { count: selectedList.length })}
-            </Button>
+              {t("skip")}
+            </button>
+            <div className="flex gap-2">
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                onClick={onClose}
+                disabled={pending}
+              >
+                {t("cancel")}
+              </Button>
+              <Button
+                type="button"
+                variant="primary"
+                size="md"
+                onClick={onSubmit}
+                disabled={pending || selected.size === 0}
+              >
+                {pending ? t("saving") : t("submit", { count: selectedList.length })}
+              </Button>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

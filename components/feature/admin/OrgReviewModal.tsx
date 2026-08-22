@@ -295,6 +295,16 @@ export function OrgReviewModal({ detail, onClose }: Props) {
             </h3>
             <dl className="grid gap-3 text-sm md:grid-cols-2">
               <InfoRow label="Legal name" value={org.name} />
+              {/* Agencies vet differently: the client relationship, not
+                  headcount, is their business (RECRUITER_CLIENT_PLAN). */}
+              <InfoRow
+                label="Organisation type"
+                value={
+                  org.orgKind === "recruitment_agency"
+                    ? "RECRUITMENT AGENCY (hires for clients)"
+                    : "Direct employer"
+                }
+              />
               <InfoRow
                 label="Registration number"
                 value={org.registrationNumber}

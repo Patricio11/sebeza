@@ -861,6 +861,9 @@ export async function acceptSeekerInvitation(
       email: schema.seekerInvitations.email,
       state: schema.seekerInvitations.state,
       orgId: schema.seekerInvitations.organizationId,
+      invitedByUserId: schema.seekerInvitations.invitedByUserId,
+      congratsRole: schema.seekerInvitations.congratsRole,
+      congratsVacancyId: schema.seekerInvitations.congratsVacancyId,
     })
     .from(schema.seekerInvitations)
     .where(eq(schema.seekerInvitations.id, tokenCheck.inviteId))
@@ -899,6 +902,7 @@ export async function acceptSeekerInvitation(
       id: schema.profiles.id,
       handle: schema.profiles.handle,
       displayName: schema.profiles.displayName,
+      city: schema.profiles.city,
     })
     .from(schema.profiles)
     .where(eq(schema.profiles.userId, newUser.id))
@@ -924,6 +928,107 @@ export async function acceptSeekerInvitation(
         signupCompletedAt: new Date().toISOString(),
       },
     });
+
+    // ── Congrats-invite linkage (docs/RECRUITER_CLIENT_PLAN.md) ────
+    // The employer asserted "we hired this person as X" at
+    // mark-filled; joining through that exact token link is the
+    // seeker's confirmation. Direct employer: employment link + the
+    // placement, vacancy attached. Agency: employment link to the
+    // LINKED client org only (the agency is not their employer), and
+    // no auto-placement - an agency asserting a client's placement
+    // would pollute the client's stats. Every step degrades to a
+    // plain join on failure: the account always wins.
+    if (invite.congratsRole) {
+      try {
+        const inviterRows = await db
+          .select({ orgKind: schema.organizations.orgKind })
+          .from(schema.organizations)
+          .where(eq(schema.organizations.id, invite.orgId))
+          .limit(1);
+        const inviterIsAgency =
+          inviterRows[0]?.orgKind === "recruitment_agency";
+
+        let employerOrgId: string | null = null;
+        let placementVacancyId: string | null = null;
+        if (!inviterIsAgency) {
+          employerOrgId = invite.orgId;
+          placementVacancyId = invite.congratsVacancyId ?? null;
+        } else if (invite.congratsVacancyId) {
+          // The client link must belong to the inviter's own vacancy.
+          const vacRows = await db
+            .select({ clientOrgId: schema.vacancies.clientOrgId })
+            .from(schema.vacancies)
+            .where(
+              and(
+                eq(schema.vacancies.id, invite.congratsVacancyId),
+                eq(schema.vacancies.organizationId, invite.orgId),
+              ),
+            )
+            .limit(1);
+          employerOrgId = vacRows[0]?.clientOrgId ?? null;
+        }
+
+        if (employerOrgId) {
+          await db
+            .update(schema.profiles)
+            .set({ currentEmployerOrgId: employerOrgId })
+            .where(eq(schema.profiles.id, newProfile.id));
+          const cntRows = await db
+            .select({ count: sql<number>`COUNT(*)::int` })
+            .from(schema.profiles)
+            .where(
+              and(
+                eq(schema.profiles.currentEmployerOrgId, employerOrgId),
+                isNull(schema.profiles.deletedAt),
+              ),
+            );
+          await db
+            .update(schema.organizations)
+            .set({ listedBySeekerCount: cntRows[0]?.count ?? 0 })
+            .where(eq(schema.organizations.id, employerOrgId));
+        }
+
+        if (!inviterIsAgency) {
+          const placementId = `plc_${randomUUID()}`;
+          await db.insert(schema.placements).values({
+            id: placementId,
+            profileId: newProfile.id,
+            organizationId: invite.orgId,
+            actorUserId: invite.invitedByUserId,
+            role: invite.congratsRole,
+            city: newProfile.city ?? "South Africa",
+            hiredAt: new Date(),
+            source: "employer_confirmed",
+            vacancyId: placementVacancyId,
+          });
+          await logAccess({
+            kind: "placement.confirm",
+            actor: invite.invitedByUserId,
+            subject: placementId,
+            meta: {
+              orgId: invite.orgId,
+              profileId: newProfile.id,
+              vacancyId: placementVacancyId,
+              via: "congrats_invite_accept",
+            },
+          });
+          const { createNotification } = await import(
+            "@/lib/notifications/server"
+          );
+          await createNotification({
+            userId: newUser.id,
+            kind: "placement.confirmed",
+            title: `Your hire at Sebenza is on the record`,
+            body: `Your new role (${invite.congratsRole}) was confirmed by the employer and now counts toward your verified work history.`,
+            link: `/dashboard/activity`,
+            meta: { placementId, via: "congrats_invite_accept" },
+          });
+        }
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.error("[acceptSeekerInvitation] congrats linkage failed:", e);
+      }
+    }
 
     // Resolve org name for the notification body.
     const orgRows = await db
@@ -960,6 +1065,9 @@ const employerSignUpSchema = z.object({
   industry: z.string().min(2),
   size: z.string().min(1),
   country: z.string().min(2),
+  /** 2026-08-22 (docs/RECRUITER_CLIENT_PLAN.md)  what the org IS.
+   *  Agencies get the client fields on vacancy creation. */
+  orgKind: z.enum(["direct_employer", "recruitment_agency"]),
   fullName: z.string().min(2),
   yourRole: z.string().min(2).max(80),
   email: z.string().email(),
@@ -1002,6 +1110,7 @@ export async function signUpEmployer(
         industry: v.industry,
         sizeBand: v.size,
         country: v.country,
+        orgKind: v.orgKind,
         verification: "unverified",
       });
       await tx.insert(schema.organizationMembers).values({

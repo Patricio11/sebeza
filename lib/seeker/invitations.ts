@@ -115,6 +115,11 @@ export async function listMyInvitations(): Promise<SeekerInvitationRow[]> {
       orgId: schema.organizations.id,
       orgName: schema.organizations.name,
       orgVerification: schema.organizations.verification,
+      // 2026-08-22  honest agency attribution: the inviting org's
+      // kind + the client-name SNAPSHOT (never clientContact, which is
+      // org-private). docs/RECRUITER_CLIENT_PLAN.md.
+      orgKind: schema.organizations.orgKind,
+      clientName: schema.vacancies.clientName,
       vacancySnapshot: schema.vacancyInvitations.vacancySnapshot,
       // Phase 9.21  season window for the detail page.
       seasonalWindowStartMonth: schema.vacancies.seasonalWindowStartMonth,
@@ -178,6 +183,11 @@ export async function getMyInvitation(
       orgId: schema.organizations.id,
       orgName: schema.organizations.name,
       orgVerification: schema.organizations.verification,
+      // 2026-08-22  honest agency attribution: the inviting org's
+      // kind + the client-name SNAPSHOT (never clientContact, which is
+      // org-private). docs/RECRUITER_CLIENT_PLAN.md.
+      orgKind: schema.organizations.orgKind,
+      clientName: schema.vacancies.clientName,
       vacancySnapshot: schema.vacancyInvitations.vacancySnapshot,
       ownerUserId: schema.profiles.userId,
       // Phase 9.21  season window for the detail page.
@@ -236,6 +246,8 @@ function toSeekerRow(r: {
   orgId: string;
   orgName: string;
   orgVerification: string;
+  orgKind: string;
+  clientName: string | null;
   vacancySnapshot: unknown;
   seasonalWindowStartMonth: number | null;
   seasonalWindowEndMonth: number | null;
@@ -267,6 +279,8 @@ function toSeekerRow(r: {
     orgName: r.orgName,
     orgVerification:
       r.orgVerification as SeekerInvitationRow["orgVerification"],
+    orgKind: r.orgKind,
+    clientName: r.clientName,
     vacancySnapshot: isVacancySnapshot(r.vacancySnapshot)
       ? r.vacancySnapshot
       : null,

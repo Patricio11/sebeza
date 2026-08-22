@@ -53,6 +53,8 @@ export interface OrgDocumentRow {
 export interface OrgVettingState {
   orgId: string;
   orgName: string;
+  /** direct_employer | recruitment_agency (docs/RECRUITER_CLIENT_PLAN.md). */
+  orgKind: string;
   registrationNumber: string | null;
   industry: string | null;
   country: string | null;

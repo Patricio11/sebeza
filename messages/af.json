@@ -249,7 +249,15 @@
       "youAs": "Oor jou",
       "yourRole": "Jou rol by die organisasie",
       "submit": "Registreer organisasie",
-      "twoFactorNote": "Tweefaktor-verifikasie is verpligtend vir werkgewerrekeninge. Jy word deur die TOTP-opstelling gelei met jou eerste aanmelding."
+      "twoFactorNote": "Tweefaktor-verifikasie is verpligtend vir werkgewerrekeninge. Jy word deur die TOTP-opstelling gelei met jou eerste aanmelding.",
+      "orgKind": "Vir wie stel jy aan?",
+      "orgKindHint": "Agentskappe noem die aanstellende maatskappy op elke vakature wat hulle skep.",
+      "orgKindDirect": "Werkgewermaatskappy",
+      "orgKindAgency": "Werwingsmaatskappy",
+      "orgKindDirectDesc": "Ons stel aan vir ons eie span.",
+      "orgKindAgencyDesc": "Ons stel aan namens kliënte, en noem die kliënt op elke vakature.",
+      "alreadyHave": "Het jy reeds 'n rekening?",
+      "signInLink": "Meld aan"
     },
     "verify": {
       "heading": "Gaan kyk in jou posbus",
@@ -1199,7 +1207,24 @@
       "saving": "Stoor tans",
       "create": "Skep vakature",
       "saveChanges": "Stoor veranderinge",
-      "sectionRole": "Die rol"
+      "sectionRole": "Die rol",
+      "client": {
+        "heading": "Vir wie is hierdie aanstelling?",
+        "sub": "As werwingsagentskap noem jy die aanstellende maatskappy. Werksoekers sien die maatskappynaam; kontakbesonderhede bly privaat in jou werkruimte.",
+        "pickLabel": "Aanstellende maatskappy",
+        "pickPlaceholder": "Begin die maatskappynaam tik…",
+        "onSebenza": "Op Sebenza",
+        "change": "Verander",
+        "notListed": "Die maatskappy is nie op Sebenza nie? Voer sy besonderhede in",
+        "nameLabel": "Maatskappynaam",
+        "namePlaceholder": "bv. Ocean Basket Holdings",
+        "cityLabel": "Maatskappy se stad",
+        "contactLabel": "Kontak by die maatskappy",
+        "contactPlaceholder": "Naam, e-pos of telefoon",
+        "contactHint": "Privaat in jou werkruimte. Nooit aan werksoekers gewys nie.",
+        "backToSearch": "Terug na soek op Sebenza",
+        "required": "Noem die aanstellende maatskappy: kies dit uit die lys of voer sy naam in."
+      }
     },
     "match": {
       "eyebrow": "Vind passings",
@@ -1309,7 +1334,20 @@
       "pickOneError": "Kies ten minste een aanstelling, of gebruik die Slaan oor-skakel.",
       "cancel": "Kanselleer",
       "saving": "Stoor tans",
-      "submit": "Merk gevul + teken {count, plural, one {1 aanstelling} other {# aanstellings}} aan"
+      "submit": "Merk gevul + teken {count, plural, one {1 aanstelling} other {# aanstellings}} aan",
+      "elsewhere": {
+        "heading": "Niemand van Sebenza het hierdie pos gevul nie?",
+        "lead": "Dis nuttige waarheid, nie mislukking nie. Sê vir ons hoe dit geëindig het sodat die rekord eerlik bly.",
+        "inviteLead": "Iemand aangestel wat nog nie op Sebenza is nie? Wens hulle geluk en nooi hulle om hul geverifieerde werkprofiel hier te bou. Hulle kan weier, en ons respekteer dit.",
+        "nameLabel": "Hul naam (opsioneel)",
+        "namePlaceholder": "bv. Thandi Nkosi",
+        "emailLabel": "Hul e-pos",
+        "emailPlaceholder": "naam@example.co.za",
+        "consentNote": "Hulle kry een uitnodiging met duidelike weier- en rapporteer-skakels. Weierings word 90 dae lank gerespekteer. POPIA geld deurgaans.",
+        "inviteCta": "Merk as gevul + stuur gelukwense",
+        "back": "Terug na aanstelling aanteken",
+        "justMark": "Merk net as gevul"
+      }
     },
     "placements": {
       "heading": "Plasings · {count} aangeteken",
@@ -1418,7 +1456,19 @@
       "cancel": "Kanselleer",
       "send": "Skeduleer",
       "sendBulk": "Skeduleer {count}",
-      "sending": "Skeduleer tans…"
+      "sending": "Skeduleer tans…",
+      "linkHint": "Plak die volledige vergaderingskakel (Teams, Meet, Zoom). Dit word die een-tik-aansluit vir die kandidaat.",
+      "linkInvalid": "Dit lyk nog nie soos 'n skakel nie. Dit moet met https:// begin."
+    },
+    "closeConfirm": {
+      "eyebrow": "Vakature · Sebenza",
+      "title": "Sluit \"{vacancyTitle}\"?",
+      "body": "Sluiting stop nuwe uitnodigings en haal hierdie rol van elke werksoeker-oppervlak af. Die pyplyn en sy geskiedenis bly presies soos dit is.",
+      "pendingWarning": "{count} uitnodiging(s) wag nog op 'n antwoord. Sluiting laat niks verval nie, maar niemand nuut kan op 'n geslote rol reageer nie.",
+      "reversible": "Jy kan dit enige tyd heropen; heropening is een tik.",
+      "cancel": "Hou dit oop",
+      "confirm": "Sluit vakature",
+      "closing": "Sluit tans…"
     }
   },
   "employerInterviews": {

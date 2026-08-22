@@ -21,9 +21,9 @@ import { BrandDialog } from "@/components/ui/BrandDialog";
 import { Button } from "@/components/ui/Button";
 import { DatePicker } from "@/components/ui/DatePicker";
 import { CustomSelect } from "@/components/ui/CustomSelect";
-import { FieldShell, TextField, TextareaField } from "@/components/ui/FormField";
+import { FieldShell, TextareaField } from "@/components/ui/FormField";
 import { formatSaDateTime } from "@/lib/interviews/links";
-import { CalendarPlus } from "lucide-react";
+import { CalendarPlus, Link2, MapPin, Phone } from "lucide-react";
 
 export interface InterviewDetailsInput {
   startsAtIso: string;
@@ -85,8 +85,16 @@ export function InterviewScheduleDialog({ open, target, onClose, onSubmit }: Pro
 
   const preview = startsAtIso ? formatSaDateTime(new Date(startsAtIso)) : null;
   const inPast = startsAtIso ? new Date(startsAtIso).getTime() <= Date.now() : false;
+  // A video interview's "where" IS the link: hold Send until it looks
+  // like one, so nobody is notified with an unclickable meeting place.
+  const linkNeeded = locationKind === "video";
+  const looksLikeLink = /^https?:\/\/\S+\.\S+/.test(location.trim());
   const canSend =
-    !pending && !!startsAtIso && !inPast && location.trim().length >= 3;
+    !pending &&
+    !!startsAtIso &&
+    !inPast &&
+    location.trim().length >= 3 &&
+    (!linkNeeded || looksLikeLink);
 
   function reset() {
     setDate("");
@@ -233,15 +241,52 @@ export function InterviewScheduleDialog({ open, target, onClose, onSubmit }: Pro
           </FieldShell>
         </div>
 
-        <TextField
+        {/* The "where" adapts to the format: address, meeting link, or
+            phone number, each with its own icon, keyboard and checks. */}
+        <FieldShell
           id="interview-location"
           label={t(`locationLabel.${locationKind as "in_person" | "video" | "phone"}`)}
-          value={location}
-          onChange={(e) => setLocation(e.target.value)}
-          maxLength={300}
-          placeholder={t(`locationPlaceholder.${locationKind as "in_person" | "video" | "phone"}`)}
-          disabled={pending}
-        />
+          hint={
+            linkNeeded
+              ? location.trim().length > 0 && !looksLikeLink
+                ? undefined
+                : t("linkHint")
+              : undefined
+          }
+          error={
+            linkNeeded && location.trim().length > 0 && !looksLikeLink
+              ? t("linkInvalid")
+              : undefined
+          }
+        >
+          <div
+            className={
+              "flex h-12 items-center gap-2 rounded-[var(--radius-sm)] border bg-[color:var(--color-surface)] px-3 transition-colors focus-within:border-[color:var(--color-ink)] " +
+              (linkNeeded && location.trim().length > 0 && !looksLikeLink
+                ? "border-[color:var(--color-danger)]"
+                : "border-[color:var(--color-hairline)]")
+            }
+          >
+            {locationKind === "video" ? (
+              <Link2 className="size-4 shrink-0 text-[color:var(--color-brand-strong)]" aria-hidden="true" />
+            ) : locationKind === "phone" ? (
+              <Phone className="size-4 shrink-0 text-[color:var(--color-ink-soft)]" aria-hidden="true" />
+            ) : (
+              <MapPin className="size-4 shrink-0 text-[color:var(--color-ink-soft)]" aria-hidden="true" />
+            )}
+            <input
+              id="interview-location"
+              type={linkNeeded ? "url" : "text"}
+              inputMode={locationKind === "phone" ? "tel" : linkNeeded ? "url" : "text"}
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+              maxLength={300}
+              placeholder={t(`locationPlaceholder.${locationKind as "in_person" | "video" | "phone"}`)}
+              disabled={pending}
+              className="w-full bg-transparent text-[color:var(--color-ink)] outline-none placeholder:text-[color:var(--color-ink-soft)]"
+            />
+          </div>
+        </FieldShell>
 
         <TextareaField
           id="interview-instructions"

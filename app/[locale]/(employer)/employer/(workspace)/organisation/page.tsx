@@ -78,6 +78,14 @@ export default async function OrganisationPage({
           <dl className="grid gap-5 md:grid-cols-2">
             <Field label={t("company")} value={orgName} />
             <Field
+              label="Organisation type"
+              value={
+                state?.orgKind === "recruitment_agency"
+                  ? "Recruitment agency (hires for clients)"
+                  : "Company (hires for itself)"
+              }
+            />
+            <Field
               label={t("registration")}
               value={state?.registrationNumber}
             />

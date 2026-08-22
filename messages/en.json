@@ -417,7 +417,15 @@
       "youAs": "About you",
       "yourRole": "Your role at the organisation",
       "submit": "Register organisation",
-      "twoFactorNote": "Two-factor authentication is mandatory for employer accounts. You'll be guided through TOTP setup on your first sign-in."
+      "twoFactorNote": "Two-factor authentication is mandatory for employer accounts. You'll be guided through TOTP setup on your first sign-in.",
+      "orgKind": "Who are you hiring for?",
+      "orgKindHint": "Agencies name the hiring company on each vacancy they create.",
+      "orgKindDirect": "Employer company",
+      "orgKindAgency": "Recruitment company",
+      "orgKindDirectDesc": "We hire for our own team.",
+      "orgKindAgencyDesc": "We hire on behalf of client companies, and name the client on each vacancy.",
+      "alreadyHave": "Already have an account?",
+      "signInLink": "Sign in"
     },
     "verify": {
       "heading": "Check your inbox",
@@ -1256,7 +1264,24 @@
       "saving": "Saving",
       "create": "Create vacancy",
       "saveChanges": "Save changes",
-      "sectionRole": "The role"
+      "sectionRole": "The role",
+      "client": {
+        "heading": "Who is this hire for?",
+        "sub": "As a recruitment agency you name the hiring company. Seekers see the company name; contact details stay private to your workspace.",
+        "pickLabel": "Hiring company",
+        "pickPlaceholder": "Start typing the company name…",
+        "onSebenza": "On Sebenza",
+        "change": "Change",
+        "notListed": "The company isn't on Sebenza? Enter its details",
+        "nameLabel": "Company name",
+        "namePlaceholder": "e.g. Ocean Basket Holdings",
+        "cityLabel": "Company city",
+        "contactLabel": "Contact at the company",
+        "contactPlaceholder": "Name, email or phone",
+        "contactHint": "Private to your workspace. Never shown to seekers.",
+        "backToSearch": "Back to searching Sebenza",
+        "required": "Name the hiring company: pick it from the list or enter its name."
+      }
     },
     "match": {
       "eyebrow": "Find matches",
@@ -1366,7 +1391,20 @@
       "pickOneError": "Pick at least one hire, or use the Skip link.",
       "cancel": "Cancel",
       "saving": "Saving",
-      "submit": "Mark filled + log {count, plural, one {1 hire} other {# hires}}"
+      "submit": "Mark filled + log {count, plural, one {1 hire} other {# hires}}",
+      "elsewhere": {
+        "heading": "Nobody from Sebenza filled this seat?",
+        "lead": "That's useful truth, not failure. Tell us how it ended so the record stays honest.",
+        "inviteLead": "Hired someone who isn't on Sebenza yet? Congratulate them and invite them to build their verified work profile here. They can decline, and we honour that.",
+        "nameLabel": "Their name (optional)",
+        "namePlaceholder": "e.g. Thandi Nkosi",
+        "emailLabel": "Their email",
+        "emailPlaceholder": "name@example.co.za",
+        "consentNote": "They get one invitation with clear decline and report links. Declines are honoured for 90 days. POPIA applies end to end.",
+        "inviteCta": "Mark filled + send congratulations",
+        "back": "Back to logging a hire",
+        "justMark": "Just mark as filled"
+      }
     },
     "placements": {
       "heading": "Placements · {count} logged",
@@ -1475,7 +1513,19 @@
       "cancel": "Cancel",
       "send": "Schedule",
       "sendBulk": "Schedule {count}",
-      "sending": "Scheduling…"
+      "sending": "Scheduling…",
+      "linkHint": "Paste the full meeting link (Teams, Meet, Zoom). It becomes the one-tap Join for the candidate.",
+      "linkInvalid": "That doesn't look like a link yet. It should start with https://"
+    },
+    "closeConfirm": {
+      "eyebrow": "Vacancy · Sebenza",
+      "title": "Close \"{vacancyTitle}\"?",
+      "body": "Closing stops new invitations and takes this role off every seeker-facing surface. The pipeline and its history stay exactly as they are.",
+      "pendingWarning": "{count} invitation(s) are still awaiting a reply. Closing expires nothing, but nobody new can respond to a closed role.",
+      "reversible": "You can reopen it any time; reopening is one tap.",
+      "cancel": "Keep it open",
+      "confirm": "Close vacancy",
+      "closing": "Closing…"
     }
   },
   "employerInterviews": {

@@ -31,6 +31,7 @@
 
 import { Link } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
+import { Avatar } from "@/components/ui/Avatar";
 import { Briefcase, CheckCircle2, Lock, Plus, Trophy } from "lucide-react";
 
 import type { VacancyPlacementRow } from "@/lib/employer/placements";
@@ -185,19 +186,28 @@ export function VacancyPlacementsPanel({
                 key={inv.id}
                 className="flex flex-wrap items-center justify-between gap-3 rounded-[var(--radius-sm)] border border-[color:var(--color-hairline)] bg-[color:var(--color-paper)] p-3"
               >
-                <div className="min-w-0">
-                  <Link
-                    href={`/employer/dossier/${inv.handle}` as never}
-                    className="font-display text-sm text-[color:var(--color-ink)] hover:underline"
-                  >
-                    {inv.displayName}
-                  </Link>
-                  {inv.state === "accepted_with_notice" &&
-                    inv.noticePeriodMonths != null && (
-                      <p className="mt-0.5 text-xs text-[color:var(--color-ink-soft)]">
-                        {t("acceptedWithNotice", { months: inv.noticePeriodMonths })}
-                      </p>
-                    )}
+                <div className="flex min-w-0 items-center gap-3">
+                  <Avatar
+                    name={inv.displayName}
+                    size="sm"
+                    showRing={false}
+                    decorative
+                  />
+                  <div className="min-w-0">
+                    <Link
+                      href={`/employer/dossier/${inv.handle}` as never}
+                      className="font-display text-sm text-[color:var(--color-ink)] hover:underline"
+                    >
+                      {inv.displayName}
+                    </Link>
+                    <p className="mt-0.5 text-xs text-[color:var(--color-ink-soft)]">
+                      @{inv.handle}
+                      {inv.state === "accepted_with_notice" &&
+                        inv.noticePeriodMonths != null && (
+                          <> · {t("acceptedWithNotice", { months: inv.noticePeriodMonths })}</>
+                        )}
+                    </p>
+                  </div>
                 </div>
                 <Link
                   href={

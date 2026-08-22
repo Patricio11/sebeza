@@ -128,6 +128,20 @@ export default async function SeekerInvitationDetailPage({
             withDetail
           />
         </div>
+        {/* Honest agency attribution (docs/RECRUITER_CLIENT_PLAN.md):
+            the badge above belongs to the AGENCY; the client line is
+            presented as their claim, not a Sebenza verification. */}
+        {inv.orgKind === "recruitment_agency" && inv.clientName && (
+          <p className="mt-1.5 text-sm text-[color:var(--color-ink)]">
+            <span className="text-[0.65rem] uppercase tracking-[0.18em] text-[color:var(--color-ink-soft)]">
+              Recruiting for
+            </span>{" "}
+            <span className="font-display">{inv.clientName}</span>
+            <span className="ml-2 text-xs text-[color:var(--color-ink-soft)]">
+              (as stated by {inv.orgName})
+            </span>
+          </p>
+        )}
 
         <dl className="mt-5 grid grid-cols-1 gap-4 text-sm md:grid-cols-2">
           <div>

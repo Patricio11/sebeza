@@ -2,7 +2,7 @@
 
 import { useMemo, useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
-import { useRouter } from "@/i18n/navigation";
+import { Link, useRouter } from "@/i18n/navigation";
 import { TextField, SelectField } from "@/components/ui/FormField";
 import { PasswordField } from "@/components/ui/PasswordField";
 import { Button } from "@/components/ui/Button";
@@ -30,6 +30,7 @@ const INDUSTRY_OTHER = "Other";
 const DRAFT_KEY = "sebenza:employer-signup-draft";
 
 interface FormFields {
+  orgKind: string;
   orgName: string;
   registrationNumber: string;
   industry: string;
@@ -43,6 +44,7 @@ interface FormFields {
 }
 
 const INITIAL: FormFields = {
+  orgKind: "",
   orgName: "",
   registrationNumber: "",
   industry: "",
@@ -74,7 +76,8 @@ export function EmployerSignUpForm() {
     passwordMismatch ||
     !passwordStrong ||
     password.length < 10 ||
-    (fields.industry === INDUSTRY_OTHER && fields.industryOther.trim().length < 2);
+    (fields.industry === INDUSTRY_OTHER && fields.industryOther.trim().length < 2) ||
+    (fields.orgKind !== "direct_employer" && fields.orgKind !== "recruitment_agency");
 
   // Persist + restore the non-sensitive fields. Passwords are
   // deliberately omitted from the draft slice  see the hook doc.
@@ -99,6 +102,7 @@ export function EmployerSignUpForm() {
         ? fields.industryOther.trim()
         : fields.industry;
     const data = {
+      orgKind: fields.orgKind as "direct_employer" | "recruitment_agency",
       orgName: fields.orgName,
       registrationNumber: fields.registrationNumber,
       industry: resolvedIndustry,
@@ -148,6 +152,71 @@ export function EmployerSignUpForm() {
         <div className="text-[0.72rem] uppercase tracking-[0.22em] text-[color:var(--color-ink)]">
           Organisation
         </div>
+        {/* The first honest question (docs/RECRUITER_CLIENT_PLAN.md):
+            agencies get client fields on every vacancy they create.
+            Two big cards, not a dropdown - this choice shapes the whole
+            workspace, so it deserves daylight (founder, 2026-08-22). */}
+        <fieldset>
+          <legend className="text-[0.72rem] uppercase tracking-[0.22em] text-[color:var(--color-ink)]">
+            {t("orgKind")}
+          </legend>
+          <div className="mt-2 grid gap-3 sm:grid-cols-2" role="radiogroup" aria-label={t("orgKind")}>
+            {(
+              [
+                {
+                  value: "direct_employer",
+                  title: t("orgKindDirect"),
+                  desc: t("orgKindDirectDesc"),
+                },
+                {
+                  value: "recruitment_agency",
+                  title: t("orgKindAgency"),
+                  desc: t("orgKindAgencyDesc"),
+                },
+              ] as const
+            ).map((opt) => {
+              const active = fields.orgKind === opt.value;
+              return (
+                <button
+                  key={opt.value}
+                  type="button"
+                  role="radio"
+                  aria-checked={active}
+                  disabled={pending}
+                  onClick={() => setField("orgKind", opt.value)}
+                  className={
+                    "rounded-[var(--radius-md)] border-2 p-4 text-left transition-colors " +
+                    (active
+                      ? "border-[color:var(--color-brand-strong)] bg-[color:var(--color-brand-tint)]"
+                      : "border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] hover:border-[color:var(--color-ink)]")
+                  }
+                >
+                  <span className="flex items-center justify-between gap-2">
+                    <span className="font-display text-base text-[color:var(--color-ink)]">
+                      {opt.title}
+                    </span>
+                    <span
+                      aria-hidden="true"
+                      className={
+                        "inline-flex size-5 shrink-0 items-center justify-center rounded-full border-2 " +
+                        (active
+                          ? "border-[color:var(--color-brand-strong)] bg-[color:var(--color-brand-strong)]"
+                          : "border-[color:var(--color-hairline)]")
+                      }
+                    >
+                      {active && (
+                        <span className="size-2 rounded-full bg-[color:var(--color-paper)]" />
+                      )}
+                    </span>
+                  </span>
+                  <span className="mt-1 block text-xs leading-relaxed text-[color:var(--color-ink-soft)]">
+                    {opt.desc}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </fieldset>
         <TextField
           id="orgName"
           name="orgName"
@@ -321,6 +390,18 @@ export function EmployerSignUpForm() {
       <Button type="submit" variant="primary" size="lg" disabled={submitBlocked}>
         {pending ? "Creating…" : t("submit")}
       </Button>
+
+      {/* The way back (founder, 2026-08-22): people land here already
+          holding an account, and the page offered no door. */}
+      <p className="text-center text-sm text-[color:var(--color-ink-soft)]">
+        {t("alreadyHave")}{" "}
+        <Link
+          href="/sign-in"
+          className="font-medium text-[color:var(--color-ink)] underline hover:text-[color:var(--color-brand-strong)]"
+        >
+          {t("signInLink")}
+        </Link>
+      </p>
     </form>
   );
 }

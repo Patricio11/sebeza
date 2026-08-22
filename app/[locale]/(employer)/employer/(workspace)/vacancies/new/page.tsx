@@ -12,6 +12,7 @@ import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
 import { verifyEmployer } from "@/lib/auth/dal";
 import {
   createVacancy,
+  getMyOrgKind,
   getMyOrgRole,
   getMyVacancy,
 } from "@/lib/employer/vacancies";
@@ -25,6 +26,7 @@ import { PROVINCES } from "@/lib/mock/taxonomy";
 import { HelpLink } from "@/components/feature/help/HelpLink";
 import { safeInternalPath } from "@/lib/nav/safe-internal-path";
 import { getSetting } from "@/lib/admin/settings";
+import { listEmployerOptions } from "@/lib/profile/employment";
 
 export const revalidate = 0;
 
@@ -108,6 +110,11 @@ export default async function NewVacancyPage({
     "feature_flag_vacancy_self_apply",
   );
 
+  // 2026-08-22  agency client picker (docs/RECRUITER_CLIENT_PLAN.md).
+  const orgKind = await getMyOrgKind();
+  const clientOptions =
+    orgKind === "recruitment_agency" ? await listEmployerOptions("") : [];
+
   return (
     <DashboardMasthead
       role="employer"
@@ -131,6 +138,8 @@ export default async function NewVacancyPage({
           // duplicating two different vacancies doesn't bleed drafts.
           draftId={duplicateFrom ? `duplicate-${duplicateFrom}` : "new"}
           selfApplyFeatureOn={selfApplyFeatureOn}
+          orgKind={orgKind}
+          clientOptions={clientOptions}
           onSubmit={async (value) => {
             "use server";
             const res = await createVacancy(value);

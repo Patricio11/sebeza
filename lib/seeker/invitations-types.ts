@@ -85,6 +85,11 @@ export interface SeekerInvitationRow {
    * glance whether this is a Sebenza-verified employer.
    */
   orgVerification: "unverified" | "pending" | "verified" | "rejected";
+  /** 2026-08-22  agency attribution (docs/RECRUITER_CLIENT_PLAN.md).
+   *  When orgKind is recruitment_agency and clientName is set, the UI
+   *  reads "recruiting for {clientName}" framed as the agency's claim. */
+  orgKind: string;
+  clientName: string | null;
   /**
    * Phase 9.21  vacancy-side season window. Surfaced on the seeker
    * detail page when present so the seeker can read the months before

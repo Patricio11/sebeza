@@ -526,6 +526,13 @@
       "when": 1787270408000,
       "tag": "0074_interviews",
       "breakpoints": false
+    },
+    {
+      "idx": 75,
+      "version": "7",
+      "when": 1787270408001,
+      "tag": "0075_recruiter_client",
+      "breakpoints": false
     }
   ]
 }

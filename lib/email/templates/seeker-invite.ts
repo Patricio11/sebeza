@@ -38,6 +38,14 @@ export interface SeekerInviteEmailInput {
   origin: string;
   /** The signed token  goes into the URL path. */
   token: string;
+  /**
+   * Filled-from-elsewhere flavour (2026-08-22, vacancy lifecycle):
+   * when the employer marks a vacancy filled by someone who isn't on
+   * Sebenza, the invite opens with congratulations on the new role
+   * instead of the recruitment framing. Same links, same POPIA
+   * footer, same decline/report machinery.
+   */
+  congratsRole?: string | null;
 }
 
 export interface SeekerInviteEmailOutput {
@@ -73,18 +81,28 @@ export function seekerInviteEmail(
       </blockquote>`
     : "";
 
+  const eyebrow = input.congratsRole
+    ? "Congratulations · Sebenza"
+    : "Invitation to Sebenza";
+  const heading = input.congratsRole
+    ? `Congratulations on your new role`
+    : `${escapeHtml(input.orgName)} has invited you`;
+  const leadPara = input.congratsRole
+    ? `<strong>${escapeHtml(input.orgName)}</strong> told us they've hired you as <strong>${escapeHtml(input.congratsRole)}</strong>, well done and welcome to the new job! They'd also love you to have a Sebenza profile: a verified, portable work record on South Africa's talent platform that stays yours as your career grows. Setting one up takes a few minutes and is free.`
+    : `<strong>${escapeHtml(input.orgName)}</strong>, a verified employer on Sebenza, has invited you to set up a profile on South Africa's talent platform. Sebenza is a national-scale, POPIA-compliant directory, your profile is yours to control, and verified employers can find you for the work you do.`;
+
   const html = emailShell(`
     <p style="font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:#003d1f;margin:16px 0 8px;">
-      Invitation to Sebenza
+      ${eyebrow}
     </p>
     <h1 style="font-family:'Fraunces',Georgia,serif;font-size:28px;line-height:1.2;margin:0 0 16px;color:#14110d;">
-      ${escapeHtml(input.orgName)} has invited you
+      ${heading}
     </h1>
     <p style="font-size:16px;line-height:1.6;margin:0 0 16px;color:#14110d;">
       ${greeting}
     </p>
     <p style="font-size:16px;line-height:1.6;margin:0 0 16px;color:#14110d;">
-      <strong>${escapeHtml(input.orgName)}</strong>, a verified employer on Sebenza, has invited you to set up a profile on South Africa's talent platform. Sebenza is a national-scale, POPIA-compliant directory, your profile is yours to control, and verified employers can find you for the work you do.
+      ${leadPara}
     </p>
     ${professionLine}
     ${noteBlock}
@@ -106,7 +124,9 @@ export function seekerInviteEmail(
   `);
 
   return {
-    subject: `${input.orgName} has invited you to join Sebenza`,
+    subject: input.congratsRole
+      ? `Congratulations from ${input.orgName}, and an invitation to Sebenza`
+      : `${input.orgName} has invited you to join Sebenza`,
     html,
   };
 }

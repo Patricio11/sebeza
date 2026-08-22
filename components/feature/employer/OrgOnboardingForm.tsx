@@ -26,7 +26,7 @@ import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "@/i18n/navigation";
 
 import { Button } from "@/components/ui/Button";
-import { TextField, TextareaField } from "@/components/ui/FormField";
+import { SelectField, TextField, TextareaField } from "@/components/ui/FormField";
 import { useSessionDraft } from "@/lib/hooks/useSessionDraft";
 import {
   deleteOrgDocument,
@@ -51,6 +51,8 @@ interface Props {
     companyAddress: string | null;
     vatNumber: string | null;
     city: string | null;
+    /** direct_employer | recruitment_agency (docs/RECRUITER_CLIENT_PLAN.md). */
+    orgKind: string;
     documents: OrgDocumentRow[];
     /** Active, admin-configured document requirements (2026-08, 0066). */
     requirements: OrgRequirementRow[];
@@ -77,6 +79,7 @@ export function OrgOnboardingForm({ initial }: Props) {
   );
   const [vatNumber, setVatNumber] = useState(initial.vatNumber ?? "");
   const [city, setCity] = useState(initial.city ?? "");
+  const [orgKind, setOrgKind] = useState(initial.orgKind || "direct_employer");
 
   // Local mirror of the server-side documents list. Updated optimistically
   // after each upload + delete; the parent page also refreshes via
@@ -169,6 +172,7 @@ export function OrgOnboardingForm({ initial }: Props) {
     setError(null);
     startTransition(async () => {
       const res = await submitOrgOnboarding({
+        orgKind: orgKind as "direct_employer" | "recruitment_agency",
         companyAddress: companyAddress.trim(),
         vatNumber: vatNumber.trim() || null,
         city: city.trim() || null,
@@ -272,6 +276,19 @@ export function OrgOnboardingForm({ initial }: Props) {
             document. Helps us match the docs without back-and-forth.
           </p>
         </header>
+        <SelectField
+          id="org-kind"
+          label="What is this organisation?"
+          hint="Recruitment agencies name the hiring company on each vacancy they create."
+          value={orgKind}
+          onChange={(e) => setOrgKind(e.target.value)}
+          disabled={pending}
+        >
+          <option value="direct_employer">A company hiring for itself</option>
+          <option value="recruitment_agency">
+            A recruitment agency hiring for clients
+          </option>
+        </SelectField>
         <TextareaField
           id="company-address"
           label="Physical address"

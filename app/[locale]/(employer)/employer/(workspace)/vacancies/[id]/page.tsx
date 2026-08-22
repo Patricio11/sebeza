@@ -24,10 +24,12 @@ import { Button } from "@/components/ui/Button";
 import { verifyEmployer } from "@/lib/auth/dal";
 import {
   getMyVacancy,
+  getMyOrgKind,
   getMyOrgRole,
   transitionVacancyStatus,
   updateVacancy,
 } from "@/lib/employer/vacancies";
+import { listEmployerOptions } from "@/lib/profile/employment";
 import {
   canEditVacancies,
   canSeeSalary,
@@ -38,6 +40,7 @@ import { VacancyStatusChip } from "@/components/feature/employer/vacancies/Vacan
 import { VacancyInvitationsPanel } from "@/components/feature/employer/vacancies/VacancyInvitationsPanel";
 import { VacancyPlacementsPanel } from "@/components/feature/employer/vacancies/VacancyPlacementsPanel";
 import { MarkAsFilledModal } from "@/components/feature/employer/vacancies/MarkAsFilledModal";
+import { CloseVacancyButton } from "@/components/feature/employer/vacancies/CloseVacancyButton";
 import {
   listInvitationsForVacancy,
   makeOfferOnInvitation,
@@ -91,9 +94,10 @@ export default async function VacancyDetailPage({
   setRequestLocale(locale);
   await verifyEmployer();
 
-  const [role, vacancy] = await Promise.all([
+  const [role, vacancy, orgKind] = await Promise.all([
     getMyOrgRole(),
     getMyVacancy(id),
+    getMyOrgKind(),
   ]);
   if (!vacancy) notFound();
   const canEdit = canEditVacancies(role);
@@ -130,6 +134,11 @@ export default async function VacancyDetailPage({
   const selfApplyFeatureOn = await getSetting<boolean>(
     "feature_flag_vacancy_self_apply",
   );
+
+  // 2026-08-22  agencies pick their client from the same
+  // registered-or-verified org list the 9.22 employer picker uses.
+  const clientOptions =
+    orgKind === "recruitment_agency" ? await listEmployerOptions("") : [];
 
   const professionLabel =
     professions.find((p) => p.slug === vacancy.professionSlug)?.label ??
@@ -344,6 +353,27 @@ export default async function VacancyDetailPage({
                 )}
                 triggerLabel={TRANSITION_LABEL[next]}
               />
+            ) : next === "closed" ? (
+              // Closing pulls the role off every seeker surface, so it
+              // confirms first (2026-08-22); reopening below stays
+              // one tap because it is the undo.
+              <CloseVacancyButton
+                key={next}
+                vacancyTitle={vacancy.title}
+                pendingCount={
+                  invitations.filter(
+                    (i) => i.state === "invited" || i.state === "offer_made",
+                  ).length
+                }
+                label={TRANSITION_LABEL[next]}
+                action={async () => {
+                  "use server";
+                  await transitionVacancyStatus({
+                    vacancyId: vacancy.id,
+                    next: "closed",
+                  });
+                }}
+              />
             ) : (
               <form
                 key={next}
@@ -394,6 +424,8 @@ export default async function VacancyDetailPage({
             skills={skills}
             draftId={vacancy.id}
             selfApplyFeatureOn={selfApplyFeatureOn}
+            orgKind={orgKind}
+            clientOptions={clientOptions}
             onSubmit={async (value) => {
               "use server";
               const res = await updateVacancy(vacancy.id, value);

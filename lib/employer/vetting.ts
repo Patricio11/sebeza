@@ -96,6 +96,7 @@ export async function getMyOrgVettingState(): Promise<OrgVettingState | null> {
       name: schema.organizations.name,
       registrationNumber: schema.organizations.registrationNumber,
       industry: schema.organizations.industry,
+      orgKind: schema.organizations.orgKind,
       country: schema.organizations.country,
       city: schema.organizations.city,
       companyAddress: schema.organizations.companyAddress,
@@ -139,6 +140,7 @@ export async function getMyOrgVettingState(): Promise<OrgVettingState | null> {
   return {
     orgId: org.id,
     orgName: org.name,
+    orgKind: org.orgKind,
     registrationNumber: org.registrationNumber,
     industry: org.industry,
     country: org.country,
@@ -380,6 +382,9 @@ const submitSchema = z.object({
   companyAddress: z.string().trim().min(10).max(500),
   vatNumber: z.string().trim().max(20).nullable().optional(),
   city: z.string().trim().min(2).max(80).nullable().optional(),
+  /** Correctable here because signup answers can be wrong; the admin
+   *  sees the final value in vetting (docs/RECRUITER_CLIENT_PLAN.md). */
+  orgKind: z.enum(["direct_employer", "recruitment_agency"]).optional(),
 });
 
 /**
@@ -438,6 +443,7 @@ export async function submitOrgOnboarding(
       companyAddress: v.companyAddress,
       vatNumber: v.vatNumber?.trim() || null,
       city: v.city?.trim() || null,
+      ...(v.orgKind ? { orgKind: v.orgKind } : {}),
       adminNote: null, // clear request-changes note on resubmit
       rejectionReason: null, // clear stale rejection if any
     })

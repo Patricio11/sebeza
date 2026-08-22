@@ -299,6 +299,7 @@ export default async function EmployerOnboardingPage({
       <OrgOnboardingForm
         initial={{
           companyAddress: state.companyAddress,
+          orgKind: state.orgKind,
           vatNumber: state.vatNumber,
           city: state.city,
           documents: state.documents,

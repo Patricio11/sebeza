@@ -78,6 +78,9 @@ export interface OrgReviewRow {
   id: string;
   name: string;
   registrationNumber: string | null;
+  /** direct_employer | recruitment_agency - vetting reads it so KYC
+   *  review knows what it is looking at (docs/RECRUITER_CLIENT_PLAN.md). */
+  orgKind: string;
   industry: string | null;
   country: string | null;
   city: string | null;
@@ -116,6 +119,7 @@ export async function listOrgsForReview(): Promise<{
       name: schema.organizations.name,
       registrationNumber: schema.organizations.registrationNumber,
       industry: schema.organizations.industry,
+      orgKind: schema.organizations.orgKind,
       country: schema.organizations.country,
       city: schema.organizations.city,
       companyAddress: schema.organizations.companyAddress,
@@ -176,6 +180,7 @@ export async function listOrgsForReview(): Promise<{
       name: r.name,
       registrationNumber: r.registrationNumber,
       industry: r.industry,
+      orgKind: r.orgKind,
       country: r.country,
       city: r.city,
       companyAddress: r.companyAddress,

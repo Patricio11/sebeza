@@ -249,7 +249,15 @@
       "youAs": "Mayelana nawe",
       "yourRole": "Indima yakho enhlanganweni",
       "submit": "Bhalisa inhlangano",
-      "twoFactorNote": "Ukuqinisekisa ngezinyathelo ezimbili kuyaphoqeleka kuma-akhawunti abaqashi. Uzoholwa ekusetheni i-TOTP lapho ungena okokuqala."
+      "twoFactorNote": "Ukuqinisekisa ngezinyathelo ezimbili kuyaphoqeleka kuma-akhawunti abaqashi. Uzoholwa ekusetheni i-TOTP lapho ungena okokuqala.",
+      "orgKind": "Uqashela bani?",
+      "orgKindHint": "Ama-ejensi asho inkampani eqashayo esikhaleni ngasinye esisidalayo.",
+      "orgKindDirect": "Inkampani eqashayo",
+      "orgKindAgency": "Inkampani yokuqasha",
+      "orgKindDirectDesc": "Siqashela ithimba lethu.",
+      "orgKindAgencyDesc": "Siqashela amakhasimende, futhi sisho ikhasimende esikhaleni ngasinye.",
+      "alreadyHave": "Usunayo i-akhawunti?",
+      "signInLink": "Ngena"
     },
     "verify": {
       "heading": "Bheka ibhokisi lakho le-imeyili",
@@ -1199,7 +1207,24 @@
       "saving": "Iyalondoloza",
       "create": "Dala isikhala",
       "saveChanges": "Londoloza izinguquko",
-      "sectionRole": "Isikhundla"
+      "sectionRole": "Isikhundla",
+      "client": {
+        "heading": "Lo msebenzi ungokabani?",
+        "sub": "Njenge-ejensi yokuqasha usho inkampani eqashayo. Abafuni-msebenzi babona igama lenkampani; imininingwane yokuxhumana ihlala iyimfihlo endaweni yakho yokusebenza.",
+        "pickLabel": "Inkampani eqashayo",
+        "pickPlaceholder": "Qala ukubhala igama lenkampani…",
+        "onSebenza": "IkuSebenza",
+        "change": "Shintsha",
+        "notListed": "Inkampani ayikho kuSebenza? Faka imininingwane yayo",
+        "nameLabel": "Igama lenkampani",
+        "namePlaceholder": "isb. Ocean Basket Holdings",
+        "cityLabel": "Idolobha lenkampani",
+        "contactLabel": "Oxhumana naye enkampanini",
+        "contactPlaceholder": "Igama, i-imeyili noma ucingo",
+        "contactHint": "Kuyimfihlo endaweni yakho yokusebenza. Akukhonjiswa kubafuni-msebenzi.",
+        "backToSearch": "Buyela ekusesheni kuSebenza",
+        "required": "Sho inkampani eqashayo: yikhethe ohlwini noma ufake igama layo."
+      }
     },
     "match": {
       "eyebrow": "Thola abafanelekayo",
@@ -1309,7 +1334,20 @@
       "pickOneError": "Khetha okungenani oyedwa oqashiwe, noma usebenzise ilinki ethi Yeqa.",
       "cancel": "Khansela",
       "saving": "Iyalondoloza",
-      "submit": "Maka kugcwalisiwe + bhala {count, plural, one {oqashiwe ongu-1} other {abaqashiwe abangu-#}}"
+      "submit": "Maka kugcwalisiwe + bhala {count, plural, one {oqashiwe ongu-1} other {abaqashiwe abangu-#}}",
+      "elsewhere": {
+        "heading": "Akekho ovela kuSebenza ogcwalise lesi sikhala?",
+        "lead": "Lelo yiqiniso eliwusizo, hhayi ukwehluleka. Sitshele ukuthi kuphele kanjani ukuze irekhodi lihlale lineqiniso.",
+        "inviteLead": "Uqashe umuntu ongakabi kuSebenza? Mhalalisele futhi ummeme ukuba akhe iphrofayela yakhe yomsebenzi eqinisekisiwe lapha. Angenqaba, futhi siyakuhlonipha lokho.",
+        "nameLabel": "Igama lakhe (elikhethekayo)",
+        "namePlaceholder": "isb. Thandi Nkosi",
+        "emailLabel": "I-imeyili yakhe",
+        "emailPlaceholder": "igama@example.co.za",
+        "consentNote": "Uthola isimemo esisodwa esinezixhumanisi ezicacile zokwenqaba nokubika. Ukwenqaba kuhlonishwa izinsuku ezingu-90. I-POPIA isebenza kukho konke.",
+        "inviteCta": "Maka njengokugcwele + thumela amahalalisela",
+        "back": "Buyela ekulogeni ukuqashwa",
+        "justMark": "Maka nje njengokugcwele"
+      }
     },
     "placements": {
       "heading": "Ukubekwa · {count} okubhaliwe",
@@ -1418,7 +1456,19 @@
       "cancel": "Khansela",
       "send": "Hlela",
       "sendBulk": "Hlela {count}",
-      "sending": "Iyahlela…"
+      "sending": "Iyahlela…",
+      "linkHint": "Namathisela isixhumanisi esiphelele somhlangano (Teams, Meet, Zoom). Siba yindlela yokungena ngokuthepha kanye.",
+      "linkInvalid": "Lokhu akubukeki njengesixhumanisi okwamanje. Kumele siqale ngo-https://"
+    },
+    "closeConfirm": {
+      "eyebrow": "Isikhala · Sebenza",
+      "title": "Vala \"{vacancyTitle}\"?",
+      "body": "Ukuvala kumisa izimemo ezintsha futhi kususa lo msebenzi kuzo zonke izindawo ezibonwa abafuni-msebenzi. Ipipeline nomlando wayo kuhlala kunjalo.",
+      "pendingWarning": "Izimemo ezingu-{count} zisalinde impendulo. Ukuvala akuphelisi lutho, kodwa akekho omusha ongaphendula esikhaleni esivaliwe.",
+      "reversible": "Ungasivula futhi noma nini; ukuvula kuwukuthepha kanye.",
+      "cancel": "Sigcine sivuliwe",
+      "confirm": "Vala isikhala",
+      "closing": "Iyavala…"
     }
   },
   "employerInterviews": {

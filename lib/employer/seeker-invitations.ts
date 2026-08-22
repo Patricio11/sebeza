@@ -88,6 +88,15 @@ const inviteSchema = z.object({
   name: z.string().trim().min(1).max(120).optional(),
   profession: z.string().trim().min(1).max(80).optional(),
   personalNote: z.string().trim().max(200).optional(),
+  /** Filled-from-elsewhere flavour: the role they were hired into.
+   *  Same invite row, caps, cooldowns and report path; only the email
+   *  opens with congratulations instead of recruitment. */
+  congratsRole: z.string().trim().min(1).max(120).optional(),
+  /** The vacancy the congrats invite celebrates. Stored on the row so
+   *  acceptance can close the loop (employment link + placement, see
+   *  docs/RECRUITER_CLIENT_PLAN.md). Server-verified to belong to the
+   *  inviter's own org. */
+  congratsVacancyId: z.string().min(1).optional(),
 });
 
 export async function inviteSeeker(
@@ -207,6 +216,24 @@ export async function inviteSeeker(
     );
   }
 
+  // ── Congrats linkage: the vacancy must be the inviter's own ──────
+  // (otherwise any org could stamp its congrats invites onto another
+  // org's vacancy and pollute the accept-time linkage).
+  let congratsVacancyId: string | null = null;
+  if (v.congratsRole && v.congratsVacancyId) {
+    const vacRows = await db
+      .select({ id: schema.vacancies.id })
+      .from(schema.vacancies)
+      .where(
+        and(
+          eq(schema.vacancies.id, v.congratsVacancyId),
+          eq(schema.vacancies.organizationId, session.orgId),
+        ),
+      )
+      .limit(1);
+    congratsVacancyId = vacRows[0]?.id ?? null;
+  }
+
   // ── Create the row + send the email ──────────────────────────────
   const inviteId = `inv_${randomUUID()}`;
   const expiresAt = new Date(Date.now() + INVITE_TTL_DAYS * 24 * 60 * 60 * 1000);
@@ -218,6 +245,8 @@ export async function inviteSeeker(
     name: v.name ?? null,
     profession: v.profession ?? null,
     personalNote: v.personalNote ?? null,
+    congratsRole: v.congratsRole ?? null,
+    congratsVacancyId,
     expiresAt,
   });
 
@@ -229,6 +258,7 @@ export async function inviteSeeker(
     profession: v.profession ?? null,
     origin: originFromEnv(),
     token,
+    congratsRole: v.congratsRole ?? null,
   });
 
   try {

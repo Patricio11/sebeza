@@ -29,7 +29,10 @@ export function AuthShell({
   children,
 }: Props) {
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[color:var(--color-paper)]">
+    // overflow-x-CLIP, not hidden: it still crops the chevron bleeding
+    // off the right edge, but unlike overflow-hidden it does not create
+    // a scroll container, which would silently kill the sticky aside.
+    <div className="relative min-h-screen overflow-x-clip bg-[color:var(--color-paper)]">
       {/* Flag stripe  same as the site header */}
       <div aria-hidden="true" className="flex h-[3px] w-full">
         <div className="flex-[3] bg-[color:var(--color-brand)]" />
@@ -84,7 +87,10 @@ export function AuthShell({
           </section>
 
           {rightAside && (
-            <aside className="anim-rise-soft anim-delay-3 md:pt-10">
+            // Sticky on md+ (founder, 2026-08-22): long forms scroll on
+            // the left while the dossier stays in view. self-start keeps
+            // the sticky box from stretching to the grid row's height.
+            <aside className="anim-rise-soft anim-delay-3 md:sticky md:top-10 md:self-start md:pt-10">
               <div className="border-t-2 border-[color:var(--color-ink)] pt-6">
                 {rightAside}
               </div>

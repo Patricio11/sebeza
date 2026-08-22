@@ -22,7 +22,7 @@
 
 import { getDb } from "@/db/client";
 import * as schema from "@/db/schema";
-import { and, desc, eq, inArray, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, or, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
@@ -139,6 +139,13 @@ export interface VacancyRow {
   /** Phase 34 D2  signed-in applicants see the salary band on the
    *  apply page while true. Anonymous visitors NEVER see it. */
   salaryVisibleToApplicants: boolean;
+  /** 2026-08-22  agency client linkage (docs/RECRUITER_CLIENT_PLAN.md).
+   *  clientContact stays inside the workspace: this row type is
+   *  org-scoped (getMyVacancy) so carrying it here is safe. */
+  clientOrgId: string | null;
+  clientName: string | null;
+  clientCity: string | null;
+  clientContact: string | null;
   createdAt: string; // ISO
   closedAt: string | null;
 }
@@ -168,6 +175,10 @@ function rowToVacancy(r: typeof schema.vacancies.$inferSelect): VacancyRow {
     selfApplyEnabled: r.selfApplyEnabled ?? false,
     selfApplyToken: r.selfApplyToken ?? null,
     salaryVisibleToApplicants: r.salaryVisibleToApplicants ?? true,
+    clientOrgId: r.clientOrgId ?? null,
+    clientName: r.clientName ?? null,
+    clientCity: r.clientCity ?? null,
+    clientContact: r.clientContact ?? null,
     // Phase 9.21  fold "one month set, the other NULL" to NULL so
     // consumers never have to defend against half-windows. The action
     // layer never writes a partial window, but legacy / hand-edited
@@ -514,6 +525,16 @@ const vacancyInputSchema = z.object({
     .nullable()
     .optional(),
   seasonalWindowRecurringAnnually: z.boolean().nullable().optional(),
+  /**
+   * 2026-08-22 (docs/RECRUITER_CLIENT_PLAN.md)  agency-only client
+   * fields. Ignored (nulled) for direct employers; for agencies the
+   * resolver below requires a linked org OR a typed name. clientContact
+   * is org-private (9.8.8 posture).
+   */
+  clientOrgId: z.string().min(1).nullable().optional(),
+  clientName: z.string().trim().min(2).max(160).nullable().optional(),
+  clientCity: z.string().trim().max(80).nullable().optional(),
+  clientContact: z.string().trim().max(200).nullable().optional(),
 })
 .refine(
   (v) => {
@@ -587,6 +608,113 @@ async function requireEditRole(): Promise<
   return { ok: true, orgId: session.orgId, userId: session.id };
 }
 
+interface ClientFields {
+  clientOrgId: string | null;
+  clientName: string | null;
+  clientCity: string | null;
+  clientContact: string | null;
+}
+
+/**
+ * Resolve the agency client fields for a vacancy write
+ * (docs/RECRUITER_CLIENT_PLAN.md). Direct employers get NULLs
+ * regardless of payload (client fields cannot be smuggled in);
+ * agencies must link a picker-visible org (same anti-FK-probing
+ * check as updateCurrentEmployment) or type the client's name.
+ */
+async function resolveClientFields(
+  orgId: string,
+  v: {
+    clientOrgId?: string | null;
+    clientName?: string | null;
+    clientCity?: string | null;
+    clientContact?: string | null;
+  },
+): Promise<{ ok: true; fields: ClientFields } | { ok: false; message: string }> {
+  const db = getDb();
+  const orgRows = await db
+    .select({ orgKind: schema.organizations.orgKind })
+    .from(schema.organizations)
+    .where(eq(schema.organizations.id, orgId))
+    .limit(1);
+  if (orgRows[0]?.orgKind !== "recruitment_agency") {
+    return {
+      ok: true,
+      fields: { clientOrgId: null, clientName: null, clientCity: null, clientContact: null },
+    };
+  }
+
+  if (v.clientOrgId) {
+    const clientRows = await db
+      .select({
+        id: schema.organizations.id,
+        name: schema.organizations.name,
+        city: schema.organizations.city,
+      })
+      .from(schema.organizations)
+      .where(
+        and(
+          eq(schema.organizations.id, v.clientOrgId),
+          or(
+            eq(schema.organizations.origin, "sebenza_registered"),
+            eq(schema.organizations.verification, "verified"),
+          ),
+        ),
+      )
+      .limit(1);
+    const client = clientRows[0];
+    if (!client) {
+      return {
+        ok: false,
+        message:
+          "That client organisation isn't available. Pick it from the list again, or enter the company name.",
+      };
+    }
+    return {
+      ok: true,
+      // Name snapshot rides along so attribution survives an unlink.
+      fields: {
+        clientOrgId: client.id,
+        clientName: client.name,
+        clientCity: client.city ?? (v.clientCity?.trim() || null),
+        clientContact: v.clientContact?.trim() || null,
+      },
+    };
+  }
+
+  const name = v.clientName?.trim();
+  if (!name) {
+    return {
+      ok: false,
+      message:
+        "As a recruitment agency, name the hiring company for this vacancy (pick it or type it).",
+    };
+  }
+  return {
+    ok: true,
+    fields: {
+      clientOrgId: null,
+      clientName: name,
+      clientCity: v.clientCity?.trim() || null,
+      clientContact: v.clientContact?.trim() || null,
+    },
+  };
+}
+
+/** The signed-in employer's org kind (self-data only; guarded).
+ *  Pages use it to decide whether the vacancy form shows the agency
+ *  client section. */
+export async function getMyOrgKind(): Promise<string> {
+  const session = await verifyEmployer();
+  if (!session.orgId) return "direct_employer";
+  const rows = await getDb()
+    .select({ orgKind: schema.organizations.orgKind })
+    .from(schema.organizations)
+    .where(eq(schema.organizations.id, session.orgId))
+    .limit(1);
+  return rows[0]?.orgKind ?? "direct_employer";
+}
+
 export async function createVacancy(
   input: z.infer<typeof vacancyInputSchema>,
 ): Promise<ActionResult<{ vacancyId: string }>> {
@@ -602,6 +730,9 @@ export async function createVacancy(
   const v = parsed.data;
   const id = `vac_${randomUUID()}`;
   const db = getDb();
+
+  const client = await resolveClientFields(guard.orgId, v);
+  if (!client.ok) return client;
 
   // Phase 10 follow-up  split skill_slugs into canonical (matcher-
   // visible) + pending (submitted to admin queue, not stored on the
@@ -635,6 +766,7 @@ export async function createVacancy(
     selfApplyEnabled: v.selfApplyEnabled ?? false,
     selfApplyToken: v.selfApplyEnabled ? mintSelfApplyToken() : null,
     salaryVisibleToApplicants: v.salaryVisibleToApplicants ?? true,
+    ...client.fields,
     // Phase 9.21  the refine() above guarantees these are paired;
     // we still defensively null both together so an unrelated bug
     // can't write a half-window.
@@ -720,6 +852,9 @@ export async function updateVacancy(
   const v = parsed.data;
   const db = getDb();
 
+  const client = await resolveClientFields(guard.orgId, v);
+  if (!client.ok) return client;
+
   // Phase 10 follow-up  mirror createVacancy: filter non-canonical
   // skills out of the vacancy row + submit them to the admin queue
   // post-update.
@@ -738,6 +873,7 @@ export async function updateVacancy(
       salaryBand: v.salaryBand ?? null,
       description: v.description ?? null,
       documentsRequired: v.documentsRequired ?? [],
+      ...client.fields,
       inviteExpiryDays: v.inviteExpiryDays ?? null,
       positions: v.positions ?? null,
       workAvailability: v.workAvailability ?? [],

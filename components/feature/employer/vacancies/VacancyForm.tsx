@@ -23,7 +23,7 @@ import { Button } from "@/components/ui/Button";
 import { ComboboxField } from "@/components/ui/ComboboxField";
 import { MultiSelectComboboxField } from "@/components/ui/MultiSelectComboboxField";
 import { MonthYearPicker } from "@/components/ui/MonthYearPicker";
-import { Lock } from "lucide-react";
+import { Building2, CheckCircle2, Lock } from "lucide-react";
 import { PROFESSION_SKILLS_MAP } from "@/lib/mock/taxonomy";
 import type {
   TaxonomyEntry,
@@ -80,6 +80,20 @@ export interface VacancyFormValue {
   seasonalWindowStartYear?: number | null;
   seasonalWindowEndYear?: number | null;
   seasonalWindowRecurringAnnually?: boolean | null;
+  /** 2026-08-22 (docs/RECRUITER_CLIENT_PLAN.md)  agency-only client
+   *  fields. The server nulls them for direct employers. */
+  clientOrgId?: string | null;
+  clientName?: string | null;
+  clientCity?: string | null;
+  clientContact?: string | null;
+}
+
+/** One pickable client org for the agency's typeahead (the same
+ *  registered-or-verified list the 9.22 employer picker uses). */
+export interface ClientOrgOption {
+  id: string;
+  name: string;
+  city: string | null;
 }
 
 export interface VacancyFormProps {
@@ -120,6 +134,12 @@ export interface VacancyFormProps {
    * regardless, so this is purely a rendering gate.
    */
   selfApplyFeatureOn?: boolean;
+  /** The signed-in org's kind; the client section renders only for
+   *  recruitment agencies. */
+  orgKind?: string;
+  /** Pickable client orgs (listEmployerOptions). Empty is fine  the
+   *  agency falls back to typing the client's details. */
+  clientOptions?: ClientOrgOption[];
 }
 
 interface VacancyDraft {
@@ -313,6 +333,8 @@ export function VacancyForm({
   cancelHref = "/employer/vacancies",
   draftId = "new",
   selfApplyFeatureOn = false,
+  orgKind = "direct_employer",
+  clientOptions = [],
 }: VacancyFormProps) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -376,6 +398,22 @@ export function VacancyForm({
   );
   const [salaryVisibleToApplicants, setSalaryVisibleToApplicants] =
     useState<boolean>(initial?.salaryVisibleToApplicants ?? true);
+  // 2026-08-22  agency client picker (docs/RECRUITER_CLIENT_PLAN.md).
+  // clientOrgId "" = nothing linked; manualClient switches to typing
+  // the details for a client that isn't on Sebenza.
+  const isAgency = orgKind === "recruitment_agency";
+  const [clientOrgId, setClientOrgId] = useState<string>(
+    initial?.clientOrgId ?? "",
+  );
+  const [manualClient, setManualClient] = useState<boolean>(
+    !initial?.clientOrgId && !!initial?.clientName,
+  );
+  const [clientName, setClientName] = useState(initial?.clientName ?? "");
+  const [clientCity, setClientCity] = useState(initial?.clientCity ?? "");
+  const [clientContact, setClientContact] = useState(
+    initial?.clientContact ?? "",
+  );
+  const pickedClient = clientOptions.find((o) => o.id === clientOrgId) ?? null;
   // Phase 9.21  season window state. Strings so the draft round-trips
   // through JSON; only persisted when 'seasonal' is in the chip set.
   // Reads from either the nested `seasonalWindow` (when initial is a
@@ -604,6 +642,11 @@ export function VacancyForm({
       submitProvince = province;
     }
 
+    if (isAgency && !clientOrgId && clientName.trim().length < 2) {
+      setError(t("client.required"));
+      return;
+    }
+
     const value: VacancyFormValue = {
       title: title.trim(),
       professionSlug: profession,
@@ -637,6 +680,12 @@ export function VacancyForm({
         endYearRaw: seasonalWindowEndYear,
         recurringAnnually: seasonalWindowRecurringAnnually,
       }),
+      // Agency client linkage; the server nulls these for direct
+      // employers regardless, so sending them is always safe.
+      clientOrgId: clientOrgId || null,
+      clientName: clientOrgId ? null : clientName.trim() || null,
+      clientCity: clientOrgId ? null : clientCity.trim() || null,
+      clientContact: clientContact.trim() || null,
     };
 
     startTransition(async () => {
@@ -659,6 +708,125 @@ export function VacancyForm({
         >
           {error}
         </div>
+      )}
+
+      {/* 2026-08-22  the agency's first honest question: WHO is this
+          hire for? (docs/RECRUITER_CLIENT_PLAN.md). A picked client
+          collapses into a company card; "not on Sebenza" switches to
+          typing the details. Direct employers never see this. */}
+      {isAgency && (
+        <section className="flex flex-col gap-4 rounded-[var(--radius-md)] border-2 border-[color:var(--color-brand)] bg-[color:var(--color-brand-tint)] p-4 md:p-5">
+          <div>
+            <div className="text-[0.72rem] uppercase tracking-[0.22em] text-[color:var(--color-brand-strong)]">
+              {t("client.heading")}
+            </div>
+            <p className="mt-1 text-xs text-[color:var(--color-ink-soft)]">
+              {t("client.sub")}
+            </p>
+          </div>
+
+          {pickedClient ? (
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-[var(--radius-sm)] border-2 border-[color:var(--color-ink)] bg-[color:var(--color-surface)] p-4">
+              <div className="flex min-w-0 items-center gap-3">
+                <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-full bg-[color:var(--color-brand-tint)]">
+                  <Building2
+                    className="size-5 text-[color:var(--color-brand-strong)]"
+                    aria-hidden="true"
+                  />
+                </span>
+                <div className="min-w-0">
+                  <p className="truncate font-display text-base text-[color:var(--color-ink)]">
+                    {pickedClient.name}
+                  </p>
+                  <p className="mt-0.5 flex flex-wrap items-center gap-2 text-xs text-[color:var(--color-ink-soft)]">
+                    {pickedClient.city && <span>{pickedClient.city}</span>}
+                    <span className="inline-flex items-center gap-1 rounded-[var(--radius-pill)] border border-[color:var(--color-brand)] bg-[color:var(--color-brand-tint)] px-2 py-0.5 text-[0.62rem] uppercase tracking-[0.18em] text-[color:var(--color-brand-strong)]">
+                      <CheckCircle2 className="size-3" aria-hidden="true" />
+                      {t("client.onSebenza")}
+                    </span>
+                  </p>
+                </div>
+              </div>
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                disabled={pending}
+                onClick={() => setClientOrgId("")}
+              >
+                {t("client.change")}
+              </Button>
+            </div>
+          ) : manualClient ? (
+            <div className="flex flex-col gap-4">
+              <TextField
+                id="client-name"
+                label={t("client.nameLabel")}
+                required
+                value={clientName}
+                onChange={(e) => setClientName(e.target.value)}
+                maxLength={160}
+                placeholder={t("client.namePlaceholder")}
+                disabled={pending}
+              />
+              <div className="grid gap-4 md:grid-cols-2">
+                <TextField
+                  id="client-city"
+                  label={t("client.cityLabel")}
+                  optional
+                  value={clientCity}
+                  onChange={(e) => setClientCity(e.target.value)}
+                  maxLength={80}
+                  disabled={pending}
+                />
+                <TextField
+                  id="client-contact"
+                  label={t("client.contactLabel")}
+                  optional
+                  value={clientContact}
+                  onChange={(e) => setClientContact(e.target.value)}
+                  maxLength={200}
+                  placeholder={t("client.contactPlaceholder")}
+                  hint={t("client.contactHint")}
+                  disabled={pending}
+                />
+              </div>
+              <button
+                type="button"
+                onClick={() => setManualClient(false)}
+                className="self-start text-[0.7rem] uppercase tracking-[0.18em] text-[color:var(--color-ink-soft)] underline hover:text-[color:var(--color-ink)]"
+              >
+                {t("client.backToSearch")}
+              </button>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-3">
+              <ComboboxField
+                id="client-org"
+                label={t("client.pickLabel")}
+                placeholder={t("client.pickPlaceholder")}
+                value={clientOrgId}
+                onChange={(next) => setClientOrgId(next)}
+                options={clientOptions.map((o) => ({
+                  value: o.id,
+                  label: o.name,
+                  hint: o.city ?? undefined,
+                }))}
+                disabled={pending}
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  setClientOrgId("");
+                  setManualClient(true);
+                }}
+                className="self-start text-[0.7rem] uppercase tracking-[0.18em] text-[color:var(--color-brand-strong)] underline hover:text-[color:var(--color-ink)]"
+              >
+                {t("client.notListed")}
+              </button>
+            </div>
+          )}
+        </section>
       )}
 
       <section className="flex flex-col gap-5">

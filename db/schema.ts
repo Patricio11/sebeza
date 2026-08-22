@@ -1183,6 +1183,13 @@ export const organizations = pgTable("organizations", {
    */
   origin: organizationOrigin("origin").notNull().default("sebenza_registered"),
   /**
+   * 2026-08-22 (migration 0075)  what this organisation IS:
+   * "direct_employer" hires for itself; "recruitment_agency" hires on
+   * behalf of clients (its vacancies then carry the client_* fields).
+   * Existing orgs predate the question and default to direct.
+   */
+  orgKind: text("org_kind").notNull().default("direct_employer"),
+  /**
    * Phase 9.22  denormalised count of profiles with this org as
    * their `current_employer_org_id`. Powers the "Listed by N seekers"
    * badge on verified seeker-named orgs without a per-render JOIN.
@@ -1689,6 +1696,22 @@ export const vacancies = pgTable(
     salaryVisibleToApplicants: boolean("salary_visible_to_applicants")
       .notNull()
       .default(true),
+    /**
+     * 2026-08-22 (migration 0075)  the client an agency is hiring FOR.
+     * clientOrgId is the real link when the client exists on Sebenza
+     * (picked via typeahead on the vacancy form); the free-text fields
+     * cover clients that don't. clientContact is ORG-PRIVATE: it must
+     * never reach a seeker-facing or public payload (9.8.8 posture);
+     * clientName/city may appear in honest attribution ("recruiting
+     * for {client}"). All NULL on direct-employer vacancies.
+     */
+    clientOrgId: text("client_org_id").references(
+      (): AnyPgColumn => organizations.id,
+      { onDelete: "set null" },
+    ),
+    clientName: text("client_name"),
+    clientCity: text("client_city"),
+    clientContact: text("client_contact"),
     createdAt: timestamp("created_at").notNull().defaultNow(),
     closedAt: timestamp("closed_at"),
   },
@@ -2619,6 +2642,18 @@ export const seekerInvitations = pgTable(
      *  invite-to-profile link pattern. */
     acceptedProfileId: text("accepted_profile_id").references(
       () => profiles.id,
+    ),
+    /**
+     * 2026-08-22 (migration 0075)  the filled-from-elsewhere congrats
+     * invite remembers the role + vacancy it celebrates, so acceptance
+     * can close the loop: employment link + (direct employers only)
+     * the placement, with both sides on record. NULL on ordinary
+     * roster invites.
+     */
+    congratsRole: text("congrats_role"),
+    congratsVacancyId: text("congrats_vacancy_id").references(
+      (): AnyPgColumn => vacancies.id,
+      { onDelete: "set null" },
     ),
     createdAt: timestamp("created_at").notNull().defaultNow(),
     expiresAt: timestamp("expires_at").notNull(),
