@@ -811,6 +811,13 @@
         "office": "Share a report, system or process you improved, and say what your part was.",
         "general": "Add work you're proud of: a link, photos, or both."
       }
+    },
+    "invitationOffer": {
+      "heading": "They came back with an offer",
+      "lead": "You declined this invitation, and the employer answered once with an improved offer. It is still entirely your call.",
+      "theirWords": "In their words",
+      "finalNote": "Accepting works exactly like accepting the invitation. Declining again is final: they cannot offer twice, and it never affects how you appear in search.",
+      "chip": "New offer, waiting for your response"
     }
   },
   "employerDash": {
@@ -1098,9 +1105,17 @@
         "declined": "Declined",
         "reconsidering": "Reconsidering",
         "withdrawn": "Withdrawn",
-        "expired": "Expired"
+        "expired": "Expired",
+        "offer_made": "Offer made"
       },
-      "withdrawing": "Withdrawing"
+      "withdrawing": "Withdrawing",
+      "makeOffer": "Make an offer",
+      "yourOffer": "Your offer",
+      "offerLead": "Answer their reason with one improved offer. They can accept, or decline again, and a second decline is final: you will not be able to offer twice.",
+      "offerPlaceholder": "What has changed: better pay, different hours, remote days…",
+      "offerOnce": "One offer per person, ever",
+      "offerCancel": "Cancel",
+      "offerSend": "Send offer"
     },
     "empty": {
       "heading": "Nobody has been invited yet",

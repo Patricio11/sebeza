@@ -15,7 +15,10 @@ export type InvitationStateSeeker =
   | "declined"
   | "reconsidering"
   | "withdrawn"
-  | "expired";
+  | "expired"
+  // The employer's ONE answer to a decline. Accept, or decline and
+  // that is final; they cannot offer twice.
+  | "offer_made";
 
 export type DeclineReasonValue =
   | "already_employed"
@@ -50,6 +53,10 @@ export interface SeekerInvitationRow {
   noticePeriodMonths: number | null;
   declineReason: DeclineReasonValue | null;
   declineNote: string | null;
+  /** The counter-offer message, when the employer answered a decline.
+   *  Employer-authored content, shown verbatim. */
+  offerNote: string | null;
+  offerMadeAt: string | null;
   vacancyId: string;
   vacancyTitle: string;
   professionSlug: string;

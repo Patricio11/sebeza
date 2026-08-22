@@ -1465,6 +1465,10 @@ export const invitationState = pgEnum("invitation_state", [
   "reconsidering",
   "withdrawn",
   "expired",
+  // The counter-offer: an employer's one answer to a decline. From
+  // here the seeker accepts (with or without notice) or declines,
+  // finally. One offer per invitation ever; see offer_made_at.
+  "offer_made",
 ]);
 
 /**
@@ -1766,6 +1770,12 @@ export const vacancyInvitations = pgTable(
      */
     expiresAt: timestamp("expires_at"),
     state: invitationState("state").notNull().default("invited"),
+    /** The counter-offer message, employer-authored, PII posture of an
+     *  invite note. Written once; offer_made_at doubles as the
+     *  one-offer-ever guard. */
+    offerNote: text("offer_note"),
+    offerMadeAt: timestamp("offer_made_at"),
+    offerMadeByUserId: text("offer_made_by_user_id"),
     respondedAt: timestamp("responded_at"),
     /** D1  populated only when state is `accepted_with_notice`. NULL
         otherwise. Months because that's the dominant unit in SA notice

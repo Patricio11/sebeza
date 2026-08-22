@@ -219,3 +219,10 @@ chips, self-apply panel and mastheads. All zu/xh/af entries are
 AI-drafted and need review like the rest. Heavy ICU plural use
 throughout (seat counts, invite counts, notice months): keep every
 placeholder and plural branch intact when editing.
+
+**2026-08-22, the counter-offer.** New keys, AI-drafted in zu/xh/af:
+`employerVacancies.pipeline.makeOffer` and friends (the employer's offer
+editor) and `seekerDash.invitationOffer.*` (the seeker's offer panel).
+The seeker invitations inbox chip ("New offer, waiting for your
+response") is hardcoded English to match that page's existing untranslated
+state; it joins the seeker-dashboard translation project when that runs.

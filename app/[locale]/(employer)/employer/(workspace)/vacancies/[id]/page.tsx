@@ -40,6 +40,7 @@ import { VacancyPlacementsPanel } from "@/components/feature/employer/vacancies/
 import { MarkAsFilledModal } from "@/components/feature/employer/vacancies/MarkAsFilledModal";
 import {
   listInvitationsForVacancy,
+  makeOfferOnInvitation,
   withdrawInvitation,
 } from "@/lib/employer/invitations";
 import { getPlacementsForVacancy } from "@/lib/employer/placements";
@@ -275,6 +276,11 @@ export default async function VacancyDetailPage({
             const res = await withdrawInvitation({ invitationId });
             return res.ok ? { ok: true } : { ok: false, message: res.message };
           }}
+          offerAction={async (invitationId: string, note: string) => {
+            "use server";
+            const res = await makeOfferOnInvitation({ invitationId, note });
+            return res.ok ? { ok: true } : { ok: false, message: res.message };
+          }}
         />
       )}
 
@@ -436,6 +442,8 @@ function AcceptRateStrip({
         declined++;
         break;
       case "invited":
+      // An outstanding counter-offer is awaiting the seeker's answer.
+      case "offer_made":
         pending++;
         break;
       case "expired":

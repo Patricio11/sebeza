@@ -58,8 +58,15 @@ export default async function SeekerInvitationDetailPage({
   // or accepted; never on a decline / expiry / withdrawal (D4: right
   // moment, no nag).
   const tReady = await getTranslations("seekerDash.workReady");
+  const tOffer = await getTranslations("seekerDash.invitationOffer");
   const showPrepare = (
-    ["invited", "reconsidering", "accepted", "accepted_with_notice"] as const
+    [
+      "invited",
+      "offer_made",
+      "reconsidering",
+      "accepted",
+      "accepted_with_notice",
+    ] as const
   ).includes(inv.state as never);
 
   // Phase 11.4.2  follow-state read for the heart button.
@@ -195,6 +202,32 @@ export default async function SeekerInvitationDetailPage({
         locale={locale}
       />
 
+      {/* The counter-offer. The employer's ONE answer to a decline:
+          their message verbatim, and the honest frame that a second
+          decline is final. The response island below renders the same
+          accept / decline set it does for a fresh invitation. */}
+      {inv.state === "offer_made" && inv.offerNote && (
+        <section
+          aria-labelledby="offer-h"
+          className="mb-6 rounded-[var(--radius-md)] border-2 border-[color:var(--color-accent)] bg-[color:var(--color-accent)]/5 p-5"
+        >
+          <p className="text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--color-accent)]">
+            {tOffer("heading")}
+          </p>
+          <p className="mt-2 text-sm text-[color:var(--color-ink)]">
+            {tOffer("lead")}
+          </p>
+          <blockquote className="mt-3 rounded-[var(--radius-sm)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-3 text-sm italic text-[color:var(--color-ink)]">
+            <span className="not-italic text-[0.65rem] uppercase tracking-[0.18em] text-[color:var(--color-ink-soft)]">
+              {tOffer("theirWords")}
+            </span>{" "}
+            &ldquo;{inv.offerNote}&rdquo;
+          </blockquote>
+          <p className="mt-3 text-xs text-[color:var(--color-ink-soft)]">
+            {tOffer("finalNote")}
+          </p>
+        </section>
+      )}
       <InvitationResponseIsland
         invitationId={inv.id}
         state={inv.state}

@@ -30,7 +30,7 @@
 
 import { getDb } from "@/db/client";
 import * as schema from "@/db/schema";
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
@@ -100,6 +100,8 @@ export async function listMyInvitations(): Promise<SeekerInvitationRow[]> {
       noticePeriodMonths: schema.vacancyInvitations.noticePeriodMonths,
       declineReason: schema.vacancyInvitations.declineReason,
       declineNote: schema.vacancyInvitations.declineNote,
+      offerNote: schema.vacancyInvitations.offerNote,
+      offerMadeAt: schema.vacancyInvitations.offerMadeAt,
       vacancyId: schema.vacancies.id,
       vacancyTitle: schema.vacancies.title,
       professionSlug: schema.vacancies.professionSlug,
@@ -161,6 +163,8 @@ export async function getMyInvitation(
       noticePeriodMonths: schema.vacancyInvitations.noticePeriodMonths,
       declineReason: schema.vacancyInvitations.declineReason,
       declineNote: schema.vacancyInvitations.declineNote,
+      offerNote: schema.vacancyInvitations.offerNote,
+      offerMadeAt: schema.vacancyInvitations.offerMadeAt,
       vacancyId: schema.vacancies.id,
       vacancyTitle: schema.vacancies.title,
       professionSlug: schema.vacancies.professionSlug,
@@ -209,6 +213,8 @@ export async function getMyInvitation(
 function toSeekerRow(r: {
   id: string;
   state: string;
+  offerNote: string | null;
+  offerMadeAt: Date | null;
   /** Phase 34  provenance (employer_invite | self_apply). */
   origin: string;
   invitedAt: Date | string;
@@ -247,6 +253,8 @@ function toSeekerRow(r: {
     noticePeriodMonths: r.noticePeriodMonths,
     declineReason: r.declineReason as DeclineReasonValue | null,
     declineNote: r.declineNote,
+    offerNote: r.offerNote,
+    offerMadeAt: r.offerMadeAt ? r.offerMadeAt.toISOString() : null,
     vacancyId: r.vacancyId,
     vacancyTitle: r.vacancyTitle,
     professionSlug: r.professionSlug,
@@ -313,8 +321,10 @@ export async function acceptInvitation(
     targetState: "accepted",
     auditResponseKind: "accept",
     notificationKind: "vacancy.response",
-    titleForOrg: (seekerName, vacancyTitle) =>
-      `${seekerName} accepted your invitation to "${vacancyTitle}"`,
+    titleForOrg: (seekerName, vacancyTitle, prevState) =>
+      prevState === "offer_made"
+        ? `${seekerName} accepted your offer for "${vacancyTitle}"`
+        : `${seekerName} accepted your invitation to "${vacancyTitle}"`,
     bodyForOrg: () =>
       "Move them through the dossier / contact flow for next steps.",
     update: () => ({ state: "accepted" as const, respondedAt: new Date() }),
@@ -332,8 +342,10 @@ export async function acceptInvitationWithNotice(
     targetState: "accepted_with_notice",
     auditResponseKind: "accept_with_notice",
     notificationKind: "vacancy.response",
-    titleForOrg: (seekerName, vacancyTitle) =>
-      `${seekerName} accepted your invitation to "${vacancyTitle}" (with notice)`,
+    titleForOrg: (seekerName, vacancyTitle, prevState) =>
+      prevState === "offer_made"
+        ? `${seekerName} accepted your offer for "${vacancyTitle}" (with notice)`
+        : `${seekerName} accepted your invitation to "${vacancyTitle}" (with notice)`,
     bodyForOrg: (_, parsed) => {
       const months = (parsed as z.infer<typeof acceptNoticeSchema>)
         .noticePeriodMonths;
@@ -370,8 +382,10 @@ export async function declineInvitation(
     targetState: "declined",
     auditResponseKind: "decline",
     notificationKind: "vacancy.response",
-    titleForOrg: (seekerName, vacancyTitle) =>
-      `${seekerName} declined your invitation to "${vacancyTitle}"`,
+    titleForOrg: (seekerName, vacancyTitle, prevState) =>
+      prevState === "offer_made"
+        ? `${seekerName} declined your offer for "${vacancyTitle}" (final)`
+        : `${seekerName} declined your invitation to "${vacancyTitle}"`,
     bodyForOrg: (_, parsedIn) => {
       const reason = (parsedIn as z.infer<typeof declineSchema>).reason;
       return `Reason: ${DECLINE_REASON_LABEL[reason]}.`;
@@ -446,7 +460,11 @@ interface RespondConfig<TSchema extends z.ZodTypeAny> {
     | "decline"
     | "reconsider";
   notificationKind: "vacancy.response" | "vacancy.reconsider";
-  titleForOrg: (seekerName: string, vacancyTitle: string) => string;
+  titleForOrg: (
+    seekerName: string,
+    vacancyTitle: string,
+    prevState?: string,
+  ) => string;
   bodyForOrg: (seekerName: string, parsed: z.infer<TSchema>) => string;
   update: (parsed: z.infer<TSchema>) => Record<string, unknown>;
   /** Optional state-machine guard. Defaults to "must be invited". */
@@ -503,15 +521,19 @@ async function respond<TSchema extends z.ZodTypeAny>(
     return fail("Invitation not found.");
   }
 
-  const expected = cfg.requireCurrentState ?? "invited";
-  if (row.state !== expected) {
-    if (expected === "invited") {
+  // Accept/decline answer either the original invitation OR a
+  // counter-offer; other transitions (reconsider) stay single-state.
+  const expectedStates: readonly string[] = cfg.requireCurrentState
+    ? [cfg.requireCurrentState]
+    : ["invited", "offer_made"];
+  if (!expectedStates.includes(row.state)) {
+    if (expectedStates.includes("invited")) {
       return fail(
         "This invitation has already been responded to or has expired.",
       );
     }
     return fail(
-      `You can only ${cfg.auditResponseKind} an invitation that is currently “${expected}”.`,
+      `You can only ${cfg.auditResponseKind} an invitation that is currently “${expectedStates[0]}”.`,
     );
   }
 
@@ -524,7 +546,10 @@ async function respond<TSchema extends z.ZodTypeAny>(
     .where(
       and(
         eq(schema.vacancyInvitations.id, invitationId),
-        eq(schema.vacancyInvitations.state, expected),
+        inArray(
+          schema.vacancyInvitations.state,
+          expectedStates as ("invited" | "offer_made" | "declined")[],
+        ),
       ),
     )
     .returning({ id: schema.vacancyInvitations.id });
@@ -539,7 +564,7 @@ async function respond<TSchema extends z.ZodTypeAny>(
   // prefs + dedupe + the suspended/deleted guard).
   await notifyOrgMembers(row.organizationId, {
     kind: cfg.notificationKind,
-    title: cfg.titleForOrg(row.seekerDisplayName, row.vacancyTitle),
+    title: cfg.titleForOrg(row.seekerDisplayName, row.vacancyTitle, row.state),
     body: cfg.bodyForOrg(row.seekerDisplayName, parsed),
     link: `/employer/vacancies/${row.vacancyId}`,
     meta: { invitationId, vacancyId: row.vacancyId },

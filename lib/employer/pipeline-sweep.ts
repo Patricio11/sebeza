@@ -87,7 +87,9 @@ export async function sweepStalledPipelines(): Promise<SweepResult> {
     if (!row) continue;
     if (inv.state === "accepted" || inv.state === "accepted_with_notice") {
       row.accepted++;
-    } else if (inv.state === "invited") {
+    } else if (inv.state === "invited" || inv.state === "offer_made") {
+      // An outstanding counter-offer is someone still deciding: the
+      // recruiter is waiting on a person, not stuck.
       row.pending++;
     }
   }

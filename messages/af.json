@@ -625,6 +625,13 @@
         "office": "Deel 'n verslag, stelsel of proses wat jy verbeter het, en sê wat jou deel was.",
         "general": "Voeg werk by waarop jy trots is: 'n skakel, foto's, of albei."
       }
+    },
+    "invitationOffer": {
+      "heading": "Hulle het teruggekom met 'n aanbod",
+      "lead": "Jy het hierdie uitnodiging geweier, en die werkgewer het een keer geantwoord met 'n verbeterde aanbod. Dit bly heeltemal jou besluit.",
+      "theirWords": "In hul woorde",
+      "finalNote": "Aanvaarding werk presies soos om die uitnodiging te aanvaar. Om weer te weier is finaal: hulle kan nie twee keer aanbied nie, en dit raak nooit hoe jy in soektogte verskyn nie.",
+      "chip": "Nuwe aanbod, wag vir jou antwoord"
     }
   },
   "employerDash": {
@@ -1041,9 +1048,17 @@
         "declined": "Van die hand gewys",
         "reconsidering": "Heroorweeg",
         "withdrawn": "Onttrek",
-        "expired": "Verval"
+        "expired": "Verval",
+        "offer_made": "Aanbod gemaak"
       },
-      "withdrawing": "Onttrek tans"
+      "withdrawing": "Onttrek tans",
+      "makeOffer": "Maak 'n aanbod",
+      "yourOffer": "Jou aanbod",
+      "offerLead": "Antwoord hul rede met een verbeterde aanbod. Hulle kan aanvaar, of weer weier, en 'n tweede weiering is finaal: jy sal nie twee keer kan aanbied nie.",
+      "offerPlaceholder": "Wat het verander: beter betaling, ander ure, afgeleë dae…",
+      "offerOnce": "Een aanbod per persoon, ooit",
+      "offerCancel": "Kanselleer",
+      "offerSend": "Stuur aanbod"
     },
     "empty": {
       "heading": "Niemand is nog uitgenooi nie",

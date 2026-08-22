@@ -1588,6 +1588,9 @@ async function notifyAcceptedOnClosure(
           inArray(schema.vacancyInvitations.state, [
             "accepted",
             "accepted_with_notice",
+            // An open counter-offer is a person still waiting on this
+            // vacancy; closing it ends their wait too, so say so.
+            "offer_made",
           ]),
         ),
       )

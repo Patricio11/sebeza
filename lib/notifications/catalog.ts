@@ -212,6 +212,20 @@ export const NOTIFICATION_CATALOG = {
       "Sent when an employer invites you to a vacancy they're trying to fill. You can accept, decline, or decline with a reason. Declining is free, it never affects your visibility in search.",
     dedupeWindowSeconds: 0, // every distinct invite is its own notification
   },
+  // The counter-offer. The employer answered a decline with ONE
+  // improved offer; this tells the seeker. Push is on by default: it
+  // is the highest-signal actionable event a seeker receives after the
+  // invitation itself, and the role can fill or close at any moment,
+  // which is as real a clock as an expiry date.
+  "vacancy.offer": {
+    defaultInApp: true,
+    defaultEmail: true,
+    audience: "seeker",
+    label: "An employer came back with an offer",
+    description:
+      "After you decline an invitation, the employer may answer once with an improved offer. Accepting is up to you, and declining again is final: they cannot offer twice.",
+    dedupeWindowSeconds: 0,
+  },
   "vacancy.invite.expired": {
     defaultInApp: true,
     defaultEmail: true,
@@ -573,6 +587,7 @@ export type NotificationKind = keyof typeof NOTIFICATION_CATALOG;
 export const PUSH_DEFAULT_ON = new Set<string>([
   "vacancy.invite",
   "vacancy.invite.followup",
+  "vacancy.offer",
 ]);
 
 export interface NotificationPref {

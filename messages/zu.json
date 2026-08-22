@@ -625,6 +625,13 @@
         "office": "Yabelana ngombiko, isistimu noma inqubo oyithuthukisile, bese usho ukuthi yayiyini ingxenye yakho.",
         "general": "Faka umsebenzi oziqhenyayo ngawo: isixhumanisi, izithombe, noma kokubili."
       }
+    },
+    "invitationOffer": {
+      "heading": "Babuye nesithembiso",
+      "lead": "Wenqabile lesi simemo, futhi umqashi uphendule kanye ngesithembiso esingcono. Kusengukunquma kwakho ngokuphelele.",
+      "theirWords": "Ngamazwi abo",
+      "finalNote": "Ukwamukela kusebenza njengokwamukela isimemo ncamashi. Ukwenqaba futhi kungokugcina: ngeke bathembise kabili, futhi akusoze kwathinta indlela ovela ngayo ekusesheni.",
+      "chip": "Isithembiso esisha, silinde impendulo yakho"
     }
   },
   "employerDash": {
@@ -1041,9 +1048,17 @@
         "declined": "Kwenqatshiwe",
         "reconsidering": "Uyacabanga futhi",
         "withdrawn": "Kuhoxisiwe",
-        "expired": "Kuphelelwe yisikhathi"
+        "expired": "Kuphelelwe yisikhathi",
+        "offer_made": "Isithembiso senziwe"
       },
-      "withdrawing": "Iyahoxiswa"
+      "withdrawing": "Iyahoxiswa",
+      "makeOffer": "Yenza isithembiso",
+      "yourOffer": "Isithembiso sakho",
+      "offerLead": "Phendula isizathu sakhe ngesithembiso esisodwa esingcono. Angamukela, noma enqabe futhi, futhi ukwenqaba kwesibili kungokugcina: ngeke ukwazi ukuthembisa kabili.",
+      "offerPlaceholder": "Yini eshintshile: iholo elingcono, amahora ahlukile, izinsuku zokusebenza ukude…",
+      "offerOnce": "Isithembiso esisodwa ngomuntu, unomphela",
+      "offerCancel": "Khansela",
+      "offerSend": "Thumela isithembiso"
     },
     "empty": {
       "heading": "Akukho muntu osememiwe okwamanje",

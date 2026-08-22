@@ -175,6 +175,7 @@ const STATE_COPY: Record<
   { label: string; tone: "brand" | "accent" | "muted" | "danger" }
 > = {
   invited: { label: "Invited, waiting for your response", tone: "brand" },
+  offer_made: { label: "New offer, waiting for your response", tone: "accent" },
   accepted: { label: "Accepted", tone: "accent" },
   accepted_with_notice: { label: "Accepted (with notice)", tone: "accent" },
   declined: { label: "Declined", tone: "danger" },

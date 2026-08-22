@@ -512,6 +512,13 @@
       "when": 1787270406000,
       "tag": "0072_runtime_errors",
       "breakpoints": false
+    },
+    {
+      "idx": 73,
+      "version": "7",
+      "when": 1787270407000,
+      "tag": "0073_vacancy_offer",
+      "breakpoints": false
     }
   ]
 }

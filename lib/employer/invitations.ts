@@ -25,7 +25,7 @@
 
 import { getDb } from "@/db/client";
 import * as schema from "@/db/schema";
-import { and, desc, eq, inArray } from "drizzle-orm";
+import { and, desc, eq, inArray, isNull } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
@@ -50,7 +50,8 @@ export type InvitationState =
   | "declined"
   | "reconsidering"
   | "withdrawn"
-  | "expired";
+  | "expired"
+  | "offer_made";
 
 export type ActionResult<T extends object = object> =
   | ({ ok: true } & T)
@@ -144,6 +145,10 @@ export interface InvitationRow {
   noticePeriodMonths: number | null;
   declineReason: string | null;
   declineNote: string | null;
+  /** The counter-offer, when one was made. offerMadeAt doubles as the
+   *  one-offer-ever marker: null means the button may still render. */
+  offerNote: string | null;
+  offerMadeAt: string | null;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -194,6 +199,8 @@ export async function listInvitationsForVacancy(
       respondedAt: schema.vacancyInvitations.respondedAt,
       noticePeriodMonths: schema.vacancyInvitations.noticePeriodMonths,
       declineReason: schema.vacancyInvitations.declineReason,
+      offerNote: schema.vacancyInvitations.offerNote,
+      offerMadeAt: schema.vacancyInvitations.offerMadeAt,
       declineNote: schema.vacancyInvitations.declineNote,
     })
     .from(schema.vacancyInvitations)
@@ -216,6 +223,8 @@ export async function listInvitationsForVacancy(
     respondedAt: r.respondedAt ? toIso(r.respondedAt) : null,
     noticePeriodMonths: r.noticePeriodMonths,
     declineReason: r.declineReason,
+    offerNote: r.offerNote,
+    offerMadeAt: r.offerMadeAt ? r.offerMadeAt.toISOString() : null,
     declineNote: r.declineNote,
   }));
 }
@@ -717,3 +726,136 @@ function toIso(d: Date | string): string {
 // sibling so they can't accidentally become Server Actions invokable by
 // a client component import. See PHASE_9_8_PLAN.md task 9.8.4 for the
 // /api/cron/vacancy-invite-expiry contract.
+
+// ─────────────────────────────────────────────────────────────────────────────
+// The counter-offer (founder request, 2026-08-22)
+// ─────────────────────────────────────────────────────────────────────────────
+
+const offerSchema = z.object({
+  invitationId: z.string().min(1),
+  /** Required, unlike the invite note: an offer with no content is just
+   *  a nudge, and nudging someone who said no is the thing this feature
+   *  is designed not to be. Same 200-char cap + PII posture as notes. */
+  note: z.string().trim().min(10, "Say what has changed, in at least a few words.").max(200),
+});
+
+/**
+ * Answer a decline with ONE improved offer.
+ *
+ * The platform collects why the seeker declined and shows the employer
+ * the reason; this is the action that closes that loop. Guards, in
+ * order of intent:
+ *
+ *   - Owner/Recruiter only, org-scoped, vacancy still open or draft.
+ *   - The invitation is currently `declined`.
+ *   - No offer has ever been made on it (`offer_made_at IS NULL`),
+ *     enforced again inside the conditional UPDATE so two tabs cannot
+ *     race past the cap. One offer, ever. A second decline is final.
+ *
+ * The note is employer-authored content shown to the seeker. If the
+ * employer chooses to reveal better pay in it, that is their deliberate
+ * disclosure; the platform still never leaks the salary band itself.
+ */
+export async function makeOfferOnInvitation(
+  input: z.infer<typeof offerSchema>,
+): Promise<ActionResult> {
+  const guard = await requireEditRole();
+  if (!guard.ok) return guard;
+
+  const parsed = offerSchema.safeParse(input);
+  if (!parsed.success) {
+    return fail(parsed.error.issues[0]?.message ?? "Invalid offer.");
+  }
+  const { invitationId, note } = parsed.data;
+
+  const db = getDb();
+  const rows = await db
+    .select({
+      id: schema.vacancyInvitations.id,
+      vacancyId: schema.vacancyInvitations.vacancyId,
+      state: schema.vacancyInvitations.state,
+      offerMadeAt: schema.vacancyInvitations.offerMadeAt,
+      organizationId: schema.vacancies.organizationId,
+      vacancyStatus: schema.vacancies.status,
+      orgName: schema.organizations.name,
+      vacancyTitle: schema.vacancies.title,
+      profileUserId: schema.profiles.userId,
+    })
+    .from(schema.vacancyInvitations)
+    .innerJoin(
+      schema.vacancies,
+      eq(schema.vacancies.id, schema.vacancyInvitations.vacancyId),
+    )
+    .innerJoin(
+      schema.organizations,
+      eq(schema.organizations.id, schema.vacancies.organizationId),
+    )
+    .innerJoin(
+      schema.profiles,
+      eq(schema.profiles.id, schema.vacancyInvitations.profileId),
+    )
+    .where(eq(schema.vacancyInvitations.id, invitationId))
+    .limit(1);
+
+  const row = rows[0];
+  if (!row) return fail("Invitation not found.");
+  if (row.organizationId !== guard.orgId) return fail("Invitation not found.");
+  if (row.vacancyStatus !== "open" && row.vacancyStatus !== "draft") {
+    return fail(`The vacancy is ${row.vacancyStatus}; re-open it before making an offer.`);
+  }
+  if (row.state !== "declined") {
+    return fail("An offer can only answer a decline.");
+  }
+  if (row.offerMadeAt) {
+    return fail(
+      "An offer was already made on this invitation. One offer per person: a second decline is final.",
+    );
+  }
+
+  // Conditional update: the state AND the one-offer cap re-checked at
+  // the database, so a concurrent second tab cannot double-offer.
+  const updated = await db
+    .update(schema.vacancyInvitations)
+    .set({
+      state: "offer_made",
+      offerNote: note,
+      offerMadeAt: new Date(),
+      offerMadeByUserId: guard.userId,
+    })
+    .where(
+      and(
+        eq(schema.vacancyInvitations.id, invitationId),
+        eq(schema.vacancyInvitations.state, "declined"),
+        isNull(schema.vacancyInvitations.offerMadeAt),
+      ),
+    )
+    .returning({ id: schema.vacancyInvitations.id });
+  if (updated.length === 0) {
+    return fail("The invitation changed in the meantime. Refresh and try again.");
+  }
+
+  await createNotification({
+    userId: row.profileUserId,
+    kind: "vacancy.offer",
+    title: `${row.orgName} came back with an offer`,
+    body: `You declined "${row.vacancyTitle}", and they answered with an improved offer. It is still your call: accept, or decline and that is final.`,
+    link: `/dashboard/invitations/${invitationId}`,
+    meta: { invitationId, vacancyId: row.vacancyId, notePii: true },
+  });
+
+  await logAccess({
+    kind: "vacancy.offer",
+    actor: guard.userId,
+    subject: invitationId,
+    meta: {
+      orgId: guard.orgId,
+      vacancyId: row.vacancyId,
+      // The note is PII-adjacent employer content; flagged like invite
+      // notes so export sweeps treat it accordingly.
+      notePii: true,
+    },
+  });
+
+  revalidatePath(`/employer/vacancies/${row.vacancyId}`);
+  return ok();
+}

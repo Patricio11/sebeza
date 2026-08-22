@@ -625,6 +625,13 @@
         "office": "Yabelana ngengxelo, inkqubo okanye indlela oyiphucileyo, uze uthethe ukuba yayiyintoni indima yakho.",
         "general": "Yongeza umsebenzi ozidla ngawo: ikhonkco, imifanekiso, okanye zombini."
       }
+    },
+    "invitationOffer": {
+      "heading": "Babuye nesithembiso",
+      "lead": "Usikhabile esi simemo, kwaye umqeshi uphendule kanye ngesithembiso esiphuculweyo. Kuseluxanduva lwakho ngokupheleleyo.",
+      "theirWords": "Ngamazwi abo",
+      "finalNote": "Ukwamkela kusebenza kanye njengokwamkela isimemo. Ukukhaba kwakhona kokokugqibela: abanakuthembisa kabini, kwaye akuze kuchaphazele indlela obonakala ngayo kukhangelo.",
+      "chip": "Isithembiso esitsha, silinde impendulo yakho"
     }
   },
   "employerDash": {
@@ -1041,9 +1048,17 @@
         "declined": "Kukhatyiwe",
         "reconsidering": "Uyaphinda acinge",
         "withdrawn": "Kurhoxisiwe",
-        "expired": "Kuphelelwe lixesha"
+        "expired": "Kuphelelwe lixesha",
+        "offer_made": "Isithembiso senziwe"
       },
-      "withdrawing": "Iyarhoxiswa"
+      "withdrawing": "Iyarhoxiswa",
+      "makeOffer": "Yenza isithembiso",
+      "yourOffer": "Isithembiso sakho",
+      "offerLead": "Phendula isizathu sakhe ngesithembiso esinye esiphuculweyo. Angamkela, okanye akhabe kwakhona, kwaye ukukhaba kwesibini kokokugqibela: awuyi kukwazi ukuthembisa kabini.",
+      "offerPlaceholder": "Yintoni etshintshileyo: umvuzo ongcono, iiyure ezahlukileyo, iintsuku zokusebenza ukude…",
+      "offerOnce": "Isithembiso esinye ngomntu, ngonaphakade",
+      "offerCancel": "Rhoxisa",
+      "offerSend": "Thumela isithembiso"
     },
     "empty": {
       "heading": "Akukho mntu umenyiweyo okwangoku",

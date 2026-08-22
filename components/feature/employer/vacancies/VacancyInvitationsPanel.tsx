@@ -32,9 +32,15 @@ interface Props {
   withdrawAction: (
     invitationId: string,
   ) => Promise<{ ok: true } | { ok: false; message: string }>;
+  /** The counter-offer. Server action bound by the page. */
+  offerAction: (
+    invitationId: string,
+    note: string,
+  ) => Promise<{ ok: true } | { ok: false; message: string }>;
 }
 
 const STATE_LABEL: Record<InvitationState, string> = {
+  offer_made: "Offer made",
   invited: "Invited",
   accepted: "Accepted",
   accepted_with_notice: "Accepted (with notice)",
@@ -49,6 +55,7 @@ const STATE_TONE: Record<
   "brand" | "accent" | "muted" | "neutral" | "danger"
 > = {
   invited: "brand",
+  offer_made: "brand",
   accepted: "accent",
   accepted_with_notice: "accent",
   declined: "danger",
@@ -74,6 +81,7 @@ const TONE_CLASS: Record<
 };
 
 const STATE_ICON: Record<InvitationState, typeof CheckCircle2> = {
+  offer_made: Send,
   invited: Send,
   accepted: CheckCircle2,
   accepted_with_notice: CheckCircle2,
@@ -89,6 +97,7 @@ export function VacancyInvitationsPanel({
   canEdit,
   locale,
   withdrawAction,
+  offerAction,
 }: Props) {
   const router = useRouter();
   const [pendingId, setPendingId] = useState<string | null>(null);
@@ -109,6 +118,28 @@ export function VacancyInvitationsPanel({
     const arr = grouped.get(inv.state) ?? [];
     arr.push(inv);
     grouped.set(inv.state, arr);
+  }
+
+  // The one-offer editor: which declined row is composing, and the
+  // draft. Only one row at a time; opening another closes the first.
+  const [offerFor, setOfferFor] = useState<string | null>(null);
+  const [offerDraft, setOfferDraft] = useState("");
+
+  function onSendOffer(invitationId: string) {
+    const note = offerDraft.trim();
+    setError(null);
+    setPendingId(invitationId);
+    startTransition(async () => {
+      const res = await offerAction(invitationId, note);
+      if (!res.ok) {
+        setError(res.message);
+      } else {
+        setOfferFor(null);
+        setOfferDraft("");
+        router.refresh();
+      }
+      setPendingId(null);
+    });
   }
 
   function onWithdraw(invitationId: string) {
@@ -159,6 +190,10 @@ export function VacancyInvitationsPanel({
           // A seat that came back: nobody replied, they said no, or we
           // pulled it. Either way the useful next step is finding
           // somebody else, and until now the row offered nothing.
+          // One offer per invitation, EVER: the button only exists
+          // while no offer has been made. A second decline is final.
+          const canOffer =
+            canEdit && inv.state === "declined" && !inv.offerMadeAt;
           const seatFreed =
             canEdit &&
             (inv.state === "expired" ||
@@ -224,6 +259,55 @@ export function VacancyInvitationsPanel({
                       : inv.declineReason}
                   </p>
                 )}
+                {inv.state === "offer_made" && inv.offerNote && (
+                  <p className="mt-1 text-xs text-[color:var(--color-ink-soft)]">
+                    <span className="text-[0.65rem] uppercase tracking-[0.18em]">
+                      {t("pipeline.yourOffer")}
+                    </span>{" "}
+                    <em>&ldquo;{inv.offerNote}&rdquo;</em>
+                  </p>
+                )}
+                {canOffer && offerFor === inv.id && (
+                  <div className="mt-3 rounded-[var(--radius-sm)] border border-[color:var(--color-brand)] bg-[color:var(--color-brand-tint)] p-3">
+                    <p className="text-xs text-[color:var(--color-ink)]">
+                      {t("pipeline.offerLead")}
+                    </p>
+                    <textarea
+                      value={offerDraft}
+                      onChange={(e) => setOfferDraft(e.target.value)}
+                      maxLength={200}
+                      rows={2}
+                      disabled={pendingId === inv.id}
+                      placeholder={t("pipeline.offerPlaceholder")}
+                      className="mt-2 w-full rounded-[var(--radius-sm)] border border-[color:var(--color-hairline)] bg-[color:var(--color-paper)] p-2 text-sm"
+                    />
+                    <div className="mt-2 flex items-center justify-between gap-2">
+                      <span className="text-[0.65rem] text-[color:var(--color-ink-soft)]">
+                        {offerDraft.length} / 200 · {t("pipeline.offerOnce")}
+                      </span>
+                      <span className="flex gap-2">
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          size="sm"
+                          disabled={pendingId === inv.id}
+                          onClick={() => setOfferFor(null)}
+                        >
+                          {t("pipeline.offerCancel")}
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="primary"
+                          size="sm"
+                          disabled={pendingId === inv.id || offerDraft.trim().length < 10}
+                          onClick={() => onSendOffer(inv.id)}
+                        >
+                          {t("pipeline.offerSend")}
+                        </Button>
+                      </span>
+                    </div>
+                  </div>
+                )}
                 {inv.declineNote && (
                   <p className="mt-1 text-xs text-[color:var(--color-ink-soft)]">
                     <em>
@@ -235,6 +319,18 @@ export function VacancyInvitationsPanel({
                   </p>
                 )}
               </div>
+              {canOffer && offerFor !== inv.id && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setOfferFor(inv.id);
+                    setOfferDraft("");
+                  }}
+                  className="inline-flex h-8 shrink-0 items-center gap-1 rounded-[var(--radius-pill)] border border-[color:var(--color-brand)] px-3 text-xs font-medium text-[color:var(--color-brand-strong)] hover:bg-[color:var(--color-brand-tint)]"
+                >
+                  {t("pipeline.makeOffer")}
+                </button>
+              )}
               {seatFreed && (
                 <Link
                   href={`/employer/vacancies/${vacancyId}/match` as never}

@@ -185,3 +185,20 @@ with "filled the role with another candidate": on this path nobody told
 us anyone was hired, and saying so anyway would be a polite fiction.
 The closure fan-out no-ops when placements exist, so nobody is told
 twice in two different registers.
+
+
+## Post-script: the counter-offer (2026-08-22, shipped)
+
+Founder addition after the fourteen gaps closed: when a seeker declines,
+the employer can answer with ONE improved offer
+(`declined -> offer_made -> accepted / declined-final`,
+`makeOfferOnInvitation` in lib/employer/invitations.ts, migration 0073).
+The decline-reason taxonomy finally has a verb attached to it.
+
+The anti-harassment rules are the design: one offer per invitation ever
+(enforced in the conditional UPDATE, tested under the concurrency
+shape), a substantive note required (an empty offer is just a nudge), a
+second decline is final, and the follow-up nudge cron never touches
+offer rows. An outstanding offer counts as "pending" in the strip and
+the stalled-pipeline sweep, and the closure fan-out tells offer-holders
+when the vacancy closes, same as acceptances.
