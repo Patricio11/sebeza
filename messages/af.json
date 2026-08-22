@@ -1157,7 +1157,8 @@
       "skillsHelp": "Kies die vaardighede wat hierdie vakature nodig het. Die passer gebruik dit om kandidate te rangskik. Kan jy nie een vind nie? Tik dit in elk geval en voeg dit by: ons span hersien nuwe vaardighede en dit word platformwyd beskikbaar.",
       "saving": "Stoor tans",
       "create": "Skep vakature",
-      "saveChanges": "Stoor veranderinge"
+      "saveChanges": "Stoor veranderinge",
+      "sectionRole": "Die rol"
     },
     "match": {
       "eyebrow": "Vind passings",
@@ -1221,7 +1222,9 @@
         "inviteCta": "Nooi na geleentheid",
         "chipAll": "Almal",
         "yearsChip": "{years}+ jaar"
-      }
+      },
+      "openDossier": "Maak dossier oop",
+      "secondary": "gepas via sekondêre beroep: {profession}"
     },
     "status": {
       "draft": "Konsep",
@@ -1276,6 +1279,60 @@
       "acceptedWithNotice": "Aanvaar met {months, plural, one {’n kennistydperk van 1 maand} other {’n kennistydperk van # maande}}",
       "logHire": "Teken hierdie aanstelling aan",
       "outsideNote": "Iemand aangestel wat nie op die aanvaarde lys is nie? Maak hul dossier oop en gebruik Merk as aangestel; om van hierdie vakature af te begin, koppel die plasing outomaties daaraan."
+    },
+    "detail": {
+      "eyebrow": "Vakature-besonderhede",
+      "helpLifecycle": "Vakature-lewensiklus",
+      "helpAcceptRate": "Die aanvaardingskoers lees",
+      "findHeading": "Vind kandidate vir hierdie vakature",
+      "findSub": "Omgekeerd gepas teen die lewende talentpoel, gerangskik, geredigeer, SA-burgers eerste uitgelig.",
+      "findCta": "Vind passings",
+      "viewerNote": "Jou werkruimterol is Kyker, dus is die vakature-besonderhede leesalleen vir jou. Vra ’n Eienaar of Werwer om veranderinge te maak.",
+      "footer": "Vind passings rangskik kandidate teen hierdie vakature, Nooi vra dié wat jy kies, en hul antwoord, met ’n rede as hulle een gee, land terug hier in die pyplyn.",
+      "transition": {
+        "draft": "Skuif na konsep",
+        "open": "Maak vakature oop",
+        "closed": "Sluit vakature",
+        "filled": "Merk as gevul"
+      },
+      "matchReqHeading": "Passingsvereistes",
+      "workModeType": "Werkwyse & tipe",
+      "yearsExp": "Jare ondervinding",
+      "yearsValue": "{years}+ jaar",
+      "yearsNone": "Geen minimum nie",
+      "nqfValue": "NKR {level}+",
+      "nqfNone": "Nie vereis nie",
+      "seasonWindow": "Seisoenvenster",
+      "noWindow": "Geen venster verklaar nie",
+      "readonlyHeading": "Vakature-besonderhede",
+      "description": "Beskrywing",
+      "requiredSkills": "Vereiste vaardighede",
+      "inviteExpiry": "Uitnodiging verval",
+      "expiryDays": "{days, plural, one {1 dag} other {# dae}} nadat elke uitnodiging gestuur is",
+      "expiryNever": "Uitnodigings verval nooit op hierdie vakature nie",
+      "backToList": "Terug na vakatures",
+      "lifecycle": "Lewensiklus",
+      "salaryPrivate": "Salarisband · privaat",
+      "editHeading": "Redigeer vakature",
+      "anyWorkMode": "Enige werkwyse / diensaard",
+      "nqfLevel": "NKR-vlak"
+    },
+    "selfApplyPanel": {
+      "aria": "Self Aansoek openbare skakel",
+      "headingLive": "Self Aansoek · openbare skakel aktief",
+      "headingPaused": "Self Aansoek · openbare skakel onderbreek",
+      "live": "Enigeen met hierdie skakel sien die rol en kan aansoek doen. Aansoekers land in hierdie pyplyn met ’n “Self aansoek gedoen”-merkie. Deel dit op WhatsApp, plakkate, enige plek.",
+      "paused": "Die vakature is nie oop nie, so die skakel wys tans “aanvaar nie aansoeke nie.” Dit hervat outomaties wanneer jy die vakature weer oopmaak.",
+      "linkAria": "Openbare aansoekskakel",
+      "copied": "Gekopieer",
+      "copy": "Kopieer skakel",
+      "whatsapp": "Deel op WhatsApp"
+    },
+    "newPage": {
+      "title": "Nuwe vakature",
+      "duplicateTitle": "Dupliseer vakature",
+      "subtitle": "Privaat aan jou organisasie. Vakatures begin as konsepte; maak hulle oop wanneer jy gereed is om kandidate te nooi.",
+      "duplicateSubtitle": "Vooraf ingevul vanaf “{source}”. Redigeer enigiets voor jy stoor; dit skep ’n vars konsep, die oorspronklike bly onaangeraak."
     }
   }
 }

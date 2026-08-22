@@ -663,7 +663,7 @@ export function VacancyForm({
 
       <section className="flex flex-col gap-5">
         <div className="text-[0.72rem] uppercase tracking-[0.22em] text-[color:var(--color-ink)]">
-          The role
+          {t("sectionRole")}
         </div>
         <TextField
           id="title"

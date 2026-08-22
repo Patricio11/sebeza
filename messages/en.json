@@ -1214,7 +1214,8 @@
       "skillsHelp": "Pick the skills this vacancy needs. The matcher uses them to rank candidates. Can’t find one? Type it anyway and add it: our team reviews new skills and it becomes available platform-wide.",
       "saving": "Saving",
       "create": "Create vacancy",
-      "saveChanges": "Save changes"
+      "saveChanges": "Save changes",
+      "sectionRole": "The role"
     },
     "match": {
       "eyebrow": "Find matches",
@@ -1278,7 +1279,9 @@
         "inviteCta": "Invite to opportunity",
         "chipAll": "All",
         "yearsChip": "{years}+ yrs"
-      }
+      },
+      "openDossier": "Open dossier",
+      "secondary": "matched via secondary profession: {profession}"
     },
     "status": {
       "draft": "Draft",
@@ -1333,6 +1336,60 @@
       "acceptedWithNotice": "Accepted with {months, plural, one {a 1-month} other {a #-month}} notice",
       "logHire": "Log this hire",
       "outsideNote": "Hired someone not on the accepted list? Open their dossier and use Mark as hired; starting from this vacancy links the placement to it automatically."
+    },
+    "detail": {
+      "eyebrow": "Vacancy detail",
+      "helpLifecycle": "Vacancy lifecycle",
+      "helpAcceptRate": "Reading the accept-rate",
+      "findHeading": "Find candidates for this vacancy",
+      "findSub": "Reverse-matched against the live talent pool, ranked, redacted, SA citizens highlighted first.",
+      "findCta": "Find matches",
+      "viewerNote": "Your workspace role is Viewer, so the vacancy detail is read-only for you. Ask an Owner or Recruiter to make changes.",
+      "footer": "Find matches ranks candidates against this vacancy, Invite asks the ones you choose, and their response, including a reason if they give one, lands back here in the pipeline.",
+      "transition": {
+        "draft": "Move to draft",
+        "open": "Open vacancy",
+        "closed": "Close vacancy",
+        "filled": "Mark as filled"
+      },
+      "matchReqHeading": "Match requirements",
+      "workModeType": "Work mode & type",
+      "yearsExp": "Years of experience",
+      "yearsValue": "{years}+ yrs",
+      "yearsNone": "No minimum",
+      "nqfValue": "NQF {level}+",
+      "nqfNone": "Not required",
+      "seasonWindow": "Season window",
+      "noWindow": "No window declared",
+      "readonlyHeading": "Vacancy detail",
+      "description": "Description",
+      "requiredSkills": "Required skills",
+      "inviteExpiry": "Invite expiry",
+      "expiryDays": "{days, plural, one {1 day} other {# days}} after each invite is sent",
+      "expiryNever": "Invites never expire on this vacancy",
+      "backToList": "Back to vacancies",
+      "lifecycle": "Lifecycle",
+      "salaryPrivate": "Salary band · private",
+      "editHeading": "Edit vacancy",
+      "anyWorkMode": "Any work mode / employment type",
+      "nqfLevel": "NQF level"
+    },
+    "selfApplyPanel": {
+      "aria": "Self Apply public link",
+      "headingLive": "Self Apply · public link live",
+      "headingPaused": "Self Apply · public link paused",
+      "live": "Anyone with this link sees the role and can apply. Applicants land in this pipeline with a “Self-applied” chip. Share it on WhatsApp, posters, anywhere.",
+      "paused": "The vacancy isn’t open, so the link currently shows “not accepting applications.” It resumes automatically when you re-open the vacancy.",
+      "linkAria": "Public apply link",
+      "copied": "Copied",
+      "copy": "Copy link",
+      "whatsapp": "Share on WhatsApp"
+    },
+    "newPage": {
+      "title": "New vacancy",
+      "duplicateTitle": "Duplicate vacancy",
+      "subtitle": "Private to your organisation. Vacancies start as drafts, open them when ready to invite candidates.",
+      "duplicateSubtitle": "Pre-filled from “{source}”. Edit anything before saving; this creates a fresh draft, the original stays untouched."
     }
   }
 }

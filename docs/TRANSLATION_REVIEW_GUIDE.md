@@ -210,7 +210,12 @@ awaiting your review like the rest:
   English-only in all catalogs on purpose: it sits on the consent screen
   and follows the same hold-for-human rule as its neighbours.
 
-**Known English-only surface:** the employer vacancy workspace
-(/employer/vacancies and its match page) has never been catalog-driven,
-zero translation calls. The 2026-08 hiring-loop work matched that
-existing state. Translating it is its own project, not a review item.
+**2026-08-22, the employer vacancy workspace (was the known
+English-only surface, now fully translated).** Five phases under
+`employerVacancies.*`: the detail page and pipeline, the vacancy form,
+the employer sidebar (`employerDash.nav`), the match page and invite
+flow, the mark-as-filled modal, placements panel, list page, status
+chips, self-apply panel and mastheads. All zu/xh/af entries are
+AI-drafted and need review like the rest. Heavy ICU plural use
+throughout (seat counts, invite counts, notice months): keep every
+placeholder and plural branch intact when editing.

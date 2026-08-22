@@ -13,6 +13,7 @@
  */
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { Check, Copy, MessageCircle } from "lucide-react";
 
 export function SelfApplyLinkPanel({
@@ -25,6 +26,7 @@ export function SelfApplyLinkPanel({
   vacancyTitle: string;
   vacancyOpen: boolean;
 }) {
+  const t = useTranslations("employerVacancies.selfApplyPanel");
   const [copied, setCopied] = useState(false);
 
   async function copy() {
@@ -44,23 +46,23 @@ export function SelfApplyLinkPanel({
 
   return (
     <section
-      aria-label="Self Apply public link"
+      aria-label={t("aria")}
       className="mb-6 rounded-[var(--radius-md)] border border-[color:var(--color-brand)]/40 bg-[color:var(--color-brand-tint)] p-4"
     >
       <div className="flex items-center gap-2 text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--color-brand-strong)]">
-        Self Apply · public link {vacancyOpen ? "live" : "paused"}
+        {vacancyOpen ? t("headingLive") : t("headingPaused")}
       </div>
       <p className="mt-1.5 text-xs leading-relaxed text-[color:var(--color-ink-soft)]">
         {vacancyOpen
-          ? "Anyone with this link sees the role and can apply. Applicants land in this pipeline with a “Self-applied” chip. Share it on WhatsApp, posters, anywhere."
-          : "The vacancy isn't open, so the link currently shows “not accepting applications.” It resumes automatically when you re-open the vacancy."}
+          ? t("live")
+          : t("paused")}
       </p>
       <div className="mt-3 flex flex-wrap items-center gap-2">
         <input
           readOnly
           value={applyUrl}
           onFocus={(e) => e.currentTarget.select()}
-          aria-label="Public apply link"
+          aria-label={t("linkAria")}
           className="min-w-0 flex-1 rounded-[var(--radius-sm)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] px-3 py-2 font-mono text-xs text-[color:var(--color-ink)]"
         />
         <button
@@ -71,12 +73,12 @@ export function SelfApplyLinkPanel({
           {copied ? (
             <>
               <Check className="size-3.5" aria-hidden="true" />
-              Copied
+              {t("copied")}
             </>
           ) : (
             <>
               <Copy className="size-3.5" aria-hidden="true" />
-              Copy link
+              {t("copy")}
             </>
           )}
         </button>
@@ -87,7 +89,7 @@ export function SelfApplyLinkPanel({
           className="inline-flex items-center gap-1.5 rounded-[var(--radius-pill)] border-2 border-[color:var(--color-ink)] px-4 py-2 text-xs font-medium text-[color:var(--color-ink)] transition-colors hover:bg-[color:var(--color-ink)] hover:text-[color:var(--color-surface)]"
         >
           <MessageCircle className="size-3.5" aria-hidden="true" />
-          Share on WhatsApp
+          {t("whatsapp")}
         </a>
       </div>
     </section>

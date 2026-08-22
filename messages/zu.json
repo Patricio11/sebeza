@@ -1157,7 +1157,8 @@
       "skillsHelp": "Khetha amakhono lesi sikhala esiwadingayo. Umfanisi uwasebenzisa ukuhlela abafakizicelo. Awulitholi? Lithayiphe noma kunjalo bese ulengeza: ithimba lethu libuyekeza amakhono amasha bese liyatholakala kuyo yonke inkundla.",
       "saving": "Iyalondoloza",
       "create": "Dala isikhala",
-      "saveChanges": "Londoloza izinguquko"
+      "saveChanges": "Londoloza izinguquko",
+      "sectionRole": "Isikhundla"
     },
     "match": {
       "eyebrow": "Thola abafanelekayo",
@@ -1221,7 +1222,9 @@
         "inviteCta": "Mema kuleli thuba",
         "chipAll": "Konke",
         "yearsChip": "{years}+ iminyaka"
-      }
+      },
+      "openDossier": "Vula idosiye",
+      "secondary": "kufaniswe ngomsebenzi wesibili: {profession}"
     },
     "status": {
       "draft": "Uhlaka",
@@ -1276,6 +1279,60 @@
       "acceptedWithNotice": "Wamukela {months, plural, one {ngesaziso senyanga engu-1} other {ngesaziso sezinyanga ezingu-#}}",
       "logHire": "Bhala lokhu kuqasha",
       "outsideNote": "Uqashe umuntu ongekho ohlwini lwabamukele? Vula idosiye lakhe usebenzise okuthi Maka njengoqashiwe; ukuqala kulesi sikhala kuxhuma ukubekwa kuso ngokuzenzakalela."
+    },
+    "detail": {
+      "eyebrow": "Imininingwane yesikhala",
+      "helpLifecycle": "Impilo yesikhala",
+      "helpAcceptRate": "Ukufunda izinga lokwamukela",
+      "findHeading": "Thola abafakizicelo balesi sikhala",
+      "findSub": "Kufaniswe ngokuhlehlisiwe nechibi lethalente eliphilayo, kuhleliwe, kufihliwe, izakhamuzi zaseNingizimu Afrika zigqanyisiwe kuqala.",
+      "findCta": "Thola abafanelekayo",
+      "viewerNote": "Indima yakho endaweni yokusebenza ithi Umbukeli, ngakho imininingwane yesikhala ifundwa kuphela kuwe. Cela uMnikazi noma uMqashi ukuthi enze izinguquko.",
+      "footer": "Okuthi Thola abafanelekayo kuhlela abafakizicelo ngokwalesi sikhala, okuthi Mema kucela labo obakhethayo, futhi impendulo yabo, kanye nesizathu uma besinikeza, ibuyela lapha ohlwini.",
+      "transition": {
+        "draft": "Buyisela kuhlaka",
+        "open": "Vula isikhala",
+        "closed": "Vala isikhala",
+        "filled": "Maka njengokugcwalisiwe"
+      },
+      "matchReqHeading": "Izidingo zokufaniswa",
+      "workModeType": "Indlela nohlobo lomsebenzi",
+      "yearsExp": "Iminyaka yolwazi",
+      "yearsValue": "{years}+ iminyaka",
+      "yearsNone": "Awukho umkhawulo",
+      "nqfValue": "NQF {level}+",
+      "nqfNone": "Akudingekile",
+      "seasonWindow": "Iwindi lenkathi",
+      "noWindow": "Alikho iwindi elishiwo",
+      "readonlyHeading": "Imininingwane yesikhala",
+      "description": "Incazelo",
+      "requiredSkills": "Amakhono adingekayo",
+      "inviteExpiry": "Ukuphelelwa yisikhathi kwesimemo",
+      "expiryDays": "{days, plural, one {usuku olungu-1} other {izinsuku ezingu-#}} ngemva kokuthunyelwa kwesimemo ngasinye",
+      "expiryNever": "Izimemo azipheleliswa yisikhathi kulesi sikhala",
+      "backToList": "Buyela ezikhaleni",
+      "lifecycle": "Impilo yesikhala",
+      "salaryPrivate": "Ibhande leholo · kuyimfihlo",
+      "editHeading": "Hlela isikhala",
+      "anyWorkMode": "Noma iyiphi indlela / uhlobo lomsebenzi",
+      "nqfLevel": "Izinga le-NQF"
+    },
+    "selfApplyPanel": {
+      "aria": "Ilinki yomphakathi yokuzifakela isicelo",
+      "headingLive": "Zifakele isicelo · ilinki yomphakathi iyasebenza",
+      "headingPaused": "Zifakele isicelo · ilinki yomphakathi imisiwe",
+      "live": "Noma ubani onale linki ubona isikhundla futhi angafaka isicelo. Abafaki-zicelo bafika kulolu hlu benophawu oluthi “Uzifakele isicelo”. Yabelana ngayo ku-WhatsApp, emaphosteni, noma kuphi.",
+      "paused": "Isikhala asivuliwe, ngakho ilinki okwamanje ibonisa okuthi “ayamukeli izicelo.” Iqala futhi ngokuzenzakalela uma uvula isikhala kabusha.",
+      "linkAria": "Ilinki yomphakathi yokufaka isicelo",
+      "copied": "Kukopishiwe",
+      "copy": "Kopisha ilinki",
+      "whatsapp": "Yabelana ku-WhatsApp"
+    },
+    "newPage": {
+      "title": "Isikhala esisha",
+      "duplicateTitle": "Phinda isikhala",
+      "subtitle": "Kuyimfihlo enhlanganweni yakho. Izikhala ziqala njengezinhlaka, uzivule uma usukulungele ukumema abafakizicelo.",
+      "duplicateSubtitle": "Kugcwaliswe kusengaphambili kusuka ku-“{source}”. Hlela noma yini ngaphambi kokulondoloza; lokhu kudala uhlaka olusha, okwangempela kuhlala kungathintwa."
     }
   }
 }

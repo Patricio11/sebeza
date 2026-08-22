@@ -304,14 +304,14 @@ export default async function VacancyMatchPage({
                             className="mr-auto italic text-[color:var(--color-ink-soft)]"
                             title={`Matched via secondary profession: ${professionLabel}. Her headline is ${p.profession}.`}
                           >
-                            matched via secondary profession: {professionLabel}
+                            {tm("secondary", { profession: professionLabel })}
                           </span>
                         )}
                         <Link
                           href={`/employer/dossier/${p.handle}` as never}
                           className="inline-flex h-9 items-center gap-2 rounded-[var(--radius-pill)] border border-[color:var(--color-ink)] px-3 font-medium text-[color:var(--color-ink)] hover:bg-[color:var(--color-ink)] hover:text-[color:var(--color-paper)]"
                         >
-                          Open dossier
+                          {tm("openDossier")}
                         </Link>
                       </div>
                     </>

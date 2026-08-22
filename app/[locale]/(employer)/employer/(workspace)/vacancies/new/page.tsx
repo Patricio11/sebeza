@@ -67,8 +67,7 @@ export default async function NewVacancyPage({
         seasonalWindow?: import("@/lib/mock/types").SeasonalWindow | null;
       })
     | undefined;
-  let pageSubtitle =
-    "Private to your organisation. Vacancies start as drafts, open them when ready to invite candidates.";
+  let pageSubtitle = tv("newPage.subtitle");
   if (duplicateFrom) {
     const source = await getMyVacancy(duplicateFrom);
     if (source) {
@@ -93,7 +92,7 @@ export default async function NewVacancyPage({
         // seasonal vacancies.
         seasonalWindow: source.seasonalWindow,
       };
-      pageSubtitle = `Pre-filled from "${source.title}". Edit anything before saving, this creates a fresh draft, the original stays untouched.`;
+      pageSubtitle = tv("newPage.duplicateSubtitle", { source: source.title });
     }
   }
 
@@ -113,7 +112,7 @@ export default async function NewVacancyPage({
     <DashboardMasthead
       role="employer"
       pageEyebrow={session.name ?? "Employer workspace"}
-      pageTitle={initial ? "Duplicate vacancy" : "New vacancy"}
+      pageTitle={initial ? tv("newPage.duplicateTitle") : tv("newPage.title")}
       pageSubtitle={pageSubtitle}
     >
       {/* Phase 10.1  in-context help deep-link (D6). */}

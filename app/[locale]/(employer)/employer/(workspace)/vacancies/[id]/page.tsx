@@ -45,6 +45,7 @@ import {
 import { getPlacementsForVacancy } from "@/lib/employer/placements";
 import { fillState, fillLabelParts } from "@/lib/employer/vacancy-fill";
 import { getTranslations } from "next-intl/server";
+import { useTranslations } from "next-intl";
 import { getProfessions, getSkills } from "@/lib/taxonomy/query";
 import { PROVINCES } from "@/lib/mock/taxonomy";
 import { formatVacancyLocation } from "@/lib/employer/vacancies-display";
@@ -140,16 +141,16 @@ export default async function VacancyDetailPage({
     filled: ["closed"],
   };
   const TRANSITION_LABEL: Record<VacancyStatus, string> = {
-    draft: "Move to draft",
-    open: "Open vacancy",
-    closed: "Close vacancy",
-    filled: "Mark as filled",
+    draft: t("detail.transition.draft"),
+    open: t("detail.transition.open"),
+    closed: t("detail.transition.closed"),
+    filled: t("detail.transition.filled"),
   };
 
   return (
     <DashboardMasthead
       role="employer"
-      pageEyebrow="Vacancy detail"
+      pageEyebrow={t("detail.eyebrow")}
       pageTitle={vacancy.title}
       pageSubtitle={`${professionLabel}${vacancy.seniority ? ` · ${vacancy.seniority}` : ""} · ${provinceLabel}`}
     >
@@ -163,11 +164,11 @@ export default async function VacancyDetailPage({
           className="inline-flex items-center gap-1 text-xs uppercase tracking-[0.18em] text-[color:var(--color-ink-soft)] hover:text-[color:var(--color-ink)]"
         >
           <ChevronLeft className="size-3" aria-hidden="true" />
-          Back to vacancies
+          {t("detail.backToList")}
         </Link>
         {/* Phase 10.1  help deep-links (D6). */}
-        <HelpLink slug="vacancy-lifecycle" label="Vacancy lifecycle" />
-        <HelpLink slug="accept-rate-strip" label="Reading the accept-rate" />
+        <HelpLink slug="vacancy-lifecycle" label={t("detail.helpLifecycle")} />
+        <HelpLink slug="accept-rate-strip" label={t("detail.helpAcceptRate")} />
         <span aria-hidden="true" className="text-[color:var(--color-ink-soft)]">·</span>
         <VacancyStatusChip status={vacancy.status} />
         <span aria-hidden="true" className="text-[color:var(--color-ink-soft)]">·</span>
@@ -227,11 +228,10 @@ export default async function VacancyDetailPage({
           />
           <div>
             <p className="font-display text-base leading-tight text-[color:var(--color-ink)]">
-              Find candidates for this vacancy
+              {t("detail.findHeading")}
             </p>
             <p className="mt-1 text-xs text-[color:var(--color-ink-soft)]">
-              Reverse-matched against the live talent pool, ranked, redacted,
-              SA citizens highlighted first.
+              {t("detail.findSub")}
             </p>
           </div>
         </div>
@@ -239,7 +239,7 @@ export default async function VacancyDetailPage({
           href={`/employer/vacancies/${vacancy.id}/match` as never}
           className="inline-flex h-10 items-center gap-2 rounded-[var(--radius-pill)] border-2 border-[color:var(--color-ink)] bg-[color:var(--color-ink)] px-4 text-sm font-medium text-[color:var(--color-paper)] hover:bg-[color:var(--color-brand-strong)] hover:border-[color:var(--color-brand-strong)]"
         >
-          Find matches
+          {t("detail.findCta")}
         </Link>
       </div>
 
@@ -298,7 +298,7 @@ export default async function VacancyDetailPage({
       {canEdit && NEXT_STATES[vacancy.status].length > 0 && (
         <section className="mb-6 flex flex-wrap items-center gap-2 rounded-[var(--radius-md)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-4">
           <span className="text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--color-ink-soft)]">
-            Lifecycle
+            {t("detail.lifecycle")}
           </span>
           {NEXT_STATES[vacancy.status].map((next) =>
             next === "filled" ? (
@@ -343,7 +343,7 @@ export default async function VacancyDetailPage({
         <section className="mb-6 rounded-[var(--radius-sm)] border border-[color:var(--color-accent)] bg-[color:var(--color-accent)]/5 p-4">
           <div className="flex items-center gap-2 text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--color-accent)]">
             <Lock className="size-3" aria-hidden="true" />
-            Salary band · private
+            {t("detail.salaryPrivate")}
           </div>
           <p className="mt-1 font-display text-lg text-[color:var(--color-ink)]">
             {vacancy.salaryBand}
@@ -355,7 +355,7 @@ export default async function VacancyDetailPage({
       {canEdit ? (
         <div className="rounded-[var(--radius-md)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-5 md:p-8">
           <h2 className="mb-5 border-b border-[color:var(--color-hairline)] pb-3 font-display text-xl">
-            Edit vacancy
+            {t("detail.editHeading")}
           </h2>
           <VacancyForm
             initial={vacancy}
@@ -381,19 +381,17 @@ export default async function VacancyDetailPage({
       )}
 
       <p className="mt-8 text-xs italic text-[color:var(--color-ink-soft)]">
-        <strong>Find matches</strong> ranks candidates against this vacancy,
-        <strong> Invite</strong> asks the ones you choose, and their response,
-        including a reason if they give one, lands back here in the pipeline.
+        {t("detail.footer")}
       </p>
     </DashboardMasthead>
   );
 }
 
 function ViewerNotice() {
+  const t = useTranslations("employerVacancies.detail");
   return (
     <p className="mb-6 rounded-[var(--radius-sm)] border border-dashed border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] px-4 py-3 text-xs text-[color:var(--color-ink-soft)]">
-      Your workspace role is <strong>Viewer</strong>  vacancy detail is
-      read-only. Ask an Owner or Recruiter to make changes.
+      {t("viewerNote")}
     </p>
   );
 }
@@ -536,17 +534,18 @@ function MatchRequirementsStrip({
 }: {
   vacancy: import("@/lib/employer/vacancies").VacancyRow;
 }) {
+  const t = useTranslations("employerVacancies");
   const workModes = vacancy.workAvailability
-    .map((k) => WORK_AVAILABILITY_LABELS[k])
+    .map((k) => t(`form.workAvailability.${k}`))
     .join(" · ");
   const yearsLabel =
     vacancy.minYearsExperience != null
-      ? `${vacancy.minYearsExperience}+ yr${vacancy.minYearsExperience === 1 ? "" : "s"}`
-      : "No minimum";
+      ? t("detail.yearsValue", { years: vacancy.minYearsExperience })
+      : t("detail.yearsNone");
   const nqfLabel =
     vacancy.minNqfLevel != null
-      ? `NQF ${vacancy.minNqfLevel}+`
-      : "Not required";
+      ? t("detail.nqfValue", { level: vacancy.minNqfLevel })
+      : t("detail.nqfNone");
   // Phase 9.21  surface the season window when the vacancy picked
   // 'seasonal' from work_availability. The fourth dl row only renders
   // for seasonal vacancies; non-seasonal vacancies keep the original
@@ -559,7 +558,7 @@ function MatchRequirementsStrip({
       className="mb-6 rounded-[var(--radius-md)] border border-[color:var(--color-hairline)] bg-[color:var(--color-paper)] p-4"
     >
       <div className="mb-2 text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--color-ink-soft)]">
-        Match requirements
+        {t("detail.matchReqHeading")}
       </div>
       <dl
         className={
@@ -569,31 +568,31 @@ function MatchRequirementsStrip({
       >
         <div>
           <dt className="text-[0.68rem] uppercase tracking-[0.18em] text-[color:var(--color-ink-soft)]">
-            Work mode &amp; type
+            {t("detail.workModeType")}
           </dt>
           <dd className="mt-0.5 text-[color:var(--color-ink)]">
-            {workModes || "Any work mode / employment type"}
+            {workModes || t("detail.anyWorkMode")}
           </dd>
         </div>
         <div>
           <dt className="text-[0.68rem] uppercase tracking-[0.18em] text-[color:var(--color-ink-soft)]">
-            Years of experience
+            {t("detail.yearsExp")}
           </dt>
           <dd className="mt-0.5 text-[color:var(--color-ink)]">{yearsLabel}</dd>
         </div>
         <div>
           <dt className="text-[0.68rem] uppercase tracking-[0.18em] text-[color:var(--color-ink-soft)]">
-            NQF level
+            {t("detail.nqfLevel")}
           </dt>
           <dd className="mt-0.5 text-[color:var(--color-ink)]">{nqfLabel}</dd>
         </div>
         {isSeasonal && (
           <div>
             <dt className="text-[0.68rem] uppercase tracking-[0.18em] text-[color:var(--color-ink-soft)]">
-              Season window
+              {t("detail.seasonWindow")}
             </dt>
             <dd className="mt-0.5 text-[color:var(--color-ink)]">
-              {seasonLabel ?? "No window declared"}
+              {seasonLabel ?? t("detail.noWindow")}
             </dd>
           </div>
         )}
@@ -650,18 +649,19 @@ function ReadOnlyDetail({
   vacancy: import("@/lib/employer/vacancies").VacancyRow;
   skillLabels: Array<{ slug: string; label: string }>;
 }) {
+  const t = useTranslations("employerVacancies.detail");
   const skills = vacancy.skillSlugs
     .map((s) => skillLabels.find((sk) => sk.slug === s)?.label ?? s);
   return (
     <div className="rounded-[var(--radius-md)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-5 md:p-8">
       <h2 className="mb-4 border-b border-[color:var(--color-hairline)] pb-3 font-display text-xl">
-        Vacancy detail
+        {t("readonlyHeading")}
       </h2>
       <dl className="space-y-4 text-sm">
         {vacancy.description && (
           <div>
             <dt className="text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--color-ink-soft)]">
-              Description
+              {t("description")}
             </dt>
             <dd className="mt-1 whitespace-pre-wrap text-[color:var(--color-ink)]">
               {vacancy.description}
@@ -671,7 +671,7 @@ function ReadOnlyDetail({
         {skills.length > 0 && (
           <div>
             <dt className="text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--color-ink-soft)]">
-              Required skills
+              {t("requiredSkills")}
             </dt>
             <dd className="mt-1.5 flex flex-wrap gap-2">
               {skills.map((s) => (
@@ -687,12 +687,12 @@ function ReadOnlyDetail({
         )}
         <div>
           <dt className="text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--color-ink-soft)]">
-            Invite expiry
+            {t("inviteExpiry")}
           </dt>
           <dd className="mt-1 text-[color:var(--color-ink)]">
             {vacancy.inviteExpiryDays
-              ? `${vacancy.inviteExpiryDays} day${vacancy.inviteExpiryDays === 1 ? "" : "s"} after each invite is sent`
-              : "Invites never expire on this vacancy"}
+              ? t("expiryDays", { days: vacancy.inviteExpiryDays })
+              : t("expiryNever")}
           </dd>
         </div>
       </dl>

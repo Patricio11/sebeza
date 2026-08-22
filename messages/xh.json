@@ -1157,7 +1157,8 @@
       "skillsHelp": "Khetha izakhono esi sithuba esizifunayo. Umhambelanisi uzisebenzisela ukucwangcisa abafaki-zicelo. Awusifumani? Sichwetheze nokuba kunjalo uze usongeze: iqela lethu lihlola izakhono ezintsha size sifumaneke kwiqonga lonke.",
       "saving": "Iyagcina",
       "create": "Yenza isithuba",
-      "saveChanges": "Gcina utshintsho"
+      "saveChanges": "Gcina utshintsho",
+      "sectionRole": "Indima"
     },
     "match": {
       "eyebrow": "Fumana abafanelekileyo",
@@ -1221,7 +1222,9 @@
         "inviteCta": "Mema kweli thuba",
         "chipAll": "Konke",
         "yearsChip": "{years}+ iminyaka"
-      }
+      },
+      "openDossier": "Vula idosiye",
+      "secondary": "kuhambelaniswe ngomsebenzi wesibini: {profession}"
     },
     "status": {
       "draft": "Uyilo",
@@ -1276,6 +1279,60 @@
       "acceptedWithNotice": "Wamkela {months, plural, one {ngesaziso senyanga e-1} other {ngesaziso seenyanga ezingu-#}}",
       "logHire": "Bhala olu qesho",
       "outsideNote": "Uqeshe umntu ongekhoyo kuluhlu lwabamkeleyo? Vula idosiye yakhe usebenzise u-Phawula njengoqeshiweyo; ukuqala kwesi sithuba kunxulumanisa ukubekwa kuso ngokuzenzekelayo."
+    },
+    "detail": {
+      "eyebrow": "Iinkcukacha zesithuba",
+      "helpLifecycle": "Ubomi besithuba",
+      "helpAcceptRate": "Ukufunda izinga lokwamkela",
+      "findHeading": "Fumana abafaki-zicelo besi sithuba",
+      "findSub": "Kuhambelaniswe ngokubuyisiweyo nechibi letalente eliphilayo, kucwangcisiwe, kufihliwe, abemi baseMzantsi Afrika bagqanyisiwe kuqala.",
+      "findCta": "Fumana abafanelekileyo",
+      "viewerNote": "Indima yakho kwindawo yokusebenza nguMboneleli, ngoko iinkcukacha zesithuba zifundwa kuphela kuwe. Cela uMnini okanye uMqeshi ukuba enze utshintsho.",
+      "footer": "U-Fumana abafanelekileyo ucwangcisa abafaki-zicelo ngokwesi sithuba, u-Mema ucela abo ubakhethayo, kwaye impendulo yabo, kunye nesizathu ukuba basinika, ibuyela apha kumgca.",
+      "transition": {
+        "draft": "Buyisela kuyilo",
+        "open": "Vula isithuba",
+        "closed": "Vala isithuba",
+        "filled": "Phawula njengezalisiweyo"
+      },
+      "matchReqHeading": "Iimfuno zokuhambelana",
+      "workModeType": "Indlela nohlobo lomsebenzi",
+      "yearsExp": "Iminyaka yamava",
+      "yearsValue": "{years}+ iminyaka",
+      "yearsNone": "Akukho mda",
+      "nqfValue": "NQF {level}+",
+      "nqfNone": "Akufuneki",
+      "seasonWindow": "Ithuba lexesha lonyaka",
+      "noWindow": "Akukho thuba lichaziweyo",
+      "readonlyHeading": "Iinkcukacha zesithuba",
+      "description": "Inkcazo",
+      "requiredSkills": "Izakhono ezifunekayo",
+      "inviteExpiry": "Ukuphelelwa lixesha kwesimemo",
+      "expiryDays": "{days, plural, one {usuku olu-1} other {iintsuku ezingu-#}} emva kokuthunyelwa kwesimemo ngasinye",
+      "expiryNever": "Izimemo aziphelelwa lixesha kwesi sithuba",
+      "backToList": "Buyela kwizithuba",
+      "lifecycle": "Ubomi besithuba",
+      "salaryPrivate": "Ibhendi yomvuzo · yimfihlo",
+      "editHeading": "Hlela isithuba",
+      "anyWorkMode": "Nayiphi na indlela / uhlobo lomsebenzi",
+      "nqfLevel": "Inqanaba le-NQF"
+    },
+    "selfApplyPanel": {
+      "aria": "Ikhonkco loluntu lokuzifakela isicelo",
+      "headingLive": "Zifakele isicelo · ikhonkco loluntu liyasebenza",
+      "headingPaused": "Zifakele isicelo · ikhonkco loluntu limisiwe",
+      "live": "Nabani na onale khonkco ubona indima kwaye angafaka isicelo. Abafaki-zicelo bafika kulo mgca benophawu oluthi “Uzifakele isicelo”. Yabelana ngayo ku-WhatsApp, kwiipowusta, naphi na.",
+      "paused": "Isithuba asivulwanga, ngoko ikhonkco okwangoku libonisa oku “ayamkeli izicelo.” Liqala kwakhona ngokuzenzekelayo xa uvula isithuba kwakhona.",
+      "linkAria": "Ikhonkco loluntu lokufaka isicelo",
+      "copied": "Kukhutshelwe",
+      "copy": "Khuphela ikhonkco",
+      "whatsapp": "Yabelana ku-WhatsApp"
+    },
+    "newPage": {
+      "title": "Isithuba esitsha",
+      "duplicateTitle": "Phinda isithuba",
+      "subtitle": "Yimfihlo kumbutho wakho. Izithuba ziqala njengezoyilo, uzivule xa sele ukulungele ukumema abafaki-zicelo.",
+      "duplicateSubtitle": "Izaliswe kwangaphambili ukusuka ku-“{source}”. Hlela nantoni na phambi kokugcina; oku kwenza uyilo olutsha, eyoqobo ihlala ingachukunyiswanga."
     }
   }
 }
