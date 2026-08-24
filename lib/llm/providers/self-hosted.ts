@@ -38,6 +38,10 @@ export async function callSelfHosted(
   const body = {
     model: call.modelId,
     temperature: 0,
+    // Token frugality (founder rule, 2026-08-24): probes pay for ONE
+    // output token; real calls are capped well above the biggest
+    // legitimate suggestions payload so a runaway response can't spend.
+    max_tokens: opts?.probe ? 1 : 800,
     messages: [
       { role: "system", content: systemPrompt(call.validSkillSlugs) },
       { role: "user", content: userPrompt(call) },

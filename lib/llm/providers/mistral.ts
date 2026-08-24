@@ -30,6 +30,10 @@ export async function callMistral(
   const body = {
     model: call.modelId,
     temperature: 0,
+    // Token frugality (founder rule, 2026-08-24): probes pay for ONE
+    // output token; real calls are capped well above the biggest
+    // legitimate suggestions payload so a runaway response can't spend.
+    max_tokens: opts?.probe ? 1 : 800,
     response_format: { type: "json_object" as const },
     messages: [
       { role: "system", content: systemPrompt(call.validSkillSlugs) },

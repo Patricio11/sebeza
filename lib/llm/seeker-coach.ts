@@ -331,6 +331,11 @@ export async function coachChat(
     body: JSON.stringify({
       model: creds.modelId,
       temperature: 0.4,
+      // Token frugality (founder rule, 2026-08-24): the anthropic
+      // branch always capped output at 1024; this branch sent
+      // UNCAPPED requests for the coach, compass read, and catalog
+      // drafts. Same ceiling for all three now.
+      max_tokens: 1024,
       response_format: { type: "json_object" as const },
       messages: [
         { role: "system", content: system },

@@ -30,7 +30,8 @@ export async function callAnthropic(
   const url = call.endpointUrl?.trim() || ANTHROPIC_DEFAULT_URL;
   const body = {
     model: call.modelId,
-    max_tokens: 1024,
+    // Probes pay for one output token (founder rule, 2026-08-24).
+    max_tokens: opts?.probe ? 1 : 1024,
     temperature: 0,
     system: systemPrompt(call.validSkillSlugs),
     messages: [

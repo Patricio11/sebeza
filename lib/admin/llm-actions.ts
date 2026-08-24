@@ -226,6 +226,25 @@ export async function deactivateAllLlmProviders(): Promise<LlmActionResult> {
   return ok({ message: "All providers deactivated." });
 }
 
+/** Human next-step per failure category: the raw bucket name sent the
+ *  founder chasing rate limits when the account simply had no credit. */
+const TEST_FAIL_HINTS: Record<string, string> = {
+  insufficient_quota:
+    "The provider account has no credit (OpenAI: add billing / credits at platform.openai.com, then test again).",
+  rate_limit: "Genuinely rate-limited. Wait a minute and test again.",
+  auth: "The API key was rejected. Check or rotate the key.",
+  network: "Could not reach the provider endpoint.",
+  no_credentials: "No stored credentials decrypt for this provider. Reconfigure it.",
+  no_active: "No provider is active.",
+  unknown_provider: "Unknown provider id.",
+  other: "Unrecognised provider error. Try again; if it persists check the provider's status page.",
+};
+
+function testFailMessage(reason: string): string {
+  const hint = TEST_FAIL_HINTS[reason];
+  return hint ? `Test failed (${reason}): ${hint}` : `Test failed: ${reason}`;
+}
+
 export async function testLlmProvider(): Promise<LlmActionResult> {
   const session = await verifyAdmin();
   const result = await testActiveProvider({
@@ -252,7 +271,7 @@ export async function testLlmProvider(): Promise<LlmActionResult> {
     subject: "active",
     meta: { ok: false, errorCategory: result.reason },
   });
-  return fail(`Test failed: ${result.reason}`);
+  return fail(testFailMessage(result.reason));
 }
 
 /** Per-card test (2026-08-24): probe ONE provider's stored
@@ -290,7 +309,7 @@ export async function testLlmProviderById(
     subject: parsed.data.providerId,
     meta: { ok: false, errorCategory: result.reason },
   });
-  return fail(`Test failed: ${result.reason}`);
+  return fail(testFailMessage(result.reason));
 }
 
 const rotateSchema = z.object({

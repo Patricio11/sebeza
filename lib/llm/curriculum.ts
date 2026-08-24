@@ -477,11 +477,19 @@ function looksLikePii(text: string): boolean {
 
 function classifyError(
   err: unknown,
-): "auth" | "network" | "rate_limit" | "other" {
+): "auth" | "network" | "rate_limit" | "insufficient_quota" | "other" {
   if (!(err instanceof Error)) return "other";
   const msg = err.message.toLowerCase();
   if (msg.includes("401") || msg.includes("unauthorized") || msg.includes("invalid api key")) {
     return "auth";
+  }
+  // OpenAI answers 429 for BOTH real rate limiting AND an account with
+  // no billing credit (error.code insufficient_quota). They need
+  // opposite fixes, so check the specific code before the blanket 429
+  // (2026-08-24: a fresh key with R0 spend "rate limited" the founder
+  // straight into the wrong diagnosis).
+  if (msg.includes("insufficient_quota") || msg.includes("exceeded your current quota")) {
+    return "insufficient_quota";
   }
   if (msg.includes("429") || msg.includes("rate limit")) {
     return "rate_limit";
