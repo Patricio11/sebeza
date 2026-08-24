@@ -1,0 +1,223 @@
+<!doctype html>
+<!--
+  Sebenza story card, extended (1080x1920). Shared by Instagram AND
+  Facebook stories: same safe zones, same brand.
+
+  Themes via body class: theme-light | theme-dark | theme-alert.
+  Layouts via body class (combine with a theme):
+    layout-headline (default)  eyebrow + headline + sub
+    layout-figure              a giant figure (R0, a count) + headline + sub
+    layout-list                eyebrow + headline + up to 4 numbered rows
+    layout-quote               oversized editorial quote + source line
+    layout-steps               chevron-led step rows (the loop stories)
+
+  Slots filled by render.mjs: [data-slot=eyebrow|headline|sub|figure|quote|source],
+  .items rows are injected. Optional sticker panel (.sticker) marks where
+  the founder drops Instagram's poll/question/countdown sticker.
+
+  Safe zones: top ~250px and bottom ~250px stay clear of content
+  (IG/FB overlay camera + reply UI there). The flag stripe at the very
+  bottom is framing, not information.
+-->
+<html>
+<head>
+<meta charset="utf-8" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=Hanken+Grotesk:ital,wght@0,400..700;1,400..700&display=block" rel="stylesheet" />
+<style>
+  :root {
+    --paper: #fbf8f0;
+    --ink: #14110d;
+    --ink-soft: #5a5249;
+    --green: #006b3c;
+    --green-deep: #003d1f;
+    --green-soft: #0a8c50;
+    --gold: #c98214;
+    --gold-bright: #f5a623;
+    --red: #de3831;
+    --headline-size: 108px;
+    --figure-size: 380px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 100%; height: 100%; }
+  body {
+    font-family: "Hanken Grotesk", system-ui, sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+  }
+  .card {
+    width: 100vw; height: 100vh;
+    display: flex; flex-direction: column;
+    padding: 280px 96px 0;
+    position: relative;
+  }
+  .toprule { height: 8px; width: 148px; background: var(--green); margin-bottom: 44px; }
+  .eyebrow {
+    font-weight: 700; font-size: 30px; letter-spacing: 0.24em;
+    text-transform: uppercase; color: var(--ink-soft);
+  }
+  .body {
+    flex: 1; display: flex; flex-direction: column;
+    justify-content: center; padding-bottom: 240px;
+  }
+  .headline {
+    font-family: "Fraunces", Georgia, serif;
+    font-weight: 560; font-size: var(--headline-size);
+    line-height: 1.08; letter-spacing: -0.015em;
+    max-width: 880px;
+    font-variation-settings: "opsz" 144;
+  }
+  .headline em { font-style: italic; color: var(--gold); font-weight: 540; }
+  .sub {
+    margin-top: 48px; font-size: 40px; line-height: 1.45;
+    color: var(--ink-soft); max-width: 800px; font-weight: 400;
+  }
+  .sub:empty { display: none; }
+
+  /* ---- layout-figure: the R0-style slam ---- */
+  .figure {
+    display: none;
+    font-family: "Fraunces", Georgia, serif;
+    font-weight: 640; font-size: var(--figure-size);
+    line-height: 0.95; letter-spacing: -0.02em;
+    color: var(--green); margin-bottom: 36px;
+    font-variation-settings: "opsz" 144;
+  }
+  body.layout-figure .figure { display: block; }
+  body.layout-figure .headline { font-size: 76px; }
+
+  /* ---- layout-list: numbered editorial rows ---- */
+  .items { display: none; margin-top: 64px; max-width: 880px; }
+  body.layout-list .items { display: block; }
+  .items .row {
+    display: flex; align-items: baseline; gap: 36px;
+    padding: 38px 0; border-top: 2px solid rgba(20, 17, 13, 0.14);
+  }
+  .items .row:last-child { border-bottom: 2px solid rgba(20, 17, 13, 0.14); }
+  .items .n {
+    font-family: "Fraunces", Georgia, serif; font-style: italic;
+    font-weight: 600; font-size: 58px; color: var(--gold);
+    min-width: 88px;
+  }
+  .items .t { font-size: 44px; line-height: 1.35; font-weight: 500; }
+  .items .t small { display: block; font-size: 33px; font-weight: 400; color: var(--ink-soft); margin-top: 8px; }
+  body.layout-list .headline { font-size: 84px; }
+
+  /* ---- layout-quote: the editorial pull-quote ---- */
+  .quotewrap { display: none; max-width: 900px; }
+  body.layout-quote .quotewrap { display: block; }
+  body.layout-quote .headline, body.layout-quote .sub { display: none; }
+  .quotemark {
+    font-family: "Fraunces", Georgia, serif; font-weight: 700;
+    font-size: 200px; line-height: 0.6; color: var(--gold);
+    margin-bottom: 8px;
+  }
+  .quote {
+    font-family: "Fraunces", Georgia, serif; font-style: italic;
+    font-weight: 500; font-size: 96px; line-height: 1.14;
+    letter-spacing: -0.01em;
+    font-variation-settings: "opsz" 144;
+  }
+  .quote em { color: var(--gold); }
+  .source {
+    margin-top: 56px; font-weight: 700; font-size: 30px;
+    letter-spacing: 0.24em; text-transform: uppercase; color: var(--ink-soft);
+  }
+  .source::before {
+    content: ""; display: inline-block; width: 64px; height: 6px;
+    background: var(--green); margin-right: 26px; vertical-align: middle;
+  }
+
+  /* ---- layout-steps: the loop, chevron-led ---- */
+  body.layout-steps .items { display: block; }
+  body.layout-steps .items .n {
+    font-style: normal; font-size: 40px; min-width: 74px;
+    color: var(--green);
+  }
+  body.layout-steps .items .row.won .t,
+  body.layout-steps .items .row.won .n { color: var(--gold); font-weight: 700; }
+
+  /* Empty panel the founder covers with a poll/question/countdown sticker */
+  .sticker {
+    display: none;
+    margin-top: 64px; width: 100%; max-width: 840px; height: 250px;
+    border-radius: 24px; background: rgba(20, 17, 13, 0.06);
+    border: 2px dashed rgba(20, 17, 13, 0.18);
+  }
+  .footer {
+    position: absolute; left: 96px; right: 96px; bottom: 150px;
+    display: flex; align-items: center; gap: 22px;
+  }
+  .footer .mark { width: 56px; height: 50px; }
+  .footer .mark svg { width: 100%; height: 100%; display: block; }
+  .wordmark {
+    font-family: "Fraunces", Georgia, serif; font-weight: 700;
+    font-size: 46px; color: var(--green-deep); letter-spacing: -0.01em;
+  }
+  .site {
+    font-size: 29px; color: var(--ink-soft); font-weight: 500;
+    letter-spacing: 0.02em; margin-left: auto;
+  }
+  .stripe { display: flex; height: 20px; width: 100vw; position: absolute; left: 0; bottom: 0; }
+  .stripe .g { flex: 3; background: var(--green); }
+  .stripe .a { flex: 2; background: var(--gold); }
+  .stripe .r { flex: 1; background: var(--red); }
+
+  body.theme-dark { background: var(--green-deep); color: var(--paper); }
+  body.theme-dark .toprule { background: var(--gold); }
+  body.theme-dark .eyebrow { color: rgba(251, 248, 240, 0.62); }
+  body.theme-dark .headline em { color: var(--gold-bright); }
+  body.theme-dark .sub { color: rgba(251, 248, 240, 0.78); }
+  body.theme-dark .figure { color: var(--gold-bright); }
+  body.theme-dark .items .row { border-color: rgba(251, 248, 240, 0.22); }
+  body.theme-dark .items .n { color: var(--gold-bright); }
+  body.theme-dark .items .t small { color: rgba(251, 248, 240, 0.66); }
+  body.theme-dark .quote em { color: var(--gold-bright); }
+  body.theme-dark .quotemark { color: var(--gold-bright); }
+  body.theme-dark .source { color: rgba(251, 248, 240, 0.62); }
+  body.theme-dark .source::before { background: var(--green-soft); }
+  body.theme-dark.layout-steps .items .n { color: var(--green-soft); }
+  body.theme-dark.layout-steps .items .row.won .t,
+  body.theme-dark.layout-steps .items .row.won .n { color: var(--gold-bright); }
+  body.theme-dark .sticker {
+    background: rgba(251, 248, 240, 0.1);
+    border-color: rgba(251, 248, 240, 0.3);
+  }
+  body.theme-dark .wordmark { color: var(--paper); }
+  body.theme-dark .site { color: rgba(251, 248, 240, 0.62); }
+  body.theme-dark .stripe { border-top: 1px solid rgba(251, 248, 240, 0.25); }
+  body.theme-dark .stripe .g { background: var(--green-soft); }
+
+  body.theme-alert .toprule { background: var(--red); }
+  body.theme-alert .eyebrow { color: var(--red); }
+  body.theme-alert .headline em { color: var(--red); }
+  body.theme-alert .items .n { color: var(--red); }
+  body.theme-alert .figure { color: var(--red); }
+</style>
+</head>
+<body class="theme-light">
+  <div class="card">
+    <div class="toprule"></div>
+    <div class="eyebrow" data-slot="eyebrow"></div>
+    <div class="body">
+      <div class="figure" data-slot="figure"></div>
+      <div class="headline" data-slot="headline"></div>
+      <div class="quotewrap">
+        <div class="quotemark">&ldquo;</div>
+        <div class="quote" data-slot="quote"></div>
+        <div class="source" data-slot="source"></div>
+      </div>
+      <div class="sub" data-slot="sub"></div>
+      <div class="items" data-items></div>
+      <div class="sticker"></div>
+    </div>
+    <div class="footer">
+      <span class="mark" data-mark></span>
+      <span class="wordmark">Sebenza</span>
+      <span class="site">sebenzasa.com</span>
+    </div>
+    <div class="stripe"><div class="g"></div><div class="a"></div><div class="r"></div></div>
+  </div>
+</body>
+</html>

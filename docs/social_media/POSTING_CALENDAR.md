@@ -20,6 +20,7 @@ everything forward; never double-post to catch up.
 Captions: Facebook versions in `facebook/SEBENZA_FB_POSTS.md`, Instagram trims in
 `instagram/SEBENZA_IG_POSTS.md`, X in `x/SEBENZA_X_POSTS.md`, LinkedIn in
 `linkedin/SEBENZA_LI_POSTS.md`, video captions + covers in `tiktok/SEBENZA_VIDEO_BANK.md`.
+Story cards (IG + FB, 20 pre-rendered): `stories/SEBENZA_STORIES.md`.
 Post mornings 6-8am or evenings 7-9pm. Reply to every comment, every day, ten minutes.
 
 ---
