@@ -341,6 +341,61 @@ export async function testActiveProvider(opts: {
   }
 }
 
+/**
+ * Probe ONE provider's stored credentials by id, active or not
+ * (2026-08-24, founder request: a Test button on every configured
+ * card, not only a global test of whichever row is active). Same
+ * probe posture as testActiveProvider: admin-only, marked probe so
+ * budget accounting ignores it.
+ */
+export async function testProviderById(opts: {
+  callerUserId: string;
+  callerRole: string;
+  providerId: string;
+}): Promise<{ ok: true; latencyMs: number } | { ok: false; reason: string }> {
+  if (opts.callerRole !== "admin") {
+    return { ok: false, reason: "not_admin" };
+  }
+  const db = getDb();
+  const rows = await db
+    .select()
+    .from(schema.llmProviders)
+    .where(eq(schema.llmProviders.id, opts.providerId))
+    .limit(1);
+  const row = rows[0];
+  if (!row) return { ok: false, reason: "unknown_provider" };
+  if (!row.credentialsEnc) return { ok: false, reason: "no_credentials" };
+
+  let creds: LlmCredentials;
+  try {
+    creds = JSON.parse(decryptField(row.credentialsEnc));
+  } catch {
+    return { ok: false, reason: "no_credentials" };
+  }
+
+  const probeCall: LlmProviderCall = {
+    apiKey: creds.apiKey,
+    modelId: creds.modelId,
+    endpointUrl: creds.endpointUrl,
+    extraHeaders: creds.extraHeaders,
+    syllabusText: "respond with the literal string ok",
+    moduleLabel: "probe",
+    validSkillSlugs: [],
+  };
+
+  const t0 = performance.now();
+  try {
+    await dispatchToProvider(row.id, probeCall, { probe: true });
+    const latencyMs = Math.round(performance.now() - t0);
+    return { ok: true, latencyMs };
+  } catch (err) {
+    return {
+      ok: false,
+      reason: err instanceof Error ? classifyError(err) : "other",
+    };
+  }
+}
+
 // ─── internals ─────────────────────────────────────────────────────
 
 type LlmCredentials = {

@@ -14,12 +14,25 @@
 
 import { useState, useTransition } from "react";
 import { useRouter, Link } from "@/i18n/navigation";
-import { AlertTriangle, Bot, Loader2, Power } from "lucide-react";
+import { AlertTriangle, Bot, CheckCircle2, Loader2, Power, XCircle } from "lucide-react";
 import { updateSetting } from "@/lib/admin/settings-actions";
 
 const KEY = "feature_flag_seeker_ai_coach" as const;
 
-export function AiCoachIntegrationSwitch({ enabled }: { enabled: boolean }) {
+export function AiCoachIntegrationSwitch({
+  enabled,
+  crisisResourceCount,
+  activeProviderName,
+}: {
+  enabled: boolean;
+  /** Active rows on /admin/crisis-resources. The HARD precondition:
+   *  the server refuses to enable with zero (settings-actions gate). */
+  crisisResourceCount: number;
+  /** The active LLM provider's display name, if any. Soft: without
+   *  one the coach degrades to "not available", so it informs rather
+   *  than blocks. */
+  activeProviderName: string | null;
+}) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [ack, setAck] = useState(false);
@@ -64,34 +77,86 @@ export function AiCoachIntegrationSwitch({ enabled }: { enabled: boolean }) {
         </span>
       </div>
 
-      {/* The different-risk-class warning. Always visible. */}
-      <div className="mt-4 flex items-start gap-2 rounded-[var(--radius-md)] border border-[color:var(--color-accent)] bg-[color:var(--color-accent)]/[0.06] p-3 text-sm">
-        <AlertTriangle
-          className="mt-0.5 size-4 shrink-0 text-[color:var(--color-accent)]"
-          aria-hidden="true"
-        />
-        <div className="text-[color:var(--color-ink-soft)]">
-          <p className="font-medium text-[color:var(--color-ink)]">
-            This is a different risk class, an LLM speaking to job seekers.
-          </p>
-          <p className="mt-1">
-            Do not enable in production until the safety review is complete:
-            refusal boundaries (no financial / legal / medical / mental-health
-            advice), distress detection routing to <strong>verified, live crisis
-            resources</strong>, output moderation, and the &ldquo;practice, not a
-            promise&rdquo; framing. See{" "}
-            <code className="text-[0.85em]">docs/PHASE_22_AI_COACH_SAFETY_PLAN.md</code>.
-            Add verified helplines on{" "}
-            <Link
-              href="/admin/crisis-resources"
-              className="underline underline-offset-2 hover:text-[color:var(--color-ink)]"
-            >
-              Crisis resources
-            </Link>{" "}
-            first. The coach also needs a configured + budgeted provider above;
-            without one it degrades gracefully to &ldquo;not available&rdquo;.
-          </p>
-        </div>
+      {/* The different-risk-class line + a LIVE readiness checklist
+          (2026-08-24). The Phase 22 safety suite is BUILT and tested;
+          what this panel checks is the operational state that can
+          drift: crisis resources and the provider. */}
+      <div className="mt-4 rounded-[var(--radius-md)] border border-[color:var(--color-accent)] bg-[color:var(--color-accent)]/[0.06] p-3 text-sm">
+        <p className="flex items-start gap-2 font-medium text-[color:var(--color-ink)]">
+          <AlertTriangle
+            className="mt-0.5 size-4 shrink-0 text-[color:var(--color-accent)]"
+            aria-hidden="true"
+          />
+          A different risk class: an LLM speaking to job seekers. Readiness:
+        </p>
+        <ul className="mt-3 space-y-2 text-[color:var(--color-ink-soft)]">
+          <li className="flex items-start gap-2">
+            <CheckCircle2
+              className="mt-0.5 size-4 shrink-0 text-[color:var(--color-positive)]"
+              aria-hidden="true"
+            />
+            <span>
+              <strong className="text-[color:var(--color-ink)]">Safety suite shipped (Phase 22).</strong>{" "}
+              Pre-LLM distress screening, refusal boundaries (no financial /
+              legal / medical / mental-health advice), output moderation, and
+              the &ldquo;practice, not a promise&rdquo; framing are built and
+              covered by the test suite. Spec:{" "}
+              <code className="text-[0.85em]">docs/PHASE_22_AI_COACH_SAFETY_PLAN.md</code>.
+            </span>
+          </li>
+          <li className="flex items-start gap-2">
+            {crisisResourceCount > 0 ? (
+              <CheckCircle2
+                className="mt-0.5 size-4 shrink-0 text-[color:var(--color-positive)]"
+                aria-hidden="true"
+              />
+            ) : (
+              <XCircle
+                className="mt-0.5 size-4 shrink-0 text-[color:var(--color-danger)]"
+                aria-hidden="true"
+              />
+            )}
+            <span>
+              <strong className="text-[color:var(--color-ink)]">
+                {crisisResourceCount > 0
+                  ? `${crisisResourceCount} crisis-support resource${crisisResourceCount === 1 ? "" : "s"} live.`
+                  : "No active crisis-support resources."}
+              </strong>{" "}
+              The distress pathway routes here, so this is a hard requirement;
+              the server refuses to enable without at least one. Manage on{" "}
+              <Link
+                href="/admin/crisis-resources"
+                className="underline underline-offset-2 hover:text-[color:var(--color-ink)]"
+              >
+                Crisis resources
+              </Link>
+              .
+            </span>
+          </li>
+          <li className="flex items-start gap-2">
+            {activeProviderName ? (
+              <CheckCircle2
+                className="mt-0.5 size-4 shrink-0 text-[color:var(--color-positive)]"
+                aria-hidden="true"
+              />
+            ) : (
+              <AlertTriangle
+                className="mt-0.5 size-4 shrink-0 text-[color:var(--color-accent)]"
+                aria-hidden="true"
+              />
+            )}
+            <span>
+              <strong className="text-[color:var(--color-ink)]">
+                {activeProviderName
+                  ? `Provider active: ${activeProviderName}.`
+                  : "No active provider."}
+              </strong>{" "}
+              {activeProviderName
+                ? "Budget and spend tracked on the card above."
+                : "Not blocking: the coach shows “not available” until a provider is activated above."}
+            </span>
+          </li>
+        </ul>
       </div>
 
       <div className="mt-4">
@@ -119,14 +184,16 @@ export function AiCoachIntegrationSwitch({ enabled }: { enabled: boolean }) {
                 className="mt-0.5"
               />
               <span>
-                I confirm the AI Coach safety review (Phase 22) is complete and
-                crisis-support resources are live and verified.
+                I confirm the crisis-support resources listed are real, current,
+                and verified by a human (the Phase 22 safety suite itself is
+                shipped and tested; this acknowledges the operational part only
+                a person can check).
               </span>
             </label>
             <button
               type="button"
               onClick={() => setEnabled(true)}
-              disabled={pending || !ack}
+              disabled={pending || !ack || crisisResourceCount < 1}
               className="inline-flex h-9 items-center gap-1.5 rounded-[var(--radius-pill)] bg-[color:var(--color-ink)] px-4 text-sm text-[color:var(--color-paper)] disabled:opacity-50"
             >
               {pending ? (

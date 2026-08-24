@@ -29,6 +29,7 @@ import {
   activateLlmProvider,
   deactivateAllLlmProviders,
   testLlmProvider,
+  testLlmProviderById,
   rotateLlmCredentials,
 } from "@/lib/admin/llm-actions";
 
@@ -156,6 +157,11 @@ function ProviderCard({ provider }: { provider: LlmProviderView }) {
   const [rotateOpen, setRotateOpen] = useState(false);
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  // Per-card credential probe (2026-08-24): validates THIS row's stored
+  // key, active or not, so a key can be tested before activation.
+  const [testMsg, setTestMsg] = useState<string | null>(null);
+  const [testOk, setTestOk] = useState<boolean>(false);
+  const [testPending, startTestTransition] = useTransition();
   const spendPct =
     provider.monthlyBudgetZar > 0
       ? Math.min(
@@ -167,6 +173,17 @@ function ProviderCard({ provider }: { provider: LlmProviderView }) {
     provider.monthlyBudgetZar > 0 &&
     provider.totalSpendZar >= provider.monthlyBudgetZar;
   const requiresS72 = CROSS_BORDER_PROVIDERS.has(provider.id);
+
+  function handleTestCard() {
+    setTestMsg(null);
+    startTestTransition(async () => {
+      const res = await testLlmProviderById({
+        providerId: provider.id as "openai" | "anthropic" | "mistral" | "self_hosted",
+      });
+      setTestOk(res.ok);
+      setTestMsg(res.ok ? (res.message ?? "Responded ok.") : res.message);
+    });
+  }
 
   function handleActivate() {
     setError(null);
@@ -202,7 +219,7 @@ function ProviderCard({ provider }: { provider: LlmProviderView }) {
           <dd className="text-[color:var(--color-ink)]">
             {provider.configuredAt
               ? new Date(provider.configuredAt).toISOString().slice(0, 10)
-              : ""}
+              : "Not configured"}
           </dd>
         </div>
         <div>
@@ -210,7 +227,7 @@ function ProviderCard({ provider }: { provider: LlmProviderView }) {
           <dd className="text-[color:var(--color-ink)]">
             {provider.lastUsedAt
               ? new Date(provider.lastUsedAt).toISOString().slice(0, 10)
-              : ""}
+              : "Never"}
           </dd>
         </div>
         <div>
@@ -294,6 +311,21 @@ function ProviderCard({ provider }: { provider: LlmProviderView }) {
         {provider.hasCredentials && (
           <button
             type="button"
+            onClick={handleTestCard}
+            disabled={testPending}
+            className="inline-flex items-center gap-2 rounded-[var(--radius-sm)] border border-[color:var(--color-brand)]/60 bg-[color:var(--color-surface)] px-3 py-1.5 text-xs font-medium uppercase tracking-[0.14em] text-[color:var(--color-brand-strong)] disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {testPending ? (
+              <Loader2 className="size-3 animate-spin" aria-hidden />
+            ) : (
+              <Sparkles className="size-3" aria-hidden />
+            )}
+            Test
+          </button>
+        )}
+        {provider.hasCredentials && (
+          <button
+            type="button"
             onClick={() => setRotateOpen((o) => !o)}
             className="inline-flex items-center gap-2 rounded-[var(--radius-sm)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] px-3 py-1.5 text-xs uppercase tracking-[0.14em] text-[color:var(--color-ink-soft)]"
           >
@@ -302,6 +334,17 @@ function ProviderCard({ provider }: { provider: LlmProviderView }) {
         )}
       </div>
 
+      {testMsg && (
+        <p
+          className={`mt-3 text-xs ${
+            testOk
+              ? "text-[color:var(--color-positive)]"
+              : "text-[color:var(--color-warning)]"
+          }`}
+        >
+          {testOk ? "Credentials ok. " : ""}{testMsg}
+        </p>
+      )}
       {error && (
         <p className="mt-3 text-xs text-[color:var(--color-warning)]">
           {error}

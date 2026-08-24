@@ -12,8 +12,8 @@
  */
 
 import { getDb } from "@/db/client";
-import { platformSettings } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { crisisResources, platformSettings } from "@/db/schema";
+import { eq, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { verifyAdmin } from "@/lib/auth/dal";
@@ -156,6 +156,26 @@ export async function updateSetting(
   }
 
   const db = getDb();
+
+  // Phase 22 hard gate (2026-08-24): the AI Coach's distress pathway
+  // routes people to the crisis-resources list. Enabling the coach
+  // with that list empty would make the pathway a dead end, so the
+  // server refuses regardless of what the UI allowed. Turning the
+  // coach OFF is never gated.
+  if (
+    parsed.data.key === "feature_flag_seeker_ai_coach" &&
+    valueParsed.data === true
+  ) {
+    const rows = await db
+      .select({ n: sql<number>`COUNT(*)::int` })
+      .from(crisisResources)
+      .where(eq(crisisResources.active, true));
+    if ((rows[0]?.n ?? 0) < 1) {
+      return fail(
+        "Add at least one active crisis-support resource on /admin/crisis-resources first. The coach's distress pathway routes people there; it cannot point at an empty list.",
+      );
+    }
+  }
   const prior = await db
     .select({ value: platformSettings.value })
     .from(platformSettings)

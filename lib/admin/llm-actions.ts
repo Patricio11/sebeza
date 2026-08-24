@@ -33,7 +33,7 @@ import * as schema from "@/db/schema";
 import { encryptField } from "@/lib/crypto";
 import { logAccess } from "@/lib/audit";
 import { verifyAdmin } from "@/lib/auth/dal";
-import { testActiveProvider } from "@/lib/llm/curriculum";
+import { testActiveProvider, testProviderById } from "@/lib/llm/curriculum";
 
 export type LlmActionResult =
   | { ok: true; message?: string; latencyMs?: number }
@@ -250,6 +250,44 @@ export async function testLlmProvider(): Promise<LlmActionResult> {
     kind: "admin.llm.provider.tested",
     actor: session.id,
     subject: "active",
+    meta: { ok: false, errorCategory: result.reason },
+  });
+  return fail(`Test failed: ${result.reason}`);
+}
+
+/** Per-card test (2026-08-24): probe ONE provider's stored
+ *  credentials, active or not, so a key can be validated before the
+ *  row is ever activated. */
+export async function testLlmProviderById(
+  input: z.infer<typeof idOnlySchema>,
+): Promise<LlmActionResult> {
+  const session = await verifyAdmin();
+  const parsed = idOnlySchema.safeParse(input);
+  if (!parsed.success) return fail("Invalid provider id.");
+
+  const result = await testProviderById({
+    callerUserId: session.id,
+    callerRole: "admin",
+    providerId: parsed.data.providerId,
+  });
+
+  if (result.ok) {
+    await logAccess({
+      kind: "admin.llm.provider.tested",
+      actor: session.id,
+      subject: parsed.data.providerId,
+      meta: { ok: true, latencyMs: result.latencyMs },
+    });
+    return ok({
+      message: `Responded in ${result.latencyMs} ms.`,
+      latencyMs: result.latencyMs,
+    });
+  }
+
+  await logAccess({
+    kind: "admin.llm.provider.tested",
+    actor: session.id,
+    subject: parsed.data.providerId,
     meta: { ok: false, errorCategory: result.reason },
   });
   return fail(`Test failed: ${result.reason}`);

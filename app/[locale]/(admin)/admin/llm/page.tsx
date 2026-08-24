@@ -12,7 +12,7 @@
  */
 
 import { setRequestLocale } from "next-intl/server";
-import { asc } from "drizzle-orm";
+import { asc, eq, sql } from "drizzle-orm";
 import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
 import { verifyAdmin } from "@/lib/auth/dal";
 import { getDb } from "@/db/client";
@@ -55,6 +55,14 @@ export default async function AdminLlmPage({
     getSetting<boolean>("feature_flag_seeker_ai_coach"),
   ]);
 
+  // Live readiness for the coach switch: the distress pathway's hard
+  // precondition is at least one ACTIVE crisis resource.
+  const crisisRows = await db
+    .select({ n: sql<number>`COUNT(*)::int` })
+    .from(schema.crisisResources)
+    .where(eq(schema.crisisResources.active, true));
+  const crisisResourceCount = crisisRows[0]?.n ?? 0;
+
   const coachTelemetry = await getCoachSafetyTelemetry();
 
   const view = providers.map((p) => ({
@@ -94,7 +102,11 @@ export default async function AdminLlmPage({
 
       {/* Phase 22.5  system-wide AI Coach switch (different risk class;
           ack-gated). The seeker-facing coach also needs a configured provider. */}
-      <AiCoachIntegrationSwitch enabled={aiCoachOn} />
+      <AiCoachIntegrationSwitch
+        enabled={aiCoachOn}
+        crisisResourceCount={crisisResourceCount}
+        activeProviderName={activeProvider?.displayName ?? null}
+      />
 
       {/* Phase 22.6  safety telemetry (counts only, never seeker content). */}
       <section
