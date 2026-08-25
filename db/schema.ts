@@ -606,6 +606,10 @@ export const academicProfiles = pgTable("academic_profiles", {
 export const skills = pgTable("skills", {
   slug: text("slug").primaryKey(),
   label: text("label").notNull(),
+  /** 2026-08-24 (migration 0076)  technical | professional. Groups
+   *  the profile editor, public profile and pickers; admin
+   *  recategorises on /admin/taxonomy. */
+  category: text("category").notNull().default("technical"),
 });
 
 /**

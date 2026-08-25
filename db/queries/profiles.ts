@@ -24,6 +24,7 @@ import "server-only";
 import { sql, eq, desc, asc, and, isNull, inArray } from "drizzle-orm";
 import { getDb } from "@/db/client";
 import * as schema from "@/db/schema";
+import { buildSkillMatcher } from "@/lib/skills/normalize";
 import { logAccess } from "@/lib/audit";
 import type {
   PublicProfile,
@@ -78,6 +79,9 @@ function parsePgEnumArray(raw: unknown): string[] {
 export interface SearchResultRow extends PublicProfile {
   /** Score is exposed for debug / display but not part of the canonical type. */
   score: number;
+  /** 2026-08-24  informational: how many of the caller's skillSlugs
+   *  (vacancy match) this profile holds. 0 when no set was passed. */
+  matchedSkillCount: number;
 }
 
 /**
@@ -95,7 +99,26 @@ export async function searchProfilesQuery(
   filters: SearchFilters,
 ): Promise<{ total: number; profiles: SearchResultRow[] }> {
   const db = getDb();
-  const q = (filters.query ?? "").trim();
+  let q = (filters.query ?? "").trim();
+  // 2026-08-24  smart skill matching: expand the free text through the
+  // taxonomy's alias map so "nextjs" also queries "Next.js" and
+  // "postgresql" reaches "PostgreSQL". No match = text unchanged; a
+  // taxonomy read failure never breaks search.
+  if (q) {
+    try {
+      // Direct read, not getSkills(): the Next data cache is absent in
+      // the test runner and a silent fallback there hid the expansion
+      // entirely. ~60 tiny indexed rows; negligible next to the FTS.
+      const skillRows = await db
+        .select({ slug: schema.skills.slug, label: schema.skills.label })
+        .from(schema.skills);
+      if (skillRows.length > 0) {
+        q = buildSkillMatcher(skillRows).expandQueryText(q);
+      }
+    } catch {
+      // keep the raw query
+    }
+  }
   const hasQuery = q.length > 0;
 
   // The ranking expression. When there's no query, ts_rank_cd would be 0 for
@@ -308,6 +331,21 @@ export async function searchProfilesQuery(
 
   const whereClause = sql.join(conditions, sql` AND `);
 
+  // Informational only (ordering untouched, founder call): how many of
+  // the vacancy's alias-expanded skills this profile holds. Zero when
+  // the caller passed no skill set (public /search).
+  const matchedSkillCountExpr =
+    filters.skillSlugs && filters.skillSlugs.length > 0
+      ? sql`(
+          SELECT COUNT(DISTINCT ps.skill_slug)::int FROM profile_skills ps
+          WHERE ps.profile_id = p.id
+            AND ps.skill_slug IN (${sql.join(
+              filters.skillSlugs.map((slug) => sql`${slug}`),
+              sql`, `,
+            )})
+        )`
+      : sql`0`;
+
   // Single query: enumerated columns (redaction!), composed score, ordered.
   // Note: `national_id_enc`, `full_surname`, `search_vector`, `email`,
   // `deleted_at` are intentionally NOT in this select list.
@@ -347,6 +385,7 @@ export async function searchProfilesQuery(
         * sebenza_freshness_confidence(p.status_confirmed_at)
         * (0.5 + 0.5 * (p.completeness::numeric / 100))
       ) AS score,
+      ${matchedSkillCountExpr} AS matched_skill_count,
       ${citizenGroupKey} AS citizen_group,
       ${primaryMatchKey} AS primary_match
     FROM profiles p
@@ -388,6 +427,7 @@ export async function searchProfilesQuery(
     current_employer_origin: string | null;
     current_employer_verification: string | null;
     score: string;
+    matched_skill_count: number | string | null;
   }> }).rows;
 
   // Pull top-skills for the matched profiles in one extra query.
@@ -433,6 +473,7 @@ export async function searchProfilesQuery(
     memberSince: new Date(r.member_since).toISOString(),
     topSkills: skillsByProfile.get(r.id) ?? [],
     score: Number(r.score),
+    matchedSkillCount: Number(r.matched_skill_count ?? 0),
     // Phase 9.22  current employer block. Same picker-visibility
     // guard as findProfileByHandle (pending orgs hidden).
     ...employerPayload({
@@ -508,7 +549,26 @@ export async function countMatchesByCitizenship(
   filters: SearchFilters,
 ): Promise<{ saCitizen: number; foreignNational: number; total: number }> {
   const db = getDb();
-  const q = (filters.query ?? "").trim();
+  let q = (filters.query ?? "").trim();
+  // 2026-08-24  smart skill matching: expand the free text through the
+  // taxonomy's alias map so "nextjs" also queries "Next.js" and
+  // "postgresql" reaches "PostgreSQL". No match = text unchanged; a
+  // taxonomy read failure never breaks search.
+  if (q) {
+    try {
+      // Direct read, not getSkills(): the Next data cache is absent in
+      // the test runner and a silent fallback there hid the expansion
+      // entirely. ~60 tiny indexed rows; negligible next to the FTS.
+      const skillRows = await db
+        .select({ slug: schema.skills.slug, label: schema.skills.label })
+        .from(schema.skills);
+      if (skillRows.length > 0) {
+        q = buildSkillMatcher(skillRows).expandQueryText(q);
+      }
+    } catch {
+      // keep the raw query
+    }
+  }
   const hasQuery = q.length > 0;
 
   const conditions = [sql`p.deleted_at IS NULL`];
@@ -583,6 +643,21 @@ export async function countMatchesByCitizenship(
     );
   }
   const whereClause = sql.join(conditions, sql` AND `);
+
+  // Informational only (ordering untouched, founder call): how many of
+  // the vacancy's alias-expanded skills this profile holds. Zero when
+  // the caller passed no skill set (public /search).
+  const matchedSkillCountExpr =
+    filters.skillSlugs && filters.skillSlugs.length > 0
+      ? sql`(
+          SELECT COUNT(DISTINCT ps.skill_slug)::int FROM profile_skills ps
+          WHERE ps.profile_id = p.id
+            AND ps.skill_slug IN (${sql.join(
+              filters.skillSlugs.map((slug) => sql`${slug}`),
+              sql`, `,
+            )})
+        )`
+      : sql`0`;
 
   const result = await db.execute(sql`
     SELECT
@@ -970,6 +1045,7 @@ async function loadTopSkills(profileId: string): Promise<SkillRef[]> {
   const rows = await db
     .select({
       label: schema.skills.label,
+      category: schema.skills.category,
       proficiency: schema.profileSkills.proficiency,
       yearsOfExperience: schema.profileSkills.yearsOfExperience,
     })
@@ -979,6 +1055,7 @@ async function loadTopSkills(profileId: string): Promise<SkillRef[]> {
     .orderBy(desc(schema.profileSkills.proficiency));
   return rows.map((r) => ({
     name: r.label,
+    category: r.category,
     proficiency: clampProficiency(r.proficiency),
     yearsOfExperience: r.yearsOfExperience,
   }));

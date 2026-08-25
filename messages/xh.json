@@ -665,6 +665,12 @@
       "youDeclined": "Uxelele umqeshi ukuba awukwazi ukufika ngo-{when}.",
       "tookPlace": "Olu dliwano-ndlebe lwalucwangciselwe u-{when}.",
       "footNote": "Ukuqinisekisa okanye ukwala akubizi nto kwaye akuchaphazeli ukubonakala kwakho. Ngulo mqeshi kuphela obona impendulo yakho."
+    },
+    "skillsGroups": {
+      "technical": "Izakhono zobugcisa",
+      "professional": "Izakhono zomsebenzi",
+      "pending": "Kulindwe uphononongo",
+      "pendingNote": "Zintsha kwikhathalogu yethu. Iqela lethu liyaziphonononga; zibalwa xa zivunyiwe."
     }
   },
   "employerDash": {
@@ -1290,7 +1296,8 @@
         "yearsChip": "{years}+ iminyaka"
       },
       "openDossier": "Vula idosiye",
-      "secondary": "kuhambelaniswe ngomsebenzi wesibini: {profession}"
+      "secondary": "kuhambelaniswe ngomsebenzi wesibini: {profession}",
+      "skillCoverage": "Izakhono {matched}/{total}"
     },
     "status": {
       "draft": "Uyilo",

@@ -290,8 +290,22 @@ export default async function EmployerDossierPage({
                 No skills on file.
               </p>
             ) : (
+              // 2026-08-24  grouped Technical / Professional; single-kind
+              // profiles render one flat list with no header noise.
+              [
+                { key: "technical", title: "Technical skills", items: profile.topSkills.filter((s) => (s as { category?: string }).category !== "professional") },
+                { key: "professional", title: "Professional skills", items: profile.topSkills.filter((s) => (s as { category?: string }).category === "professional") },
+              ]
+                .filter((g) => g.items.length > 0)
+                .map((g, _, arr) => (
+              <div key={g.key} className="mb-4 last:mb-0">
+                {arr.length > 1 && (
+                  <h3 className="mb-2 text-[0.68rem] uppercase tracking-[0.2em] text-[color:var(--color-ink-soft)]">
+                    {g.title}
+                  </h3>
+                )}
               <ul className="grid gap-2 md:grid-cols-2">
-                {profile.topSkills.map((s) => (
+                {g.items.map((s) => (
                   <li
                     key={s.name}
                     className="flex items-center justify-between gap-3 rounded-[var(--radius-sm)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] px-4 py-3"
@@ -324,6 +338,8 @@ export default async function EmployerDossierPage({
                   </li>
                 ))}
               </ul>
+              </div>
+                ))
             )}
           </section>
 

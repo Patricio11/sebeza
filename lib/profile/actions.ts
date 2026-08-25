@@ -20,6 +20,7 @@ import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { getSessionUser } from "@/lib/auth/guard";
 import { logAccess } from "@/lib/audit";
+import { buildSkillMatcher } from "@/lib/skills/normalize";
 import { encryptField } from "@/lib/crypto";
 import { validateSaIdNumber } from "@/lib/id-number";
 import { isValidCountryCode, countryLabel } from "@/lib/taxonomy/countries";
@@ -377,18 +378,48 @@ export async function updateSkills(
   // grown by /admin/taxonomy + Phase-19 canonicalization), not the frozen
   // constant  a canonicalized skill used to be silently dropped here.
   const liveSkills = await db
-    .select({ slug: schema.skills.slug })
+    .select({ slug: schema.skills.slug, label: schema.skills.label })
     .from(schema.skills);
-  const validSlugs =
+  const skillRows =
     liveSkills.length > 0
-      ? new Set(liveSkills.map((s) => s.slug))
-      : new Set(SKILLS.map((s) => s.slug));
+      ? liveSkills
+      : SKILLS.map((s) => ({ slug: s.slug, label: s.label }));
+  const validSlugs = new Set(skillRows.map((s) => s.slug));
   const canonicalSkills = parsed.data.skills.filter((s) =>
     validSlugs.has(s.slug),
   );
-  const pendingSkills = parsed.data.skills.filter(
+  const typedSkills = parsed.data.skills.filter(
     (s) => !validSlugs.has(s.slug),
   );
+
+  // 2026-08-24 (docs/SKILLS_CATEGORIES_MATCHING_PLAN.md)  before a
+  // typed skill goes to the admin queue, try to CANONICALISE it:
+  // "Node.js & Express.js" normalises onto the canonical "Node.js",
+  // so it attaches there (keeping the typed proficiency/years) instead
+  // of silently vanishing into review. Only genuinely-new skills
+  // remain pending, and the caller is told both outcomes.
+  const matcher = buildSkillMatcher(skillRows);
+  const labelBySlug = new Map(skillRows.map((r) => [r.slug, r.label]));
+  const canonicalisedInfo: Array<{ typed: string; label: string }> = [];
+  const pendingSkills: typeof typedSkills = [];
+  const alreadyPicked = new Set(canonicalSkills.map((s) => s.slug));
+  for (const t of typedSkills) {
+    const matches = matcher.matchText(t.slug);
+    if (matches.length === 0) {
+      pendingSkills.push(t);
+      continue;
+    }
+    for (const slug of matches) {
+      if (alreadyPicked.has(slug)) continue;
+      alreadyPicked.add(slug);
+      canonicalSkills.push({
+        slug,
+        proficiency: t.proficiency,
+        yearsOfExperience: t.yearsOfExperience ?? null,
+      });
+      canonicalisedInfo.push({ typed: t.slug, label: labelBySlug.get(slug) ?? slug });
+    }
+  }
 
   await db.transaction(async (tx) => {
     await tx
@@ -442,7 +473,11 @@ export async function updateSkills(
     kind: "profile.skills.update",
     actor: session.id,
     subject: profile.id,
-    meta: { count: parsed.data.skills.length },
+    meta: {
+      count: parsed.data.skills.length,
+      canonicalised: canonicalisedInfo.length || undefined,
+      pendingReview: pendingSkills.length || undefined,
+    },
   });
 
   revalidatePath("/dashboard");

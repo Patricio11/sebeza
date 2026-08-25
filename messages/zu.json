@@ -665,6 +665,12 @@
       "youDeclined": "Utshele umqashi ukuthi awukwazi ukufika ngo-{when}.",
       "tookPlace": "Le nhlolokhono ibihlelelwe u-{when}.",
       "footNote": "Ukuqinisekisa noma ukwenqaba akubizi lutho futhi akuthinti ukubonakala kwakho. Yilo mqashi kuphela obona impendulo yakho."
+    },
+    "skillsGroups": {
+      "technical": "Amakhono obuchwepheshe",
+      "professional": "Amakhono omsebenzi",
+      "pending": "Kulindwe ukubuyekezwa",
+      "pendingNote": "Amasha kukhathalogu yethu. Ithimba lethu liyawabuyekeza; abalwa uma esegunyaziwe."
     }
   },
   "employerDash": {
@@ -1290,7 +1296,8 @@
         "yearsChip": "{years}+ iminyaka"
       },
       "openDossier": "Vula idosiye",
-      "secondary": "kufaniswe ngomsebenzi wesibili: {profession}"
+      "secondary": "kufaniswe ngomsebenzi wesibili: {profession}",
+      "skillCoverage": "Amakhono {matched}/{total}"
     },
     "status": {
       "draft": "Uhlaka",

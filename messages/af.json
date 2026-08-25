@@ -665,6 +665,12 @@
       "youDeclined": "Jy het die werkgewer laat weet jy kan nie die {when}-gleuf maak nie.",
       "tookPlace": "Hierdie onderhoud was vir {when} gereël.",
       "footNote": "Om te bevestig of te weier kos niks en raak nooit jou sigbaarheid nie. Net hierdie werkgewer sien jou antwoord."
+    },
+    "skillsGroups": {
+      "technical": "Tegniese vaardighede",
+      "professional": "Professionele vaardighede",
+      "pending": "Wag op hersiening",
+      "pendingNote": "Nuut in ons katalogus. Ons span hersien dit; dit tel sodra dit goedgekeur is."
     }
   },
   "employerDash": {
@@ -1290,7 +1296,8 @@
         "yearsChip": "{years}+ jaar"
       },
       "openDossier": "Maak dossier oop",
-      "secondary": "gepas via sekondêre beroep: {profession}"
+      "secondary": "gepas via sekondêre beroep: {profession}",
+      "skillCoverage": "Vaardighede {matched}/{total}"
     },
     "status": {
       "draft": "Konsep",

@@ -851,6 +851,12 @@
       "youDeclined": "You told the employer you can't make the {when} slot.",
       "tookPlace": "This interview was set for {when}.",
       "footNote": "Confirming or declining costs nothing and never affects your visibility. Only this employer sees your answer."
+    },
+    "skillsGroups": {
+      "technical": "Technical skills",
+      "professional": "Professional skills",
+      "pending": "Awaiting review",
+      "pendingNote": "New to our catalogue. Our team reviews these; they count once approved."
     }
   },
   "employerDash": {
@@ -1347,7 +1353,8 @@
         "yearsChip": "{years}+ yrs"
       },
       "openDossier": "Open dossier",
-      "secondary": "matched via secondary profession: {profession}"
+      "secondary": "matched via secondary profession: {profession}",
+      "skillCoverage": "Skills {matched}/{total}"
     },
     "status": {
       "draft": "Draft",

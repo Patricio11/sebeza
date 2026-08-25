@@ -18,6 +18,9 @@ import {
 } from "@/lib/mock/taxonomy";
 
 export interface TaxonomyOption {
+  /** 2026-08-24  present on skills only: technical | professional.
+   *  Optional so profession/province options stay untouched. */
+  category?: string;
   slug: string;
   label: string;
 }
@@ -58,14 +61,18 @@ export const getSkills = unstable_cache(
     try {
       const db = getDb();
       const rows = await db
-        .select({ slug: schema.skills.slug, label: schema.skills.label })
+        .select({
+          slug: schema.skills.slug,
+          label: schema.skills.label,
+          category: schema.skills.category,
+        })
         .from(schema.skills)
         .orderBy(asc(schema.skills.label));
       if (rows.length > 0) return rows;
     } catch {
       // DB unavailable  fall through so the form still renders.
     }
-    return MOCK_SKILLS.map((s) => ({ slug: s.slug, label: s.label }));
+    return MOCK_SKILLS.map((s) => ({ slug: s.slug, label: s.label, category: "technical" }));
   },
   ["taxonomy.skills"],
   { revalidate: 300, tags: ["taxonomy"] },

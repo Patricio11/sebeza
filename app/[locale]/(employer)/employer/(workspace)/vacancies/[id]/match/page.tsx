@@ -45,6 +45,7 @@ import { BulkInviteIsland } from "@/components/feature/employer/vacancies/BulkIn
 import { PROVINCES, PROFESSIONS, findCityBySlug } from "@/lib/mock/taxonomy";
 import { formatVacancyLocation } from "@/lib/employer/vacancies-display";
 import { getSetting } from "@/lib/admin/settings";
+import { getProfessions } from "@/lib/taxonomy/query";
 import { listInvitationsForVacancy } from "@/lib/employer/invitations";
 import { getPlacementsForVacancy } from "@/lib/employer/placements";
 import { fillState } from "@/lib/employer/vacancy-fill";
@@ -120,7 +121,12 @@ export default async function VacancyMatchPage({
     for (const r of rows) handleToProfileId.set(r.handle, r.id);
   }
 
+  // 2026-08-24  LIVE taxonomy, not the frozen constant (founder rule:
+  // the system is live; mock data never resolves real labels). The
+  // constant remains only as the empty-DB fallback inside getProfessions.
+  const liveProfessions = await getProfessions();
   const professionLabel =
+    liveProfessions.find((p) => p.slug === vacancy.professionSlug)?.label ??
     PROFESSIONS.find((p) => p.slug === vacancy.professionSlug)?.label ??
     vacancy.professionSlug;
   // Phase 13.9  single source of truth for location rendering.
@@ -305,6 +311,26 @@ export default async function VacancyMatchPage({
                             title={`Matched via secondary profession: ${professionLabel}. Her headline is ${p.profession}.`}
                           >
                             {tm("secondary", { profession: professionLabel })}
+                          </span>
+                        )}
+                        {/* 2026-08-24  informational skill coverage:
+                            how many of the vacancy's skills this
+                            candidate holds (alias-aware, capped at
+                            the vacancy's own count). Never changes
+                            the ordering; it explains it. */}
+                        {vacancy.skillSlugs.length > 0 && (
+                          <span
+                            className={`inline-flex items-center rounded-[var(--radius-pill)] border px-2 py-0.5 text-[0.65rem] uppercase tracking-[0.14em] ${
+                              Math.min(p.matchedSkillCount, vacancy.skillSlugs.length) === vacancy.skillSlugs.length
+                                ? "border-[color:var(--color-brand)] bg-[color:var(--color-brand-tint)] text-[color:var(--color-brand-strong)]"
+                                : "border-[color:var(--color-hairline)] text-[color:var(--color-ink-soft)]"
+                            }`}
+                            title="How many of this vacancy's required skills the candidate lists (name variations counted)."
+                          >
+                            {tm("skillCoverage", {
+                              matched: Math.min(p.matchedSkillCount, vacancy.skillSlugs.length),
+                              total: vacancy.skillSlugs.length,
+                            })}
                           </span>
                         )}
                         <Link

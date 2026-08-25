@@ -25,10 +25,18 @@ vi.mock("@/lib/auth/dal", async (importOriginal) => {
     verifyAdmin: vi.fn(async () => ADMIN),
   };
 });
-vi.mock("next/cache", () => ({
-  revalidatePath: vi.fn(),
-  revalidateTag: vi.fn(),
-}));
+vi.mock("next/cache", async (importOriginal) => {
+  // Partial mock: keep unstable_cache etc. real - modules under test
+  // import lib/taxonomy/query, whose getSkills is built with
+  // unstable_cache at module load (2026-08-24 lesson: a naked mock
+  // here fails the whole suite file the moment any import touches it).
+  const original = await importOriginal<typeof import("next/cache")>();
+  return {
+    ...original,
+    revalidatePath: vi.fn(),
+    revalidateTag: vi.fn(),
+  };
+});
 
 import { getDb } from "@/db/client";
 import * as schema from "@/db/schema";

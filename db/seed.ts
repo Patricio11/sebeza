@@ -31,6 +31,7 @@ import { drizzle } from "drizzle-orm/neon-serverless";
 import { drizzle as drizzlePostgresJs } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import { sql, inArray } from "drizzle-orm";
+import { skillCategoryFor } from "@/lib/skills/categories";
 import ws from "ws";
 
 // Match the runtime client (`db/client.ts`) so the seed runs against the
@@ -573,7 +574,12 @@ async function seedTaxonomy() {
 
   console.log("🧑‍🍳 Professions + skills…");
   await db.insert(schema.professions).values(PROFESSIONS);
-  await db.insert(schema.skills).values(SKILLS);
+  // 2026-08-24  categories ride the seed (the test harness re-seeds on
+  // every run; without this the migration backfill was wiped and the
+  // grouped skill sections showed everything as technical).
+  await db.insert(schema.skills).values(
+    SKILLS.map((s) => ({ ...s, category: skillCategoryFor(s.slug) })),
+  );
 
   console.log("🎓 Institutions…");
   await db.insert(schema.institutions).values(

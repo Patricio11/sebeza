@@ -31,7 +31,11 @@ export async function loadTaxonomy(): Promise<TaxonomyData> {
 
   const [skillsRows, profRows, provRows, cityRows] = await Promise.all([
     db
-      .select({ slug: schema.skills.slug, label: schema.skills.label })
+      .select({
+        slug: schema.skills.slug,
+        label: schema.skills.label,
+        category: schema.skills.category,
+      })
       .from(schema.skills)
       .orderBy(asc(schema.skills.label)),
     db

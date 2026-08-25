@@ -46,7 +46,13 @@ const LABEL = z.string().min(2, "Label is too short.").max(80, "Label is too lon
 // Skills
 // ─────────────────────────────────────────────────────────────────────────────
 
-const skillSchema = z.object({ slug: SLUG, label: LABEL });
+const skillSchema = z.object({
+  slug: SLUG,
+  label: LABEL,
+  /** 2026-08-24  technical | professional; omitted keeps the current
+   *  value on update and defaults technical on add. */
+  category: z.enum(["technical", "professional"]).optional(),
+});
 
 export async function addSkill(
   input: z.infer<typeof skillSchema>,
@@ -67,6 +73,7 @@ export async function addSkill(
   await db.insert(schema.skills).values({
     slug: parsed.data.slug,
     label: parsed.data.label,
+    category: parsed.data.category ?? "technical",
   });
 
   await logAccess({
@@ -94,7 +101,10 @@ export async function updateSkill(
   const db = getDb();
   const updated = await db
     .update(schema.skills)
-    .set({ label: parsed.data.label })
+    .set({
+      label: parsed.data.label,
+      ...(parsed.data.category ? { category: parsed.data.category } : {}),
+    })
     .where(eq(schema.skills.slug, parsed.data.slug))
     .returning({ slug: schema.skills.slug });
   if (updated.length === 0) return fail("Skill not found.");

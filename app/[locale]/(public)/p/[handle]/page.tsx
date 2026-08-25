@@ -1004,10 +1004,33 @@ function SkillsSection({
     Awaited<ReturnType<typeof dataProvider.getProfile>>
   >["topSkills"];
 }) {
+  // 2026-08-24  grouped Technical / Professional (founder request).
+  // Category rides on each SkillRef from the taxonomy; a profile with
+  // only one kind renders a single group with no header noise.
+  const groups = [
+    {
+      key: "technical",
+      title: "Technical skills",
+      items: skills.filter((s) => (s as { category?: string }).category !== "professional"),
+    },
+    {
+      key: "professional",
+      title: "Professional skills",
+      items: skills.filter((s) => (s as { category?: string }).category === "professional"),
+    },
+  ].filter((g) => g.items.length > 0);
+  const showHeaders = groups.length > 1;
   return (
     <Section eyebrow="Capability" title="Skills">
+      {groups.map((g) => (
+        <div key={g.key} className={showHeaders ? "mb-5 last:mb-0" : ""}>
+          {showHeaders && (
+            <h3 className="mb-2 border-b border-[color:var(--color-hairline)] pb-1.5 text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--color-ink-soft)]">
+              {g.title}
+            </h3>
+          )}
       <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {skills.map((s) => {
+        {g.items.map((s) => {
           const pct = (s.proficiency / 5) * 100;
           return (
             <li
@@ -1045,6 +1068,8 @@ function SkillsSection({
           );
         })}
       </ul>
+        </div>
+      ))}
     </Section>
   );
 }

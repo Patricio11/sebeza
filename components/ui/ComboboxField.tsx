@@ -99,9 +99,14 @@ function rank(option: ComboboxOption, q: string): number {
   if (!q) return 0;
   const label = (option.label ?? option.value).toLowerCase();
   const idx = label.indexOf(q);
-  if (idx === -1) return -1;
   // Starts-with wins; then earliest-substring wins.
-  return idx === 0 ? 0 : 1 + idx;
+  if (idx !== -1) return idx === 0 ? 0 : 1 + idx;
+  // Normalized fallback (2026-08-24): punctuation/spacing-insensitive
+  // ("nodejs" finds "Node.js"). Ranked below direct hits.
+  const nl = label.replace(/[^a-z0-9]+/g, "");
+  const nq = q.replace(/[^a-z0-9]+/g, "");
+  if (nq.length >= 2 && nl.includes(nq)) return 1000 + nl.indexOf(nq);
+  return -1;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

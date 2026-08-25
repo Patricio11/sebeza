@@ -26,6 +26,8 @@ export interface TaxonomyRow {
   provinceLabel?: string;
   /** Provinces aren't editable from this surface (seeded by Stats SA). */
   readOnly?: boolean;
+  /** Skills only  technical | professional (2026-08-24). */
+  category?: string;
 }
 
 interface Props {
@@ -43,6 +45,7 @@ export function TaxonomyManager({ kind, rows, provinces }: Props) {
   const [slug, setSlug] = useState("");
   const [label, setLabel] = useState("");
   const [provinceSlug, setProvinceSlug] = useState(provinces?.[0]?.slug ?? "");
+  const [category, setCategory] = useState<"technical" | "professional">("technical");
   const [error, setError] = useState<string | null>(null);
   const [query, setQuery] = useState("");
 
@@ -64,6 +67,7 @@ export function TaxonomyManager({ kind, rows, provinces }: Props) {
     setSlug("");
     setLabel("");
     setProvinceSlug(provinces?.[0]?.slug ?? "");
+    setCategory("technical");
     setShowAdd(true);
     setError(null);
   }
@@ -73,6 +77,7 @@ export function TaxonomyManager({ kind, rows, provinces }: Props) {
     setSlug(row.slug);
     setLabel(row.label);
     setProvinceSlug(row.provinceSlug ?? provinces?.[0]?.slug ?? "");
+    setCategory(row.category === "professional" ? "professional" : "technical");
     setShowAdd(true);
     setError(null);
   }
@@ -82,12 +87,12 @@ export function TaxonomyManager({ kind, rows, provinces }: Props) {
     startTransition(async () => {
       const res = editingSlug
         ? kind === "skills"
-          ? await updateSkill({ slug: editingSlug, label })
+          ? await updateSkill({ slug: editingSlug, label, category })
           : kind === "professions"
             ? await updateProfession({ slug: editingSlug, label })
             : await updateCity({ slug: editingSlug, label, provinceSlug })
         : kind === "skills"
-          ? await addSkill({ slug, label })
+          ? await addSkill({ slug, label, category })
           : kind === "professions"
             ? await addProfession({ slug, label })
             : await addCity({ slug, label, provinceSlug });
@@ -191,6 +196,23 @@ export function TaxonomyManager({ kind, rows, provinces }: Props) {
               onChange={(v) => setProvinceSlug(v)}
               options={provinces.map((p) => ({ value: p.slug, label: p.label }))}
             />
+          ) : kind === "skills" ? (
+            // 2026-08-24  technical | professional groups the seeker
+            // editor + profile; recategorise any skill here.
+            <CustomSelect
+              key={`cat-${editingSlug ?? "new"}`}
+              ariaLabel="Category"
+              variant="compact"
+              name="category"
+              value={category}
+              onChange={(v) =>
+                setCategory(v === "professional" ? "professional" : "technical")
+              }
+              options={[
+                { value: "technical", label: "Technical skill" },
+                { value: "professional", label: "Professional skill" },
+              ]}
+            />
           ) : (
             <span />
           )}
@@ -237,6 +259,9 @@ export function TaxonomyManager({ kind, rows, provinces }: Props) {
             <tr className="border-b-2 border-[color:var(--color-ink)] text-left text-[0.7rem] uppercase tracking-[0.18em] text-[color:var(--color-ink-soft)]">
               <th className="px-5 py-3 font-normal">Label</th>
               <th className="px-5 py-3 font-normal">Slug</th>
+              {kind === "skills" && (
+                <th className="px-5 py-3 font-normal">Category</th>
+              )}
               {kind === "cities" && (
                 <th className="px-5 py-3 font-normal">Province</th>
               )}
@@ -250,6 +275,19 @@ export function TaxonomyManager({ kind, rows, provinces }: Props) {
                 className="border-t border-[color:var(--color-hairline)]"
               >
                 <td className="px-5 py-2.5 font-display text-base">{row.label}</td>
+                {kind === "skills" && (
+                  <td className="px-5 py-2.5">
+                    <span
+                      className={`inline-flex rounded-[var(--radius-pill)] border px-2 py-0.5 text-[0.62rem] uppercase tracking-[0.14em] ${
+                        row.category === "professional"
+                          ? "border-[color:var(--color-accent)]/50 text-[color:var(--color-accent)]"
+                          : "border-[color:var(--color-brand)]/50 text-[color:var(--color-brand-strong)]"
+                      }`}
+                    >
+                      {row.category === "professional" ? "Professional" : "Technical"}
+                    </span>
+                  </td>
+                )}
                 <td className="px-5 py-2.5 font-mono text-xs text-[color:var(--color-ink-soft)]">
                   {row.slug}
                 </td>

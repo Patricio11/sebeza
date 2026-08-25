@@ -28,6 +28,8 @@ import { randomUUID } from "node:crypto";
 import { z } from "zod";
 import { verifyEmployer, verifyOrgVerified } from "@/lib/auth/dal";
 import { logAccess } from "@/lib/audit";
+import { getProfessions, getSkills } from "@/lib/taxonomy/query";
+import { buildSkillMatcher } from "@/lib/skills/normalize";
 import { createNotification, notifyAllAdmins } from "@/lib/notifications/server";
 import {
   composeClosureNotification,
@@ -1085,15 +1087,29 @@ const VALID_SENIORITY: Seniority[] = ["junior", "intermediate", "senior"];
 // callers. This is a pure sync mapping used by matchVacancyCandidates()
 // below; if a caller ever needs the filters directly, move to a sibling
 // plain module rather than re-exporting from here.
-function vacancyToSearchFilters(
+async function vacancyToSearchFilters(
   vacancy: VacancyRow,
-): SearchFilters {
+): Promise<SearchFilters> {
+  // 2026-08-24 (docs/SKILLS_CATEGORIES_MATCHING_PLAN.md)  resolve
+  // labels through the LIVE taxonomy, not the frozen mock. The old
+  // MOCK_SKILLS lookup silently dropped every admin-promoted skill
+  // from the match query, so a vacancy asking for a promoted skill
+  // matched on profession alone. Alias expansion then bridges
+  // near-duplicate entries ("nodejs" and "Node.js") both directions.
+  const [liveSkills, liveProfessions] = await Promise.all([
+    getSkills(),
+    getProfessions(),
+  ]);
   const professionLabel =
+    liveProfessions.find((p) => p.slug === vacancy.professionSlug)?.label ??
     MOCK_PROFESSIONS.find((p) => p.slug === vacancy.professionSlug)?.label ??
     vacancy.professionSlug;
-  const skillLabels = vacancy.skillSlugs
-    .map((s) => MOCK_SKILLS.find((sk) => sk.slug === s)?.label)
-    .filter((s): s is string => Boolean(s));
+  const matcher = buildSkillMatcher(liveSkills);
+  const expandedSlugs = matcher.expandSlugs(vacancy.skillSlugs);
+  const labelBySlug = new Map(liveSkills.map((sk) => [sk.slug, sk.label]));
+  const skillLabels = expandedSlugs
+    .map((slug) => labelBySlug.get(slug) ?? MOCK_SKILLS.find((sk) => sk.slug === slug)?.label)
+    .filter((label): label is string => Boolean(label));
   const query = [professionLabel, ...skillLabels].join(" ").trim();
 
   const seniorityNormalised =
@@ -1119,6 +1135,8 @@ function vacancyToSearchFilters(
         : undefined,
     minYearsExperience: vacancy.minYearsExperience,
     minNqfLevel: vacancy.minNqfLevel,
+    // Informational matched-count on the match page; never ordering.
+    skillSlugs: expandedSlugs.length > 0 ? expandedSlugs : undefined,
   };
 }
 
@@ -1156,7 +1174,7 @@ export async function matchVacancyCandidates(
 ): Promise<VacancyMatchResult | null> {
   const vacancy = await getMyVacancy(vacancyId);
   if (!vacancy) return null;
-  const filters = vacancyToSearchFilters(vacancy);
+  const filters = await vacancyToSearchFilters(vacancy);
   const [search, counts] = await Promise.all([
     searchProfilesQuery(filters),
     countMatchesByCitizenship(filters),

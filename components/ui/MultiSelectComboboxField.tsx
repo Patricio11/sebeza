@@ -104,8 +104,14 @@ function rank(label: string, q: string): number {
   if (!q) return 0;
   const lower = label.toLowerCase();
   const idx = lower.indexOf(q);
-  if (idx === -1) return -1;
-  return idx === 0 ? 0 : 1 + idx;
+  if (idx !== -1) return idx === 0 ? 0 : 1 + idx;
+  // Normalized fallback (2026-08-24): "nodejs" must surface "Node.js",
+  // "postgres" must surface "PostgreSQL". Punctuation and spacing are
+  // stripped on both sides; ranked below direct substring hits.
+  const nl = lower.replace(/[^a-z0-9]+/g, "");
+  const nq = q.replace(/[^a-z0-9]+/g, "");
+  if (nq.length >= 2 && nl.includes(nq)) return 1000 + nl.indexOf(nq);
+  return -1;
 }
 
 export function MultiSelectComboboxField({

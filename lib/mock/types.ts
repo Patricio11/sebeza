@@ -97,6 +97,9 @@ export interface LanguageRef {
 export interface SkillRef {
   name: string;
   proficiency: 1 | 2 | 3 | 4 | 5;
+  /** 2026-08-24  technical | professional; groups the profile +
+   *  dossier skill sections. Optional so mock fixtures stay valid. */
+  category?: string;
   /**
    * Phase 9.9  Years of experience with this skill. Nullable
    * self-declared by the seeker; UI clamps 0..60. NULL renders as
@@ -375,6 +378,13 @@ export interface SearchFilters {
    * no filter applied. Matches via `&&` array containment.
    */
   availableFor?: WorkAvailabilityKind[];
+  /**
+   * 2026-08-24 (docs/SKILLS_CATEGORIES_MATCHING_PLAN.md)  vacancy-match
+   * only: the vacancy's canonical skill slugs, ALIAS-EXPANDED. Drives
+   * the informational matched_skill_count on each row. Never a hard
+   * filter and never changes ordering.
+   */
+  skillSlugs?: string[];
   /**
    * Phase 9.19  hard floor on the seeker's total years of experience.
    * NULL / omitted = no constraint; the matcher does not check this

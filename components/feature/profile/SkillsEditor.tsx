@@ -8,6 +8,7 @@
  */
 
 import { useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
 import { MultiSelectComboboxField } from "@/components/ui/MultiSelectComboboxField";
 import { Button } from "@/components/ui/Button";
 import { X } from "lucide-react";
@@ -32,11 +33,14 @@ interface Props {
   professionSlug?: string;
   /** Phase 23.4  the LIVE skill catalogue from the `skills` table (via
    *  `getSkills()`), so admin-added + Phase-19 canonicalized skills appear.
-   *  Falls back to the frozen constant when not passed (old callers/tests). */
-  skillOptions?: Array<{ slug: string; label: string }>;
+   *  Falls back to the frozen constant when not passed (old callers/tests).
+   *  2026-08-24: carries `category` (technical | professional) for the
+   *  grouped sections below. */
+  skillOptions?: Array<{ slug: string; label: string; category?: string }>;
 }
 
 export function SkillsEditor({ initial, professionSlug, skillOptions }: Props) {
+  const t = useTranslations("seekerDash.skillsGroups");
   const catalogue = skillOptions ?? SKILLS;
   const [items, setItems] = useState<SkillState[]>(initial);
   const [pending, startTransition] = useTransition();
@@ -133,15 +137,38 @@ export function SkillsEditor({ initial, professionSlug, skillOptions }: Props) {
     });
   }
 
-  return (
-    <div className="space-y-4">
-      <ul className="grid gap-3 md:grid-cols-2">
-        {items.length === 0 ? (
-          <li className="md:col-span-2 rounded-[var(--radius-sm)] border border-dashed border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-4 text-sm text-[color:var(--color-ink-soft)]">
-            No skills yet. Pick one or two below to start.
-          </li>
-        ) : (
-          items.map((s) => (
+  // 2026-08-24  Technical / Professional grouping (founder request).
+  // Category comes from the live catalogue; entries typed by the seeker
+  // that aren't canonical yet get their own "awaiting review" group so
+  // nothing silently disappears.
+  const categoryBySlug = new Map(
+    catalogue.map((c) => [c.slug, (c as { category?: string }).category ?? "technical"]),
+  );
+  const canonicalSlugs = new Set(catalogue.map((c) => c.slug));
+  const groups: Array<{ key: string; title: string; note?: string; items: SkillState[] }> = [
+    {
+      key: "technical",
+      title: t("technical"),
+      items: items.filter(
+        (i) => canonicalSlugs.has(i.slug) && categoryBySlug.get(i.slug) !== "professional",
+      ),
+    },
+    {
+      key: "professional",
+      title: t("professional"),
+      items: items.filter(
+        (i) => canonicalSlugs.has(i.slug) && categoryBySlug.get(i.slug) === "professional",
+      ),
+    },
+    {
+      key: "pending",
+      title: t("pending"),
+      note: t("pendingNote"),
+      items: items.filter((i) => !canonicalSlugs.has(i.slug)),
+    },
+  ];
+
+  const renderCard = (s: SkillState) => (
             <li
               key={s.slug}
               className="flex items-center justify-between gap-4 rounded-[var(--radius-sm)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] px-4 py-3"
@@ -196,9 +223,38 @@ export function SkillsEditor({ initial, professionSlug, skillOptions }: Props) {
                 </button>
               </div>
             </li>
+  );
+
+  return (
+    <div className="space-y-4">
+      {items.length === 0 ? (
+        <p className="rounded-[var(--radius-sm)] border border-dashed border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-4 text-sm text-[color:var(--color-ink-soft)]">
+          No skills yet. Pick one or two below to start.
+        </p>
+      ) : (
+        groups
+          .filter((g) => g.items.length > 0)
+          .map((g) => (
+            <section key={g.key} aria-label={g.title}>
+              <div className="mb-2 flex items-baseline gap-2 border-b border-[color:var(--color-hairline)] pb-1.5">
+                <h3 className="text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--color-ink)]">
+                  {g.title}
+                </h3>
+                <span className="text-[0.65rem] text-[color:var(--color-ink-soft)]">
+                  {g.items.length}
+                </span>
+                {g.note && (
+                  <span className="text-[0.65rem] italic text-[color:var(--color-ink-soft)]">
+                    {g.note}
+                  </span>
+                )}
+              </div>
+              <ul className="grid gap-3 md:grid-cols-2">
+                {g.items.map((s) => renderCard(s))}
+              </ul>
+            </section>
           ))
-        )}
-      </ul>
+      )}
 
       {/* Phase 10 follow-up  typeahead multi-select replaces the
           dropdown-then-Add pattern. Picking a skill adds it to the
