@@ -232,7 +232,10 @@
           "nsfasLabel": "Ngixhaswa yi-NSFAS",
           "openToInternships": "Ngivulekele ama-internship ngesikhathi ngifunda",
           "openToGraduateProgrammes": "Ngivulekele izinhlelo zabaphothule ngemva kokuphothula"
-        }
+        },
+        "cityLabel": "Idolobha noma idolobhana",
+        "cityHint": "Kuyakhethwa manje, kodwa abaqashi basesha ngendawo. Ungakushintsha noma nini.",
+        "cityLater": "Ngizokwengeza kamuva"
       },
       "stepHints": {
         "name": "Kuvela kwiphrofayela yakho njengo \"Gama L.\" ngokuzenzakalela. Isibongo sakho esiphelele sivela kuphela uma unikeze imvume yokuxhunywa."

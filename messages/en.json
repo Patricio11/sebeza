@@ -399,7 +399,10 @@
           "nsfasLabel": "I'm funded by NSFAS",
           "openToInternships": "Open to internships during studies",
           "openToGraduateProgrammes": "Open to graduate / articles programmes after graduation"
-        }
+        },
+        "cityLabel": "City or town",
+        "cityHint": "Optional now, but employers search by place. You can change it any time.",
+        "cityLater": "I'll add it later"
       },
       "stepHints": {
         "name": "Goes on your profile as \"First L.\" by default. Your full surname only appears after you grant contact consent.",

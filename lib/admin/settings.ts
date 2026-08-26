@@ -163,7 +163,10 @@ export type SettingKey =
   // recipient's own per-device browser permission. Flipping this off is
   // a killswitch: it stops sends without touching anybody's
   // subscriptions, so turning it back on does not ask everyone again.
-  | "feature_flag_web_push";
+  | "feature_flag_web_push"
+  /** 2026-08-26  Career Compass "Learning paths" section (SETA/TVET
+   *  cards). Ships dark; admin flips it on /admin/settings. */
+  | "feature_flag_learning_paths";
 
 const DEFAULTS: Record<SettingKey, unknown> = {
   freshness_band_days_fresh: 30,
@@ -209,6 +212,7 @@ const DEFAULTS: Record<SettingKey, unknown> = {
   feature_flag_selfie_verification: false,
   feature_flag_seeker_projects: false,
   feature_flag_web_push: false,
+  feature_flag_learning_paths: false,
 };
 
 /**

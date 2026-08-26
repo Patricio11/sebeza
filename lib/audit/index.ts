@@ -249,6 +249,8 @@ export type AuditKind =
   | "interview.response"
   | "interview.attendance"
   | "interview.reminder"
+  /** 2026-08-26  the once-ever 50% profile nudge cron. */
+  | "profile.completeness.nudge"
   // G11  weekly stalled-pipeline sweep.
   | "vacancy.pipeline.stalled"
   // Phase 9.12  the learning loop. Seeker-private events that capture

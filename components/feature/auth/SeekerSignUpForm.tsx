@@ -162,6 +162,9 @@ interface FormState {
   // Step 3
   profession: string;
   province: string;
+  /** 2026-08-26  city SLUG (profiles.city convention), optional. Asked
+   *  up front because people forgot to add it on the profile later. */
+  city: string;
   status: "open_to_work" | "employed" | "self_employed" | "studying" | "unemployed";
   /** Phase 7.5  optional work-availability set captured at sign-up. */
   workAvailability: (
@@ -211,6 +214,7 @@ const initialState: FormState = {
   termsAccepted: false,
   profession: "",
   province: "",
+  city: "",
   status: "open_to_work",
   workAvailability: [],
   academic: {
@@ -357,6 +361,7 @@ export function SeekerSignUpForm({
       termsAccepted: state.termsAccepted,
       profession: state.profession,
       province: state.province,
+      city: state.city,
       status: state.status,
       workAvailability: state.workAvailability,
       academic: state.academic,
@@ -542,6 +547,7 @@ export function SeekerSignUpForm({
           termsAccepted: true,
           profession: state.profession,
           province: state.province,
+          city: state.city || undefined,
           status: state.status,
           workAvailability: state.workAvailability,
           academic,
@@ -559,6 +565,7 @@ export function SeekerSignUpForm({
           wantsPushNotifications: state.wantsPush,
           profession: state.profession,
           province: state.province,
+          city: state.city || undefined,
           status: state.status,
           workAvailability: state.workAvailability,
           academic,
@@ -982,7 +989,8 @@ export function SeekerSignUpForm({
             label={t("step3.locationLabel")}
             value={state.province}
             onChange={(e) =>
-              setState({ ...state, province: e.target.value })
+              // A province change invalidates the city pick.
+              setState({ ...state, province: e.target.value, city: "" })
             }
             required
           >
@@ -993,6 +1001,25 @@ export function SeekerSignUpForm({
               </option>
             ))}
           </SelectField>
+          {/* 2026-08-26  city at signup (optional; nudged later if
+              skipped). Cities follow the picked province; stored as the
+              slug like the profile editor. */}
+          {state.province && (
+            <SelectField
+              id="city"
+              label={t("step3.cityLabel")}
+              hint={t("step3.cityHint")}
+              value={state.city}
+              onChange={(e) => setState({ ...state, city: e.target.value })}
+            >
+              <option value="">{t("step3.cityLater")}</option>
+              {(PROVINCES.find((p) => p.label === state.province)?.cities ?? []).map((c) => (
+                <option key={c.slug} value={c.slug}>
+                  {c.label}
+                </option>
+              ))}
+            </SelectField>
+          )}
           <SelectField
             id="status"
             label={t("step3.statusLabel")}

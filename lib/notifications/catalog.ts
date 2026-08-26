@@ -62,6 +62,19 @@ export const NOTIFICATION_CATALOG = {
       "Quietly de-duplicated per organisation per day. Off by default to keep your bell calm.",
     dedupeWindowSeconds: 24 * 60 * 60,
   },
+  // 2026-08-26  the one gentle profile nudge: 24h after signup, only
+  // when the profile is under half complete, once ever. Email on
+  // because the person may not be back yet; push OFF (a nudge is not
+  // a clock).
+  "profile.completeness.nudge": {
+    defaultInApp: true,
+    defaultEmail: true,
+    audience: "seeker",
+    label: "Finish-your-profile reminder",
+    description:
+      "One reminder the day after you join if your profile is under half complete, with exactly what is missing. Sent once, never repeated.",
+    dedupeWindowSeconds: 0,
+  },
   "contact.revealed": {
     defaultInApp: true,
     defaultEmail: false,

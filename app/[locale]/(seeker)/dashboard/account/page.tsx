@@ -83,6 +83,7 @@ export default async function AccountPage({
     "interview.scheduled",
     "interview.cancelled",
     "interview.reminder",
+    "profile.completeness.nudge",
     "employer.opened_vacancy.in_your_pool",
     "contact.revealed",
     "document.downloaded",

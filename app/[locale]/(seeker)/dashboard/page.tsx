@@ -25,6 +25,10 @@ import { SelfReportPlacementCard } from "@/components/feature/profile/SelfReport
 import { StatusNudgeBanner } from "@/components/feature/profile/StatusNudgeBanner";
 import { listMyInvitations } from "@/lib/seeker/invitations";
 import { getSetting } from "@/lib/admin/settings";
+import { getDb } from "@/db/client";
+import * as schema from "@/db/schema";
+import { and, eq, isNull, sql } from "drizzle-orm";
+import { PushOptIn } from "@/components/feature/notifications/PushOptIn";
 import { Inbox } from "lucide-react";
 import { HelpLink } from "@/components/feature/help/HelpLink";
 import { WelcomeBackCard } from "@/components/feature/seeker/WelcomeBackCard";
@@ -77,6 +81,25 @@ export default async function SeekerOverviewPage({
   const topRec = compass.recommendations[0];
 
   // Derive Next steps from real profile state  never lie about what's done.
+  // 2026-08-26 (docs/SEEKER_ONBOARDING_POLISH_PLAN.md): every step is
+  // gated by the same truth its feature is. ID collection is dormant
+  // unless its flag is on; qualification evidence uploads are retired
+  // (a qualification RECORD is the ask); custom skills count too (a
+  // seeker whose skills sat in the custom table read "Add 5 more").
+  const idCollectionOn = await getSetting<boolean>(
+    "feature_flag_id_verification_enabled",
+  );
+  const customSkillRows = await getDb()
+    .select({ n: sql<number>`COUNT(*)::int` })
+    .from(schema.profileSkillsCustom)
+    .where(
+      and(
+        eq(schema.profileSkillsCustom.profileId, me.profileId),
+        isNull(schema.profileSkillsCustom.deletedAt),
+      ),
+    );
+  const skillCount = me.topSkills.length + (customSkillRows[0]?.n ?? 0);
+  const cityMissing = !me.city || me.city.trim() === "" || me.city === "Pending";
   const nextSteps: { text: string; done: boolean; href?: string }[] = [
     {
       text: "Verify your email address",
@@ -88,20 +111,23 @@ export default async function SeekerOverviewPage({
       href: "/dashboard/profile#avatar",
     },
     {
+      text: cityMissing ? "Add your city" : "Location set",
+      done: !cityMissing,
+      href: "/dashboard/profile#location",
+    },
+    {
       text:
-        me.topSkills.length >= 5
+        skillCount >= 5
           ? "Skills set is strong"
-          : `Add ${5 - me.topSkills.length} more skill${
-              5 - me.topSkills.length === 1 ? "" : "s"
-            }`,
-      done: me.topSkills.length >= 5,
+          : `Add ${5 - skillCount} more skill${5 - skillCount === 1 ? "" : "s"}`,
+      done: skillCount >= 5,
       href: "/dashboard/profile#skills",
     },
     {
       text:
         (me.qualifications?.length ?? 0) > 0
-          ? "Certificate on file"
-          : "Upload a recent certificate",
+          ? "Qualification on file"
+          : "Add a qualification (no upload needed)",
       done: (me.qualifications?.length ?? 0) > 0,
       href: "/dashboard/qualifications",
     },
@@ -113,13 +139,19 @@ export default async function SeekerOverviewPage({
       done: (me.experience?.length ?? 0) > 0,
       href: "/dashboard/experience",
     },
-    {
-      text: me.hasNationalId
-        ? "ID on file (encrypted)"
-        : "Add your ID number (encrypted on save)",
-      done: me.hasNationalId,
-      href: "/dashboard/profile#national-id",
-    },
+    // ID collection is DORMANT (Phase 31): the step exists only while
+    // the admin has switched collection on; never asks otherwise.
+    ...(idCollectionOn
+      ? [
+          {
+            text: me.hasNationalId
+              ? "ID on file (encrypted)"
+              : "Add your ID number (encrypted on save)",
+            done: me.hasNationalId,
+            href: "/dashboard/profile#national-id",
+          },
+        ]
+      : []),
   ];
 
   // Pull the seeker-side activity feed (real events from audit_log).
@@ -548,6 +580,12 @@ export default async function SeekerOverviewPage({
             ))}
           </ol>
         </section>
+
+        {/* 2026-08-26  the real push opt-in, on the first visits. The
+            signup checkbox only records intent; the browser permission
+            can only be granted from the person's own tap, here. Renders
+            nothing when push is flagged off or unsupported. */}
+        <PushOptIn />
 
         {/* Activity  real audit log filtered to this seeker */}
         <ActivitySection

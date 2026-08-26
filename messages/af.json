@@ -232,7 +232,10 @@
           "nsfasLabel": "Ek word deur NSFAS befonds",
           "openToInternships": "Oop vir internskappe tydens studies",
           "openToGraduateProgrammes": "Oop vir gegradueerde- / klerkskapprogramme ná graduering"
-        }
+        },
+        "cityLabel": "Stad of dorp",
+        "cityHint": "Opsioneel nou, maar werkgewers soek per plek. Jy kan dit enige tyd verander.",
+        "cityLater": "Ek voeg dit later by"
       },
       "stepHints": {
         "name": "Verskyn by verstek op jou profiel as \"Naam L.\". Jou volle van verskyn eers nadat jy kontaktoestemming gegee het."

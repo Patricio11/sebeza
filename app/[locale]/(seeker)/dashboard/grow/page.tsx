@@ -235,6 +235,9 @@ export default async function CareerCompassPage({
   // Phase 18.1 ("Living Learning Catalog")  gates the per-card path-review
   // control + the recommend roll-up. Off = today's path cards, unchanged.
   const livingCatalog = await getSetting<boolean>("feature_flag_living_catalog");
+  // 2026-08-26  the Learning paths section ships dark (founder call);
+  // the admin catalogue keeps growing behind the flag.
+  const learningPathsOn = await getSetting<boolean>("feature_flag_learning_paths");
   // Phase 20.2 ("Unlocks next")  flag-gated. Skills the seeker can now tackle
   // because they already hold the prerequisite. Off → nothing computed/shown.
   const prereqsEnabled = await getSetting<boolean>("feature_flag_skill_prereqs");
@@ -318,7 +321,9 @@ export default async function CareerCompassPage({
       {/* Phase 10.2  help deep-links (D6). */}
       <div className="mb-4 flex flex-wrap items-center gap-2">
         <HelpLink role="seeker" slug="career-compass-recommendations" label="How recommendations work" />
-        <HelpLink role="seeker" slug="learning-paths-and-proficiency" label="Learning paths" />
+        {learningPathsOn && (
+          <HelpLink role="seeker" slug="learning-paths-and-proficiency" label="Learning paths" />
+        )}
         <HelpLink role="seeker" slug="finding-the-right-course" label="Finding the right course" />
         <HelpLink role="seeker" slug="cost-and-free-alternatives" label="Free alternatives" />
         <HelpLink role="seeker" slug="upgrading-to-verified" label="Upgrading to verified" />
@@ -510,7 +515,8 @@ export default async function CareerCompassPage({
         </ol>
       </section>
 
-      {/* ───────────── Learning paths ───────────── */}
+      {/* ───────────── Learning paths (flag-gated, dark by default) ───────────── */}
+      {learningPathsOn && (
       <section aria-labelledby="paths-h" className="mt-16">
         <header className="mb-5 flex items-baseline justify-between border-b-2 border-[color:var(--color-ink)] pb-2">
           <h2 id="paths-h" className="font-display text-2xl">
@@ -534,6 +540,7 @@ export default async function CareerCompassPage({
           ))}
         </ul>
       </section>
+      )}
 
       {/* ───────────── Adjacent professions ───────────── */}
       <section aria-labelledby="adj-h" className="mt-16">

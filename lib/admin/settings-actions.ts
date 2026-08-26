@@ -97,6 +97,7 @@ const KEY_SCHEMAS = {
   feature_flag_selfie_verification: z.boolean(),
   feature_flag_seeker_projects: z.boolean(),
   feature_flag_web_push: z.boolean(),
+  feature_flag_learning_paths: z.boolean(),
 } as const satisfies Record<SettingKey, z.ZodTypeAny>;
 
 const updateSchema = z.object({
@@ -136,6 +137,7 @@ const updateSchema = z.object({
     "feature_flag_selfie_verification",
     "feature_flag_seeker_projects",
     "feature_flag_web_push",
+    "feature_flag_learning_paths",
   ] as const),
   value: z.unknown(),
 });

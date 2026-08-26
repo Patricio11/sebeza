@@ -232,7 +232,10 @@
           "nsfasLabel": "Ndixhaswa yi-NSFAS",
           "openToInternships": "Ndivulekele ii-internship ngexesha ndifunda",
           "openToGraduateProgrammes": "Ndivulekele iinkqubo zabaphumeleleyo emva kokuphumelela"
-        }
+        },
+        "cityLabel": "Isixeko okanye idolophu",
+        "cityHint": "Kuyakhethwa ngoku, kodwa abaqeshi bakhangela ngendawo. Ungayitshintsha nanini na.",
+        "cityLater": "Ndiza kuyongeza kamva"
       },
       "stepHints": {
         "name": "Livela kwiprofayile yakho njengo \"Gama L.\" ngokuzenzekelayo. Ifani yakho epheleleyo ivela kuphela emva kokuba unike imvume yoqhagamshelwano."

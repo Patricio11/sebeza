@@ -186,6 +186,16 @@ const ROWS: SettingRow[] = [
       "without touching anyone's subscription.",
   },
   {
+    key: "feature_flag_learning_paths",
+    group: "launch",
+    label: "Learning paths on Career Compass",
+    type: "boolean",
+    hint:
+      "Shows the SETA / TVET / INDLELA learning-path cards on /dashboard/grow. " +
+      "Off = the section is hidden; the admin catalogue on /admin/learning-paths " +
+      "keeps working so it can grow behind the flag.",
+  },
+  {
     key: "feature_flag_sms_channel_enabled",
     group: "notifications",
     label: "SMS notifications channel",

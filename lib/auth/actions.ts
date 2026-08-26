@@ -132,6 +132,9 @@ const seekerSignUpSchema = z.object({
   // Step 3  first profile fields
   profession: z.string().min(2),
   province: z.string().min(2),
+  /** 2026-08-26  optional city at signup (people forgot to add it
+   *  later). Stored as the label, same as profiles.city everywhere. */
+  city: z.string().trim().max(80).optional(),
   status: z.enum([
     "employed",
     "unemployed",
@@ -503,7 +506,7 @@ export async function signUpSeeker(
         displayName,
         fullSurname: v.fullName.split(/\s+/).slice(1).join(" ") || null,
         profession: v.profession,
-        city: "",
+        city: v.city?.trim() ?? "",
         province: v.province,
         // Phase 9.16  DOB captured at sign-up; ID number / passport
         // NOT collected here (added later from /dashboard/profile).

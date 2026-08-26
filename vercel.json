@@ -87,6 +87,10 @@
     {
       "path": "/api/cron/interview-reminders",
       "schedule": "30 4 * * *"
+    },
+    {
+      "path": "/api/cron/profile-completeness-nudge",
+      "schedule": "0 7 * * *"
     }
   ]
 }
