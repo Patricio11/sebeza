@@ -44,7 +44,7 @@ Built here, for here. 🇿🇦 → sebenzasa.com
 
 **Description:**
 ```
-This is Sebenza: search by skill and place, see real people ready to work. 🇿🇦
+This is Sebenza: search by skill and place, prioritize Sout African, see real people ready to work. 🇿🇦
 
 Sebenza is South Africa's national talent platform. Free for job-seekers, always.
 Built here, for here. 🇿🇦 → sebenzasa.com

@@ -61,6 +61,18 @@ learning ───▶ /dashboard/grow "Learning paths" section behind
 - [x] Signup step 3: province + city on one row; city disabled with a "pick a province first" hint until a province is chosen
 - [x] Tests: marker set on send, main-info trigger at high completeness, complete profile never nudged
 
+### Follow-up 2 (founder, 2026-08-26): phone-channel consents behind the admin flags
+
+The SMS, WhatsApp and Platform-announcement consent cards on /dashboard/privacy
+showed for everyone even though no channel can send until the admin flips
+`feature_flag_sms_channel_enabled` / `feature_flag_whatsapp_channel_enabled`
+(both default OFF). Signup step 2 never offered them; the account panel already
+said "Coming soon". Now the privacy page follows the same flags.
+
+- [x] /dashboard/privacy: hide messaging_channel_sms + announcements while the SMS flag is off, messaging_channel_whatsapp while the WhatsApp flag is off; an already-granted consent stays visible so it can be revoked (POPIA s.11(3))
+- [x] /admin/settings hints say the flags also reveal the consent cards
+- [x] Harness screenshot on08: privacy page with both flags off (six cards)
+
 ## VERIFY
 
 - [x] Full suite + build green (588 tests, 66 files; production build green)

@@ -13,11 +13,7 @@ interface Props {
 }
 
 type SettingsTab =
-  | "launch"
-  | "growth"
-  | "notifications"
-  | "verification"
-  | "ranking";
+  "launch" | "growth" | "notifications" | "verification" | "ranking";
 
 interface SettingRow {
   key: SettingKey;
@@ -50,8 +46,7 @@ const TABS: Array<{ id: SettingsTab; label: string; blurb: string }> = [
   {
     id: "notifications",
     label: "Notifications",
-    blurb:
-      "Which channels may reach users, and when they must stay quiet.",
+    blurb: "Which channels may reach users, and when they must stay quiet.",
   },
   {
     id: "verification",
@@ -112,8 +107,7 @@ const ROWS: SettingRow[] = [
     key: "feature_flag_email_notifications",
     group: "notifications",
     label: "Email notifications",
-    hint:
-      "Transactional email for the notification kinds users opted into. Configure and test the Email provider on Integrations first.",
+    hint: "Transactional email for the notification kinds users opted into. Configure and test the Email provider on Integrations first.",
     type: "boolean",
   },
   {
@@ -139,8 +133,7 @@ const ROWS: SettingRow[] = [
     key: "feature_flag_employer_mix_lookup",
     group: "verification",
     label: "Per-employer mix lookup (government)",
-    hint:
-      "Ships dormant. Activate when the DEL §8 partnership lands.",
+    hint: "Ships dormant. Activate when the DEL §8 partnership lands.",
     type: "boolean",
   },
   // ── Launch switches ──────────────────────────────────────────────
@@ -202,14 +195,16 @@ const ROWS: SettingRow[] = [
     type: "boolean",
     hint:
       "Critical notifications by SMS. Needs the SMS integration configured " +
-      "on Integrations; sends also require per-user consent + verified phone.",
+      "on Integrations; sends also require per-user consent + verified phone. " +
+      "Off = the SMS and Platform announcements consent cards stay hidden on " +
+      "seekers' Privacy & consent page.",
   },
   {
     key: "feature_flag_whatsapp_channel_enabled",
     group: "notifications",
     label: "WhatsApp notifications channel",
     type: "boolean",
-    hint: "Same gates as SMS, over WhatsApp Business.",
+    hint: "Same gates as SMS, over WhatsApp Business. Off = the WhatsApp consent card stays hidden.",
   },
   {
     key: "feature_flag_sms_quiet_hours_start",
@@ -469,9 +464,13 @@ function SettingRow({ row, value }: { row: SettingRow; value: unknown }) {
     return (
       <li className="flex flex-wrap items-center justify-between gap-3 rounded-[var(--radius-md)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] px-4 py-3">
         <div className="min-w-0">
-          <div className="text-sm text-[color:var(--color-ink)]">{row.label}</div>
+          <div className="text-sm text-[color:var(--color-ink)]">
+            {row.label}
+          </div>
           {row.hint && (
-            <p className="mt-0.5 text-xs text-[color:var(--color-ink-soft)]">{row.hint}</p>
+            <p className="mt-0.5 text-xs text-[color:var(--color-ink-soft)]">
+              {row.hint}
+            </p>
           )}
         </div>
         <div className="flex items-center gap-3">
@@ -516,10 +515,14 @@ function SettingRow({ row, value }: { row: SettingRow; value: unknown }) {
         </div>
         <div className="flex items-center gap-3">
           {status === "saved" && (
-            <span className="text-xs text-[color:var(--color-employed)]">Saved</span>
+            <span className="text-xs text-[color:var(--color-employed)]">
+              Saved
+            </span>
           )}
           {error && (
-            <span className="text-xs text-[color:var(--color-danger)]">{error}</span>
+            <span className="text-xs text-[color:var(--color-danger)]">
+              {error}
+            </span>
           )}
           <button
             type="button"
@@ -585,7 +588,9 @@ function SettingRow({ row, value }: { row: SettingRow; value: unknown }) {
       <p className="text-[0.68rem] text-[color:var(--color-ink-soft)]">
         {row.hint}
         {status === "saved" && (
-          <span className="ml-2 text-[color:var(--color-employed)]">Saved.</span>
+          <span className="ml-2 text-[color:var(--color-employed)]">
+            Saved.
+          </span>
         )}
         {error && (
           <span className="ml-2 text-[color:var(--color-danger)]">{error}</span>

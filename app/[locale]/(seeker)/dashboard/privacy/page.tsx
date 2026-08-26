@@ -15,6 +15,7 @@ import { SearchabilityPauseControl } from "@/components/feature/privacy/Searchab
 import { readMyPauseState } from "@/lib/consent/pause";
 import { BlockedEmployersList } from "@/components/feature/privacy/BlockedEmployersList";
 import { listMyBlocks } from "@/lib/seeker/blocks";
+import { getSetting } from "@/lib/admin/settings";
 
 interface ConsentSnapshot {
   state: ConsentState;
@@ -40,7 +41,11 @@ const FALLBACK_CONSENT: Record<
   // Phase 11.4.4  per-channel opt-in. Default off; admin must
   // additionally flip the platform flag before any send fires.
   messaging_channel_sms: { state: "none", grantedAt: null, version: "v2.1" },
-  messaging_channel_whatsapp: { state: "none", grantedAt: null, version: "v2.1" },
+  messaging_channel_whatsapp: {
+    state: "none",
+    grantedAt: null,
+    version: "v2.1",
+  },
   // Phase 25.4  opt-in platform announcements over SMS. Default off.
   announcements: { state: "none", grantedAt: null, version: "v2.1" },
 };
@@ -117,6 +122,31 @@ export default async function PrivacyPage({
   // Phase 11.3.2  current employer blocks for the seeker.
   const blocks = await listMyBlocks();
 
+  // 2026-08-26  the phone-channel consents (SMS, WhatsApp, SMS
+  // announcements) only appear once the admin has switched the channel
+  // on (/admin/settings, Notifications). Founder call: default off, no
+  // asking for consent to a channel that cannot send. One exception:
+  // a consent someone ALREADY granted stays visible while the channel
+  // is off, so revoking is always possible (POPIA s.11(3)).
+  const smsChannelOn = await getSetting<boolean>(
+    "feature_flag_sms_channel_enabled",
+  );
+  const whatsappChannelOn = await getSetting<boolean>(
+    "feature_flag_whatsapp_channel_enabled",
+  );
+  const channelFor: Partial<
+    Record<(typeof CONSENT_PURPOSES)[number], boolean>
+  > = {
+    messaging_channel_sms: smsChannelOn,
+    messaging_channel_whatsapp: whatsappChannelOn,
+    announcements: smsChannelOn,
+  };
+  const visiblePurposes = CONSENT_PURPOSES.filter((purpose) => {
+    const gate = channelFor[purpose];
+    if (gate === undefined || gate) return true;
+    return (rows[purpose] ?? FALLBACK_CONSENT[purpose]).state === "granted";
+  });
+
   return (
     <DashboardMasthead
       role="seeker"
@@ -126,11 +156,31 @@ export default async function PrivacyPage({
     >
       {/* Phase 10.2  help deep-links (D6). */}
       <div className="mb-4 flex flex-wrap items-center gap-2">
-        <HelpLink role="seeker" slug="what-consent-purposes-mean" label="Consent purposes explained" />
-        <HelpLink role="seeker" slug="pausing-searchability" label="Pause searchability" />
-        <HelpLink role="seeker" slug="blocking-employers" label="Block an employer" />
-        <HelpLink role="seeker" slug="exporting-your-data-popia-section-23" label="Export your data (s.23)" />
-        <HelpLink role="seeker" slug="deleting-your-account-right-to-erasure" label="Delete your account" />
+        <HelpLink
+          role="seeker"
+          slug="what-consent-purposes-mean"
+          label="Consent purposes explained"
+        />
+        <HelpLink
+          role="seeker"
+          slug="pausing-searchability"
+          label="Pause searchability"
+        />
+        <HelpLink
+          role="seeker"
+          slug="blocking-employers"
+          label="Block an employer"
+        />
+        <HelpLink
+          role="seeker"
+          slug="exporting-your-data-popia-section-23"
+          label="Export your data (s.23)"
+        />
+        <HelpLink
+          role="seeker"
+          slug="deleting-your-account-right-to-erasure"
+          label="Delete your account"
+        />
       </div>
 
       <section aria-labelledby="consents-h">
@@ -141,7 +191,7 @@ export default async function PrivacyPage({
           {t("consents")}
         </h2>
         <ul className="space-y-3">
-          {CONSENT_PURPOSES.map((purpose) => {
+          {visiblePurposes.map((purpose) => {
             const c = rows[purpose] ?? FALLBACK_CONSENT[purpose];
             return (
               <li key={purpose}>
@@ -182,8 +232,8 @@ export default async function PrivacyPage({
         <p className="mb-4 max-w-prose text-sm text-[color:var(--color-ink-soft)]">
           Private to you. Blocked employers can&rsquo;t find you in search or
           send you new invites; they are <strong>not</strong> told. Use the
-          report flow on an invitation card instead if you want admins to
-          review the employer&rsquo;s conduct.
+          report flow on an invitation card instead if you want admins to review
+          the employer&rsquo;s conduct.
         </p>
         <BlockedEmployersList initial={blocks} locale={locale} />
       </section>
@@ -240,7 +290,9 @@ export default async function PrivacyPage({
 
 async function loadConsents(
   userId: string | undefined,
-): Promise<Partial<Record<(typeof CONSENT_PURPOSES)[number], ConsentSnapshot>>> {
+): Promise<
+  Partial<Record<(typeof CONSENT_PURPOSES)[number], ConsentSnapshot>>
+> {
   if (!userId || !process.env.DATABASE_URL) return {};
   try {
     const db = getDb();
