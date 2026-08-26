@@ -179,7 +179,9 @@ async function record(name, choreography) {
 
 const browser = await chromium.launch();
 const ONLY = process.env.ONLY?.split(",");
-const want = (n) => !ONLY || ONLY.some((o) => n.includes(o));
+// Exact match on the "vN" prefix: ONLY=v1 must not also record v10-v17
+// (it did once, and overwrote six reviewed videos).
+const want = (n) => !ONLY || ONLY.some((o) => n.split("-")[0] === o.trim());
 
 // ---- V1 · The search, live (~20s) ----
 if (want("v1")) await record("v1-search-live.mp4", async (page, markLead) => {
@@ -200,10 +202,38 @@ if (want("v1")) await record("v1-search-live.mp4", async (page, markLead) => {
   await page.waitForLoadState("load");
   await page.waitForTimeout(1600);
   await injectOverlaySystem(page);
-  const note = showNote(page, "Real people. Real skills. <em>Ready to work.</em>", 3200);
-  await smoothScroll(page, 1900, 6500);
-  await note;
-  await showNote(page, "Live availability. Honest freshness.", 2600);
+  const n1 = showNote(page, "Real people. Real skills. <em>Ready to work.</em>", 3000);
+  await smoothScroll(page, 700, 3000);
+  await n1;
+
+  // 2026-08-26 (founder): the search alone left out the best part. Show
+  // the Citizen-Visibility toggle in the same take: South Africans rise
+  // to the top, and the scroll proves every other nationality is still
+  // there. Scope to the OPEN sheet (the hidden desktop rail carries the
+  // same labels).
+  await page.getByRole("button", { name: /open filters/i }).click();
+  const sheet = page.getByRole("dialog", { name: /filters/i });
+  await sheet.waitFor({ timeout: 5000 }).catch(async () => {
+    await page.getByRole("button", { name: /open filters/i }).click();
+    await sheet.waitFor({ timeout: 5000 });
+  });
+  await page.waitForTimeout(600);
+  const n2 = showNote(page, "One tap: <em>South Africans first</em>.", 2600, { atTop: true });
+  await sheet.getByText("Highlight SA citizens").click();
+  await page.waitForTimeout(1200);
+  await n2;
+  await sheet.getByRole("button", { name: /^apply$/i }).click();
+  await page.waitForLoadState("load");
+  await page.waitForTimeout(1600);
+
+  await injectOverlaySystem(page);
+  const n3 = showNote(page, "SA citizens grouped on top. <em>Nobody removed.</em>", 3400);
+  await smoothScroll(page, 1100, 4200);
+  await n3;
+  const n4 = showNote(page, "Keep scrolling: every nationality is <em>still here</em>.", 3200);
+  await smoothScroll(page, 1300, 4000);
+  await n4;
+  await showNote(page, "Matched by skill and place. Live availability. <em>Honest freshness.</em>", 3000);
   await showEndCard(page, 2800);
 });
 

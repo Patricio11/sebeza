@@ -13,7 +13,7 @@ cards, the flag stripe) is baked in.
 
 | File | Bank | What it is |
 |---|---|---|
-| `v1-search-live.mp4` (~20s) | V1 | The real /search: typing "developer", live results, honest badges + freshness, overlay notes. |
+| `v1-search-live.mp4` (~31s) | V1 | The real /search: typing "developer", live results, then the Highlight SA citizens toggle: South Africans grouped on top, scroll into the other nationalities, nobody removed. Re-cut 2026-08-26. |
 | `v5-to-work.mp4` (~12s) | V5 | The anthem: mark, wordmark, "to work.", stripe sweep. Pin this one. |
 | `v6-cv-pile.mp4` (~20s) | V6 | The text-driven CV-pile story ("number 347" → "You get found"). |
 | `v8-verified-honesty.mp4` (~19s) | V8 | The real register: Unverified badges shown honestly, a real profile with status date + audit strip. |
