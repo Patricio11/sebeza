@@ -235,7 +235,9 @@
         },
         "cityLabel": "Stad of dorp",
         "cityHint": "Opsioneel nou, maar werkgewers soek per plek. Jy kan dit enige tyd verander.",
-        "cityLater": "Ek voeg dit later by"
+        "cityLater": "Ek voeg dit later by",
+        "cityPickProvince": "Kies eers 'n provinsie.",
+        "provinceLabel": "Provinsie"
       },
       "stepHints": {
         "name": "Verskyn by verstek op jou profiel as \"Naam L.\". Jou volle van verskyn eers nadat jy kontaktoestemming gegee het."

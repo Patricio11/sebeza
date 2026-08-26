@@ -531,6 +531,11 @@ export const profiles = pgTable("profiles", {
       `status.stale.warning` for this profile. NULL = never sent.
       Idempotency anchor so we don't spam on every nightly run. */
   statusStaleLastSentAt: timestamp("status_stale_last_sent_at"),
+  /** 2026-08-26  when the once-ever day-after "finish your profile"
+      nudge was sent (cron profile-completeness-nudge). NULL = never.
+      The marker lives on the profile, not in `notifications`, so a
+      cleared bell can never cause a second nudge. */
+  profileCompleteNotifiedAt: timestamp("profile_complete_notified_at"),
   /**
    * Phase 11.5.1  voluntary secondary-intent tags. Independent of
    * `status`  a fully-employed seeker can be open to mentorship

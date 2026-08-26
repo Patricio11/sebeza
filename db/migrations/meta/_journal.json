@@ -540,6 +540,13 @@
       "when": 1787270408002,
       "tag": "0076_skill_categories",
       "breakpoints": false
+    },
+    {
+      "idx": 77,
+      "version": "7",
+      "when": 1787270408003,
+      "tag": "0077_profile_complete_notified",
+      "breakpoints": false
     }
   ]
 }

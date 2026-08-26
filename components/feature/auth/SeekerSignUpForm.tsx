@@ -165,7 +165,8 @@ interface FormState {
   /** 2026-08-26  city SLUG (profiles.city convention), optional. Asked
    *  up front because people forgot to add it on the profile later. */
   city: string;
-  status: "open_to_work" | "employed" | "self_employed" | "studying" | "unemployed";
+  status:
+    "open_to_work" | "employed" | "self_employed" | "studying" | "unemployed";
   /** Phase 7.5  optional work-availability set captured at sign-up. */
   workAvailability: (
     | "casual"
@@ -311,7 +312,8 @@ export function SeekerSignUpForm({
   applyContext,
 }: Props = {}) {
   const router = useRouter();
-  const PROFESSIONS = professions && professions.length > 0 ? professions : MOCK_PROFESSIONS;
+  const PROFESSIONS =
+    professions && professions.length > 0 ? professions : MOCK_PROFESSIONS;
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   // Phase 34  post-sign-up congrats moment for the apply funnel. When
@@ -763,8 +765,7 @@ export function SeekerSignUpForm({
               )}
               <ul className="space-y-2">
                 {group.purposes.map((purpose) => {
-                  const required =
-                    REQUIRED_FOR_SEARCHABILITY.includes(purpose);
+                  const required = REQUIRED_FOR_SEARCHABILITY.includes(purpose);
                   // Per-purpose onboarding explainer (D8 source text
                   // for vacancy_matching  locked plan copy). Renders
                   // as tap-to-expand on mobile, always visible on md+.
@@ -894,9 +895,9 @@ export function SeekerSignUpForm({
           </div>
 
           <p className="rounded-[var(--radius-sm)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface-sunk)] px-4 py-3 text-xs text-[color:var(--color-ink-soft)]">
-            Granted consents are stored with the version of the consent text
-            you saw and the timestamp. You can revoke any of them from your
-            privacy centre at any time.
+            Granted consents are stored with the version of the consent text you
+            saw and the timestamp. You can revoke any of them from your privacy
+            centre at any time.
           </p>
           <div className="flex gap-3">
             <Button
@@ -947,9 +948,9 @@ export function SeekerSignUpForm({
               </legend>
               <p className="mb-3 text-xs leading-relaxed text-[color:var(--color-ink-soft)]">
                 {applyContext.orgName} asked for these skills on{" "}
-                <strong>{applyContext.vacancyTitle}</strong>. Tap the ones
-                you have: they&rsquo;re saved to your profile and help you
-                rank for this role. You can refine them any time.
+                <strong>{applyContext.vacancyTitle}</strong>. Tap the ones you
+                have: they&rsquo;re saved to your profile and help you rank for
+                this role. You can refine them any time.
               </p>
               <div className="flex flex-wrap gap-2">
                 {applyContext.skills.map((s) => {
@@ -964,9 +965,7 @@ export function SeekerSignUpForm({
                         setState((prev) => ({
                           ...prev,
                           applySkillSlugs: selected
-                            ? prev.applySkillSlugs.filter(
-                                (x) => x !== s.slug,
-                              )
+                            ? prev.applySkillSlugs.filter((x) => x !== s.slug)
                             : [...prev.applySkillSlugs, s.slug],
                         }))
                       }
@@ -984,42 +983,56 @@ export function SeekerSignUpForm({
               </div>
             </fieldset>
           )}
-          <SelectField
-            id="province"
-            label={t("step3.locationLabel")}
-            value={state.province}
-            onChange={(e) =>
-              // A province change invalidates the city pick.
-              setState({ ...state, province: e.target.value, city: "" })
-            }
-            required
-          >
-            <option value="">Select…</option>
-            {PROVINCES.map((p) => (
-              <option key={p.slug} value={p.label}>
-                {p.label}
-              </option>
-            ))}
-          </SelectField>
-          {/* 2026-08-26  city at signup (optional; nudged later if
-              skipped). Cities follow the picked province; stored as the
-              slug like the profile editor. */}
-          {state.province && (
-            <SelectField
-              id="city"
-              label={t("step3.cityLabel")}
-              hint={t("step3.cityHint")}
-              value={state.city}
-              onChange={(e) => setState({ ...state, city: e.target.value })}
-            >
-              <option value="">{t("step3.cityLater")}</option>
-              {(PROVINCES.find((p) => p.label === state.province)?.cities ?? []).map((c) => (
-                <option key={c.slug} value={c.slug}>
-                  {c.label}
-                </option>
-              ))}
-            </SelectField>
-          )}
+          {/* 2026-08-26  province + city share one row (founder ask).
+              City is optional and follows the picked province; stored
+              as the slug like the profile editor. Skipped cities are
+              nudged the day after. */}
+          <fieldset>
+            <legend className="mb-1.5 text-[0.72rem] uppercase tracking-[0.22em] text-[color:var(--color-ink)]">
+              {t("step3.locationLabel")}
+            </legend>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <SelectField
+                id="province"
+                label={t("step3.provinceLabel")}
+                value={state.province}
+                onChange={(e) =>
+                  // A province change invalidates the city pick.
+                  setState({ ...state, province: e.target.value, city: "" })
+                }
+                required
+              >
+                <option value="">Select…</option>
+                {PROVINCES.map((p) => (
+                  <option key={p.slug} value={p.label}>
+                    {p.label}
+                  </option>
+                ))}
+              </SelectField>
+              <SelectField
+                id="city"
+                label={t("step3.cityLabel")}
+                hint={
+                  state.province
+                    ? t("step3.cityHint")
+                    : t("step3.cityPickProvince")
+                }
+                value={state.city}
+                disabled={!state.province}
+                onChange={(e) => setState({ ...state, city: e.target.value })}
+              >
+                <option value="">{t("step3.cityLater")}</option>
+                {(
+                  PROVINCES.find((p) => p.label === state.province)?.cities ??
+                  []
+                ).map((c) => (
+                  <option key={c.slug} value={c.slug}>
+                    {c.label}
+                  </option>
+                ))}
+              </SelectField>
+            </div>
+          </fieldset>
           <SelectField
             id="status"
             label={t("step3.statusLabel")}
@@ -1058,9 +1071,9 @@ export function SeekerSignUpForm({
               <p className="mb-4 text-xs text-[color:var(--color-ink-soft)]">
                 Optional. Tells employers searching the platform where
                 you&rsquo;re currently placed + grows the platform&rsquo;s
-                employer database honestly. Pick from the list, or use
-                Other to add a new employer (admin reviews these before
-                they appear in the picker for others).
+                employer database honestly. Pick from the list, or use Other to
+                add a new employer (admin reviews these before they appear in
+                the picker for others).
               </p>
               <div className="grid gap-4 md:grid-cols-2">
                 <ComboboxField
@@ -1206,7 +1219,11 @@ export function SeekerSignUpForm({
                 }
               >
                 {state.academic.isStudent && (
-                  <svg viewBox="0 0 12 12" className="size-3" aria-hidden="true">
+                  <svg
+                    viewBox="0 0 12 12"
+                    className="size-3"
+                    aria-hidden="true"
+                  >
                     <path
                       d="M2 6.5 5 9.5 10 3.5"
                       fill="none"
@@ -1484,7 +1501,9 @@ export function SeekerSignUpForm({
                       checked={checked}
                       onChange={(v) => {
                         const next = v
-                          ? Array.from(new Set([...state.workAvailability, kind]))
+                          ? Array.from(
+                              new Set([...state.workAvailability, kind]),
+                            )
                           : state.workAvailability.filter((x) => x !== kind);
                         setState({ ...state, workAvailability: next });
                       }}
@@ -1532,9 +1551,7 @@ export function SeekerSignUpForm({
           }
           eyebrow={applyCongrats?.applied ? "Application sent" : "Almost there"}
           title={
-            applyCongrats?.applied
-              ? "Nicely done."
-              : "Your profile is created."
+            applyCongrats?.applied ? "Nicely done." : "Your profile is created."
           }
           footer={
             <button
@@ -1566,9 +1583,9 @@ export function SeekerSignUpForm({
                 </>
               ) : (
                 <>
-                  Your Sebenza profile is created. This vacancy&rsquo;s link
-                  is no longer active, but your profile keeps you findable
-                  for every open role on the platform.
+                  Your Sebenza profile is created. This vacancy&rsquo;s link is
+                  no longer active, but your profile keeps you findable for
+                  every open role on the platform.
                 </>
               )}
             </p>
@@ -1579,8 +1596,8 @@ export function SeekerSignUpForm({
             </p>
             <ol className="mt-2 list-decimal space-y-1.5 pl-5 text-sm leading-relaxed text-[color:var(--color-ink)]">
               <li>
-                <strong>Verify your email</strong>. We&rsquo;ve sent you a
-                link, and your account activates the moment you tap it.
+                <strong>Verify your email</strong>. We&rsquo;ve sent you a link,
+                and your account activates the moment you tap it.
               </li>
               <li>
                 <strong>Complete your profile</strong>. Add your skills,

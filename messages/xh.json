@@ -235,7 +235,9 @@
         },
         "cityLabel": "Isixeko okanye idolophu",
         "cityHint": "Kuyakhethwa ngoku, kodwa abaqeshi bakhangela ngendawo. Ungayitshintsha nanini na.",
-        "cityLater": "Ndiza kuyongeza kamva"
+        "cityLater": "Ndiza kuyongeza kamva",
+        "cityPickProvince": "Khetha iphondo kuqala.",
+        "provinceLabel": "Iphondo"
       },
       "stepHints": {
         "name": "Livela kwiprofayile yakho njengo \"Gama L.\" ngokuzenzekelayo. Ifani yakho epheleleyo ivela kuphela emva kokuba unike imvume yoqhagamshelwano."

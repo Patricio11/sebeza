@@ -53,8 +53,16 @@ learning ───▶ /dashboard/grow "Learning paths" section behind
 - [x] Tests: nudge cron (secret, 24h grace, once-ever, threshold) written; runs on the Docker harness
 - [x] i18n for every new seeker-facing string (step3.cityLabel/cityHint/cityLater)
 
+### Follow-up (founder, 2026-08-26 afternoon)
+
+- [x] Migration 0077: `profiles.profile_complete_notified_at` (NULL = never nudged) + partial index; the cron reads and sets it (marker on the profile, not the bell)
+- [x] Nudge trigger widened: a day after signup, fire when completeness < 50% OR any main info is missing (summary, 3+ skills, city); never repeated
+- [x] Bespoke nudge email: checklist of what is missing with a one-line why each, "Finish your profile" CTA, only-reminder note
+- [x] Signup step 3: province + city on one row; city disabled with a "pick a province first" hint until a province is chosen
+- [x] Tests: marker set on send, main-info trigger at high completeness, complete profile never nudged
+
 ## VERIFY
 
 - [x] Full suite + build green (588 tests, 66 files; production build green)
-- [x] Harness screenshots on01-on04 in test-results/: signup step 3 city select, dashboard next steps (no ID/certificate asks, live skills count), grow page without the Learning paths section or help chip, /admin/settings Launch tab flag row. Push card renders nothing on the harness (web-push flag OFF there), so it is exercised by the existing PushOptIn behaviour on prod
+- [x] Harness screenshots on01-on06 (on05 = rendered nudge email, on06 = one-row province/city before a province is picked) in test-results/: signup step 3 city select, dashboard next steps (no ID/certificate asks, live skills count), grow page without the Learning paths section or help chip, /admin/settings Launch tab flag row. Push card renders nothing on the harness (web-push flag OFF there), so it is exercised by the existing PushOptIn behaviour on prod
 - [x] Neon: nothing to migrate (no schema change); flag lands OFF via DEFAULTS

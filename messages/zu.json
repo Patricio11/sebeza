@@ -235,7 +235,9 @@
         },
         "cityLabel": "Idolobha noma idolobhana",
         "cityHint": "Kuyakhethwa manje, kodwa abaqashi basesha ngendawo. Ungakushintsha noma nini.",
-        "cityLater": "Ngizokwengeza kamuva"
+        "cityLater": "Ngizokwengeza kamuva",
+        "cityPickProvince": "Khetha isifundazwe kuqala.",
+        "provinceLabel": "Isifundazwe"
       },
       "stepHints": {
         "name": "Kuvela kwiphrofayela yakho njengo \"Gama L.\" ngokuzenzakalela. Isibongo sakho esiphelele sivela kuphela uma unikeze imvume yokuxhunywa."

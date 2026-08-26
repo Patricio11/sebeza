@@ -148,12 +148,90 @@ function interviewDetailsTemplate(
   return { subject: ctx.title, html };
 }
 
+// Day-after "finish your profile" nudge: the missing pieces render as a
+// checklist with a one-line reason each, so the email reads as a short
+// to-do list. `meta.missing` holds stable keys written by the cron.
+const PROFILE_NUDGE_ITEMS: Record<string, { label: string; why: string }> = {
+  summary: {
+    label: "A short summary about you",
+    why: "Two or three sentences. It is the first thing an employer reads.",
+  },
+  skills: {
+    label: "At least three skills",
+    why: "Skills are how employers search. Each one you add is another way to be found.",
+  },
+  city: {
+    label: "Your city or town",
+    why: "Employers search near where they hire. Without a city you are not in their results.",
+  },
+  photo: {
+    label: "A profile photo",
+    why: "Optional, but profiles with a photo get contacted more often.",
+  },
+};
+
+function profileNudgeTemplate(ctx: NotificationEmailContext): NotificationEmailContent {
+  const link = fullLink(ctx.link);
+  const keys = Array.isArray(ctx.meta?.missing)
+    ? (ctx.meta.missing as unknown[]).filter((k): k is string => typeof k === "string")
+    : [];
+  const completeness =
+    typeof ctx.meta?.completeness === "number" ? ctx.meta.completeness : null;
+  const rows = keys
+    .map((k, i) => {
+      const item = PROFILE_NUDGE_ITEMS[k] ?? { label: k, why: "" };
+      const bg = i % 2 === 0 ? "#f3efe7" : "#fbf8f0";
+      return `
+      <tr>
+        <td style="padding:12px 16px;background:${bg};vertical-align:top;width:32px;">
+          <div style="width:20px;height:20px;border:1.5px solid #14110d;border-radius:4px;"></div>
+        </td>
+        <td style="padding:12px 16px 12px 0;background:${bg};">
+          <div style="font-size:16px;line-height:1.4;color:#14110d;font-weight:500;">${escapeHtml(item.label)}</div>
+          ${item.why ? `<div style="font-size:13px;line-height:1.5;color:#5a5249;margin-top:4px;">${escapeHtml(item.why)}</div>` : ""}
+        </td>
+      </tr>`;
+    })
+    .join("");
+  const intro =
+    completeness !== null
+      ? `Your profile is <strong>${completeness}% complete</strong>, and employers read complete profiles first.`
+      : "Employers read complete profiles first.";
+  const html = emailShell(`
+    <p style="font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:#003d1f;margin:16px 0 8px;">One day in</p>
+    <h1 style="font-family:'Fraunces',Georgia,serif;font-size:28px;line-height:1.2;margin:0 0 16px;color:#14110d;">
+      ${escapeHtml(ctx.title)}
+    </h1>
+    <p style="font-size:16px;line-height:1.6;margin:0 0 16px;color:#14110d;">
+      ${greeting(ctx.recipientName)}
+    </p>
+    <p style="font-size:16px;line-height:1.6;margin:0 0 20px;color:#14110d;">
+      Welcome to Sebenza. ${intro} Finishing takes about five minutes. Here is what is still missing:
+    </p>
+    ${
+      rows
+        ? `<table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:separate;border-spacing:0;margin:0 0 24px;border-radius:8px;overflow:hidden;">${rows}</table>`
+        : ""
+    }
+    ${ctaButton(link, "Finish your profile")}
+    <p style="font-size:14px;line-height:1.6;color:#5a5249;margin:0 0 8px;">
+      This is the only reminder we will send about this. Your profile stays private until you switch on searchability, and you can change anything later.
+    </p>
+    <p style="font-size:12px;line-height:1.6;color:#5a5249;margin:24px 0 0;font-style:italic;">
+      You can change which Sebenza emails you receive in your account's
+      Notification preferences.
+    </p>
+  `);
+  return { subject: ctx.title, html };
+}
+
 const TEMPLATES: Partial<
   Record<
     NotificationKind,
     (ctx: NotificationEmailContext) => NotificationEmailContent
   >
 > = {
+  "profile.completeness.nudge": profileNudgeTemplate,
   "interview.scheduled": interviewDetailsTemplate,
   "interview.reminder": interviewDetailsTemplate,
   "interview.reminder.employer": interviewDetailsTemplate,
