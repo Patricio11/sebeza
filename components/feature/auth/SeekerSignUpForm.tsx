@@ -987,52 +987,46 @@ export function SeekerSignUpForm({
               City is optional and follows the picked province; stored
               as the slug like the profile editor. Skipped cities are
               nudged the day after. */}
-          <fieldset>
-            <legend className="mb-1.5 text-[0.72rem] uppercase tracking-[0.22em] text-[color:var(--color-ink)]">
-              {t("step3.locationLabel")}
-            </legend>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <SelectField
-                id="province"
-                label={t("step3.provinceLabel")}
-                value={state.province}
-                onChange={(e) =>
-                  // A province change invalidates the city pick.
-                  setState({ ...state, province: e.target.value, city: "" })
-                }
-                required
-              >
-                <option value="">Select…</option>
-                {PROVINCES.map((p) => (
-                  <option key={p.slug} value={p.label}>
-                    {p.label}
-                  </option>
-                ))}
-              </SelectField>
-              <SelectField
-                id="city"
-                label={t("step3.cityLabel")}
-                hint={
-                  state.province
-                    ? t("step3.cityHint")
-                    : t("step3.cityPickProvince")
-                }
-                value={state.city}
-                disabled={!state.province}
-                onChange={(e) => setState({ ...state, city: e.target.value })}
-              >
-                <option value="">{t("step3.cityLater")}</option>
-                {(
-                  PROVINCES.find((p) => p.label === state.province)?.cities ??
-                  []
-                ).map((c) => (
-                  <option key={c.slug} value={c.slug}>
-                    {c.label}
-                  </option>
-                ))}
-              </SelectField>
-            </div>
-          </fieldset>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <SelectField
+              id="province"
+              label={t("step3.provinceLabel")}
+              value={state.province}
+              onChange={(e) =>
+                // A province change invalidates the city pick.
+                setState({ ...state, province: e.target.value, city: "" })
+              }
+              required
+            >
+              <option value="">Select…</option>
+              {PROVINCES.map((p) => (
+                <option key={p.slug} value={p.label}>
+                  {p.label}
+                </option>
+              ))}
+            </SelectField>
+            <SelectField
+              id="city"
+              label={t("step3.cityLabel")}
+              hint={
+                state.province
+                  ? t("step3.cityHint")
+                  : t("step3.cityPickProvince")
+              }
+              value={state.city}
+              disabled={!state.province}
+              onChange={(e) => setState({ ...state, city: e.target.value })}
+            >
+              <option value="">{t("step3.cityLater")}</option>
+              {(
+                PROVINCES.find((p) => p.label === state.province)?.cities ?? []
+              ).map((c) => (
+                <option key={c.slug} value={c.slug}>
+                  {c.label}
+                </option>
+              ))}
+            </SelectField>
+          </div>
           <SelectField
             id="status"
             label={t("step3.statusLabel")}
