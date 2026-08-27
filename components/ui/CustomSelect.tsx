@@ -109,6 +109,9 @@ export function CustomSelect({
     left: number;
     bottom: number;
     width: number;
+    /** Viewport height at measure time; decides whether the desktop
+        popover opens below the trigger or flips above it. */
+    viewportH: number;
   } | null>(null);
 
   useEffect(() => {
@@ -124,6 +127,7 @@ export function CustomSelect({
       left: r.left,
       bottom: r.bottom,
       width: r.width,
+      viewportH: window.innerHeight,
     });
   }, []);
 
@@ -214,15 +218,12 @@ export function CustomSelect({
     [isControlled, onChange],
   );
 
-  const onTriggerKey = useCallback(
-    (e: KeyboardEvent<HTMLButtonElement>) => {
-      if (e.key === "Enter" || e.key === " " || e.key === "ArrowDown") {
-        e.preventDefault();
-        setOpen(true);
-      }
-    },
-    [],
-  );
+  const onTriggerKey = useCallback((e: KeyboardEvent<HTMLButtonElement>) => {
+    if (e.key === "Enter" || e.key === " " || e.key === "ArrowDown") {
+      e.preventDefault();
+      setOpen(true);
+    }
+  }, []);
 
   const onListKey = useCallback(
     (e: KeyboardEvent<HTMLUListElement>) => {
@@ -271,12 +272,7 @@ export function CustomSelect({
     <div className={cn("relative", className)}>
       {/* Hidden input keeps native form submission working unchanged. */}
       {name && (
-        <input
-          type="hidden"
-          name={name}
-          value={value}
-          required={required}
-        />
+        <input type="hidden" name={name} value={value} required={required} />
       )}
 
       <button
@@ -329,7 +325,8 @@ export function CustomSelect({
         />
       </button>
 
-      {open && mounted &&
+      {open &&
+        mounted &&
         createPortal(
           <>
             {/* Mobile backdrop */}
@@ -351,18 +348,14 @@ export function CustomSelect({
                 "fixed inset-x-0 bottom-0 max-h-[80vh] rounded-t-2xl border-t-2 border-[color:var(--color-ink)]",
                 // Desktop popover  clear bottom-sheet positioning + apply
                 // measured viewport coords via CSS custom properties.
-                "md:inset-auto md:bottom-auto md:top-[var(--cs-top)] md:left-[var(--cs-left)] md:min-w-[var(--cs-min-w)]",
-                "md:max-h-80 md:max-w-md md:rounded-2xl md:border md:border-[color:var(--color-hairline)] md:border-t-2 md:border-t-[color:var(--color-ink)]",
+                // 2026-08-27  flips ABOVE the trigger when the space below
+                // is too small (sidebar language switcher sat at the bottom
+                // of the viewport and its menu was cut off). `--cs-max-h`
+                // clamps the panel to whichever side it opens on.
+                "md:inset-auto md:top-[var(--cs-top)] md:bottom-[var(--cs-bottom)] md:left-[var(--cs-left)] md:min-w-[var(--cs-min-w)]",
+                "md:max-h-[var(--cs-max-h)] md:max-w-md md:rounded-2xl md:border md:border-[color:var(--color-hairline)] md:border-t-2 md:border-t-[color:var(--color-ink)]",
               )}
-              style={
-                triggerRect
-                  ? ({
-                      "--cs-top": `${triggerRect.bottom + 8}px`,
-                      "--cs-left": `${triggerRect.left}px`,
-                      "--cs-min-w": `${triggerRect.width}px`,
-                    } as React.CSSProperties)
-                  : undefined
-              }
+              style={triggerRect ? desktopPopoverVars(triggerRect) : undefined}
             >
               {/* Mobile-only header with title + close */}
               <div className="flex items-center justify-between gap-3 border-b border-[color:var(--color-hairline)] bg-[color:var(--color-paper)] px-5 py-3 md:hidden">
@@ -385,10 +378,12 @@ export function CustomSelect({
                 role="listbox"
                 tabIndex={-1}
                 aria-activedescendant={
-                  activeIndex >= 0 ? `${buttonId}-opt-${activeIndex}` : undefined
+                  activeIndex >= 0
+                    ? `${buttonId}-opt-${activeIndex}`
+                    : undefined
                 }
                 onKeyDown={onListKey}
-                className="max-h-[calc(80vh-4rem)] overflow-y-auto py-1 outline-none md:max-h-72"
+                className="max-h-[calc(80vh-4rem)] overflow-y-auto py-1 outline-none md:max-h-[calc(var(--cs-max-h)-0.75rem)]"
               >
                 {options.map((opt, i) => {
                   const isSelected = opt.value === value;
@@ -401,9 +396,7 @@ export function CustomSelect({
                       aria-selected={isSelected}
                       aria-disabled={opt.disabled}
                       data-idx={i}
-                      onMouseEnter={() =>
-                        !opt.disabled && setActiveIndex(i)
-                      }
+                      onMouseEnter={() => !opt.disabled && setActiveIndex(i)}
                       onClick={() => {
                         if (!opt.disabled) commit(opt.value);
                       }}
@@ -441,4 +434,33 @@ export function CustomSelect({
         )}
     </div>
   );
+}
+
+/**
+ * Desktop popover placement. Opens below the trigger by default; when the
+ * room below is smaller than the panel wants (320px) AND the room above is
+ * larger, it flips upward. Either way the panel's max height is clamped to
+ * the side it opens on, so it never runs past the viewport edge.
+ */
+function desktopPopoverVars(r: {
+  top: number;
+  bottom: number;
+  left: number;
+  width: number;
+  viewportH: number;
+}): React.CSSProperties {
+  const GAP = 8;
+  const EDGE = 12;
+  const WANTED = 320;
+  const below = r.viewportH - r.bottom - GAP - EDGE;
+  const above = r.top - GAP - EDGE;
+  const flip = below < Math.min(WANTED, 160) && above > below;
+  const room = Math.max(120, Math.min(WANTED, flip ? above : below));
+  return {
+    "--cs-top": flip ? "auto" : `${r.bottom + GAP}px`,
+    "--cs-bottom": flip ? `${r.viewportH - r.top + GAP}px` : "auto",
+    "--cs-left": `${r.left}px`,
+    "--cs-min-w": `${r.width}px`,
+    "--cs-max-h": `${room}px`,
+  } as React.CSSProperties;
 }
