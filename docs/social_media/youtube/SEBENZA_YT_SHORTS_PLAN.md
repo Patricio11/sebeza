@@ -38,7 +38,7 @@ Built here, for here. 🇿🇦 → sebenzasa.com
 
 ## 2 · V1, the search live 🎬 `videos/v1-search-live.mp4`
 
-- [ ] Posted.
+- [ ] Posted
 
 **Title:** `Watch talent become findable · Sebenza`
 
