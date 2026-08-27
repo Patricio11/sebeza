@@ -21,6 +21,7 @@ import { getCityDemandHotspots } from "@/db/queries/city-demand";
 import { getSessionUser } from "@/lib/auth/guard";
 import type { GrowthMomentum } from "@/components/feature/seeker/learning/GrowthMomentumCard";
 import { getSetting } from "@/lib/admin/settings";
+import { canonicalProvinceLabel } from "@/lib/geo/canonical";
 import { AcceptRecommendationButton } from "@/components/feature/seeker/learning/AcceptRecommendationButton";
 import { OpenLearningPathButton } from "@/components/feature/seeker/learning/OpenLearningPathButton";
 import { PathReviewControl } from "@/components/feature/seeker/learning/PathReviewControl";
@@ -151,19 +152,19 @@ export default async function CareerCompassPage({
     studentSkills,
     progression,
   ] = await Promise.all([
-      getCompassForProfile(me),
-      rankInPoolQuery({
-        handle: me.handle,
-        profession: me.profession,
-        province: me.province,
-        projectedSkillBoost: 2,
-      }),
-      listMyLearningItems(),
-      listRecentAbandonReasonsBySkill(),
-      curriculumPromise,
-      studentSkillsPromise,
-      progressionPromise,
-    ]);
+    getCompassForProfile(me),
+    rankInPoolQuery({
+      handle: me.handle,
+      profession: me.profession,
+      province: me.province,
+      projectedSkillBoost: 2,
+    }),
+    listMyLearningItems(),
+    listRecentAbandonReasonsBySkill(),
+    curriculumPromise,
+    studentSkillsPromise,
+    progressionPromise,
+  ]);
   // Phase 9.12  D3 + Accept-button awareness. The compass needs to know:
   //  - which recommendations are already on the seeker's active learning
   //    list (so the Accept button renders as a quiet "On your list" pill)
@@ -234,13 +235,19 @@ export default async function CareerCompassPage({
   );
   // Phase 18.1 ("Living Learning Catalog")  gates the per-card path-review
   // control + the recommend roll-up. Off = today's path cards, unchanged.
-  const livingCatalog = await getSetting<boolean>("feature_flag_living_catalog");
+  const livingCatalog = await getSetting<boolean>(
+    "feature_flag_living_catalog",
+  );
   // 2026-08-26  the Learning paths section ships dark (founder call);
   // the admin catalogue keeps growing behind the flag.
-  const learningPathsOn = await getSetting<boolean>("feature_flag_learning_paths");
+  const learningPathsOn = await getSetting<boolean>(
+    "feature_flag_learning_paths",
+  );
   // Phase 20.2 ("Unlocks next")  flag-gated. Skills the seeker can now tackle
   // because they already hold the prerequisite. Off → nothing computed/shown.
-  const prereqsEnabled = await getSetting<boolean>("feature_flag_skill_prereqs");
+  const prereqsEnabled = await getSetting<boolean>(
+    "feature_flag_skill_prereqs",
+  );
   const unlockedNext = prereqsEnabled
     ? await getUnlockedNextSkills(me.profileId)
     : [];
@@ -249,7 +256,10 @@ export default async function CareerCompassPage({
   // silent fallback to the province rail above.
   const growSession = await getSessionUser();
   const cityDemand = growSession
-    ? await getCityDemandHotspots({ cityLabel: me.city, userId: growSession.id })
+    ? await getCityDemandHotspots({
+        cityLabel: me.city,
+        userId: growSession.id,
+      })
     : null;
   let momentum: GrowthMomentum | null = null;
   let oneSkillRank: number | null = null;
@@ -268,7 +278,9 @@ export default async function CareerCompassPage({
           })
         : null;
     // Phase 23.3  reuse the boost-1 projection computed above (one query).
-    oneSkillRank = rank ? oneSkillProjection?.projectedRank ?? rank.rank : null;
+    oneSkillRank = rank
+      ? (oneSkillProjection?.projectedRank ?? rank.rank)
+      : null;
     momentum = {
       skillsGrown: grownCount,
       inProgress: activeCount,
@@ -278,6 +290,26 @@ export default async function CareerCompassPage({
       poolLabel: rank?.poolLabel ?? null,
     };
   }
+
+  // 2026-08-27 (founder): "move from #1 to #1" is not a move. Say only
+  // what is true for this seeker: move, hold, already #1, alone in the
+  // pool, or no rank at all. See docs/GEO_LABEL_CANONICAL_PLAN.md.
+  const poolTotal = rank?.poolTotal ?? 0;
+  const headlineKey = !rank
+    ? "headlineNoRank"
+    : poolTotal <= 1
+      ? "headlineOnly"
+      : compass.headline.currentRank === 1 &&
+          compass.headline.projectedRank === 1
+        ? "headlineTop"
+        : compass.headline.currentRank === compass.headline.projectedRank
+          ? "headlineHold"
+          : "headline";
+  const headlineSubKey = !rank
+    ? "headlineSubNoRank"
+    : poolTotal <= 1
+      ? "headlineSubOnly"
+      : "headlineSub";
 
   return (
     <DashboardMasthead
@@ -320,23 +352,63 @@ export default async function CareerCompassPage({
 
       {/* Phase 10.2  help deep-links (D6). */}
       <div className="mb-4 flex flex-wrap items-center gap-2">
-        <HelpLink role="seeker" slug="career-compass-recommendations" label="How recommendations work" />
+        <HelpLink
+          role="seeker"
+          slug="career-compass-recommendations"
+          label="How recommendations work"
+        />
         {learningPathsOn && (
-          <HelpLink role="seeker" slug="learning-paths-and-proficiency" label="Learning paths" />
+          <HelpLink
+            role="seeker"
+            slug="learning-paths-and-proficiency"
+            label="Learning paths"
+          />
         )}
-        <HelpLink role="seeker" slug="finding-the-right-course" label="Finding the right course" />
-        <HelpLink role="seeker" slug="cost-and-free-alternatives" label="Free alternatives" />
-        <HelpLink role="seeker" slug="upgrading-to-verified" label="Upgrading to verified" />
-        <HelpLink role="seeker" slug="adjacent-roles-and-skill-gaps" label="Adjacent roles" />
-        <HelpLink role="seeker" slug="switching-profession" label="Switching profession" />
-        <HelpLink role="seeker" slug="discovering-employers" label="Recommended employers" />
-        <HelpLink role="seeker" slug="following-employers" label="Following employers" />
+        <HelpLink
+          role="seeker"
+          slug="finding-the-right-course"
+          label="Finding the right course"
+        />
+        <HelpLink
+          role="seeker"
+          slug="cost-and-free-alternatives"
+          label="Free alternatives"
+        />
+        <HelpLink
+          role="seeker"
+          slug="upgrading-to-verified"
+          label="Upgrading to verified"
+        />
+        <HelpLink
+          role="seeker"
+          slug="adjacent-roles-and-skill-gaps"
+          label="Adjacent roles"
+        />
+        <HelpLink
+          role="seeker"
+          slug="switching-profession"
+          label="Switching profession"
+        />
+        <HelpLink
+          role="seeker"
+          slug="discovering-employers"
+          label="Recommended employers"
+        />
+        <HelpLink
+          role="seeker"
+          slug="following-employers"
+          label="Following employers"
+        />
         {/* Phase 13.7  student-only HelpLink. The article itself
             is audience-gated in the help center; this chip only
             surfaces for viewers who'd actually land on the
             progression timeline section below. */}
         {me.academic && (
-          <HelpLink role="seeker" slug="student-progression-tracker" label="Progression timeline" />
+          <HelpLink
+            role="seeker"
+            slug="student-progression-tracker"
+            label="Progression timeline"
+          />
         )}
       </div>
 
@@ -361,8 +433,8 @@ export default async function CareerCompassPage({
           </h2>
           <p className="mt-2 max-w-2xl text-sm text-[color:var(--color-ink-soft)]">
             We&rsquo;ve highlighted these below in your recommendations and
-            learning paths. Closing one or two of them measurably moves
-            your rank in this pool.
+            learning paths. Closing one or two of them measurably moves your
+            rank in this pool.
           </p>
         </section>
       )}
@@ -388,22 +460,25 @@ export default async function CareerCompassPage({
               id="anchor-h"
               className="mt-2 font-display text-3xl leading-tight md:text-5xl"
             >
-              {t.rich("headline", {
+              {t.rich(headlineKey, {
                 n: compass.headline.skillsNeeded,
                 from: compass.headline.currentRank,
                 to: compass.headline.projectedRank,
+                total: poolTotal,
               })}
             </h2>
             <p className="mt-2 text-[color:var(--color-ink-soft)]">
-              {t("headlineSub", { pool: compass.headline.poolLabel })}
+              {t(headlineSubKey, { pool: compass.headline.poolLabel })}
             </p>
             <div className="mt-5">
-              <Link
-                href="/dashboard/profile"
+              {/* 2026-08-27  the headline promises learning, so the CTA
+                  leads to the recommendations, not the profile editor. */}
+              <a
+                href="#rec-h"
                 className="inline-flex items-center gap-2 rounded-[var(--radius-pill)] bg-[color:var(--color-ink)] px-5 py-2.5 text-sm font-medium text-[color:var(--color-paper)]"
               >
-                {t("openProfileEditor")}
-              </Link>
+                {t("seeRecommendations")}
+              </a>
             </div>
           </div>
         </div>
@@ -499,6 +574,11 @@ export default async function CareerCompassPage({
         <p className="mb-6 max-w-2xl text-sm text-[color:var(--color-ink-soft)]">
           {t("recommendationsSub")}
         </p>
+        {compass.recommendations.length === 0 && (
+          <p className="rounded-[var(--radius-md)] border border-dashed border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-6 text-sm text-[color:var(--color-ink-soft)]">
+            {t("recommendationsEmpty")}
+          </p>
+        )}
         <ol className="grid gap-4">
           {compass.recommendations.map((rec, i) => (
             <RecommendationItem
@@ -509,7 +589,9 @@ export default async function CareerCompassPage({
               t={t}
               highlight={missingSet.has(rec.skill.slug)}
               alreadyOnLearningList={activeLearningSkills.has(rec.skill.slug)}
-              costAccessAbandoned={costAccessAbandonedSkills.has(rec.skill.slug)}
+              costAccessAbandoned={costAccessAbandonedSkills.has(
+                rec.skill.slug,
+              )}
             />
           ))}
         </ol>
@@ -517,29 +599,29 @@ export default async function CareerCompassPage({
 
       {/* ───────────── Learning paths (flag-gated, dark by default) ───────────── */}
       {learningPathsOn && (
-      <section aria-labelledby="paths-h" className="mt-16">
-        <header className="mb-5 flex items-baseline justify-between border-b-2 border-[color:var(--color-ink)] pb-2">
-          <h2 id="paths-h" className="font-display text-2xl">
-            {t("pathsTitle")}
-          </h2>
-          <span className="hidden text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--color-ink-soft)] md:inline">
-            Free first
-          </span>
-        </header>
-        <p className="mb-6 max-w-2xl text-sm text-[color:var(--color-ink-soft)]">
-          {t("pathsSub")}
-        </p>
-        <ul className="grid gap-4 md:grid-cols-2">
-          {compass.learningPaths.map((path, i) => (
-            <LearningPathCard
-              key={i}
-              path={path}
-              t={t}
-              livingCatalog={livingCatalog}
-            />
-          ))}
-        </ul>
-      </section>
+        <section aria-labelledby="paths-h" className="mt-16">
+          <header className="mb-5 flex items-baseline justify-between border-b-2 border-[color:var(--color-ink)] pb-2">
+            <h2 id="paths-h" className="font-display text-2xl">
+              {t("pathsTitle")}
+            </h2>
+            <span className="hidden text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--color-ink-soft)] md:inline">
+              Free first
+            </span>
+          </header>
+          <p className="mb-6 max-w-2xl text-sm text-[color:var(--color-ink-soft)]">
+            {t("pathsSub")}
+          </p>
+          <ul className="grid gap-4 md:grid-cols-2">
+            {compass.learningPaths.map((path, i) => (
+              <LearningPathCard
+                key={i}
+                path={path}
+                t={t}
+                livingCatalog={livingCatalog}
+              />
+            ))}
+          </ul>
+        </section>
       )}
 
       {/* ───────────── Adjacent professions ───────────── */}
@@ -555,6 +637,11 @@ export default async function CareerCompassPage({
         <p className="mb-6 max-w-2xl text-sm text-[color:var(--color-ink-soft)]">
           {t("adjacentSub")}
         </p>
+        {compass.adjacentProfessions.length === 0 && (
+          <p className="rounded-[var(--radius-md)] border border-dashed border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-6 text-sm text-[color:var(--color-ink-soft)]">
+            {t("adjacentEmpty")}
+          </p>
+        )}
         <ul className="grid gap-4 md:grid-cols-3">
           {compass.adjacentProfessions.map((adj, i) => (
             <AdjacentProfessionCard
@@ -571,164 +658,176 @@ export default async function CareerCompassPage({
           when the seeker scrolls within 600px. Above-fold rendering
           stays untouched. */}
       <LazySection placeholderClassName="min-h-[400px]" rootMargin="600px">
-
-      {/* ───────────── City demand ───────────── */}
-      <section aria-labelledby="city-h" className="mt-16">
-        <header className="mb-5 flex items-baseline justify-between border-b-2 border-[color:var(--color-ink)] pb-2">
-          <h2 id="city-h" className="font-display text-2xl">
-            {t("cityDemandTitle")}
-          </h2>
-          <span className="hidden text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--color-ink-soft)] md:inline">
-            {me.province}
-          </span>
-        </header>
-        <p className="mb-4 max-w-2xl text-sm text-[color:var(--color-ink-soft)]">
-          {t("cityDemandSub")}
-        </p>
-        {/* Desktop table */}
-        <div className="hidden overflow-hidden rounded-[var(--radius-md)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] md:block">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b-2 border-[color:var(--color-ink)] text-left text-[0.7rem] uppercase tracking-[0.18em] text-[color:var(--color-ink-soft)]">
-                <th className="px-5 py-3 font-normal">{t("cityDemandColSkill")}</th>
-                <th className="px-5 py-3 font-normal tabular text-right">
-                  {t("cityDemandColSearches")}
-                </th>
-                <th className="px-5 py-3 font-normal tabular text-right">
-                  {t("cityDemandColMatches")}
-                </th>
-                <th className="px-5 py-3 font-normal">{t("cityDemandColGap")}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {compass.cityDemand.map((row, i) => {
-                const ratio = row.gap / Math.max(row.searches, 1);
-                const href = cityDemandSearchHref(row.skill, me.province);
-                return (
-                  <tr
-                    key={i}
-                    className="border-t border-[color:var(--color-hairline)] transition-colors hover:bg-[color:var(--color-surface-sunk)]"
-                  >
-                    <td className="px-5 py-3">
-                      <Link
-                        href={href as never}
-                        className="text-[color:var(--color-ink)] hover:underline"
-                      >
-                        {row.skill}
-                      </Link>
-                    </td>
-                    <td className="px-5 py-3 tabular text-right">
-                      {nfmt.format(row.searches)}
-                    </td>
-                    <td className="px-5 py-3 tabular text-right text-[color:var(--color-ink-soft)]">
-                      {nfmt.format(row.matches)}
-                    </td>
-                    <td className="px-5 py-3">
-                      <div className="flex items-center justify-end gap-3">
-                        {/* Phase 11.5.6 + .11  hide the bar at very
+        {/* ───────────── City demand ───────────── */}
+        <section aria-labelledby="city-h" className="mt-16">
+          <header className="mb-5 flex items-baseline justify-between border-b-2 border-[color:var(--color-ink)] pb-2">
+            <h2 id="city-h" className="font-display text-2xl">
+              {t("cityDemandTitle")}
+            </h2>
+            <span className="hidden text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--color-ink-soft)] md:inline">
+              {canonicalProvinceLabel(me.province) ?? me.province}
+            </span>
+          </header>
+          <p className="mb-4 max-w-2xl text-sm text-[color:var(--color-ink-soft)]">
+            {t("cityDemandSub")}
+          </p>
+          {compass.cityDemand.length === 0 && (
+            <p className="rounded-[var(--radius-md)] border border-dashed border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-6 text-sm text-[color:var(--color-ink-soft)]">
+              {t("cityDemandEmpty")}
+            </p>
+          )}
+          {/* Desktop table */}
+          <div className="hidden overflow-hidden rounded-[var(--radius-md)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] md:block">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b-2 border-[color:var(--color-ink)] text-left text-[0.7rem] uppercase tracking-[0.18em] text-[color:var(--color-ink-soft)]">
+                  <th className="px-5 py-3 font-normal">
+                    {t("cityDemandColSkill")}
+                  </th>
+                  <th className="px-5 py-3 font-normal tabular text-right">
+                    {t("cityDemandColSearches")}
+                  </th>
+                  <th className="px-5 py-3 font-normal tabular text-right">
+                    {t("cityDemandColMatches")}
+                  </th>
+                  <th className="px-5 py-3 font-normal">
+                    {t("cityDemandColGap")}
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {compass.cityDemand.map((row, i) => {
+                  const ratio = row.gap / Math.max(row.searches, 1);
+                  const href = cityDemandSearchHref(row.skill, me.province);
+                  return (
+                    <tr
+                      key={i}
+                      className="border-t border-[color:var(--color-hairline)] transition-colors hover:bg-[color:var(--color-surface-sunk)]"
+                    >
+                      <td className="px-5 py-3">
+                        <Link
+                          href={href as never}
+                          className="text-[color:var(--color-ink)] hover:underline"
+                        >
+                          {row.skill}
+                        </Link>
+                      </td>
+                      <td className="px-5 py-3 tabular text-right">
+                        {nfmt.format(row.searches)}
+                      </td>
+                      <td className="px-5 py-3 tabular text-right text-[color:var(--color-ink-soft)]">
+                        {nfmt.format(row.matches)}
+                      </td>
+                      <td className="px-5 py-3">
+                        <div className="flex items-center justify-end gap-3">
+                          {/* Phase 11.5.6 + .11  hide the bar at very
                             small viewports (≤ 480px) where it adds
                             visual noise; add a visually-hidden span
                             describing the gap ratio for screen
                             readers (the bar itself is aria-hidden). */}
-                        <div
-                          className="hidden h-1.5 w-40 overflow-hidden rounded-full bg-[color:var(--color-surface-sunk)] sm:block"
-                          aria-hidden="true"
-                        >
                           <div
-                            className="h-full bg-[color:var(--color-accent)]"
-                            style={{ width: `${Math.min(100, Math.round(ratio * 100))}%` }}
-                          />
+                            className="hidden h-1.5 w-40 overflow-hidden rounded-full bg-[color:var(--color-surface-sunk)] sm:block"
+                            aria-hidden="true"
+                          >
+                            <div
+                              className="h-full bg-[color:var(--color-accent)]"
+                              style={{
+                                width: `${Math.min(100, Math.round(ratio * 100))}%`,
+                              }}
+                            />
+                          </div>
+                          <span className="sr-only">
+                            {Math.round(ratio * 100)}% gap
+                          </span>
+                          <span className="font-display tabular text-base text-[color:var(--color-ink)]">
+                            {nfmt.format(row.gap)}
+                          </span>
                         </div>
-                        <span className="sr-only">
-                          {Math.round(ratio * 100)}% gap
-                        </span>
-                        <span className="font-display tabular text-base text-[color:var(--color-ink)]">
-                          {nfmt.format(row.gap)}
-                        </span>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
 
-        {/* Mobile cards */}
-        <ul className="space-y-3 md:hidden">
-          {compass.cityDemand.map((row, i) => {
-            const ratio = row.gap / Math.max(row.searches, 1);
-            const href = cityDemandSearchHref(row.skill, me.province);
-            return (
-              <li
-                key={i}
-                className="rounded-xl border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-4"
-              >
-                <Link
-                  href={href as never}
-                  className="block text-[color:var(--color-ink)]"
+          {/* Mobile cards */}
+          <ul className="space-y-3 md:hidden">
+            {compass.cityDemand.map((row, i) => {
+              const ratio = row.gap / Math.max(row.searches, 1);
+              const href = cityDemandSearchHref(row.skill, me.province);
+              return (
+                <li
+                  key={i}
+                  className="rounded-xl border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-4"
                 >
-                <div className="flex items-baseline justify-between gap-3">
-                  <span className="text-sm font-medium">{row.skill}</span>
-                  <span className="font-display tabular text-2xl text-[color:var(--color-ink)]">
-                    {nfmt.format(row.gap)}
-                  </span>
-                </div>
-                <dl className="mt-3 grid grid-cols-2 gap-3 text-xs">
-                  <div>
-                    <dt className="text-[0.62rem] uppercase tracking-[0.22em] text-[color:var(--color-ink-soft)]">
-                      {t("cityDemandColSearches")}
-                    </dt>
-                    <dd className="tabular text-sm">{nfmt.format(row.searches)}</dd>
-                  </div>
-                  <div>
-                    <dt className="text-[0.62rem] uppercase tracking-[0.22em] text-[color:var(--color-ink-soft)]">
-                      {t("cityDemandColMatches")}
-                    </dt>
-                    <dd className="tabular text-sm text-[color:var(--color-ink-soft)]">
-                      {nfmt.format(row.matches)}
-                    </dd>
-                  </div>
-                </dl>
-                <div className="mt-3 flex items-center gap-2">
-                  <div
-                    className="h-1.5 flex-1 overflow-hidden rounded-full bg-[color:var(--color-surface-sunk)]"
-                    aria-hidden="true"
+                  <Link
+                    href={href as never}
+                    className="block text-[color:var(--color-ink)]"
                   >
-                    <div
-                      className="h-full bg-[color:var(--color-accent)]"
-                      style={{
-                        width: `${Math.min(100, Math.round(ratio * 100))}%`,
-                      }}
-                    />
-                  </div>
-                  <span className="text-[0.62rem] uppercase tracking-[0.22em] text-[color:var(--color-ink-soft)]">
-                    {t("cityDemandColGap")}
-                  </span>
-                </div>
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
-      </section>
+                    <div className="flex items-baseline justify-between gap-3">
+                      <span className="text-sm font-medium">{row.skill}</span>
+                      <span className="font-display tabular text-2xl text-[color:var(--color-ink)]">
+                        {nfmt.format(row.gap)}
+                      </span>
+                    </div>
+                    <dl className="mt-3 grid grid-cols-2 gap-3 text-xs">
+                      <div>
+                        <dt className="text-[0.62rem] uppercase tracking-[0.22em] text-[color:var(--color-ink-soft)]">
+                          {t("cityDemandColSearches")}
+                        </dt>
+                        <dd className="tabular text-sm">
+                          {nfmt.format(row.searches)}
+                        </dd>
+                      </div>
+                      <div>
+                        <dt className="text-[0.62rem] uppercase tracking-[0.22em] text-[color:var(--color-ink-soft)]">
+                          {t("cityDemandColMatches")}
+                        </dt>
+                        <dd className="tabular text-sm text-[color:var(--color-ink-soft)]">
+                          {nfmt.format(row.matches)}
+                        </dd>
+                      </div>
+                    </dl>
+                    <div className="mt-3 flex items-center gap-2">
+                      <div
+                        className="h-1.5 flex-1 overflow-hidden rounded-full bg-[color:var(--color-surface-sunk)]"
+                        aria-hidden="true"
+                      >
+                        <div
+                          className="h-full bg-[color:var(--color-accent)]"
+                          style={{
+                            width: `${Math.min(100, Math.round(ratio * 100))}%`,
+                          }}
+                        />
+                      </div>
+                      <span className="text-[0.62rem] uppercase tracking-[0.22em] text-[color:var(--color-ink-soft)]">
+                        {t("cityDemandColGap")}
+                      </span>
+                    </div>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
 
-      {/* ───────────── Honesty note ───────────── */}
-      <aside
-        aria-label={t("honestNote")}
-        className="mt-12 rounded-[var(--radius-md)] border border-dashed border-[color:var(--color-ink)] bg-[color:var(--color-surface-sunk)] p-6"
-      >
-        <div className="flex items-center gap-2 text-[0.7rem] uppercase tracking-[0.24em] text-[color:var(--color-ink)]">
-          <Sparkles className="size-3.5" aria-hidden="true" />
-          {t("honestNote")}
-        </div>
-        <p className="mt-2 max-w-3xl text-sm text-[color:var(--color-ink-soft)]">
-          {t("honestBody")}
-        </p>
-      </aside>
+        {/* ───────────── Honesty note ───────────── */}
+        <aside
+          aria-label={t("honestNote")}
+          className="mt-12 rounded-[var(--radius-md)] border border-dashed border-[color:var(--color-ink)] bg-[color:var(--color-surface-sunk)] p-6"
+        >
+          <div className="flex items-center gap-2 text-[0.7rem] uppercase tracking-[0.24em] text-[color:var(--color-ink)]">
+            <Sparkles className="size-3.5" aria-hidden="true" />
+            {t("honestNote")}
+          </div>
+          <p className="mt-2 max-w-3xl text-sm text-[color:var(--color-ink-soft)]">
+            {t("honestBody")}
+          </p>
+        </aside>
 
-      {/* Phase 21.2  "Your city's hotspots" (gated query; null → hidden). */}
-      {cityDemand && <CityHotspotsCard data={cityDemand} />}
+        {/* Phase 21.2  "Your city's hotspots" (gated query; null → hidden). */}
+        {cityDemand && <CityHotspotsCard data={cityDemand} />}
       </LazySection>
     </DashboardMasthead>
   );
@@ -822,9 +921,7 @@ function RecommendationItem({
           aria-label={`Recommendation ${ordinal}`}
           role="text"
         >
-          <span aria-hidden="true">
-            {ordinal.toString().padStart(2, "0")}
-          </span>
+          <span aria-hidden="true">{ordinal.toString().padStart(2, "0")}</span>
         </span>
 
         <div>
@@ -887,16 +984,22 @@ function RecommendationItem({
         {rec.rankIfLearned && (
           <div className="rounded-[var(--radius-sm)] border border-[color:var(--color-brand)] bg-[color:var(--color-brand-tint)] p-4 text-center md:min-w-[180px]">
             <div className="text-[0.62rem] uppercase tracking-[0.22em] text-[color:var(--color-brand-strong)]">
-              Projected rank
+              {rec.rankIfLearned.projected === rec.rankIfLearned.current
+                ? t("rankHolds")
+                : "Projected rank"}
             </div>
             <div className="mt-1 flex items-baseline justify-center gap-2">
-              <span className="font-display tabular text-base text-[color:var(--color-ink-soft)] line-through">
-                #{rec.rankIfLearned.current}
-              </span>
-              <ArrowUpRight
-                className="size-4 text-[color:var(--color-brand)]"
-                aria-hidden="true"
-              />
+              {rec.rankIfLearned.projected !== rec.rankIfLearned.current && (
+                <>
+                  <span className="font-display tabular text-base text-[color:var(--color-ink-soft)] line-through">
+                    #{rec.rankIfLearned.current}
+                  </span>
+                  <ArrowUpRight
+                    className="size-4 text-[color:var(--color-brand)]"
+                    aria-hidden="true"
+                  />
+                </>
+              )}
               <span className="font-display tabular text-3xl text-[color:var(--color-brand-strong)]">
                 #{rec.rankIfLearned.projected}
               </span>
@@ -1024,7 +1127,8 @@ function LearningPathCard({
           />
         ) : (
           <p className="text-xs italic text-[color:var(--color-ink-soft)]">
-            Provider link coming, search &ldquo;{path.title}&rdquo; on Google for now.
+            Provider link coming, search &ldquo;{path.title}&rdquo; on Google
+            for now.
           </p>
         )}
         {path.sebenzaReviewed && (
@@ -1060,7 +1164,8 @@ function ProviderChip({ kind }: { kind: LearningProviderKind }) {
 function CostChip({ cost }: { cost: LearningCost }) {
   const palette: Record<LearningCost, string> = {
     free: "border-[color:var(--color-brand)] bg-[color:var(--color-brand-tint)] text-[color:var(--color-brand-strong)]",
-    subsidised: "border-[color:var(--color-accent)] bg-[color:var(--color-accent-tint)] text-[color:var(--color-accent)]",
+    subsidised:
+      "border-[color:var(--color-accent)] bg-[color:var(--color-accent-tint)] text-[color:var(--color-accent)]",
     paid: "border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] text-[color:var(--color-ink-soft)]",
   };
   return (
@@ -1199,7 +1304,10 @@ function StudentLane({
               {t("headline")}
             </h2>
             <p className="mt-2 max-w-2xl text-[color:var(--color-paper)]/80">
-              {t("subhead", { months: monthsLeft, programme: academic.programme })}
+              {t("subhead", {
+                months: monthsLeft,
+                programme: academic.programme,
+              })}
             </p>
           </div>
           <div className="text-right">
@@ -1223,69 +1331,69 @@ function StudentLane({
         {/* Electives  hidden when the programme has no covered demand cells
             yet (Phase 23.1: real data or nothing). */}
         {snapshot.electives.length > 0 && (
-        <section aria-labelledby="elec-h">
-          <header className="mb-4 flex items-baseline justify-between border-b border-[color:var(--color-hairline)] pb-2">
-            <h3 id="elec-h" className="font-display text-xl">
-              {t("electivesTitle")}
-            </h3>
-            <span className="hidden text-[0.62rem] uppercase tracking-[0.22em] text-[color:var(--color-ink-soft)] md:inline">
-              Inside your degree
-            </span>
-          </header>
-          <p className="mb-4 max-w-2xl text-sm text-[color:var(--color-ink-soft)]">
-            {t("electivesSub")}
-          </p>
-          <ul className="grid gap-4 md:grid-cols-3">
-            {snapshot.electives.map((e, i) => (
-              <ElectiveCard key={i} elective={e} nfmt={nfmt} t={t} />
-            ))}
-          </ul>
-        </section>
+          <section aria-labelledby="elec-h">
+            <header className="mb-4 flex items-baseline justify-between border-b border-[color:var(--color-hairline)] pb-2">
+              <h3 id="elec-h" className="font-display text-xl">
+                {t("electivesTitle")}
+              </h3>
+              <span className="hidden text-[0.62rem] uppercase tracking-[0.22em] text-[color:var(--color-ink-soft)] md:inline">
+                Inside your degree
+              </span>
+            </header>
+            <p className="mb-4 max-w-2xl text-sm text-[color:var(--color-ink-soft)]">
+              {t("electivesSub")}
+            </p>
+            <ul className="grid gap-4 md:grid-cols-3">
+              {snapshot.electives.map((e, i) => (
+                <ElectiveCard key={i} elective={e} nfmt={nfmt} t={t} />
+              ))}
+            </ul>
+          </section>
         )}
 
         {/* Programmes  hidden when no live listing matches the field. */}
         {snapshot.programmes.length > 0 && (
-        <section aria-labelledby="prog-h">
-          <header className="mb-4 flex items-baseline justify-between border-b border-[color:var(--color-hairline)] pb-2">
-            <h3 id="prog-h" className="font-display text-xl">
-              {t("programmesTitle")}
-            </h3>
-            <span className="hidden text-[0.62rem] uppercase tracking-[0.22em] text-[color:var(--color-ink-soft)] md:inline">
-              Public sector listed first
-            </span>
-          </header>
-          <p className="mb-4 max-w-2xl text-sm text-[color:var(--color-ink-soft)]">
-            {t("programmesSub")}
-          </p>
-          <ul className="grid gap-4 md:grid-cols-2">
-            {snapshot.programmes.map((p, i) => (
-              <ProgrammeCard key={i} programme={p} t={t} />
-            ))}
-          </ul>
-        </section>
+          <section aria-labelledby="prog-h">
+            <header className="mb-4 flex items-baseline justify-between border-b border-[color:var(--color-hairline)] pb-2">
+              <h3 id="prog-h" className="font-display text-xl">
+                {t("programmesTitle")}
+              </h3>
+              <span className="hidden text-[0.62rem] uppercase tracking-[0.22em] text-[color:var(--color-ink-soft)] md:inline">
+                Public sector listed first
+              </span>
+            </header>
+            <p className="mb-4 max-w-2xl text-sm text-[color:var(--color-ink-soft)]">
+              {t("programmesSub")}
+            </p>
+            <ul className="grid gap-4 md:grid-cols-2">
+              {snapshot.programmes.map((p, i) => (
+                <ProgrammeCard key={i} programme={p} t={t} />
+              ))}
+            </ul>
+          </section>
         )}
 
         {/* Destinations  REAL confirmed placements (k-floor suppressed);
             below the floor the section hides rather than fabricating. */}
         {snapshot.destinations.length > 0 && (
-        <section aria-labelledby="dest-h">
-          <header className="mb-4 flex items-baseline justify-between border-b border-[color:var(--color-hairline)] pb-2">
-            <h3 id="dest-h" className="font-display text-xl">
-              {t("destinationsTitle", { programme: academic.programme })}
-            </h3>
-            <span className="hidden text-[0.62rem] uppercase tracking-[0.22em] text-[color:var(--color-ink-soft)] md:inline">
-              From confirmed placements
-            </span>
-          </header>
-          <p className="mb-4 max-w-2xl text-sm text-[color:var(--color-ink-soft)]">
-            {t("destinationsSub")}
-          </p>
-          <ul className="overflow-hidden rounded-[var(--radius-md)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)]">
-            {snapshot.destinations.map((d, i) => (
-              <DestinationRow key={i} destination={d} nfmt={nfmt} t={t} />
-            ))}
-          </ul>
-        </section>
+          <section aria-labelledby="dest-h">
+            <header className="mb-4 flex items-baseline justify-between border-b border-[color:var(--color-hairline)] pb-2">
+              <h3 id="dest-h" className="font-display text-xl">
+                {t("destinationsTitle", { programme: academic.programme })}
+              </h3>
+              <span className="hidden text-[0.62rem] uppercase tracking-[0.22em] text-[color:var(--color-ink-soft)] md:inline">
+                From confirmed placements
+              </span>
+            </header>
+            <p className="mb-4 max-w-2xl text-sm text-[color:var(--color-ink-soft)]">
+              {t("destinationsSub")}
+            </p>
+            <ul className="overflow-hidden rounded-[var(--radius-md)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)]">
+              {snapshot.destinations.map((d, i) => (
+                <DestinationRow key={i} destination={d} nfmt={nfmt} t={t} />
+              ))}
+            </ul>
+          </section>
         )}
 
         {/* Supplementary */}
@@ -1358,8 +1466,10 @@ function ProgrammeCard({
   const Icon = SECTOR_ICON[programme.sector];
   const statusPalette = {
     open: "bg-[color:var(--color-brand)] text-white",
-    closing_soon: "bg-[color:var(--color-accent)] text-[color:var(--color-ink)]",
-    closed: "border border-[color:var(--color-hairline)] text-[color:var(--color-ink-soft)]",
+    closing_soon:
+      "bg-[color:var(--color-accent)] text-[color:var(--color-ink)]",
+    closed:
+      "border border-[color:var(--color-hairline)] text-[color:var(--color-ink-soft)]",
   }[programme.applicationStatus];
 
   return (

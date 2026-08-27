@@ -7,7 +7,11 @@
  */
 
 import { useMemo, useState, useTransition } from "react";
-import { TextField, TextareaField, SelectField } from "@/components/ui/FormField";
+import {
+  TextField,
+  TextareaField,
+  SelectField,
+} from "@/components/ui/FormField";
 import { Button } from "@/components/ui/Button";
 import { Checkbox } from "@/components/ui/Checkbox";
 import { ComboboxField } from "@/components/ui/ComboboxField";
@@ -15,6 +19,7 @@ import { MultiSelectComboboxField } from "@/components/ui/MultiSelectComboboxFie
 import { submitTaxonomySuggestion } from "@/lib/taxonomy/suggestions";
 import { ProfileCompleteness } from "@/components/ui/ProfileCompleteness";
 import { updateProfileBasics } from "@/lib/profile/actions";
+import { citySlugFor, provinceSlugFor } from "@/lib/geo/canonical";
 import { PROVINCES } from "@/lib/mock/taxonomy";
 import { COUNTRIES, flagEmoji } from "@/lib/taxonomy/countries";
 import type { Seniority } from "@/lib/mock/types";
@@ -82,9 +87,10 @@ export function ProfileBasicsForm({
   labels,
 }: Props) {
   const [pending, startTransition] = useTransition();
-  const [message, setMessage] = useState<
-    { kind: "ok" | "error"; text: string } | null
-  >(null);
+  const [message, setMessage] = useState<{
+    kind: "ok" | "error";
+    text: string;
+  } | null>(null);
 
   const [displayName, setDisplayName] = useState(initial.displayName);
   const [profession, setProfession] = useState(initial.profession);
@@ -99,9 +105,18 @@ export function ProfileBasicsForm({
   const [professionSuggestion, setProfessionSuggestion] = useState<
     string | null
   >(null);
-  const [seniority, setSeniority] = useState<Seniority | null>(initial.seniority);
-  const [province, setProvince] = useState(initial.province);
-  const [city, setCity] = useState(initial.city);
+  const [seniority, setSeniority] = useState<Seniority | null>(
+    initial.seniority,
+  );
+  // The DB holds LABELS ("Western Cape"); the pickers work in slugs.
+  // Map on load so the current value is selected instead of blank; the
+  // server maps back to labels on save (docs/GEO_LABEL_CANONICAL_PLAN.md).
+  const [province, setProvince] = useState(
+    provinceSlugFor(initial.province) ?? initial.province,
+  );
+  const [city, setCity] = useState(
+    citySlugFor(initial.city, initial.province) ?? initial.city,
+  );
   // Phase 31 final shape (operator, 2026-07-21)  ONE nationality picker
   // for everyone; no "are you a citizen?" control (the two-class flag is
   // derived server-side from the picked country). Free text stays retired
@@ -327,9 +342,7 @@ export function ProfileBasicsForm({
               const canonical = new Set(professions.map((p) => p.label));
               const cleaned = Array.from(
                 new Set(
-                  next.filter(
-                    (v) => v && v !== profession && canonical.has(v),
-                  ),
+                  next.filter((v) => v && v !== profession && canonical.has(v)),
                 ),
               ).slice(0, SECONDARY_PROFESSIONS_MAX);
               setSecondaryProfessions(cleaned);
@@ -376,9 +389,7 @@ export function ProfileBasicsForm({
             value={seniority ?? "intermediate"}
             name="seniority"
             onChange={(e) =>
-              setSeniority(
-                (e.target as HTMLSelectElement).value as Seniority,
-              )
+              setSeniority((e.target as HTMLSelectElement).value as Seniority)
             }
           >
             <option value="junior">Junior</option>

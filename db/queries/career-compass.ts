@@ -22,6 +22,7 @@
  */
 
 import "server-only";
+import { canonicalProvinceLabel } from "@/lib/geo/canonical";
 import { sql } from "drizzle-orm";
 import { getDb } from "@/db/client";
 import { SKILLS, PROFESSIONS, PROVINCES } from "@/lib/mock/taxonomy";
@@ -247,7 +248,10 @@ export async function getCompassForProfile(
   const recommendations: SkillRecommendation[] = [];
 
   for (const row of demandRows) {
-    if (seen.has(row.skill_slug) || recommendations.length >= MAX_RECOMMENDATIONS)
+    if (
+      seen.has(row.skill_slug) ||
+      recommendations.length >= MAX_RECOMMENDATIONS
+    )
       break;
     seen.add(row.skill_slug);
     recommendations.push({
@@ -259,7 +263,10 @@ export async function getCompassForProfile(
   }
 
   for (const row of peerSkillRows) {
-    if (seen.has(row.skill_slug) || recommendations.length >= MAX_RECOMMENDATIONS)
+    if (
+      seen.has(row.skill_slug) ||
+      recommendations.length >= MAX_RECOMMENDATIONS
+    )
       break;
     seen.add(row.skill_slug);
     recommendations.push({
@@ -286,7 +293,9 @@ export async function getCompassForProfile(
   // skill it unlocks, and annotate each with the prereqs the seeker still lacks
   // (the "Requires: X" pill). Pure re-rank  the demand math above is untouched.
   let orderedRecommendations: SkillRecommendation[] = recommendations;
-  const prereqsEnabled = await getSetting<boolean>("feature_flag_skill_prereqs");
+  const prereqsEnabled = await getSetting<boolean>(
+    "feature_flag_skill_prereqs",
+  );
   if (prereqsEnabled && recommendations.length > 0) {
     const edges = await listPrereqsForSkills(
       recommendations.map((r) => r.skill.slug),
@@ -328,7 +337,7 @@ export async function getCompassForProfile(
     headline: {
       currentRank: 0,
       projectedRank: 0,
-      poolLabel: `${profile.profession} · ${profile.province}`,
+      poolLabel: `${profile.profession} · ${canonicalProvinceLabel(profile.province) ?? profile.province}`,
       skillsNeeded: Math.min(
         recommendations.length,
         Math.max(1, 5 - profile.topSkills.length),
@@ -442,8 +451,11 @@ function pickRelevantPaths(
   catalog: LearningPath[],
   prioritySkillSlugs: string[],
 ): LearningPath[] {
-  if (prioritySkillSlugs.length === 0) return catalog.slice(0, MAX_LEARNING_PATHS);
-  const skillLabelBySlug = new Map(SKILLS.map((s) => [s.slug, s.label.toLowerCase()]));
+  if (prioritySkillSlugs.length === 0)
+    return catalog.slice(0, MAX_LEARNING_PATHS);
+  const skillLabelBySlug = new Map(
+    SKILLS.map((s) => [s.slug, s.label.toLowerCase()]),
+  );
   const priorityLabels = new Set(
     prioritySkillSlugs
       .map((s) => skillLabelBySlug.get(s))
@@ -454,9 +466,8 @@ function pickRelevantPaths(
   const scored = catalog
     .map((p) => ({
       path: p,
-      score: p.unlocksSkills.filter((s) =>
-        priorityLabels.has(s.toLowerCase()),
-      ).length,
+      score: p.unlocksSkills.filter((s) => priorityLabels.has(s.toLowerCase()))
+        .length,
     }))
     .sort((a, b) => b.score - a.score)
     .map((x) => x.path);

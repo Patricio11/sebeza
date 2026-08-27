@@ -60,10 +60,7 @@ export const verificationStatus = pgEnum("verification_status", [
  * is kind-agnostic; this enum tells the application which validation
  * + UI flow applies.
  */
-export const idDocumentKind = pgEnum("id_document_kind", [
-  "sa_id",
-  "passport",
-]);
+export const idDocumentKind = pgEnum("id_document_kind", ["sa_id", "passport"]);
 
 // Phase 9  added `gov` for the government / policy / SETA-partner
 // workspace. Admins promote a user to `gov` from the admin users surface.
@@ -432,7 +429,9 @@ export const profiles = pgTable("profiles", {
    * `/api/admin/outcomes-compliance` is the structural pin against
    * the roll-up drifting from this column.
    */
-  verification: verificationStatus("verification").notNull().default("unverified"),
+  verification: verificationStatus("verification")
+    .notNull()
+    .default("unverified"),
   /**
    * 2026-08 (0067)  set when the seeker completed the in-browser live
    * selfie (MediaPipe gesture liveness; docs/SELFIE_VERIFICATION_PLAN.md).
@@ -543,7 +542,10 @@ export const profiles = pgTable("profiles", {
    * `OPEN_TO_TAGS` in the action layer; only stored values match the
    * canonical set. GIN-indexed for `&&` overlap filter on /search.
    */
-  openToTags: text("open_to_tags").array().notNull().default(sql`'{}'::text[]`),
+  openToTags: text("open_to_tags")
+    .array()
+    .notNull()
+    .default(sql`'{}'::text[]`),
   /**
    * Phase 11.5.2  personal CV backup. The file lives in the Supabase
    * private bucket under `{userId}/cvs/{id}.pdf`. PRIVATE TO THE
@@ -574,7 +576,9 @@ export const academicProfiles = pgTable("academic_profiles", {
   currentYear: integer("current_year"), // null for postgrad without year structure
   expectedGraduation: text("expected_graduation").notNull(), // ISO yyyy-mm
   nsfas: boolean("nsfas").notNull().default(false),
-  verification: verificationStatus("verification").notNull().default("unverified"),
+  verification: verificationStatus("verification")
+    .notNull()
+    .default("unverified"),
   openToInternships: boolean("open_to_internships").notNull().default(false),
   openToGraduateProgrammes: boolean("open_to_graduate_programmes")
     .notNull()
@@ -667,29 +671,43 @@ export const profileLanguages = pgTable(
   }),
 );
 
-export const profileSkills = pgTable("profile_skills", {
-  profileId: text("profile_id")
-    .notNull()
-    .references(() => profiles.id, { onDelete: "cascade" }),
-  skillSlug: text("skill_slug")
-    .notNull()
-    .references(() => skills.slug),
-  proficiency: integer("proficiency").notNull(),
-  /**
-   * Phase 9.9  Per-skill years of experience. Nullable; self-
-   * declared by the seeker on the SkillsEditor. UI clamps 0..60.
-   * NULL = "rather not say." Public  shipped in the SkillRef
-   * shape, visible on /search top-skills + /p/[handle] + employer
-   * dossier. Phase 9.9.3 (OPTIONAL per D6) wires the value into
-   * the Phase 4 ranking blend as a bounded multiplier; 9.9.1
-   * just stores it.
-   */
-  yearsOfExperience: integer("years_of_experience"),
-  /** Phase 9.12  honesty contract; see `skillProvenance` doc above. */
-  provenance: skillProvenance("provenance").notNull().default("self_attested"),
-  /** Phase 9.12  set by the dormant Phase 8 SAQA/provider adapter. */
-  verifiedAt: timestamp("verified_at"),
-});
+export const profileSkills = pgTable(
+  "profile_skills",
+  {
+    profileId: text("profile_id")
+      .notNull()
+      .references(() => profiles.id, { onDelete: "cascade" }),
+    skillSlug: text("skill_slug")
+      .notNull()
+      .references(() => skills.slug),
+    proficiency: integer("proficiency").notNull(),
+    /**
+     * Phase 9.9  Per-skill years of experience. Nullable; self-
+     * declared by the seeker on the SkillsEditor. UI clamps 0..60.
+     * NULL = "rather not say." Public  shipped in the SkillRef
+     * shape, visible on /search top-skills + /p/[handle] + employer
+     * dossier. Phase 9.9.3 (OPTIONAL per D6) wires the value into
+     * the Phase 4 ranking blend as a bounded multiplier; 9.9.1
+     * just stores it.
+     */
+    yearsOfExperience: integer("years_of_experience"),
+    /** Phase 9.12  honesty contract; see `skillProvenance` doc above. */
+    provenance: skillProvenance("provenance")
+      .notNull()
+      .default("self_attested"),
+    /** Phase 9.12  set by the dormant Phase 8 SAQA/provider adapter. */
+    verifiedAt: timestamp("verified_at"),
+  },
+  (t) => ({
+    /** One row per (profile, skill): the learning-loop upsert's ON CONFLICT
+      target (migration 0079; the table shipped without it). */
+    oneSkillPerProfile: uniqueIndex("profile_skills_profile_skill_uniq").on(
+      t.profileId,
+      t.skillSlug,
+    ),
+    bySkill: index("profile_skills_skill_slug_idx").on(t.skillSlug),
+  }),
+);
 
 /**
  * Phase 19 ("Custom Skills & Taxonomy Growth")  niche skills a seeker claims
@@ -804,7 +822,9 @@ export const graduateProgrammes = pgTable("graduate_programmes", {
 export const testimonials = pgTable("testimonials", {
   id: text("id").primaryKey(),
   /** Null for admin-created entries. */
-  userId: text("user_id").references(() => appUser.id, { onDelete: "set null" }),
+  userId: text("user_id").references(() => appUser.id, {
+    onDelete: "set null",
+  }),
   /** "seeker" | "employer" | "admin" (admin = manually created). */
   authorRole: text("author_role").notNull(),
   quote: text("quote").notNull(),
@@ -1066,9 +1086,15 @@ export const profileProjects = pgTable(
     /** "I built the backend"  self-declared, never verified. */
     contribution: text("contribution").notNull(),
     year: integer("year"),
-    skillSlugs: text("skill_slugs").array().notNull().default(sql`'{}'::text[]`),
+    skillSlugs: text("skill_slugs")
+      .array()
+      .notNull()
+      .default(sql`'{}'::text[]`),
     /** WebP keys; each has a derived `.thumb.webp` sibling. Max 5. */
-    imageKeys: text("image_keys").array().notNull().default(sql`'{}'::text[]`),
+    imageKeys: text("image_keys")
+      .array()
+      .notNull()
+      .default(sql`'{}'::text[]`),
     sortOrder: integer("sort_order").notNull().default(0),
     createdAt: timestamp("created_at").notNull().defaultNow(),
     updatedAt: timestamp("updated_at").notNull().defaultNow(),
@@ -1123,7 +1149,9 @@ export const qualifications = pgTable("qualifications", {
   title: text("title").notNull(),
   institution: text("institution").notNull(),
   awardedYear: integer("awarded_year"),
-  verification: verificationStatus("verification").notNull().default("unverified"),
+  verification: verificationStatus("verification")
+    .notNull()
+    .default("unverified"),
   documentStorageKey: text("document_storage_key"), // object key in Supabase Storage; signed URL only on audited reveal
 });
 
@@ -1163,7 +1191,9 @@ export const organizations = pgTable("organizations", {
    * which surfaces every recruiting employer + every verified
    * seeker-named org.
    */
-  verification: verificationStatus("verification").notNull().default("unverified"),
+  verification: verificationStatus("verification")
+    .notNull()
+    .default("unverified"),
   /**
    * Phase 9.10  the org vetting lifecycle columns. NULL until the
    * admin reviews the submission:
@@ -1179,7 +1209,9 @@ export const organizations = pgTable("organizations", {
    *   - vatNumber         : optional, captured at onboarding
    */
   verifiedAt: timestamp("verified_at"),
-  verifiedByUserId: text("verified_by_user_id").references((): AnyPgColumn => appUser.id),
+  verifiedByUserId: text("verified_by_user_id").references(
+    (): AnyPgColumn => appUser.id,
+  ),
   rejectionReason: text("rejection_reason"),
   adminNote: text("admin_note"),
   companyAddress: text("company_address"),
@@ -1218,11 +1250,11 @@ export const organizations = pgTable("organizations", {
  * supporting doc (e.g. SARB licence for a financial-services org).
  */
 export const orgDocumentKind = pgEnum("org_document_kind", [
-  "company_reg_cert",   // CIPC / CK1 / CK2 document
-  "tax_clearance",      // SARS pin or letter
-  "proof_of_address",   //  3 months old
-  "bank_confirmation",  // bank letter
-  "other",              // optional supporting doc
+  "company_reg_cert", // CIPC / CK1 / CK2 document
+  "tax_clearance", // SARS pin or letter
+  "proof_of_address", //  3 months old
+  "bank_confirmation", // bank letter
+  "other", // optional supporting doc
 ]);
 
 /**
@@ -1287,10 +1319,11 @@ export const organizationMembers = pgTable("organization_members", {
  * action; `unknown` is reserved for legacy / imported rows where the
  * employer never told us either way (and we don't want to assume).
  */
-export const placementLifecycleStatus = pgEnum(
-  "placement_lifecycle_status",
-  ["active", "departed", "unknown"],
-);
+export const placementLifecycleStatus = pgEnum("placement_lifecycle_status", [
+  "active",
+  "departed",
+  "unknown",
+]);
 
 /**
  * Phase 9.20 Tier 3 D4  SA labour-relations vocabulary for *why* a
@@ -1580,7 +1613,10 @@ export const vacancies = pgTable(
     citySlug: text("city_slug").references(() => cities.slug),
     /** Free-form skill slugs from the controlled vocabulary. Stored as a
         Postgres text[] so filter-shape matches `SearchFilters.skills`. */
-    skillSlugs: text("skill_slugs").array().notNull().default(sql`'{}'::text[]`),
+    skillSlugs: text("skill_slugs")
+      .array()
+      .notNull()
+      .default(sql`'{}'::text[]`),
     /** Free text for now; could enum (junior/intermediate/senior) later. */
     seniority: text("seniority"),
     /**
@@ -2030,16 +2066,18 @@ export const reports = pgTable("reports", {
   // Phase 11.3.3  subjectProfileId now nullable; an invite report
   // points at an org + invitation, not a profile. Legacy profile
   // reports keep the column populated.
-  subjectProfileId: text("subject_profile_id").references(
-    () => profiles.id,
-    { onDelete: "cascade" },
-  ),
+  subjectProfileId: text("subject_profile_id").references(() => profiles.id, {
+    onDelete: "cascade",
+  }),
   // Phase 11.3.3  invite reports populate these two columns. Either
   // (subject_profile_id) or (subject_org_id, subject_invitation_id)
   // is set; the admin queue surfaces whichever path was used.
-  subjectOrgId: text("subject_org_id").references((): AnyPgColumn => organizations.id, {
-    onDelete: "cascade",
-  }),
+  subjectOrgId: text("subject_org_id").references(
+    (): AnyPgColumn => organizations.id,
+    {
+      onDelete: "cascade",
+    },
+  ),
   subjectInvitationId: text("subject_invitation_id").references(
     (): AnyPgColumn => vacancyInvitations.id,
     { onDelete: "set null" },
@@ -2580,9 +2618,7 @@ export const llmProviders = pgTable("llm_providers", {
   lastUsedAt: timestamp("last_used_at"),
   totalCalls: integer("total_calls").notNull().default(0),
   /** bigint  monthly token counts can blow past int32. */
-  totalTokens: bigint("total_tokens", { mode: "number" })
-    .notNull()
-    .default(0),
+  totalTokens: bigint("total_tokens", { mode: "number" }).notNull().default(0),
   /** numeric(12,2) → stored as string by Drizzle to preserve precision. */
   totalSpendZar: numeric("total_spend_zar", { precision: 12, scale: 2 })
     .notNull()
@@ -2757,9 +2793,10 @@ export const employmentVerifications = pgTable(
     ),
   },
   (t) => ({
-    profileStateIdx: index(
-      "employment_verifications_profile_state_idx",
-    ).on(t.profileId, t.state),
+    profileStateIdx: index("employment_verifications_profile_state_idx").on(
+      t.profileId,
+      t.state,
+    ),
     /** Token lookup for the verify landing page. Drizzle's basic
      *  unique() can't carry a partial WHERE; the migration's
      *  CREATE UNIQUE INDEX … WHERE is the authoritative version. */

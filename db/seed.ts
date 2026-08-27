@@ -50,6 +50,10 @@ import {
   SKILLS,
   INSTITUTIONS,
 } from "@/lib/mock/taxonomy";
+import {
+  canonicalCityLabel,
+  canonicalProvinceLabel,
+} from "@/lib/geo/canonical";
 import { mockProfiles } from "@/lib/mock/profiles";
 import { MOCK_COMPASS } from "@/lib/mock/growth";
 import { SEED_GRADUATE_PROGRAMMES } from "@/lib/mock/academic";
@@ -144,10 +148,30 @@ async function seedLlmProviders() {
   await db
     .insert(schema.llmProviders)
     .values([
-      { id: "openai", displayName: "OpenAI", active: false, monthlyBudgetZar: 0 },
-      { id: "anthropic", displayName: "Anthropic", active: false, monthlyBudgetZar: 0 },
-      { id: "mistral", displayName: "Mistral", active: false, monthlyBudgetZar: 0 },
-      { id: "self_hosted", displayName: "Self-hosted (POPIA-clean)", active: false, monthlyBudgetZar: 0 },
+      {
+        id: "openai",
+        displayName: "OpenAI",
+        active: false,
+        monthlyBudgetZar: 0,
+      },
+      {
+        id: "anthropic",
+        displayName: "Anthropic",
+        active: false,
+        monthlyBudgetZar: 0,
+      },
+      {
+        id: "mistral",
+        displayName: "Mistral",
+        active: false,
+        monthlyBudgetZar: 0,
+      },
+      {
+        id: "self_hosted",
+        displayName: "Self-hosted (POPIA-clean)",
+        active: false,
+        monthlyBudgetZar: 0,
+      },
     ])
     .onConflictDoNothing();
 }
@@ -226,14 +250,46 @@ function slugifyLearningPathId(title: string): string {
 async function seedSkillPrereqs() {
   console.log("🪜 Phase 20, skill prerequisite graph…");
   const PAIRS: Array<{ skill: string; prereq: string; reason: string }> = [
-    { skill: "postgres", prereq: "sql", reason: "SQL fundamentals come before Postgres-specific work." },
-    { skill: "industrial-wiring", prereq: "wiring", reason: "Industrial wiring builds on domestic wiring basics." },
-    { skill: "payroll", prereq: "bookkeeping-skill", reason: "Payroll assumes core bookkeeping." },
-    { skill: "saipa", prereq: "bookkeeping-skill", reason: "SAIPA articles assume bookkeeping fundamentals." },
-    { skill: "open-water-rescue", prereq: "pool-rescue", reason: "Open-water rescue extends pool rescue." },
-    { skill: "grill", prereq: "prep", reason: "Grill stations assume kitchen prep skills." },
-    { skill: "plating", prereq: "prep", reason: "Plating assumes prep fundamentals." },
-    { skill: "medication-administration", prereq: "first-aid", reason: "Medication administration assumes first-aid basics." },
+    {
+      skill: "postgres",
+      prereq: "sql",
+      reason: "SQL fundamentals come before Postgres-specific work.",
+    },
+    {
+      skill: "industrial-wiring",
+      prereq: "wiring",
+      reason: "Industrial wiring builds on domestic wiring basics.",
+    },
+    {
+      skill: "payroll",
+      prereq: "bookkeeping-skill",
+      reason: "Payroll assumes core bookkeeping.",
+    },
+    {
+      skill: "saipa",
+      prereq: "bookkeeping-skill",
+      reason: "SAIPA articles assume bookkeeping fundamentals.",
+    },
+    {
+      skill: "open-water-rescue",
+      prereq: "pool-rescue",
+      reason: "Open-water rescue extends pool rescue.",
+    },
+    {
+      skill: "grill",
+      prereq: "prep",
+      reason: "Grill stations assume kitchen prep skills.",
+    },
+    {
+      skill: "plating",
+      prereq: "prep",
+      reason: "Plating assumes prep fundamentals.",
+    },
+    {
+      skill: "medication-administration",
+      prereq: "first-aid",
+      reason: "Medication administration assumes first-aid basics.",
+    },
   ];
   await db
     .insert(schema.skillPrereqs)
@@ -340,7 +396,9 @@ async function seedCityDemand() {
  * (the AI-Coach switch is acknowledgement-gated on this).
  */
 async function seedCrisisResources() {
-  console.log("🛟 Phase 22, crisis-resource template (INACTIVE; admin verifies)…");
+  console.log(
+    "🛟 Phase 22, crisis-resource template (INACTIVE; admin verifies)…",
+  );
   await db
     .insert(schema.crisisResources)
     .values([
@@ -403,7 +461,9 @@ async function seedGraduateProgrammes() {
  *     in-progress at 50%, one accepted) + earned badges; lerato-n gets badges.
  */
 async function seedShowcase() {
-  console.log("🌟 Phase 23.6, showcase seed (flagship accounts + filled-vacancy story)…");
+  console.log(
+    "🌟 Phase 23.6, showcase seed (flagship accounts + filled-vacancy story)…",
+  );
   const v3 = id("vac", "grad-sw-dev-programme");
   const orgId = id("org", "discovery-bank");
   const cohort = (n: string) => id("prof", `wits-bsc-cs-2026-${n}`);
@@ -554,7 +614,9 @@ async function seedShowcase() {
       ])
       .onConflictDoNothing();
   }
-  console.log(", filled-vacancy feedback + cohort placements + flagship enrichment done");
+  console.log(
+    ", filled-vacancy feedback + cohort placements + flagship enrichment done",
+  );
 }
 
 async function seedTaxonomy() {
@@ -577,9 +639,9 @@ async function seedTaxonomy() {
   // 2026-08-24  categories ride the seed (the test harness re-seeds on
   // every run; without this the migration backfill was wiped and the
   // grouped skill sections showed everything as technical).
-  await db.insert(schema.skills).values(
-    SKILLS.map((s) => ({ ...s, category: skillCategoryFor(s.slug) })),
-  );
+  await db
+    .insert(schema.skills)
+    .values(SKILLS.map((s) => ({ ...s, category: skillCategoryFor(s.slug) })));
 
   console.log("🎓 Institutions…");
   await db.insert(schema.institutions).values(
@@ -648,8 +710,8 @@ async function seedUsersAndProfiles() {
       profilePhotoUrl: p.profilePhotoUrl ?? null,
       profession: p.profession,
       seniority: p.seniority,
-      city: p.city,
-      province: p.province,
+      city: canonicalCityLabel(p.city, p.province),
+      province: canonicalProvinceLabel(p.province) ?? p.province,
       nationality: p.nationality,
       isCitizen: p.isCitizen,
       bio: p.bio,
@@ -698,21 +760,64 @@ async function seedProfileChildren() {
       .filter((r): r is NonNullable<typeof r> => r !== null),
   );
   if (profileSkillRows.length > 0) {
-    await db.insert(schema.profileSkills).values(profileSkillRows);
+    await db
+      .insert(schema.profileSkills)
+      .values(profileSkillRows)
+      .onConflictDoNothing();
   }
 
   // Languages (docs/PROFILE_LANGUAGES_PLAN.md) - realistic multilingual
   // showcase data for the flagship seekers so the public dossier's
   // Languages section, the editor, and E2E all have real rows.
   await db.insert(schema.profileLanguages).values([
-    { profileId: id("prof", "andile-z"), languageSlug: "isizulu", spokenLevel: "native", writtenLevel: "fluent" },
-    { profileId: id("prof", "andile-z"), languageSlug: "english", spokenLevel: "fluent", writtenLevel: "fluent" },
-    { profileId: id("prof", "andile-z"), languageSlug: "sesotho", spokenLevel: "intermediate", writtenLevel: "basic" },
-    { profileId: id("prof", "lerato-n"), languageSlug: "setswana", spokenLevel: "native", writtenLevel: "native" },
-    { profileId: id("prof", "lerato-n"), languageSlug: "english", spokenLevel: "fluent", writtenLevel: "fluent" },
-    { profileId: id("prof", "thandeka-m"), languageSlug: "isixhosa", spokenLevel: "native", writtenLevel: "fluent" },
-    { profileId: id("prof", "thandeka-m"), languageSlug: "english", spokenLevel: "fluent", writtenLevel: "intermediate" },
-    { profileId: id("prof", "thandeka-m"), languageSlug: "afrikaans", spokenLevel: "intermediate", writtenLevel: "basic" },
+    {
+      profileId: id("prof", "andile-z"),
+      languageSlug: "isizulu",
+      spokenLevel: "native",
+      writtenLevel: "fluent",
+    },
+    {
+      profileId: id("prof", "andile-z"),
+      languageSlug: "english",
+      spokenLevel: "fluent",
+      writtenLevel: "fluent",
+    },
+    {
+      profileId: id("prof", "andile-z"),
+      languageSlug: "sesotho",
+      spokenLevel: "intermediate",
+      writtenLevel: "basic",
+    },
+    {
+      profileId: id("prof", "lerato-n"),
+      languageSlug: "setswana",
+      spokenLevel: "native",
+      writtenLevel: "native",
+    },
+    {
+      profileId: id("prof", "lerato-n"),
+      languageSlug: "english",
+      spokenLevel: "fluent",
+      writtenLevel: "fluent",
+    },
+    {
+      profileId: id("prof", "thandeka-m"),
+      languageSlug: "isixhosa",
+      spokenLevel: "native",
+      writtenLevel: "fluent",
+    },
+    {
+      profileId: id("prof", "thandeka-m"),
+      languageSlug: "english",
+      spokenLevel: "fluent",
+      writtenLevel: "intermediate",
+    },
+    {
+      profileId: id("prof", "thandeka-m"),
+      languageSlug: "afrikaans",
+      spokenLevel: "intermediate",
+      writtenLevel: "basic",
+    },
   ]);
 
   // Experiences
@@ -881,7 +986,9 @@ async function seedConsents() {
  * → size 12, placed 3, rate 25%.
  */
 async function seedPhase7_5OutcomesCohort() {
-  console.log("🎓 Phase 7.5, synthetic graduate cohort for /insights outcomes…");
+  console.log(
+    "🎓 Phase 7.5, synthetic graduate cohort for /insights outcomes…",
+  );
   const pwHash = await hashPassword(SEED_PASSWORD);
   const orgId = id("org", "discovery-bank");
   const institutionSlug = "wits";
@@ -931,15 +1038,11 @@ async function seedPhase7_5OutcomesCohort() {
       isCitizen: true,
       bio: null,
       status: (i < placedCount ? "employed" : "open_to_work") as
-        | "employed"
-        | "open_to_work",
+        "employed" | "open_to_work",
       statusConfirmedAt: new Date("2026-05-10"),
       // Open to full-time + remote so the cohort surfaces on the
       // remote-friendly "near you / or remote" demo too.
-      workAvailability: ["full_time", "remote"] as (
-        | "full_time"
-        | "remote"
-      )[],
+      workAvailability: ["full_time", "remote"] as ("full_time" | "remote")[],
       verification: "unverified" as const,
       // Realistic for a profile with academic + skills but no bio/photo/
       // experience yet.
@@ -955,16 +1058,19 @@ async function seedPhase7_5OutcomesCohort() {
   // (typescript + postgres). Proficiency varies deterministically by
   // index; new grads carry no per-skill years.
   const cohortSkillSlugs = ["python", "sql", "postgres", "typescript", "react"];
-  await db.insert(schema.profileSkills).values(
-    cohortHandles.flatMap((handle, i) =>
-      cohortSkillSlugs.map((slug, j) => ({
-        profileId: id("prof", handle),
-        skillSlug: slug,
-        proficiency: ((i + j) % 3) + 2, // 2..4
-        yearsOfExperience: null,
-      })),
-    ),
-  );
+  await db
+    .insert(schema.profileSkills)
+    .values(
+      cohortHandles.flatMap((handle, i) =>
+        cohortSkillSlugs.map((slug, j) => ({
+          profileId: id("prof", handle),
+          skillSlug: slug,
+          proficiency: ((i + j) % 3) + 2, // 2..4
+          yearsOfExperience: null,
+        })),
+      ),
+    )
+    .onConflictDoNothing();
 
   // academic_profiles
   await db.insert(schema.academicProfiles).values(
@@ -1021,7 +1127,9 @@ async function seedPhase7_5OutcomesCohort() {
       profileId: id("prof", handle),
       organizationId: orgId,
       actorUserId: id("user", "naledi-k"),
-      role: ["Backend developer", "Data engineer", "Frontend developer"][i] ?? "Software developer",
+      role:
+        ["Backend developer", "Data engineer", "Frontend developer"][i] ??
+        "Software developer",
       city: "Sandton",
       hiredAt: new Date(`2026-04-${10 + i * 3}`),
       salaryBand: "R 480k-600k",
@@ -1148,8 +1256,8 @@ async function seedPhase9_7NationalityDemo() {
       displayName: p.displayName,
       profession: p.profession,
       seniority: null,
-      city: p.city,
-      province: p.province,
+      city: canonicalCityLabel(p.city, p.province),
+      province: canonicalProvinceLabel(p.province) ?? p.province,
       nationality: p.nationality,
       isCitizen: false,
       bio: null,
@@ -1717,7 +1825,8 @@ async function seedPhase9_10OrgVetting() {
       industry: "Manufacturing",
       country: "South Africa",
       city: "Cape Town",
-      companyAddress: "Building 4, Black River Park, Observatory, Cape Town, 7925",
+      companyAddress:
+        "Building 4, Black River Park, Observatory, Cape Town, 7925",
       vatNumber: null,
       verification: "rejected",
       rejectionReason:
@@ -1808,7 +1917,12 @@ async function seedPhase9_10OrgVetting() {
     f.docs.map((d, idx) => ({
       id: id("orgdoc", `${f.ownerHandle}-${d.kind}-${idx}`),
       organizationId: f.orgId,
-      kind: d.kind as "company_reg_cert" | "tax_clearance" | "proof_of_address" | "bank_confirmation" | "other",
+      kind: d.kind as
+        | "company_reg_cert"
+        | "tax_clearance"
+        | "proof_of_address"
+        | "bank_confirmation"
+        | "other",
       originalName: d.originalName,
       storageKey: `${id("user", f.ownerHandle)}/org-documents/${id("orgdoc", `${f.ownerHandle}-${d.kind}-${idx}`)}.pdf`,
       mimeType: "application/pdf",
@@ -1858,7 +1972,8 @@ async function seedPhase9_12LearningLoop() {
       skillSlug: "react",
       title: "Build a React app from scratch, freeCodeCamp",
       provider: "freeCodeCamp",
-      resourceUrl: "https://www.freecodecamp.org/learn/front-end-development-libraries/",
+      resourceUrl:
+        "https://www.freecodecamp.org/learn/front-end-development-libraries/",
       resourceKind: "free",
       isFree: true,
       state: "in_progress",
@@ -1908,7 +2023,13 @@ async function seedPhase9_12LearningLoop() {
       provenance: "self_attested_learning",
       verifiedAt: null,
     })
-    .onConflictDoNothing();
+    // The cohort insert above already gave this student TypeScript as
+    // self-attested; the completed learning item upgrades its provenance
+    // (the same upgrade-only rule completeLearningItem applies).
+    .onConflictDoUpdate({
+      target: [schema.profileSkills.profileId, schema.profileSkills.skillSlug],
+      set: { provenance: "self_attested_learning" },
+    });
 
   await db.insert(schema.auditLog).values([
     {
@@ -2016,7 +2137,9 @@ async function seedPhase9_12LearningLoop() {
  * fixtures for variety).
  */
 async function seedPhase9_13StallFixtures() {
-  console.log("📉 Phase 9.13, stall-cell fixtures (10 BSc CS · postgres abandoned)…");
+  console.log(
+    "📉 Phase 9.13, stall-cell fixtures (10 BSc CS · postgres abandoned)…",
+  );
   const day = 24 * 60 * 60 * 1000;
   const now = Date.now();
   // Cohort members to add stall fixtures for (10 total, excluding
@@ -2145,7 +2268,12 @@ async function seedPhase9_13ProgrammeSkills() {
   function hospitalityRows(slug: string): PSRow[] {
     const programme = "National Certificate Hospitality";
     return [
-      { institutionSlug: slug, programme, skillSlug: "kitchen-mgmt", weight: 9 },
+      {
+        institutionSlug: slug,
+        programme,
+        skillSlug: "kitchen-mgmt",
+        weight: 9,
+      },
       { institutionSlug: slug, programme, skillSlug: "prep", weight: 9 },
       { institutionSlug: slug, programme, skillSlug: "plating", weight: 7 },
       { institutionSlug: slug, programme, skillSlug: "grill", weight: 6 },
@@ -2157,7 +2285,12 @@ async function seedPhase9_13ProgrammeSkills() {
     const programme = "National Certificate Electrical";
     return [
       { institutionSlug: slug, programme, skillSlug: "wiring", weight: 9 },
-      { institutionSlug: slug, programme, skillSlug: "industrial-wiring", weight: 8 },
+      {
+        institutionSlug: slug,
+        programme,
+        skillSlug: "industrial-wiring",
+        weight: 8,
+      },
       { institutionSlug: slug, programme, skillSlug: "pdi", weight: 4 },
     ];
   }
@@ -2195,9 +2328,7 @@ async function seedPhase9_13ProgrammeSkills() {
 // ─────────────────────────────────────────────────────────────────────────────
 
 async function seedPhase13_2ModuleSkills() {
-  console.log(
-    "📚  Phase 13.5, module_skills Tier-1 editorial seed",
-  );
+  console.log("📚  Phase 13.5, module_skills Tier-1 editorial seed");
 
   type MSRow = {
     moduleSlug: string;
@@ -2699,7 +2830,9 @@ async function seedPhase9_15TaxonomySuggestions() {
 }
 
 async function seedPhase7Reports() {
-  console.log("🚩 Phase 7 sample reports (open + closed, for /admin/moderation)…");
+  console.log(
+    "🚩 Phase 7 sample reports (open + closed, for /admin/moderation)…",
+  );
   await db.insert(schema.reports).values([
     {
       id: id("rep", "amara-spam"),

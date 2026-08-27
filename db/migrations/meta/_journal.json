@@ -547,6 +547,20 @@
       "when": 1787270408003,
       "tag": "0077_profile_complete_notified",
       "breakpoints": false
+    },
+    {
+      "idx": 78,
+      "version": "7",
+      "when": 1787270408004,
+      "tag": "0078_geo_labels_canonical",
+      "breakpoints": false
+    },
+    {
+      "idx": 79,
+      "version": "7",
+      "when": 1787270408005,
+      "tag": "0079_profile_skills_unique",
+      "breakpoints": false
     }
   ]
 }

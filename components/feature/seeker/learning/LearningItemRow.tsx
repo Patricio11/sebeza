@@ -140,7 +140,9 @@ export function LearningItemRow({
           </div>
           <p className="mt-1 text-sm text-[color:var(--color-ink-soft)]">
             {item.title}{" "}
-            <span className="text-[color:var(--color-ink-soft)]">  {item.provider}</span>
+            <span className="text-[color:var(--color-ink-soft)]">
+              · {item.provider}
+            </span>
           </p>
           {item.resourceUrl && (
             <a
@@ -222,7 +224,7 @@ export function LearningItemRow({
                 className="inline-flex items-center gap-1 text-[color:var(--color-brand-strong)] hover:underline"
               >
                 <ShieldCheck className="size-3" aria-hidden="true" />
-                Got a certificate? Upload it for the verified badge
+                Got a certificate? Add it to your qualifications
               </Link>
             </p>
           )}

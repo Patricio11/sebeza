@@ -22,6 +22,10 @@
 import { auth } from "./server";
 import { roleHome } from "./guard";
 import { isValidCountryCode, countryLabel } from "@/lib/taxonomy/countries";
+import {
+  canonicalCityLabel,
+  canonicalProvinceLabel,
+} from "@/lib/geo/canonical";
 import { getDb } from "@/db/client";
 import * as schema from "@/db/schema";
 import { eq, and, sql, isNull } from "drizzle-orm";
@@ -89,8 +93,7 @@ function ok<T extends object>(extra?: T): { ok: true } & T {
 }
 
 export type ActionResult<T extends object = object> =
-  | ({ ok: true } & T)
-  | { ok: false; message: string };
+  ({ ok: true } & T) | { ok: false; message: string };
 
 // ─────────────────────────────────────────────────────────────────────────────
 // signUpSeeker  wires the 3-step seeker form
@@ -190,12 +193,7 @@ const seekerSignUpSchema = z.object({
    * exclusive  the action ignores the custom name when the id is set.
    */
   currentEmployerOrgId: z.string().min(1).nullable().optional(),
-  customCurrentEmployerName: z
-    .string()
-    .trim()
-    .min(2)
-    .max(80)
-    .optional(),
+  customCurrentEmployerName: z.string().trim().min(2).max(80).optional(),
   customCurrentEmployerCity: z.string().trim().max(80).optional(),
   currentRoleStartedAt: z
     .string()
@@ -233,7 +231,7 @@ const seekerSignUpSchema = z.object({
  * simply the easier oracle.
  *
  * On a JOB platform this matters more than usual: confirming an address
- * has an account can reveal that a specific person is job-hunting 
+ * has an account can reveal that a specific person is job-hunting
  * exactly the inference a current employer should not be able to draw.
  *
  * So we return the SAME shape as a successful sign-up and email the
@@ -309,9 +307,7 @@ export async function signUpSeeker(
 
   // Searchability must be granted before the profile becomes searchable
   // (Phase 2 acceptance criterion). We require it on the form too.
-  if (
-    !REQUIRED_FOR_SEARCHABILITY.every((p) => v.grantedConsents.includes(p))
-  ) {
+  if (!REQUIRED_FOR_SEARCHABILITY.every((p) => v.grantedConsents.includes(p))) {
     return fail("Searchability consent is required to create a profile.");
   }
 
@@ -477,8 +473,7 @@ export async function signUpSeeker(
             // Create the pending org row. Suggestion + audit go
             // post-transaction below.
             pendingEmployerOrgId = `org_${randomUUID()}`;
-            employerCustomCity =
-              v.customCurrentEmployerCity?.trim() ?? null;
+            employerCustomCity = v.customCurrentEmployerCity?.trim() ?? null;
             await db.insert(schema.organizations).values({
               id: pendingEmployerOrgId,
               name: customName,
@@ -506,8 +501,11 @@ export async function signUpSeeker(
         displayName,
         fullSurname: v.fullName.split(/\s+/).slice(1).join(" ") || null,
         profession: v.profession,
-        city: v.city?.trim() ?? "",
-        province: v.province,
+        // Labels on disk (docs/GEO_LABEL_CANONICAL_PLAN.md): the city
+        // picker submits a slug, the province picker a label; both land
+        // as labels so search and the rank pool see one register.
+        city: canonicalCityLabel(v.city, v.province),
+        province: canonicalProvinceLabel(v.province) ?? v.province.trim(),
         // Phase 9.16  DOB captured at sign-up; ID number / passport
         // NOT collected here (added later from /dashboard/profile).
         // The id_document_kind column stays at its DB default ("sa_id")
@@ -542,8 +540,7 @@ export async function signUpSeeker(
           userId: user.id,
           purpose,
           state: (v.grantedConsents.includes(purpose) ? "granted" : "none") as
-            | "granted"
-            | "none",
+            "granted" | "none",
           version: "v2.1",
           grantedAt: v.grantedConsents.includes(purpose) ? new Date() : null,
           revokedAt: null,
@@ -730,7 +727,10 @@ export async function signUpSeeker(
       try {
         const wants = v.wantsPushNotifications;
         const prefs: NotificationPrefMap = {};
-        for (const kind of ["vacancy.invite", "vacancy.invite.followup"] as const) {
+        for (const kind of [
+          "vacancy.invite",
+          "vacancy.invite.followup",
+        ] as const) {
           prefs[kind] = { ...defaultPrefFor(kind), push: wants };
         }
         await db
@@ -1015,9 +1015,8 @@ export async function acceptSeekerInvitation(
               via: "congrats_invite_accept",
             },
           });
-          const { createNotification } = await import(
-            "@/lib/notifications/server"
-          );
+          const { createNotification } =
+            await import("@/lib/notifications/server");
           await createNotification({
             userId: newUser.id,
             kind: "placement.confirmed",
@@ -1203,7 +1202,10 @@ async function revokeAllSessionsForEmail(email: string): Promise<void> {
   } catch (e) {
     // Non-fatal: the DAL re-check (32.2.1) still fails closed for a
     // suspended account, so a surviving row grants no access.
-    console.error("[signIn] session revocation after moderation gate failed:", e);
+    console.error(
+      "[signIn] session revocation after moderation gate failed:",
+      e,
+    );
   }
 }
 
@@ -1236,7 +1238,9 @@ export async function signIn(
   const ipKey = await clientIpKey();
   const signInLimit = await peek("signin", ipKey);
   if (!signInLimit.ok) {
-    return fail("Too many sign-in attempts. Please wait a few minutes and try again.");
+    return fail(
+      "Too many sign-in attempts. Please wait a few minutes and try again.",
+    );
   }
 
   try {
@@ -1320,7 +1324,9 @@ export async function signIn(
       return ok({ next: `/verify-email?email=${encodeURIComponent(v.email)}` });
     }
 
-    const home = roleHome(((u.role as "seeker" | "employer" | "admin") ?? "seeker"));
+    const home = roleHome(
+      (u.role as "seeker" | "employer" | "admin") ?? "seeker",
+    );
     // Phase 32.2.6  see above: protocol-relative targets must not pass.
     return ok({ next: safeInternalPath(v.next, home) });
   } catch (e) {
@@ -1401,7 +1407,8 @@ export async function completePasswordReset(
   input: z.infer<typeof resetCompleteSchema>,
 ): Promise<ActionResult<{ next: string }>> {
   const parsed = resetCompleteSchema.safeParse(input);
-  if (!parsed.success) return fail("Please choose a stronger password (10+ chars).");
+  if (!parsed.success)
+    return fail("Please choose a stronger password (10+ chars).");
   try {
     await auth.api.resetPassword({
       body: {
@@ -1420,7 +1427,9 @@ export async function completePasswordReset(
 // resendVerificationEmail
 // ─────────────────────────────────────────────────────────────────────────────
 
-export async function resendVerificationEmail(email: string): Promise<ActionResult> {
+export async function resendVerificationEmail(
+  email: string,
+): Promise<ActionResult> {
   if (!email || !email.includes("@")) return ok(); // anti-enumeration
   // Phase 32.2.4  same throttle as requestPasswordReset. `?email=` on
   // /verify-email is attacker-controllable, so this endpoint could be

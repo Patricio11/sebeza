@@ -24,6 +24,10 @@ import { buildSkillMatcher } from "@/lib/skills/normalize";
 import { encryptField } from "@/lib/crypto";
 import { validateSaIdNumber } from "@/lib/id-number";
 import { isValidCountryCode, countryLabel } from "@/lib/taxonomy/countries";
+import {
+  canonicalCityLabel,
+  canonicalProvinceLabel,
+} from "@/lib/geo/canonical";
 import { validateDob } from "@/lib/auth/id-validation";
 import { computeCompleteness } from "@/lib/mock/helpers";
 import { LANGUAGES, LANGUAGE_LEVELS } from "@/lib/mock/taxonomy";
@@ -34,8 +38,7 @@ import { OPEN_TO_TAGS, type OpenToTag } from "@/lib/mock/types";
 import { notifyAllAdmins } from "@/lib/notifications/server";
 
 export type ActionResult<T extends object = object> =
-  | ({ ok: true } & T)
-  | { ok: false; message: string };
+  ({ ok: true } & T) | { ok: false; message: string };
 
 function ok<T extends object>(extra?: T): { ok: true } & T {
   return { ok: true, ...(extra ?? ({} as T)) };
@@ -138,7 +141,7 @@ export async function updateProfileBasics(
     experience: [],
     qualifications: [],
   });
-  // Skills + experience + qualifications haven't changed in this action 
+  // Skills + experience + qualifications haven't changed in this action
   // we mix the old counts back in by re-reading them. (Tiny cost; keeps the
   // user's headline number accurate after every save.)
   const liveCompleteness = await recomputeCompleteness(db, profile.id, {
@@ -159,8 +162,10 @@ export async function updateProfileBasics(
         new Set((v.secondaryProfessions ?? []).map((s) => s.trim())),
       ).slice(0, SECONDARY_PROFESSIONS_MAX),
       seniority: v.seniority ?? null,
-      city: v.city,
-      province: v.province,
+      // Labels are the one on-disk form (docs/GEO_LABEL_CANONICAL_PLAN.md);
+      // the picker submits slugs, so convert here, never in the form.
+      city: canonicalCityLabel(v.city, v.province),
+      province: canonicalProvinceLabel(v.province) ?? v.province.trim(),
       // Phase 31 final shape  label + class both DERIVED from the one
       // picked country (never free text, never a separate question).
       nationality: countryLabel(v.nationality) || null,
@@ -185,7 +190,9 @@ export async function updateProfileBasics(
   // case-insensitive against existing customText. Failure is
   // logged but doesn't tank the profile update.
   const isCanonical = PROFESSIONS.some(
-    (p) => p.slug === v.profession || p.label.toLowerCase() === v.profession.toLowerCase(),
+    (p) =>
+      p.slug === v.profession ||
+      p.label.toLowerCase() === v.profession.toLowerCase(),
   );
   if (!isCanonical) {
     try {
@@ -200,7 +207,11 @@ export async function updateProfileBasics(
         kind: "taxonomy.suggestion.submit",
         actor: session.id,
         subject: suggestionId,
-        meta: { kind: "profession", customText: v.profession, via: "profile-editor" },
+        meta: {
+          kind: "profession",
+          customText: v.profession,
+          via: "profile-editor",
+        },
       });
       await notifyAllAdmins({
         kind: "taxonomy.suggestion.received",
@@ -301,9 +312,7 @@ export async function switchPrimaryProfession(
 // ─────────────────────────────────────────────────────────────────────────────
 
 const openToSchema = z.object({
-  tags: z
-    .array(z.enum(OPEN_TO_TAGS))
-    .max(OPEN_TO_TAGS.length),
+  tags: z.array(z.enum(OPEN_TO_TAGS)).max(OPEN_TO_TAGS.length),
 });
 
 export async function setOpenToTags(
@@ -351,7 +360,13 @@ const skillsSchema = z.object({
         proficiency: z.number().int().min(1).max(5),
         /** Phase 9.9  per-skill years of experience. NULL = "rather not say."
          *  Clamped 0..60 server-side; UI also clamps. */
-        yearsOfExperience: z.number().int().min(0).max(60).nullable().optional(),
+        yearsOfExperience: z
+          .number()
+          .int()
+          .min(0)
+          .max(60)
+          .nullable()
+          .optional(),
       }),
     )
     .max(20),
@@ -388,9 +403,7 @@ export async function updateSkills(
   const canonicalSkills = parsed.data.skills.filter((s) =>
     validSlugs.has(s.slug),
   );
-  const typedSkills = parsed.data.skills.filter(
-    (s) => !validSlugs.has(s.slug),
-  );
+  const typedSkills = parsed.data.skills.filter((s) => !validSlugs.has(s.slug));
 
   // 2026-08-24 (docs/SKILLS_CATEGORIES_MATCHING_PLAN.md)  before a
   // typed skill goes to the admin queue, try to CANONICALISE it:
@@ -417,7 +430,10 @@ export async function updateSkills(
         proficiency: t.proficiency,
         yearsOfExperience: t.yearsOfExperience ?? null,
       });
-      canonicalisedInfo.push({ typed: t.slug, label: labelBySlug.get(slug) ?? slug });
+      canonicalisedInfo.push({
+        typed: t.slug,
+        label: labelBySlug.get(slug) ?? slug,
+      });
     }
   }
 
@@ -524,7 +540,9 @@ export async function updateWorkAvailability(
 
   // De-dupe + preserve canonical order so two seekers with the same
   // set end up with byte-identical column values (helps GIN cardinality).
-  const dedup = Array.from(new Set(parsed.data.values)) as typeof parsed.data.values;
+  const dedup = Array.from(
+    new Set(parsed.data.values),
+  ) as typeof parsed.data.values;
   const ordered = WORK_AVAILABILITY_VALUES.filter((k) => dedup.includes(k));
 
   await db
@@ -860,39 +878,40 @@ async function recomputeCompleteness(
   basics: { city: string; bio: string },
 ): Promise<number | null> {
   try {
-    const [skillsRows, customSkillRows, expRows, qualsRows, langRows] = await Promise.all([
-      db
-        .select({ slug: schema.profileSkills.skillSlug })
-        .from(schema.profileSkills)
-        .where(eq(schema.profileSkills.profileId, profileId)),
-      // Phase 19  self-described custom skills count toward completeness too
-      // (the seeker is rewarded for documenting niche skills, even though they
-      // stay out of search until canonicalized).
-      db
-        .select({ id: schema.profileSkillsCustom.id })
-        .from(schema.profileSkillsCustom)
-        .where(
-          and(
-            eq(schema.profileSkillsCustom.profileId, profileId),
-            isNull(schema.profileSkillsCustom.deletedAt),
+    const [skillsRows, customSkillRows, expRows, qualsRows, langRows] =
+      await Promise.all([
+        db
+          .select({ slug: schema.profileSkills.skillSlug })
+          .from(schema.profileSkills)
+          .where(eq(schema.profileSkills.profileId, profileId)),
+        // Phase 19  self-described custom skills count toward completeness too
+        // (the seeker is rewarded for documenting niche skills, even though they
+        // stay out of search until canonicalized).
+        db
+          .select({ id: schema.profileSkillsCustom.id })
+          .from(schema.profileSkillsCustom)
+          .where(
+            and(
+              eq(schema.profileSkillsCustom.profileId, profileId),
+              isNull(schema.profileSkillsCustom.deletedAt),
+            ),
           ),
-        ),
-      db
-        .select({ id: schema.experiences.id })
-        .from(schema.experiences)
-        .where(eq(schema.experiences.profileId, profileId)),
-      db
-        .select({ id: schema.qualifications.id })
-        .from(schema.qualifications)
-        .where(eq(schema.qualifications.profileId, profileId)),
-      // Languages (docs/PROFILE_LANGUAGES_PLAN.md) count too - this
-      // recompute and completeness-internal.ts MUST stay in parity or
-      // saving one section silently drops another section's points.
-      db
-        .select({ slug: schema.profileLanguages.languageSlug })
-        .from(schema.profileLanguages)
-        .where(eq(schema.profileLanguages.profileId, profileId)),
-    ]);
+        db
+          .select({ id: schema.experiences.id })
+          .from(schema.experiences)
+          .where(eq(schema.experiences.profileId, profileId)),
+        db
+          .select({ id: schema.qualifications.id })
+          .from(schema.qualifications)
+          .where(eq(schema.qualifications.profileId, profileId)),
+        // Languages (docs/PROFILE_LANGUAGES_PLAN.md) count too - this
+        // recompute and completeness-internal.ts MUST stay in parity or
+        // saving one section silently drops another section's points.
+        db
+          .select({ slug: schema.profileLanguages.languageSlug })
+          .from(schema.profileLanguages)
+          .where(eq(schema.profileLanguages.profileId, profileId)),
+      ]);
     return computeCompleteness({
       city: basics.city,
       bio: basics.bio,
@@ -933,7 +952,12 @@ async function recomputeCompleteness(
 // ─────────────────────────────────────────────────────────────────────────────
 
 const languageLevelEnum = z.enum(
-  LANGUAGE_LEVELS.map((l) => l.value) as ["basic", "intermediate", "fluent", "native"],
+  LANGUAGE_LEVELS.map((l) => l.value) as [
+    "basic",
+    "intermediate",
+    "fluent",
+    "native",
+  ],
 );
 
 const languagesSchema = z.object({
@@ -974,7 +998,9 @@ export async function updateLanguages(
   const seen = new Set<string>();
   for (const l of parsed.data.languages) {
     if (!validSlugs.has(l.slug)) {
-      return fail("One of those languages isn't in the list. Pick from the dropdown.");
+      return fail(
+        "One of those languages isn't in the list. Pick from the dropdown.",
+      );
     }
     if (seen.has(l.slug)) {
       return fail("Each language can only appear once.");

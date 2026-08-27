@@ -25,8 +25,7 @@ import { verifyAdmin } from "@/lib/auth/dal";
 import { logAccess } from "@/lib/audit";
 
 export type ActionResult<T extends object = object> =
-  | ({ ok: true } & T)
-  | { ok: false; message: string };
+  ({ ok: true } & T) | { ok: false; message: string };
 
 function ok<T extends object>(extra?: T): { ok: true } & T {
   return { ok: true, ...(extra ?? ({} as T)) };
@@ -39,8 +38,14 @@ const SLUG = z
   .string()
   .min(2, "Slug must be at least 2 characters.")
   .max(64, "Slug too long.")
-  .regex(/^[a-z0-9][a-z0-9-]*$/, "Slug must be lowercase letters, digits, or hyphens.");
-const LABEL = z.string().min(2, "Label is too short.").max(80, "Label is too long.");
+  .regex(
+    /^[a-z0-9][a-z0-9-]*$/,
+    "Slug must be lowercase letters, digits, or hyphens.",
+  );
+const LABEL = z
+  .string()
+  .min(2, "Label is too short.")
+  .max(80, "Label is too long.");
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Skills
@@ -120,7 +125,9 @@ export async function updateSkill(
   return ok();
 }
 
-export async function removeSkill(input: { slug: string }): Promise<ActionResult> {
+export async function removeSkill(input: {
+  slug: string;
+}): Promise<ActionResult> {
   const session = await verifyAdmin();
   if (!input?.slug) return fail("Missing slug.");
   const db = getDb();
@@ -130,7 +137,9 @@ export async function removeSkill(input: { slug: string }): Promise<ActionResult
     .from(schema.profileSkills)
     .where(eq(schema.profileSkills.skillSlug, input.slug));
   if ((usage?.c ?? 0) > 0) {
-    return fail(`Still in use by ${usage?.c ?? 0} profile(s). Reassign before removal.`);
+    return fail(
+      `Still in use by ${usage?.c ?? 0} profile(s). Reassign before removal.`,
+    );
   }
 
   const deleted = await db
@@ -228,7 +237,9 @@ export async function removeProfession(input: {
     .from(schema.profiles)
     .where(eq(schema.profiles.profession, input.slug));
   if ((usage?.c ?? 0) > 0) {
-    return fail(`Still in use by ${usage?.c ?? 0} profile(s). Reassign before removal.`);
+    return fail(
+      `Still in use by ${usage?.c ?? 0} profile(s). Reassign before removal.`,
+    );
   }
 
   const deleted = await db
@@ -342,7 +353,9 @@ export async function updateCity(
   return ok();
 }
 
-export async function removeCity(input: { slug: string }): Promise<ActionResult> {
+export async function removeCity(input: {
+  slug: string;
+}): Promise<ActionResult> {
   const session = await verifyAdmin();
   if (!input?.slug) return fail("Missing slug.");
   const db = getDb();
@@ -350,12 +363,20 @@ export async function removeCity(input: { slug: string }): Promise<ActionResult>
   // Cities are referenced by profiles.city (text label, not FK)  match by slug
   // OR by label so we don't strand profiles. We accept either column lookup
   // because seed/legacy data mixed both.
+  const [cityRow] = await db
+    .select({ label: schema.cities.label })
+    .from(schema.cities)
+    .where(eq(schema.cities.slug, input.slug));
   const [usage] = await db
     .select({ c: count() })
     .from(schema.profiles)
-    .where(sql`${schema.profiles.city} = ${input.slug}`);
+    .where(
+      sql`lower(${schema.profiles.city}) IN (${input.slug}, lower(${cityRow?.label ?? input.slug}))`,
+    );
   if ((usage?.c ?? 0) > 0) {
-    return fail(`Still in use by ${usage?.c ?? 0} profile(s). Reassign before removal.`);
+    return fail(
+      `Still in use by ${usage?.c ?? 0} profile(s). Reassign before removal.`,
+    );
   }
 
   const deleted = await db

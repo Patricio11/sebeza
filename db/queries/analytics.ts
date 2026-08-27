@@ -9,7 +9,7 @@
  *  - Freshness-weighted: each `byStatus` bucket carries the average
  *    `sebenza_freshness_confidence` for the rows that contribute. Lets
  *    `/insights` show "data you can trust" honestly.
- *  - One round-trip per logical aggregate (counts / demandBySkill / trend) 
+ *  - One round-trip per logical aggregate (counts / demandBySkill / trend)
  *    Phase 6 may swap these for materialised views once row counts grow.
  *
  * `demandBySkill` is intentionally derived from `search_events` (what
@@ -19,14 +19,12 @@
  */
 
 import "server-only";
+import { canonicalProvinceLabel } from "@/lib/geo/canonical";
 import { randomUUID } from "node:crypto";
 import { sql } from "drizzle-orm";
 import { getDb } from "@/db/client";
 import * as schema from "@/db/schema";
-import type {
-  AnalyticsSnapshot,
-  EmploymentStatus,
-} from "@/lib/mock/types";
+import type { AnalyticsSnapshot, EmploymentStatus } from "@/lib/mock/types";
 
 const EMPLOYMENT_STATUSES: EmploymentStatus[] = [
   "employed",
@@ -222,10 +220,12 @@ export interface SkillsGapRow {
  * Pass `province` to scope supply to one province; demand stays national
  * because employers don't always tag a province in their query.
  */
-export async function skillsGapQuery(opts: {
-  province?: string | null;
-  top?: number;
-} = {}): Promise<SkillsGapRow[]> {
+export async function skillsGapQuery(
+  opts: {
+    province?: string | null;
+    top?: number;
+  } = {},
+): Promise<SkillsGapRow[]> {
   const db = getDb();
   const top = opts.top ?? 20;
   const province = opts.province ?? null;
@@ -450,12 +450,14 @@ export interface SkillDemandRow {
 }
 
 /**
- * Skill-level demand vs supply. More granular than `skillsGapQuery` 
+ * Skill-level demand vs supply. More granular than `skillsGapQuery`
  * surfaces gaps that don't map to a profession (e.g. "Cybersecurity").
  */
-export async function skillDemandQuery(opts: {
-  top?: number;
-} = {}): Promise<SkillDemandRow[]> {
+export async function skillDemandQuery(
+  opts: {
+    top?: number;
+  } = {},
+): Promise<SkillDemandRow[]> {
   const db = getDb();
   const top = opts.top ?? 20;
 
@@ -526,12 +528,17 @@ export async function skillDemandQuery(opts: {
  *
  * Returns the number of rows inserted (one per skill in the captured set).
  */
-export async function captureSkillGapSnapshot(opts: {
-  province?: string | null;
-  top?: number;
-} = {}): Promise<{ rowsCaptured: number; capturedAt: string }> {
+export async function captureSkillGapSnapshot(
+  opts: {
+    province?: string | null;
+    top?: number;
+  } = {},
+): Promise<{ rowsCaptured: number; capturedAt: string }> {
   const db = getDb();
-  const rows = await skillsGapQuery({ province: opts.province, top: opts.top ?? 50 });
+  const rows = await skillsGapQuery({
+    province: opts.province,
+    top: opts.top ?? 50,
+  });
   const capturedAt = new Date();
 
   if (rows.length === 0) {
@@ -566,11 +573,13 @@ export interface SkillsGapTrendRow extends SkillsGapRow {
  * the lookback window) deltas. Falls back to the current `skillsGapQuery`
  * result when there's no comparison snapshot yet  the page never breaks.
  */
-export async function skillsGapTrendQuery(opts: {
-  top?: number;
-  /** Minimum age (days) of the comparison snapshot. Default: 7 (week-over-week). */
-  lookbackDays?: number;
-} = {}): Promise<SkillsGapTrendRow[]> {
+export async function skillsGapTrendQuery(
+  opts: {
+    top?: number;
+    /** Minimum age (days) of the comparison snapshot. Default: 7 (week-over-week). */
+    lookbackDays?: number;
+  } = {},
+): Promise<SkillsGapTrendRow[]> {
   const db = getDb();
   const top = opts.top ?? 20;
   const lookbackDays = opts.lookbackDays ?? 7;
@@ -582,7 +591,11 @@ export async function skillsGapTrendQuery(opts: {
   // 2. Find a comparison snapshot: most recent capture that's at least
   //    `lookbackDays` old. We pick from national snapshots (province IS NULL).
   // Neon's raw `execute()` returns timestamps as strings, not Date objects.
-  const cmp = unwrap<{ skill: string; gap: number; captured_at: string | Date }>(
+  const cmp = unwrap<{
+    skill: string;
+    gap: number;
+    captured_at: string | Date;
+  }>(
     await db.execute(sql`
       WITH latest_capture AS (
         SELECT captured_at
@@ -656,6 +669,9 @@ export async function rankInPoolQuery(opts: {
 }): Promise<PoolRank | null> {
   const db = getDb();
   const boost = opts.projectedSkillBoost ?? 2;
+  // Labels are canonical on disk; accept a slug or a label here so every
+  // caller lands in the same pool (docs/GEO_LABEL_CANONICAL_PLAN.md).
+  const province = canonicalProvinceLabel(opts.province) ?? opts.province;
 
   const rows = unwrap<{
     rank: number;
@@ -676,7 +692,7 @@ export async function rankInPoolQuery(opts: {
         FROM profiles p
         WHERE p.deleted_at IS NULL
           AND LOWER(p.profession) = LOWER(${opts.profession})
-          AND LOWER(p.province) = LOWER(${opts.province})
+          AND LOWER(p.province) = LOWER(${province})
       )
       SELECT rank::int, pool_total::int
       FROM pool
@@ -708,7 +724,7 @@ export async function rankInPoolQuery(opts: {
         FROM profiles p
         WHERE p.deleted_at IS NULL
           AND LOWER(p.profession) = LOWER(${opts.profession})
-          AND LOWER(p.province) = LOWER(${opts.province})
+          AND LOWER(p.province) = LOWER(${province})
       )
       SELECT rank::int AS projected
       FROM pool
@@ -722,7 +738,7 @@ export async function rankInPoolQuery(opts: {
   return {
     rank: row.rank,
     poolTotal: row.pool_total,
-    poolLabel: `${opts.profession} · ${opts.province}`,
+    poolLabel: `${opts.profession} · ${province}`,
     projectedRank,
   };
 }
