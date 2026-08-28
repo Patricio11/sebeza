@@ -20,6 +20,7 @@
  */
 
 import "server-only";
+import { generationParams } from "../openai-tuning";
 import type {
   LlmProviderAdapterOpts,
   LlmProviderCall,
@@ -38,16 +39,24 @@ export async function callOpenAi(
   const url = call.endpointUrl?.trim() || OPENAI_DEFAULT_URL;
   const body = {
     model: call.modelId,
-    temperature: 0,
     // Token frugality (founder rule, 2026-08-24): probes pay for ONE
     // output token; real calls are capped well above the biggest
     // legitimate suggestions payload so a runaway response can't spend.
-    max_tokens: opts?.probe ? 1 : 800,
+    // Parameter names per model family: lib/llm/openai-tuning.ts.
+    // A probe asks for a handful of plain-text tokens: reasoning families
+    // cannot finish a JSON-mode reply inside a 1-token cap and answer 400
+    // "output limit reached" on a perfectly good key.
+    ...generationParams("openai", call.modelId, {
+      maxOutput: opts?.probe ? 8 : 800,
+      temperature: 0,
+    }),
     messages: [
       { role: "system", content: systemPrompt(call.validSkillSlugs) },
       { role: "user", content: userPrompt(call) },
     ],
-    response_format: { type: "json_object" as const },
+    ...(opts?.probe
+      ? {}
+      : { response_format: { type: "json_object" as const } }),
   };
 
   const res = await fetch(url, {
@@ -85,10 +94,10 @@ function systemPrompt(validSkillSlugs: string[]): string {
     "Your task: given a module syllabus, suggest which canonical skill slugs the module teaches.",
     "STRICT CONSTRAINTS:",
     "- You may ONLY use slugs from the provided taxonomy. Inventing a new slug is forbidden.",
-    "- Respond ONLY with valid JSON of the shape: { \"suggestions\": [{ \"skillSlug\": string, \"confidence\": 1-5, \"rationale\": string }] }.",
+    '- Respond ONLY with valid JSON of the shape: { "suggestions": [{ "skillSlug": string, "confidence": 1-5, "rationale": string }] }.',
     "- 'confidence' is your editorial confidence the syllabus genuinely teaches this skill: 5 = central, 1 = touched briefly.",
     "- 'rationale' is one sentence (<= 25 words).",
-    "- If no listed slug applies, return { \"suggestions\": [] }.",
+    '- If no listed slug applies, return { "suggestions": [] }.',
     "",
     "Valid skill slugs:",
     validSkillSlugs.join(", "),
@@ -124,7 +133,9 @@ function parseSuggestions(
       moduleLabel,
       skillSlug: String(s.skillSlug ?? "").trim(),
       confidence: clamp(Math.round(Number(s.confidence ?? 3)), 1, 5),
-      rationale: String(s.rationale ?? "").trim().slice(0, 240),
+      rationale: String(s.rationale ?? "")
+        .trim()
+        .slice(0, 240),
     }))
     .filter((s) => s.skillSlug.length > 0);
 }

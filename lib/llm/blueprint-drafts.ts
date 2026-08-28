@@ -16,7 +16,6 @@
 import "server-only";
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
-import { z } from "zod";
 
 import { getDb } from "@/db/client";
 import * as schema from "@/db/schema";
@@ -24,126 +23,18 @@ import { decryptField } from "@/lib/crypto";
 import { logAccess } from "@/lib/audit";
 import { getSetting } from "@/lib/admin/settings";
 import { coachChat, type LlmCredentials } from "./seeker-coach";
+import { parseBlueprintDraft } from "@/lib/blueprints/draft-parser";
 
-const slugRe = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
-const slug = z.string().regex(slugRe).max(60);
-
-export const blueprintDraftSchema = z.object({
-  core: z.array(slug).min(1).max(8),
-  expected: z.array(slug).max(8).default([]),
-  tracks: z
-    .array(
-      z.object({
-        name: z.string().trim().min(2).max(40),
-        skills: z.array(slug).min(1).max(8),
-      }),
-    )
-    .max(5)
-    .default([]),
-  proveIt: z.record(z.string(), z.string().trim().max(240)).optional(),
-  newSkills: z
-    .array(
-      z.object({
-        slug,
-        label: z.string().trim().min(2).max(40),
-        category: z.enum(["technical", "professional"]),
-      }),
-    )
-    .max(6)
-    .default([]),
-});
-
-export interface BlueprintDraftPayload {
-  core: string[];
-  expected: string[];
-  tracks: Array<{ name: string; skills: string[] }>;
-  proveIt: Record<string, string>;
-  newSkills: Array<{
-    slug: string;
-    label: string;
-    category: "technical" | "professional";
-  }>;
-}
-
-/**
- * Pure: model text -> clean payload. Drops slugs the taxonomy does not have
- * (unless the draft itself introduces them), dedupes across tiers (core
- * wins, then expected, then tracks), caps sizes, and refuses a draft whose
- * core is thinner than three skills. Never throws.
- */
-export function parseBlueprintDraft(
-  text: string,
-  knownSlugs: ReadonlySet<string>,
-):
-  { ok: true; payload: BlueprintDraftPayload } | { ok: false; reason: string } {
-  let raw: unknown;
-  try {
-    raw = JSON.parse(
-      text
-        .replace(/^\s*```(?:json)?/m, "")
-        .replace(/```\s*$/m, "")
-        .trim(),
-    );
-  } catch {
-    return {
-      ok: false,
-      reason: "The model reply wasn't valid JSON, try again.",
-    };
-  }
-  const parsed = blueprintDraftSchema.safeParse(raw);
-  if (!parsed.success)
-    return { ok: false, reason: "The model reply had the wrong shape." };
-  const d = parsed.data;
-  const newSkills = d.newSkills.filter((s) => !knownSlugs.has(s.slug));
-  const allowed = new Set([...knownSlugs, ...newSkills.map((s) => s.slug)]);
-  const seen = new Set<string>();
-  const take = (list: string[], max: number) => {
-    const out: string[] = [];
-    for (const s of list) {
-      if (!allowed.has(s) || seen.has(s)) continue;
-      seen.add(s);
-      out.push(s);
-      if (out.length >= max) break;
-    }
-    return out;
-  };
-  const core = take(d.core, 5);
-  if (core.length < 3) {
-    return {
-      ok: false,
-      reason: "The draft named fewer than three core skills we recognise.",
-    };
-  }
-  const expected = take(d.expected, 4);
-  const tracks = d.tracks
-    .map((t) => ({ name: t.name, skills: take(t.skills, 5) }))
-    .filter((t) => t.skills.length >= 2)
-    .slice(0, 4);
-  const used = new Set([
-    ...core,
-    ...expected,
-    ...tracks.flatMap((t) => t.skills),
-  ]);
-  const proveIt: Record<string, string> = {};
-  for (const [k, v] of Object.entries(d.proveIt ?? {})) {
-    if (used.has(k) && v.trim().length > 0) proveIt[k] = v.trim();
-  }
-  return {
-    ok: true,
-    payload: {
-      core,
-      expected,
-      tracks,
-      proveIt,
-      newSkills: newSkills.filter((s) => used.has(s.slug)),
-    },
-  };
-}
+export {
+  blueprintDraftSchema,
+  parseBlueprintDraft,
+  type BlueprintDraftPayload,
+} from "@/lib/blueprints/draft-parser";
 
 function systemPrompt(): string {
   return [
     "You design role skill blueprints for a South African national talent platform.",
-    "Use ONLY skill slugs from the provided list. If a skill the role truly needs is absent, add it under newSkills (max 6) with a short kebab-case slug, a label (max 40 chars) and category technical or professional; then use that slug.",
+    "Use ONLY skill slugs from the provided list. If a skill the role truly needs is absent, add it under newSkills (max 6) with a short kebab-case slug, a label (max 40 chars) and category technical or professional; then use that slug. The skill the role is NAMED for (what the person actually does all day) MUST appear in core, added under newSkills if the list lacks it; never substitute a generic skill for it.",
     "Tiers: core = 3-5 skills every person in this role has; expected = 2-4 skills employers assume; tracks = 1-4 named routes to the next level (a South African career step, e.g. supervision, a specialisation, running your own business), each with 2-5 skills.",
     "proveIt: for up to 4 skills, one concrete sentence describing a small project that proves the skill.",
     "Be honest and local: no invented certifications, no promises about pay.",

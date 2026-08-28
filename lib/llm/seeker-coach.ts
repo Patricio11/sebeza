@@ -16,6 +16,7 @@
  */
 
 import "server-only";
+import { generationParams } from "./openai-tuning";
 import { eq } from "drizzle-orm";
 import { getDb } from "@/db/client";
 import * as schema from "@/db/schema";
@@ -284,7 +285,8 @@ export async function coachChat(
   user: string,
 ): Promise<{ text: string; tokenCount: number; estZarCost: number }> {
   if (providerId === "anthropic") {
-    const url = creds.endpointUrl?.trim() || "https://api.anthropic.com/v1/messages";
+    const url =
+      creds.endpointUrl?.trim() || "https://api.anthropic.com/v1/messages";
     const res = await fetch(url, {
       method: "POST",
       headers: {
@@ -330,12 +332,14 @@ export async function coachChat(
     },
     body: JSON.stringify({
       model: creds.modelId,
-      temperature: 0.4,
-      // Token frugality (founder rule, 2026-08-24): the anthropic
-      // branch always capped output at 1024; this branch sent
-      // UNCAPPED requests for the coach, compass read, and catalog
-      // drafts. Same ceiling for all three now.
-      max_tokens: 1024,
+      // Token frugality (founder rule, 2026-08-24): output capped at 1024
+      // for every call. The parameter NAMES depend on the provider and
+      // model family (gpt-5 / o-series reject max_tokens and any
+      // temperature); lib/llm/openai-tuning.ts decides.
+      ...generationParams(providerId, creds.modelId, {
+        maxOutput: 1024,
+        temperature: 0.4,
+      }),
       response_format: { type: "json_object" as const },
       messages: [
         { role: "system", content: system },

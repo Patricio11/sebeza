@@ -15,7 +15,7 @@ import {
   type BlueprintDraftDto,
 } from "@/components/feature/admin/BlueprintDraftPanel";
 import { latestPendingDraft } from "@/lib/admin/blueprints";
-import { blueprintDraftSchema } from "@/lib/llm/blueprint-drafts";
+import { blueprintDraftSchema } from "@/lib/blueprints/draft-parser";
 
 /**
  * Role blueprints (docs/ROLE_BLUEPRINTS_PLAN.md): what each profession's

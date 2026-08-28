@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 
-import { parseBlueprintDraft } from "./blueprint-drafts";
+import { parseBlueprintDraft } from "@/lib/blueprints/draft-parser";
 
 const known = new Set([
   "git",

@@ -76,6 +76,7 @@ failure. Nothing reaches a seeker without Approve.
 - [x] Admin actions: requestBlueprintDraft, draftMissingBlueprints (cap 10, stops on provider failure), approveBlueprintDraft (drop list, new skills, replace rows), rejectBlueprintDraft; audit kinds
 - [x] BlueprintDraftPanel on /admin/blueprints: draft / redraft the selected profession, batch the missing ones, review card with untick, approve / reject
 - [x] Integration test: approve writes reviewed rows + new skill + replaces old rows; double approve refused; reject only flips state
+- [x] Live probe with the founder's key (gpt-5.4-mini): the app's OpenAI requests were 400 (max_tokens / temperature rejected by that family). `lib/llm/openai-tuning.ts` now decides the parameters per provider + model; the Test-button probe is plain text with 8 tokens. One real draft for "Drone Pilot": 1.3k tokens, honest tiers, defining skill proposed as a new taxonomy skill
 
 ## VERIFY
 
