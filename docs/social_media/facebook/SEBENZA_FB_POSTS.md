@@ -118,7 +118,7 @@ Sebenza is for everyone in South Africa's job market. Young and old, entry-level
 You're matched by your skills and where you live. Full stop.
 
 Talent is talent. We help it get found. 🇿🇦
-**Visual:** Quote-card (ask Claude to mint one from the kit) or a warm illustration of diverse people.
+**Visual:** `assets/post-07-for-everyone.png` (minted 2026-08-28; the same file is the IG feed post, and `instagram/assets/story-for-everyone.png` is the story).
 **Tags:** #Sebenza #Mzansi #SouthAfrica #Inclusion
 
 ---

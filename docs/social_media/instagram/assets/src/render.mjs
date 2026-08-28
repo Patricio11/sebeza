@@ -48,6 +48,12 @@ const CARDS = [
     sub: "You will never pay a cent to be found.",
   },
   {
+    template: "story.html", out: "story-for-everyone.png", ...STORY,
+    theme: "light", size: 132, eyebrow: "For everyone, fairly",
+    headline: "Talent is talent. We help it get <em>found</em>.",
+    sub: "Matched by your skills and where you live. Full stop.",
+  },
+  {
     template: "story.html", out: "story-trust.png", ...STORY,
     theme: "light", size: 140, eyebrow: "The honesty principle",
     headline: "<em>Trust</em> is the whole product.",
@@ -102,7 +108,9 @@ const CARDS = [
 const browser = await chromium.launch();
 const page = await browser.newPage();
 
+const ONLY = process.env.ONLY?.split(",").map((o) => o.trim());
 for (const card of CARDS) {
+  if (ONLY && !ONLY.includes(card.out)) continue;
   await page.setViewportSize({ width: card.w, height: card.h });
   await page.goto("file://" + path.join(srcDir, card.template).replace(/\\/g, "/"));
 

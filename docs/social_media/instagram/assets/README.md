@@ -17,6 +17,7 @@ Instagram's native portrait ratio). This folder holds only what Instagram alone 
 | `story-question.png` | 1080x1920 | Question story; place IG's question sticker over the dashed panel. |
 | `story-free-always.png` | 1080x1920 | Promise story; pair with a poll sticker. |
 | `story-trust.png` | 1080x1920 | Honesty story; pair with a quiz sticker. |
+| `story-for-everyone.png` | 1080x1920 | Story: "Talent is talent. We help it get found." (mission, light). Feed version: `../../facebook/assets/post-07-for-everyone.png`. |
 | `story-scam-warning.png` | 1080x1920 | Scam PSA story (red alert card); reshare monthly. |
 | `carousel-promise-1-cover.png` … `-6-proudly.png` | 1080x1350 ×6 | The promise carousel, posted in numeric order (cover first). |
 

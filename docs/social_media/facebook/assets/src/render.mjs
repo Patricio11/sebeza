@@ -106,6 +106,12 @@ const CARDS = [
     caption: "Live search on sebenzasa.com &middot; chef, Cape Town",
   },
   {
+    template: "quote.html", out: "post-07-for-everyone.png", w: 1080, h: 1350,
+    theme: "light", size: 118, eyebrow: "For everyone, fairly",
+    headline: "Talent is talent. We help it get <em>found</em>.",
+    sub: "Matched by your skills and where you live. Full stop. Citizens first, nobody here legally left out.",
+  },
+  {
     template: "quote.html", out: "post-02-who.png", w: 1080, h: 1350,
     theme: "light", size: 92, eyebrow: "Who's behind this",
     headline: "A small South African company with one belief: this country's talent deserves to be <em>seen</em>.",
@@ -116,7 +122,10 @@ const CARDS = [
 const browser = await chromium.launch();
 const page = await browser.newPage();
 
+// ONLY=post-07-for-everyone.png node render.mjs  renders just those outputs.
+const ONLY = process.env.ONLY?.split(",").map((o) => o.trim());
 for (const card of CARDS) {
+  if (ONLY && !ONLY.includes(card.out)) continue;
   await page.setViewportSize({ width: card.w, height: card.h });
   await page.goto("file://" + path.join(srcDir, card.template).replace(/\\/g, "/"));
 
