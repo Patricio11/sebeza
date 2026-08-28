@@ -25,6 +25,7 @@ import { SelfReportPlacementCard } from "@/components/feature/profile/SelfReport
 import { StatusNudgeBanner } from "@/components/feature/profile/StatusNudgeBanner";
 import { listMyInvitations } from "@/lib/seeker/invitations";
 import { getSetting } from "@/lib/admin/settings";
+import { getMySelfieVerifiedAt } from "@/lib/profile/selfie-status";
 import { getDb } from "@/db/client";
 import * as schema from "@/db/schema";
 import { and, eq, isNull, sql } from "drizzle-orm";
@@ -89,6 +90,16 @@ export default async function SeekerOverviewPage({
   const idCollectionOn = await getSetting<boolean>(
     "feature_flag_id_verification_enabled",
   );
+  // 2026-08-28 (founder): the live selfie is the ONE step that earns the
+  // Verified badge, so it belongs on this list. Follows its flag (ships
+  // dark) and reads the same field the badge reads. Nothing biometric
+  // is stored; the copy says so.
+  const selfieOn = await getSetting<boolean>(
+    "feature_flag_selfie_verification",
+  );
+  const selfieVerifiedAt = selfieOn
+    ? await getMySelfieVerifiedAt(me.profileId)
+    : null;
   const customSkillRows = await getDb()
     .select({ n: sql<number>`COUNT(*)::int` })
     .from(schema.profileSkillsCustom)
@@ -99,7 +110,8 @@ export default async function SeekerOverviewPage({
       ),
     );
   const skillCount = me.topSkills.length + (customSkillRows[0]?.n ?? 0);
-  const cityMissing = !me.city || me.city.trim() === "" || me.city === "Pending";
+  const cityMissing =
+    !me.city || me.city.trim() === "" || me.city === "Pending";
   const nextSteps: { text: string; done: boolean; href?: string }[] = [
     {
       text: "Verify your email address",
@@ -110,6 +122,17 @@ export default async function SeekerOverviewPage({
       done: !!me.profilePhotoUrl,
       href: "/dashboard/profile#avatar",
     },
+    ...(selfieOn
+      ? [
+          {
+            text: selfieVerifiedAt
+              ? "Verified with a live selfie"
+              : "Verify with a live selfie (done in your browser, nothing is stored)",
+            done: !!selfieVerifiedAt,
+            href: "/dashboard/profile#avatar",
+          },
+        ]
+      : []),
     {
       text: cityMissing ? "Add your city" : "Location set",
       done: !cityMissing,
@@ -197,7 +220,9 @@ export default async function SeekerOverviewPage({
   return (
     <DashboardMasthead
       role="seeker"
-      pageEyebrow={t("overview.greeting", { name: me.displayName.split(" ")[0] ?? "" })}
+      pageEyebrow={t("overview.greeting", {
+        name: me.displayName.split(" ")[0] ?? "",
+      })}
       pageTitle={t("title")}
       pageSubtitle={`${me.profession} · ${me.city}, ${me.province}`}
       pageActions={
@@ -236,9 +261,21 @@ export default async function SeekerOverviewPage({
 
       {/* Phase 10.2  help deep-links (D6 mirror from employer). */}
       <div className="mb-4 flex flex-wrap items-center gap-2">
-        <HelpLink role="seeker" slug="how-search-ranking-works" label="How ranking works" />
-        <HelpLink role="seeker" slug="understanding-profile-completeness" label="Profile completeness" />
-        <HelpLink role="seeker" slug="career-compass-recommendations" label="Career compass" />
+        <HelpLink
+          role="seeker"
+          slug="how-search-ranking-works"
+          label="How ranking works"
+        />
+        <HelpLink
+          role="seeker"
+          slug="understanding-profile-completeness"
+          label="Profile completeness"
+        />
+        <HelpLink
+          role="seeker"
+          slug="career-compass-recommendations"
+          label="Career compass"
+        />
       </div>
 
       {/* Phase 17 ("Demand Pulse")  flag-gated live demand spike. */}
@@ -267,13 +304,14 @@ export default async function SeekerOverviewPage({
             />
             <div>
               <p className="text-sm text-[color:var(--color-ink)]">
-                <strong>{activity.kpis.distinctEmployersThisWeek}</strong> employer
-                {activity.kpis.distinctEmployersThisWeek === 1 ? "" : "s"} viewed your
-                profile this week.
+                <strong>{activity.kpis.distinctEmployersThisWeek}</strong>{" "}
+                employer
+                {activity.kpis.distinctEmployersThisWeek === 1 ? "" : "s"}{" "}
+                viewed your profile this week.
               </p>
               <p className="mt-0.5 text-xs text-[color:var(--color-ink-soft)]">
-                Sebenza records every PII-touching action. You can see
-                exactly who.
+                Sebenza records every PII-touching action. You can see exactly
+                who.
               </p>
             </div>
           </div>
@@ -326,7 +364,10 @@ export default async function SeekerOverviewPage({
             <h2 id="vis-h" className="font-display text-2xl">
               {t("overview.completeness")}
             </h2>
-            <VerificationBadge state={me.verification} visible={verificationVisible} />
+            <VerificationBadge
+              state={me.verification}
+              visible={verificationVisible}
+            />
           </header>
           <div className="flex flex-col items-start gap-6 md:flex-row md:items-center">
             <ProfileCompleteness value={me.completeness} variant="arc" />
@@ -385,7 +426,7 @@ export default async function SeekerOverviewPage({
             <span className="text-[color:var(--color-ink)]">
               freshness × completeness × citizen boost
             </span>{" "}
-             same blend that drives `/search`.
+            same blend that drives `/search`.
           </p>
           {rank ? (
             <div className="grid grid-cols-[auto_1fr_auto] items-baseline gap-4">
@@ -423,8 +464,8 @@ export default async function SeekerOverviewPage({
             </div>
           ) : (
             <div className="text-sm text-[color:var(--color-ink-soft)]">
-              Your profile isn't ranked yet, confirm your status to enter
-              the pool.
+              Your profile isn't ranked yet, confirm your status to enter the
+              pool.
             </div>
           )}
         </section>
@@ -500,7 +541,10 @@ export default async function SeekerOverviewPage({
                     <span className="font-display tabular text-base text-[color:var(--color-ink-soft)] line-through">
                       #{rank.rank}
                     </span>
-                    <ArrowUpRight className="size-4 text-[color:var(--color-brand)]" aria-hidden="true" />
+                    <ArrowUpRight
+                      className="size-4 text-[color:var(--color-brand)]"
+                      aria-hidden="true"
+                    />
                     <span className="font-display tabular text-3xl text-[color:var(--color-brand-strong)]">
                       #{rank.projectedRank}
                     </span>
@@ -595,14 +639,16 @@ export default async function SeekerOverviewPage({
           link={{ href: "/dashboard/activity", label: "Open ledger →" }}
         >
           {activity.feed.length > 0
-            ? activity.feed.slice(0, 4).map((item, i) => (
-                <ActivityRow
-                  key={i}
-                  when={formatRelativeTime(item.at, locale)}
-                  who={item.actor}
-                  detail={item.detail}
-                />
-              ))
+            ? activity.feed
+                .slice(0, 4)
+                .map((item, i) => (
+                  <ActivityRow
+                    key={i}
+                    when={formatRelativeTime(item.at, locale)}
+                    who={item.actor}
+                    detail={item.detail}
+                  />
+                ))
             : null}
         </ActivitySection>
 
