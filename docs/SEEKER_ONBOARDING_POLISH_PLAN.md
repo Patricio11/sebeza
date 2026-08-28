@@ -99,6 +99,7 @@ list at 20 and the autosave retried the rejected save every second.
 - [x] Basics form autosaves (1.2s debounce) with the Unsaved / Saving / Saved status row; the mid-page primary button is gone; Enter still saves now
 - [x] Both editors router.refresh() on success so the Live completeness bar moves immediately
 - [x] Harness: ba01 untouched basics (hint, no button), ba02 bio edit autosaved with the bar moving, ba03 over-cap draft refused
+- [x] Typed skills: the validation message names the entry; each typed skill reaches the review queue ONCE (per-user pending lookup on the existing (state, kind) index, autosave-safe); pending ones come back into the editor after reload as Awaiting review; integration test saves the founder's real 22-item list twice
 
 ## VERIFY
 

@@ -10,6 +10,10 @@ import {
   INSTITUTION_KIND_LABEL,
   NQF_LEVELS,
 } from "@/lib/mock/taxonomy";
+import { getSessionUser } from "@/lib/auth/guard";
+import { and, eq } from "drizzle-orm";
+import { getDb } from "@/db/client";
+import * as schema from "@/db/schema";
 import { getSkills } from "@/lib/taxonomy/query";
 import { GraduationCap } from "lucide-react";
 import { ProfileBasicsForm } from "@/components/feature/profile/ProfileBasicsForm";
@@ -43,10 +47,7 @@ import { MobileSectionJumpNav } from "@/components/feature/profile/MobileSection
 import { StudentContextEditor } from "@/components/feature/profile/StudentContextEditor";
 import { signedPhotoUrl } from "@/lib/storage/signed";
 import { isStorageAvailable } from "@/lib/storage/backend";
-import {
-  TextField,
-  SelectField,
-} from "@/components/ui/FormField";
+import { TextField, SelectField } from "@/components/ui/FormField";
 import { HelpLink } from "@/components/feature/help/HelpLink";
 
 export default async function ProfileEditorPage({
@@ -59,7 +60,9 @@ export default async function ProfileEditorPage({
 
   const me = await getMyProfile();
   if (!me) redirect("/sign-in?next=/dashboard/profile");
-  const kycProviderEnabled = await getSetting<boolean>("feature_flag_kyc_provider");
+  const kycProviderEnabled = await getSetting<boolean>(
+    "feature_flag_kyc_provider",
+  );
   // Phase 31 (data minimisation)  ID/passport COLLECTION is dormant by
   // default. When OFF, the ID controls + KYC panel render ONLY if the
   // seeker already holds ID data (remove/status affordances  data-subject
@@ -80,7 +83,9 @@ export default async function ProfileEditorPage({
   );
   const selfieVerifiedAt = await getMySelfieVerifiedAt(me.profileId);
   // 2026-08-19  Work & projects (ships dark; PROFILE_PROJECTS_PLAN).
-  const projectsEnabled = await getSetting<boolean>("feature_flag_seeker_projects");
+  const projectsEnabled = await getSetting<boolean>(
+    "feature_flag_seeker_projects",
+  );
   const projects = projectsEnabled
     ? await listProjectsForProfile(me.profileId)
     : [];
@@ -105,6 +110,22 @@ export default async function ProfileEditorPage({
   // Map the live `topSkills` (labels) back to slug+label so the SkillsEditor
   // can validate against the controlled taxonomy.
   const slugByLabel = new Map(skillCatalogue.map((s) => [s.label, s.slug]));
+  // Typed skills that are still awaiting review live in the suggestion
+  // queue, not on the profile. Bring them back into the editor so they do
+  // not vanish after a save + reload (one indexed query, this seeker only).
+  const sessionUser = await getSessionUser();
+  const pendingTyped = sessionUser
+    ? await getDb()
+        .select({ text: schema.taxonomySuggestions.customText })
+        .from(schema.taxonomySuggestions)
+        .where(
+          and(
+            eq(schema.taxonomySuggestions.submittedByUserId, sessionUser.id),
+            eq(schema.taxonomySuggestions.kind, "skill"),
+            eq(schema.taxonomySuggestions.state, "pending"),
+          ),
+        )
+    : [];
   const initialSkills = me.topSkills
     .map((s) => {
       const slug = slugByLabel.get(s.name);
@@ -117,6 +138,15 @@ export default async function ProfileEditorPage({
       };
     })
     .filter((s): s is NonNullable<typeof s> => s !== null);
+  const pendingItems = pendingTyped
+    .filter((p) => !initialSkills.some((i) => i.slug === p.text))
+    .map((p) => ({
+      slug: p.text,
+      label: p.text,
+      proficiency: 3,
+      yearsOfExperience: null as number | null,
+    }));
+  const editorSkills = [...initialSkills, ...pendingItems];
 
   // Mint a short-lived signed URL for the current photo, if any. The page
   // re-renders on every nav so this stays fresh.
@@ -139,15 +169,39 @@ export default async function ProfileEditorPage({
     >
       {/* Phase 10.2  help deep-links (D6). */}
       <div className="mb-4 flex flex-wrap items-center gap-2">
-        <HelpLink role="seeker" slug="setting-up-your-profile-photo" label="Profile photo guide" />
-        <HelpLink role="seeker" slug="adding-skills-from-the-taxonomy" label="Adding skills" />
-        <HelpLink role="seeker" slug="employment-history-entry" label="Work history" />
+        <HelpLink
+          role="seeker"
+          slug="setting-up-your-profile-photo"
+          label="Profile photo guide"
+        />
+        <HelpLink
+          role="seeker"
+          slug="adding-skills-from-the-taxonomy"
+          label="Adding skills"
+        />
+        <HelpLink
+          role="seeker"
+          slug="employment-history-entry"
+          label="Work history"
+        />
         <HelpLink role="seeker" slug="open-to-tags" label="Open-to tags" />
-        <HelpLink role="seeker" slug="secondary-professions-and-cross-training" label="Secondary professions" />
+        <HelpLink
+          role="seeker"
+          slug="secondary-professions-and-cross-training"
+          label="Secondary professions"
+        />
         <HelpLink role="seeker" slug="cv-backup" label="CV backup" />
         <HelpLink role="seeker" slug="build-your-cv" label="Build your CV" />
-        <HelpLink role="seeker" slug="sharing-your-profile" label="Sharing your profile" />
-        <HelpLink role="seeker" slug="achievements" label="Achievement badges" />
+        <HelpLink
+          role="seeker"
+          slug="sharing-your-profile"
+          label="Sharing your profile"
+        />
+        <HelpLink
+          role="seeker"
+          slug="achievements"
+          label="Achievement badges"
+        />
       </div>
 
       <div className="grid gap-10 md:grid-cols-[240px_1fr] md:gap-16">
@@ -157,12 +211,54 @@ export default async function ProfileEditorPage({
             Sections
           </div>
           <ul className="space-y-1.5 text-sm">
-            <li><a href="#avatar" className="text-[color:var(--color-ink-soft)] hover:text-[color:var(--color-ink)]">Photo</a></li>
-            <li><a href="#identity" className="text-[color:var(--color-ink-soft)] hover:text-[color:var(--color-ink)]">Identity basics</a></li>
-            <li><a href="#location" className="text-[color:var(--color-ink-soft)] hover:text-[color:var(--color-ink)]">Location</a></li>
-            <li><a href="#professional" className="text-[color:var(--color-ink-soft)] hover:text-[color:var(--color-ink)]">Professional summary</a></li>
-            <li><a href="#skills" className="text-[color:var(--color-ink-soft)] hover:text-[color:var(--color-ink)]">Skills</a></li>
-            <li><a href="#national-id" className="text-[color:var(--color-ink-soft)] hover:text-[color:var(--color-ink)]">National ID</a></li>
+            <li>
+              <a
+                href="#avatar"
+                className="text-[color:var(--color-ink-soft)] hover:text-[color:var(--color-ink)]"
+              >
+                Photo
+              </a>
+            </li>
+            <li>
+              <a
+                href="#identity"
+                className="text-[color:var(--color-ink-soft)] hover:text-[color:var(--color-ink)]"
+              >
+                Identity basics
+              </a>
+            </li>
+            <li>
+              <a
+                href="#location"
+                className="text-[color:var(--color-ink-soft)] hover:text-[color:var(--color-ink)]"
+              >
+                Location
+              </a>
+            </li>
+            <li>
+              <a
+                href="#professional"
+                className="text-[color:var(--color-ink-soft)] hover:text-[color:var(--color-ink)]"
+              >
+                Professional summary
+              </a>
+            </li>
+            <li>
+              <a
+                href="#skills"
+                className="text-[color:var(--color-ink-soft)] hover:text-[color:var(--color-ink)]"
+              >
+                Skills
+              </a>
+            </li>
+            <li>
+              <a
+                href="#national-id"
+                className="text-[color:var(--color-ink-soft)] hover:text-[color:var(--color-ink)]"
+              >
+                National ID
+              </a>
+            </li>
             {academic && (
               <li>
                 <a
@@ -173,11 +269,32 @@ export default async function ProfileEditorPage({
                 </a>
               </li>
             )}
-            <li><a href="#open-to" className="text-[color:var(--color-ink-soft)] hover:text-[color:var(--color-ink)]">Open to</a></li>
+            <li>
+              <a
+                href="#open-to"
+                className="text-[color:var(--color-ink-soft)] hover:text-[color:var(--color-ink)]"
+              >
+                Open to
+              </a>
+            </li>
             {projectsEnabled && (
-              <li><a href="#projects" className="text-[color:var(--color-ink-soft)] hover:text-[color:var(--color-ink)]">Work &amp; projects</a></li>
+              <li>
+                <a
+                  href="#projects"
+                  className="text-[color:var(--color-ink-soft)] hover:text-[color:var(--color-ink)]"
+                >
+                  Work &amp; projects
+                </a>
+              </li>
             )}
-            <li><a href="#cv-backup" className="text-[color:var(--color-ink-soft)] hover:text-[color:var(--color-ink)]">CV backup</a></li>
+            <li>
+              <a
+                href="#cv-backup"
+                className="text-[color:var(--color-ink-soft)] hover:text-[color:var(--color-ink)]"
+              >
+                CV backup
+              </a>
+            </li>
           </ul>
           <p className="mt-6 rounded-[var(--radius-sm)] border border-dashed border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-3 text-xs text-[color:var(--color-ink-soft)]">
             {t("savedHint")}
@@ -216,7 +333,8 @@ export default async function ProfileEditorPage({
                 </h2>
               </div>
               <p className="mt-1 text-sm text-[color:var(--color-ink-soft)]">
-                Optional. A real photo lifts profile completeness; initials still look great.
+                Optional. A real photo lifts profile completeness; initials
+                still look great.
               </p>
             </header>
             <AvatarEditor name={me.displayName} initialUrl={photoUrl} />
@@ -311,7 +429,7 @@ export default async function ProfileEditorPage({
               hint="Skills must come from our controlled taxonomy, keeps search and analytics clean."
             />
             <SkillsEditor
-              initial={initialSkills}
+              initial={editorSkills}
               professionSlug={me.profession}
               skillOptions={skillCatalogue}
             />
@@ -389,12 +507,18 @@ export default async function ProfileEditorPage({
             <SectionHeading
               eyebrow="06"
               title={
-                idCollectionEnabled || me.hasNationalId || me.hasIdDocument || me.kycVerifiedAt
+                idCollectionEnabled ||
+                me.hasNationalId ||
+                me.hasIdDocument ||
+                me.kycVerifiedAt
                   ? "National ID"
                   : "Date of birth"
               }
               hint={
-                idCollectionEnabled || me.hasNationalId || me.hasIdDocument || me.kycVerifiedAt
+                idCollectionEnabled ||
+                me.hasNationalId ||
+                me.hasIdDocument ||
+                me.kycVerifiedAt
                   ? "Captured once, encrypted on save, never displayed back. POPIA special-category data."
                   : "Used only for the age check at sign-up. Sebenza does not ask for ID or passport numbers."
               }
@@ -437,7 +561,10 @@ export default async function ProfileEditorPage({
               />
 
               <div className="mb-5 flex flex-wrap items-center gap-2">
-                <VerificationBadge state={academic.verification} visible={verificationVisible} />
+                <VerificationBadge
+                  state={academic.verification}
+                  visible={verificationVisible}
+                />
                 <span className="text-xs text-[color:var(--color-ink-soft)]">
                   {tAcademic("verificationNote")}
                 </span>
@@ -492,10 +619,9 @@ export default async function ProfileEditorPage({
                 </SelectField>
               </div>
               <p className="mt-4 rounded-[var(--radius-sm)] border border-dashed border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-3 text-xs text-[color:var(--color-ink-soft)]">
-                Institution, programme and NQF level stay read-only while
-                we build the verification link with SAQA and the
-                institutions. The current-semester context below is
-                editable any time.
+                Institution, programme and NQF level stay read-only while we
+                build the verification link with SAQA and the institutions. The
+                current-semester context below is editable any time.
               </p>
 
               {/* Phase 13.1  current-semester context editor.
@@ -521,7 +647,11 @@ export default async function ProfileEditorPage({
 
           {/* Phase 11.5.1  voluntary "open to" tags. Independent of
               employment status; secondary intent only. */}
-          <section id="open-to" aria-labelledby="open-to-h" className="scroll-mt-20">
+          <section
+            id="open-to"
+            aria-labelledby="open-to-h"
+            className="scroll-mt-20"
+          >
             <header className="mb-5 border-b-2 border-[color:var(--color-ink)] pb-3">
               <div className="flex items-baseline gap-3">
                 <span className="font-display text-2xl italic text-[color:var(--color-accent)]">
@@ -532,8 +662,8 @@ export default async function ProfileEditorPage({
                 </h2>
               </div>
               <p className="mt-2 text-sm text-[color:var(--color-ink-soft)]">
-                Optional secondary intent, doesn&rsquo;t change your
-                employment status.
+                Optional secondary intent, doesn&rsquo;t change your employment
+                status.
               </p>
             </header>
             <OpenToTagsEditor initial={me.openToTags ?? []} />
@@ -542,7 +672,11 @@ export default async function ProfileEditorPage({
           {/* 2026-08-19  Work & projects. Self-declared evidence of work;
               deliberately outside completeness + ranking. */}
           {projectsEnabled && (
-            <section id="projects" aria-labelledby="projects-h" className="scroll-mt-20">
+            <section
+              id="projects"
+              aria-labelledby="projects-h"
+              className="scroll-mt-20"
+            >
               <header className="mb-5 border-b-2 border-[color:var(--color-ink)] pb-3">
                 <div className="flex items-baseline gap-3">
                   <span className="font-display text-2xl italic text-[color:var(--color-accent)]">
@@ -562,7 +696,11 @@ export default async function ProfileEditorPage({
 
           {/* Phase 11.5.2  personal CV backup. Private to the seeker;
               never exposed to employers. */}
-          <section id="cv-backup" aria-labelledby="cv-h" className="scroll-mt-20">
+          <section
+            id="cv-backup"
+            aria-labelledby="cv-h"
+            className="scroll-mt-20"
+          >
             <header className="mb-5 border-b-2 border-[color:var(--color-ink)] pb-3">
               <div className="flex items-baseline gap-3">
                 <span className="font-display text-2xl italic text-[color:var(--color-accent)]">
@@ -573,8 +711,8 @@ export default async function ProfileEditorPage({
                 </h2>
               </div>
               <p className="mt-2 text-sm text-[color:var(--color-ink-soft)]">
-                Private to you. We don&rsquo;t share this with
-                employers; it&rsquo;s a personal backup copy.
+                Private to you. We don&rsquo;t share this with employers;
+                it&rsquo;s a personal backup copy.
               </p>
             </header>
             <CvBackupEditor
@@ -607,7 +745,9 @@ function SectionHeading({
         <h2 className="font-display text-2xl">{title}</h2>
       </div>
       {hint && (
-        <p className="mt-1 text-sm text-[color:var(--color-ink-soft)]">{hint}</p>
+        <p className="mt-1 text-sm text-[color:var(--color-ink-soft)]">
+          {hint}
+        </p>
       )}
     </header>
   );

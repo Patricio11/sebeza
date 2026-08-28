@@ -387,7 +387,26 @@ export async function updateSkills(
     );
   }
   const parsed = skillsSchema.safeParse(input);
-  if (!parsed.success) return fail("Skill list invalid, try again.");
+  if (!parsed.success) {
+    // Name the entry, not the list: "Skill list invalid" told a seeker
+    // nothing about which of 22 cards to fix.
+    const issue = parsed.error.issues[0];
+    const idx = typeof issue?.path[1] === "number" ? issue.path[1] : null;
+    const field = typeof issue?.path[2] === "string" ? issue.path[2] : null;
+    const label =
+      idx !== null && Array.isArray(input?.skills)
+        ? String(input.skills[idx]?.slug ?? "")
+        : "";
+    if (label && field === "proficiency") {
+      return fail(`"${label}": proficiency must be between 1 and 5.`);
+    }
+    if (label && field === "yearsOfExperience") {
+      return fail(`"${label}": years must be between 0 and 60.`);
+    }
+    if (label)
+      return fail(`"${label}" could not be saved. Remove it and try again.`);
+    return fail("Skill list invalid, try again.");
+  }
   const db = getDb();
   const profile = await loadOwnedProfile(db, session.id);
   if (!profile) return fail("Profile not found.");
@@ -469,15 +488,39 @@ export async function updateSkills(
   // the dashboard steps and the nudge cron all see the same number.
   await refreshProfileCompleteness(db, profile.id);
 
-  for (const s of pendingSkills) {
+  // Autosave calls this on every change, so a typed skill must reach the
+  // review queue ONCE. One indexed query (state, kind) for this seeker's
+  // open suggestions; anything already queued is skipped, along with
+  // text the table's own CHECK (2..80 chars) would refuse.
+  const openSuggestions = new Set(
+    (
+      await db
+        .select({ text: schema.taxonomySuggestions.customText })
+        .from(schema.taxonomySuggestions)
+        .where(
+          and(
+            eq(schema.taxonomySuggestions.submittedByUserId, session.id),
+            eq(schema.taxonomySuggestions.kind, "skill"),
+            eq(schema.taxonomySuggestions.state, "pending"),
+          ),
+        )
+    ).map((r) => r.text.trim().toLowerCase()),
+  );
+  const newSuggestions = pendingSkills
+    .map((s) => ({ ...s, text: s.slug.trim().slice(0, 80) }))
+    .filter(
+      (s) => s.text.length >= 2 && !openSuggestions.has(s.text.toLowerCase()),
+    );
+  for (const s of newSuggestions) {
     try {
       const suggestionId = `tx_${randomUUID()}`;
       await db.insert(schema.taxonomySuggestions).values({
         id: suggestionId,
         kind: "skill",
-        customText: s.slug,
+        customText: s.text,
         submittedByUserId: session.id,
       });
+      openSuggestions.add(s.text.toLowerCase());
       await logAccess({
         kind: "taxonomy.suggestion.submit",
         actor: session.id,
