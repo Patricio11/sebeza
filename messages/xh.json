@@ -686,7 +686,13 @@
       "technical": "Izakhono zobugcisa",
       "professional": "Izakhono zomsebenzi",
       "pending": "Kulindwe uphononongo",
-      "pendingNote": "Zintsha kwikhathalogu yethu. Iqela lethu liyaziphonononga; zibalwa xa zivunyiwe."
+      "pendingNote": "Zintsha kwikhathalogu yethu. Iqela lethu liyaziphonononga; zibalwa xa zivunyiwe.",
+      "statusUnsaved": "Utshintsho olungagcinwanga",
+      "statusSaving": "Iyagcina…",
+      "statusSaved": "Igciniwe {time}",
+      "statusError": "Ayikwazanga ukugcina. Zama kwakhona.",
+      "autosaveHint": "Utshintsho luzigcina ngokwalo umzuzwana emva kokulwenza.",
+      "saveButton": "Gcina izakhono"
     }
   },
   "employerDash": {

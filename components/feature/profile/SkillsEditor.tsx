@@ -1,13 +1,20 @@
 "use client";
 
 /**
- * Skills editor  managed local state, single "Save skills" submit.
+ * Skills editor  managed local state that AUTOSAVES.
+ *
+ * 2026-08-28 (founder): a seeker's skills sat in the session draft for
+ * days and never reached the database; the editor showed them, the
+ * dashboard truthfully counted zero. Now every change is written a
+ * moment after it happens (debounced), the status chip says Unsaved /
+ * Saving / Saved / error honestly, the explicit button stays as an
+ * immediate save, and a restored draft is saved for real on arrival.
  *
  * Only allows skills from the controlled taxonomy (SKILLS in `lib/mock/taxonomy.ts`).
  * Per Phase 3 plan re-check #5: no free-text  keeps search and analytics clean.
  */
 
-import { useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
 import { MultiSelectComboboxField } from "@/components/ui/MultiSelectComboboxField";
 import { Button } from "@/components/ui/Button";
@@ -15,6 +22,7 @@ import { X } from "lucide-react";
 import { updateSkills } from "@/lib/profile/actions";
 import { SKILLS, PROFESSION_SKILLS_MAP } from "@/lib/mock/taxonomy";
 import { useSessionDraft } from "@/lib/hooks/useSessionDraft";
+import { serialiseSkills } from "@/lib/profile/skills-draft";
 
 interface SkillState {
   slug: string;
@@ -44,9 +52,17 @@ export function SkillsEditor({ initial, professionSlug, skillOptions }: Props) {
   const catalogue = skillOptions ?? SKILLS;
   const [items, setItems] = useState<SkillState[]>(initial);
   const [pending, startTransition] = useTransition();
-  const [message, setMessage] = useState<
-    { kind: "ok" | "error"; text: string } | null
-  >(null);
+  const [message, setMessage] = useState<{
+    kind: "ok" | "error";
+    text: string;
+  } | null>(null);
+  const [status, setStatus] = useState<"idle" | "saving" | "saved" | "error">(
+    "idle",
+  );
+  const [savedAt, setSavedAt] = useState<string | null>(null);
+  /** Fingerprint of the list the database last accepted. */
+  const [lastSaved, setLastSaved] = useState(() => serialiseSkills(initial));
+  const dirty = serialiseSkills(items) !== lastSaved;
 
   // Persist the skills list so locale-switching mid-edit doesn't
   // wipe a freshly-curated set of skills + proficiencies. Items
@@ -118,23 +134,60 @@ export function SkillsEditor({ initial, professionSlug, skillOptions }: Props) {
     );
   }
 
-  function handleSave() {
+  const clearDraftRef = useRef(clearDraft);
+  useEffect(() => {
+    clearDraftRef.current = clearDraft;
+  });
+
+  function persist(snapshot: SkillState[]) {
     setMessage(null);
+    setStatus("saving");
     startTransition(async () => {
       const r = await updateSkills({
-        skills: items.map((i) => ({
+        skills: snapshot.map((i) => ({
           slug: i.slug,
           proficiency: i.proficiency,
           yearsOfExperience: i.yearsOfExperience,
         })),
       });
       if (r.ok) {
-        setMessage({ kind: "ok", text: "Skills saved." });
-        clearDraft();
+        setLastSaved(serialiseSkills(snapshot));
+        clearDraftRef.current();
+        setStatus("saved");
+        setSavedAt(
+          new Date().toLocaleTimeString("en-ZA", {
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
+        );
       } else {
+        setStatus("error");
         setMessage({ kind: "error", text: r.message });
       }
     });
+  }
+
+  // Autosave: a moment after the list stops changing, write it. The
+  // fingerprint guard means a save only fires when something differs
+  // from what the database last accepted (a restored draft counts).
+  useEffect(() => {
+    if (!dirty || pending) return;
+    const timer = setTimeout(() => persist(items), 900);
+    return () => clearTimeout(timer);
+  }, [items, dirty, pending]);
+
+  // Never let a tab close on unsaved skills without a word.
+  useEffect(() => {
+    if (!dirty) return;
+    const warn = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+    };
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [dirty]);
+
+  function handleSave() {
+    persist(items);
   }
 
   // 2026-08-24  Technical / Professional grouping (founder request).
@@ -142,22 +195,34 @@ export function SkillsEditor({ initial, professionSlug, skillOptions }: Props) {
   // that aren't canonical yet get their own "awaiting review" group so
   // nothing silently disappears.
   const categoryBySlug = new Map(
-    catalogue.map((c) => [c.slug, (c as { category?: string }).category ?? "technical"]),
+    catalogue.map((c) => [
+      c.slug,
+      (c as { category?: string }).category ?? "technical",
+    ]),
   );
   const canonicalSlugs = new Set(catalogue.map((c) => c.slug));
-  const groups: Array<{ key: string; title: string; note?: string; items: SkillState[] }> = [
+  const groups: Array<{
+    key: string;
+    title: string;
+    note?: string;
+    items: SkillState[];
+  }> = [
     {
       key: "technical",
       title: t("technical"),
       items: items.filter(
-        (i) => canonicalSlugs.has(i.slug) && categoryBySlug.get(i.slug) !== "professional",
+        (i) =>
+          canonicalSlugs.has(i.slug) &&
+          categoryBySlug.get(i.slug) !== "professional",
       ),
     },
     {
       key: "professional",
       title: t("professional"),
       items: items.filter(
-        (i) => canonicalSlugs.has(i.slug) && categoryBySlug.get(i.slug) === "professional",
+        (i) =>
+          canonicalSlugs.has(i.slug) &&
+          categoryBySlug.get(i.slug) === "professional",
       ),
     },
     {
@@ -169,60 +234,69 @@ export function SkillsEditor({ initial, professionSlug, skillOptions }: Props) {
   ];
 
   const renderCard = (s: SkillState) => (
-            <li
-              key={s.slug}
-              className="flex items-center justify-between gap-4 rounded-[var(--radius-sm)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] px-4 py-3"
-            >
-              <div className="min-w-0">
-                <div className="truncate font-medium">{s.label}</div>
-                <div className="text-xs text-[color:var(--color-ink-soft)]">
-                  Proficiency: {s.proficiency}/5
-                  {s.yearsOfExperience !== null && (
-                    <>  {s.yearsOfExperience === 0 ? "<1 yr" : `${s.yearsOfExperience} yr${s.yearsOfExperience === 1 ? "" : "s"}`}</>
-                  )}
-                </div>
-              </div>
-              <div className="flex flex-wrap items-center gap-2">
-                <div className="flex items-center gap-0.5" role="group" aria-label="Proficiency">
-                  {[1, 2, 3, 4, 5].map((level) => (
-                    <button
-                      key={level}
-                      type="button"
-                      aria-label={`Set proficiency ${level}`}
-                      onClick={() => setProficiency(s.slug, level)}
-                      className="size-3 rounded-full"
-                      style={{
-                        background:
-                          level <= s.proficiency
-                            ? "var(--color-brand)"
-                            : "var(--color-hairline)",
-                      }}
-                    />
-                  ))}
-                </div>
-                {/* Phase 9.9  per-skill years input. 5ch wide so the
+    <li
+      key={s.slug}
+      className="flex items-center justify-between gap-4 rounded-[var(--radius-sm)] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] px-4 py-3"
+    >
+      <div className="min-w-0">
+        <div className="truncate font-medium">{s.label}</div>
+        <div className="text-xs text-[color:var(--color-ink-soft)]">
+          Proficiency: {s.proficiency}/5
+          {s.yearsOfExperience !== null && (
+            <>
+              {" "}
+              {s.yearsOfExperience === 0
+                ? "<1 yr"
+                : `${s.yearsOfExperience} yr${s.yearsOfExperience === 1 ? "" : "s"}`}
+            </>
+          )}
+        </div>
+      </div>
+      <div className="flex flex-wrap items-center gap-2">
+        <div
+          className="flex items-center gap-0.5"
+          role="group"
+          aria-label="Proficiency"
+        >
+          {[1, 2, 3, 4, 5].map((level) => (
+            <button
+              key={level}
+              type="button"
+              aria-label={`Set proficiency ${level}`}
+              onClick={() => setProficiency(s.slug, level)}
+              className="size-3 rounded-full"
+              style={{
+                background:
+                  level <= s.proficiency
+                    ? "var(--color-brand)"
+                    : "var(--color-hairline)",
+              }}
+            />
+          ))}
+        </div>
+        {/* Phase 9.9  per-skill years input. 5ch wide so the
                     row stays single-line at 360px. NULL when blank. */}
-                <input
-                  type="number"
-                  min={0}
-                  max={60}
-                  inputMode="numeric"
-                  placeholder="yrs"
-                  aria-label={`Years of ${s.label}`}
-                  value={s.yearsOfExperience ?? ""}
-                  onChange={(e) => setYears(s.slug, e.target.value)}
-                  className="h-7 w-14 rounded-[var(--radius-sm)] border border-[color:var(--color-hairline)] bg-[color:var(--color-paper)] px-1.5 text-xs"
-                />
-                <button
-                  type="button"
-                  aria-label={`Remove ${s.label}`}
-                  onClick={() => removeSkill(s.slug)}
-                  className="text-[color:var(--color-ink-soft)] hover:text-[color:var(--color-danger)]"
-                >
-                  <X className="size-4" aria-hidden="true" />
-                </button>
-              </div>
-            </li>
+        <input
+          type="number"
+          min={0}
+          max={60}
+          inputMode="numeric"
+          placeholder="yrs"
+          aria-label={`Years of ${s.label}`}
+          value={s.yearsOfExperience ?? ""}
+          onChange={(e) => setYears(s.slug, e.target.value)}
+          className="h-7 w-14 rounded-[var(--radius-sm)] border border-[color:var(--color-hairline)] bg-[color:var(--color-paper)] px-1.5 text-xs"
+        />
+        <button
+          type="button"
+          aria-label={`Remove ${s.label}`}
+          onClick={() => removeSkill(s.slug)}
+          className="text-[color:var(--color-ink-soft)] hover:text-[color:var(--color-danger)]"
+        >
+          <X className="size-4" aria-hidden="true" />
+        </button>
+      </div>
+    </li>
   );
 
   return (
@@ -269,7 +343,7 @@ export function SkillsEditor({ initial, professionSlug, skillOptions }: Props) {
           onChange={handlePickerChange}
           options={catalogue.map((s) => ({ value: s.slug, label: s.label }))}
           suggestedValues={
-            professionSlug ? PROFESSION_SKILLS_MAP[professionSlug] ?? [] : []
+            professionSlug ? (PROFESSION_SKILLS_MAP[professionSlug] ?? []) : []
           }
           placeholder="Type to search skills…"
           allowOther
@@ -277,15 +351,37 @@ export function SkillsEditor({ initial, professionSlug, skillOptions }: Props) {
           otherHint="Can't find your skill? Just keep typing it and add it - our team reviews new skills."
           splitOtherOnComma
         />
-        <div className="mt-3 flex justify-end">
+        <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
+          <p
+            role="status"
+            aria-live="polite"
+            className={
+              "text-[0.7rem] uppercase tracking-[0.18em] " +
+              (status === "error"
+                ? "text-[color:var(--color-danger)]"
+                : dirty || status === "saving"
+                  ? "text-[color:var(--color-accent)]"
+                  : "text-[color:var(--color-ink-soft)]")
+            }
+          >
+            {status === "saving" || pending
+              ? t("statusSaving")
+              : dirty
+                ? t("statusUnsaved")
+                : status === "saved" && savedAt
+                  ? t("statusSaved", { time: savedAt })
+                  : status === "error"
+                    ? t("statusError")
+                    : t("autosaveHint")}
+          </p>
           <Button
             type="button"
             variant="primary"
             size="sm"
             onClick={handleSave}
-            disabled={pending}
+            disabled={pending || !dirty}
           >
-            {pending ? "Saving…" : "Save skills"}
+            {pending ? t("statusSaving") : t("saveButton")}
           </Button>
         </div>
       </div>

@@ -686,7 +686,13 @@
       "technical": "Tegniese vaardighede",
       "professional": "Professionele vaardighede",
       "pending": "Wag op hersiening",
-      "pendingNote": "Nuut in ons katalogus. Ons span hersien dit; dit tel sodra dit goedgekeur is."
+      "pendingNote": "Nuut in ons katalogus. Ons span hersien dit; dit tel sodra dit goedgekeur is.",
+      "statusUnsaved": "Ongestoorde veranderinge",
+      "statusSaving": "Stoor tans…",
+      "statusSaved": "Gestoor {time}",
+      "statusError": "Kon nie stoor nie. Probeer weer.",
+      "autosaveHint": "Veranderinge stoor vanself 'n oomblik nadat jy dit maak.",
+      "saveButton": "Stoor vaardighede"
     }
   },
   "employerDash": {

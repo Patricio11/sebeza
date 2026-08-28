@@ -686,7 +686,13 @@
       "technical": "Amakhono obuchwepheshe",
       "professional": "Amakhono omsebenzi",
       "pending": "Kulindwe ukubuyekezwa",
-      "pendingNote": "Amasha kukhathalogu yethu. Ithimba lethu liyawabuyekeza; abalwa uma esegunyaziwe."
+      "pendingNote": "Amasha kukhathalogu yethu. Ithimba lethu liyawabuyekeza; abalwa uma esegunyaziwe.",
+      "statusUnsaved": "Izinguquko ezingagciniwe",
+      "statusSaving": "Iyagcina…",
+      "statusSaved": "Kugciniwe {time}",
+      "statusError": "Ayikwazanga ukugcina. Zama futhi.",
+      "autosaveHint": "Izinguquko zizigcina ngokwazo isikhashana emva kokuzenza.",
+      "saveButton": "Gcina amakhono"
     }
   },
   "employerDash": {

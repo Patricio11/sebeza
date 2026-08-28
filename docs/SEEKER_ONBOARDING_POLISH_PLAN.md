@@ -73,6 +73,18 @@ said "Coming soon". Now the privacy page follows the same flags.
 - [x] /admin/settings hints say the flags also reveal the consent cards
 - [x] Harness screenshot on08: privacy page with both flags off (six cards)
 
+### Follow-up 3 (founder, 2026-08-28): skills that never reached the database
+
+The founder's own profile showed 3 skills + 19 awaiting review in the editor while the
+dashboard said "Add 5 more skills". The database had ZERO rows: the editor restores an
+unsaved session draft on every visit, the only save was a button at the bottom, and
+the page-level note says "Autosaves as you type". Skills now autosave.
+
+- [x] SkillsEditor autosaves 900ms after any change (fingerprint vs last accepted list, lib/profile/skills-draft.ts); explicit Save stays as an immediate save and is disabled when nothing is unsaved
+- [x] Honest status chip: Unsaved changes / Saving / Saved HH:MM / Could not save (en + zu/xh/af); beforeunload warning while unsaved
+- [x] A restored draft counts as unsaved and is written on arrival (fixes the founder's case without asking anyone to re-add skills)
+- [x] Harness: sa01 (draft autosaved on arrival, survives reload), sa02/sa03 (chip states), sa04 (dashboard "Skills set is strong")
+
 ## VERIFY
 
 - [x] Full suite + build green (588 tests, 66 files; production build green)
