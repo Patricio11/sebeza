@@ -904,7 +904,11 @@
     "notFoundLinkInsights": "Imininingwane kazwelonke",
     "notFoundLinkSignUp": "Yakha iphrofayela yamahhala",
     "notFoundLinkAbout": "Indlela uSebenza asebenza ngayo",
-    "errorDigestHint": "Uma usithinta ngalokhu, sho le khodi"
+    "errorDigestHint": "Uma usithinta ngalokhu, sho le khodi",
+    "updatingEyebrow": "Inguqulo entsha",
+    "updatingTitle": "I-Sebenza isanda kubuyekezwa",
+    "updatingBody": "Leli khasi belivuliwe ngesikhathi sikhipha isibuyekezo. Ukulayisha kabusha kuletha inguqulo entsha; noma yini obuyibhala igciniwe.",
+    "updatingReload": "Layisha kabusha manje"
   },
   "common": {
     "loading": "Iyalayisha…",

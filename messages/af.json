@@ -904,7 +904,11 @@
     "notFoundLinkInsights": "Nasionale insigte",
     "notFoundLinkSignUp": "Skep 'n gratis profiel",
     "notFoundLinkAbout": "Hoe Sebenza werk",
-    "errorDigestHint": "As jy ons hieroor kontak, noem die kode"
+    "errorDigestHint": "As jy ons hieroor kontak, noem die kode",
+    "updatingEyebrow": "Nuwe weergawe",
+    "updatingTitle": "Sebenza is pas opgedateer",
+    "updatingBody": "Hierdie bladsy was oop terwyl ons 'n opdatering uitgestuur het. Herlaai bring die nuwe weergawe; enigiets wat jy getik het, word behou.",
+    "updatingReload": "Herlaai nou"
   },
   "common": {
     "loading": "Laai tans…",

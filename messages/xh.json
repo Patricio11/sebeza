@@ -904,7 +904,11 @@
     "notFoundLinkInsights": "Iinkcukacha zesizwe",
     "notFoundLinkSignUp": "Yenza iprofayile yasimahla",
     "notFoundLinkAbout": "Indlela uSebenza asebenza ngayo",
-    "errorDigestHint": "Ukuba uqhagamshelana nathi ngoku, khankanya le khowudi"
+    "errorDigestHint": "Ukuba uqhagamshelana nathi ngoku, khankanya le khowudi",
+    "updatingEyebrow": "Inguqulelo entsha",
+    "updatingTitle": "I-Sebenza isandula ukuhlaziywa",
+    "updatingBody": "Eli phepha belivuliwe ngexesha sikhupha uhlaziyo. Ukulayisha kwakhona kuzisa inguqulelo entsha; nantoni na obuyibhala igciniwe.",
+    "updatingReload": "Layisha kwakhona ngoku"
   },
   "common": {
     "loading": "Iyalayisha…",

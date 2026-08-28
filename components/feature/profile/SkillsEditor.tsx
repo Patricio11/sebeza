@@ -23,6 +23,10 @@ import { updateSkills } from "@/lib/profile/actions";
 import { SKILLS, PROFESSION_SKILLS_MAP } from "@/lib/mock/taxonomy";
 import { useSessionDraft } from "@/lib/hooks/useSessionDraft";
 import { serialiseSkills } from "@/lib/profile/skills-draft";
+import {
+  isStaleServerActionError,
+  reloadOnceForNewVersion,
+} from "@/lib/client/stale-deploy";
 
 interface SkillState {
   slug: string;
@@ -143,13 +147,24 @@ export function SkillsEditor({ initial, professionSlug, skillOptions }: Props) {
     setMessage(null);
     setStatus("saving");
     startTransition(async () => {
-      const r = await updateSkills({
-        skills: snapshot.map((i) => ({
-          slug: i.slug,
-          proficiency: i.proficiency,
-          yearsOfExperience: i.yearsOfExperience,
-        })),
-      });
+      let r: Awaited<ReturnType<typeof updateSkills>>;
+      try {
+        r = await updateSkills({
+          skills: snapshot.map((i) => ({
+            slug: i.slug,
+            proficiency: i.proficiency,
+            yearsOfExperience: i.yearsOfExperience,
+          })),
+        });
+      } catch (e) {
+        // A tab from before a deploy calls action ids that no longer
+        // exist. The draft survives a reload, so reload once and the
+        // autosave completes on the new bundle.
+        if (isStaleServerActionError(e) && reloadOnceForNewVersion()) return;
+        setStatus("error");
+        setMessage({ kind: "error", text: t("statusError") });
+        return;
+      }
       if (r.ok) {
         setLastSaved(serialiseSkills(snapshot));
         clearDraftRef.current();
@@ -175,16 +190,6 @@ export function SkillsEditor({ initial, professionSlug, skillOptions }: Props) {
     const timer = setTimeout(() => persist(items), 900);
     return () => clearTimeout(timer);
   }, [items, dirty, pending]);
-
-  // Never let a tab close on unsaved skills without a word.
-  useEffect(() => {
-    if (!dirty) return;
-    const warn = (e: BeforeUnloadEvent) => {
-      e.preventDefault();
-    };
-    window.addEventListener("beforeunload", warn);
-    return () => window.removeEventListener("beforeunload", warn);
-  }, [dirty]);
 
   function handleSave() {
     persist(items);

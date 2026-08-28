@@ -1090,7 +1090,11 @@
     "notFoundLinkInsights": "National insights",
     "notFoundLinkSignUp": "Create a free profile",
     "notFoundLinkAbout": "How Sebenza works",
-    "errorDigestHint": "If you contact us about this, mention the code"
+    "errorDigestHint": "If you contact us about this, mention the code",
+    "updatingEyebrow": "New version",
+    "updatingTitle": "Sebenza just updated",
+    "updatingBody": "This page was open while we shipped an update. Reloading brings the new version; anything you were typing is kept.",
+    "updatingReload": "Reload now"
   },
   "common": {
     "loading": "Loading…",
