@@ -24,10 +24,10 @@ import { getSessionUser } from "@/lib/auth/guard";
 import { logAccess } from "@/lib/audit";
 import { deleteStorageObject } from "@/lib/storage/upload";
 import { recomputeProfileVerification } from "./verification-rollup";
+import { refreshProfileCompleteness } from "./completeness-internal";
 
 export type ActionResult<T extends object = object> =
-  | ({ ok: true } & T)
-  | { ok: false; message: string };
+  ({ ok: true } & T) | { ok: false; message: string };
 
 function ok<T extends object>(extra?: T): { ok: true } & T {
   return { ok: true, ...(extra ?? ({} as T)) };
@@ -71,8 +71,11 @@ export async function addQualification(
     actor: session.id,
     subject: id,
   });
+  await refreshProfileCompleteness(db, profile);
 
   revalidatePath("/dashboard/qualifications");
+  revalidatePath("/dashboard");
+  revalidatePath("/dashboard/profile");
   return ok({ id });
 }
 
@@ -137,6 +140,7 @@ export async function deleteQualification(id: string): Promise<ActionResult> {
   // badge if this was the only verified / pending row. Always runs;
   // idempotent if nothing changed.
   await recomputeProfileVerification(profile);
+  await refreshProfileCompleteness(db, profile);
 
   await logAccess({
     kind: "profile.qualification.delete",

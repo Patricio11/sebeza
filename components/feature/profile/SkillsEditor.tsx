@@ -22,7 +22,11 @@ import { X } from "lucide-react";
 import { updateSkills } from "@/lib/profile/actions";
 import { SKILLS, PROFESSION_SKILLS_MAP } from "@/lib/mock/taxonomy";
 import { useSessionDraft } from "@/lib/hooks/useSessionDraft";
-import { serialiseSkills } from "@/lib/profile/skills-draft";
+import {
+  MAX_PROFILE_SKILLS,
+  serialiseSkills,
+} from "@/lib/profile/skills-draft";
+import { useRouter } from "@/i18n/navigation";
 import {
   isStaleServerActionError,
   reloadOnceForNewVersion,
@@ -66,7 +70,13 @@ export function SkillsEditor({ initial, professionSlug, skillOptions }: Props) {
   const [savedAt, setSavedAt] = useState<string | null>(null);
   /** Fingerprint of the list the database last accepted. */
   const [lastSaved, setLastSaved] = useState(() => serialiseSkills(initial));
-  const dirty = serialiseSkills(items) !== lastSaved;
+  /** Fingerprint of the last list we TRIED to save. A failed attempt is
+      not retried until the list changes again (no retry storm). */
+  const [lastAttempted, setLastAttempted] = useState<string | null>(null);
+  const router = useRouter();
+  const fingerprint = serialiseSkills(items);
+  const dirty = fingerprint !== lastSaved;
+  const overCap = items.length > MAX_PROFILE_SKILLS;
 
   // Persist the skills list so locale-switching mid-edit doesn't
   // wipe a freshly-curated set of skills + proficiencies. Items
@@ -100,8 +110,10 @@ export function SkillsEditor({ initial, professionSlug, skillOptions }: Props) {
     const currentSet = new Set(items.map((i) => i.slug));
     const nextSet = new Set(nextSlugs);
     const kept = items.filter((i) => nextSet.has(i.slug));
+    const room = Math.max(0, MAX_PROFILE_SKILLS - kept.length);
     const added = nextSlugs
       .filter((s) => !currentSet.has(s))
+      .slice(0, room)
       .map((slug) => {
         const fromCatalogue = catalogue.find((s) => s.slug === slug);
         return {
@@ -145,6 +157,7 @@ export function SkillsEditor({ initial, professionSlug, skillOptions }: Props) {
 
   function persist(snapshot: SkillState[]) {
     setMessage(null);
+    setLastAttempted(serialiseSkills(snapshot));
     setStatus("saving");
     startTransition(async () => {
       let r: Awaited<ReturnType<typeof updateSkills>>;
@@ -169,6 +182,8 @@ export function SkillsEditor({ initial, professionSlug, skillOptions }: Props) {
         setLastSaved(serialiseSkills(snapshot));
         clearDraftRef.current();
         setStatus("saved");
+        // The completeness bar and the dashboard steps read the server.
+        router.refresh();
         setSavedAt(
           new Date().toLocaleTimeString("en-ZA", {
             hour: "2-digit",
@@ -186,10 +201,12 @@ export function SkillsEditor({ initial, professionSlug, skillOptions }: Props) {
   // fingerprint guard means a save only fires when something differs
   // from what the database last accepted (a restored draft counts).
   useEffect(() => {
-    if (!dirty || pending) return;
+    if (!dirty || pending || overCap) return;
+    if (fingerprint === lastAttempted) return;
     const timer = setTimeout(() => persist(items), 900);
     return () => clearTimeout(timer);
-  }, [items, dirty, pending]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [items, dirty, pending, overCap, fingerprint, lastAttempted]);
 
   function handleSave() {
     persist(items);
@@ -362,29 +379,31 @@ export function SkillsEditor({ initial, professionSlug, skillOptions }: Props) {
             aria-live="polite"
             className={
               "text-[0.7rem] uppercase tracking-[0.18em] " +
-              (status === "error"
+              (status === "error" || overCap
                 ? "text-[color:var(--color-danger)]"
                 : dirty || status === "saving"
                   ? "text-[color:var(--color-accent)]"
                   : "text-[color:var(--color-ink-soft)]")
             }
           >
-            {status === "saving" || pending
-              ? t("statusSaving")
-              : dirty
-                ? t("statusUnsaved")
-                : status === "saved" && savedAt
-                  ? t("statusSaved", { time: savedAt })
-                  : status === "error"
-                    ? t("statusError")
-                    : t("autosaveHint")}
+            {overCap
+              ? t("overCap", { max: MAX_PROFILE_SKILLS, n: items.length })
+              : status === "saving" || pending
+                ? t("statusSaving")
+                : dirty
+                  ? t("statusUnsaved")
+                  : status === "saved" && savedAt
+                    ? t("statusSaved", { time: savedAt })
+                    : status === "error"
+                      ? t("statusError")
+                      : t("autosaveHint")}
           </p>
           <Button
             type="button"
             variant="primary"
             size="sm"
             onClick={handleSave}
-            disabled={pending || !dirty}
+            disabled={pending || !dirty || overCap}
           >
             {pending ? t("statusSaving") : t("saveButton")}
           </Button>

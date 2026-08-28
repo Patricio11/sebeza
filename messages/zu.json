@@ -692,7 +692,8 @@
       "statusSaved": "Kugciniwe {time}",
       "statusError": "Ayikwazanga ukugcina. Zama futhi.",
       "autosaveHint": "Izinguquko zizigcina ngokwazo isikhashana emva kokuzenza.",
-      "saveButton": "Gcina amakhono"
+      "saveButton": "Gcina amakhono",
+      "overCap": "Amakhono amaningi kakhulu: {n} kwangu-{max}. Susa ambalwa bese kuyagcina."
     }
   },
   "employerDash": {

@@ -85,6 +85,21 @@ the page-level note says "Autosaves as you type". Skills now autosave.
 - [x] A restored draft counts as unsaved and is written on arrival (fixes the founder's case without asking anyone to re-add skills)
 - [x] Harness: sa01 (draft autosaved on arrival, survives reload), sa02/sa03 (chip states), sa04 (dashboard "Skills set is strong")
 
+### Follow-up 4 (founder, 2026-08-28): completeness jumps, the mid-page Save, the 20-skill wall
+
+The founder clicked the basics "Save changes" on an untouched form and completeness
+went 36% -> 69%. Only three code paths recomputed completeness; adding skills,
+qualifications or experience left the stored number stale until something else
+recomputed it. Separately his 22 skills never saved because updateSkills capped the
+list at 20 and the autosave retried the rejected save every second.
+
+- [x] refreshProfileCompleteness after updateSkills, addQualification, deleteQualification, addExperience, updateExperience, deleteExperience (integration test poisons the stored value and expects each action to recompute)
+- [x] Skill cap raised to MAX_PROFILE_SKILLS = 30 in one pure constant; the picker refuses beyond it, the action says the cap in words, the status row shows "Too many skills: n of 30"
+- [x] Autosave never retries a failed attempt until the list changes (lastAttempted fingerprint); same in the basics form
+- [x] Basics form autosaves (1.2s debounce) with the Unsaved / Saving / Saved status row; the mid-page primary button is gone; Enter still saves now
+- [x] Both editors router.refresh() on success so the Live completeness bar moves immediately
+- [x] Harness: ba01 untouched basics (hint, no button), ba02 bio edit autosaved with the bar moving, ba03 over-cap draft refused
+
 ## VERIFY
 
 - [x] Full suite + build green (588 tests, 66 files; production build green)

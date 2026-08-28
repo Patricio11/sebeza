@@ -878,7 +878,8 @@
       "statusSaved": "Saved {time}",
       "statusError": "Could not save. Try again.",
       "autosaveHint": "Changes save on their own a moment after you make them.",
-      "saveButton": "Save skills"
+      "saveButton": "Save skills",
+      "overCap": "Too many skills: {n} of {max}. Remove a few and it will save."
     }
   },
   "employerDash": {

@@ -692,7 +692,8 @@
       "statusSaved": "Gestoor {time}",
       "statusError": "Kon nie stoor nie. Probeer weer.",
       "autosaveHint": "Veranderinge stoor vanself 'n oomblik nadat jy dit maak.",
-      "saveButton": "Stoor vaardighede"
+      "saveButton": "Stoor vaardighede",
+      "overCap": "Te veel vaardighede: {n} van {max}. Verwyder 'n paar en dit sal stoor."
     }
   },
   "employerDash": {

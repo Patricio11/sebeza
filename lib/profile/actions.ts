@@ -32,6 +32,7 @@ import { validateDob } from "@/lib/auth/id-validation";
 import { computeCompleteness } from "@/lib/mock/helpers";
 import { LANGUAGES, LANGUAGE_LEVELS } from "@/lib/mock/taxonomy";
 import { refreshProfileCompleteness } from "@/lib/profile/completeness-internal";
+import { MAX_PROFILE_SKILLS } from "@/lib/profile/skills-draft";
 import { SKILLS, PROFESSIONS } from "@/lib/mock/taxonomy";
 import type { EmploymentStatus } from "@/lib/mock/types";
 import { OPEN_TO_TAGS, type OpenToTag } from "@/lib/mock/types";
@@ -369,7 +370,7 @@ const skillsSchema = z.object({
           .optional(),
       }),
     )
-    .max(20),
+    .max(MAX_PROFILE_SKILLS),
 });
 
 export async function updateSkills(
@@ -377,6 +378,14 @@ export async function updateSkills(
 ): Promise<ActionResult> {
   const session = await getSessionUser();
   if (!session) return fail("Not signed in.");
+  if (
+    Array.isArray(input?.skills) &&
+    input.skills.length > MAX_PROFILE_SKILLS
+  ) {
+    return fail(
+      `You can list up to ${MAX_PROFILE_SKILLS} skills. Remove a few and it will save.`,
+    );
+  }
   const parsed = skillsSchema.safeParse(input);
   if (!parsed.success) return fail("Skill list invalid, try again.");
   const db = getDb();
@@ -456,6 +465,10 @@ export async function updateSkills(
   // Submit taxonomy suggestions for the pending entries. Auxiliary
   // failure logs but doesn't tank the parent save. Same pattern as
   // the profession suggestion path in updateProfileBasics.
+  // Skills weigh 30 points of completeness; recompute now so the bar,
+  // the dashboard steps and the nudge cron all see the same number.
+  await refreshProfileCompleteness(db, profile.id);
+
   for (const s of pendingSkills) {
     try {
       const suggestionId = `tx_${randomUUID()}`;

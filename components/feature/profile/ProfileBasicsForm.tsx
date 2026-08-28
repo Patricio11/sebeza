@@ -6,13 +6,18 @@
  * and academic record have their own islands so saves can be partial.
  */
 
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
+import { useRouter } from "@/i18n/navigation";
+import {
+  isStaleServerActionError,
+  reloadOnceForNewVersion,
+} from "@/lib/client/stale-deploy";
 import {
   TextField,
   TextareaField,
   SelectField,
 } from "@/components/ui/FormField";
-import { Button } from "@/components/ui/Button";
 import { Checkbox } from "@/components/ui/Checkbox";
 import { ComboboxField } from "@/components/ui/ComboboxField";
 import { MultiSelectComboboxField } from "@/components/ui/MultiSelectComboboxField";
@@ -91,6 +96,12 @@ export function ProfileBasicsForm({
     kind: "ok" | "error";
     text: string;
   } | null>(null);
+  const tStatus = useTranslations("seekerDash.skillsGroups");
+  const router = useRouter();
+  const [status, setStatus] = useState<"idle" | "saving" | "saved" | "error">(
+    "idle",
+  );
+  const [savedAt, setSavedAt] = useState<string | null>(null);
 
   const [displayName, setDisplayName] = useState(initial.displayName);
   const [profession, setProfession] = useState(initial.profession);
@@ -191,46 +202,100 @@ export function ProfileBasicsForm({
     },
   );
 
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
+  // 2026-08-28 (founder): the sidebar promised "Autosaves as you type"
+  // while this form only saved on a mid-page button. Now it does what
+  // the note says: a fingerprint of the persistable slice against the
+  // last list the server accepted, debounced, with an honest status row.
+  const fingerprint = JSON.stringify(persistable);
+  const [lastSaved, setLastSaved] = useState<string | null>(null);
+  const [lastAttempted, setLastAttempted] = useState<string | null>(null);
+  const [hydratedAt] = useState(() => Date.now());
+  const dirty = lastSaved !== null ? fingerprint !== lastSaved : false;
+  const [baseline, setBaseline] = useState<string | null>(null);
+  useEffect(() => {
+    // The first fingerprint after mount (post draft-restore) is the
+    // baseline; anything that differs from it later is unsaved.
+    if (baseline !== null) return;
+    const t = setTimeout(() => setBaseline(fingerprint), 50);
+    return () => clearTimeout(t);
+  }, [baseline, fingerprint]);
+  const unsaved =
+    baseline !== null &&
+    (lastSaved !== null ? dirty : fingerprint !== baseline);
+
+  useEffect(() => {
+    if (!unsaved || pending) return;
+    if (fingerprint === lastAttempted) return;
+    if (Date.now() - hydratedAt < 300) return;
+    const timer = setTimeout(() => persist(), 1200);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [unsaved, pending, fingerprint, lastAttempted]);
+
+  function persist() {
     setMessage(null);
+    setLastAttempted(fingerprint);
+    setStatus("saving");
     startTransition(async () => {
       const yearsRaw = yearsExperience.trim();
       const yearsNum =
         yearsRaw === ""
           ? null
           : Math.max(0, Math.min(60, Math.floor(Number(yearsRaw))));
-      const r = await updateProfileBasics({
-        displayName,
-        profession,
-        // Phase 13.10  belt-and-braces filter: dedupe + drop the
-        // primary if a user added it as a secondary (the server
-        // action refuses this combination anyway). Cap is enforced
-        // again server-side for the curl / scripted-submit case.
-        secondaryProfessions: Array.from(
-          new Set(
-            secondaryProfessions
-              .map((s) => s.trim())
-              .filter((s) => s.length > 0 && s !== profession),
-          ),
-        ).slice(0, SECONDARY_PROFESSIONS_MAX),
-        seniority: seniority ?? null,
-        city,
-        province,
-        // Phase 31 final shape  the server derives BOTH the display
-        // label and the two-class citizen flag from this one code.
-        nationality: nationalityCode,
-        bio: bio || null,
-        yearsExperience:
-          yearsNum !== null && Number.isFinite(yearsNum) ? yearsNum : null,
-      });
+      let r: Awaited<ReturnType<typeof updateProfileBasics>>;
+      try {
+        r = await updateProfileBasics({
+          displayName,
+          profession,
+          // Phase 13.10  belt-and-braces filter: dedupe + drop the
+          // primary if a user added it as a secondary (the server
+          // action refuses this combination anyway). Cap is enforced
+          // again server-side for the curl / scripted-submit case.
+          secondaryProfessions: Array.from(
+            new Set(
+              secondaryProfessions
+                .map((s) => s.trim())
+                .filter((s) => s.length > 0 && s !== profession),
+            ),
+          ).slice(0, SECONDARY_PROFESSIONS_MAX),
+          seniority: seniority ?? null,
+          city,
+          province,
+          // Phase 31 final shape  the server derives BOTH the display
+          // label and the two-class citizen flag from this one code.
+          nationality: nationalityCode,
+          bio: bio || null,
+          yearsExperience:
+            yearsNum !== null && Number.isFinite(yearsNum) ? yearsNum : null,
+        });
+      } catch (e) {
+        if (isStaleServerActionError(e) && reloadOnceForNewVersion()) return;
+        setStatus("error");
+        setMessage({ kind: "error", text: tStatus("statusError") });
+        return;
+      }
       if (r.ok) {
-        setMessage({ kind: "ok", text: "Saved." });
+        setLastSaved(fingerprint);
+        setBaseline(fingerprint);
+        setStatus("saved");
+        setSavedAt(
+          new Date().toLocaleTimeString("en-ZA", {
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
+        );
         clearDraft();
+        router.refresh();
       } else {
+        setStatus("error");
         setMessage({ kind: "error", text: r.message });
       }
     });
+  }
+
+  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    persist();
   }
 
   return (
@@ -442,9 +507,28 @@ export function ProfileBasicsForm({
           </div>
           <ProfileCompleteness value={initial.completeness} />
         </div>
-        <Button type="submit" variant="primary" size="md" disabled={pending}>
-          {pending ? "Saving…" : labels.saveButton}
-        </Button>
+        <p
+          role="status"
+          aria-live="polite"
+          className={
+            "text-[0.7rem] uppercase tracking-[0.18em] " +
+            (status === "error"
+              ? "text-[color:var(--color-danger)]"
+              : unsaved || status === "saving"
+                ? "text-[color:var(--color-accent)]"
+                : "text-[color:var(--color-ink-soft)]")
+          }
+        >
+          {status === "saving" || pending
+            ? tStatus("statusSaving")
+            : unsaved
+              ? tStatus("statusUnsaved")
+              : status === "saved" && savedAt
+                ? tStatus("statusSaved", { time: savedAt })
+                : status === "error"
+                  ? tStatus("statusError")
+                  : tStatus("autosaveHint")}
+        </p>
       </div>
     </form>
   );

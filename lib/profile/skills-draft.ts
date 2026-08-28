@@ -4,6 +4,10 @@
  * difference. Order-insensitive (the picker may reorder), label-insensitive
  * (labels are display-only; the action layer ignores them).
  */
+/** Hard cap on canonical + typed skills per profile; the picker, the action
+ *  and the tests read this one value. */
+export const MAX_PROFILE_SKILLS = 30;
+
 export interface SkillDraftItem {
   slug: string;
   proficiency: number;

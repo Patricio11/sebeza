@@ -15,10 +15,10 @@ import { revalidatePath } from "next/cache";
 import { randomUUID } from "node:crypto";
 import { getSessionUser } from "@/lib/auth/guard";
 import { logAccess } from "@/lib/audit";
+import { refreshProfileCompleteness } from "./completeness-internal";
 
 export type ActionResult<T extends object = object> =
-  | ({ ok: true } & T)
-  | { ok: false; message: string };
+  ({ ok: true } & T) | { ok: false; message: string };
 
 function ok<T extends object>(extra?: T): { ok: true } & T {
   return { ok: true, ...(extra ?? ({} as T)) };
@@ -34,11 +34,7 @@ const experienceSchema = z.object({
   organization: z.string().min(1).max(160),
   city: z.string().max(80).optional().nullable(),
   startedAt: z.string().regex(YEAR_MONTH, "Use YYYY-MM"),
-  endedAt: z
-    .string()
-    .regex(YEAR_MONTH, "Use YYYY-MM")
-    .nullable()
-    .optional(),
+  endedAt: z.string().regex(YEAR_MONTH, "Use YYYY-MM").nullable().optional(),
   description: z.string().max(2000).optional().nullable(),
 });
 
@@ -76,8 +72,10 @@ export async function addExperience(
     subject: id,
   });
 
+  await refreshProfileCompleteness(db, profile);
   revalidatePath("/dashboard/experience");
   revalidatePath("/dashboard");
+  revalidatePath("/dashboard/profile");
   return ok({ id });
 }
 
@@ -125,8 +123,10 @@ export async function updateExperience(
     subject: v.id,
   });
 
+  await refreshProfileCompleteness(db, profile);
   revalidatePath("/dashboard/experience");
   revalidatePath("/dashboard");
+  revalidatePath("/dashboard/profile");
   return ok();
 }
 
@@ -153,8 +153,10 @@ export async function deleteExperience(id: string): Promise<ActionResult> {
     subject: id,
   });
 
+  await refreshProfileCompleteness(db, profile);
   revalidatePath("/dashboard/experience");
   revalidatePath("/dashboard");
+  revalidatePath("/dashboard/profile");
   return ok();
 }
 
