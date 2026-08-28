@@ -142,6 +142,9 @@ export type AuditKind =
   | "blueprint.import"
   | "blueprint.update"
   | "blueprint.remove"
+  | "blueprint.draft"
+  | "blueprint.draft.approve"
+  | "blueprint.draft.reject"
   | "setting.update"
   // Phase 7 (Task 7.2)  admin escape hatch when a user loses device + codes.
   | "account.2fa.reset"

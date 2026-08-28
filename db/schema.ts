@@ -2371,6 +2371,29 @@ export const professionSkillBlueprints = pgTable(
   }),
 );
 
+/** AI-drafted blueprints awaiting admin review (migration 0081). */
+export const blueprintDrafts = pgTable(
+  "blueprint_drafts",
+  {
+    id: text("id").primaryKey(),
+    professionSlug: text("profession_slug").notNull(),
+    payload: jsonb("payload").notNull().$type<Record<string, unknown>>(),
+    state: text("state").notNull().default("pending"),
+    rawModel: text("raw_model"),
+    createdByUserId: text("created_by_user_id"),
+    resolvedByUserId: text("resolved_by_user_id"),
+    resolvedAt: timestamp("resolved_at"),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+  },
+  (t) => ({
+    byProfessionState: index("blueprint_drafts_profession_state_idx").on(
+      t.professionSlug,
+      t.state,
+      t.createdAt,
+    ),
+  }),
+);
+
 /** SA tertiary institutions  public universities + universities of technology +
     UNISA (distance) + public TVET colleges + INDLELA (artisan training).
     Phase 7 admin taxonomy extends this. Phase 8 SAQA integration verifies

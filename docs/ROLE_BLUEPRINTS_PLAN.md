@@ -59,8 +59,27 @@ AI              ▶ Coach's read explains THESE facts (cached, no free text);
 - [x] i18n en + zu/xh/af drafts for every new seeker string
 - [x] Integration tests: compass with flag on for a seeker whose core is covered; import + edit actions
 
+## Part 2: any profession, AI drafts (founder, 2026-08-28)
+
+Hand-authored blueprints cover the 105 professions the taxonomy shipped with. New
+professions arrive through the suggestion queue; nobody will hand-write those. So the
+admin can now **draft with AI**: one lean call per profession (slugs only in, one small
+JSON out, capped by the shared transport), gated by the curriculum drafting switch and the
+provider budget like the learning-path drafts. The draft is a review card (untick rows,
+new skills listed); **Approve** replaces the profession's rows (source `ai`) and adds the
+draft's new skills to the taxonomy; **Reject** leaves everything as it was. "Draft the
+next N professions with no blueprint" batches the backlog, stops on the first provider
+failure. Nothing reaches a seeker without Approve.
+
+- [x] lib/llm/blueprint-drafts.ts: pure parser (drops unknown slugs, dedupes tiers, min 3 core) + draftBlueprint (gated, budgeted, audited) + unit tests
+- [x] blueprint_drafts table (0081) + schema
+- [x] Admin actions: requestBlueprintDraft, draftMissingBlueprints (cap 10, stops on provider failure), approveBlueprintDraft (drop list, new skills, replace rows), rejectBlueprintDraft; audit kinds
+- [x] BlueprintDraftPanel on /admin/blueprints: draft / redraft the selected profession, batch the missing ones, review card with untick, approve / reject
+- [x] Integration test: approve writes reviewed rows + new skill + replaces old rows; double approve refused; reject only flips state
+
 ## VERIFY
 
 - [x] Full suite + build green (626 tests, 75 files)
+- [x] Harness screenshots rb08-rb10: draft review card (untick + approve -> live), a new profession with no blueprint showing Draft + batch buttons; 632 tests green
 - [x] Harness screenshots rb01-rb07 in test-results/: compass with route map + role chips, Start-this-route adding 5 skills, 360px, /admin/blueprints (105/105 live), settings flag row; console clean
-- [ ] Neon: `npm run db:migrate` (0080), then Import on /admin/blueprints, then flip the flag
+- [ ] Neon: `npm run db:migrate` (0080 + 0081), then Import on /admin/blueprints, then flip the flag

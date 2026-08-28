@@ -10,6 +10,12 @@ import {
   BlueprintsManager,
   type BlueprintRowDto,
 } from "@/components/feature/admin/BlueprintsManager";
+import {
+  BlueprintDraftPanel,
+  type BlueprintDraftDto,
+} from "@/components/feature/admin/BlueprintDraftPanel";
+import { latestPendingDraft } from "@/lib/admin/blueprints";
+import { blueprintDraftSchema } from "@/lib/llm/blueprint-drafts";
 
 /**
  * Role blueprints (docs/ROLE_BLUEPRINTS_PLAN.md): what each profession's
@@ -74,6 +80,31 @@ export default async function AdminBlueprintsPage({
           live: false,
         }));
   const liveCount = coverage.filter((c) => c.dbRows > 0).length;
+  const missing = coverage
+    .filter((c) => c.dbRows === 0 && c.starterRows === 0)
+    .map((c) => ({ slug: c.slug, label: c.label }));
+  const pendingRow = selected ? await latestPendingDraft(selected) : null;
+  const draftParsed = pendingRow
+    ? blueprintDraftSchema.safeParse(pendingRow.payload)
+    : null;
+  const draft: BlueprintDraftDto | null =
+    pendingRow && draftParsed?.success
+      ? {
+          id: pendingRow.id,
+          professionSlug: pendingRow.professionSlug,
+          rawModel: pendingRow.rawModel,
+          createdAt: pendingRow.createdAt.toISOString(),
+          payload: {
+            core: draftParsed.data.core,
+            expected: draftParsed.data.expected,
+            tracks: draftParsed.data.tracks,
+            proveIt: draftParsed.data.proveIt ?? {},
+            newSkills: draftParsed.data.newSkills,
+          },
+        }
+      : null;
+  const selectedLabel =
+    coverage.find((c) => c.slug === selected)?.label ?? selected;
 
   return (
     <DashboardMasthead
@@ -82,6 +113,16 @@ export default async function AdminBlueprintsPage({
       pageTitle="Role blueprints"
       pageSubtitle="What each profession's skill set looks like: core, expected, and next-level tracks. The Career Compass reads these to show every seeker an honest route, even where employer demand is still quiet."
     >
+      <div className="mb-8">
+        <BlueprintDraftPanel
+          selected={selected}
+          selectedLabel={selectedLabel}
+          hasRows={dbRows.length > 0}
+          draft={draft}
+          labels={Object.fromEntries(labelBySlug)}
+          missing={missing}
+        />
+      </div>
       <BlueprintsManager
         coverage={coverage}
         liveCount={liveCount}
