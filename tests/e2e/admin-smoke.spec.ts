@@ -33,6 +33,7 @@ const ADMIN_ROUTES: ReadonlyArray<{ path: string; name: string }> = [
   { path: "/en/admin/taxonomy/suggestions", name: "taxonomy-suggestions" },
   { path: "/en/admin/curriculum", name: "curriculum" },
   { path: "/en/admin/learning-paths", name: "learning-paths" },
+  { path: "/en/admin/blueprints", name: "blueprints" },
   { path: "/en/admin/custom-skills", name: "custom-skills" },
   { path: "/en/admin/skill-prereqs", name: "skill-prereqs" },
   { path: "/en/admin/integrations", name: "integrations" },

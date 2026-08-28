@@ -683,7 +683,10 @@
         "demand_high": "High demand · low supply",
         "common_among_top_ranked": "Common at top of your pool",
         "missing_for_role": "Unlocks an adjacent role",
-        "adjacent_role": "Builds on what you already have"
+        "adjacent_role": "Builds on what you already have",
+        "role_core": "Core for your role",
+        "role_expected": "Employers expect this",
+        "role_next_level": "Next level"
       },
       "demandSignal": "{searches} demand signals vs {matches} matches near you",
       "rankIfLearned": "If you add this: rank → #{projected} in {pool}",
@@ -745,7 +748,22 @@
         "step2": "We compare that demand with the skills already on your profile.",
         "step3": "You get a short list: which skills to learn next, why they matter near you, and free or low-cost SA ways to learn them (SETA, TVET, online)."
       },
-      "nationalBasis": "Not enough employer activity in your province yet, so your compass is using national patterns for now. It localises automatically as employers near you join."
+      "nationalBasis": "Not enough employer activity in your province yet, so your compass is using national patterns for now. It localises automatically as employers near you join.",
+      "headlineCovered": "Your core is covered. Nothing urgent to learn right now.",
+      "headlineNextLevel": "Your core is covered → next level: {skills}",
+      "proveIt": "Prove it:",
+      "route": {
+        "eyebrow": "Your route",
+        "title": "Your route as a {profession}",
+        "sub": "What this role looks like on Sebenza: the core everyone has, what employers expect, and the routes that take you to the next level. Ticks are skills already on your profile.",
+        "core": "Core",
+        "expected": "Expected",
+        "next": "Next level",
+        "start": "Start this route",
+        "starting": "Adding…",
+        "started": "On your list",
+        "honest": "Routes come from Sebenza's role blueprints, reviewed by our team, and from what employers near you search for. A number next to a skill is how many employer searches mentioned it recently."
+      }
     },
     "cv": {
       "pageEyebrow": "Seeker · CV builder",

@@ -40,10 +40,20 @@ import { listAllLearningPaths } from "@/db/queries/learning-paths";
 import { listPrereqsForSkills } from "@/db/queries/skill-prereqs";
 import { applyPrereqOrdering } from "@/lib/skills/prereq-graph";
 import { getSetting } from "@/lib/admin/settings";
+import {
+  getBlueprintRows,
+  getSkillLabels,
+  professionSlugForLabel,
+} from "@/db/queries/blueprints";
+import {
+  buildRouteMap,
+  rankBlueprintGaps,
+  type RouteMap,
+} from "@/lib/blueprints/engine";
 import type { PublicProfile, TaxonomyEntry } from "@/lib/mock/types";
 
 const DEMAND_WINDOW_DAYS = 90;
-const MAX_RECOMMENDATIONS = 5;
+const MAX_RECOMMENDATIONS = 6;
 const MAX_LEARNING_PATHS = 4;
 const MAX_ADJACENT = 3;
 const OVERLAP_THRESHOLD = 0.4;
@@ -281,6 +291,76 @@ export async function getCompassForProfile(
   // by the grow page with the REAL boost-1 `rankInPoolQuery` projection; when
   // no real rank exists it stays absent and the card doesn't render.
 
+  // ── 4b. Role blueprint (docs/ROLE_BLUEPRINTS_PLAN.md, flag-gated) ────────
+  // The third source: what the role's skill set looks like. Core gaps go to
+  // the FRONT of the list (an employer assumes them), expected and next-level
+  // gaps fill the remaining slots after the demand + peer signals above.
+  let routeMap: RouteMap | null = null;
+  const blueprintsOn = await getSetting<boolean>(
+    "feature_flag_role_blueprints",
+  );
+  if (blueprintsOn) {
+    const professionSlug = await professionSlugForLabel(profile.profession);
+    if (professionSlug) {
+      const { rows: blueprintRows } = await getBlueprintRows(professionSlug);
+      if (blueprintRows.length > 0) {
+        const ownedRes = await db.execute(sql`
+          SELECT ps.skill_slug FROM profile_skills ps
+          JOIN profiles p ON p.id = ps.profile_id
+          WHERE p.handle = ${profile.handle}
+        `);
+        const ownedSlugs = new Set(
+          unwrap<{ skill_slug: string }>(ownedRes).map((r) => r.skill_slug),
+        );
+        const needed = [...new Set(blueprintRows.map((r) => r.skillSlug))];
+        const labelBySlug = await getSkillLabels(needed);
+        const demandBySlug = new Map(
+          demandRows.map((r) => [
+            r.skill_slug,
+            { searches: r.searches, matches: r.matches },
+          ]),
+        );
+        // Skills the taxonomy no longer has cannot be recommended honestly.
+        const usable = blueprintRows.filter((r) =>
+          labelBySlug.has(r.skillSlug),
+        );
+        const engineInput = {
+          rows: usable,
+          ownedSlugs,
+          labelBySlug,
+          demandBySlug,
+          professionLabel: profile.profession,
+        };
+        routeMap = buildRouteMap(engineInput);
+        const gaps = rankBlueprintGaps(engineInput, MAX_RECOMMENDATIONS);
+        const toRec = (g: (typeof gaps)[number]): SkillRecommendation => ({
+          skill: { slug: g.slug, label: g.label },
+          reason: g.reason,
+          detail: g.detail,
+          demandSignal: g.demand ?? undefined,
+          track: g.track,
+          proveIt: g.proveIt,
+        });
+        const coreGaps = gaps.filter(
+          (g) => g.tier === "core" && !seen.has(g.slug),
+        );
+        for (const g of coreGaps) {
+          seen.add(g.slug);
+          recommendations.unshift(toRec(g));
+        }
+        for (const g of gaps.filter((g) => g.tier !== "core")) {
+          if (seen.has(g.slug) || recommendations.length >= MAX_RECOMMENDATIONS)
+            continue;
+          seen.add(g.slug);
+          recommendations.push(toRec(g));
+        }
+        if (recommendations.length > MAX_RECOMMENDATIONS) {
+          recommendations.length = MAX_RECOMMENDATIONS;
+        }
+      }
+    }
+  }
+
   // ── 5. Adjacent professions (skill-overlap heuristic) ────────────────────
   const adjacentProfessions = await loadAdjacentProfessions(
     db,
@@ -344,6 +424,7 @@ export async function getCompassForProfile(
       ),
     },
     recommendations: orderedRecommendations,
+    routeMap,
     learningPaths,
     adjacentProfessions,
     cityDemand,

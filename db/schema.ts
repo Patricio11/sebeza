@@ -2345,6 +2345,32 @@ export const professions = pgTable("professions", {
   label: text("label").notNull(),
 });
 
+/**
+ * Role blueprints (docs/ROLE_BLUEPRINTS_PLAN.md, migration 0080): what a
+ * profession's skill set looks like in three tiers. `track` names the
+ * next-level route; `prove_it` is a one-line project idea shown to every
+ * seeker; `source` seed | admin decides whether a re-import may refresh.
+ */
+export const professionSkillBlueprints = pgTable(
+  "profession_skill_blueprints",
+  {
+    professionSlug: text("profession_slug").notNull(),
+    skillSlug: text("skill_slug")
+      .notNull()
+      .references(() => skills.slug),
+    tier: text("tier").notNull(),
+    track: text("track"),
+    proveIt: text("prove_it"),
+    source: text("source").notNull().default("seed"),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+    updatedByUserId: text("updated_by_user_id"),
+  },
+  (t) => ({
+    pk: primaryKey({ columns: [t.professionSlug, t.skillSlug] }),
+    bySkill: index("profession_skill_blueprints_skill_idx").on(t.skillSlug),
+  }),
+);
+
 /** SA tertiary institutions  public universities + universities of technology +
     UNISA (distance) + public TVET colleges + INDLELA (artisan training).
     Phase 7 admin taxonomy extends this. Phase 8 SAQA integration verifies

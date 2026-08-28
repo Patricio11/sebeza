@@ -189,6 +189,16 @@ const ROWS: SettingRow[] = [
       "keeps working so it can grow behind the flag.",
   },
   {
+    key: "feature_flag_role_blueprints",
+    group: "launch",
+    label: "Role blueprints on Career Compass",
+    type: "boolean",
+    hint:
+      "Shows every seeker their role's core / expected / next-level route and " +
+      "role-based recommendations even where employer demand is quiet. Import " +
+      "the starter catalogue on Role blueprints first.",
+  },
+  {
     key: "feature_flag_sms_channel_enabled",
     group: "notifications",
     label: "SMS notifications channel",

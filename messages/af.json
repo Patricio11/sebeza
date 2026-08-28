@@ -498,7 +498,10 @@
         "demand_high": "Hoë vraag · lae aanbod",
         "common_among_top_ranked": "Algemeen aan die bopunt van jou poel",
         "missing_for_role": "Sluit 'n aangrensende rol oop",
-        "adjacent_role": "Bou op wat jy reeds het"
+        "adjacent_role": "Bou op wat jy reeds het",
+        "role_core": "Kern vir jou rol",
+        "role_expected": "Werkgewers verwag dit",
+        "role_next_level": "Volgende vlak"
       },
       "demandSignal": "{searches} aanvraagseine teenoor {matches} passings naby jou",
       "rankIfLearned": "As jy dit byvoeg: posisie → #{projected} in {pool}",
@@ -560,7 +563,22 @@
         "step2": "Ons vergelyk daardie aanvraag met die vaardighede reeds op jou profiel.",
         "step3": "Jy kry 'n kort lys: watter vaardighede om volgende te leer, hoekom hulle naby jou saak maak, en gratis of bekostigbare SA-maniere om hulle te leer (SETA, TVET, aanlyn)."
       },
-      "nationalBasis": "Daar is nog nie genoeg werkgewer-aktiwiteit in jou provinsie nie, so jou kompas gebruik tans nasionale patrone. Dit lokaliseer outomaties soos werkgewers naby jou aansluit."
+      "nationalBasis": "Daar is nog nie genoeg werkgewer-aktiwiteit in jou provinsie nie, so jou kompas gebruik tans nasionale patrone. Dit lokaliseer outomaties soos werkgewers naby jou aansluit.",
+      "headlineCovered": "Jou kern is gedek. Niks dringend om nou te leer nie.",
+      "headlineNextLevel": "Jou kern is gedek → volgende vlak: {skills}",
+      "proveIt": "Bewys dit:",
+      "route": {
+        "eyebrow": "Jou roete",
+        "title": "Jou roete as {profession}",
+        "sub": "Hoe hierdie rol op Sebenza lyk: die kern wat almal het, wat werkgewers verwag, en die roetes na die volgende vlak. Regmerkies is vaardighede wat reeds op jou profiel is.",
+        "core": "Kern",
+        "expected": "Verwag",
+        "next": "Volgende vlak",
+        "start": "Begin hierdie roete",
+        "starting": "Voeg by…",
+        "started": "Op jou lys",
+        "honest": "Roetes kom uit Sebenza se rolbloudrukke, nagegaan deur ons span, en uit waarna werkgewers naby jou soek. 'n Getal langs 'n vaardigheid is hoeveel werkgewersoektogte dit onlangs genoem het."
+      }
     },
     "cv": {
       "pageEyebrow": "Werksoeker · CV-bouer",

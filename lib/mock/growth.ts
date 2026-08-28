@@ -18,7 +18,11 @@ export type GrowthReason =
   | "demand_high"
   | "common_among_top_ranked"
   | "missing_for_role"
-  | "adjacent_role";
+  | "adjacent_role"
+  // Role blueprints (docs/ROLE_BLUEPRINTS_PLAN.md)
+  | "role_core"
+  | "role_expected"
+  | "role_next_level";
 
 export interface SkillRecommendation {
   skill: TaxonomyEntry;
@@ -35,6 +39,10 @@ export interface SkillRecommendation {
    * when the flag is off or there are no unmet prereqs.
    */
   unmetPrereqs?: string[];
+  /** Role blueprints: the next-level route this skill sits on. */
+  track?: string | null;
+  /** Role blueprints: one-line "prove it with" idea. */
+  proveIt?: string | null;
 }
 
 export type LearningProviderKind =
@@ -95,6 +103,8 @@ export interface AdjacentProfession {
 }
 
 export interface CompassSnapshot {
+  /** Role blueprints (flag-gated): the seeker's route map, or null. */
+  routeMap?: import("@/lib/blueprints/engine").RouteMap | null;
   /** Hero line: the headline rank-delta story. Drives the page's anchor number. */
   headline: {
     currentRank: number;
@@ -107,7 +117,12 @@ export interface CompassSnapshot {
   learningPaths: LearningPath[];
   adjacentProfessions: AdjacentProfession[];
   /** Skills with the biggest demand vs match gap in the seeker's province. */
-  cityDemand: { skill: string; searches: number; matches: number; gap: number }[];
+  cityDemand: {
+    skill: string;
+    searches: number;
+    matches: number;
+    gap: number;
+  }[];
   /**
    * 2026-08 (COMPASS_FUEL_PLAN A2)  which pool fed the vacancy/placement
    * demand legs. "national" = not enough employer activity in the seeker's
@@ -130,11 +145,18 @@ export const MOCK_COMPASS: CompassSnapshot = {
   },
   recommendations: [
     {
-      skill: { slug: "kubernetes", label: "Kubernetes & container orchestration" },
+      skill: {
+        slug: "kubernetes",
+        label: "Kubernetes & container orchestration",
+      },
       reason: "demand_high",
       detail:
-        "Searches for \"developer + Kubernetes\" in Gauteng outnumber matches roughly 3 to 1. Senior-level postings almost always list it.",
-      rankIfLearned: { current: 4, projected: 2, poolLabel: "Software Developer · Gauteng" },
+        'Searches for "developer + Kubernetes" in Gauteng outnumber matches roughly 3 to 1. Senior-level postings almost always list it.',
+      rankIfLearned: {
+        current: 4,
+        projected: 2,
+        poolLabel: "Software Developer · Gauteng",
+      },
       demandSignal: { searches: 1240, matches: 410 },
     },
     {
@@ -167,7 +189,8 @@ export const MOCK_COMPASS: CompassSnapshot = {
       durationWeeks: 48,
       cost: "subsidised",
       costNote: "Stipend-paying, fully funded for unemployed SA citizens.",
-      outcome: "NQF Level 5 Cloud Engineer certificate · covers Kubernetes, AWS basics",
+      outcome:
+        "NQF Level 5 Cloud Engineer certificate · covers Kubernetes, AWS basics",
       unlocksSkills: ["Kubernetes", "AWS", "CI/CD"],
       national: true,
       url: "https://www.mict.org.za/learnerships/",
@@ -250,9 +273,24 @@ export const MOCK_COMPASS: CompassSnapshot = {
   ],
   cityDemand: [
     { skill: "Data engineering", searches: 1820, matches: 480, gap: 1340 },
-    { skill: "Kubernetes / container orchestration", searches: 1240, matches: 410, gap: 830 },
-    { skill: "Mobile (React Native / Kotlin)", searches: 880, matches: 270, gap: 610 },
-    { skill: "Cybersecurity (blue team)", searches: 760, matches: 220, gap: 540 },
+    {
+      skill: "Kubernetes / container orchestration",
+      searches: 1240,
+      matches: 410,
+      gap: 830,
+    },
+    {
+      skill: "Mobile (React Native / Kotlin)",
+      searches: 880,
+      matches: 270,
+      gap: 610,
+    },
+    {
+      skill: "Cybersecurity (blue team)",
+      searches: 760,
+      matches: 220,
+      gap: 540,
+    },
     { skill: "Accessibility (WCAG)", searches: 320, matches: 110, gap: 210 },
   ],
 };
@@ -267,6 +305,9 @@ export const REASON_LABEL: Record<GrowthReason, string> = {
   common_among_top_ranked: "Common at top of your pool",
   missing_for_role: "Unlocks an adjacent role",
   adjacent_role: "Builds on what you already have",
+  role_core: "Core for your role",
+  role_expected: "Employers expect this",
+  role_next_level: "Next level",
 };
 
 export const PROVIDER_LABEL: Record<LearningProviderKind, string> = {

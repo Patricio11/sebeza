@@ -5,6 +5,7 @@ import { DashboardMasthead } from "@/components/layout/DashboardMasthead";
 import { Button } from "@/components/ui/Button";
 import { getMyProfile } from "@/lib/profile/me";
 import { CompassReadCard } from "@/components/feature/seeker/CompassReadCard";
+import { RouteMap } from "@/components/feature/seeker/RouteMap";
 import { getCompassForProfile } from "@/db/queries/career-compass";
 import { rankInPoolQuery } from "@/db/queries/analytics";
 import { SKILLS } from "@/lib/mock/taxonomy";
@@ -295,16 +296,36 @@ export default async function CareerCompassPage({
   // what is true for this seeker: move, hold, already #1, alone in the
   // pool, or no rank at all. See docs/GEO_LABEL_CANONICAL_PLAN.md.
   const poolTotal = rank?.poolTotal ?? 0;
-  const headlineKey = !rank
-    ? "headlineNoRank"
-    : poolTotal <= 1
-      ? "headlineOnly"
-      : compass.headline.currentRank === 1 &&
-          compass.headline.projectedRank === 1
-        ? "headlineTop"
-        : compass.headline.currentRank === compass.headline.projectedRank
-          ? "headlineHold"
-          : "headline";
+  // Role blueprints: when the core is covered the headline says so and
+  // names the next level instead of counting skills toward a rank.
+  const routeMap = compass.routeMap ?? null;
+  const coreMissing = routeMap
+    ? routeMap.core.length - routeMap.coreCovered
+    : null;
+  const nextLevelNames = compass.recommendations
+    .filter(
+      (r) => r.reason === "role_next_level" || r.reason === "role_expected",
+    )
+    .slice(0, 3)
+    .map((r) => r.skill.label);
+  const coveredKey =
+    routeMap && coreMissing === 0
+      ? nextLevelNames.length > 0
+        ? "headlineNextLevel"
+        : "headlineCovered"
+      : null;
+  const headlineKey = coveredKey
+    ? coveredKey
+    : !rank
+      ? "headlineNoRank"
+      : poolTotal <= 1
+        ? "headlineOnly"
+        : compass.headline.currentRank === 1 &&
+            compass.headline.projectedRank === 1
+          ? "headlineTop"
+          : compass.headline.currentRank === compass.headline.projectedRank
+            ? "headlineHold"
+            : "headline";
   const headlineSubKey = !rank
     ? "headlineSubNoRank"
     : poolTotal <= 1
@@ -465,6 +486,7 @@ export default async function CareerCompassPage({
                 from: compass.headline.currentRank,
                 to: compass.headline.projectedRank,
                 total: poolTotal,
+                skills: nextLevelNames.join(", "),
               })}
             </h2>
             <p className="mt-2 text-[color:var(--color-ink-soft)]">
@@ -483,6 +505,9 @@ export default async function CareerCompassPage({
           </div>
         </div>
       </section>
+
+      {/* ───────────── Your route (role blueprints, flag-gated) ───────────── */}
+      {routeMap && <RouteMap data={routeMap} professionLabel={me.profession} />}
 
       {/* ───────────── Student lane (only when academic record exists) ───────────── */}
       {student && me.academic && (
@@ -930,6 +955,11 @@ function RecommendationItem({
               {rec.skill.label}
             </h3>
             <ReasonChip reason={rec.reason} t={t} />
+            {rec.track && (
+              <span className="rounded-[var(--radius-pill)] border border-[color:var(--color-hairline)] bg-[color:var(--color-paper)] px-2.5 py-0.5 text-[0.62rem] uppercase tracking-[0.18em] text-[color:var(--color-ink-soft)]">
+                {rec.track}
+              </span>
+            )}
             {highlight && (
               <span className="inline-flex items-center gap-1 rounded-[var(--radius-pill)] border border-[color:var(--color-accent)] bg-[color:var(--color-accent-tint)] px-2 py-0.5 text-[0.62rem] uppercase tracking-[0.18em] text-[color:var(--color-accent)]">
                 <Target className="size-3" aria-hidden="true" />
@@ -948,6 +978,14 @@ function RecommendationItem({
           <p className="mt-2 max-w-2xl text-sm text-[color:var(--color-ink-soft)]">
             {rec.detail}
           </p>
+          {rec.proveIt && (
+            <p className="mt-2 max-w-2xl text-sm text-[color:var(--color-ink)]">
+              <span className="text-[0.62rem] uppercase tracking-[0.18em] text-[color:var(--color-ink-soft)]">
+                {t("proveIt")}{" "}
+              </span>
+              {rec.proveIt}
+            </p>
+          )}
 
           {/* Phase 20.1  unmet-prerequisite pill (flag-gated upstream). */}
           {rec.unmetPrereqs && rec.unmetPrereqs.length > 0 && (
@@ -1030,6 +1068,12 @@ function ReasonChip({
       "border-[color:var(--color-ink)] bg-[color:var(--color-ink)] text-[color:var(--color-paper)]",
     adjacent_role:
       "border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] text-[color:var(--color-ink-soft)]",
+    role_core:
+      "border-[color:var(--color-danger)] bg-[color:var(--color-surface)] text-[color:var(--color-danger)]",
+    role_expected:
+      "border-[color:var(--color-ink)] bg-[color:var(--color-surface)] text-[color:var(--color-ink)]",
+    role_next_level:
+      "border-[color:var(--color-brand)] bg-[color:var(--color-brand-tint)] text-[color:var(--color-brand-strong)]",
   };
   return (
     <span

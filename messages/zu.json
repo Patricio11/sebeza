@@ -498,7 +498,10 @@
         "demand_high": "Isidingo esiphezulu · ukutholakala okuphansi",
         "common_among_top_ranked": "Kuvamile phezulu ohlwini lwakho",
         "missing_for_role": "Kuvula isikhundla esiseduze",
-        "adjacent_role": "Kwakhela phezu kwalokho osunakho"
+        "adjacent_role": "Kwakhela phezu kwalokho osunakho",
+        "role_core": "Isisekelo somsebenzi wakho",
+        "role_expected": "Abaqashi bakulindele lokhu",
+        "role_next_level": "Izinga elilandelayo"
       },
       "demandSignal": "{searches} izimpawu zesidingo uma kuqhathaniswa nokufana okungu-{matches} eduze kwakho",
       "rankIfLearned": "Uma ungeza lokhu: indawo → #{projected} ku-{pool}",
@@ -560,7 +563,22 @@
         "step2": "Sikuqhathanisa nesidingo samakhono asevele kwiphrofayela yakho.",
         "step3": "Uthola uhlu olufushane: yimaphi amakhono okufanele uwafunde ngokulandelayo, kungani ebalulekile eduze kwakho, nezindlela zase-South Africa zamahhala noma ezingabizi zokuwafunda (SETA, TVET, online)."
       },
-      "nationalBasis": "Akukabi nomsebenzi owanele wabaqashi esifundazweni sakho okwamanje, ngakho ikhampasi yakho isebenzisa amaphethini kazwelonke. Izozenzela eyendawo ngokuzenzakalela njengoba abaqashi abaseduze kwakho bejoyina."
+      "nationalBasis": "Akukabi nomsebenzi owanele wabaqashi esifundazweni sakho okwamanje, ngakho ikhampasi yakho isebenzisa amaphethini kazwelonke. Izozenzela eyendawo ngokuzenzakalela njengoba abaqashi abaseduze kwakho bejoyina.",
+      "headlineCovered": "Amakhono akho ayisisekelo agcwele. Akukho okuphuthumayo okufanele ukufunde manje.",
+      "headlineNextLevel": "Amakhono akho ayisisekelo agcwele → izinga elilandelayo: {skills}",
+      "proveIt": "Kufakazele:",
+      "route": {
+        "eyebrow": "Indlela yakho",
+        "title": "Indlela yakho njengo-{profession}",
+        "sub": "Lokho lo msebenzi obukeka njakho ku-Sebenza: isisekelo wonke umuntu anaso, lokho abaqashi abakulindele, nezindlela ezikuyisa ezingeni elilandelayo. Amaphawu okuqinisekisa ngamakhono asevele kwiphrofayela yakho.",
+        "core": "Isisekelo",
+        "expected": "Okulindelekile",
+        "next": "Izinga elilandelayo",
+        "start": "Qala le ndlela",
+        "starting": "Iyafaka…",
+        "started": "Kuhlwini lwakho",
+        "honest": "Izindlela zivela kumapulani emisebenzi e-Sebenza, abuyekezwe yithimba lethu, nakulokho abaqashi abaseduze nawe abakusesha. Inombolo eseduze nekhono ingukuthi zingaki izinsesho zabaqashi ezilikhulumile muva nje."
+      }
     },
     "cv": {
       "pageEyebrow": "Umfuni womsebenzi · Umakhi we-CV",

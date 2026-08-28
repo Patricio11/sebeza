@@ -166,7 +166,9 @@ export type SettingKey =
   | "feature_flag_web_push"
   /** 2026-08-26  Career Compass "Learning paths" section (SETA/TVET
    *  cards). Ships dark; admin flips it on /admin/settings. */
-  | "feature_flag_learning_paths";
+  | "feature_flag_learning_paths"
+  // 2026-08-28  role blueprints on the Career Compass (docs/ROLE_BLUEPRINTS_PLAN.md).
+  | "feature_flag_role_blueprints";
 
 const DEFAULTS: Record<SettingKey, unknown> = {
   freshness_band_days_fresh: 30,
@@ -213,6 +215,7 @@ const DEFAULTS: Record<SettingKey, unknown> = {
   feature_flag_seeker_projects: false,
   feature_flag_web_push: false,
   feature_flag_learning_paths: false,
+  feature_flag_role_blueprints: false,
 };
 
 /**
@@ -220,18 +223,20 @@ const DEFAULTS: Record<SettingKey, unknown> = {
  * narrows the type. Falls back to the bundled default if the row is
  * missing  so a brand-new DB without seeds still boots.
  */
-export const getSetting = cache(async <T = unknown>(key: SettingKey): Promise<T> => {
-  const db = getDb();
-  const rows = await db
-    .select({ value: platformSettings.value })
-    .from(platformSettings)
-    .where(eq(platformSettings.key, key))
-    .limit(1);
-  if (rows.length === 0 || rows[0]?.value === undefined) {
-    return DEFAULTS[key] as T;
-  }
-  return rows[0].value as T;
-});
+export const getSetting = cache(
+  async <T = unknown>(key: SettingKey): Promise<T> => {
+    const db = getDb();
+    const rows = await db
+      .select({ value: platformSettings.value })
+      .from(platformSettings)
+      .where(eq(platformSettings.key, key))
+      .limit(1);
+    if (rows.length === 0 || rows[0]?.value === undefined) {
+      return DEFAULTS[key] as T;
+    }
+    return rows[0].value as T;
+  },
+);
 
 /**
  * Read every known setting in one go. Used by `/admin/settings` to

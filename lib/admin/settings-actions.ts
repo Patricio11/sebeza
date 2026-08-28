@@ -21,8 +21,7 @@ import { logAccess } from "@/lib/audit";
 import type { SettingKey } from "@/lib/admin/settings";
 
 export type ActionResult<T extends object = object> =
-  | ({ ok: true } & T)
-  | { ok: false; message: string };
+  ({ ok: true } & T) | { ok: false; message: string };
 
 function ok<T extends object>(extra?: T): { ok: true } & T {
   return { ok: true, ...(extra ?? ({} as T)) };
@@ -98,6 +97,7 @@ const KEY_SCHEMAS = {
   feature_flag_seeker_projects: z.boolean(),
   feature_flag_web_push: z.boolean(),
   feature_flag_learning_paths: z.boolean(),
+  feature_flag_role_blueprints: z.boolean(),
 } as const satisfies Record<SettingKey, z.ZodTypeAny>;
 
 const updateSchema = z.object({
@@ -138,6 +138,7 @@ const updateSchema = z.object({
     "feature_flag_seeker_projects",
     "feature_flag_web_push",
     "feature_flag_learning_paths",
+    "feature_flag_role_blueprints",
   ] as const),
   value: z.unknown(),
 });

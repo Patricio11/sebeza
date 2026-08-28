@@ -50,6 +50,7 @@ import {
   SKILLS,
   INSTITUTIONS,
 } from "@/lib/mock/taxonomy";
+import { STARTER_BLUEPRINTS } from "@/lib/blueprints/catalogue";
 import {
   canonicalCityLabel,
   canonicalProvinceLabel,
@@ -642,6 +643,22 @@ async function seedTaxonomy() {
   await db
     .insert(schema.skills)
     .values(SKILLS.map((s) => ({ ...s, category: skillCategoryFor(s.slug) })));
+
+  // Role blueprints (docs/ROLE_BLUEPRINTS_PLAN.md): the harness reads the
+  // live table like production will after the admin import.
+  await db
+    .insert(schema.professionSkillBlueprints)
+    .values(
+      STARTER_BLUEPRINTS.map((r) => ({
+        professionSlug: r.professionSlug,
+        skillSlug: r.skillSlug,
+        tier: r.tier,
+        track: r.track,
+        proveIt: r.proveIt,
+        source: "seed",
+      })),
+    )
+    .onConflictDoNothing();
 
   console.log("🎓 Institutions…");
   await db.insert(schema.institutions).values(
