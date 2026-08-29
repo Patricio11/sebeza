@@ -33,7 +33,10 @@ import { WorkAvailabilityChips } from "@/components/feature/profile/WorkAvailabi
 import { getSessionUser } from "@/lib/auth/dal";
 import { getMyProfile } from "@/lib/profile/me";
 import { getSetting } from "@/lib/admin/settings";
-import { listProjectsForHandle, type ProjectView } from "@/lib/profile/projects-read";
+import {
+  listProjectsForHandle,
+  type ProjectView,
+} from "@/lib/profile/projects-read";
 import { ProjectsShowcase } from "@/components/feature/profile/ProjectsShowcase";
 import { isProfileIndexableQuery } from "@/db/queries/profiles";
 import type { LanguageRef } from "@/lib/mock/types";
@@ -54,7 +57,14 @@ export async function generateMetadata({ params }: Props) {
   ]);
   if (!p) return { title: "Profile" };
   const title = `${p.displayName} · ${p.profession}`;
-  const description = `${p.displayName}, ${p.profession} based in ${p.city}, ${p.province}. Trust-verified Sebenza profile.`;
+  // Honest by construction: no empty city ("based in , Western Cape"),
+  // and "verified" only when the badge is actually earned.
+  const place = [p.city?.trim(), p.province].filter(Boolean).join(", ");
+  const description = `${p.displayName}, ${p.profession}${place ? ` based in ${place}` : ""}. ${
+    p.verification === "verified"
+      ? "Verified Sebenza profile."
+      : "Sebenza profile, matched by skills and location."
+  }`;
   return {
     title,
     description,
@@ -140,7 +150,8 @@ export default async function ProfilePage({ params }: Props) {
     viewer?.role === "employer" || viewer?.role === "admin"
       ? dossierHref
       : `/sign-in?next=${encodeURIComponent(dossierHref)}`;
-  const ctaEnabled = !viewer || viewer.role === "employer" || viewer.role === "admin";
+  const ctaEnabled =
+    !viewer || viewer.role === "employer" || viewer.role === "admin";
 
   const t = await getTranslations("profile");
   const tStatus = await getTranslations("status");
@@ -228,7 +239,9 @@ function OwnerPreviewBanner() {
             <Eye className="size-3.5" aria-hidden="true" />
           </span>
           <span>
-            <span className="font-medium">You&rsquo;re previewing your public profile.</span>
+            <span className="font-medium">
+              You&rsquo;re previewing your public profile.
+            </span>
             <span className="ml-1.5 text-[color:var(--color-ink-soft)]">
               This is how verified employers see you.
             </span>
@@ -392,7 +405,10 @@ async function ProfileHero({
                   confirmedAt={profile.statusConfirmedAt}
                   locale={locale}
                 />
-                <VerificationBadge state={profile.verification} visible={verificationVisible} />
+                <VerificationBadge
+                  state={profile.verification}
+                  visible={verificationVisible}
+                />
                 <ProfileCompleteness value={profile.completeness} />
               </div>
             </div>
@@ -424,8 +440,8 @@ async function ProfileHero({
                 <p className="mt-2 text-sm text-[color:var(--color-ink-soft)]">
                   This is the dossier verified employers see. The
                   request-to-engage card lives here for them, contact reveals
-                  and document requests are gated behind your consent and
-                  every action is audit-logged.
+                  and document requests are gated behind your consent and every
+                  action is audit-logged.
                 </p>
 
                 <div className="mt-5 flex flex-col gap-2.5">
@@ -466,7 +482,9 @@ async function ProfileHero({
                       className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[color:var(--color-ink)] px-5 py-3 text-sm font-medium text-[color:var(--color-paper)] shadow-press transition-transform hover:-translate-y-0.5"
                     >
                       <Lock className="size-3.5" aria-hidden="true" />
-                      {viewerSignedIn ? "Open employer dossier" : "Sign in to request contact"}
+                      {viewerSignedIn
+                        ? "Open employer dossier"
+                        : "Sign in to request contact"}
                     </Link>
                   ) : (
                     <div className="rounded-md border border-dashed border-[color:var(--color-hairline)] px-4 py-3 text-center text-xs text-[color:var(--color-ink-soft)]">
@@ -480,7 +498,9 @@ async function ProfileHero({
                       className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-[color:var(--color-ink)] px-5 py-3 text-sm font-medium text-[color:var(--color-ink)] transition-colors hover:bg-[color:var(--color-ink)] hover:text-[color:var(--color-paper)]"
                     >
                       <Bookmark className="size-3.5" aria-hidden="true" />
-                      {viewerSignedIn ? "Save to talent pool" : "Sign in to save"}
+                      {viewerSignedIn
+                        ? "Save to talent pool"
+                        : "Sign in to save"}
                     </Link>
                   )}
                 </div>
@@ -555,7 +575,8 @@ async function ProfileHero({
                     </div>
                     {profile.employmentVerifiedAt && (
                       <div className="mt-1.5 inline-flex items-center gap-1 rounded-[var(--radius-pill)] border border-[color:var(--color-brand)] bg-[color:var(--color-brand-tint)] px-2 py-0.5 text-[0.6rem] uppercase tracking-[0.18em] text-[color:var(--color-brand-strong)]">
-                        Employer-verified · {formatRoleStartedAt(profile.employmentVerifiedAt)}
+                        Employer-verified ·{" "}
+                        {formatRoleStartedAt(profile.employmentVerifiedAt)}
                       </div>
                     )}
                   </div>
@@ -642,7 +663,11 @@ async function ProfileBody({
           )}
 
           {profile.academic && (
-            <StudiesSection profile={profile} t={t} verificationVisible={verificationVisible} />
+            <StudiesSection
+              profile={profile}
+              t={t}
+              verificationVisible={verificationVisible}
+            />
           )}
 
           <SkillsSection skills={profile.topSkills} />
@@ -691,7 +716,11 @@ async function ProfileBody({
               At a glance
             </div>
             <ul className="mt-4 space-y-3 text-sm">
-              <RailRow icon={<MapPin className="size-3.5" />} label="Based in" value={profile.city} />
+              <RailRow
+                icon={<MapPin className="size-3.5" />}
+                label="Based in"
+                value={profile.city}
+              />
               {profile.nationality && (
                 <RailRow
                   icon={<Flag className="size-3.5" />}
@@ -840,7 +869,10 @@ function StudiesSection({
             <h3 className="font-display text-2xl text-[color:var(--color-ink)]">
               {academic.programme}
             </h3>
-            <VerificationBadge state={academic.verification} visible={verificationVisible} />
+            <VerificationBadge
+              state={academic.verification}
+              visible={verificationVisible}
+            />
           </div>
           <p className="mt-1 text-[color:var(--color-ink-soft)]">
             <span className="text-[color:var(--color-ink)]">
@@ -859,7 +891,10 @@ function StudiesSection({
           </p>
 
           <dl className="mt-5 grid grid-cols-2 gap-4 text-xs md:grid-cols-4">
-            <MetaTile label={t("studiesGraduation")} value={academic.expectedGraduation}>
+            <MetaTile
+              label={t("studiesGraduation")}
+              value={academic.expectedGraduation}
+            >
               <span className="block text-[color:var(--color-ink-soft)]">
                 {months <= 0
                   ? `${Math.abs(months)} months ago`
@@ -1011,12 +1046,16 @@ function SkillsSection({
     {
       key: "technical",
       title: "Technical skills",
-      items: skills.filter((s) => (s as { category?: string }).category !== "professional"),
+      items: skills.filter(
+        (s) => (s as { category?: string }).category !== "professional",
+      ),
     },
     {
       key: "professional",
       title: "Professional skills",
-      items: skills.filter((s) => (s as { category?: string }).category === "professional"),
+      items: skills.filter(
+        (s) => (s as { category?: string }).category === "professional",
+      ),
     },
   ].filter((g) => g.items.length > 0);
   const showHeaders = groups.length > 1;
@@ -1029,45 +1068,45 @@ function SkillsSection({
               {g.title}
             </h3>
           )}
-      <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {g.items.map((s) => {
-          const pct = (s.proficiency / 5) * 100;
-          return (
-            <li
-              key={s.name}
-              className="group rounded-xl border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-4 transition-colors hover:border-[color:var(--color-brand)]"
-            >
-              <div className="flex items-baseline justify-between gap-2">
-                <span className="font-medium text-[color:var(--color-ink)]">
-                  {s.name}
-                  {/* Phase 9.9  years rendered after the skill name. NULL =
+          <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {g.items.map((s) => {
+              const pct = (s.proficiency / 5) * 100;
+              return (
+                <li
+                  key={s.name}
+                  className="group rounded-xl border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-4 transition-colors hover:border-[color:var(--color-brand)]"
+                >
+                  <div className="flex items-baseline justify-between gap-2">
+                    <span className="font-medium text-[color:var(--color-ink)]">
+                      {s.name}
+                      {/* Phase 9.9  years rendered after the skill name. NULL =
                       omit entirely; 0 = "<1 yr". */}
-                  {s.yearsOfExperience != null && (
-                    <span className="ml-1 text-xs font-normal text-[color:var(--color-ink-soft)]">
-                      ·{" "}
-                      {s.yearsOfExperience === 0
-                        ? "<1 yr"
-                        : `${s.yearsOfExperience} yr${s.yearsOfExperience === 1 ? "" : "s"}`}
+                      {s.yearsOfExperience != null && (
+                        <span className="ml-1 text-xs font-normal text-[color:var(--color-ink-soft)]">
+                          ·{" "}
+                          {s.yearsOfExperience === 0
+                            ? "<1 yr"
+                            : `${s.yearsOfExperience} yr${s.yearsOfExperience === 1 ? "" : "s"}`}
+                        </span>
+                      )}
                     </span>
-                  )}
-                </span>
-                <span className="font-display tabular text-sm text-[color:var(--color-ink-soft)]">
-                  {s.proficiency}/5
-                </span>
-              </div>
-              <div
-                className="mt-3 h-1 overflow-hidden rounded-full bg-[color:var(--color-surface-sunk)]"
-                aria-hidden="true"
-              >
-                <div
-                  className="h-full bg-[color:var(--color-brand)]"
-                  style={{ width: `${pct}%` }}
-                />
-              </div>
-            </li>
-          );
-        })}
-      </ul>
+                    <span className="font-display tabular text-sm text-[color:var(--color-ink-soft)]">
+                      {s.proficiency}/5
+                    </span>
+                  </div>
+                  <div
+                    className="mt-3 h-1 overflow-hidden rounded-full bg-[color:var(--color-surface-sunk)]"
+                    aria-hidden="true"
+                  >
+                    <div
+                      className="h-full bg-[color:var(--color-brand)]"
+                      style={{ width: `${pct}%` }}
+                    />
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
         </div>
       ))}
     </Section>
@@ -1188,7 +1227,10 @@ function QualificationsSection({
                 <div className="font-display text-lg text-[color:var(--color-ink)]">
                   {q.title}
                 </div>
-                <VerificationBadge state={q.verification} visible={verificationVisible} />
+                <VerificationBadge
+                  state={q.verification}
+                  visible={verificationVisible}
+                />
               </div>
               <div className="text-sm text-[color:var(--color-ink-soft)]">
                 {q.institution}
@@ -1199,8 +1241,8 @@ function QualificationsSection({
         ))}
       </ul>
       <p className="mt-4 text-xs italic text-[color:var(--color-ink-soft)]">
-        Document files are gated. Only verified employers can request them 
-        every access is audit-logged.
+        Document files are gated. Only verified employers can request them every
+        access is audit-logged.
       </p>
     </Section>
   );
@@ -1248,11 +1290,11 @@ function GatedSection({
             Your contact and documents stay private until you consent.
           </h2>
           <p className="mt-3 text-[color:var(--color-ink-soft)]">
-            Verified employers see a locked panel where this section sits.
-            Your email, mobile, un-redacted surname, CV and certificate
-            files are revealed only after they request access and you
-            approve, every reveal is audit-logged and surfaced back to
-            you in your activity feed.
+            Verified employers see a locked panel where this section sits. Your
+            email, mobile, un-redacted surname, CV and certificate files are
+            revealed only after they request access and you approve, every
+            reveal is audit-logged and surfaced back to you in your activity
+            feed.
           </p>
 
           <ul className="mt-6 grid gap-3 text-sm md:grid-cols-2">
@@ -1313,10 +1355,10 @@ function GatedSection({
             Contact reveals are an employer feature.
           </h2>
           <p className="mt-3 text-[color:var(--color-ink-soft)]">
-            Verified employer accounts can request to reveal this candidate&rsquo;s
-            contact details and documents, post-consent. Your account
-            doesn&rsquo;t have that action, every reveal is audit-logged and
-            surfaced back to the candidate in their activity feed.
+            Verified employer accounts can request to reveal this
+            candidate&rsquo;s contact details and documents, post-consent. Your
+            account doesn&rsquo;t have that action, every reveal is audit-logged
+            and surfaced back to the candidate in their activity feed.
           </p>
 
           <ul className="mt-6 grid gap-3 text-sm md:grid-cols-2">
@@ -1418,7 +1460,9 @@ function GatedItem({
           {icon}
           {title}
         </div>
-        <p className="mt-1 text-sm text-[color:var(--color-ink-soft)]">{body}</p>
+        <p className="mt-1 text-sm text-[color:var(--color-ink-soft)]">
+          {body}
+        </p>
       </li>
     );
   }
