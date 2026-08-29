@@ -18,7 +18,13 @@ import { outcomesQuery } from "@/lib/analytics/outcomes";
 import { getLatestRetentionSnapshot } from "@/lib/analytics/retention";
 import { InsightsCharts } from "@/components/feature/InsightsCharts";
 import { InsightsExportButton } from "@/components/feature/InsightsExportButton";
-import { TrendingUp, AlertCircle, ArrowUp, ArrowDown, Minus } from "lucide-react";
+import {
+  TrendingUp,
+  AlertCircle,
+  ArrowUp,
+  ArrowDown,
+  Minus,
+} from "lucide-react";
 import { localeAlternates } from "@/lib/seo";
 
 /**
@@ -72,16 +78,23 @@ export default async function InsightsPage({
   // Parallel load  all six aggregates ship at once. `skillsGapTrendQuery`
   // is `skillsGapQuery` plus the week-over-week delta arrow column (falls
   // back to no-delta when there's no prior snapshot yet).
-  const [analytics, skillsGap, skillDemand, heatmap, freshness, outcomes, retention] =
-    await Promise.all([
-      dataProvider.getAnalyticsSnapshot(),
-      skillsGapTrendQuery({ top: 20, lookbackDays: 7 }),
-      skillDemandQuery({ top: 12 }),
-      supplyHeatmapQuery(),
-      freshnessBreakdownQuery({ freshDays, ageingDays }),
-      outcomesQuery(),
-      getLatestRetentionSnapshot(),
-    ]);
+  const [
+    analytics,
+    skillsGap,
+    skillDemand,
+    heatmap,
+    freshness,
+    outcomes,
+    retention,
+  ] = await Promise.all([
+    dataProvider.getAnalyticsSnapshot(),
+    skillsGapTrendQuery({ top: 20, lookbackDays: 7 }),
+    skillDemandQuery({ top: 12 }),
+    supplyHeatmapQuery(),
+    freshnessBreakdownQuery({ freshDays, ageingDays }),
+    outcomesQuery(),
+    getLatestRetentionSnapshot(),
+  ]);
 
   const conf = overallFreshnessConfidence(analytics);
   const nfmt = new Intl.NumberFormat(locale);
@@ -167,7 +180,10 @@ export default async function InsightsPage({
 
         <div className="mx-auto max-w-[1320px] px-5 py-14 md:px-10 md:py-20">
           {/* Headline stats */}
-          <section aria-label="Headline statistics" className="grid gap-4 md:grid-cols-3">
+          <section
+            aria-label="Headline statistics"
+            className="grid gap-4 md:grid-cols-3"
+          >
             <StatCard
               label={t("stat.totalActive")}
               value={nfmt.format(analytics.totalActive)}
@@ -242,7 +258,9 @@ export default async function InsightsPage({
                 <tr className="text-left text-[0.7rem] uppercase tracking-[0.18em] text-[color:var(--color-ink-soft)]">
                   <th className="py-2 font-normal">Status</th>
                   <th className="py-2 font-normal tabular text-right">Count</th>
-                  <th className="py-2 font-normal text-right">Freshness confidence</th>
+                  <th className="py-2 font-normal text-right">
+                    Freshness confidence
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -250,7 +268,10 @@ export default async function InsightsPage({
                   const row = analytics.byStatus[s];
                   const pct = Math.round(row.freshnessConfidence * 100);
                   return (
-                    <tr key={s} className="border-t border-[color:var(--color-hairline)]">
+                    <tr
+                      key={s}
+                      className="border-t border-[color:var(--color-hairline)]"
+                    >
                       <td className="py-3">{tStatus(s)}</td>
                       <td className="py-3 tabular text-right font-display text-lg">
                         {nfmt.format(row.count)}
@@ -320,8 +341,8 @@ export default async function InsightsPage({
             <p className="mb-5 max-w-3xl text-sm text-[color:var(--color-ink-soft)]">
               Every employer search writes to <code>search_events</code>; every
               profile contributes freshness-weighted supply. Where demand
-              outstrips supply is where Sebenza can direct training,
-              learnership intake, and policy attention.
+              outstrips supply is where Sebenza can direct training, learnership
+              intake, and policy attention.
             </p>
 
             {skillsGap.length === 0 ? (
@@ -336,12 +357,25 @@ export default async function InsightsPage({
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="border-b-2 border-[color:var(--color-ink)] text-left text-[0.7rem] uppercase tracking-[0.18em] text-[color:var(--color-ink-soft)]">
-                        <th className="px-5 py-3 font-normal">Skill / profession</th>
-                        <th className="px-5 py-3 font-normal tabular text-right">Searches</th>
-                        <th className="px-5 py-3 font-normal tabular text-right">Matches</th>
-                        <th className="px-5 py-3 font-normal tabular text-right">Fresh matches</th>
+                        <th className="px-5 py-3 font-normal">
+                          Skill / profession
+                        </th>
+                        <th className="px-5 py-3 font-normal tabular text-right">
+                          Searches
+                        </th>
+                        <th className="px-5 py-3 font-normal tabular text-right">
+                          Matches
+                        </th>
+                        <th className="px-5 py-3 font-normal tabular text-right">
+                          Fresh matches
+                        </th>
                         <th className="px-5 py-3 font-normal">Gap</th>
-                        <th className="px-5 py-3 font-normal text-right" title="Change vs last week's snapshot">Δ 7d</th>
+                        <th
+                          className="px-5 py-3 font-normal text-right"
+                          title="Change vs last week's snapshot"
+                        >
+                          Δ 7d
+                        </th>
                       </tr>
                     </thead>
                     <tbody>
@@ -420,7 +454,9 @@ export default async function InsightsPage({
                             <dt className="text-[0.62rem] uppercase tracking-[0.18em] text-[color:var(--color-ink-soft)]">
                               Searches
                             </dt>
-                            <dd className="tabular">{nfmt.format(r.searches)}</dd>
+                            <dd className="tabular">
+                              {nfmt.format(r.searches)}
+                            </dd>
                           </div>
                           <div>
                             <dt className="text-[0.62rem] uppercase tracking-[0.18em] text-[color:var(--color-ink-soft)]">
@@ -455,7 +491,8 @@ export default async function InsightsPage({
                   Supply heatmap · province × profession
                 </h2>
                 <span className="hidden text-[0.7rem] uppercase tracking-[0.24em] text-[color:var(--color-ink-soft)] md:inline">
-                  Top {topProvinces.length} provinces · top {topProfessions.length} professions
+                  Top {topProvinces.length} provinces · top{" "}
+                  {topProfessions.length} professions
                 </span>
               </header>
               <p className="mb-5 max-w-3xl text-sm text-[color:var(--color-ink-soft)]">
@@ -548,10 +585,7 @@ export default async function InsightsPage({
           {skillDemand.length > 0 && (
             <section className="mt-16" aria-labelledby="skill-demand-h">
               <header className="mb-4 flex items-baseline justify-between border-b-2 border-[color:var(--color-ink)] pb-2">
-                <h2
-                  id="skill-demand-h"
-                  className="font-display text-2xl"
-                >
+                <h2 id="skill-demand-h" className="font-display text-2xl">
                   Skill-level demand · top 12
                 </h2>
                 <span className="hidden text-[0.7rem] uppercase tracking-[0.24em] text-[color:var(--color-ink-soft)] md:inline">
@@ -560,9 +594,9 @@ export default async function InsightsPage({
               </header>
               <p className="mb-5 max-w-3xl text-sm text-[color:var(--color-ink-soft)]">
                 Sister view to the profession-level table: which individual
-                <em> skills</em> show up most in employer searches, and how
-                many people on Sebenza carry them. The most unfilled rows
-                are where bursary / SETA investment moves the needle fastest.
+                <em> skills</em> show up most in employer searches, and how many
+                people on Sebenza carry them. The most unfilled rows are where
+                bursary / SETA investment moves the needle fastest.
               </p>
               <ul className="grid gap-3 md:grid-cols-2">
                 {skillDemand.map((s) => {
@@ -617,10 +651,10 @@ export default async function InsightsPage({
             {outcomes.cohorts.length === 0 ? (
               <p className="rounded-[var(--radius-md)] border border-dashed border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-6 text-sm text-[color:var(--color-ink-soft)]">
                 No cohort cleared the suppression floor of{" "}
-                {outcomes.minCohortSize} consented profiles. The dataset
-                grows as students opt in to outcomes research from{" "}
-                <code>/dashboard/privacy</code> and as employers log
-                confirmed placements. Source pool today:{" "}
+                {outcomes.minCohortSize} consented profiles. The dataset grows
+                as students opt in to outcomes research from{" "}
+                <code>/dashboard/privacy</code> and as employers log confirmed
+                placements. Source pool today:{" "}
                 <span className="font-medium">
                   {outcomes.consentedProfileCount}
                 </span>{" "}
@@ -645,9 +679,7 @@ export default async function InsightsPage({
                       <th className="px-4 py-3 font-normal text-right">
                         Placed
                       </th>
-                      <th className="px-4 py-3 font-normal text-right">
-                        Rate
-                      </th>
+                      <th className="px-4 py-3 font-normal text-right">Rate</th>
                       <th className="px-4 py-3 font-normal text-right">
                         Median days to hire
                       </th>
@@ -693,10 +725,10 @@ export default async function InsightsPage({
                 </table>
                 <p className="border-t border-[color:var(--color-hairline)] bg-[color:var(--color-surface-sunk)] px-4 py-2 text-[0.65rem] uppercase tracking-[0.18em] text-[color:var(--color-ink-soft)]">
                   {outcomes.consentedProfileCount} consented profile
-                  {outcomes.consentedProfileCount === 1 ? "" : "s"} in
-                  source · {outcomes.suppressedCohorts} cohort
-                  {outcomes.suppressedCohorts === 1 ? "" : "s"} suppressed
-                  · primary + complementary k-anonymity floor
+                  {outcomes.consentedProfileCount === 1 ? "" : "s"} in source ·{" "}
+                  {outcomes.suppressedCohorts} cohort
+                  {outcomes.suppressedCohorts === 1 ? "" : "s"} suppressed ·
+                  primary + complementary k-anonymity floor
                 </p>
               </div>
             )}
@@ -717,9 +749,9 @@ export default async function InsightsPage({
                 </h2>
                 <p className="mt-1 max-w-2xl text-sm text-[color:var(--color-ink-soft)]">
                   Of the Sebenza-confirmed placements that made it to each
-                  milestone, how many were still active at that mark. Per-
-                  cell suppression at k = 10, employer privacy is held;
-                  the national picture stays honest.
+                  milestone, how many were still active at that mark. Per- cell
+                  suppression at k = 10, employer privacy is held; the national
+                  picture stays honest.
                 </p>
               </div>
               {retention.capturedAt && (
@@ -736,10 +768,10 @@ export default async function InsightsPage({
 
             {retention.nationalByMilestone.length === 0 ? (
               <div className="rounded-[var(--radius-md)] border border-dashed border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-6 text-sm text-[color:var(--color-ink-soft)]">
-                Not enough confirmed placements have reached the first
-                milestone yet to publish a retention figure, the dataset
-                grows as employers log + check in on hires across the
-                platform. The k = 10 floor is intentional, not a bug.
+                Not enough confirmed placements have reached the first milestone
+                yet to publish a retention figure, the dataset grows as
+                employers log + check in on hires across the platform. The k =
+                10 floor is intentional, not a bug.
               </div>
             ) : (
               <>
@@ -769,9 +801,9 @@ export default async function InsightsPage({
                       Roles where hires stick
                     </h3>
                     <p className="mt-1 text-xs text-[color:var(--color-ink-soft)]">
-                      12-month retention by (profession × province), best
-                      first. Tie-breaker is cohort size, larger cohorts
-                      surface above smaller ones at the same rate.
+                      12-month retention by (profession × province), best first.
+                      Tie-breaker is cohort size, larger cohorts surface above
+                      smaller ones at the same rate.
                     </p>
                     <ul className="mt-4 grid gap-2 md:grid-cols-2">
                       {retention.topCells.map((c) => (
@@ -784,7 +816,7 @@ export default async function InsightsPage({
                               {c.professionLabel}
                             </p>
                             <p className="text-xs text-[color:var(--color-ink-soft)]">
-                              {c.provinceLabel}  cohort of{" "}
+                              {c.provinceLabel} cohort of{" "}
                               {nfmt.format(c.hiredInCohort)}
                             </p>
                           </div>
@@ -800,9 +832,9 @@ export default async function InsightsPage({
                 <p className="mt-4 text-xs italic text-[color:var(--color-ink-soft)]">
                   Snapshot covers {nfmt.format(retention.cellsPublished)}{" "}
                   published cell{retention.cellsPublished === 1 ? "" : "s"}
-                   cells below the k = 10 floor are suppressed at the
-                  cron so per-employer numbers never leak. Retention =
-                  active at the milestone  NOT active today.
+                  cells below the k = 10 floor are suppressed at the cron so
+                  per-employer numbers never leak. Retention = active at the
+                  milestone NOT active today.
                 </p>
               </>
             )}
@@ -834,12 +866,12 @@ export default async function InsightsPage({
             <div className="flex flex-wrap items-center gap-3">
               <InsightsExportButton label={t("export")} />
               <a
-                href="/insights/print"
+                href="/insights/print?auto=1"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex h-10 items-center gap-2 rounded-[var(--radius-pill)] border border-[color:var(--color-ink)] px-4 text-sm font-medium hover:bg-[color:var(--color-ink)] hover:text-[color:var(--color-paper)]"
               >
-                Print to PDF
+                Download PDF briefing
               </a>
             </div>
           </section>
@@ -863,9 +895,7 @@ function DeltaCell({ delta }: { delta: number | null }) {
       <span
         className="inline-flex items-center text-[color:var(--color-ink-soft)]"
         title="No prior snapshot to compare against yet"
-      >
-        
-      </span>
+      ></span>
     );
   }
   if (delta === 0) {
@@ -907,13 +937,18 @@ function FreshnessTile({
 }) {
   const pct = total > 0 ? Math.round((count / total) * 100) : 0;
   const toneClass = {
-    brand: "border-[color:var(--color-brand)] text-[color:var(--color-brand-strong)]",
-    accent: "border-[color:var(--color-accent)] text-[color:var(--color-accent)]",
-    danger: "border-[color:var(--color-danger)] text-[color:var(--color-danger)]",
+    brand:
+      "border-[color:var(--color-brand)] text-[color:var(--color-brand-strong)]",
+    accent:
+      "border-[color:var(--color-accent)] text-[color:var(--color-accent)]",
+    danger:
+      "border-[color:var(--color-danger)] text-[color:var(--color-danger)]",
   }[tone];
   const Icon = tone === "danger" ? AlertCircle : TrendingUp;
   return (
-    <div className={`rounded-[var(--radius-md)] border-2 ${toneClass} bg-[color:var(--color-paper)] p-5`}>
+    <div
+      className={`rounded-[var(--radius-md)] border-2 ${toneClass} bg-[color:var(--color-paper)] p-5`}
+    >
       <div className="flex items-center gap-2 text-[0.7rem] uppercase tracking-[0.22em]">
         <Icon className="size-3.5" aria-hidden="true" />
         {label}
