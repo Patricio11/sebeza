@@ -132,7 +132,7 @@ People ask why we're building this ourselves instead of leaving it to the big pl
 Honestly? Because we kept meeting talented people who couldn't catch a break. Not because they lacked skill, but because no one could *find* them.
 
 Building things is what we can do. So this is our contribution to a problem that's bigger than all of us.
-**Visual:** A "months of work" screenshot montage (no faces).
+**Visual:** `assets/post-08-why-we-started.png` (minted 2026-08-31; montage of three real product shots from the seeded showcase register, no faces). Same file for IG.
 **Tags:** #Sebenza #BuildInPublic #SAtech #Mzansi
 
 ---

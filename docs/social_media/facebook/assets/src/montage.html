@@ -1,0 +1,125 @@
+<!doctype html>
+<!--
+  Sebenza social MONTAGE card (1080x1350) - the "months of work" BTS
+  graphic. Three real product screenshots (seeded harness only, never a
+  real person's data) fanned like prints on a desk, house type above,
+  the flag stripe below. Slots: [data-slot=eyebrow], [data-slot=headline],
+  [data-slot=sub], [data-slot=caption], [data-mark], and [data-shot-1..3].
+-->
+<html>
+<head>
+<meta charset="utf-8" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=Hanken+Grotesk:ital,wght@0,400..700;1,400..700&display=block" rel="stylesheet" />
+<style>
+  :root {
+    --paper: #fbf8f0;
+    --ink: #14110d;
+    --ink-soft: #5a5249;
+    --green: #006b3c;
+    --green-deep: #003d1f;
+    --gold: #c98214;
+    --red: #de3831;
+    --hairline: #e4ded4;
+    --headline-size: 84px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 100%; height: 100%; }
+  body {
+    font-family: "Hanken Grotesk", system-ui, sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    overflow: hidden;
+  }
+  .card {
+    width: 100vw; height: 100vh;
+    display: flex; flex-direction: column;
+    padding: 84px 84px 0;
+    position: relative;
+  }
+  .toprule { height: 8px; width: 148px; background: var(--green); margin-bottom: 36px; }
+  .eyebrow {
+    font-weight: 700; font-size: 26px; letter-spacing: 0.24em;
+    text-transform: uppercase; color: var(--ink-soft);
+  }
+  .headline {
+    font-family: "Fraunces", Georgia, serif;
+    font-weight: 560; font-size: var(--headline-size);
+    line-height: 1.08; letter-spacing: -0.015em;
+    margin-top: 26px; max-width: 920px;
+    font-variation-settings: "opsz" 144;
+  }
+  .headline em { font-style: italic; color: var(--gold); font-weight: 540; }
+  .sub {
+    margin-top: 22px; font-size: 30px; line-height: 1.4;
+    color: var(--ink-soft); max-width: 860px; font-weight: 400;
+  }
+  .sub:empty { display: none; }
+
+  /* The fan of prints. Fixed geometry so the render is deterministic. */
+  .fan {
+    flex: 1; position: relative; min-height: 0;
+    margin: 26px -12px 0;
+  }
+  .print {
+    position: absolute;
+    background: #fff;
+    border: 1px solid var(--hairline);
+    border-radius: 18px;
+    box-shadow: 0 30px 70px rgba(20, 17, 13, 0.18),
+                0 6px 16px rgba(20, 17, 13, 0.07);
+    overflow: hidden;
+  }
+  .print img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top; }
+  .print-1 { left: 4%;  top: 10%; width: 42%; height: 82%; transform: rotate(-4deg); z-index: 1; }
+  .print-2 { left: 30%; top: 2%;  width: 44%; height: 90%; transform: rotate(1.5deg); z-index: 2; }
+  .print-3 { left: 58%; top: 12%; width: 40%; height: 80%; transform: rotate(4deg);  z-index: 3; }
+  .caption {
+    position: absolute; left: 0; right: 0; bottom: -6px;
+    font-size: 23px; color: var(--ink-soft); font-weight: 500;
+    letter-spacing: 0.02em; text-align: center; z-index: 4;
+  }
+  .caption:empty { display: none; }
+
+  .footer {
+    display: flex; align-items: center; gap: 22px;
+    padding: 30px 0 54px;
+  }
+  .footer .mark { width: 52px; height: 47px; display: block; }
+  .footer .mark svg { width: 100%; height: 100%; display: block; }
+  .wordmark {
+    font-family: "Fraunces", Georgia, serif; font-weight: 700;
+    font-size: 44px; color: var(--green-deep); letter-spacing: -0.01em;
+  }
+  .site {
+    margin-left: auto; font-size: 26px; font-weight: 600;
+    color: var(--ink-soft); letter-spacing: 0.02em;
+  }
+  .stripe { display: flex; height: 22px; width: 100vw; margin-left: -84px; }
+  .stripe .g { flex: 3; background: var(--green); }
+  .stripe .a { flex: 2; background: var(--gold); }
+  .stripe .r { flex: 1; background: var(--red); }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="toprule"></div>
+    <div class="eyebrow" data-slot="eyebrow"></div>
+    <div class="headline" data-slot="headline"></div>
+    <div class="sub" data-slot="sub"></div>
+    <div class="fan">
+      <div class="print print-1"><img data-shot-1 alt="" /></div>
+      <div class="print print-2"><img data-shot-2 alt="" /></div>
+      <div class="print print-3"><img data-shot-3 alt="" /></div>
+      <div class="caption" data-slot="caption"></div>
+    </div>
+    <div class="footer">
+      <span class="mark" data-mark></span>
+      <span class="wordmark">Sebenza</span>
+      <span class="site">sebenzasa.com</span>
+    </div>
+    <div class="stripe"><div class="g"></div><div class="a"></div><div class="r"></div></div>
+  </div>
+</body>
+</html>

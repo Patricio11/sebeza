@@ -31,6 +31,7 @@ Red appears nowhere else on a graphic except the stripe, unless the card is a wa
 | `post-05-dignity.png` | 1080x1350 | Post 5: "Being seen matters" quote card. |
 | `post-06-free-always.png` | 1080x1350 | Post 6: "Free for job-seekers. Always." (dark). |
 | `post-07-for-everyone.png` | 1080x1350 | Post 7: "Talent is talent. We help it get found." mission quote card (light). Also the IG feed graphic (4:5). |
+| `post-08-why-we-started.png` | 1080x1350 | Post 8: BTS montage, three real product shots fanned (search, compass, insights) from the seeded showcase register. Same file for IG. |
 | `post-09-cheap-phone.png` | 1080x1350 | Post 9: the cheap-phone / slow-data design rule. |
 | `post-10-trust.png` | 1080x1350 | Post 10: "Trust is the whole product." (dark). |
 | `post-13-the-name.png` | 1080x1350 | Post 13: why the name Sebenza. |

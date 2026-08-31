@@ -112,6 +112,14 @@ const CARDS = [
     sub: "Matched by your skills and where you live. Full stop. Citizens first, nobody here legally left out.",
   },
   {
+    template: "montage.html", out: "post-08-why-we-started.png", w: 1080, h: 1350,
+    size: 84, markTone: "light", eyebrow: "Why we started",
+    headline: "Months of nights and weekends, so talent stops being <em>invisible</em>.",
+    sub: "Talented people kept missing out, not for lack of skill, but because nobody could find them. Building is what we can do.",
+    shots: ["shots/bts-search.png", "shots/bts-compass.png", "shots/bts-insights.png"],
+    caption: "The real product on the seeded showcase register",
+  },
+  {
     template: "quote.html", out: "post-02-who.png", w: 1080, h: 1350,
     theme: "light", size: 92, eyebrow: "Who's behind this",
     headline: "A small South African company with one belief: this country's talent deserves to be <em>seen</em>.",
@@ -147,6 +155,10 @@ for (const card of CARDS) {
         const img = document.querySelector("[data-shot]");
         if (img) img.setAttribute("src", card.shot);
       }
+      (card.shots ?? []).forEach((src, i) => {
+        const img = document.querySelector(`[data-shot-${i + 1}]`);
+        if (img) img.setAttribute("src", src);
+      });
       document.querySelectorAll("[data-mark]").forEach((el) => (el.innerHTML = mark));
     },
     { card, mark: markTone === "dark" ? MARK_LIGHT_ON_DARK : MARK_DARK_ON_LIGHT },
