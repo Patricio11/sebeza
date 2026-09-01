@@ -327,7 +327,7 @@ async function ProfileHero({
         className="pointer-events-none absolute -right-32 -top-20 size-[460px] opacity-[0.06]"
       />
 
-      <div className="relative mx-auto grid max-w-[1320px] grid-cols-12 gap-8 px-5 py-12 md:gap-12 md:px-10 md:py-20">
+      <div className="relative mx-auto grid max-w-[1320px] grid-cols-12 gap-8 px-5 py-10 md:gap-12 md:px-10 md:py-14">
         {/* Identity column */}
         <div className="col-span-12 md:col-span-7">
           <div className="flex flex-col items-start gap-6 md:flex-row md:items-end">
