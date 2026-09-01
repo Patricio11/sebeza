@@ -603,7 +603,7 @@
         "seniority": "Seniority",
         "headline": "Public headline",
         "bio": "About",
-        "bioHelp": "Two or three sentences, what you're great at, and what you're looking for.",
+        "bioHelp": "Two or three sentences: what you do, what you're great at, and why someone should hire you.",
         "addSkill": "Add a skill",
         "removeSkill": "Remove",
         "proficiency": "Self-rated proficiency"

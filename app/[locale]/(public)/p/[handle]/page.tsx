@@ -5,7 +5,6 @@ import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { StatusChip } from "@/components/ui/StatusChip";
 import { VerificationBadge } from "@/components/ui/VerificationBadge";
-import { ProfileCompleteness } from "@/components/ui/ProfileCompleteness";
 import { Avatar } from "@/components/ui/Avatar";
 import { SAChevron } from "@/components/ui/SAChevron";
 import { dataProvider } from "@/lib/data/provider";
@@ -301,6 +300,22 @@ async function ProfileHero({
   /** Phase 9.16.1  threaded from ProfilePage's getSetting() read. */
   verificationVisible: boolean;
 }) {
+  // 2026-09-01 (employer-view polish, docs/EMPLOYER_VIEW_POLISH_PLAN.md):
+  // completeness is a seeker number and a ranking input; employers get
+  // derived facts instead. Only true lines render.
+  const latestQualification = [...(profile.qualifications ?? [])].sort(
+    (a, b) => (b.awardedYear ?? 0) - (a.awardedYear ?? 0),
+  )[0];
+  const verifiedQualCount = (profile.qualifications ?? []).filter(
+    (q) => q.verification === "verified",
+  ).length;
+  const essentials = [
+    (profile.experience?.length ?? 0) > 0 && "experience",
+    (profile.qualifications?.length ?? 0) > 0 && "qualifications",
+    profile.topSkills.length > 0 && "skills",
+    (profile.languages?.length ?? 0) > 0 && "languages",
+  ].filter((x): x is string => Boolean(x));
+
   return (
     <section
       aria-label="Profile masthead"
@@ -393,6 +408,29 @@ async function ProfileHero({
                   </p>
                 )}
 
+              {/* 2026-09-01 (employer-view polish)  the facts an employer
+                  scans for, as chips: latest qualification + availability.
+                  Everything derived; nothing scored. */}
+              {(latestQualification || profile.workAvailability.length > 0) && (
+                <div className="mt-3 flex flex-wrap items-center gap-2">
+                  {latestQualification && (
+                    <span className="inline-flex items-center gap-1.5 rounded-[var(--radius-pill)] border border-[color:var(--color-hairline)] bg-[color:var(--color-paper)] px-2.5 py-1 text-[0.72rem] text-[color:var(--color-ink)]">
+                      <GraduationCap
+                        className="size-3.5 text-[color:var(--color-brand)]"
+                        aria-hidden="true"
+                      />
+                      {latestQualification.title}
+                    </span>
+                  )}
+                  {profile.workAvailability.length > 0 && (
+                    <WorkAvailabilityChips
+                      values={profile.workAvailability}
+                      variant="compact"
+                    />
+                  )}
+                </div>
+              )}
+
               {/* Honest redaction note  quiet, italic */}
               <p className="mt-2 text-[0.78rem] italic text-[color:var(--color-ink-soft)]">
                 {t("redacted")}
@@ -409,7 +447,6 @@ async function ProfileHero({
                   state={profile.verification}
                   visible={verificationVisible}
                 />
-                <ProfileCompleteness value={profile.completeness} />
               </div>
             </div>
           </div>
@@ -519,12 +556,51 @@ async function ProfileHero({
                   </span>
                 </span>
               </DossierRow>
-              <DossierRow label="Verification">
-                <span className="capitalize">{profile.verification}</span>
+              <DossierRow label="Identity">
+                <span className="inline-flex items-center gap-1.5">
+                  <span
+                    aria-hidden="true"
+                    className={
+                      "inline-block size-2 rounded-full " +
+                      (profile.verification === "verified"
+                        ? "bg-[color:var(--color-brand)]"
+                        : "bg-[color:var(--color-hairline)]")
+                    }
+                  />
+                  {profile.verification === "verified"
+                    ? "Live-selfie verified"
+                    : "Not yet verified"}
+                </span>
               </DossierRow>
-              <DossierRow label="Completeness">
-                <span className="font-display tabular text-base">
-                  {profile.completeness}%
+              <DossierRow label="Email">
+                <span className="inline-flex items-center gap-1.5">
+                  <span
+                    aria-hidden="true"
+                    className="inline-block size-2 rounded-full bg-[color:var(--color-brand)]"
+                  />
+                  Verified
+                </span>
+              </DossierRow>
+              <DossierRow label="Qualifications">
+                <span>
+                  {(profile.qualifications?.length ?? 0) === 0
+                    ? "None on file yet"
+                    : `${profile.qualifications!.length} on file${
+                        verifiedQualCount > 0
+                          ? `, ${verifiedQualCount} verified`
+                          : " · self-declared"
+                      }`}
+                </span>
+              </DossierRow>
+              <DossierRow label="Essentials">
+                <span className="text-sm">
+                  {essentials.length > 0
+                    ? `${essentials
+                        .map((e, i) =>
+                          i === 0 ? e[0]!.toUpperCase() + e.slice(1) : e,
+                        )
+                        .join(", ")} on file`
+                    : "Still building their profile"}
                 </span>
               </DossierRow>
               <DossierRow label="Member since">
