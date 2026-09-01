@@ -436,18 +436,6 @@ async function ProfileHero({
                 {t("redacted")}
               </p>
 
-              {/* 2026-09-01 (founder)  the bio moves up into the hero's
-                  empty space: the "why hire me" pitch is the first thing
-                  an employer reads. Clamped so a long bio never shoves
-                  the page; the full text still lives in the profile. */}
-              {profile.bio && (
-                <blockquote className="mt-6 max-w-xl border-l-4 border-[color:var(--color-accent)] pl-5">
-                  <p className="line-clamp-4 font-display text-xl italic leading-snug text-[color:var(--color-ink)] md:line-clamp-5 md:text-2xl">
-                    &ldquo;{profile.bio}&rdquo;
-                  </p>
-                </blockquote>
-              )}
-
               {/* Chip row */}
               <div className="mt-6 flex flex-wrap items-center gap-3">
                 <StatusChip
@@ -462,6 +450,18 @@ async function ProfileHero({
               </div>
             </div>
           </div>
+
+          {/* 2026-09-01 (founder, take 2)  the bio sits BELOW the whole
+              identity row, full column width from the avatar's left edge,
+              filling the hero's empty space. Clamped so a long bio never
+              shoves the layout; the full text lives in the profile. */}
+          {profile.bio && (
+            <blockquote className="mt-8 border-l-4 border-[color:var(--color-accent)] pl-6">
+              <p className="line-clamp-5 font-display text-2xl italic leading-snug text-[color:var(--color-ink)] md:line-clamp-6 md:text-3xl">
+                &ldquo;{profile.bio}&rdquo;
+              </p>
+            </blockquote>
+          )}
         </div>
 
         {/* Right-rail panel  swaps between owner-preview and the employer
