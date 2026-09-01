@@ -436,6 +436,18 @@ async function ProfileHero({
                 {t("redacted")}
               </p>
 
+              {/* 2026-09-01 (founder)  the bio moves up into the hero's
+                  empty space: the "why hire me" pitch is the first thing
+                  an employer reads. Clamped so a long bio never shoves
+                  the page; the full text still lives in the profile. */}
+              {profile.bio && (
+                <blockquote className="mt-6 max-w-xl border-l-4 border-[color:var(--color-accent)] pl-5">
+                  <p className="line-clamp-4 font-display text-xl italic leading-snug text-[color:var(--color-ink)] md:line-clamp-5 md:text-2xl">
+                    &ldquo;{profile.bio}&rdquo;
+                  </p>
+                </blockquote>
+              )}
+
               {/* Chip row */}
               <div className="mt-6 flex flex-wrap items-center gap-3">
                 <StatusChip
@@ -728,16 +740,6 @@ async function ProfileBody({
       <div className="grid grid-cols-12 gap-8 md:gap-16">
         {/* Single main column  sections stacked, full-width, editorial */}
         <div className="col-span-12 space-y-20 md:col-span-9">
-          {profile.bio && (
-            <Section eyebrow="On the candidate" title={t("bio")}>
-              <blockquote className="border-l-4 border-[color:var(--color-accent)] pl-6">
-                <p className="font-display text-2xl italic leading-snug text-[color:var(--color-ink)] md:text-3xl">
-                  &ldquo;{profile.bio}&rdquo;
-                </p>
-              </blockquote>
-            </Section>
-          )}
-
           {profile.academic && (
             <StudiesSection
               profile={profile}
