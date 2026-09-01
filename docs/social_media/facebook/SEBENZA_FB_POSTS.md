@@ -201,7 +201,7 @@ Not a clever tech name. Not English. A South African word for a South African pr
 
 ---
 
-## 🟢 WHAT IT DOES / VISION
+## 🟢 WHAT IT DOES / VISION.
 
 ### 14. [VISION] · Available *now*
 **Caption:**
