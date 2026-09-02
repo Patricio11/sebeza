@@ -143,10 +143,10 @@ A design rule we refused to break while building Sebenza:
 
 **It has to work on a cheap phone, on slow data.**
 
-No heavy graphics. No fancy animations that eat your airtime. Because the people who need this most are often on entry-level phones and expensive data, and building something they can't actually use would defeat the whole point.
+Data in South Africa is expensive, and a lot of hard-working phones are humble. If a job platform only runs smoothly on a flagship over fibre, it isn't built for this country. So Sebenza loads light, skips the bloat, and respects your airtime, we literally test it on a throttled 3G connection before we ship.
 
 Fast and fair beats flashy. Every time.
-**Graphic:** `assets/post-09-cheap-phone.png` (or a screenshot on a modest Android)
+**Graphic:** `assets/post-09-cheap-phone.png` (reviewed 2026-09-02, ship as is). Alternative media: `videos/v3-slow-data.mp4`, the real landing page loading under a throttled 3G connection, pairs perfectly with this caption.
 **Tags:** #Sebenza #SAtech #BuildInPublic #Mzansi
 
 ---
