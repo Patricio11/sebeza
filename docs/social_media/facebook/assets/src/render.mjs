@@ -120,6 +120,12 @@ const CARDS = [
     caption: "The real product on the seeded showcase register",
   },
   {
+    template: "quote.html", out: "post-11-hard-parts.png", w: 1080, h: 1350,
+    theme: "dark", size: 92, eyebrow: "Behind the build",
+    headline: "Some nights it&rsquo;s magic. Some nights it&rsquo;s a bug that won&rsquo;t <em>die</em>.",
+    sub: "One person getting hired because of this makes every late night worth it. If you&rsquo;re building something hard: keep going.",
+  },
+  {
     template: "quote.html", out: "post-02-who.png", w: 1080, h: 1350,
     theme: "light", size: 92, eyebrow: "Who's behind this",
     headline: "A small South African company with one belief: this country's talent deserves to be <em>seen</em>.",

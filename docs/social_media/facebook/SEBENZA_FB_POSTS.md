@@ -172,7 +172,7 @@ Some nights it's exciting: a feature finally works and it feels like magic. Othe
 But every time we imagine one person getting hired because of this, it's worth it. That's the fuel.
 
 To anyone building something hard right now: keep going. 💪
-**Visual:** Branded card (ask Claude to mint one when this post comes up; no workspace photos yet, per the founder's 2026-08 decision).
+**Visual:** `assets/post-11-hard-parts.png` (minted 2026-09-06; dark quote card, no workspace photos per the founder's 2026-08 decision). Same file for IG.
 **Tags:** #Sebenza #BuildInPublic #Founder #SAtech
 
 ---
