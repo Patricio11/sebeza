@@ -84,3 +84,25 @@ failure. Nothing reaches a seeker without Approve.
 - [x] Harness screenshots rb08-rb10: draft review card (untick + approve -> live), a new profession with no blueprint showing Draft + batch buttons; 632 tests green
 - [x] Harness screenshots rb01-rb07 in test-results/: compass with route map + role chips, Start-this-route adding 5 skills, 360px, /admin/blueprints (105/105 live), settings flag row; console clean
 - [ ] Neon: `npm run db:migrate` (0080 + 0081), then Import on /admin/blueprints, then flip the flag
+
+## Part 3: the student-lane 500 (found 2026-09-10)
+
+Capturing a Career Compass screenshot for a social post surfaced a hard failure that
+the suite never saw: signed in as a seeker WITH an academic profile, `/dashboard/grow`
+rendered the branded error page, not the compass.
+
+Cause: `db/queries/student-lane.ts` built its elective match counts with a raw
+`WHERE skill_slug = ANY(${slugs})`. Drizzle binds an interpolated JS array as a
+parameter LIST, so Postgres received `ANY(($1, $2))`, a row constructor, and refused
+it: 42809 "op ANY/ALL (array) requires array on right side". `buildStudentSnapshot`
+is awaited in the page's own render path, so the throw took the WHOLE page down, not
+just the student lane. Every seeker with an academic profile has been getting the
+error page. Non-students were unaffected, which is why it stayed hidden.
+
+This is the second time this exact trap has shipped (the first was on the Neon driver
+during the compass-fuel wave), so it is now a source rule with a test, not a memo.
+
+- [x] `student-lane.ts`: `inArray(profileSkills.skillSlug, slugs)` via the typed builder
+- [x] `lib/taxonomy/suggestions.ts`: same trap in the institution promote/merge path (backfill + dupe delete), same fix
+- [x] `lib/sql/array-binding.test.ts`: fails the suite on any `ANY(${...})` under app/components/db/lib
+- [x] Harness: signed in as a student seeker, compass renders end to end, console clean

@@ -126,6 +126,14 @@ const CARDS = [
     sub: "One person getting hired because of this makes every late night worth it. If you&rsquo;re building something hard: keep going.",
   },
   {
+    template: "product.html", out: "post-12-what-to-learn.png", w: 1080, h: 1350,
+    size: 82, eyebrow: "A feature we love",
+    headline: "The part that tells you <em>what to learn next</em>.",
+    sub: "What employers near you are searching for, minus the skills already on your profile. Ranked by the size of the gap.",
+    shot: "shots/compass-what-to-learn.png",
+    caption: "Career compass &middot; in every seeker&rsquo;s dashboard",
+  },
+  {
     template: "quote.html", out: "post-02-who.png", w: 1080, h: 1350,
     theme: "light", size: 92, eyebrow: "Who's behind this",
     headline: "A small South African company with one belief: this country's talent deserves to be <em>seen</em>.",

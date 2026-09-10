@@ -341,7 +341,11 @@ export default async function CareerCompassPage({
     >
       {/* 2026-08  plain-language explainer (real-user feedback: "unclear
           what is meant by career compass or its function"). Three steps,
-          always visible, above everything else on the page. */}
+          always visible, above everything else on the page.
+          2026-09-10: step 3 promised SETA / TVET / online routes, which only
+          exist on the page when the learning-paths section is on. With the
+          flag dark the promise was not true, so the step says only what the
+          seeker actually gets. */}
       <section
         aria-label={t("how.title")}
         className="mb-6 rounded-[var(--radius-md)] border-2 border-dashed border-[color:var(--color-ink)] bg-[color:var(--color-surface)] p-5"
@@ -350,7 +354,13 @@ export default async function CareerCompassPage({
           {t("how.title")}
         </div>
         <ol className="mt-3 grid gap-3 text-sm text-[color:var(--color-ink)] md:grid-cols-3">
-          {(["step1", "step2", "step3"] as const).map((step, i) => (
+          {(
+            [
+              "step1",
+              "step2",
+              learningPathsOn ? "step3" : "step3NoPaths",
+            ] as const
+          ).map((step, i) => (
             <li key={step} className="flex items-start gap-2.5">
               <span className="mt-0.5 inline-flex size-6 shrink-0 items-center justify-center rounded-full bg-[color:var(--color-ink)] font-display text-xs text-[color:var(--color-paper)]">
                 {i + 1}

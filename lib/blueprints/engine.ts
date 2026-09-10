@@ -108,10 +108,13 @@ export function rankBlueprintGaps(input: EngineInput, max = 6): BlueprintGap[] {
   const map = buildRouteMap(input);
   const out: BlueprintGap[] = [];
   const prof = input.professionLabel;
-  const withDemand = (s: RouteSkill, base: string) =>
-    s.demand && s.demand.searches > 0
-      ? `${base} ${s.demand.searches} employer ${s.demand.searches === 1 ? "search" : "searches"} near you mention it.`
-      : base;
+  const withDemand = (s: RouteSkill, base: string) => {
+    const n = s.demand?.searches ?? 0;
+    if (n === 0) return base;
+    return n === 1
+      ? `${base} 1 employer search near you mentions it.`
+      : `${base} ${n} employer searches near you mention it.`;
+  };
 
   for (const s of map.core.filter((s) => !s.owned)) {
     out.push({

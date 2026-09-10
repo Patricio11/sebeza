@@ -51,8 +51,8 @@ import {
   type RouteMap,
 } from "@/lib/blueprints/engine";
 import type { PublicProfile, TaxonomyEntry } from "@/lib/mock/types";
+import { DEMAND_WINDOW_DAYS, demandDetail } from "@/lib/seeker/demand-copy";
 
-const DEMAND_WINDOW_DAYS = 90;
 const MAX_RECOMMENDATIONS = 6;
 const MAX_LEARNING_PATHS = 4;
 const MAX_ADJACENT = 3;
@@ -267,7 +267,7 @@ export async function getCompassForProfile(
     recommendations.push({
       skill: { slug: row.skill_slug, label: row.skill_label },
       reason: "demand_high",
-      detail: `${row.searches} searches over the last ${DEMAND_WINDOW_DAYS} days mention this skill  and only ${row.matches} ${row.matches === 1 ? "person" : "people"} on Sebenza carries it.`,
+      detail: demandDetail(row.searches, row.matches),
       demandSignal: { searches: row.searches, matches: row.matches },
     });
   }
@@ -282,7 +282,10 @@ export async function getCompassForProfile(
     recommendations.push({
       skill: { slug: row.skill_slug, label: row.skill_label },
       reason: "common_among_top_ranked",
-      detail: `${row.peers} ${row.peers === 1 ? "peer" : "peers"} in your profession + province carry this; you don't yet.`,
+      detail:
+        row.peers === 1
+          ? "1 peer in your profession and province carries this; you don't yet."
+          : `${row.peers} peers in your profession and province carry this; you don't yet.`,
     });
   }
 

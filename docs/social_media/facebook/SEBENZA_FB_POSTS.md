@@ -184,7 +184,7 @@ Our favourite thing in Sebenza isn't the job search. It's the part that tells yo
 Sebenza looks at what employers in your area actually want, compares it to your skills, and shows you the gap. Plus real South African ways to close it (SETA, TVET, free courses).
 
 Most platforms help you find a job. This one also helps you *become more employable.* That's the difference. 📈
-**Visual:** Screenshot of the Career Compass / "grow" screen (branded frame, no PII).
+**Visual:** `assets/post-12-what-to-learn.png` (minted 2026-09-10; the real Career compass recommendations from the seeded showcase register, branded frame, no PII). Same file for IG.
 **Tags:** #Sebenza #SkillsDevelopment #YouthEmployment #Mzansi
 
 ---

@@ -746,7 +746,8 @@
         "title": "How your compass works",
         "step1": "We watch what employers in your area search and hire for, live.",
         "step2": "We compare that demand with the skills already on your profile.",
-        "step3": "You get a short list: which skills to learn next, why they matter near you, and free or low-cost SA ways to learn them (SETA, TVET, online)."
+        "step3": "You get a short list: which skills to learn next, why they matter near you, and free or low-cost SA ways to learn them (SETA, TVET, online).",
+        "step3NoPaths": "You get a short list: which skills to learn next, and why each one matters to employers near you."
       },
       "nationalBasis": "Not enough employer activity in your province yet, so your compass is using national patterns for now. It localises automatically as employers near you join.",
       "headlineCovered": "Your core is covered. Nothing urgent to learn right now.",

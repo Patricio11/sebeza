@@ -561,7 +561,8 @@
         "title": "Isebenza njani ikhampasi yakho",
         "step1": "Sijonga oko abaqeshi kwindawo yakho abakukhangelayo nabaqesha ngako, ngexesha langempela.",
         "step2": "Sikuthelekisa oko nezakhono esele zikwiprofayile yakho.",
-        "step3": "Ufumana uluhlu olufutshane: zeziphi izakhono omawuzifunde ngokulandelayo, kutheni zibalulekile kufuphi nawe, neendlela zase-South Africa zasimahla okanye ezingabizi kakhulu zokuzifunda (SETA, TVET, online)."
+        "step3": "Ufumana uluhlu olufutshane: zeziphi izakhono omawuzifunde ngokulandelayo, kutheni zibalulekile kufuphi nawe, neendlela zase-South Africa zasimahla okanye ezingabizi kakhulu zokuzifunda (SETA, TVET, online).",
+        "step3NoPaths": "Ufumana uluhlu olufutshane: zeziphi izakhono omawuzifunde ngokulandelayo, nokuba ngasinye sibaluleke ngantoni kubaqeshi abakufuphi nawe."
       },
       "nationalBasis": "Akukabikho msebenzi waneleyo wabaqeshi kwiphondo lakho okwangoku, ngoko ikhampasi yakho isebenzisa iipatheni zikazwelonke. Iya kuzenzela eyengingqi ngokuzenzekelayo njengoko abaqeshi abakufuphi nawe bengena.",
       "headlineCovered": "Izakhono zakho ezisisiseko zigqityiwe. Akukho nto ingxamisekileyo yokufunda ngoku.",

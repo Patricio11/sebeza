@@ -717,12 +717,12 @@ export async function promoteTaxonomySuggestion(
       const backfill = await db
         .update(schema.academicProfiles)
         .set({ institutionSlug: row.pendingInstitutionSlug })
-        .where(sql`${schema.academicProfiles.institutionSlug} = ANY(${dupeSlugs})`);
+        .where(inArray(schema.academicProfiles.institutionSlug, dupeSlugs));
       backfilledRows = (backfill as unknown as { rowCount?: number }).rowCount ?? 0;
       // Clean up the now-orphaned dupe rows.
       await db
         .delete(schema.institutions)
-        .where(sql`${schema.institutions.slug} = ANY(${dupeSlugs})`);
+        .where(inArray(schema.institutions.slug, dupeSlugs));
     }
     targetSlug = row.pendingInstitutionSlug;
   }

@@ -561,7 +561,8 @@
         "title": "Hoe jou kompas werk",
         "step1": "Ons hou dop waarvoor werkgewers in jou omgewing soek en aanstel, intyds.",
         "step2": "Ons vergelyk daardie aanvraag met die vaardighede reeds op jou profiel.",
-        "step3": "Jy kry 'n kort lys: watter vaardighede om volgende te leer, hoekom hulle naby jou saak maak, en gratis of bekostigbare SA-maniere om hulle te leer (SETA, TVET, aanlyn)."
+        "step3": "Jy kry 'n kort lys: watter vaardighede om volgende te leer, hoekom hulle naby jou saak maak, en gratis of bekostigbare SA-maniere om hulle te leer (SETA, TVET, aanlyn).",
+        "step3NoPaths": "Jy kry 'n kort lys: watter vaardighede om volgende te leer, en hoekom elkeen saak maak vir werkgewers naby jou."
       },
       "nationalBasis": "Daar is nog nie genoeg werkgewer-aktiwiteit in jou provinsie nie, so jou kompas gebruik tans nasionale patrone. Dit lokaliseer outomaties soos werkgewers naby jou aansluit.",
       "headlineCovered": "Jou kern is gedek. Niks dringend om nou te leer nie.",

@@ -22,7 +22,7 @@
  */
 
 import "server-only";
-import { asc, isNull, sql } from "drizzle-orm";
+import { asc, inArray, isNull, sql } from "drizzle-orm";
 import { getDb } from "@/db/client";
 import * as schema from "@/db/schema";
 import { getSetting } from "@/lib/admin/settings";
@@ -175,26 +175,26 @@ async function buildElectives(
 
   const db = getDb();
   const slugs = covered.map((c) => c.skill_slug);
-  const matchResult = await db.execute(sql`
-    SELECT skill_slug, COUNT(*)::int AS matches
-    FROM profile_skills
-    WHERE skill_slug = ANY(${slugs})
-    GROUP BY skill_slug
-  `);
-  const matchBySlug = new Map(
-    (
-      matchResult as unknown as {
-        rows: Array<{ skill_slug: string; matches: number }>;
-      }
-    ).rows.map((r) => [r.skill_slug, r.matches]),
-  );
+  // A raw `= ANY(${jsArray})` binds the array as a tuple, which Postgres
+  // rejects (42809) on both drivers. `inArray` is the only correct shape.
+  const matchRows = await db
+    .select({
+      skillSlug: schema.profileSkills.skillSlug,
+      matches: sql<number>`COUNT(*)::int`,
+    })
+    .from(schema.profileSkills)
+    .where(inArray(schema.profileSkills.skillSlug, slugs))
+    .groupBy(schema.profileSkills.skillSlug);
+  const matchBySlug = new Map(matchRows.map((r) => [r.skillSlug, r.matches]));
 
   return covered.map((c) => ({
     skill: { slug: c.skill_slug, label: c.skill_label },
     curriculumHint: `${programme} · ${institutionLabel}`,
-    detail: `${c.demand_score} employer search${
-      c.demand_score === 1 ? "" : "es"
-    } in the last 90 days mention this skill  and your programme's curriculum covers it. Prioritising it before graduation is real leverage.`,
+    detail:
+      (c.demand_score === 1
+        ? "1 employer search in the last 90 days mentions this skill"
+        : `${c.demand_score} employer searches in the last 90 days mention this skill`) +
+      ", and your programme's curriculum covers it. Prioritising it before graduation is real leverage.",
     demandSignal: {
       searches: c.demand_score,
       matches: matchBySlug.get(c.skill_slug) ?? 0,
