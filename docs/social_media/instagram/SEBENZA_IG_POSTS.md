@@ -78,6 +78,15 @@ Reuse the FB bank post-for-post with the trim rule above. The carded ones map di
 | 9 · Cheap phone | `../facebook/assets/post-09-cheap-phone.png` | "It has to work on a cheap phone, on slow data." |
 | 10 · Trust | `../facebook/assets/post-10-trust.png` | "Sebenza never pretends." |
 | 13 · The name | `../facebook/assets/post-13-the-name.png` | "Why 'Sebenza'?" |
+| 14 · Available now | `../facebook/assets/post-14-available-now.png` | "Most places you look for staff, you can't tell who's actually available." |
+| 15 · For employers | `../facebook/assets/post-15-for-employers.png` | "Imagine finding skilled people near you in minutes." |
+| 16 · Bigger picture | `../facebook/assets/post-16-bigger-picture.png` | "Every search quietly reveals which skills SA employers want but can't find." |
+| 17 · The dream | `../facebook/assets/post-17-the-dream.png` | "The dream for Sebenza:" |
+| 18 · Students | `../facebook/assets/post-18-students.png` | "The hardest part isn't finishing your studies." |
+| 19 · CV tip | `../facebook/assets/post-19-cv-tip.png` | "Quick CV tip: put your skills near the top." |
+| 20 · Interview tip | `../facebook/assets/post-20-interview-tip.png` | "Going for an interview? Prepare one real story." |
+| 21 · In demand | `../facebook/assets/post-21-in-demand.png` | "Skills SA employers are hungry for right now." |
+| 22 · Free learning | `../facebook/assets/post-22-free-learning.png` | "You don't always need an expensive course." |
 | 23 · Scam warning | `../facebook/assets/post-23-scam-warning.png` | "A real employer will never ask you to pay for a job. 🚩" |
 | 25 · Youth | `../facebook/assets/post-25-youth.png` | "Nearly half of young South Africans who want to work can't find it." |
 | 26 · Question | `../facebook/assets/post-26-question.png` | "If you could change ONE thing about job-hunting in SA?" |

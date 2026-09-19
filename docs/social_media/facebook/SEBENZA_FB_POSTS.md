@@ -210,7 +210,7 @@ Most places you look for staff, you can't tell who's actually available.
 Sebenza keeps it honest: people confirm they're still looking, and the system knows when that info is fresh or getting old. So when an employer searches, they see people who are *genuinely* ready. Not a stale list from two years ago.
 
 Live, honest, current. That's the goal. ⚡
-**Visual:** Screenshot of the status/"Talent Pulse" chip, or ask Claude for a quote-card.
+**Visual:** `assets/post-14-available-now.png` (minted 2026-09-19; a real search result card with the status + freshness chip, seeded showcase register, no PII). Same file for IG.
 **Tags:** #Sebenza #Hiring #Jobs #SouthAfrica
 
 ---
@@ -222,7 +222,7 @@ To the business owners out there: imagine finding skilled people *near you* in m
 That's what we're building on the employer side of Sebenza. Not a flood of random applications. The right people, close by, ready to work.
 
 More on this soon. 👀
-**Visual:** Clean employer-search screenshot (branded frame, no PII).
+**Visual:** `assets/post-15-for-employers.png` (minted 2026-09-19; search bar, "4 chef in Western Cape" headline and the first result, seeded showcase register, no PII). Same file for IG.
 **Tags:** #Sebenza #Hiring #SmallBusiness #SouthAfrica #CapeTown
 
 ---
@@ -236,7 +236,7 @@ Every search on the platform quietly reveals something important: *which skills 
 That's a real-time map of the country's skills gaps. The kind of insight that could actually help fix unemployment at the policy level, not just one hire at a time.
 
 We're not just matching jobs. We're building understanding. 🗺️
-**Visual:** Anonymised skills-gap chart / heatmap screenshot.
+**Visual:** `assets/post-16-bigger-picture.png` (minted 2026-09-19; the public Employment insights skills-gap table, aggregate only). Same file for IG.
 **Tags:** #Sebenza #SkillsDevelopment #SouthAfrica #FutureOfWork
 
 ---
@@ -248,7 +248,7 @@ The dream for Sebenza:
 A South Africa where any skilled person can be found for work, wherever they live. Where employers find local talent easily. Where the country can actually *see* its own job market clearly.
 
 We're not there yet. We're at the start. But every big thing starts with one line of code and one person who won't give up. 🇿🇦
-**Visual:** Aspirational quote-card (ask Claude to mint one from the kit).
+**Visual:** `assets/post-17-the-dream.png` (minted 2026-09-19; dark quote card). Same file for IG.
 **Tags:** #Sebenza #Mzansi #FutureOfWork #SouthAfrica
 
 ---
@@ -260,7 +260,7 @@ A message for students and recent graduates:
 The hardest part isn't finishing your studies. It's not knowing which skills actually get you hired.
 
 Sebenza shows you what the market in your area really wants, so you can bridge the gap between your qualification and a real job. Study smart, not just hard. 🎓
-**Visual:** Career Compass "student lane" screenshot (branded frame, no PII).
+**Visual:** `assets/post-18-students.png` (minted 2026-09-19; the Career compass student-mode header, seeded showcase student, no PII). Same file for IG.
 **Tags:** #Sebenza #Graduates #YouthEmployment #SkillsDevelopment
 
 ---
@@ -274,7 +274,7 @@ Quick CV tip: 📄
 Put your **skills** near the top, and be specific. Not "hard worker." Say "pastry, menu planning, kitchen management." Employers search for *skills*, not adjectives.
 
 Save this for when you update yours. And share it with someone job-hunting. 🙌
-**Visual:** Simple tip-card, numbered (ask Claude to mint one from the kit).
+**Visual:** `assets/post-19-cv-tip.png` (minted 2026-09-19; numbered tip card). Same file for IG.
 **Tags:** #Sebenza #CVTips #JobSeekersSA #JobHunting
 
 ---
@@ -286,7 +286,7 @@ Going for an interview? One thing that always helps:
 Prepare *one real story* for "tell me about yourself." A short, honest example of something you did and the result. Practice it out loud until it feels natural.
 
 Confidence comes from preparation, not luck. You've got this. 💪
-**Visual:** Tip-card.
+**Visual:** `assets/post-20-interview-tip.png` (minted 2026-09-19; numbered tip card, dark). Same file for IG.
 **Tags:** #Sebenza #InterviewTips #JobSeekersSA #YouthEmployment
 
 ---
@@ -300,7 +300,7 @@ Trades (electricians, welders, plumbers). Tech (developers, IT support). Healthc
 The gap between what people study and what employers need is real. Closing it starts with knowing it exists.
 
 What field are you in? Tell us below. 👇
-**Visual:** Simple in-demand-skills graphic.
+**Visual:** `assets/post-21-in-demand.png` (minted 2026-09-19; list card of the four fields named in the caption). Same file for IG.
 **Tags:** #Sebenza #SkillsDevelopment #Jobs #SouthAfrica
 
 ---
@@ -312,7 +312,7 @@ You don't always need an expensive course to become more employable.
 SETA learnerships, TVET colleges, INDLELA, and free online courses can genuinely move you forward. Often at little or no cost.
 
 The trick is knowing *which* skill to learn for the jobs near you. (That's a problem we're working hard on. 😉)
-**Visual:** Quote-card or a list-graphic of SA learning routes.
+**Visual:** `assets/post-22-free-learning.png` (minted 2026-09-19; list card of the SA learning routes). Same file for IG.
 **Tags:** #Sebenza #SkillsDevelopment #FreeLearning #YouthEmployment
 
 ---

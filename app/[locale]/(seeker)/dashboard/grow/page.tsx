@@ -1370,7 +1370,7 @@ function StudentLane({
             </div>
             <div className="font-display tabular text-2xl">{gradFmt}</div>
             <div className="text-[0.62rem] text-[color:var(--color-paper)]/60">
-              {monthsLeft} months · {snapshot.bridgeHeadline.slice(0, 0)}
+              {t("duration", { months: monthsLeft })}
             </div>
           </div>
         </div>

@@ -34,6 +34,15 @@ Red appears nowhere else on a graphic except the stripe, unless the card is a wa
 | `post-08-why-we-started.png` | 1080x1350 | Post 8: BTS montage, three real product shots fanned (search, compass, insights) from the seeded showcase register. Same file for IG. |
 | `post-11-hard-parts.png` | 1080x1350 | Post 11: "Some nights it's magic..." BTS quote card (dark). Same file for IG. |
 | `post-12-what-to-learn.png` | 1080x1350 | Post 12: "what to learn next", the real Career compass recommendations on a product card. Same file for IG. |
+| `post-14-available-now.png` | 1080x1350 | Post 14: "Live, honest, current." A real search result card with the status + freshness chip. Same file for IG. |
+| `post-15-for-employers.png` | 1080x1350 | Post 15: "Skilled people near you, in minutes." Search bar + results headline + first card. Same file for IG. |
+| `post-16-bigger-picture.png` | 1080x1350 | Post 16: "A live map of the country's skills gaps." The public insights skills-gap table. Same file for IG. |
+| `post-17-the-dream.png` | 1080x1350 | Post 17: the aspirational quote card (dark). Same file for IG. |
+| `post-18-students.png` | 1080x1350 | Post 18: "Bridge your degree to the market." Career compass student-mode header. Same file for IG. |
+| `post-19-cv-tip.png` | 1080x1350 | Post 19: CV tip, numbered list card. Same file for IG. |
+| `post-20-interview-tip.png` | 1080x1350 | Post 20: interview tip, numbered list card (dark). Same file for IG. |
+| `post-21-in-demand.png` | 1080x1350 | Post 21: skills in demand, list card. Same file for IG. |
+| `post-22-free-learning.png` | 1080x1350 | Post 22: free SA learning routes, list card. Same file for IG. |
 | `post-09-cheap-phone.png` | 1080x1350 | Post 9: the cheap-phone / slow-data design rule. |
 | `post-10-trust.png` | 1080x1350 | Post 10: "Trust is the whole product." (dark). |
 | `post-13-the-name.png` | 1080x1350 | Post 13: why the name Sebenza. |
@@ -60,6 +69,8 @@ fonts and margins are all baked into the template, so a new card is a five-line
 manifest entry, never a design job.
 
 Special layouts have their own templates: `intro.html` (logo card),
-`checklist.html` (promise list), `cover.html`, `profile.html`.
+`checklist.html` (promise list), `list.html` (tip cards: `items` of `{ lead, body }`,
+`marker: "number" | "dot"`, light or dark), `product.html` (one real screenshot from
+`src/shots/`), `montage.html` (three), `cover.html`, `profile.html`.
 
 House copy rule applies to graphics too: **no em-dashes** anywhere on a card.

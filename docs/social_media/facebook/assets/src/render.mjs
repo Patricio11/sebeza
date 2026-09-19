@@ -134,6 +134,90 @@ const CARDS = [
     caption: "Career compass &middot; in every seeker&rsquo;s dashboard",
   },
   {
+    template: "product.html", out: "post-14-available-now.png", w: 1080, h: 1350,
+    size: 92, eyebrow: "Available now",
+    headline: "Live, honest, <em>current</em>.",
+    sub: "People confirm they are still looking. The system knows when that is fresh or getting old, and stale statuses fall to the bottom.",
+    shot: "shots/search-status-fresh.png",
+    caption: "Status and freshness, on every profile in search",
+  },
+  {
+    template: "product.html", out: "post-15-for-employers.png", w: 1080, h: 1350,
+    size: 82, eyebrow: "For employers",
+    headline: "Skilled people <em>near you</em>, in minutes.",
+    sub: "Experience already laid out. No agency fees. Not a flood of random applications.",
+    shot: "shots/search-chef-employer.png",
+    caption: "Search on sebenzasa.com &middot; chef, Western Cape",
+  },
+  {
+    template: "product.html", out: "post-16-bigger-picture.png", w: 1080, h: 1350,
+    size: 82, eyebrow: "The bigger picture",
+    headline: "A live map of the country&rsquo;s <em>skills gaps</em>.",
+    sub: "Every search quietly shows which skills employers want but cannot find, and where. Aggregate only, never one person.",
+    shot: "shots/insights-skills-gap.png",
+    caption: "Employment insights &middot; public, anonymised",
+  },
+  {
+    template: "quote.html", out: "post-17-the-dream.png", w: 1080, h: 1350,
+    theme: "dark", size: 86, eyebrow: "The dream",
+    headline: "A South Africa where any skilled person can be <em>found</em>, wherever they live.",
+    sub: "We&rsquo;re not there yet. We&rsquo;re at the start. Every big thing starts with one line of code and one person who won&rsquo;t give up.",
+  },
+  {
+    template: "product.html", out: "post-18-students.png", w: 1080, h: 1350,
+    size: 82, eyebrow: "Students &amp; graduates",
+    headline: "Bridge your degree to the <em>market</em>.",
+    sub: "See what employers in your area really want before you graduate. Study smart, not just hard.",
+    shot: "shots/compass-student-lane.png",
+    caption: "Career compass, student mode",
+  },
+  {
+    template: "list.html", out: "post-19-cv-tip.png", w: 1080, h: 1350,
+    theme: "light", marker: "number", size: 88, eyebrow: "CV tip",
+    headline: "Skills near the top. Be <em>specific</em>.",
+    items: [
+      { lead: "Put your skills first.", body: "Above the long paragraphs." },
+      { lead: "Name them.", body: "Not &ldquo;hard worker.&rdquo; Say &ldquo;pastry, menu planning, kitchen management.&rdquo;" },
+      { lead: "Employers search for skills,", body: "not adjectives." },
+    ],
+    sub: "Save this for when you update yours.",
+  },
+  {
+    template: "list.html", out: "post-20-interview-tip.png", w: 1080, h: 1350,
+    theme: "dark", marker: "number", size: 88, eyebrow: "Interview tip",
+    headline: "Prepare <em>one real story</em>.",
+    items: [
+      { lead: "Something you actually did.", body: "Short and honest." },
+      { lead: "What happened, and the result.", body: "One or two lines." },
+      { lead: "Say it out loud", body: "until it feels natural." },
+    ],
+    sub: "For &ldquo;tell me about yourself.&rdquo; Confidence comes from preparation, not luck.",
+  },
+  {
+    template: "list.html", out: "post-21-in-demand.png", w: 1080, h: 1350,
+    theme: "light", marker: "dot", size: 84, eyebrow: "Skills in demand",
+    headline: "What SA employers are <em>hungry</em> for.",
+    items: [
+      { lead: "Trades.", body: "Electricians, welders, plumbers." },
+      { lead: "Tech.", body: "Developers, IT support." },
+      { lead: "Healthcare." },
+      { lead: "Skilled hospitality." },
+    ],
+    sub: "The gap between what people study and what employers need is real. Closing it starts with knowing it exists.",
+  },
+  {
+    template: "list.html", out: "post-22-free-learning.png", w: 1080, h: 1350,
+    theme: "light", marker: "dot", size: 78, eyebrow: "Free learning matters",
+    headline: "You don&rsquo;t need an expensive course to become more <em>employable</em>.",
+    items: [
+      { lead: "SETA learnerships" },
+      { lead: "TVET colleges" },
+      { lead: "INDLELA", body: "trade testing" },
+      { lead: "Free online courses" },
+    ],
+    sub: "Often at little or no cost. The trick is knowing which skill to learn for the jobs near you.",
+  },
+  {
     template: "quote.html", out: "post-02-who.png", w: 1080, h: 1350,
     theme: "light", size: 92, eyebrow: "Who's behind this",
     headline: "A small South African company with one belief: this country's talent deserves to be <em>seen</em>.",
@@ -155,8 +239,26 @@ for (const card of CARDS) {
   const markTone = card.markTone === "dark" || isDarkQuote ? "dark" : "light";
   await page.evaluate(
     ({ card, mark }) => {
-      if (card.theme) document.body.className = `theme-${card.theme}`;
+      if (card.theme || card.marker) {
+        document.body.className = [
+          card.theme ? `theme-${card.theme}` : "",
+          card.marker ? `marker-${card.marker}` : "",
+        ].join(" ").trim();
+      }
       if (card.size) document.documentElement.style.setProperty("--headline-size", `${card.size}px`);
+      if (card.itemSize) document.documentElement.style.setProperty("--item-size", `${card.itemSize}px`);
+      // list.html: items are { lead, body } pairs; lead is bold, body is soft.
+      const list = document.querySelector('[data-slot="items"]');
+      if (list && card.items) {
+        list.innerHTML = card.items
+          .map(
+            (it, i) =>
+              `<li class="item"><span class="num">${i + 1}</span><p><strong>${it.lead}</strong>${
+                it.body ? ` <span>${it.body}</span>` : ""
+              }</p></li>`,
+          )
+          .join("");
+      }
       const set = (slot, html) => {
         const el = document.querySelector(`[data-slot="${slot}"]`);
         if (el && html != null) el.innerHTML = html;
