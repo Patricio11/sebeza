@@ -271,7 +271,7 @@ export default async function SearchPage({ params, searchParams }: SearchPagePro
       <SiteHeader />
       <main id="main">
         {/* Sticky editable search header  the query stays in front of you */}
-        <div className="sticky top-[60px] z-20 border-b border-[color:var(--color-hairline)] bg-[color:var(--color-paper)]/95 backdrop-blur">
+        <div className="sticky top-[var(--site-header-offset)] z-20 transition-[top] duration-200 motion-reduce:transition-none border-b border-[color:var(--color-hairline)] bg-[color:var(--color-paper)]/95 backdrop-blur">
           <div className="mx-auto max-w-[1320px] px-5 py-4 md:px-10">
             <SearchBar
               variant="compact"

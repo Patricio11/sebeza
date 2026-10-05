@@ -63,6 +63,19 @@ export function StickyHeaderShell({
     };
   }, []);
 
+  // Anything pinned BELOW this bar (the /search query box) reads
+  // --site-header-offset from globals.css, which collapses to 0 on mobile
+  // while this flag is set. Without it the pinned element keeps a
+  // header-sized hole above it once the bar has slid away.
+  useEffect(() => {
+    const root = document.documentElement;
+    if (hidden) root.dataset.headerHidden = "true";
+    else delete root.dataset.headerHidden;
+    return () => {
+      delete root.dataset.headerHidden;
+    };
+  }, [hidden]);
+
   return (
     <header
       data-hidden={hidden ? "true" : "false"}

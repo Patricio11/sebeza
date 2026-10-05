@@ -73,6 +73,19 @@
 /* ---------------------------------------------------------
    Base
    --------------------------------------------------------- */
+/* Height reserved for the sticky site header by anything pinned beneath
+   it. On mobile the header slides away on scroll-down (StickyHeaderShell
+   sets data-header-hidden), so the reserve collapses with it. Desktop
+   never hides the header, so the reserve never changes there. */
+:root {
+  --site-header-offset: 60px;
+}
+@media (max-width: 767px) {
+  html[data-header-hidden="true"] {
+    --site-header-offset: 0px;
+  }
+}
+
 @layer base {
   html {
     color-scheme: light;
