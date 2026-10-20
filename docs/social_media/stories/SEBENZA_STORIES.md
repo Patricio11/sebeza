@@ -2,7 +2,7 @@
 
 **Twenty pre-rendered story cards in `assets/` (1080x1920). One set serves BOTH platforms:
 post to Instagram Stories, then use Instagram's "share to Facebook" toggle (or post the same
-PNG to the Facebook Page's story). Same gate and standing rules as every platform.**
+PNG to the Facebook Page's story). Same gate and standing rules as every platform...**
 
 **How to post any card:** get the PNG onto your phone (WhatsApp/email it to yourself) → open
 Instagram → Your story → pick the image → share (toggle Facebook sharing ON in story settings
