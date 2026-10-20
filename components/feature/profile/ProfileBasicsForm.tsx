@@ -275,8 +275,26 @@ export function ProfileBasicsForm({
         return;
       }
       if (r.ok) {
-        setLastSaved(fingerprint);
-        setBaseline(fingerprint);
+        // A typed "A | B" came back split: mirror it into the form and
+        // treat THAT shape as the saved one, so no second save fires.
+        const serverProfession = r.profession ?? profession;
+        const serverSecondaries = r.secondaryProfessions ?? secondaryProfessions;
+        const changed =
+          serverProfession !== profession ||
+          JSON.stringify(serverSecondaries) !== JSON.stringify(secondaryProfessions);
+        const savedFingerprint = changed
+          ? JSON.stringify({
+              ...persistable,
+              profession: serverProfession,
+              secondaryProfessions: serverSecondaries,
+            })
+          : fingerprint;
+        if (changed) {
+          setProfession(serverProfession);
+          setSecondaryProfessions(serverSecondaries);
+        }
+        setLastSaved(savedFingerprint);
+        setBaseline(savedFingerprint);
         setStatus("saved");
         setSavedAt(
           new Date().toLocaleTimeString("en-ZA", {
@@ -404,27 +422,28 @@ export function ProfileBasicsForm({
             helpText={`Up to ${SECONDARY_PROFESSIONS_MAX} other professions you've worked in. Surfaces you to employers who search for those roles. Your headline stays the primary above.`}
             values={secondaryProfessions}
             onChange={(next) => {
-              const canonical = new Set(professions.map((p) => p.label));
+              // 2026-10-20 (founder): free-text secondaries are allowed
+              // until an admin approves them, same as the primary, so no
+              // canonical filter here any more.
               const cleaned = Array.from(
-                new Set(
-                  next.filter((v) => v && v !== profession && canonical.has(v)),
-                ),
+                new Set(next.filter((v) => v && v !== profession)),
               ).slice(0, SECONDARY_PROFESSIONS_MAX);
               setSecondaryProfessions(cleaned);
             }}
             onOtherSubmit={(text) => {
               const label = text.trim();
-              if (!label) return;
-              void submitTaxonomySuggestion({
-                kind: "profession",
-                customText: label,
-              }).then((res) => {
-                setProfessionSuggestion(
-                  res.ok
-                    ? `Thanks. "${label}" was sent to Sebenza for review. Once it is approved you can add it here.`
-                    : res.message,
-                );
-              });
+              if (!label || label === profession) return;
+              // Lands on the profile now; the save action sends every
+              // custom part to the admin queue.
+              setSecondaryProfessions((prev) =>
+                Array.from(new Set([...prev, label])).slice(
+                  0,
+                  SECONDARY_PROFESSIONS_MAX,
+                ),
+              );
+              setProfessionSuggestion(
+                `"${label}" is on your profile now and goes to Sebenza for review. Employers find it by that name once it is approved.`,
+              );
             }}
             options={professions.map((p) => ({
               value: p.label,

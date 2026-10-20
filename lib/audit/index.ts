@@ -340,6 +340,9 @@ export type AuditKind =
   | "taxonomy.suggestion.promote"
   | "taxonomy.suggestion.merge"
   | "taxonomy.suggestion.reject"
+  // 2026-10-20  admin split a joined "A | B" profession suggestion into
+  // one row per part; meta carries the parts and the rows touched.
+  | "taxonomy.suggestion.split"
   // Phase 9.16  admin-mediated seeker ID verification. `subject` is the
   // seeker's profile id; meta carries the document storage key on
   // upload, the reviewer's user id on review actions, and the

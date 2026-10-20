@@ -37,6 +37,11 @@ import { SKILLS, PROFESSIONS } from "@/lib/mock/taxonomy";
 import type { EmploymentStatus } from "@/lib/mock/types";
 import { OPEN_TO_TAGS, type OpenToTag } from "@/lib/mock/types";
 import { notifyAllAdmins } from "@/lib/notifications/server";
+import {
+  mergeSecondaryProfessions,
+  splitProfessionText,
+} from "@/lib/taxonomy/profession-split";
+import { recordProfessionSuggestions } from "@/lib/taxonomy/profession-suggest";
 
 export type ActionResult<T extends object = object> =
   ({ ok: true } & T) | { ok: false; message: string };
@@ -86,20 +91,11 @@ const basicsSchema = z
      *  Clamped 0..60 server-side; UI also clamps. */
     yearsExperience: z.number().int().min(0).max(60).nullable().optional(),
   })
-  .refine(
-    (v) => {
-      // Phase 13.10 D3  secondary entries must be canonical PROFESSIONS
-      // labels. The form picker enforces this; the action layer is the
-      // structural backstop for bypassed-form payloads (curl, scripted).
-      const allowed = new Set(PROFESSIONS.map((p) => p.label));
-      return (v.secondaryProfessions ?? []).every((s) => allowed.has(s));
-    },
-    {
-      message:
-        "Secondary professions must come from the canonical taxonomy. New professions go through the admin suggestion queue first.",
-      path: ["secondaryProfessions"],
-    },
-  )
+  // 2026-10-20 (founder): secondaries may be free text until an admin
+  // approves them, exactly like the primary. A typed "A | B" lands as
+  // primary A + secondary B, and each custom part goes to the queue;
+  // promote/merge then backfills the secondary array too. The old
+  // canonical-only refine (Phase 13.10 D3) is deliberately gone.
   .refine(
     (v) => {
       // Phase 13.10  the secondaries are MEANT to be additive to the
@@ -115,7 +111,9 @@ const basicsSchema = z
 
 export async function updateProfileBasics(
   input: z.infer<typeof basicsSchema>,
-): Promise<ActionResult> {
+): Promise<
+  ActionResult<{ profession: string; secondaryProfessions: string[] }>
+> {
   const session = await getSessionUser();
   if (!session) return fail("Not signed in.");
   const parsed = basicsSchema.safeParse(input);
@@ -129,6 +127,19 @@ export async function updateProfileBasics(
   if (!isValidCountryCode(v.nationality)) {
     return fail("That nationality isn't recognised, pick from the list.");
   }
+
+  // 2026-10-20  a typed "A | B" is primary A + secondary B. Canonical
+  // parts take their DB label (so promoted professions count too).
+  const professionLabels = (
+    await db.select({ label: schema.professions.label }).from(schema.professions)
+  ).map((r) => r.label);
+  const split = splitProfessionText(v.profession, professionLabels);
+  const primaryProfession = split.primary;
+  const secondaryProfessions = mergeSecondaryProfessions(
+    primaryProfession,
+    split.secondaries,
+    v.secondaryProfessions ?? [],
+  );
 
   // Recompute completeness based on the new shape. Cheap; keeps the
   // ProfileCompleteness UI honest in real time.
@@ -154,14 +165,8 @@ export async function updateProfileBasics(
     .update(schema.profiles)
     .set({
       displayName: v.displayName,
-      profession: v.profession,
-      // Phase 13.10  dedupe defensively. The form pre-cleans + the
-      // refine() already refused duplicates against the primary, but
-      // an array with two identical secondary entries would still
-      // pass the schema check  one cleanup line is cheap.
-      secondaryProfessions: Array.from(
-        new Set((v.secondaryProfessions ?? []).map((s) => s.trim())),
-      ).slice(0, SECONDARY_PROFESSIONS_MAX),
+      profession: primaryProfession,
+      secondaryProfessions,
       seniority: v.seniority ?? null,
       // Labels are the one on-disk form (docs/GEO_LABEL_CANONICAL_PLAN.md);
       // the picker submits slugs, so convert here, never in the form.
@@ -184,53 +189,26 @@ export async function updateProfileBasics(
     meta: { fields: Object.keys(v) },
   });
 
-  // Phase 10 follow-up  if the user picked "Other" on the profession
-  // combobox, the value isn't a canonical slug. Submit a taxonomy
-  // suggestion so admins can review + promote (same pattern as the
-  // sign-up flow). Dedupes via the suggestion-table lookup;
-  // case-insensitive against existing customText. Failure is
-  // logged but doesn't tank the profile update.
-  const isCanonical = PROFESSIONS.some(
-    (p) =>
-      p.slug === v.profession ||
-      p.label.toLowerCase() === v.profession.toLowerCase(),
-  );
-  if (!isCanonical) {
-    try {
-      const suggestionId = `tx_${randomUUID()}`;
-      await db.insert(schema.taxonomySuggestions).values({
-        id: suggestionId,
-        kind: "profession",
-        customText: v.profession,
-        submittedByUserId: session.id,
-      });
-      await logAccess({
-        kind: "taxonomy.suggestion.submit",
-        actor: session.id,
-        subject: suggestionId,
-        meta: {
-          kind: "profession",
-          customText: v.profession,
-          via: "profile-editor",
-        },
-      });
-      await notifyAllAdmins({
-        kind: "taxonomy.suggestion.received",
-        title: `New profession suggestion: ${v.profession}`,
-        body: `A seeker picked "Other" on their profile + entered "${v.profession}". Review at /admin/taxonomy.`,
-        link: "/admin/taxonomy",
-        dedupeKey: `profession::${v.profession.toLowerCase()}`,
-        meta: { suggestionId, kind: "profession", customText: v.profession },
-      });
-    } catch (e) {
-      // eslint-disable-next-line no-console
-      console.error("[profile] profession suggestion submit failed:", e);
-    }
+  // Every part the seeker typed that is not canonical yet (the primary
+  // and any free-text secondary) goes to the admin queue as its own row.
+  // Failure is logged but doesn't tank the profile update.
+  try {
+    await recordProfessionSuggestions({
+      db,
+      userId: session.id,
+      parts: [primaryProfession, ...secondaryProfessions],
+      via: "profile-editor",
+    });
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.error("[profile] profession suggestion submit failed:", e);
   }
 
   revalidatePath("/dashboard");
   revalidatePath("/dashboard/profile");
-  return ok();
+  // The form mirrors these back into its state so a typed "A | B" shows
+  // as primary A + secondary B without a reload.
+  return ok({ profession: primaryProfession, secondaryProfessions });
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

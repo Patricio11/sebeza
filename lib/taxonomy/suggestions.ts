@@ -48,6 +48,11 @@ import {
 } from "@/lib/notifications/server";
 import { slug as slugify } from "@/lib/mock/helpers";
 import { refreshProfileCompleteness } from "@/lib/profile/completeness-internal";
+import {
+  mergeSecondaryProfessions,
+  splitProfessionText,
+} from "@/lib/taxonomy/profession-split";
+import { recordProfessionSuggestions } from "@/lib/taxonomy/profession-suggest";
 
 export type ActionResult<T extends object = object> =
   | ({ ok: true } & T)
@@ -475,6 +480,36 @@ export async function listPendingSuggestions(
   return out;
 }
 
+
+/**
+ * 2026-10-20  a custom profession can also live in a profile's
+ * secondary_professions (a typed "A | B" puts B there). When B is
+ * promoted or merged, rewrite it inside every array that carries it,
+ * dropping anything that would duplicate the profile's own headline.
+ * Returns the number of profiles touched.
+ */
+async function backfillSecondaryProfessions(
+  db: ReturnType<typeof getDb>,
+  oldText: string,
+  newLabel: string,
+): Promise<number> {
+  const result = await db.execute(sql`
+    UPDATE profiles AS p
+    SET secondary_professions = ARRAY(
+      SELECT DISTINCT t.x FROM (
+        SELECT CASE WHEN lower(s) = lower(${oldText}) THEN ${newLabel}::text ELSE s END AS x
+        FROM unnest(p.secondary_professions) AS s
+      ) AS t
+      WHERE lower(t.x) <> lower(p.profession)
+    )
+    WHERE EXISTS (
+      SELECT 1 FROM unnest(p.secondary_professions) AS s WHERE lower(s) = lower(${oldText})
+    )
+  `);
+  const r = result as unknown as { rowCount?: number; count?: number };
+  return r.rowCount ?? r.count ?? 0;
+}
+
 // ─────────────────────────────────────────────────────────────────────
 // Admin resolve
 // ─────────────────────────────────────────────────────────────────────
@@ -529,12 +564,13 @@ export async function promoteTaxonomySuggestion(
       .values({ slug: finalSlug, label: finalLabel })
       .onConflictDoNothing();
     // Backfill: every profile carrying the ORIGINAL custom_text gets
-    // the canonical label.
+    // the canonical label, as the headline or as a secondary.
     const result = await db
       .update(schema.profiles)
       .set({ profession: finalLabel })
       .where(sql`lower(${schema.profiles.profession}) = lower(${row.customText})`);
     backfilledRows = (result as unknown as { rowCount?: number }).rowCount ?? 0;
+    backfilledRows += await backfillSecondaryProfessions(db, row.customText, finalLabel);
   } else if (row.kind === "organisation") {
     // Phase 9.22  promote the pending org: update name + city, flip
     // verification='verified'. Then find any OTHER pending orgs with
@@ -833,6 +869,7 @@ export async function mergeTaxonomySuggestion(
       .set({ profession: targetLabel })
       .where(sql`lower(${schema.profiles.profession}) = lower(${row.customText})`);
     backfilledRows = (result as unknown as { rowCount?: number }).rowCount ?? 0;
+    backfilledRows += await backfillSecondaryProfessions(db, row.customText, targetLabel);
   } else if (row.kind === "organisation") {
     // Phase 9.22  merge into an existing canonical org. Target must
     // be picker-visible (sebenza_registered, or verified seeker_named).
@@ -1060,4 +1097,130 @@ export async function rejectTaxonomySuggestion(
 
   revalidatePath("/admin/taxonomy");
   return ok();
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// Admin split (2026-10-20): "A | B" becomes one row per part
+// ─────────────────────────────────────────────────────────────────────
+
+const splitSchema = z.object({ suggestionId: z.string().min(1) });
+
+/**
+ * A joined profession suggestion ("AI Specialist | Supply Chain
+ * Architect") is really two. Split it: every submitter whose profile
+ * still carries the joined text gets part one as the headline and the
+ * rest as secondaries; each custom part becomes its own pending row for
+ * that submitter; the joined rows resolve as "merged" with a note. Parts
+ * that are already canonical raise no new row.
+ */
+export async function splitTaxonomySuggestion(
+  input: z.infer<typeof splitSchema>,
+): Promise<
+  ActionResult<{ parts: string[]; profilesUpdated: number; rowsCreated: number }>
+> {
+  const session = await verifyAdmin();
+  const parsed = splitSchema.safeParse(input);
+  if (!parsed.success) return fail("Invalid input.");
+  const db = getDb();
+
+  const rows = await db
+    .select()
+    .from(schema.taxonomySuggestions)
+    .where(eq(schema.taxonomySuggestions.id, parsed.data.suggestionId))
+    .limit(1);
+  const row = rows[0];
+  if (!row) return fail("Suggestion not found.");
+  if (row.kind !== "profession") return fail("Only profession suggestions can be split.");
+  if (row.state !== "pending") return fail("This suggestion has already been resolved.");
+
+  const labels = (
+    await db.select({ label: schema.professions.label }).from(schema.professions)
+  ).map((r) => r.label);
+  const split = splitProfessionText(row.customText, labels);
+  if (!split.wasSplit) {
+    return fail('Nothing to split: the text has no "|" or " / " separator.');
+  }
+  const parts = [split.primary, ...split.secondaries];
+
+  // Every pending row with this exact text, one per submitter.
+  const siblings = await db
+    .select({
+      id: schema.taxonomySuggestions.id,
+      submittedByUserId: schema.taxonomySuggestions.submittedByUserId,
+    })
+    .from(schema.taxonomySuggestions)
+    .where(
+      and(
+        eq(schema.taxonomySuggestions.kind, "profession"),
+        eq(schema.taxonomySuggestions.state, "pending"),
+        sql`lower(${schema.taxonomySuggestions.customText}) = lower(${row.customText})`,
+      ),
+    );
+
+  let profilesUpdated = 0;
+  let rowsCreated = 0;
+  for (const s of siblings) {
+    const profiles = await db
+      .select({
+        id: schema.profiles.id,
+        profession: schema.profiles.profession,
+        secondaryProfessions: schema.profiles.secondaryProfessions,
+      })
+      .from(schema.profiles)
+      .where(
+        and(
+          eq(schema.profiles.userId, s.submittedByUserId),
+          isNull(schema.profiles.deletedAt),
+        ),
+      )
+      .limit(1);
+    const p = profiles[0];
+    if (p && p.profession.toLowerCase() === row.customText.toLowerCase()) {
+      await db
+        .update(schema.profiles)
+        .set({
+          profession: split.primary,
+          secondaryProfessions: mergeSecondaryProfessions(
+            split.primary,
+            split.secondaries,
+            p.secondaryProfessions ?? [],
+          ),
+        })
+        .where(eq(schema.profiles.id, p.id));
+      profilesUpdated++;
+    }
+    const created = await recordProfessionSuggestions({
+      db,
+      userId: s.submittedByUserId,
+      parts: split.customParts,
+      via: "admin-split",
+    });
+    rowsCreated += created.length;
+    await db
+      .update(schema.taxonomySuggestions)
+      .set({
+        state: "merged",
+        resolvedByUserId: session.id,
+        resolvedAt: new Date(),
+        adminNote: `Split into: ${parts.join("; ")}`,
+      })
+      .where(eq(schema.taxonomySuggestions.id, s.id));
+  }
+
+  await logAccess({
+    kind: "taxonomy.suggestion.split",
+    actor: session.id,
+    subject: row.id,
+    meta: {
+      kind: row.kind,
+      customText: row.customText,
+      parts,
+      siblings: siblings.length,
+      profilesUpdated,
+      rowsCreated,
+    },
+  });
+
+  revalidatePath("/admin/taxonomy");
+  return ok({ parts, profilesUpdated, rowsCreated });
 }

@@ -25,6 +25,7 @@ import {
   promoteTaxonomySuggestion,
   mergeTaxonomySuggestion,
   rejectTaxonomySuggestion,
+  splitTaxonomySuggestion,
   type SuggestionRow,
 } from "@/lib/taxonomy/suggestions";
 import {
@@ -32,9 +33,14 @@ import {
   CheckCircle2,
   GitMerge,
   PencilLine,
+  Scissors,
   ShieldOff,
   Users,
 } from "lucide-react";
+import {
+  hasProfessionSeparator,
+  splitProfessionText,
+} from "@/lib/taxonomy/profession-split";
 
 interface CanonicalOption {
   value: string; // slug
@@ -166,7 +172,7 @@ function SuggestionRowCard({
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [mode, setMode] = useState<
-    "idle" | "promote" | "merge" | "reject"
+    "idle" | "promote" | "merge" | "reject" | "split"
   >("idle");
   // Phase 9.22  org rows store the canonical name on the pending org
   // row (not on suggestion row), so seed correctedLabel from there
@@ -179,6 +185,28 @@ function SuggestionRowCard({
   const [mergeTarget, setMergeTarget] = useState("");
   const [reason, setReason] = useState("");
   const isOrgKind = row.kind === "organisation";
+  // 2026-10-20  "A | B" is two professions. Preview the parts with the
+  // same splitter the action uses; canonical parts show as such.
+  const splittable =
+    row.kind === "profession" && hasProfessionSeparator(row.customText);
+  const splitPreview = splittable
+    ? splitProfessionText(
+        row.customText,
+        canonical.map((c) => c.label),
+      )
+    : null;
+
+  function onSplit() {
+    setError(null);
+    startTransition(async () => {
+      const res = await splitTaxonomySuggestion({ suggestionId: row.id });
+      if (!res.ok) {
+        setError(res.message);
+        return;
+      }
+      router.refresh();
+    });
+  }
 
   function onPromote() {
     setError(null);
@@ -258,6 +286,17 @@ function SuggestionRowCard({
         </div>
         {mode === "idle" && (
           <div className="flex flex-wrap gap-2">
+            {splittable && (
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                onClick={() => setMode("split")}
+              >
+                <Scissors className="mr-1 size-3.5" aria-hidden="true" />
+                Split
+              </Button>
+            )}
             <Button
               type="button"
               variant="primary"
@@ -288,6 +327,58 @@ function SuggestionRowCard({
           </div>
         )}
       </header>
+
+      {mode === "split" && splitPreview && (
+        <div className="mt-4 rounded-[var(--radius-sm)] border border-[color:var(--color-accent)] bg-[color:var(--color-accent-tint)] p-3">
+          <p className="text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--color-accent)]">
+            <Scissors className="mr-1 inline size-3" aria-hidden="true" />
+            Split into {1 + splitPreview.secondaries.length} professions
+          </p>
+          <ol className="mt-2 space-y-1 text-sm text-[color:var(--color-ink)]">
+            <li>
+              <span className="text-[color:var(--color-ink-soft)]">Primary: </span>
+              <strong>{splitPreview.primary}</strong>
+              {!splitPreview.customParts.includes(splitPreview.primary) && (
+                <span className="text-[color:var(--color-ink-soft)]"> (already canonical)</span>
+              )}
+            </li>
+            {splitPreview.secondaries.map((s) => (
+              <li key={s}>
+                <span className="text-[color:var(--color-ink-soft)]">Secondary: </span>
+                <strong>{s}</strong>
+                {!splitPreview.customParts.includes(s) && (
+                  <span className="text-[color:var(--color-ink-soft)]"> (already canonical)</span>
+                )}
+              </li>
+            ))}
+          </ol>
+          <p className="mt-2 text-xs text-[color:var(--color-ink-soft)]">
+            Every submitter still carrying the joined text gets the primary as
+            their headline and the rest as secondary professions. Each part that
+            is not canonical yet becomes its own row here for you to review.
+          </p>
+          <div className="mt-3 flex justify-end gap-2">
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => setMode("idle")}
+              disabled={pending}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              variant="primary"
+              size="sm"
+              onClick={onSplit}
+              disabled={pending}
+            >
+              {pending ? "Splitting" : "Confirm split"}
+            </Button>
+          </div>
+        </div>
+      )}
 
       {mode === "promote" && (
         <div className="mt-4 rounded-[var(--radius-sm)] border border-[color:var(--color-brand)] bg-[color:var(--color-brand-tint)] p-3">

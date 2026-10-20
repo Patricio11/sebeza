@@ -36,6 +36,8 @@ import { randomUUID } from "node:crypto";
 import { logAccess } from "@/lib/audit";
 import { notifyAllAdmins } from "@/lib/notifications/server";
 import { slug as slugify } from "@/lib/mock/helpers";
+import { splitProfessionText } from "@/lib/taxonomy/profession-split";
+import { recordProfessionSuggestions } from "@/lib/taxonomy/profession-suggest";
 import {
   CONSENT_PURPOSES,
   type ConsentPurpose,
@@ -406,14 +408,13 @@ export async function signUpSeeker(
       }
     }
 
-    // Phase 9.15  determine if the profession was free-text (not in
-    // canonical list).
-    const canonicalProf = await db
-      .select({ slug: schema.professions.slug })
-      .from(schema.professions)
-      .where(sql`lower(${schema.professions.label}) = lower(${v.profession})`)
-      .limit(1);
-    const professionWasCustom = !canonicalProf[0];
+    // Phase 9.15 / 2026-10-20  a typed "A | B" is primary A + secondary
+    // B; canonical parts take their DB label, custom parts go to the
+    // admin queue post-transaction (one row each, never the joined text).
+    const professionLabels = (
+      await db.select({ label: schema.professions.label }).from(schema.professions)
+    ).map((r) => r.label);
+    const professionSplit = splitProfessionText(v.profession, professionLabels);
 
     // Phase 9.22  resolve the current-employer FK. Three paths:
     //   1) currentEmployerOrgId picked from the dropdown  verify
@@ -500,7 +501,8 @@ export async function signUpSeeker(
         handle,
         displayName,
         fullSurname: v.fullName.split(/\s+/).slice(1).join(" ") || null,
-        profession: v.profession,
+        profession: professionSplit.primary,
+        secondaryProfessions: professionSplit.secondaries,
         // Labels on disk (docs/GEO_LABEL_CANONICAL_PLAN.md): the city
         // picker submits a slug, the province picker a label; both land
         // as labels so search and the rank pool see one register.
@@ -586,28 +588,13 @@ export async function signUpSeeker(
     // auxiliary  if they fail (DB blip, notification system down), the
     // user account + profile + academic remain intact. Admin loses
     // visibility into one suggestion but the user is signed up cleanly.
-    if (professionWasCustom) {
+    if (professionSplit.customParts.length > 0) {
       try {
-        const suggestionId = `tx_${randomUUID()}`;
-        await db.insert(schema.taxonomySuggestions).values({
-          id: suggestionId,
-          kind: "profession",
-          customText: v.profession,
-          submittedByUserId: user.id,
-        });
-        await logAccess({
-          kind: "taxonomy.suggestion.submit",
-          actor: user.id,
-          subject: suggestionId,
-          meta: { kind: "profession", customText: v.profession, via: "signup" },
-        });
-        await notifyAllAdmins({
-          kind: "taxonomy.suggestion.received",
-          title: `New profession suggestion: ${v.profession}`,
-          body: `A new user picked "Other" + entered "${v.profession}". Review on /admin/taxonomy.`,
-          link: "/admin/taxonomy",
-          dedupeKey: `profession::${v.profession.toLowerCase()}`,
-          meta: { suggestionId, kind: "profession", customText: v.profession },
+        await recordProfessionSuggestions({
+          db,
+          userId: user.id,
+          parts: professionSplit.customParts,
+          via: "signup",
         });
       } catch (e) {
         // eslint-disable-next-line no-console
